@@ -1,1 +1,6 @@
-language: r
+language: R
+sudo: false
+cache: packages
+branches:
+  only:
+  - NNS-Beta-Version
