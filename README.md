@@ -1,5 +1,5 @@
-[![packageversion](https://img.shields.io/badge/NNS%20version-0.3.1-blue.svg?style=flat-square)](commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![codecov](
-https://img.shields.io/codecov/c/github/NNS/NNS-Beta-Version.svg?maxAge=0)](https://codecov.io/gh/NNS/NNS-Beta-Version) 
+[![packageversion](https://img.shields.io/badge/NNS%20version-0.3.1-blue.svg?style=flat-square)](commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) 
+
 
 # NNS
 
