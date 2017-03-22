@@ -1,0 +1,12 @@
+Text	IsSunny
+sunny	1
+rainy	-1
+sunny sunny	1
+sunny rainy	-1
+rainy sunny	-1
+rainy rainy	-1
+sunny sunny sunny	1
+sunny rainy sunny	1
+sunny sunny rainy	1
+rainy sunny sunny	1
+rainy rainy sunny	-1
