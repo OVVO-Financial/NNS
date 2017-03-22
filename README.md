@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=master)](https://travis-ci.org/OVVO-Financial/NNS)
+
 # NNS
 
 Companion R-package and datasets to: 
