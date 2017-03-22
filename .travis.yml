@@ -5,3 +5,9 @@ cache: packages
 branches:
   only:
   - NNS-Beta-Version
+
+r_packages:
+  - covr
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
