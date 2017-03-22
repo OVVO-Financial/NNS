@@ -1,0 +1,55 @@
+---
+title: "Getting Started with NNS: Correlation and Dependence"
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with NNS: Correlation and Dependence}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(NNS)
+require(knitr)
+require(rgl)
+```
+
+# Correlation and Dependence
+The limitations of linear correlation are well known.  Often one uses correlation, when dependence is the intended measure for defining the relationship between variables.  NNS dependence `NNS.dep` is a signal:noise measure robust to nonlinear signals.
+
+Below are some examples comparing NNS correlation `NNS.cor` and `NNS.dep` with the standard Pearson's correlation coefficient `cor`.
+
+##Linear Equivalence
+```{r linear}
+x=seq(0,3,.01); y=2*x
+
+cor(x,y)
+NNS.dep(x,y,print.map = T)
+```
+
+##Nonlinear Relationship
+```{r nonlinear}
+x=seq(0,3,.01); y=x^10
+
+cor(x,y)
+NNS.dep(x,y,print.map = T)
+```
+
+##Dependence
+```{r dependence}
+set.seed(123)
+df<- data.frame(x=runif(10000,-1,1),y=runif(10000,-1,1))
+df<- subset(df, (x^2 + y^2 <= 1 & x^2 + y^2 >= 0.95))
+NNS.dep(df$x,df$y,print.map = T)
+```
+
+#References
+If the user is so motivated, detailed arguments and proofs are provided within the following:
+
+*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+
+*[Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+
+*[Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+
