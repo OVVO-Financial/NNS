@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=master)](https://travis-ci.org/OVVO-Financial/NNS)
+[![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS)
 
 # NNS
 
