@@ -123,8 +123,6 @@ if(all(sapply(reg.points, length) == length(reg.points[[1]]))==FALSE){
   setkey(resid.plot,'obs')
   y.hat=mean.by.id.matrix[,.(y.hat)]
 
-  B=mean.by.id.matrix[,(1:n),with=FALSE]
-  B=data.frame(B)
   fitted.matrix = data.table(original.IVs,y.hat)
 
   setkey(mean.by.id.matrix,'NNS.ID')
