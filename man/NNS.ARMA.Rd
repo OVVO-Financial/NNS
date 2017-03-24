@@ -5,7 +5,7 @@
 \title{NNS ARMA}
 \usage{
 NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
-  negative.values = FALSE, method = "nonlin", dynamic = FALSE, stn = 0,
+  negative.values = FALSE, method = "nonlin", dynamic = FALSE,
   plot = TRUE, seasonal.plot = TRUE, intervals = FALSE)
 }
 \arguments{
@@ -22,8 +22,6 @@ NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
 \item{method}{options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{method="lin"}.}
 
 \item{dynamic}{logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.}
-
-\item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to \code{(stn=0)} to allow for maximum fit.}
 
 \item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference in upper panel.  Lower panel returns original data and forecast.}
 
