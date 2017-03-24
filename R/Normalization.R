@@ -21,12 +21,8 @@ NNS.norm <- function(A,chart.type=NULL,linear=F,order=NULL) {
   m  <- colMeans(A)
   RG <- m %o% (1/m)
 
-  if(length(A[,1])<=30){
-    scale.factor=as.matrix(abs(NNS.cor(A,order=1)))} else {
-    scale.factor=as.matrix(abs(NNS.cor(A)))
-  }
-
   if(linear==FALSE){
+      scale.factor=abs(NNS.cor(A))
       scales <- colMeans(RG * scale.factor)
   } else {
         scales <- colMeans(RG)

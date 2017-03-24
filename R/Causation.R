@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param tau integer; Number of lagged observations to consider
+#' @param tau integer; Number of lagged observations to consider.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation and quantity of association.
 #' @keywords causation

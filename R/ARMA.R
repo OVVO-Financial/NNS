@@ -85,8 +85,10 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
     Component.index = list()
 
     for (i in 1:length(lag)){
-      Component.series[[paste('Series.',i,sep="")]] <- na.omit(rev(variable[seq(aa+1,1,-lag[i])]))
-      Component.index[[paste('Index.',i,sep="")]] <- (1:length(na.omit(Component.series[[i]])))
+      CS=rev(variable[seq(aa+1,1,-lag[i])])
+      CS=CS[!is.na(CS)]
+      Component.series[[paste('Series.',i,sep="")]] <- CS
+      Component.index[[paste('Index.',i,sep="")]] <- (1:length(CS))
     }
     return(list(Component.index=Component.index,Component.series=Component.series))
   }
@@ -104,7 +106,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
         seas.matrix = NNS.seas(variable,plot=F)
         if(!is.list(seas.matrix)){
-          M<- t(seas.matrix)} else {
+          M<- t(1)} else {
             M<- seas.matrix$all.periods}
         ASW=ARMA.seas.weighting()
         lag=ASW$lag
@@ -177,7 +179,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
     seas.matrix = NNS.seas(variable,plot=F)
     if(!is.list(seas.matrix)){
-      M<- t(seas.matrix)} else {
+      M<- t(1)} else {
         M<- seas.matrix$all.periods}
     ASW=ARMA.seas.weighting()
     lag=ASW$lag
@@ -265,8 +267,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
       text(1,abs(sd(FV)/mean(FV)),pos=3,"NO SEASONALITY DETECTED",col='red')
     }
 }
-    plot( OV, type = 'l',lwd=2,main = "Forecast",col='steelblue',
-          xlim=c(1,max((a+h),length(OV))),
+    plot(OV, type = 'l',lwd=2,main = "Forecast",col='steelblue',
+          xlim=c(1,max((training.set+h),length(OV))),
           ylab="Variable", ylim=c(min(Estimates, OV),max( OV,Estimates)))
 
     if(intervals==T){

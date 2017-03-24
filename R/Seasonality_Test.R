@@ -4,7 +4,7 @@
 #'
 #' @param variable a numeric vector.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
-#' @return Returns a matrix of all periods exhibiting less coefficient of variance than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variance versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return (1).
+#' @return Returns a matrix of all periods exhibiting less coefficient of variance than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variance versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @keywords seasonality
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -43,10 +43,11 @@ NNS.seas <- function(variable,plot=TRUE){
       M<- data.table("Period"=instances[instances>0],"Coefficient.of.Variance"=output[output>0],"Variable.Coefficient.of.Variance"=n,key = "Coefficient.of.Variance")
 
 
-    }
+    } else {M="No Seasonality Detected"}
 
-  if(plot==T){
+
     if(sum(instances[instances>0])>0){
+      if(plot==T){
   plot(instances[instances>0],output[output>0],
          xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",
          ylim = c(0,2*abs(sd(variable)/mean(variable))))
@@ -57,22 +58,19 @@ NNS.seas <- function(variable,plot=TRUE){
     text(mean(instances[instances>0]),abs(sd(variable)/mean(variable)),pos=3,
          "Variable Coefficient of Variance",col='red')}
 
-           else {
-            plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*abs(sd(variable)/mean(variable))))
+         #  else {
+#            plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*abs(sd(variable)/mean(variable))))
 
-             text(1,abs(sd(variable)/mean(variable)),pos=3,"NO SEASONALITY DETECTED",col='red')
-           }
+#             text(1,abs(sd(variable)/mean(variable)),pos=3,"NO SEASONALITY DETECTED",col='red')
+ #          }
 
   }
 
-  if(sum(instances[instances>0])==0) {return('best.period'=t(1))}
 
-if(length(instances[instances>0])>0){
-
-  return(list("all.periods"=M,"best.period"=M[1,Period]))
-}
-    else {
-     list("all.periods"=NULL, "best.period"=1)}
+    if(length(instances[instances>0])>0){
+      return(list("all.periods"=M,"best.period"=M[1,Period]))
+    }
+    else { return(M) }
 
 
 }

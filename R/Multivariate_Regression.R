@@ -85,13 +85,12 @@ if(all(sapply(reg.points, length) == length(reg.points[[1]]))==FALSE){
     colnames(reg.points.matrix)=as.character(colnames.list)}
 
 
-  reg.length=length(na.omit(reg.points.matrix[,1]))
-
 ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   NNS.ID = list()
 
       for(j in 1:n){
-        sorted.reg.points=sort(na.omit(reg.points.matrix[,j]))
+        sorted.reg.points=sort(reg.points.matrix[,j])
+        sorted.reg.points=sorted.reg.points[!is.na(sorted.reg.points)]
         NNS.ID[[j]]= findInterval(original.IVs[,j],sorted.reg.points,left.open = TRUE)+1 + findInterval(original.IVs[,j],sorted.reg.points,left.open = FALSE)+1
           }
 
