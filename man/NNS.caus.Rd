@@ -11,7 +11,7 @@ NNS.caus(x, y, tau, plot = FALSE)
 
 \item{y}{a numeric vector.}
 
-\item{tau}{integer; Number of lagged observations to consider}
+\item{tau}{integer; Number of lagged observations to consider.}
 
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
 }
