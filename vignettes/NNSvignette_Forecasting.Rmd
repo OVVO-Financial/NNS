@@ -76,7 +76,7 @@ Using our cross-validated parameters (`seasonal.factor` and `method`) we can for
 NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seasonal.plot = FALSE)
 ```
 
-## Brief Notes on other parameters
+## Brief Notes on Other Parameters
 * `seasonal.factor=FALSE`
 
 We included the ability to use all detected seasonal periods simultaneously, weighted by their strength.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
