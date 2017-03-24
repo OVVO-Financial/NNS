@@ -78,11 +78,16 @@ NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seas
 
 ## Brief Notes on other parameters
 * `seasonal.factor=FALSE`
+
 We included the ability to use all detected seasonal periods simultaneously, weighted by their strength.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+
 * `dynamic=TRUE`
+
 This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`.  Also computationally expensive due to the recalculation of seasonal periods for each estimated value.
-* `plot` and `seasonal.plot`
-These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot=TRUE` will not plot without `plot=TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.
+
+* `plot` , `seasonal.plot` and `intervals`
+
+These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot=TRUE` will not plot without `plot=TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  `intervals` will plot the surrounding estimated values iff `intervals=TRUE & seasonal.factor=FALSE`.
 
 
 # References
