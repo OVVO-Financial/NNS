@@ -9,7 +9,6 @@
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.
 #' @param method options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{method="lin"}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
-#' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to \code{(stn=0)} to allow for maximum fit.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
 #' @param intervals logical; \code{FALSE} (default) Plots the surrounding forecasts around the final estimate when \code{(intervals=TRUE)} and \code{(seasonal.factor=FALSE)}.  There are no other forecasts to plot when a single \code{seasonal.factor} is selected.
@@ -27,7 +26,7 @@
 
 
 # Autoregressive Model
-NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,negative.values = FALSE, method = "nonlin", dynamic = FALSE,stn=0,plot=TRUE,seasonal.plot=TRUE,intervals=FALSE){
+NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,negative.values = FALSE, method = "nonlin", dynamic = FALSE,plot=TRUE,seasonal.plot=TRUE,intervals=FALSE){
 
   if(intervals==TRUE && is.numeric(seasonal.factor)){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
 
@@ -126,24 +125,23 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
 
       if(method=='nonlin' | method=='both'){
-        if(negative.values==TRUE){
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=stn)$Point.est)
-        }
+
+          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0)$Point.est)
+
         if(negative.values==FALSE){
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=stn)$Point.est)
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
+
         Nonlin.estimates=sum(Regression.Estimates*Weights)
       }#Linear == F
 
       if(method=='lin' | method=='both'){
-        if(negative.values==FALSE){
+
           Regression.Estimates=sapply(1:length(lag),function(i) coef(lm(Component.series[[i]]~Component.index[[i]]))[1]+(coef(lm(Component.series[[i]]~Component.index[[i]]))[2]*(length(Component.series[[i]])+1)))
+        if(negative.values==FALSE){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
-        if(negative.values==TRUE){
-          Regression.Estimates=sapply(1:length(lag),function(i) coef(lm(Component.series[[i]]~Component.index[[i]]))[1]+(coef(lm(Component.series[[i]]~Component.index[[i]]))[2]*(length(Component.series[[i]])+1)))
-        }
+
         Lin.estimates=sum(Regression.Estimates*Weights)
       }#Linear==T
 
@@ -157,8 +155,12 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
       }
 
 
-      if(method=='both'){Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}else{
-        Estimates[j+1] = sum(Regression.Estimates*Weights)}
+      if(method=='both'){
+        Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}
+        else{
+            Estimates[j+1] = sum(Regression.Estimates*Weights)
+        }
+
       variable = c(variable,(Estimates[j+1]))
       FV=variable
 
@@ -199,32 +201,26 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
 
       if(method=='nonlin' | method=='both'){
-        if(negative.values==TRUE){
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=stn)$Point.est)
-          NL.Regression.Estimates=Regression.Estimates
-        }
+
+          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0)$Point.est)
 
         if(negative.values==FALSE){
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=stn)$Point.est)
           Regression.Estimates=pmax(0,Regression.Estimates)
-          NL.Regression.Estimates=Regression.Estimates
         }
 
+        NL.Regression.Estimates=Regression.Estimates
         Nonlin.estimates=sum(Regression.Estimates*Weights)
       }#Linear == F
 
       if(method=='lin' | method=='both'){
+
+          Regression.Estimates=sapply(1:length(lag),function(i) coef(lm(Component.series[[i]]~Component.index[[i]]))[1]+(coef(lm(Component.series[[i]]~Component.index[[i]]))[2]*(length(Component.series[[i]])+1)))
+
         if(negative.values==FALSE){
-          Regression.Estimates=sapply(1:length(lag),function(i) coef(lm(Component.series[[i]]~Component.index[[i]]))[1]+(coef(lm(Component.series[[i]]~Component.index[[i]]))[2]*(length(Component.series[[i]])+1)))
           Regression.Estimates=pmax(0,Regression.Estimates)
-          L.Regression.Estimates=Regression.Estimates
         }
 
-        if(negative.values==TRUE){
-          Regression.Estimates=sapply(1:length(lag),function(i) coef(lm(Component.series[[i]]~Component.index[[i]]))[1]+(coef(lm(Component.series[[i]]~Component.index[[i]]))[2]*(length(Component.series[[i]])+1)))
-          L.Regression.Estimates=Regression.Estimates
-        }
-
+        L.Regression.Estimates=Regression.Estimates
         Lin.estimates=sum(Regression.Estimates*Weights)
 
       }#Linear==T
@@ -239,12 +235,16 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
       }
 
       if(method=='both'){
-        Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}else{
-          Estimates[j+1] = sum(Regression.Estimates*Weights)}
+        Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}
+        else{
+            Estimates[j+1] = sum(Regression.Estimates*Weights)
+        }
+
       variable = c(variable,(Estimates[j+1]))
       FV=variable
 
-    }}  # ELSE {}
+    } # j loop non-dynamic
+    }  # ELSE from (if dynamic)
 
   #### PLOTTING
   if(plot==T){
