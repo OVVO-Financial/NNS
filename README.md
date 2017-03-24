@@ -1,4 +1,4 @@
-[![packageversion](https://img.shields.io/badge/NNS%20version-0.3.1-blue.svg?style=flat-square)](commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) 
+[![packageversion](https://img.shields.io/badge/NNS%20version-0.3.1-blue.svg?style=flat-square)](commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
 # NNS
@@ -30,6 +30,4 @@ Please see https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples 
 
 
 ## Thank you for your interest in NNS!
-[![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-
 ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/NNS)
