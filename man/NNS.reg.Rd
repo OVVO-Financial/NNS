@@ -54,7 +54,7 @@ MULTIVARIATE regression returns the values: \code{"Fitted"} for only the fitted 
 Generates a nonlinear regression based on partial moment quadrant means.
 }
 \note{
-Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
+Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
 }
 \examples{
 set.seed(123)
@@ -65,7 +65,7 @@ NNS.reg(x,y)
 NNS.reg(x,y,order=2)
 
 ## Maximum {order} selection
-NNS.reg(x,y,order='max')
+NNS.reg(x,y,order="max")
 
 ## x-only paritioning (Univariate only)
 NNS.reg(x,y,type="XONLY")
@@ -85,7 +85,7 @@ NNS.reg(x,y,point.est=c(.25,.5,.75),type="CLASS")
 #Dimension Reduction:
 NNS.reg(iris[,1:4],iris[,5],type="CLASS",order=5)
 #Multiple Regression:
-NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction='off')
+NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
 
 ## To call fitted values:
 x<-rnorm(100); y<-rnorm(100)

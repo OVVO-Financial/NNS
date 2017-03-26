@@ -4,14 +4,19 @@
 \alias{UPM.VaR}
 \title{UPM VaR}
 \usage{
-UPM.VaR(percentile, degree, x)
+UPM.VaR(percentile, degree, x, extend = NULL)
 }
 \arguments{
-\item{percentile}{numeric [0,1]; The percentile for VaR.}
+\item{percentile}{numeric [0,1]; The percentile for right-tail VaR.}
 
 \item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
+
+\item{extend}{options("yes",NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
+}
+\value{
+Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 }
 \description{
 Generates an upside VaR based on the Upper Partial Moment ratio
@@ -19,6 +24,7 @@ Generates an upside VaR based on the Upper Partial Moment ratio
 \examples{
 set.seed(123)
 x<-rnorm(100)
+## For 95th percentile VaR (right-tail)
 UPM.VaR(0.95,0,x)
 }
 \keyword{VaR}

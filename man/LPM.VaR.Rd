@@ -4,21 +4,30 @@
 \alias{LPM.VaR}
 \title{LPM VaR}
 \usage{
-LPM.VaR(percentile, degree, x)
+LPM.VaR(percentile, degree, x, extend = NULL)
 }
 \arguments{
-\item{percentile}{numeric [0,1]; The percentile for VaR.}
+\item{percentile}{numeric [0,1]; The percentile for left-tail VaR.}
 
 \item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
+
+\item{extend}{options("yes",NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
+}
+\value{
+Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 }
 \description{
 Generates a VaR based on the Lower Partial Moment ratio
 }
+\note{
+If endpoint error is generated, set \code{(extend="yes")}.
+}
 \examples{
 set.seed(123)
 x<-rnorm(100)
+## For 95th percentile VaR (left-tail)
 LPM.VaR(0.95,0,x)
 }
 \author{

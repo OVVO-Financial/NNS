@@ -5,7 +5,7 @@
 \title{NNS ANOVA}
 \usage{
 NNS.ANOVA(control, treatment, confidence.interval = 0.95, pairwise = FALSE,
-  plot = TRUE, binary = TRUE)
+  plot = TRUE, binary = TRUE, extend = NULL)
 }
 \arguments{
 \item{control}{a numeric vector, matrix or data frame.}
@@ -19,6 +19,8 @@ NNS.ANOVA(control, treatment, confidence.interval = 0.95, pairwise = FALSE,
 \item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.}
 
 \item{binary}{logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.}
+
+\item{extend}{options("yes",NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
 For \code{binary=FALSE} returns the degree certainty the samples belong to the same population [0,1].
@@ -27,6 +29,9 @@ For \code{binary=TRUE} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \
 }
 \description{
 Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the samples belong to the same population, not a p-value.
+}
+\note{
+If endpoint error is generated, set \code{(extend="yes")}.
 }
 \examples{
 ### Binary analysis and effect size
