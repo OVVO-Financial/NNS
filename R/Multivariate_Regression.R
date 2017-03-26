@@ -256,9 +256,9 @@ rhs.partitions=data.table(reg.points.matrix)
 ### Return Values
   if(return.values==T){
 
-      return(list(R2=R2,Fitted=y.hat,rhs.partitions=rhs.partitions, RPM=REGRESSION.POINT.MATRIX[] ,partition=y.identifier,Point.est=predict.fit,Fitted.xy=fitted.matrix[]))}
+      return(list(R2=R2,Fitted=y.hat,rhs.partitions=rhs.partitions, RPM=REGRESSION.POINT.MATRIX[] ,partition=data.table(Y=original.DV,NNS.ID=y.identifier),Point.est=predict.fit,Fitted.xy=fitted.matrix[]))}
 
   else{
-     invisible(list(R2=R2,Fitted=y.hat,rhs.partitions=rhs.partitions, RPM=REGRESSION.POINT.MATRIX[],partition=y.identifier,Point.est=predict.fit,Fitted.xy=fitted.matrix[]))}
+     invisible(list(R2=R2,Fitted=y.hat,rhs.partitions=rhs.partitions, RPM=REGRESSION.POINT.MATRIX[],partition=data.table(Y=original.DV,NNS.ID=y.identifier),Point.est=predict.fit,Fitted.xy=fitted.matrix[]))}
 
 }
