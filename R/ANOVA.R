@@ -7,9 +7,11 @@
 #' @param confidence.interval numeric [0,1]; The confidence interval surrounding the control mean when \code{(binary=TRUE)}.  Defaults to \code{(confidence.interval=0.95)}.
 #' @param pairwise logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise=TRUE}.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.
+#' @param extend options("yes",NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return For \code{binary=FALSE} returns the degree certainty the samples belong to the same population [0,1].
 #'
 #' For \code{binary=TRUE} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \code{"Grand Mean"}, \code{"Control CDF"}, \code{"Treatment CDF"}, the certainty of the same population statistic \code{"Certainty"}, the effect size of the treatment for a specified confidence interval with \code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}.
+#' @note If endpoint error is generated, set \code{(extend="yes")}.
 #' @keywords ANOVA, effect size
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -32,14 +34,14 @@
 #' @export
 
 
-NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,plot=TRUE,binary=TRUE){
+NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,plot=TRUE,binary=TRUE,extend=NULL){
 
     if(missing(treatment)){
         n= ncol(control)
         if(is.null(n)){stop("supply both 'control' and 'treatment' or a matrix-like 'control'")}
         if(n==1){stop("supply both 'control' and 'treatment' or a matrix-like 'control'")}
         if(n>=2){A=control}
-    } else {return(NNS.ANOVA.bin(control,treatment,confidence.interval,plot=plot))}
+    } else {return(NNS.ANOVA.bin(control,treatment,confidence.interval,plot=plot,extend=extend))}
 
     mean.of.means <- mean(colMeans(A))
     n<- ncol(A)

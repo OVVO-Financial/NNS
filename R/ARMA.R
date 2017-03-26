@@ -266,10 +266,11 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
       text(1,abs(sd(FV)/mean(FV)),pos=3,"NO SEASONALITY DETECTED",col='red')
     }
-}
+    }
+    label=names(variable)
     plot(OV, type = 'l',lwd=2,main = "Forecast",col='steelblue',
           xlim=c(1,max((training.set+h),length(OV))),
-          ylab="Variable", ylim=c(min(Estimates, OV),max( OV,Estimates)))
+          ylab=label, ylim=c(min(Estimates, OV),max( OV,Estimates)))
 
     if(intervals==T){
       for(i in 1:h){

@@ -1,5 +1,5 @@
 
-NNS.ANOVA.bin<- function(control,treatment,confidence.interval=NULL,plot=TRUE){
+NNS.ANOVA.bin<- function(control,treatment,confidence.interval=NULL,plot=TRUE,extend=NULL){
 
         mean.of.means <- mean(c(mean(control),mean(treatment)))
 
@@ -34,8 +34,8 @@ if(is.null(confidence.interval)){
 
 if(!is.null(confidence.interval)){
         #Upper end of CDF confidence interval for control mean
-            a=UPM.VaR((confidence.interval+(1-confidence.interval)/2),1,control)
-            b=UPM.VaR(.5,1,control)
+            a=UPM.VaR((confidence.interval+(1-confidence.interval)/2),1,control,extend = extend)
+            b=UPM.VaR(.5,1,control,extend=extend)
             if(plot==TRUE){
         abline(v=max(a,b),
               col="green",lwd=4, lty=3)
@@ -43,8 +43,8 @@ if(!is.null(confidence.interval)){
               pos=4,0.75,"mu+",col="green")}
 
         #Lower end of CDF confidence interval for control mean
-            c=LPM.VaR((confidence.interval+(1-confidence.interval)/2),1,control)
-            d=LPM.VaR(.5,1,control)
+            c=LPM.VaR((confidence.interval+(1-confidence.interval)/2),1,control,extend=extend)
+            d=LPM.VaR(.5,1,control,extend=extend)
             if(plot==TRUE){
         abline(v=min(c,d),
               col="blue",lwd=4, lty=3)
