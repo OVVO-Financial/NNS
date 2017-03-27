@@ -19,11 +19,11 @@ NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.}
 
-\item{method}{options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{method="lin"}.}
+\item{method}{options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.}
 
 \item{dynamic}{logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.}
 
-\item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference in upper panel.  Lower panel returns original data and forecast.}
+\item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.}
 
 \item{seasonal.plot}{logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.}
 

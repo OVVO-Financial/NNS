@@ -17,11 +17,11 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = 0.2,
 
 \item{CV.size}{numeric [0,1]; Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.2 for a 20 percent random sampling of the training set.}
 
-\item{weight}{options:("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.}
+\item{weight}{options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.}
 
-\item{precision}{options:("LOW","HIGH");2 settings offered: \code{"LOW"} (Default) ,and \code{"HIGH"}.  \code{"HIGH"} is the limit condition of every observation as a regression point and uses a \code{(norm="NNS")} while \code{(precision="LOW")} uses a \code{(norm="std")} in \link{NNS.reg}.  Errors/warnings can generally be reconciled with \code{(precision="LOW")}.}
+\item{precision}{options: ("LOW","HIGH"); 2 settings offered: \code{"LOW"} (Default) ,and \code{"HIGH"}.  \code{"HIGH"} is the limit condition of every observation as a regression point and uses a \code{(norm="NNS")} while \code{(precision="LOW")} uses a \code{(norm="std")} in \link{NNS.reg}.  Errors/warnings can generally be reconciled with \code{(precision="LOW")}.}
 
-\item{method}{numeric options:(1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction logistic regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.}
+\item{method}{numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction logistic regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.}
 
 \item{threshold}{numeric [0,1]; Sets the correlation threshold for independent variables in \link{NNS.reg}.  Defaults to \code{(threshold=0)}.}
 

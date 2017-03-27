@@ -20,12 +20,12 @@ NNS.ANOVA(control, treatment, confidence.interval = 0.95, pairwise = FALSE,
 
 \item{binary}{logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.}
 
-\item{extend}{options("yes",NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
+\item{extend}{options:("yes", NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
-For \code{binary=FALSE} returns the degree certainty the samples belong to the same population [0,1].
+For \code{(binary=FALSE)} returns the degree certainty the samples belong to the same population [0,1].
 
-For \code{binary=TRUE} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \code{"Grand Mean"}, \code{"Control CDF"}, \code{"Treatment CDF"}, the certainty of the same population statistic \code{"Certainty"}, the effect size of the treatment for a specified confidence interval with \code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}.
+For \code{(binary=TRUE)} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \code{"Grand Mean"}, \code{"Control CDF"}, \code{"Treatment CDF"}, the certainty of the same population statistic \code{"Certainty"}, the effect size of the treatment for a specified confidence interval with \code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}.
 }
 \description{
 Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the samples belong to the same population, not a p-value.

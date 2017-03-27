@@ -25,13 +25,13 @@ dy.dx(x, y, order = NULL, stn = 0.99, eval.point = median(x),
 
 \item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.}
 
-\item{deriv.method}{method of derivative estimation {"NNS","FS"}; Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).}
+\item{deriv.method}{method of derivative estimation, options:("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).}
 }
 \value{
 Returns the value of the partial derivative estimate for the given order.
 }
 \description{
-Returns the numerical partial derivate of y wrt x for a point of interest.
+Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
 }
 \examples{
 x<-seq(0,2*pi,pi/100); y<-sin(x)

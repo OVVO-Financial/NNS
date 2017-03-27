@@ -11,11 +11,11 @@ NNS.diff(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE)
 
 \item{point}{numeric; Point to be evaluated for derivative of a given function \code{f}.}
 
-\item{h}{numeric [0,...]; Initial step for secant projection.  Defaults to \code{(h=0.1)}.}
+\item{h}{numeric [0, ...]; Initial step for secant projection.  Defaults to \code{(h=0.1)}.}
 
-\item{tol}{numeric; Sets the tolerance for the stopping condition of the inferred h.  Defualts to \code{(tol=1e-10)}.}
+\item{tol}{numeric; Sets the tolerance for the stopping condition of the inferred \code{h}.  Defualts to \code{(tol=1e-10)}.}
 
-\item{print.trace}{logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred h.}
+\item{print.trace}{logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.}
 }
 \value{
 Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.

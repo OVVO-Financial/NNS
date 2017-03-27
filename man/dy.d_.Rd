@@ -5,7 +5,7 @@
 \title{Partial Derivative dy/d[wrt]}
 \usage{
 dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.9,
-  h = 0.1, n.best = 2, mixed = FALSE, plot = FALSE, norm = NULL,
+  h = 0.1, n.best = 2, mixed = FALSE, plot = FALSE,
   noise.reduction = "mean")
 }
 \arguments{
@@ -29,15 +29,13 @@ dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.9,
 
 \item{plot}{logical; \code{FALSE} (default) Set to \code{(plot=TRUE)} to view plot.}
 
-\item{norm}{\code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.}
-
 \item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{noise.reduction="median"} uses medians instead of means for partitions, while \code{noise.reduction="mode"} uses modes instead of means for partitions.  \code{noise.reduction="off"}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{noise.reduction="mean"}.}
 }
 \value{
 Returns the 1st derivative \code{"First Derivative"}, 2nd derivative \code{"Second Derivative"}, and mixed derivative \code{"Mixed Derivative"} (for two independent variables only).
 }
 \description{
-Returns the numerical partial derivate of y with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as f(x+h) and f(x-h) values.
+Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x+h)} and \code{f(x-h)} values.
 }
 \note{
 For known function testing and analysis, regressors should be transformed via \link{expand.grid} to fill the dimensions with \code{(order="max")}.  Example provided below.
