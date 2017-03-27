@@ -1,6 +1,6 @@
 #' Partial Derivative dy/dx
 #'
-#' Returns the numerical partial derivate of y wrt x for a point of interest.
+#' Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
@@ -10,7 +10,7 @@
 #' @param deriv.order numeric options: (1,2); 1 (default) For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.
 #' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.01} representing a 1 percent step from the value of the independent variable.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.
-#' @param deriv.method method of derivative estimation {"NNS","FS"}; Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).
+#' @param deriv.method method of derivative estimation, options:("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).
 #' @return Returns the value of the partial derivative estimate for the given order.
 #' @keywords partial derivative
 #' @author Fred Viole, OVVO Financial Systems

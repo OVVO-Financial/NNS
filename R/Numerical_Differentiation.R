@@ -4,9 +4,9 @@
 #'
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
-#' @param h numeric [0,...]; Initial step for secant projection.  Defaults to \code{(h=0.1)}.
-#' @param tol numeric; Sets the tolerance for the stopping condition of the inferred h.  Defualts to \code{(tol=1e-10)}.
-#' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred h.
+#' @param h numeric [0, ...]; Initial step for secant projection.  Defaults to \code{(h=0.1)}.
+#' @param tol numeric; Sets the tolerance for the stopping condition of the inferred \code{h}.  Defualts to \code{(tol=1e-10)}.
+#' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.
 #' @return Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
 #' @keywords numerical differentiation, secant
 #' @author Fred Viole, OVVO Financial Systems

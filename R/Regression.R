@@ -19,9 +19,47 @@
 #' @param norm \code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.
 #' @param dist options:("L1","L2") the method of distance calculation; Selects the distance calculation used. \code{dist="L2"} (default) selects the Euclidean distance and \code{(dist="L1")} seclects the Manhattan distance.
 #' @param multivariate.call Internal parameter for multivariate regressions.
-#' @return UNIVARIATE regression returns the values:  \code{"Fitted"} for only the fitted values, \code{y.hat}; \code{"Fitted.xy"} for a data frame of \code{x},\code{y} and \code{y.hat}; \code{"derivative"} for the coefficient of the \code{x} and its applicable range;   \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y}; \code{"Point"} returns the \code{x} point(s) being evaluated; \code{"Point.est"} for the predicted value generated; \code{"Point"} returns the \code{x} point(s) being evaluated; \code{"regression.points"} provides the points used in the regression equation for the given order of partitions; \code{"R2"} provides the goodness of fit; \code{"MSE"} returns the MSE between \code{y} and \code{y.hat}; \code{"Prediction.Accuracy"} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y}.
+#' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 #'
-#' MULTIVARIATE regression returns the values: \code{"Fitted"} for only the fitted values of \code{x}; \code{"Fitted.xy"} for a data frame of \code{y} and fitted values; \code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions; \code{"rhs.partitions"} returns the partition points for each \code{x}; \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y}; \code{"Point"} returns the \code{x} point(s) being evaluated; \code{"Point.est"} returns the predicted value generated; \code{"equation"} returns the synthetic X* dimension reduction equation.
+#'      \code{"R2"} provides the goodness of fit;
+#'
+#'      \code{"MSE"} returns the MSE between \code{y} and \code{y.hat};
+#'
+#'      \code{"Prediction.Accuracy"} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y};
+#'
+#'      \code{"derivative"} for the coefficient of the \code{x} and its applicable range;
+#'
+#'      \code{"Point"} returns the \code{x} point(s) being evaluated;
+#'
+#'      \code{"Point.est"} for the predicted value generated;
+#'
+#'      \code{"regression.points"} provides the points used in the regression equation for the given order of partitions;
+#'
+#'      \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
+#'
+#'      \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
+#'
+#'      \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y} and \code{y.hat};
+#'
+#'
+#' MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+#'
+#' \code{"R2"} provides the goodness of fit;
+#'
+#' \code{"equation"} returns the synthetic X* dimension reduction equation;
+#'
+#' \code{"rhs.partitions"} returns the partition points for each \code{x};
+#'
+#' \code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
+#'
+#' \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
+#'
+#' \code{"Point.est"} returns the predicted value generated;
+#'
+#' \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
+#'
+#' \code{"Fitted.xy"} reutnrs a \link{data.table} of \code{y} and fitted values.
+#'
 #' @note Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
 #' @keywords nonlinear regression, classifier
 #' @author Fred Viole, OVVO Financial Systems
@@ -360,7 +398,7 @@ NNS.reg = function (x,y,
 
   ### Return Values
   if(return.values == TRUE){
-    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation,"Segments" = p-1, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,y.hat],"Fitted.xy"=fitted))
+    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,y.hat],"Fitted.xy"=fitted))
   } else {
     invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation,"Segments" = p-1, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,y.hat],"Fitted.xy"=fitted))
   }
