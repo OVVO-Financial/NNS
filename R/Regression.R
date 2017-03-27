@@ -398,9 +398,9 @@ NNS.reg = function (x,y,
 
   ### Return Values
   if(return.values == TRUE){
-    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,y.hat],"Fitted.xy"=fitted))
+    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   } else {
-    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation,"Segments" = p-1, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,y.hat],"Fitted.xy"=fitted))
+    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   }
 
 }
