@@ -121,6 +121,7 @@ NNS.reg = function (x,y,
                     norm=NULL,
                     dist="L2",multivariate.call=FALSE){
 
+  if(plot.regions==TRUE && order=='max'){stop("Please reduce the 'order' or set 'plot.regions' to FALSE.")}
 
   original.columns = ncol(x)
   original.variable = x
