@@ -121,7 +121,7 @@ NNS.reg = function (x,y,
                     norm=NULL,
                     dist="L2",multivariate.call=FALSE){
 
-  if(plot.regions==TRUE && order=='max'){stop("Please reduce the 'order' or set 'plot.regions' to FALSE.")}
+  if(plot.regions==TRUE && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
 
   original.columns = ncol(x)
   original.variable = x
@@ -363,9 +363,7 @@ NNS.reg = function (x,y,
     ymax= max(c(point.est.y,y))
 
     if(is.null(order)){
-      plot.order =max(nchar(part.map$dt$quadrant))-1} else {plot.order=order}
-
-    if(dep.reduced.order==ceiling(log2(length(y)))){plot.order= ' max'}
+      plot.order = dep.reduced.order} else {plot.order=order}
 
     plot(x,y,xlim=c(xmin,xmax),ylim=c(ymin,ymax),col='steelblue',main=paste(paste0("NNS Order = ", plot.order),sep="\n"),
          xlab = if(!is.null(original.columns))

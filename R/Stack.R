@@ -19,10 +19,12 @@
 #' @note If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data<- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
 #' @examples
 #'  ## Using 'iris' dataset where test set \code{IVs.test} is rows 141:150.
-#'  NNS.stack(iris[1:140,1:4],iris[1:140,5],IVs.test=iris[141:150,1:4])
+#'  \dontrun{
+#'  NNS.stack(iris[1:140,1:4],iris[1:140,5],IVs.test=iris[141:150,1:4])}
 #'
 #'  ## Selecting NNS.reg and dimension reduction techniques.
-#'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))
+#'  \dontrun{
+#'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 #' @export
 
 NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",precision="LOW",method=c(1,2),threshold=0,seed=123){

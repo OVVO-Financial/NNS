@@ -268,6 +268,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
     }
     }
     label=names(variable)
+    if(is.null(label)){label = "Variable"}
     plot(OV, type = 'l',lwd=2,main = "Forecast",col='steelblue',
           xlim=c(1,max((training.set+h),length(OV))),
           ylab=label, ylim=c(min(Estimates, OV),max( OV,Estimates)))

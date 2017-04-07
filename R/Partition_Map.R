@@ -1,6 +1,6 @@
 #' NNS Partition Map
 #'
-#'  Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchal clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
+#'  Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
 #' @param x a numeric vector.
 #' @param y a numeric vector with compatible dimsensions to \code{x}.
 #' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
@@ -33,7 +33,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
 
 
-  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant='q',key = c('x','y'))
+  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant='q',prior.quadrant='pq',key = c('x','y'))
 
   mode=function(x) {
     if(length(x)>1){
@@ -48,7 +48,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
 
   l=length(y)
 
-  if(is.null(order)){order=ceiling(log2(length(x)))}
+  if(is.null(order)){order=Inf}#ceiling(log2(length(x)))}
 
   if(!is.numeric(order)){
       min.obs=1
@@ -65,69 +65,55 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(is.null(type)){
     i=0L
     while(i>=0){
-      z=PART[,.N,quadrant]
-      if(sum(z$N<min.obs)>0){break}
+      PART = PART[,counts := .N,quadrant]
+
       if(i==order){break}
+
+      if(order==Inf){
+        if(nrow(PART[counts>=min.obs,.(x),by=quadrant])==0) break
+      }
 
       #Segments for Voronoi...
       if(Voronoi==T){
-        PART[,segments(min(x),mean(y),max(x),mean(y),lty=3),by=quadrant]
-        PART[,segments(mean(x),min(y),mean(x),max(y),lty=3),by=quadrant]
-        }
-
-      if(noise.reduction=='mean' | noise.reduction=='off'){
-        RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-        PART[, prior.quadrant := (quadrant)]
-        PART[, quadrant :=
-                  ifelse( x <= mean(x) & y <= mean(y) , paste0(quadrant,4),
-                  ifelse(x <= mean(x) & y >mean(y),paste0(quadrant,2),
-                  ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
-          if(!is.numeric(order)){
-              RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-              if(length(RP.new$x)==length(RP$x)){break} }
-          }
-      else {
-        if(noise.reduction=='mode'){
-          RP = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-          PART[, prior.quadrant := (quadrant)]
-
-
-          PART[, quadrant :=
-                    ifelse( x <= mode(x) & y <= mode(y) , paste0(quadrant,4),
-                    ifelse(x <= mode(x) & y >mode(y),paste0(quadrant,2),
-                    ifelse(x > mode(x) & y <=mode(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
-          if(!is.numeric(order)){
-            RP.new = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-            if(length(RP.new$x)==length(RP$x)){break}}
-          }
-        else {
-          if(noise.reduction=='median'){
-            RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
-            PART[, prior.quadrant := (quadrant)]
-            PART[, quadrant :=
-                      ifelse( x <= median(x) & y <= median(y) , paste0(quadrant,4),
-                      ifelse(x <= median(x) & y >median(y),paste0(quadrant,2),
-                      ifelse(x > median(x) & y <=median(y),paste0(quadrant,3),                                paste0(quadrant,1)))), by='quadrant']
-            if(!is.numeric(order)){
-              RP.new = PART[,.(x=median(x),y=median(y)),by=quadrant]
-              if(length(RP.new$x)==length(RP$x)){break}}
-            }
+        if(nrow(PART[counts>=min.obs,.(x),by=quadrant])>0){
+        PART[ counts>=min.obs , segments(min(x),mean(y),max(x),mean(y),lty=3),by=quadrant]
+        PART[ counts>=min.obs , segments(mean(x),min(y),mean(x),max(y),lty=3),by=quadrant]
         }
       }
+
+      if(noise.reduction=='mean' | noise.reduction=='off'){
+
+        PART[ counts>=min.obs , prior.quadrant := (quadrant)]
+
+        PART[ counts>=min.obs , quadrant :=
+               ifelse( x <= mean(x) & y <= mean(y) , paste0(quadrant,4),
+                       ifelse(x <= mean(x) & y >mean(y),paste0(quadrant,2),
+                              ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
+
+        RP = PART[ , .(x=mean(x),y=mean(y)),by=prior.quadrant]
+
+        if(!is.numeric(order)){
+          RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
+          if(length(RP.new$x)==length(RP$x)){break} }
+      }
+
+
       i=i+1L
       if(length(RP$x)==length(x)){break}
 
-
-    } #(i in 1:max.order) loop
-
+    }
 
     if(Voronoi==T){
       points(RP$x,RP$y,pch=15,lwd=2,col='red')
       title(main=paste0("NNS Order = ",i),cex.main=2)
     }
 
+    setnames(RP,"prior.quadrant","quadrant")
+
     return(list("order"=i,"dt"=PART[, .(x, y, quadrant,prior.quadrant)],"regression.points"=RP))
-  }
+
+    }
+
 
   ### X ONLY partition
   if(!is.null(type)){
@@ -185,6 +171,5 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
 
     return(list("order"=i,"dt"=PART[, .(x, y, quadrant,prior.quadrant)],"regression.points"=RP))
   }
-
 
 }

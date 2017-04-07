@@ -39,17 +39,10 @@ NNS.dep = function(x,y=NULL,order = 3,
   if(!missing(y)){
 
     if(print.map==T){
-      part.map = NNS.part(x,y,order=order, Voronoi=F)
-      #if part is not at least 2nd degree...< 4 regression points
-      if(length(part.map$regression.points$x)<4 & order>1){
-        part.map = NNS.part(x,y,order=2, Voronoi=T,min.obs = 1)}else{part.map=NNS.part(x,y,order=order, Voronoi=T)}
+      part.map = NNS.part(x,y,order=order, Voronoi=T)
     }
     else {
       part.map = NNS.part(x,y,order=order)
-      #if part is not at least 2nd degree...< 4 regression points
-      if(length(part.map$regression.points$x)<4 & order>1){
-        part.map = NNS.part(x,y,order=2,min.obs = 1)}else{part.map=part.map
-        }
     }
 
     part.df = part.map$dt
