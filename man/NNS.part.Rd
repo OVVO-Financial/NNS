@@ -26,7 +26,7 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL, min.obs = 4,
 Returns both a \link{data.table} \code{("dt")} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column; and the \link{data.table} of regression points \code{("regression.points")} for that given \code{(order=...)}.  Also returns the \code{"order"} of the final partition given \code{"min.obs"} constraints.
 }
 \description{
-Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchal clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
+Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
 }
 \examples{
 set.seed(123)
