@@ -5,8 +5,8 @@
 \title{NNS ARMA}
 \usage{
 NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
-  negative.values = FALSE, method = "nonlin", dynamic = FALSE,
-  plot = TRUE, seasonal.plot = TRUE, intervals = FALSE)
+  best.periods = NULL, negative.values = FALSE, method = "nonlin",
+  dynamic = FALSE, plot = TRUE, seasonal.plot = TRUE, intervals = FALSE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -16,6 +16,8 @@ NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
 \item{training.set}{\code{NULL} (defualt) numeric; Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.}
 
 \item{seasonal.factor}{logical or integer; \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.}
+
+\item{best.periods}{integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when \code{(seasonal.factor=FALSE)}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.}
 
@@ -39,8 +41,15 @@ Autoregressive model incorporating nonlinear regressions of component series.
 \code{(seasonal.factor=FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
 }
 \examples{
+
 ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12 period lag
-NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=12,method='nonlin')
+\dontrun{
+NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=12,method='nonlin')}
+
+## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
+\dontrun{
+NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=FALSE,best.periods=2,method='nonlin')}
+
 }
 \author{
 Fred Viole, OVVO Financial Systems
