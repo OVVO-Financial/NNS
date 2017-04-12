@@ -81,6 +81,10 @@ NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seas
 
 We included the ability to use all detected seasonal periods simultaneously, weighted by their strength.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
 
+* `best.periods`
+
+This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjuction with  `seasonal.factor=FALSE`.
+
 * `dynamic=TRUE`
 
 This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`.  Also computationally expensive due to the recalculation of seasonal periods for each estimated value.

@@ -153,6 +153,10 @@ seas</code></pre></div>
 </ul>
 <p>We included the ability to use all detected seasonal periods simultaneously, weighted by their strength. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.</p>
 <ul>
+<li><code>best.periods</code></li>
+</ul>
+<p>This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength. To be used in conjuction with <code>seasonal.factor=FALSE</code>.</p>
+<ul>
 <li><code>dynamic=TRUE</code></li>
 </ul>
 <p>This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a <code>training.set</code>. Also computationally expensive due to the recalculation of seasonal periods for each estimated value.</p>
