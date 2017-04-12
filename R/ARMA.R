@@ -6,6 +6,7 @@
 #' @param h integer; 1 (default) Number of periods to forecast.
 #' @param training.set \code{NULL} (defualt) numeric; Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer; \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.
+#' @param best.periods integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when \code{(seasonal.factor=FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.
 #' @param method options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
@@ -19,14 +20,21 @@
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
 #' @examples
+#'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12 period lag
-#' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=12,method='nonlin')
+#' \dontrun{
+#' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=12,method='nonlin')}
+#'
+#' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
+#' \dontrun{
+#' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=FALSE,best.periods=2,method='nonlin')}
+#'
 #' @export
 
 
 
 # Autoregressive Model
-NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,negative.values = FALSE, method = "nonlin", dynamic = FALSE,plot=TRUE,seasonal.plot=TRUE,intervals=FALSE){
+NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,best.periods=NULL,negative.values = FALSE, method = "nonlin", dynamic = FALSE,plot=TRUE,seasonal.plot=TRUE,intervals=FALSE){
 
   if(intervals==TRUE && is.numeric(seasonal.factor)){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
 
@@ -62,23 +70,27 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
             return(list(lag=lag,Weights=Weights))
         }
 
-      Observation.sum = sum(1/sqrt(M[,1]))
-      Observation.weighting = (1/sqrt(M[,1]))
+      if(is.numeric(seasonal.factor) && length(seasonal.factor)==1){
+        lag<- seasonal.factor
+        Weights=1}
 
-      Lag.sum = sum(M[,3]-M[,2])
-      Lag.weighting = (M[,3]-M[,2])
+
+
+      # Determine lag from seasonality test
+      if(seasonal.factor==FALSE){
+        lag<- M$Period
+        Observation.sum = sum(1/sqrt(lag))
+        Observation.weighting = (1/sqrt(lag))
+
+        Lag.sum = sum(M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
+        Lag.weighting = (M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
 
 
       Weights = (Lag.weighting*Observation.weighting) / sum(Lag.weighting*Observation.weighting)
-
-      # Determine lag from seasonality test
-      if(seasonal.factor==FALSE){lag<- M[,1]}
-      if(is.numeric(seasonal.factor)){
-        lag<- seasonal.factor
-        Weights=1}
       return(list(lag=lag,Weights=Weights))
-    }}
+    }
 
+}}
   #Vectors generator for 1:lag
   generate.vectors=function(lag){
     Component.series = list()
@@ -180,7 +192,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
     seas.matrix = NNS.seas(variable,plot=F)
     if(!is.list(seas.matrix)){
       M<- t(1)} else {
-        M<- seas.matrix$all.periods}
+        if(is.null(best.periods)){
+        M<- seas.matrix$all.periods} else {M<- seas.matrix$all.periods[1:best.periods,] }}
     ASW=ARMA.seas.weighting()
     lag=ASW$lag
     Weights=ASW$Weights
@@ -259,7 +272,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
       points(M[1,Period],M[1,Coefficient.of.Variance],pch=19,col='red')
 
       abline(h=M[1,Variable.Coefficient.of.Variance], col="red",lty=5)
-      text(median(M[,Period]),M[1,Variable.Coefficient.of.Variance],pos=3,"Variable Coefficient of Variance",col='red')
+      text((M[,min(Period)]+M[,max(Period)])/2,M[1,Variable.Coefficient.of.Variance],pos=3,"Variable Coefficient of Variance",col='red')
     } else {
       par(mfrow=c(2,1))
       plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*abs(sd(FV)/mean(FV))))
@@ -305,6 +318,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,n
 
     par(mfrow=c(1,1))
   }
+
   return(Estimates)
 
 }

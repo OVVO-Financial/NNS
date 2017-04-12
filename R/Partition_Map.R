@@ -92,7 +92,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
                                ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
 
         RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
-        }
+      }
 
       if(noise.reduction=='median'){
         PART[ counts>=min.obs , prior.quadrant := (quadrant)]
@@ -101,7 +101,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
                         ifelse(x <= median(x) & y >median(y),paste0(quadrant,2),
                                ifelse(x > median(x) & y <=median(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
         RP = PART[ , .(x=median(x),y=median(y)),by=prior.quadrant]
-        }
+      }
 
       if(noise.reduction=='mode'){
         PART[ counts>=min.obs , prior.quadrant := (quadrant)]
@@ -110,7 +110,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
                         ifelse(x <= mode(x) & y > mode(y),paste0(quadrant,2),
                                ifelse(x > mode(x) & y <=mode(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
         RP = PART[ , .(x=mode(x),y=mode(y)),by=prior.quadrant]
-        }
+      }
 
       if(!is.numeric(order)){
         RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
@@ -124,6 +124,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
     if(Voronoi==T){
       points(RP$x,RP$y,pch=15,lwd=2,col='red')
       title(main=paste0("NNS Order = ",i),cex.main=2)
+
     }
 
     setnames(RP,"prior.quadrant","quadrant")
