@@ -2,6 +2,9 @@
 
 
 # NNS
+Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and asymptotically approximate the area of f(x).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
+
+NNS offers: Numerical integration, Numerical differentiation, Clustering, Correlation, Dependence, Causal analysis, ANOVA, Regression, Classification, Seasonality, Autoregressive modelling, Normalization and Stochastic dominance.
 
 Companion R-package and datasets to: 
 
@@ -13,10 +16,10 @@ Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Pa
 *Current [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) CRAN version is  [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NNS)](https://cran.r-project.org/package=NNS)
 
 ## Installation
-[![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) requires [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.3.0-6666ff.svg)](https://cran.r-project.org/).  See https://cran.r-project.org/ for upgrading to latest release.
+[![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) requires [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.3.0-6666ff.svg)](https://cran.r-project.org/).  See https://cran.r-project.org/ or [![installr](https://img.shields.io/badge/installr-0.18.0-blue.svg)](https://cran.r-project.org/package=installr) for upgrading to latest R release.
 
 ```r
-require(devtools); install_github('OVVO-Financial/NNS',ref = "NNS-Beta-Version")
+require(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
 ```
 or via CRAN
 ```r
