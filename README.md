@@ -2,13 +2,22 @@
 
 
 # NNS
-Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and asymptotically approximate the area of f(x).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
+Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://ssrn.com/abstract=2186471).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
 
-NNS offers: Numerical integration, Numerical differentiation, Clustering, Correlation, Dependence, Causal analysis, ANOVA, Regression, Classification, Seasonality, Autoregressive modelling, Normalization and Stochastic dominance.
+NNS offers: 
+  - Numerical Integration & Numerical Differentiation
+  - Partitional & Hierarchial Clustering
+  - Nonlinear Correlation & Dependence
+  - Causal Analysis
+  - Nonlinear Regression & Classification
+  - ANOVA
+  - Seasonality & Autoregressive Modelling
+  - Normalization 
+  - Stochastic Dominance
 
 Companion R-package and datasets to: 
 
-Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" http://amzn.com/1490523995
+#### Viole, F. and Nawrocki, D. (2013) ["*Nonlinear Nonparametric Statistics: Using Partial Moments*"](http://amzn.com/1490523995)
 
 ## Current Version
 [![NNS](https://img.shields.io/badge/NNS%3E%3D-0.3.0-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![data.table](https://img.shields.io/badge/data.table%3E%3D-1.10.4-6666ff.svg)](https://cran.r-project.org/package=data.table) architecture with notable performance enhancements.
