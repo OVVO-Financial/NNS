@@ -54,7 +54,7 @@ Now we know `seasonal.factor = 12` is our best fit, we can see if there's any be
 a=seas[which.min(seas[,2]),1]
 ```
 
-Below you will notice the use of `seasonal.factor=a`...
+Below you will notice the use of `seasonal.factor=a`
 ```{r best nonlinear}
 nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',seasonal.factor = a,plot = TRUE,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
