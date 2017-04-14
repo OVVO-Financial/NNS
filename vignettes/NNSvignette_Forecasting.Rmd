@@ -77,9 +77,13 @@ NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seas
 ```
 
 ## Brief Notes on Other Parameters
+* `seasonal.factor=c(1,2,...)`
+
+We included the ability to use any number of specified seasonal periods simultaneously, weighted by their number of observations.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+
 * `seasonal.factor=FALSE`
 
-We included the ability to use all detected seasonal periods simultaneously, weighted by their strength.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
 
 * `best.periods`
 

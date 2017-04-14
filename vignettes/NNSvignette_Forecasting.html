@@ -149,9 +149,13 @@ seas</code></pre></div>
 <div id="brief-notes-on-other-parameters" class="section level2">
 <h2>Brief Notes on Other Parameters</h2>
 <ul>
+<li><code>seasonal.factor=c(1,2,...)</code></li>
+</ul>
+<p>We included the ability to use any number of specified seasonal periods simultaneously, weighted by their number of observations. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.</p>
+<ul>
 <li><code>seasonal.factor=FALSE</code></li>
 </ul>
-<p>We included the ability to use all detected seasonal periods simultaneously, weighted by their strength. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.</p>
+<p>We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.</p>
 <ul>
 <li><code>best.periods</code></li>
 </ul>
