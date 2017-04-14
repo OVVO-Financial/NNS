@@ -5,7 +5,7 @@
 #' @param variable a numeric vector.
 #' @param h integer; 1 (default) Number of periods to forecast.
 #' @param training.set \code{NULL} (defualt) numeric; Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.
-#' @param seasonal.factor logical or integer; \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.
+#' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor=c(12,24,36))}
 #' @param best.periods integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when \code{(seasonal.factor=FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.
 #' @param method options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.
@@ -25,6 +25,10 @@
 #' \dontrun{
 #' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=12,method='nonlin')}
 #'
+#' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12, 24, and 36 period lags
+#' \dontrun{
+#' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=c(12,24,36),method='nonlin')}
+#'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
 #' \dontrun{
 #' NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=FALSE,best.periods=2,method='nonlin')}
@@ -40,6 +44,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
   if(intervals==TRUE && seasonal.factor==TRUE){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
 
+  if(is.numeric(seasonal.factor) && dynamic==TRUE){stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')}
 
   variable=as.numeric(variable)
   OV = variable
@@ -69,12 +74,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
             Weights=1
             return(list(lag=lag,Weights=Weights))
         }
-
-      if(is.numeric(seasonal.factor) && length(seasonal.factor)==1){
-        lag<- seasonal.factor
-        Weights=1}
-
-
 
       # Determine lag from seasonality test
       if(seasonal.factor==FALSE){
@@ -109,12 +108,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
   if(dynamic == TRUE){
     for (j in 0:(h-1)){
-      if(is.numeric(seasonal.factor)){
-        M<-t(seasonal.factor)
-        lag=seasonal.factor
-        Weights=1
-        seasonal.plot=F
-      } else {
 
         seas.matrix = NNS.seas(variable,plot=F)
         if(!is.list(seas.matrix)){
@@ -123,7 +116,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         ASW=ARMA.seas.weighting()
         lag=ASW$lag
         Weights=ASW$Weights
-      }
 
       a=length(FV)
       aa=length(variable)
@@ -185,7 +177,9 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     if(is.numeric(seasonal.factor)){
       M<-t(seasonal.factor)
       lag=seasonal.factor
-      Weights=1
+      Observation.sum = sum(1/sqrt(lag))
+      Observation.weighting = (1/sqrt(lag))
+      Weights=Observation.weighting/Observation.sum
       seasonal.plot=F
     } else {
 

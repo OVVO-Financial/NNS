@@ -26,7 +26,7 @@ NNS.ANOVA.bin<- function(control,treatment,confidence.interval=NULL,plot=TRUE,ex
 
         #For ANOVA Visualization
         abline(v=mean.of.means,col="red",lwd=4)
-        mtext("Grand Mean", side = 3,col = "red")}
+        mtext("Grand Mean", side = 3,col = "red",at=mean.of.means)}
 
 if(is.null(confidence.interval)){
     return(list("Control Mean" = mean(control),"Treatment Mean" = mean(treatment),"Grand Mean" = mean.of.means,"Control CDF" =LPM_ratio.1,"Treatment CDF" = LPM_ratio.2, "Certainty" = NNS.ANOVA.rho))}

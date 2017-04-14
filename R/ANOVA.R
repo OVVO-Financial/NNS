@@ -68,7 +68,7 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,p
 
   #For ANOVA Visualization
         abline(v=mean.of.means,col="red",lwd=4)
-        mtext("Grand Mean", side = 3,col = "red")}
+        mtext("Grand Mean", side = 3,col = "red",at=mean.of.means)}
 
         return(c("Certainty"=NNS.ANOVA.rho))
     } else {
@@ -88,7 +88,8 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,p
           boxplot(A, las=2, xlab= "Means", ylab="Variable",horizontal = TRUE,
               main="ANOVA", col=c('steelblue',rainbow(n-1)))
           abline(v=mean.of.means,col="red",lwd=4)
-          mtext("Grand Mean", side = 3,col = "red")}
+          mtext("Grand Mean", side = 3,col = "red",
+                at=mean.of.means)}
 
           return(certainties)
       }
