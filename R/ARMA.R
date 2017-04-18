@@ -112,7 +112,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         seas.matrix = NNS.seas(variable,plot=F)
         if(!is.list(seas.matrix)){
           M<- t(1)} else {
-            M<- seas.matrix$all.periods}
+            if(is.null(best.periods)){
+            M<- seas.matrix$all.periods} else {M<- seas.matrix$all.periods[1:best.periods,] }}
         ASW=ARMA.seas.weighting()
         lag=ASW$lag
         Weights=ASW$Weights
@@ -177,9 +178,13 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     if(is.numeric(seasonal.factor)){
       M<-t(seasonal.factor)
       lag=seasonal.factor
-      Observation.sum = sum(1/sqrt(lag))
-      Observation.weighting = (1/sqrt(lag))
-      Weights=Observation.weighting/Observation.sum
+      output=numeric()
+      for(i in 1:length(seasonal.factor)){
+        output[i]<- (abs(sd(variable[seq(length(variable),1,-i)])/mean(variable[seq(length(variable),1,-i)])))
+      }
+      Seasonal.sum = sum(1/output)
+      Seasonal.weighting = (1/output)
+      Weights = Seasonal.weighting / Seasonal.sum
       seasonal.plot=F
     } else {
 
