@@ -78,15 +78,10 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       # Determine lag from seasonality test
       if(seasonal.factor==FALSE){
         lag<- M$Period
-        Observation.sum = sum(1/sqrt(lag))
         Observation.weighting = (1/sqrt(lag))
-
-        Lag.sum = sum(M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
         Lag.weighting = (M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
-
-
-      Weights = (Lag.weighting*Observation.weighting) / sum(Lag.weighting*Observation.weighting)
-      return(list(lag=lag,Weights=Weights))
+        Weights = (Lag.weighting*Observation.weighting) / sum(Lag.weighting*Observation.weighting)
+        return(list(lag=lag,Weights=Weights))
     }
 
 }}
@@ -182,9 +177,10 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       for(i in 1:length(seasonal.factor)){
         output[i]<- (abs(sd(variable[seq(length(variable),1,-i)])/mean(variable[seq(length(variable),1,-i)])))
       }
-      Seasonal.sum = sum(1/output)
-      Seasonal.weighting = (1/output)
-      Weights = Seasonal.weighting / Seasonal.sum
+      Relative.seasonal= output/(abs(sd(variable)/mean(variable)))
+      Seasonal.weighting = (1/Relative.seasonal)
+      Observation.weighting = (1/sqrt(seasonal.factor))
+      Weights = (Seasonal.weighting) / sum( Seasonal.weighting)
       seasonal.plot=F
     } else {
 
