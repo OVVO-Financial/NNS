@@ -10,7 +10,7 @@ x=seq(-5,5,.05); y=x^3
 NNS.part(x,y,Voronoi = T)
 
 ## ----x part--------------------------------------------------------------
-NNS.part(x,y,Voronoi = T,type="XONLY")
+NNS.part(x,y,Voronoi = T,type="XONLY",order=3)
 
 ## ----depreg,results='hide'-----------------------------------------------
 for(i in 1:3){NNS.part(x,y,order=i,Voronoi = T);NNS.reg(x,y,order=i)}

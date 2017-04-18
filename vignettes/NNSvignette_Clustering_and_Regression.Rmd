@@ -31,7 +31,7 @@ NNS.part(x,y,Voronoi = T)
 ### X-only Partitioning
 `NNS.part` offers a partitioning based on $x$ values only, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
 ```{r x part}
-NNS.part(x,y,Voronoi = T,type="XONLY")
+NNS.part(x,y,Voronoi = T,type="XONLY",order=3)
 ```
 
 ##Clusters Used in Regression
@@ -74,7 +74,7 @@ NNS.reg(iris[,1:4],iris[,5],type = "CLASS")$equation
 NNS.reg(iris[,1:4],iris[,5],type = "CLASS",threshold=.35)$equation
 ```
 
-and the `point.est=...` operates in the same manner as the full regression above, again called with `$Point.est`.
+and the `point.est=(...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r }
 NNS.reg(iris[,1:4],iris[,5],type = "CLASS",threshold=.35,point.est=iris[1:10,1:4])$Point.est
 ```
