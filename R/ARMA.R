@@ -15,6 +15,12 @@
 #' @param intervals logical; \code{FALSE} (default) Plots the surrounding forecasts around the final estimate when \code{(intervals=TRUE)} and \code{(seasonal.factor=FALSE)}.  There are no other forecasts to plot when a single \code{seasonal.factor} is selected.
 #' @return Returns a vector of forecasts of length \code{(h)}.
 #' @note \code{(seasonal.factor=FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
+#'
+#' If error encountered:
+#'
+#' \code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) : wrong sign in 'by' argument"}
+#'
+#' when \code{(seasonal.factor=TRUE)}, try the combination of \code{(seasonal.factor=FALSE) and (best.periods=1)} as those two settings are equivalent.
 #' @keywords Autoregressive model
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -46,7 +52,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
   if(is.numeric(seasonal.factor) && dynamic==TRUE){stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')}
 
-  variable=as.numeric(variable)
+  variable = as.numeric(variable)
   OV = variable
 
   if(!is.null(training.set)){
@@ -61,7 +67,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
   Estimates = numeric()
 
   # Weight and lag function for seasonality...
-  ARMA.seas.weighting=function(){
+  ARMA.seas.weighting = function(){
     if(is.null(ncol(M))){
       return(list(lag=M[1],Weights=1))}
 
@@ -77,7 +83,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       # Determine lag from seasonality test
       if(seasonal.factor==FALSE){
-        lag<- M$Period
+        lag = M$Period
         Observation.weighting = (1/sqrt(lag))
         Lag.weighting = (M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
         Weights = (Lag.weighting*Observation.weighting) / sum(Lag.weighting*Observation.weighting)
@@ -91,7 +97,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     Component.index = list()
 
     for (i in 1:length(lag)){
-      CS=rev(variable[seq(aa+1,1,-lag[i])])
+      CS=rev(variable[seq(length(variable)+1,1,-lag[i])])
       CS=CS[!is.na(CS)]
       Component.series[[paste('Series.',i,sep="")]] <- CS
       Component.index[[paste('Index.',i,sep="")]] <- (1:length(CS))
@@ -112,9 +118,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         ASW=ARMA.seas.weighting()
         lag=ASW$lag
         Weights=ASW$Weights
-
-      a=length(FV)
-      aa=length(variable)
 
       # Generate vectors for 1:lag
       GV=generate.vectors(lag)
@@ -197,9 +200,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     Estimate.band= list()
 
     for (j in 0:(h-1)){
-      a=length(FV)
-      aa=length(variable)
-
       # Generate vectors for 1:lag
       GV=generate.vectors(lag)
       Component.index=GV$Component.index

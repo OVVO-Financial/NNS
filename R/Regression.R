@@ -129,8 +129,9 @@ NNS.reg = function (x,y,
 
   if(noise.reduction=='off'){stn=0}else{stn=stn}
 
+  y=as.numeric(y)
 
-  if(class(x)=='factor' | class(y)=='factor'){
+  if(class(x)=='factor'){
     if(is.null(ncol(x))){
       x=as.numeric(x)
       if(!is.null(point.est)){point.est=as.numeric(point.est)}
@@ -138,7 +139,7 @@ NNS.reg = function (x,y,
         x=apply(x,2,as.numeric)
         if(!is.null(point.est)){point.est=apply(point.est,2,as.numeric)}
         }
-    y=as.numeric(y)
+
   }
 
   if(!is.null(ncol(original.variable))){
