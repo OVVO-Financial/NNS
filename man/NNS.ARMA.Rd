@@ -39,6 +39,12 @@ Autoregressive model incorporating nonlinear regressions of component series.
 }
 \note{
 \code{(seasonal.factor=FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
+
+If error encountered:
+
+\code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) : wrong sign in 'by' argument"}
+
+when \code{(seasonal.factor=TRUE)}, try the combination of \code{(seasonal.factor=FALSE) and (best.periods=1)} as those two settings are equivalent.
 }
 \examples{
 
