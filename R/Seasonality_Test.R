@@ -23,8 +23,14 @@ NNS.seas <- function(variable,plot=TRUE){
   output <- vector("numeric", length(variable)/4)
   instances <- vector("numeric", length(variable)/4)
 
+  if(mean(variable)!=0){
+  var.cov<- abs(sd(variable)/mean(variable))}
+  else{
+    var.cov<- Inf
+  }
+
   for (i in 1:(length(variable)/4)){
-      if (abs(sd(variable[seq(length(variable),1,-i)])/mean(variable[seq(length(variable),1,-i)])) < abs(sd(variable)/mean(variable))){
+      if (abs(sd(variable[seq(length(variable),1,-i)])/mean(variable[seq(length(variable),1,-i)])) < var.cov){
 
           instances[i] <- i
 
@@ -38,10 +44,11 @@ NNS.seas <- function(variable,plot=TRUE){
 
   if(length(instances[instances>0])>0){
 
-      n<- rep(abs(sd(variable)/mean(variable)),length(instances[instances>0]))
+      n<- rep(var.cov,length(instances[instances>0]))
 
       M<- data.table("Period"=instances[instances>0],"Coefficient.of.Variance"=output[output>0],"Variable.Coefficient.of.Variance"=n,key = "Coefficient.of.Variance")
 
+      M<- M[is.finite(rowSums(M))]
 
     } else {M="No Seasonality Detected"}
 
@@ -57,12 +64,6 @@ NNS.seas <- function(variable,plot=TRUE){
     abline(h=abs(sd(variable)/mean(variable)), col="red",lty=5)
     text(mean(instances[instances>0]),abs(sd(variable)/mean(variable)),pos=3,
          "Variable Coefficient of Variance",col='red')}
-
-         #  else {
-#            plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*abs(sd(variable)/mean(variable))))
-
-#             text(1,abs(sd(variable)/mean(variable)),pos=3,"NO SEASONALITY DETECTED",col='red')
- #          }
 
   }
 
