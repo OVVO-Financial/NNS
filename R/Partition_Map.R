@@ -68,8 +68,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       if(i==order){break}
 
       PART = PART[,counts := .N,quadrant]
-
-      l.PART = nrow(PART[counts>min.obs,.(x),by=quadrant])
+      l.PART = sum(PART$counts>=min.obs)
       if(order==Inf){
         if(l.PART==0) break
       }
@@ -141,9 +140,9 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       if(i==order){break}
 
       PART = PART[,counts := .N,quadrant]
-
+      l.PART = sum(PART$counts>=min.obs)
       if(order==Inf){
-        if(nrow(PART[counts>min.obs,.(x),by=quadrant])==0) break
+        if(l.PART==0) break
       }
 
 
