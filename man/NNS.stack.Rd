@@ -37,9 +37,13 @@ Prediction model using the predictions of the NNS base models (\link{NNS.reg} as
 If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data<- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
 }
 \examples{
- ## Using 'iris' dataset where test set \\code{IVs.test} is rows 141:150.
+ ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
  \dontrun{
  NNS.stack(iris[1:140,1:4],iris[1:140,5],IVs.test=iris[141:150,1:4])}
+
+ ## Using 'iris' dataset to determine [n.best] and [logistic.order] with no test set.
+ \dontrun{
+ NNS.stack(iris[,1:4],iris[,5])}
 
  ## Selecting NNS.reg and dimension reduction techniques.
  \dontrun{
