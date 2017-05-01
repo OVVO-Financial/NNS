@@ -6,7 +6,7 @@
 #' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
 #' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to NULL for both X and Y-axis partitioning.
 #' @param order integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.
-#' @param min.obs integer; Reduces minimum number of necessary observations in a quadrant to 1 when \code{(min.obs=1)}.  In the instances where \code{"regression.points"} fail to be generated in the output, re-run partitioning with \code{(min.obs=1)} for the given \code{(order=...)}.  Defaults to \code{(min.obs=4)}.
+#' @param min.obs integer; (4 default) Desired observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(min.obs=1)}.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction="mean")}, while \code{(noise.reduction="off")} will partition quadrant to a single observation for a given \code{(order=...)}.
 #' @return Returns both a \link{data.table} \code{("dt")} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column; and the \link{data.table} of regression points \code{("regression.points")} for that given \code{(order=...)}.  Also returns the \code{"order"} of the final partition given \code{"min.obs"} constraints.
 #' @keywords partitioning, cluster
@@ -26,6 +26,11 @@
 #'
 #' ## Voronoi style plot
 #' NNS.part(x,y,Voronoi=TRUE)
+#'
+#' ## Examine final counts by quadrant
+#' DT=NNS.part(x,y)$dt
+#' DT[,counts := .N,by=quadrant]
+#' DT
 #' @export
 
 NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.reduction="mean"){
@@ -33,7 +38,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
 
 
-  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant='q',prior.quadrant='q',key = c('x','y'))
+  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant='q',prior.quadrant='q',key = c('quadrant','x','y'))
 
   mode=function(x) {
     if(length(x)>1){
@@ -45,8 +50,6 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(Voronoi==T){
     PART[,plot(x,y,col='steelblue',cex.lab=2,xlab = "X",ylab="Y")]
   }
-
-  l=length(y)
 
   if(is.null(order)){order=Inf}
 
@@ -68,10 +71,10 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       if(i==order){break}
 
       PART = PART[,counts := .N,quadrant]
-      l.PART = sum(PART$counts>=min.obs)
-      if(order==Inf){
-        if(l.PART==0) break
-      }
+      setkey(PART,counts,quadrant,x,y)
+      l.PART = sum(PART$counts>min.obs)
+
+      if(l.PART==0){break}
 
       #Segments for Voronoi...
       if(Voronoi==T){
@@ -88,7 +91,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
         PART[ counts>=min.obs , quadrant :=
                 ifelse( x <= mean(x) & y <= mean(y) , paste0(quadrant,4),
                         ifelse(x <= mean(x) & y >mean(y),paste0(quadrant,2),
-                               ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
+                               ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))) ,
+              by='quadrant']
 
         RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
       }
@@ -115,9 +119,9 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
         RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
         if(length(RP.new$x)==length(RP$x)){break} }
 
-      i=i+1L
-      if(length(RP$x)==length(x)){break}
 
+      if(length(RP$x)==length(x)){break}
+      i=i+1L
     }
 
     if(Voronoi==T){
@@ -140,11 +144,10 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       if(i==order){break}
 
       PART = PART[,counts := .N,quadrant]
-      l.PART = sum(PART$counts>=min.obs)
-      if(order==Inf){
-        if(l.PART==0) break
-      }
+      setkey(PART,counts,quadrant,x,y)
+      l.PART = sum(PART$counts>min.obs)
 
+      if(l.PART==0){break}
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
@@ -178,9 +181,9 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
               if(length(RP.new$x)==length(RP$x)){break}}
           }
         }}
-      i=i+1L
-      if(length(RP$x)==length(x)){break}
 
+      if(length(RP$x)==length(x)){break}
+      i=i+1L
     }
 
 
