@@ -7,16 +7,16 @@
 NNS.caus(x, y, tau, plot = FALSE)
 }
 \arguments{
-\item{x}{a numeric vector.}
+\item{x}{a numeric vector, matrix or data frame.}
 
-\item{y}{a numeric vector.}
+\item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
 
 \item{tau}{integer; Number of lagged observations to consider.}
 
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
 }
 \value{
-Returns the directional causation and quantity of association.
+Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, gross quantity of association is returned as (x[column] ---> y[row]).
 }
 \description{
 Returns the causality from observational data between two variables
@@ -26,6 +26,11 @@ Returns the causality from observational data between two variables
 set.seed(123)
 x<-rnorm(100); y<-x^2
 NNS.caus(x,y,1)
+
+## Causal matrix
+\dontrun{
+NNS.caus(data.matrix(iris),tau = 0)
+}
 }
 \author{
 Fred Viole, OVVO Financial Systems
