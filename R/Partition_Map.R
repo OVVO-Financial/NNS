@@ -38,7 +38,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
 
 
-  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant='q',prior.quadrant='q',key = c('quadrant','x','y'))
+  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant="q",prior.quadrant="q")[, counts := .N]
+  setkey(PART,counts,quadrant,x,y)
 
   mode=function(x) {
     if(length(x)>1){
@@ -48,7 +49,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   }
 
   if(Voronoi==T){
-    PART[,plot(x,y,col='steelblue',cex.lab=2,xlab = "X",ylab="Y")]
+    plot(PART[,.(x,y)],col='steelblue',cex.lab=2,xlab = "X",ylab="Y")
   }
 
   if(is.null(order)){order=Inf}
@@ -68,72 +69,85 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(is.null(type)){
     i=0L
     while(i>=0){
-      if(i==order){break}
+      if(i==order) break
 
-      PART = PART[,counts := .N,quadrant]
-      setkey(PART,counts,quadrant,x,y)
-      l.PART = sum(PART$counts>min.obs)
+      PART[counts >= min.obs, counts := .N, by=quadrant]
+
+      l.PART = max(PART$counts)
+      #if(i>5) return(PART[counts==8])
+      if (l.PART <= min.obs) break
+
       min.obs.rows = PART[counts>=min.obs,which=TRUE]
-      if(l.PART==0){break}
+
 
       #Segments for Voronoi...
       if(Voronoi==T){
-        if(l.PART>0){
-          PART[ min.obs.rows ,{
-            segments(min(x),mean(y),max(x),mean(y),lty=3)
-            segments(mean(x),min(y),mean(x),max(y),lty=3)
-          } , by=quadrant]
+        if(l.PART>min.obs){
+          PART[ min.obs.rows ,segments(min(x),mean(y),max(x),mean(y),lty=3), by=quadrant]
+          PART[ min.obs.rows ,segments(mean(x),min(y),mean(x),max(y),lty=3), by=quadrant]
         }
       }
 
 
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
-        PART[ min.obs.rows , prior.quadrant := (quadrant)]
-        PART[ min.obs.rows , quadrant :=
-                ifelse( x <= mean(x) & y <= mean(y) , paste0(quadrant,4),
-                        ifelse(x <= mean(x) & y >mean(y),paste0(quadrant,2),
-                               ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
+        PART[min.obs.rows,  `:=` (tmp.x=mean(x),tmp.y=mean(y)),by=quadrant]
+        PART[min.obs.rows, prior.quadrant := quadrant]
+        PART[min.obs.rows, quadrant.new :=
+               (x <= tmp.x & y <= tmp.y)*4 +
+               (x <= tmp.x & y > tmp.y)*2 +
+               (x > tmp.x & y <= tmp.y)*3 +
+               (x > tmp.x & y > tmp.y)*1,by=quadrant]
+
+        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
 
         RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
       }
 
       if(noise.reduction=='median'){
-        PART[ min.obs.rows , prior.quadrant := (quadrant)]
-        PART[ min.obs.rows , quadrant :=
-                ifelse( x <= median(x) & y <= median(y) , paste0(quadrant,4),
-                        ifelse(x <= median(x) & y >median(y),paste0(quadrant,2),
-                               ifelse(x > median(x) & y <=median(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
+        PART[min.obs.rows,  `:=` (tmp.x=median(x),tmp.y=median(y)),by=quadrant]
+        PART[min.obs.rows, prior.quadrant := quadrant]
+        PART[min.obs.rows, quadrant.new :=
+               (x <= tmp.x & y <= tmp.y)*4 +
+               (x <= tmp.x & y > tmp.y)*2 +
+               (x > tmp.x & y <= tmp.y)*3 +
+               (x > tmp.x & y > tmp.y)*1,by=quadrant]
+
+        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
+
         RP = PART[ , .(x=median(x),y=median(y)),by=prior.quadrant]
       }
 
       if(noise.reduction=='mode'){
-        PART[ min.obs.rows , prior.quadrant := (quadrant)]
-        PART[ min.obs.rows , quadrant :=
-                ifelse( x <= mode(x) & y <= mode(y) , paste0(quadrant,4),
-                        ifelse(x <= mode(x) & y > mode(y),paste0(quadrant,2),
-                               ifelse(x > mode(x) & y <=mode(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
+        PART[min.obs.rows,  `:=` (tmp.x=mode(x),tmp.y=mode(y)),by=quadrant]
+        PART[min.obs.rows, prior.quadrant := quadrant]
+        PART[min.obs.rows, quadrant.new :=
+               (x <= tmp.x & y <= tmp.y)*4 +
+               (x <= tmp.x & y > tmp.y)*2 +
+               (x > tmp.x & y <= tmp.y)*3 +
+               (x > tmp.x & y > tmp.y)*1,by=quadrant]
+
+        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
+
         RP = PART[ , .(x=mode(x),y=mode(y)),by=prior.quadrant]
       }
 
       if(!is.numeric(order)){
         RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-        if(length(RP.new$x)==length(RP$x)){break} }
+        if(length(RP.new$x)==length(RP$x)) break }
 
-
-      if(length(RP$x)==length(x)){break}
       i=i+1L
     }
 
     if(Voronoi==T){
       points(RP$x,RP$y,pch=15,lwd=2,col='red')
       title(main=paste0("NNS Order = ",i),cex.main=2)
-
     }
 
     setnames(RP,"prior.quadrant","quadrant")
-
-    return(list("order"=i,"dt"=PART[, .(x, y, quadrant,prior.quadrant)],"regression.points"=RP))
+    PART[,c("quadrant.new","tmp.x","tmp.y","counts"):=NULL]
+    DT=setorder(PART[], x, y,quadrant)[]
+    return(list("order"=i,"dt"=DT,"regression.points"=RP))
 
   }
 
@@ -142,48 +156,52 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   if(!is.null(type)){
     i=0L
     while(i>=0){
-      if(i==order){break}
+      if(i==order) break
 
-      PART = PART[,counts := .N,quadrant]
-      setkey(PART,counts,quadrant,x,y)
-      l.PART = sum(PART$counts>min.obs)
+      PART[counts >= min.obs, counts := .N, by=quadrant]
+
+      if (max(PART$counts) <= min.obs) break
+
       min.obs.rows = PART[counts>=min.obs,which=TRUE]
-      if(l.PART==0){break}
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-        PART[min.obs.rows, prior.quadrant := (quadrant)]
-        PART[min.obs.rows, quadrant :=
-               ifelse( x <= mean(x) , paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
-        if(!is.numeric(order)){
-          RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-          if(length(RP.new$x)==length(RP$x)){break}}
+        PART[min.obs.rows,  `:=` (tmp.x=mean(x),tmp.y=mean(y)),by=quadrant]
+        PART[min.obs.rows, prior.quadrant := quadrant]
+        PART[min.obs.rows, quadrant.new :=
+               (x <= tmp.x)*1 +
+               (x > tmp.x)*2,by=quadrant]
+
+        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
       }
 
-      else {
-        if(noise.reduction=='mode'){
+      if(noise.reduction=='mode'){
           RP = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-          PART[min.obs.rows, prior.quadrant := (quadrant)]
-          PART[min.obs.rows, quadrant :=
-                 ifelse( x <= mode(x), paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
-          if(!is.numeric(order)){
-            RP.new = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-            if(length(RP.new$x)==length(RP$x)){break}}
+          PART[min.obs.rows,  `:=` (tmp.x=mode(x),tmp.y=mode(y)),by=quadrant]
+          PART[min.obs.rows, prior.quadrant := quadrant]
+          PART[min.obs.rows, quadrant.new :=
+                 (x <= tmp.x)*1 +
+                 (x > tmp.x)*2,by=quadrant]
+
+          PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
         }
 
-        else {
-          if(noise.reduction=='median'){
+       if(noise.reduction=='median'){
             RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
-            PART[min.obs.rows, prior.quadrant := (quadrant)]
-            PART[min.obs.rows, quadrant :=
-                   ifelse( x <= median(x), paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
-            if(!is.numeric(order)){
-              RP.new = PART[,.(x=median(x),y=median(y)),by=quadrant]
-              if(length(RP.new$x)==length(RP$x)){break}}
-          }
-        }}
+            PART[min.obs.rows,  `:=` (tmp.x=median(x),tmp.y=median(y)),by=quadrant]
+            PART[min.obs.rows, prior.quadrant := quadrant]
+            PART[min.obs.rows, quadrant.new :=
+                   (x <= tmp.x)*1 +
+                   (x > tmp.x)*2,by=quadrant]
 
-      if(length(RP$x)==length(x)){break}
+            PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
+       }
+
+      if(!is.numeric(order)){
+        RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
+        if(length(RP.new$x)==length(RP$x)) break }
+
+
       i=i+1L
     }
 
@@ -195,7 +213,10 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       title(main=paste0("NNS Order = ",i),cex.main=2)
     }
 
-    return(list("order"=i,"dt"=PART[, .(x, y, quadrant,prior.quadrant)],"regression.points"=RP))
+    PART[,c("quadrant.new","tmp.x","tmp.y","counts"):=NULL]
+    DT=setorder(PART[], x, y,quadrant)[]
+
+    return(list("order"=i,"dt"=DT,"regression.points"=RP))
   }
 
 }
