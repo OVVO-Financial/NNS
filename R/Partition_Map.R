@@ -1,6 +1,6 @@
 #' NNS Partition Map
 #'
-#'  Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
+#' Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation \link{NNS.cor}, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
 #' @param x a numeric vector.
 #' @param y a numeric vector with compatible dimsensions to \code{x}.
 #' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
@@ -27,7 +27,7 @@
 #' ## Voronoi style plot
 #' NNS.part(x,y,Voronoi=TRUE)
 #'
-#' ## Examine final counts by quadrant
+#' ## Examine counts by quadrant
 #' DT=NNS.part(x,y)$dt
 #' DT[,counts := .N,by=quadrant]
 #' DT
@@ -36,10 +36,9 @@
 NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.reduction="mean"){
 
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
+  x=as.numeric(x);y=as.numeric(y)
 
-
-  PART = data.table(x=as.numeric(x),y=as.numeric(y),quadrant="q",prior.quadrant="pq")[, counts := .N]
-  setkey(PART,counts,quadrant,x,y)
+  PART = data.table(x,y,quadrant="q",prior.quadrant="pq")[, counts := .N]
 
   mode=function(x) {
     if(length(x)>1){
@@ -63,7 +62,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
   }
 
 
-  if(noise.reduction=='off'){min.obs=1}else{min.obs=min.obs}
+  if(noise.reduction=='off')min.obs=1 else min.obs=min.obs
 
   ### X and Y partition
   if(is.null(type)){
@@ -72,73 +71,62 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       if(i==order) break
 
       PART[counts >= min.obs, counts := .N, by=quadrant]
-
-      l.PART = max(PART$counts)
-
+      l.PART=max(PART$counts)
       if (l.PART <= min.obs) break
-
-      min.obs.rows = PART[counts>=min.obs,which=TRUE]
-
-
+      min.obs.rows = PART[counts >= min.obs, which=TRUE]
       #Segments for Voronoi...
       if(Voronoi==T){
         if(l.PART>min.obs){
-          PART[ min.obs.rows ,segments(min(x),mean(y),max(x),mean(y),lty=3), by=quadrant]
-          PART[ min.obs.rows ,segments(mean(x),min(y),mean(x),max(y),lty=3), by=quadrant]
+          PART[ min.obs.rows ,{
+            segments(min(x),mean(y),max(x),mean(y),lty=3)
+            segments(mean(x),min(y),mean(x),max(y),lty=3)
+            },by=quadrant]
         }
       }
 
 
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
-        RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
-        old.parts=(length(unique(PART$quadrant)))
-        PART[min.obs.rows,  `:=` (tmp.x=mean(x),tmp.y=mean(y)),by=quadrant]
-        PART[min.obs.rows, prior.quadrant := quadrant]
-        PART[min.obs.rows, quadrant.new :=
-               (x <= tmp.x & y <= tmp.y)*4 +
-               (x <= tmp.x & y > tmp.y)*2 +
-               (x > tmp.x & y <= tmp.y)*3 +
-               (x > tmp.x & y > tmp.y),by=quadrant]
+        mPART = PART[min.obs.rows, lapply(.SD, mean), by=quadrant, .SDcols = x:y]
+        PART[min.obs.rows , prior.quadrant := (quadrant)]
+        PART[mPART, on=.(quadrant), q_new := {
+          lox = x.x <= i.x
+          loy = x.y <= i.y
+          1L + lox + loy*2L
+        }]
+        PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+        PART[, q_new := NULL ]
 
-        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-        new.parts=(length(unique(PART$quadrant)))
+        RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
       }
 
       if(noise.reduction=='median'){
-        RP = PART[, .(x=median(x),y=median(y)),by=prior.quadrant]
-        old.parts=(length(unique(PART$quadrant)))
-        PART[min.obs.rows,  `:=` (tmp.x=median(x),tmp.y=median(y)),by=quadrant]
-        PART[min.obs.rows, prior.quadrant := quadrant]
-        PART[min.obs.rows, quadrant.new :=
-               (x <= tmp.x & y <= tmp.y)*4 +
-               (x <= tmp.x & y > tmp.y)*2 +
-               (x > tmp.x & y <= tmp.y)*3 +
-               (x > tmp.x & y > tmp.y),by=quadrant]
+        mPART = PART[min.obs.rows, lapply(.SD, median), by=quadrant, .SDcols = x:y]
+        PART[min.obs.rows , prior.quadrant := (quadrant)]
+        PART[mPART, on=.(quadrant), q_new := {
+          lox = x.x <= i.x
+          loy = x.y <= i.y
+          1L + lox + loy*2L
+        }]
+        PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+        PART[, q_new := NULL ]
 
-        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-        new.parts=(length(unique(PART$quadrant)))
+        RP = PART[ , .(x=median(x),y=median(y)),by=prior.quadrant]
       }
 
       if(noise.reduction=='mode'){
-        RP = PART[, .(x=mode(x),y=mode(y)),by=prior.quadrant]
-        old.parts=(length(unique(PART$quadrant)))
-        PART[min.obs.rows,  `:=` (tmp.x=mode(x),tmp.y=mode(y)),by=quadrant]
-        PART[min.obs.rows, prior.quadrant := quadrant]
-        PART[min.obs.rows, quadrant.new :=
-               (x <= tmp.x & y <= tmp.y)*4 +
-               (x <= tmp.x & y > tmp.y)*2 +
-               (x > tmp.x & y <= tmp.y)*3 +
-               (x > tmp.x & y > tmp.y),by=quadrant]
+        mPART = PART[min.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+        PART[min.obs.rows , prior.quadrant := (quadrant)]
+        PART[mPART, on=.(quadrant), q_new := {
+          lox = x.x <= i.x
+          loy = x.y <= i.y
+          1L + lox + loy*2L
+        }]
+        PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+        PART[, q_new := NULL ]
 
-        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-        new.parts=(length(unique(PART$quadrant)))
+        RP = PART[ , .(x=mode(x),y=mode(y)),by=prior.quadrant]
       }
-
-
-        if(old.parts==new.parts) break
-        if(length(RP$x)==length(x)) break
-
       i=i+1L
     }
 
@@ -148,8 +136,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
     }
 
     setnames(RP,"prior.quadrant","quadrant")
-    PART[,c("quadrant.new","tmp.x","tmp.y","counts"):=NULL]
-    DT=setorder(PART[], x, y,quadrant)[]
+    DT=setorder(PART[], quadrant,x, y)[]
+    RP=setorder(RP[],quadrant)[]
     return(list("order"=i,"dt"=DT,"regression.points"=RP))
 
   }
@@ -161,54 +149,47 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
     while(i>=0){
       if(i==order) break
 
-      PART[counts >= min.obs, counts := .N, by=quadrant]
+      PART[counts >= 2*min.obs, counts := .N, by=quadrant]
 
-      if (max(PART$counts) <= min.obs) break
+      if (max(PART$counts) <= 2*min.obs) break
+      min.obs.rows = PART[counts >= 2*min.obs, which=TRUE]
 
-      min.obs.rows = PART[counts>=min.obs,which=TRUE]
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-        old.parts=(length(unique(PART$quadrant)))
-        PART[min.obs.rows,  `:=` (tmp.x=mean(x),tmp.y=mean(y)),by=quadrant]
-        PART[min.obs.rows, prior.quadrant := quadrant]
-        PART[min.obs.rows, quadrant.new :=
-               (x <= tmp.x) +
-               (x > tmp.x)*2,by=quadrant]
-
-        PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-        new.parts=(length(unique(PART$quadrant)))
+        mPART = PART[min.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+        PART[min.obs.rows , prior.quadrant := (quadrant)]
+        PART[mPART, on=.(quadrant), q_new := {
+          lox = x.x > i.x
+          1L + lox
+        }]
+        PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+        PART[, q_new := NULL ]
       }
 
-      if(noise.reduction=='mode'){
+        if(noise.reduction=='mode'){
           RP = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-          PART[min.obs.rows,  `:=` (tmp.x=mode(x),tmp.y=mode(y)),by=quadrant]
-          old.parts=(length(unique(PART$quadrant)))
-          PART[min.obs.rows, prior.quadrant := quadrant]
-          PART[min.obs.rows, quadrant.new :=
-                 (x <= tmp.x) +
-                 (x > tmp.x)*2,by=quadrant]
-
-          PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-          new.parts=(length(unique(PART$quadrant)))
+          mPART = PART[min.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+          PART[min.obs.rows , prior.quadrant := (quadrant)]
+          PART[mPART, on=.(quadrant), q_new := {
+            lox = x.x > i.x
+            1L + lox
+          }]
+          PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+          PART[, q_new := NULL ]
         }
 
        if(noise.reduction=='median'){
-            RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
-            PART[min.obs.rows,  `:=` (tmp.x=median(x),tmp.y=median(y)),by=quadrant]
-            old.parts=(length(unique(PART$quadrant)))
-            PART[min.obs.rows, prior.quadrant := quadrant]
-            PART[min.obs.rows, quadrant.new :=
-                   (x <= tmp.x) +
-                   (x > tmp.x)*2,by=quadrant]
-
-            PART[min.obs.rows, quadrant := paste0(quadrant,quadrant.new)]
-            new.parts=(length(unique(PART$quadrant)))
-       }
-
-      if(old.parts==new.parts) break
-      if(length(RP$x)==length(x)) break
-
+         RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
+         mPART = PART[min.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+         PART[min.obs.rows , prior.quadrant := (quadrant)]
+         PART[mPART, on=.(quadrant), q_new := {
+           lox = x.x > i.x
+           1L + lox
+         }]
+         PART[min.obs.rows, quadrant := paste0(quadrant, q_new)]
+         PART[, q_new := NULL ]
+          }
       i=i+1L
     }
 
@@ -218,10 +199,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       points(RP$x,RP$y,pch=15,lwd=2,col='red')
       title(main=paste0("NNS Order = ",i),cex.main=2)
     }
-
-    PART[,c("quadrant.new","tmp.x","tmp.y","counts"):=NULL]
-    DT=setorder(PART[], x, y,quadrant)[]
-
+    DT=setorder(PART[], quadrant,x, y)[]
+    RP=setorder(RP[],quadrant)[]
     return(list("order"=i,"dt"=DT,"regression.points"=RP))
   }
 
