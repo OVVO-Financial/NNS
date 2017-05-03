@@ -73,33 +73,34 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       PART = PART[,counts := .N,quadrant]
       setkey(PART,counts,quadrant,x,y)
       l.PART = sum(PART$counts>min.obs)
-
+      min.obs.rows = PART[counts>=min.obs,which=TRUE]
       if(l.PART==0){break}
 
       #Segments for Voronoi...
       if(Voronoi==T){
         if(l.PART>0){
-          PART[ counts>=min.obs , segments(min(x),mean(y),max(x),mean(y),lty=3),by=quadrant]
-          PART[ counts>=min.obs , segments(mean(x),min(y),mean(x),max(y),lty=3),by=quadrant]
+          PART[ min.obs.rows ,{
+            segments(min(x),mean(y),max(x),mean(y),lty=3)
+            segments(mean(x),min(y),mean(x),max(y),lty=3)
+          } , by=quadrant]
         }
       }
 
 
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
-        PART[ counts>=min.obs , prior.quadrant := (quadrant)]
-        PART[ counts>=min.obs , quadrant :=
+        PART[ min.obs.rows , prior.quadrant := (quadrant)]
+        PART[ min.obs.rows , quadrant :=
                 ifelse( x <= mean(x) & y <= mean(y) , paste0(quadrant,4),
                         ifelse(x <= mean(x) & y >mean(y),paste0(quadrant,2),
-                               ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))) ,
-              by='quadrant']
+                               ifelse(x > mean(x) & y <=mean(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
 
         RP = PART[, .(x=mean(x),y=mean(y)),by=prior.quadrant]
       }
 
       if(noise.reduction=='median'){
-        PART[ counts>=min.obs , prior.quadrant := (quadrant)]
-        PART[ counts>=min.obs , quadrant :=
+        PART[ min.obs.rows , prior.quadrant := (quadrant)]
+        PART[ min.obs.rows , quadrant :=
                 ifelse( x <= median(x) & y <= median(y) , paste0(quadrant,4),
                         ifelse(x <= median(x) & y >median(y),paste0(quadrant,2),
                                ifelse(x > median(x) & y <=median(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
@@ -107,8 +108,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       }
 
       if(noise.reduction=='mode'){
-        PART[ counts>=min.obs , prior.quadrant := (quadrant)]
-        PART[ counts>=min.obs , quadrant :=
+        PART[ min.obs.rows , prior.quadrant := (quadrant)]
+        PART[ min.obs.rows , quadrant :=
                 ifelse( x <= mode(x) & y <= mode(y) , paste0(quadrant,4),
                         ifelse(x <= mode(x) & y > mode(y),paste0(quadrant,2),
                                ifelse(x > mode(x) & y <=mode(y),paste0(quadrant,3),                                    paste0(quadrant,1)))), by='quadrant']
@@ -146,13 +147,13 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       PART = PART[,counts := .N,quadrant]
       setkey(PART,counts,quadrant,x,y)
       l.PART = sum(PART$counts>min.obs)
-
+      min.obs.rows = PART[counts>=min.obs,which=TRUE]
       if(l.PART==0){break}
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
-        PART[counts>=min.obs, prior.quadrant := (quadrant)]
-        PART[counts>=min.obs, quadrant :=
+        PART[min.obs.rows, prior.quadrant := (quadrant)]
+        PART[min.obs.rows, quadrant :=
                ifelse( x <= mean(x) , paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
         if(!is.numeric(order)){
           RP.new = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
@@ -162,8 +163,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
       else {
         if(noise.reduction=='mode'){
           RP = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
-          PART[counts>=min.obs, prior.quadrant := (quadrant)]
-          PART[counts>=min.obs, quadrant :=
+          PART[min.obs.rows, prior.quadrant := (quadrant)]
+          PART[min.obs.rows, quadrant :=
                  ifelse( x <= mode(x), paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
           if(!is.numeric(order)){
             RP.new = PART[,.(x=mode(x),y=mode(y)),by=quadrant]
@@ -173,8 +174,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.red
         else {
           if(noise.reduction=='median'){
             RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
-            PART[counts>=min.obs, prior.quadrant := (quadrant)]
-            PART[counts>=min.obs, quadrant :=
+            PART[min.obs.rows, prior.quadrant := (quadrant)]
+            PART[min.obs.rows, quadrant :=
                    ifelse( x <= median(x), paste0(quadrant,1),paste0(quadrant,2)), by='quadrant']
             if(!is.numeric(order)){
               RP.new = PART[,.(x=median(x),y=median(y)),by=quadrant]
