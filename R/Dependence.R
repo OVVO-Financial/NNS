@@ -31,18 +31,20 @@ NNS.dep = function(x,y=NULL,order = 3,
   if(is.null(degree)){degree=ifelse(length(x)<100,0,1)}else{degree=degree}
   if(length(x)<20){
     order=1
+    min.obs=1
     }else{
       order=order
+      min.obs=NULL
       }
 
 
   if(!missing(y)){
 
     if(print.map==T){
-      part.map = NNS.part(x,y,order=order, Voronoi=T)
+      part.map = NNS.part(x,y,order=order,min.obs=min.obs, Voronoi=T)
     }
     else {
-      part.map = NNS.part(x,y,order=order)
+      part.map = NNS.part(x,y,order=order,min.obs=min.obs)
     }
 
     part.df = part.map$dt

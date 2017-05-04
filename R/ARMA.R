@@ -92,7 +92,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
 }}
   #Vectors generator for 1:lag
-  generate.vectors=function(lag){
+  generate.vectors=function(lag,j){
     Component.series = list()
     Component.index = list()
 
@@ -201,7 +201,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
     for (j in 0:(h-1)){
       # Generate vectors for 1:lag
-      GV=generate.vectors(lag)
+      GV=generate.vectors(lag,j)
       Component.index=GV$Component.index
       Component.series=GV$Component.series
 
@@ -209,10 +209,9 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       Regression.Estimates = numeric()
       Coefficients = numeric()
 
-
       if(method=='nonlin' | method=='both'){
 
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0)$Point.est)
+          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est)
 
         if(negative.values==FALSE){
           Regression.Estimates=pmax(0,Regression.Estimates)
@@ -308,7 +307,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
 
     }
-    points(training.set,variable[training.set],col="green",pch=18)
+    points(training.set,OV[training.set],col="green",pch=18)
     points(training.set+h,sum(Regression.Estimates*Weights),col="green",pch=18)
 
     par(mfrow=c(1,1))

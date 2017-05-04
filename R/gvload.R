@@ -21,6 +21,6 @@
       "NNS.ID","max.x1","max.x2","min.x1","min.x2","counts",
       "Period","Coefficient.of.Variance","Variable.Coefficient.of.Variance",
       "i.x","i.y","q_new","x.x","x.y"
-      ))
+    ))
   invisible()
 }

@@ -27,14 +27,14 @@
 #' ## Voronoi style plot
 #' NNS.part(x,y,Voronoi=TRUE)
 #'
-#' ## Examine counts by quadrant
+#' ## Examine final counts by quadrant
 #' DT=NNS.part(x,y)$dt
 #' DT[,counts := .N,by=quadrant]
 #' DT
 #' @export
 
 NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,min.obs=4,noise.reduction="mean"){
-
+  if(is.null(min.obs)) min.obs=4
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
   x=as.numeric(x);y=as.numeric(y)
 
