@@ -8,10 +8,10 @@
 #' @param CV.size numeric [0,1]; Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.2 for a 20 percent random sampling of the training set.
 #' @param weight options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.
 #' @param precision options: ("LOW","HIGH"); 2 settings offered: \code{"LOW"} (Default) ,and \code{"HIGH"}.  \code{"HIGH"} is the limit condition of every observation as a regression point and uses a \code{(norm="NNS")} while \code{(precision="LOW")} uses a \code{(norm="std")} in \link{NNS.reg}.  Errors/warnings can generally be reconciled with \code{(precision="LOW")}.
-#' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction logistic regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
+#' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
 #' @param threshold  numeric [0,1]; Sets the correlation threshold for independent variables in \link{NNS.reg}.  Defaults to \code{(threshold=0)}.
 #' @param seed numeric; 123 (default) Sets seed for CV sampling.
-#' @return Returns a vector of fitted values for the dependent variable test set for all models.  \code{"NNS.reg.n.best"} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"NNS.logistic.order"} returns the optimum \code{"order"} from the \link{NNS.reg} logistic regression.  \code{"reg"} returns \link{NNS.reg} output, \code{"logistic"} returns \link{NNS.reg} logistic regression output, and \code{"stack"} returns the output of the stacked model.
+#' @return Returns a vector of fitted values for the dependent variable test set for all models.  \code{"NNS.reg.n.best"} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression. \code{"NNS.dim.red.order"} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.   \code{"MSE.dim.red"} returns the MSE for the \link{NNS.reg} dimension reduction regression.  \code{"reg"} returns \link{NNS.reg} output, \code{"dim.red"} returns \link{NNS.reg} dimension reduction regression output, and \code{"stack"} returns the output of the stacked model.
 #' @keywords classifier
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analyis"
@@ -120,6 +120,6 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
 
   estimates = (weights[1]*nns.1+weights[2]*nns.2)
 
-  return(list(NNS.reg.n.best=k,NNS.logistic.order=which.min(nns.ord),reg=nns.1,logistic=nns.2,stack=estimates))
+  return(list(NNS.reg.n.best=k,MSE.reg=nns.cv.mse,NNS.dim.red.order=which.min(nns.ord),MSE.dim.red=nns.ord.mse,reg=nns.1,dim.red=nns.2,stack=estimates))
 
 }
