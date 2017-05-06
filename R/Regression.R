@@ -46,7 +46,9 @@
 #'
 #' \code{"R2"} provides the goodness of fit;
 #'
-#' \code{"equation"} returns the synthetic X* dimension reduction equation;
+#' \code{"equation"} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
+#'
+#' \code{"x.star"} returns the synthetic X* as a vector;
 #'
 #' \code{"rhs.partitions"} returns the partition points for each \code{x};
 #'
@@ -123,13 +125,16 @@ NNS.reg = function (x,y,
 
   if(plot.regions==TRUE && !is.null(order) && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
 
+  original.names = names(x)
   original.columns = ncol(x)
   original.variable = x
+  original.y = y
   np = nrow(point.est)
 
   if(noise.reduction=='off'){stn=0}else{stn=stn}
 
   y=as.numeric(y)
+  if(is.null(names(original.y))){y.label="Y"}else{y.label=names(y)}
 
   if(class(x)=='factor'){
     if(is.null(ncol(x))){
@@ -155,19 +160,28 @@ NNS.reg = function (x,y,
       } # Multivariate NULL type
           else{
               if(type=="CLASS"){
+
+                if(is.null(original.names)){
+                  colnames.list=list()
+                  for(i in 1:ncol(x)){
+                    colnames.list[i]=paste0("X",i)
+                  }} else {colnames.list=names(x)}
+
                   x= data.matrix(x)
                   y= as.numeric(y)
 
                   x.star.matrix = matrix(nrow=length(y))
 
-                  x.star.dep = sapply(1:original.columns, function(i) abs(NNS.dep(unlist(x[,i]),unlist(y))$Dependence))
-                  x.star.coef=sapply(1:original.columns, function(i) abs(NNS.cor(unlist(x[,i]),unlist(y))))
+                  x.star.dep = NNS.dep(cbind(x,y))
+                  x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+                  x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]
 
-                  x.star.coef[x.star.coef<threshold]<- 0
+
+                  x.star.coef[abs(x.star.coef)<threshold]<- 0
 
                   x.star.matrix=t(t(original.variable) * x.star.coef)
 
-                  synthetic.x.equation=(paste0("Synthetic Independent Variable X* = (",paste(format(x.star.coef[1:original.columns],digits = 4),paste("X",1:original.columns,sep = ''),sep='*',collapse = "  "),")/",sum(abs(x.star.coef)>0)))
+                  synthetic.x.equation=data.table(Variable=colnames.list,Coefficient=x.star.coef)
 
                   #In case all IVs have 0 correlation to DV
                   if(all(x.star.matrix==0)){
@@ -175,9 +189,6 @@ NNS.reg = function (x,y,
                       x.star.coef[x.star.coef==0]<- 1
                   }
 
-                  #Above threshold coefficients
-                  coefs=abs(x.star.coef)
-                  coefs=coefs[coefs>0]
 
                   if(!is.null(point.est)){
                       new.point.est=numeric()
@@ -193,7 +204,7 @@ NNS.reg = function (x,y,
                   }
 
                   x = rowSums(x.star.matrix/sum(abs(x.star.coef)>0))
-
+                  x.star = data.table(x.star=x)
               } # Multivariate "CLASS" type
           } #Multivariate Not NULL type
       }
@@ -204,7 +215,7 @@ NNS.reg = function (x,y,
 
   if(is.null(original.columns)){
     synthetic.x.equation=NULL
-
+    x.star=NULL
     dependence = NNS.dep(x,y,print.map = F)$Dependence
 
   } else {
@@ -399,9 +410,9 @@ NNS.reg = function (x,y,
 
   ### Return Values
   if(return.values == TRUE){
-    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   } else {
-    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   }
 
 }
