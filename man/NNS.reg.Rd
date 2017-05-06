@@ -73,7 +73,9 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
 \code{"R2"} provides the goodness of fit;
 
-\code{"equation"} returns the synthetic X* dimension reduction equation;
+\code{"equation"} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
+
+\code{"x.star"} returns the synthetic X* as a vector;
 
 \code{"rhs.partitions"} returns the partition points for each \code{x};
 
