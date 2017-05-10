@@ -71,8 +71,8 @@ if(all(sapply(reg.points, length) == length(reg.points[[1]]))==FALSE){
         part.map=NNS.part(original.IVs[,i],original.DV,order=order,type=type,noise.reduction=noise.reduction)
         dep=NNS.dep(original.IVs[,i],original.DV,order=3)$Dependence
             if(dep>stn){
-        reg.points[[i]] = NNS.part(original.IVs[,i],original.DV,order=round(dep*max(nchar(part.map$df$quadrant))),type=type,noise.reduction='off',min.obs = 1)$regression.points$x}
-            else{reg.points[[i]] = NNS.part(original.IVs[,i],original.DV,order=round(dep*max(nchar(part.map$df$quadrant))),noise.reduction=noise.reduction,type="XONLY",min.obs = 1)$regression.points$x}
+        reg.points[[i]] = NNS.part(original.IVs[,i],original.DV,order=round(dep*max(nchar(part.map$df$quadrant))),type=type,noise.reduction='off',max.obs = 1)$regression.points$x}
+            else{reg.points[[i]] = NNS.part(original.IVs[,i],original.DV,order=round(dep*max(nchar(part.map$df$quadrant))),noise.reduction=noise.reduction,type="XONLY",max.obs = 1)$regression.points$x}
         }
       reg.points.matrix=do.call('cbind',lapply(reg.points, `length<-`, max(lengths(reg.points))))
     }

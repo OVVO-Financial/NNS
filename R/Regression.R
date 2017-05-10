@@ -232,7 +232,7 @@ NNS.reg = function (x,y,
     if(is.null(type)){
       part.map = NNS.part(x,y,noise.reduction='off',order=dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
-        part.map=NNS.part(x,y,noise.reduction='off',order = min(nchar(part.map$dt$quadrant)),min.obs = 1)
+        part.map=NNS.part(x,y,noise.reduction='off',order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
       } else {part.map=part.map
       }
     } # NULL type
@@ -240,7 +240,7 @@ NNS.reg = function (x,y,
     if(!is.null(type)){
       part.map=NNS.part(x,y,type = "XONLY",noise.reduction='off',order = dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
-        part.map=NNS.part(x,y,noise.reduction='off',type="XONLY",order = min(nchar(part.map$dt$quadrant)),min.obs = 1)
+        part.map=NNS.part(x,y,noise.reduction='off',type="XONLY",order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
       } else {part.map=part.map
       }
     } # type
@@ -250,7 +250,7 @@ NNS.reg = function (x,y,
     if(is.null(type)){
       part.map = NNS.part(x,y,noise.reduction=noise.reduction, order=dep.reduced.order,type = "XONLY")
       if(length(part.map$regression.points$x)==0){
-        part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),min.obs = 1)
+        part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
       } else {part.map=part.map
       }
     } # NULL type
@@ -259,7 +259,7 @@ NNS.reg = function (x,y,
     if(!is.null(type)){
       part.map = NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction, order = dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
-        part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),min.obs = 1)
+        part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
       } else {part.map=part.map
       }
     } # type
@@ -291,18 +291,15 @@ NNS.reg = function (x,y,
   regression.points=rbindlist(list(regression.points,list(max(x),mean(x.max))))
   regression.points=rbindlist(list(regression.points,list(min(x),mean(x0))))
 
-  setkey(regression.points,x)
+  setkey(regression.points,x,y)
 
   ### Regression Equation
-
-  regression.points =regression.points[complete.cases(regression.points*0)]
 
   if(multivariate.call==T){
     return(regression.points$x)
   }
 
   ### Consolidate possible duplicated points
-  regression.points=regression.points[,y := mean(y),by=x]
   regression.points=unique(regression.points)
 
   rise = regression.points[,'rise' := y - shift(y)]
