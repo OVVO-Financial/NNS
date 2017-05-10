@@ -4,8 +4,8 @@
 \alias{NNS.part}
 \title{NNS Partition Map}
 \usage{
-NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL, min.obs = 4,
-  noise.reduction = "mean")
+NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs = 4,
+  min.obs = FALSE, noise.reduction = "mean")
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -18,7 +18,9 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL, min.obs = 4,
 
 \item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.}
 
-\item{min.obs}{integer; (4 default) Desired observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(min.obs=1)}.}
+\item{max.obs}{integer; (4 default) Desired observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs=1)}.}
+
+\item{min.obs}{logical; (FALSE default) Number of observations per cluster where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs}.}
 
 \item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction="mean")}, while \code{(noise.reduction="off")} will partition quadrant to a single observation for a given \code{(order=...)}.}
 }
