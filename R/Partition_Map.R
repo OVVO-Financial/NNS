@@ -7,7 +7,7 @@
 #' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to NULL for both X and Y-axis partitioning.
 #' @param order integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.
 #' @param max.obs integer; (4 default) Desired observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs=1)}.
-#' @param min.obs logical; (FALSE default) Number of observations per cluster where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs}.
+#' @param min.obs logical; \code{FALSE} (default) Number of observations per cluster where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs}.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction="mean")}, while \code{(noise.reduction="off")} will partition quadrant to a single observation for a given \code{(order=...)}.
 #' @return Returns both a \link{data.table} \code{("dt")} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column; and the \link{data.table} of regression points \code{("regression.points")} for that given \code{(order=...)}.  Also returns the \code{"order"} of the final partition given \code{"min.obs"} constraints.
 #' @keywords partitioning, cluster
@@ -73,7 +73,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs=F
 
       PART[counts >= max.obs, counts := .N, by=quadrant]
       l.PART=max(PART$counts)
-      if(min.obs && min(PART$counts)<= max.obs) break
+      if(min.obs && (min(PART$counts)<= max.obs)) break
       if (l.PART <= max.obs) break
       max.obs.rows = PART[counts >= max.obs, which=TRUE]
       #Segments for Voronoi...
@@ -165,14 +165,14 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs=F
       PART[counts >= 2*max.obs, counts := .N, by=quadrant]
 
       if (max(PART$counts) <= 2*max.obs) break
-      if(min.obs && min(PART$counts)<= 2*max.obs) break
+      if(min.obs && (min(PART$counts)<= 2*max.obs)) break
       max.obs.rows = PART[counts >= 2*max.obs, which=TRUE]
 
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP = PART[,.(x=mean(x),y=mean(y)),by=quadrant]
         old.parts=length(unique(PART$quadrant))
-        mPART = PART[max.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+        mPART = PART[max.obs.rows, lapply(.SD, mean), by=quadrant, .SDcols = x:y]
         PART[max.obs.rows , prior.quadrant := (quadrant)]
         PART[mPART, on=.(quadrant), q_new := {
           lox = x.x > i.x
@@ -200,7 +200,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs=F
       if(noise.reduction=='median'){
         RP = PART[,.(x=median(x),y=median(y)),by=quadrant]
         old.parts=length(unique(PART$quadrant))
-        mPART = PART[max.obs.rows, lapply(.SD, mode), by=quadrant, .SDcols = x:y]
+        mPART = PART[max.obs.rows, lapply(.SD, median), by=quadrant, .SDcols = x:y]
         PART[max.obs.rows , prior.quadrant := (quadrant)]
         PART[mPART, on=.(quadrant), q_new := {
           lox = x.x > i.x

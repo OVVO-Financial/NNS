@@ -1,14 +1,3 @@
-#' NNS Causation uni-directional  (INTERNAL CALL FOR \link{NNS.caus})
-#'
-#' Returns the uni-directional causality from observational data between two variables.  Causation nets out the univariate effect.
-#'
-#' @param x a numeric vector.
-#' @param y a numeric vector.
-#' @param tau integer; Number of lagged observations to consider
-#' @param plot logical; \code{TRUE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
-#' @keywords causation
-#' @author Fred Viole, OVVO Financial Systems
-
 Uni.caus <- function(x,y,tau,plot=TRUE){
 
 

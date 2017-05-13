@@ -50,7 +50,7 @@
 #'
 #' \code{"x.star"} returns the synthetic X* as a vector;
 #'
-#' \code{"rhs.partitions"} returns the partition points for each \code{x};
+#' \code{"rhs.partitions"} returns the partition points for each regressor \code{x};
 #'
 #' \code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 #'

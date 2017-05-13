@@ -44,7 +44,7 @@ NNS.dep = function(x,y=NULL,order = NULL,
       part.map = NNS.part(x,y,order=order,max.obs=max.obs, Voronoi=T,min.obs=T)
     }
     else {
-      part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs=T)
+      part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs=TRUE)
     }
 
     part.df = part.map$dt
