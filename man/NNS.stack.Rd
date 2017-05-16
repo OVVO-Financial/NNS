@@ -31,7 +31,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = 0.2,
 Returns a vector of fitted values for the dependent variable test set for all models.  \code{"NNS.reg.n.best"} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression. \code{"NNS.dim.red.order"} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.   \code{"MSE.dim.red"} returns the MSE for the \link{NNS.reg} dimension reduction regression.  \code{"reg"} returns \link{NNS.reg} output, \code{"dim.red"} returns \link{NNS.reg} dimension reduction regression output, and \code{"stack"} returns the output of the stacked model.
 }
 \description{
-Prediction model using the predictions of the NNS base models (\link{NNS.reg} as features (i.e. meta-features) for the stacked model.
+Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 }
 \note{
 If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data<- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
