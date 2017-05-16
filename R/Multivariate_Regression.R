@@ -42,9 +42,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
           point.est=apply(point.B,2,function(c) (c-min(c))/(max(c)-min(c)))[1:np,]}else{
           point.est=NNS.norm(point.B)[1:np,]
           }
-    }}else{original.IVs=original.IVs
-    point.est=point.est
-    }
+    }}
 
   original.matrix=data.frame(original.IVs,original.DV)
 
@@ -182,8 +180,6 @@ if(all(sapply(reg.points, length) == length(reg.points[[1]]))==FALSE){
     predict.fit.iter=numeric()
     if(is.null(np)){
       predict.fit = distance(dist.est = point.est)
-
-
     }
     if(!is.null(np)){
       predict.fit.iter=apply(point.est,1,function(p) distance(dist.est = as.vector(p) ))

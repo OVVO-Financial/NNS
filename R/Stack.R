@@ -1,6 +1,6 @@
 #' NNS stack
 #'
-#' Prediction model using the predictions of the NNS base models (\link{NNS.reg} as features (i.e. meta-features) for the stacked model.
+#' Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 #'
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types.

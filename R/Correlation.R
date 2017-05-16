@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param order integer; Controls the level of quadrant partitioning.  Defualts to \code{(order=3)}.  Errors can generally be rectified by setting \code{(order=1)}.
+#' @param order integer; Controls the level of quadrant partitioning.  Defualts to \code{(order=NULL)}.  Errors can generally be rectified by setting \code{(order=1)}.
 #' @param degree integer; \code{(degree = 0)} is frequency based correlations, while \code{(degree = 1)} is for area based correlations.  Defaults to \code{(degree = 0)} for smaller number of observations.
 #' @return Returns nonlinear correlation coefficient between two variables, or nonlinear correlation matrix for matrix input.
 #' @keywords nonlinear correlation
@@ -24,8 +24,8 @@
 #'
 #' @export
 
-NNS.cor = function(x, y=NULL, order = 3,
-                   degree= ifelse(length(x)<100,0,1)){
+NNS.cor = function(x, y=NULL, order = NULL,
+                   degree= NULL){
 
   if(is.null(y)){
   NNS.dep(x,order=order,degree=degree)$Correlation}

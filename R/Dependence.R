@@ -56,18 +56,6 @@ NNS.dep = function(x,y=NULL,order = NULL,
                     counts=.N
                     ),by=prior.quadrant]
 
-    setkey(part.df,prior.quadrant)
-    part.df=(unique(part.df[,.(prior.quadrant,sub.clpm,sub.cupm,sub.dlpm,sub.dupm,
-    nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
-    nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm), counts)]))
-
-    zeros=part.df[,sum(counts==1)]
-
-    part.df=part.df[,`:=` (weight=counts/(length(x)-zeros)),by=prior.quadrant]
-
-    part.df=part.df[counts==1, weight := 0]
-
-
 ### Re-run with order=1 if categorical data...
     if(part.df[,sum(sub.clpm,sub.cupm,sub.dlpm,sub.dupm)]==0){
       if(print.map==T){
@@ -95,6 +83,19 @@ NNS.dep = function(x,y=NULL,order = NULL,
 
       part.df=part.df[counts==1, weight := 0]
 } #Categorical re-run
+
+    else{
+    setkey(part.df,prior.quadrant)
+    part.df=(unique(part.df[,.(prior.quadrant,sub.clpm,sub.cupm,sub.dlpm,sub.dupm,
+    nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
+    nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm), counts)]))
+
+    zeros=part.df[,sum(counts==1)]
+
+    part.df=part.df[,`:=` (weight=counts/(length(x)-zeros)),by=prior.quadrant]
+
+    part.df=part.df[counts==1, weight := 0]
+}
 
 
       for (j in seq_len(ncol(part.df))){

@@ -4,7 +4,6 @@
 #' @param A a numeric matrix or data frame.
 #' @param chart.type  options: ("l","b"); \code{NULL} (default).  Set \code{(chart.type="l")} for line, \code{(chart.type="b")} for boxplot.
 #' @param linear logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.
-#' @param order integer; \code{NULL} (default) Controls the \link{NNS.cor} \code{"order"} for number of partial moment quadrant partitions.
 #' @return Returns a \link{data.frame} of normalized values.
 #' @keywords normalization
 #' @author Fred Viole, OVVO Financial Systems
@@ -17,7 +16,7 @@
 #' NNS.norm(A)
 #' @export
 
-NNS.norm <- function(A,chart.type=NULL,linear=FALSE,order=NULL) {
+NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
   m  <- colMeans(A)
   RG <- m %o% (1/m)
 

@@ -131,7 +131,7 @@ NNS.reg = function (x,y,
   original.y = y
   np = nrow(point.est)
 
-  if(noise.reduction=='off'){stn=0}else{stn=stn}
+  if(noise.reduction=='off'){stn=0}
 
   y=as.numeric(y)
   if(is.null(names(original.y))){y.label="Y"}else{y.label=names(y)}
@@ -153,8 +153,8 @@ NNS.reg = function (x,y,
     } else {
       if(is.null(type)){
         if(!is.null(original.columns)){
-        if(is.null(n.best)){n.best=2*original.columns} else {n.best=n.best}}
-        if(is.null(original.columns)){if(is.null(n.best)){n.best=2} else {n.best=n.best}}
+          if(is.null(n.best)){n.best=2*original.columns} }
+        else{if(is.null(n.best)){n.best=2} }
 
         return(NNS.M.reg(x,y,point.est=point.est,plot=plot,residual.plot=plot,order=order,n.best=n.best,type=type,location=location,noise.reduction=noise.reduction,norm = norm,dist=dist,stn = stn,return.values=return.values,plot.regions = plot.regions))
       } # Multivariate NULL type
@@ -175,7 +175,6 @@ NNS.reg = function (x,y,
                   x.star.dep = NNS.dep(cbind(x,y))
                   x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
                   x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]
-
 
                   x.star.coef[abs(x.star.coef)<threshold]<- 0
 
@@ -222,7 +221,6 @@ NNS.reg = function (x,y,
     if(type=="CLASS") dependence=mean(x.star.dep)}
 
   if(is.null(order)){
-
       dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
       else {
       dep.reduced.order=order
@@ -233,7 +231,6 @@ NNS.reg = function (x,y,
       part.map = NNS.part(x,y,noise.reduction='off',order=dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
         part.map=NNS.part(x,y,noise.reduction='off',order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
-      } else {part.map=part.map
       }
     } # NULL type
 
@@ -241,7 +238,6 @@ NNS.reg = function (x,y,
       part.map=NNS.part(x,y,type = "XONLY",noise.reduction='off',order = dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
         part.map=NNS.part(x,y,noise.reduction='off',type="XONLY",order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
-      } else {part.map=part.map
       }
     } # type
   } # Dependence > stn
@@ -251,7 +247,6 @@ NNS.reg = function (x,y,
       part.map = NNS.part(x,y,noise.reduction=noise.reduction, order=dep.reduced.order,type = "XONLY")
       if(length(part.map$regression.points$x)==0){
         part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
-      } else {part.map=part.map
       }
     } # NULL type
 
@@ -260,7 +255,6 @@ NNS.reg = function (x,y,
       part.map = NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction, order = dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
         part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
-      } else {part.map=part.map
       }
     } # type
   } # Dependence < stn
@@ -273,7 +267,6 @@ NNS.reg = function (x,y,
 
   min.range = min(regression.points$x)
   max.range = max(regression.points$x)
-
 
   Dynamic.average.min = mean(y[x<=min.range])
   Dynamic.average.max = mean(y[x>=max.range])
@@ -308,9 +301,7 @@ NNS.reg = function (x,y,
 
   Regression.Coefficients=regression.points[,.(rise,run)]
 
-
   Regression.Coefficients=Regression.Coefficients[complete.cases(Regression.Coefficients)]
-
 
   upper.x = regression.points[(2:.N),x]
 

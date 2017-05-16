@@ -29,7 +29,7 @@ NNS.caus <- function(x,y,tau,plot=FALSE){
   Causation.x.given.y = Uni.caus(x,y,tau,plot = plot)
   Causation.y.given.x = Uni.caus(y,x,tau,plot = plot)
 
-  if(abs(Causation.x.given.y)<abs(Causation.y.given.x)){
+  if(abs(Causation.x.given.y)<=abs(Causation.y.given.x)){
       return(c(Causation.x.given.y = Causation.x.given.y,
                Causation.y.given.x = Causation.y.given.x,
         "C(y--->x)" =  Causation.y.given.x-Causation.x.given.y))
