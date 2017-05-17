@@ -47,6 +47,18 @@ NNS.dep = function(x,y=NULL,order = NULL,
       part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs=TRUE)
     }
 
+    part.order = part.map$order
+
+    if(part.order<3){
+      if(print.map==T){
+        part.map = NNS.part(x,y,order=3, Voronoi=T)
+      }
+      else {
+        part.map = NNS.part(x,y,order=3)
+      }
+
+    }
+
     part.df = part.map$dt
 
     part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean(x),mean(y)),
