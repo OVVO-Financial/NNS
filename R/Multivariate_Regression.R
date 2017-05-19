@@ -241,7 +241,7 @@ if(all(sapply(reg.points, length) == length(reg.points[[1]]))==FALSE){
   if(residual.plot==TRUE){
     resids=cbind(original.DV,y.hat)
     r2.leg=bquote(bold(R^2 == .(format(R2,digits=4))))
-    matplot(resids,type = 'l',xlab="Index",ylab="Y (black) and Y.hat (red)",cex.lab=1.5,mgp=c(2,.5,0))
+    matplot(resids,type = 'l',xlab="Index",ylab=expression(paste("y (black)   ",hat(y), " (red)")),cex.lab=1.5,mgp=c(2,.5,0))
 
     title(main = paste0("NNS Order = ",order),cex.main=2)
     legend(location,legend =r2.leg,bty = 'n')
