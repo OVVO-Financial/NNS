@@ -62,11 +62,9 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
      \code{"regression.points"} provides the points used in the regression equation for the given order of partitions;
 
-     \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
-
      \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
 
-     \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y} and \code{y.hat};
+     \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
 
 
 MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
@@ -81,13 +79,11 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
 \code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 
-\code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
-
 \code{"Point.est"} returns the predicted value generated;
 
 \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
 
-\code{"Fitted.xy"} reutnrs a \link{data.table} of \code{y} and fitted values.
+\code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID}.
 }
 \description{
 Generates a nonlinear regression based on partial moment quadrant means.
