@@ -35,11 +35,9 @@
 #'
 #'      \code{"regression.points"} provides the points used in the regression equation for the given order of partitions;
 #'
-#'      \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
-#'
 #'      \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
 #'
-#'      \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y} and \code{y.hat};
+#'      \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
 #'
 #'
 #' MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
@@ -54,13 +52,11 @@
 #'
 #' \code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 #'
-#' \code{"partition"} returns the \code{"NNS.ID"} assigned to the observation and \code{y};
-#'
 #' \code{"Point.est"} returns the predicted value generated;
 #'
 #' \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
 #'
-#' \code{"Fitted.xy"} reutnrs a \link{data.table} of \code{y} and fitted values.
+#' \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID}.
 #'
 #' @note Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
 #' @keywords nonlinear regression, classifier
@@ -340,8 +336,8 @@ NNS.reg = function (x,y,
   point.est.y=((point.est - regression.points[reg.point.interval,x])*Regression.Coefficients[coef.point.interval,Coefficient])+regression.points[reg.point.interval,y]
   }
 
-
-  fitted=(data.table(x=x,y=y,y.hat=estimate))
+  setkey(part.map$dt,"x")
+  fitted=(data.table(x=x,y=y,y.hat=estimate,NNS.ID=part.map$dt$quadrant))
 
   Values = (cbind(x,Fitted=fitted[,y.hat],Actual=fitted[,y],Difference=fitted[,y.hat]-fitted[,y], Accuracy=abs(round(fitted[,y.hat])-fitted[,y])))
 
@@ -398,9 +394,9 @@ NNS.reg = function (x,y,
 
   ### Return Values
   if(return.values == TRUE){
-    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   } else {
-    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"partition"=part.map$dt[,.(y,NNS.ID=quadrant)],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   }
 
 }
