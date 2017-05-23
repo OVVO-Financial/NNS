@@ -90,6 +90,8 @@ Generates a nonlinear regression based on partial moment quadrant means.
 }
 \note{
 Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
+
+Identical regressors can be used as long as they do not share the same name. For instance, \code{NNS.reg(cbind(x,1*x),y)} will work as \code{NNS.reg} is not affected by multicollinearity.
 }
 \examples{
 set.seed(123)
