@@ -80,7 +80,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
     }
     colnames(reg.points.matrix)=as.character(colnames.list)}
 
-
+  reg.points.matrix = unique(reg.points.matrix)
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   NNS.ID = list()
 
