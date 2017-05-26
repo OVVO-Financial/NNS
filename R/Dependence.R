@@ -61,10 +61,12 @@ NNS.dep = function(x,y=NULL,order = NULL,
 
     part.df = part.map$dt
 
-    part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean(x),mean(y)),
-                    sub.cupm=Co.UPM(degree,degree,x,y,mean(x),mean(y)),
-                    sub.dlpm=D.LPM(degree,degree,x,y,mean(x),mean(y)),
-                    sub.dupm=D.UPM(degree,degree,x,y,mean(x),mean(y)),
+    part.df[, `:=` (mean.x=mean(x),mean.y=mean(y)),by=prior.quadrant]
+
+    part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                    sub.cupm=Co.UPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                    sub.dlpm=D.LPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                    sub.dupm=D.UPM(degree,degree,x,y,mean.x[1],mean.y[1]),
                     counts=.N
                     ),by=prior.quadrant]
 
@@ -78,16 +80,22 @@ NNS.dep = function(x,y=NULL,order = NULL,
 
       part.df = part.map$dt
 
-      part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean(x),mean(y)),
-                      sub.cupm=Co.UPM(degree,degree,x,y,mean(x),mean(y)),
-                      sub.dlpm=D.LPM(degree,degree,x,y,mean(x),mean(y)),
-                      sub.dupm=D.UPM(degree,degree,x,y,mean(x),mean(y)),
-                      counts=.N),by=prior.quadrant]
+      part.df[, `:=` (mean.x=mean(x),mean.y=mean(y)),by=prior.quadrant]
+
+      part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                      sub.cupm=Co.UPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                      sub.dlpm=D.LPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                      sub.dupm=D.UPM(degree,degree,x,y,mean.x[1],mean.y[1]),
+                      counts=.N
+                      ),by=prior.quadrant]
+
+      part.df[,c("x","y","quadrant","mean.x","mean.y"):=NULL]
 
       setkey(part.df,prior.quadrant)
-      part.df=(unique(part.df[,.(prior.quadrant,sub.clpm,sub.cupm,sub.dlpm,sub.dupm,
-               nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
-               nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm), counts)]))
+      part.df=unique(part.df[])
+
+      part.df[, `:=` ( nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
+                       nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm))]
 
       zeros=part.df[,sum(counts==1)]
 
@@ -97,10 +105,14 @@ NNS.dep = function(x,y=NULL,order = NULL,
 } #Categorical re-run
 
     else{
+
+      part.df[,c("x","y","quadrant","mean.x","mean.y"):=NULL]
+
     setkey(part.df,prior.quadrant)
-    part.df=(unique(part.df[,.(prior.quadrant,sub.clpm,sub.cupm,sub.dlpm,sub.dupm,
-    nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
-    nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm), counts)]))
+    part.df=unique(part.df[])
+
+    part.df[, `:=` ( nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
+                     nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm))]
 
     zeros=part.df[,sum(counts==1)]
 

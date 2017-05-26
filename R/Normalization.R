@@ -21,7 +21,7 @@ NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
   RG <- m %o% (1/m)
 
   if(linear==FALSE){
-      scale.factor=abs(NNS.cor(A))
+      scale.factor=abs(cor(A))
       scales <- colMeans(RG * scale.factor)
   } else {
         scales <- colMeans(RG)

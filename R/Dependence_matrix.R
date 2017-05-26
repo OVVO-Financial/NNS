@@ -13,7 +13,6 @@ for(i in 1:n){
         deps[[i]]=sapply(1:n, function(b) NNS.dep(x[,i],x[,b],print.map = F,order=order,degree = degree)$Dependence)
         }
 
-
 rhos=do.call(rbind,rhos)
 deps=do.call(rbind,deps)
 
