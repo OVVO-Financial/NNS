@@ -28,4 +28,3 @@ x<-rnorm(100)
 UPM.VaR(0.95,0,x)
 }
 \keyword{VaR}
-

@@ -28,7 +28,15 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = 0.2,
 \item{seed}{numeric; 123 (default) Sets seed for CV sampling.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set for all models.  \code{"NNS.reg.n.best"} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression. \code{"NNS.dim.red.order"} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.   \code{"MSE.dim.red"} returns the MSE for the \link{NNS.reg} dimension reduction regression.  \code{"reg"} returns \link{NNS.reg} output, \code{"dim.red"} returns \link{NNS.reg} dimension reduction regression output, and \code{"stack"} returns the output of the stacked model.
+Returns a vector of fitted values for the dependent variable test set for all models.
+\itemize{
+\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
+\item{\code{"NNS.dim.red.order"}} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.
+\item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
+\item{\code{"reg"}} returns \link{NNS.reg} output.
+\item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
+\item{\code{"stack"}} returns the output of the stacked model.
+}
 }
 \description{
 Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
@@ -49,12 +57,11 @@ If character variables are used, transform them first to factors using \link{as.
  \dontrun{
  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analyis"
 \url{https://ssrn.com/abstract=2864711}
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{classifier}
-

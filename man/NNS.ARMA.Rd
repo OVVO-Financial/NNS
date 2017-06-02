@@ -61,13 +61,12 @@ NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=c(12,24,36),method=
 NNS.ARMA(AirPassengers,h=45,training.set=100,seasonal.factor=FALSE,best.periods=2,method='nonlin')}
 
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{Autoregressive}
 \keyword{model}
-

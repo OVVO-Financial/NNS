@@ -47,43 +47,45 @@ NNS.reg(x, y, order = NULL, stn = 0.99, type = NULL, point.est = NULL,
 }
 \value{
 UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+\itemize{
+ \item{\code{"R2"}} provides the goodness of fit;
 
-     \code{"R2"} provides the goodness of fit;
+ \item{\code{"MSE"}} returns the MSE between \code{y} and \code{y.hat};
 
-     \code{"MSE"} returns the MSE between \code{y} and \code{y.hat};
+ \item{\code{"Prediction.Accuracy"}} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y};
 
-     \code{"Prediction.Accuracy"} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y};
+ \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 
-     \code{"derivative"} for the coefficient of the \code{x} and its applicable range;
+ \item{\code{"Point"}} returns the \code{x} point(s) being evaluated;
 
-     \code{"Point"} returns the \code{x} point(s) being evaluated;
+ \item{\code{"Point.est"}} for the predicted value generated;
 
-     \code{"Point.est"} for the predicted value generated;
+ \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 
-     \code{"regression.points"} provides the points used in the regression equation for the given order of partitions;
+ \item{\code{"Fitted"}} returns a vector containing only the fitted values, \code{y.hat};
 
-     \code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
-
-     \code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
+ \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
+}
 
 
 MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+\itemize{
+ \item{\code{"R2"}} provides the goodness of fit;
 
-\code{"R2"} provides the goodness of fit;
+ \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
 
-\code{"equation"} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
+ \item{\code{"x.star"}} returns the synthetic X* as a vector;
 
-\code{"x.star"} returns the synthetic X* as a vector;
+ \item{\code{"rhs.partitions"}} returns the partition points for each regressor \code{x};
 
-\code{"rhs.partitions"} returns the partition points for each regressor \code{x};
+ \item{\code{"RPM"}} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 
-\code{"RPM"} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
+ \item{\code{"Point.est"}} returns the predicted value generated;
 
-\code{"Point.est"} returns the predicted value generated;
+ \item{\code{"Fitted"}} returns a vector containing only the fitted values, \code{y.hat};
 
-\code{"Fitted"} returns a vector containing only the fitted values, \code{y.hat};
-
-\code{"Fitted.xy"} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID}.
+ \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID}.
+}
 }
 \description{
 Generates a nonlinear regression based on partial moment quadrant means.
@@ -133,14 +135,13 @@ x<-rnorm(100); y<-rnorm(100)
 NNS.reg(x,y)$derivative
 
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{classifier}
 \keyword{nonlinear}
 \keyword{regression,}
-

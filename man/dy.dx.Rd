@@ -37,13 +37,12 @@ Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of i
 x<-seq(0,2*pi,pi/100); y<-sin(x)
 dy.dx(x,y,eval.point=1.75)
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{derivative}
 \keyword{partial}
-

@@ -33,13 +33,12 @@ x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
 B<-cbind(x,y,z)
 NNS.dep(B)
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{correlation}
 \keyword{dependence,}
-

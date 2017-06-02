@@ -25,12 +25,11 @@ x<-rnorm(1000); y<-rnorm(1000); z<-rnorm(1000)
 A<-data.frame(x,y,z)
 NNS.cor.hd(A,plot=TRUE,independence.overlay=TRUE)
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{http://ssrn.com/abstract=2745308}.
 }
+\author{
+Fred Viole, OVVO Financial Systems
+}
 \keyword{correlation}
 \keyword{dependence,}
-

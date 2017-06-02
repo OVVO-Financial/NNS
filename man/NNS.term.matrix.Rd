@@ -46,4 +46,3 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 \keyword{document}
 \keyword{matrix}
 \keyword{term}
-

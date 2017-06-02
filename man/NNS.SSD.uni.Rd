@@ -25,4 +25,3 @@ NNS.SSD.uni(x,y)
 \author{
 Fred Viole, OVVO Financial Systems
 }
-

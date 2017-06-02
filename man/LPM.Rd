@@ -24,16 +24,15 @@ set.seed(123)
 x<-rnorm(100)
 LPM(0,mean(x),x)
 }
-\author{
-Fred Viole, OVVO Financial Systems
-}
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
+}
+\author{
+Fred Viole, OVVO Financial Systems
 }
 \keyword{CDF}
 \keyword{mean,}
 \keyword{moments,}
 \keyword{partial}
 \keyword{variance,}
-
