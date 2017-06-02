@@ -1,6 +1,6 @@
 #' NNS ANOVA
 #'
-#' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the samples belong to the same population, not a p-value.
+#' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
 #' @param control a numeric vector, matrix or data frame.
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
 #' @param binary logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.
@@ -8,7 +8,7 @@
 #' @param pairwise logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise=TRUE}.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.
 #' @param extend options:("yes", NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
-#' @return For \code{(binary=FALSE)} returns the degree certainty the samples belong to the same population [0,1].
+#' @return For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].
 #'
 #' For \code{(binary=TRUE)} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \code{"Grand Mean"}, \code{"Control CDF"}, \code{"Treatment CDF"}, the certainty of the same population statistic \code{"Certainty"}, the effect size of the treatment for a specified confidence interval with \code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}.
 #' @note If endpoint error is generated, set \code{(extend="yes")}.

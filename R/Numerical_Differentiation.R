@@ -102,7 +102,7 @@ NNS.diff<- function(f,point,h=0.1,tol=1e-10,print.trace=FALSE){
 
     ###  SOLVE FOR h, we just need the negative or positive sign from the tested B
 
-    inferred.h = uniroot(new.f, c(-2*h,2*h))$root
+    inferred.h = uniroot(new.f, c(-2*h,2*h),extendInt = 'yes')$root
 
     if(print.trace==TRUE) {print(c("Iteration"=i, "h"=inferred.h,"Lower B" = lower.B,"Upper B" = upper.B))}
 
