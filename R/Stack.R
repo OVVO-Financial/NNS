@@ -11,7 +11,16 @@
 #' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
 #' @param threshold  numeric [0,1]; Sets the correlation threshold for independent variables in \link{NNS.reg}.  Defaults to \code{(threshold=0)}.
 #' @param seed numeric; 123 (default) Sets seed for CV sampling.
-#' @return Returns a vector of fitted values for the dependent variable test set for all models.  \code{"NNS.reg.n.best"} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression. \code{"NNS.dim.red.order"} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.   \code{"MSE.dim.red"} returns the MSE for the \link{NNS.reg} dimension reduction regression.  \code{"reg"} returns \link{NNS.reg} output, \code{"dim.red"} returns \link{NNS.reg} dimension reduction regression output, and \code{"stack"} returns the output of the stacked model.
+#' @return Returns a vector of fitted values for the dependent variable test set for all models.
+#' \itemize{
+#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
+#' \item{\code{"NNS.dim.red.order"}} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"reg"}} returns \link{NNS.reg} output.
+#' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
+#' \item{\code{"stack"}} returns the output of the stacked model.
+#' }
+#'
 #' @keywords classifier
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analyis"
