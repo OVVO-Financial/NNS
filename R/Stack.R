@@ -14,7 +14,7 @@
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
-#' \item{\code{"NNS.dim.red.order"}} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
 #' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
@@ -71,13 +71,11 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
   points.norm=rbind(CV.IVs.test,CV.IVs.train)
   colnames(points.norm)=colnames(CV.IVs.test)
   if(precision=="LOW"){
-    order=NULL
     CV.IVs.train=apply(CV.IVs.train,2,function(b) (b-min(b))/(max(b)-min(b)))
     CV.IVs.test=apply(points.norm,2,function(b) (b-min(b))/(max(b)-min(b)))[1:np,]
     }
 
   if(precision=="HIGH"){
-    order="max"
     CV.IVs.train=NNS.norm(CV.IVs.train)
     CV.IVs.test=NNS.norm(points.norm)[1:np,]
   }
@@ -85,26 +83,31 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
 
   if(1%in%method){
 
-    nns.cv=sapply(1:(2*n),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i,order=order,noise.reduction = 'off')$Point.est-CV.DV.test)^2))
+    nns.cv=sapply(1:(2*n),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i)$Point.est-CV.DV.test)^2))
 
-    nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all',order=order,noise.reduction = 'off')$Point.est-CV.DV.test)^2))
+    nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all')$Point.est-CV.DV.test)^2))
 
     k=which.min(nns.cv)
     if(k==length(nns.cv)){k='all'}else{k=k}
 
-    nns.1=NNS.reg(IVs.train, DV.train,point.est = IVs.test, plot=F, n.best = k,order=order,noise.reduction = 'off')$Point.est
+    nns.1=NNS.reg(IVs.train, DV.train,point.est = IVs.test, plot=F, n.best = k)$Point.est
     nns.cv.mse=min(nns.cv)
   } else {
+    k='N/A'
     nns.1=0
     nns.cv=1e-10
     nns.cv.mse='N/A'}
 
   # Logistic Regression Output
   if(2%in%method){
+    var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,type = "CLASS",plot=F)$equation$Coefficient,digits = 2))
 
-    nns.ord=sapply(1:log(l,2),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, order = i, type = "CLASS",threshold = threshold,noise.reduction = 'off')$Point.est-CV.DV.test)^2))
+    var.cutoffs=unique(var.cutoffs[var.cutoffs<max(var.cutoffs)])
 
-    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, type = "CLASS",noise.reduction = 'off',plot=F,order=which.min(nns.ord),threshold = threshold)$Point.est
+    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, type = "CLASS",threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
+#return(nns.ord)
+    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, type = "CLASS",plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
+
     nns.ord.mse=min(nns.ord)
   } else {nns.2=0
   nns.ord=1e-10
@@ -129,6 +132,6 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
 
   estimates = (weights[1]*nns.1+weights[2]*nns.2)
 
-  return(list(NNS.reg.n.best=k,MSE.reg=nns.cv.mse,NNS.dim.red.order=which.min(nns.ord),MSE.dim.red=nns.ord.mse,reg=nns.1,dim.red=nns.2,stack=estimates))
+  return(list(NNS.reg.n.best=k,MSE.reg=nns.cv.mse,NNS.dim.red.threshold=var.cutoffs[which.min(nns.ord)],MSE.dim.red=nns.ord.mse,reg=nns.1,dim.red=nns.2,stack=estimates))
 
 }
