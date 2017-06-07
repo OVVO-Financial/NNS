@@ -47,18 +47,6 @@ NNS.dep = function(x,y=NULL,order = NULL,
       part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs.stop=TRUE)
     }
 
-    part.order = part.map$order
-
-    if(part.order<3){
-      if(print.map==T){
-        part.map = NNS.part(x,y,order=3, Voronoi=T,max.obs=max.obs,min.obs.stop=TRUE)
-      }
-      else {
-        part.map = NNS.part(x,y,order=3,max.obs = 1,min.obs.stop = TRUE)
-      }
-
-    }
-
     part.df = part.map$dt
 
     part.df[, `:=` (mean.x=mean(x),mean.y=mean(y)),by=prior.quadrant]
