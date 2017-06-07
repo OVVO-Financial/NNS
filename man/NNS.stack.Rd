@@ -31,7 +31,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = 0.2,
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
 \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
-\item{\code{"NNS.dim.red.order"}} returns the optimum \code{"order"} from the \link{NNS.reg} dimension reduction regression.
+\item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 \item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
 \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
