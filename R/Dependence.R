@@ -6,7 +6,7 @@
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
 #' @param order integer; Controls the level of quadrant partitioning.  Defaults to \code{(order=NULL)}.  Errors can generally be rectified by setting \code{(order=1)}.  Will not partition further if less than 4 observations exist in a quadrant.
 #' @param degree integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.
-#' @param print.map  logical; \code{FALSE} (default) Plots quadrant means.
+#' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #' @keywords dependence, correlation
 #' @author Fred Viole, OVVO Financial Systems
@@ -97,11 +97,11 @@ NNS.dep = function(x,y=NULL,order = NULL,
       part.df[, `:=` ( nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
                        nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm))]
 
-      zeros=part.df[,sum(counts==1)]
+      part.df=part.df[counts==1, counts := 0]
+      part.df=part.df[(sub.clpm==0&sub.cupm==0&sub.dlpm==0& sub.dupm==0), counts := 0]
+      zeros=length(x)-part.df[,sum(counts)]
 
       part.df=part.df[,`:=` (weight=counts/(length(x)-zeros)),by=prior.quadrant]
-
-      part.df=part.df[counts==1, weight := 0]
 } #Categorical re-run
 
     else{
@@ -114,11 +114,13 @@ NNS.dep = function(x,y=NULL,order = NULL,
     part.df[, `:=` ( nns.cor=(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm),
                      nns.dep=abs(sub.clpm+sub.cupm-sub.dlpm-sub.dupm)/(sub.clpm+sub.cupm+sub.dlpm+sub.dupm))]
 
-    zeros=part.df[,sum(counts==1)]
+
+    part.df=part.df[counts==1, counts := 0]
+    part.df=part.df[(sub.clpm==0&sub.cupm==0&sub.dlpm==0& sub.dupm==0), counts := 0]
+    zeros=length(x)-part.df[,sum(counts)]
 
     part.df=part.df[,`:=` (weight=counts/(length(x)-zeros)),by=prior.quadrant]
 
-    part.df=part.df[counts==1, weight := 0]
 }
 
 
