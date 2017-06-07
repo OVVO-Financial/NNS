@@ -87,7 +87,7 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
 
     nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all')$Point.est-CV.DV.test)^2))
 
-    k=which.min(nns.cv)
+    k=which.min(na.omit(nns.cv))
     if(k==length(nns.cv)){k='all'}else{k=k}
 
     nns.1=NNS.reg(IVs.train, DV.train,point.est = IVs.test, plot=F, n.best = k)$Point.est
@@ -98,17 +98,17 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
     nns.cv=1e-10
     nns.cv.mse='N/A'}
 
-  # Logistic Regression Output
+  # Dimension Reduction Regression Output
   if(2%in%method){
     var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,type = "CLASS",plot=F)$equation$Coefficient,digits = 2))
 
     var.cutoffs=unique(var.cutoffs[var.cutoffs<max(var.cutoffs)])
 
     nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, type = "CLASS",threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
-#return(nns.ord)
+
     nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, type = "CLASS",plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
 
-    nns.ord.mse=min(nns.ord)
+    nns.ord.mse=min(na.omit(nns.ord))
   } else {nns.2=0
   nns.ord=1e-10
   nns.ord.mse='N/A'}
