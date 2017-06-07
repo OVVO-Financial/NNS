@@ -41,7 +41,7 @@ NNS.dep = function(x,y=NULL,order = NULL,
   if(!missing(y)){
 
     if(print.map==T){
-      part.map = NNS.part(x,y,order=order,max.obs=max.obs, Voronoi=T,min.obs.stop=T)
+      part.map = NNS.part(x,y,order=order,max.obs=max.obs, Voronoi=T,min.obs.stop=TRUE)
     }
     else {
       part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs.stop=TRUE)
@@ -51,10 +51,10 @@ NNS.dep = function(x,y=NULL,order = NULL,
 
     if(part.order<3){
       if(print.map==T){
-        part.map = NNS.part(x,y,order=3, Voronoi=T)
+        part.map = NNS.part(x,y,order=3, Voronoi=T,max.obs=max.obs,min.obs.stop=TRUE)
       }
       else {
-        part.map = NNS.part(x,y,order=3)
+        part.map = NNS.part(x,y,order=3,max.obs = 1,min.obs.stop = TRUE)
       }
 
     }
