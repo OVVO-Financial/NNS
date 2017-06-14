@@ -73,14 +73,18 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,p
         return(c("Certainty"=NNS.ANOVA.rho))
     } else {
 
-          certainties = list()
-          i=1L
-          while(i <=ncol(A)){
-            certainties[[i]]=sapply(1:ncol(A), function(b) NNS.ANOVA(cbind(A[,i],A[,b])))
+          raw.certainties = list()
+          n <- ncol(A)
+          for(i in 1:(n-1)){
+            raw.certainties[[i]]=sapply((i+1):n, function(b) NNS.ANOVA(cbind(A[,i],A[,b])))
             i=i+1
           }
 
-          certainties=do.call(rbind,certainties)
+          certainties <- matrix(, n, n)
+          certainties[lower.tri(certainties, diag=FALSE)] <- unlist(raw.certainties)
+          diag(certainties) <- 1
+          certainties = pmax(certainties, t(certainties), na.rm=TRUE)
+
           colnames(certainties) = colnames(A)
           rownames(certainties) = colnames(A)
 

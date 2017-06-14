@@ -138,7 +138,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         }
 
         Nonlin.estimates=sum(Regression.Estimates*Weights)
-      }#Linear == F
+      }#Linear==F
 
       if(method=='lin' | method=='both'){
 
@@ -252,7 +252,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       variable = c(variable,(Estimates[j+1]))
       FV=variable
 
-    } # j loop non-dynamic
+    }  # j loop non-dynamic
     }  # ELSE from (if dynamic)
 
   #### PLOTTING
