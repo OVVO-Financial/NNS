@@ -25,7 +25,7 @@ g=f(z[,1],z[,2])
 NNS.reg(z,g,order='max')
 
 ## ----iris point.est------------------------------------------------------
-NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4])$Point.est
+NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
 
 ## ----nonlinear class-----------------------------------------------------
 NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE)$equation
