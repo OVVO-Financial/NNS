@@ -4,8 +4,8 @@
 \alias{NNS.reg}
 \title{NNS Regression}
 \usage{
-NNS.reg(x, y, order = NULL, stn = 0.99, type = NULL, point.est = NULL,
-  location = "top", return.values = TRUE, plot = TRUE,
+NNS.reg(x, y, order = NULL, stn = 0.99, dim.red = FALSE, type = NULL,
+  point.est = NULL, location = "top", return.values = TRUE, plot = TRUE,
   plot.regions = FALSE, residual.plot = TRUE, threshold = 0,
   n.best = NULL, noise.reduction = "mean", norm = NULL, dist = "L2",
   multivariate.call = FALSE)
@@ -18,6 +18,8 @@ NNS.reg(x, y, order = NULL, stn = 0.99, type = NULL, point.est = NULL,
 \item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.}
 
 \item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.}
+
+\item{dim.red}{logical; \code{FALSE} (default).  Set to \code{(dim.red=TRUE)} for dimension reduction using synthetic X*.}
 
 \item{type}{\code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.}
 
@@ -39,7 +41,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, type = NULL, point.est = NULL,
 
 \item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal:noise situations,\code{(noise.reduction="mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction="median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction="mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit with a specific \code{order}.}
 
-\item{norm}{\code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.}
+\item{norm}{\code{NULL} (default) the method of normalization options: ("NNS","std","off"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.  Uses raw values when set to \code{(norm="off")}.}
 
 \item{dist}{options:("L1","L2") the method of distance calculation; Selects the distance calculation used. \code{dist="L2"} (default) selects the Euclidean distance and \code{(dist="L1")} seclects the Manhattan distance.}
 
@@ -94,6 +96,8 @@ Generates a nonlinear regression based on partial moment quadrant means.
 Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
 
 Identical regressors can be used as long as they do not share the same name. For instance, \code{NNS.reg(cbind(x,1*x),y)} will work as \code{NNS.reg} is not affected by multicollinearity.
+
+\code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type="CLASS")}.  \code{(type="CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red=TRUE)} enables dimension reduction regressions.
 }
 \examples{
 set.seed(123)
@@ -118,11 +122,11 @@ NNS.reg(x,y,point.est=c(.25,.5,.75))
 
 ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
 x<-cbind(rnorm(100),rnorm(100),rnorm(100)); y<-rnorm(100)
-NNS.reg(x,y,point.est=c(.25,.5,.75),type="CLASS")
+NNS.reg(x,y,point.est=c(.25,.5,.75),dim.red=TRUE)
 
 ## IRIS dataset example:
 #Dimension Reduction:
-NNS.reg(iris[,1:4],iris[,5],type="CLASS",order=5)
+NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,order=5)
 #Multiple Regression:
 NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
 
