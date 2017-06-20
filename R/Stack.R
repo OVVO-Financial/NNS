@@ -100,13 +100,13 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
 
   # Dimension Reduction Regression Output
   if(2%in%method){
-    var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,type = "CLASS",plot=F)$equation$Coefficient,digits = 2))
+    var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,dim.red=TRUE,plot=F)$equation$Coefficient,digits = 2))
 
     var.cutoffs=unique(var.cutoffs[var.cutoffs<max(var.cutoffs)])
 
-    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, type = "CLASS",threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
+    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, dim.red=TRUE,threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
 
-    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, type = "CLASS",plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
+    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red=TRUE,plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
 
     nns.ord.mse=min(na.omit(nns.ord))
   } else {nns.2=0
