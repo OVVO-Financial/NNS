@@ -65,18 +65,18 @@ NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4])$Point.est
 ###NNS Dimension Reduction Regression
 `NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x,y,type="CLASS")`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
 ```{r nonlinear class}
-NNS.reg(iris[,1:4],iris[,5],type = "CLASS")$equation
+NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE)$equation
 ```
 
 ####Threshold
 `NNS.reg(x,y,type="CLASS",threshold=...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
 ```{r nonlinear class threshold}
-NNS.reg(iris[,1:4],iris[,5],type = "CLASS",threshold=.35)$equation
+NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,threshold=.75)$equation
 ```
 
 and the `point.est=(...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r }
-NNS.reg(iris[,1:4],iris[,5],type = "CLASS",threshold=.35,point.est=iris[1:10,1:4])$Point.est
+NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,threshold=.75,point.est=iris[1:10,1:4])$Point.est
 ```
 
 
