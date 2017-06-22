@@ -13,7 +13,7 @@ LPM.VaR(percentile, degree, x, extend = NULL)
 
 \item{x}{a numeric vector.}
 
-\item{extend}{options: ("yes",NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
+\item{extend}{options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
 Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.

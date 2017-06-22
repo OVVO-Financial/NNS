@@ -14,7 +14,7 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs = 4,
 
 \item{Voronoi}{logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.}
 
-\item{type}{\code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to NULL for both X and Y-axis partitioning.}
+\item{type}{\code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.}
 
 \item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.}
 
