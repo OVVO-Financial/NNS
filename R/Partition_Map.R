@@ -4,7 +4,7 @@
 #' @param x a numeric vector.
 #' @param y a numeric vector with compatible dimsensions to \code{x}.
 #' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
-#' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to NULL for both X and Y-axis partitioning.
+#' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.
 #' @param order integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.
 #' @param max.obs integer; (4 default) Desired observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs=1)}.
 #' @param min.obs.stop logical; \code{FALSE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs}.

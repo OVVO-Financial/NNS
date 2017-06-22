@@ -5,9 +5,9 @@
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
-#' @param CV.size numeric [0,1]; Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.2 for a 20 percent random sampling of the training set.
+#' @param CV.size numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.
 #' @param weight options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.
-#' @param precision options: ("LOW","HIGH"); 2 settings offered: \code{"LOW"} (Default) ,and \code{"HIGH"}.  \code{"HIGH"} is the limit condition of every observation as a regression point and uses a \code{(norm="NNS")} while \code{(precision="LOW")} uses a \code{(norm="std")} in \link{NNS.reg}.  Errors/warnings can generally be reconciled with \code{(precision="LOW")}.
+#' @param norm options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL},\code{"LOW"} ,and \code{"HIGH"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
 #' @param threshold  numeric [0,1]; Sets the correlation threshold for independent variables in \link{NNS.reg}.  Defaults to \code{(threshold=0)}.
 #' @param seed numeric; 123 (default) Sets seed for CV sampling.
@@ -25,7 +25,9 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analyis"
 #' \url{https://ssrn.com/abstract=2864711}
-#' @note If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data<- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
+#' @note If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data <- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
+#'
+#' Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
@@ -40,7 +42,9 @@
 #'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 #' @export
 
-NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",precision="LOW",method=c(1,2),threshold=0,seed=123){
+NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",norm=NULL,method=c(1,2),threshold=0,seed=123){
+
+
 
   IVs.train<- apply(IVs.train,2,as.numeric)
   DV.train<- as.numeric(DV.train)
@@ -48,6 +52,15 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
   n<- ncol(IVs.train)
 
   l=length(IVs.train[,1])
+
+  if(is.null(CV.size)){
+    if(is.null(IVs.test)){
+      CV.size=0.25}
+    else{
+      CV.size=mean(c(.2,length(IVs.test[,1])/l))
+    }
+  }
+
   #IV test provided...
   if(!is.null(IVs.test)){
   IVs.test<- data.matrix(IVs.test)
@@ -70,16 +83,17 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=.2,weight="MSE",p
   np=nrow(CV.IVs.test)
   points.norm=rbind(CV.IVs.test,CV.IVs.train)
   colnames(points.norm)=colnames(CV.IVs.test)
-  if(precision=="LOW"){
+  if(!is.null(norm)){
+  if(norm=="std"){
     CV.IVs.train=apply(CV.IVs.train,2,function(b) (b-min(b))/(max(b)-min(b)))
     CV.IVs.test=apply(points.norm,2,function(b) (b-min(b))/(max(b)-min(b)))[1:np,]
     }
 
-  if(precision=="HIGH"){
+  if(norm=="NNS"){
     CV.IVs.train=NNS.norm(CV.IVs.train)
     CV.IVs.test=NNS.norm(points.norm)[1:np,]
   }
-
+  }
 
   if(1%in%method){
 

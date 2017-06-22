@@ -17,7 +17,7 @@
 #' @param threshold  numeric [0,1]; \code{threshold=0} (default) Sets the correlation threshold for independent variables.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at 2*(# of regressors).  \code{(n.best="all")} will select and weight all generated regression points.  Analogous to \code{k} in \code{k Nearest Neighbors} algorithm and different values are tested using cross-validation in \link{NNS.stack}.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal:noise situations,\code{(noise.reduction="mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction="median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction="mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit with a specific \code{order}.
-#' @param norm \code{NULL} (default) the method of normalization options: ("NNS","std","off"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.  Uses raw values when set to \code{(norm="off")}.
+#' @param norm \code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.
 #' @param dist options:("L1","L2") the method of distance calculation; Selects the distance calculation used. \code{dist="L2"} (default) selects the Euclidean distance and \code{(dist="L1")} seclects the Manhattan distance.
 #' @param multivariate.call Internal parameter for multivariate regressions.
 #' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
@@ -141,7 +141,6 @@ NNS.reg = function (x,y,
   if(noise.reduction=='off'){stn=0}
   if(!is.null(type)){
   if(type=="CLASS"){
-    if(is.null(norm)){norm="std"}
     if(is.null(n.best)){n.best=1}
   }}
 

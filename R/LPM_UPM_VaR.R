@@ -4,7 +4,7 @@
 #' @param percentile numeric [0,1]; The percentile for left-tail VaR.
 #' @param degree integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.
 #' @param x a numeric vector.
-#' @param extend options: ("yes",NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
+#' @param extend options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 #' @note If endpoint error is generated, set \code{(extend="yes")}.
 #' @keywords VaR
@@ -32,7 +32,7 @@ LPM.VaR <- function(percentile,degree,x,extend=NULL){
 #' @param percentile numeric [0,1]; The percentile for right-tail VaR.
 #' @param degree integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.
 #' @param x a numeric vector.
-#' @param extend options: ("yes",NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
+#' @param extend options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 #' @keywords VaR
 #' @examples

@@ -10,7 +10,16 @@
 #' @param extend options:("yes", NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].
 #'
-#' For \code{(binary=TRUE)} returns \code{"Control Mean"}, \code{"Treatment Mean"}, \code{"Grand Mean"}, \code{"Control CDF"}, \code{"Treatment CDF"}, the certainty of the same population statistic \code{"Certainty"}, the effect size of the treatment for a specified confidence interval with \code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}.
+#' For \code{(binary=TRUE)} returns:
+#' \itemize{
+#' \item{\code{"Control Mean"}}
+#' \item{\code{"Treatment Mean"}}
+#' \item{\code{"Grand Mean"}}
+#' \item{\code{"Control CDF"}}
+#' \item{\code{"Treatment CDF"}}
+#' \item{\code{"Certainty"}} the certainty of the same population statistic
+#' \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the treatment for the specified confidence interval
+#' }
 #' @note If endpoint error is generated, set \code{(extend="yes")}.
 #' @keywords ANOVA, effect size
 #' @author Fred Viole, OVVO Financial Systems

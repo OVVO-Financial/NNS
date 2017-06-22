@@ -8,9 +8,9 @@
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.
 #' @param eval.point numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.points="overall")} to find an overall partial derivative estimate.
 #' @param deriv.order numeric options: (1,2); 1 (default) For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.
-#' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.01} representing a 1 percent step from the value of the independent variable.
+#' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.05} representing a 5 percent step from the value of the independent variable.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.
-#' @param deriv.method method of derivative estimation, options:("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).
+#' @param deriv.method method of derivative estimation, options: ("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).
 #' @return Returns the value of the partial derivative estimate for the given order.
 #' @keywords partial derivative
 #' @author Fred Viole, OVVO Financial Systems
@@ -21,7 +21,7 @@
 #' dy.dx(x,y,eval.point=1.75)
 #' @export
 
-dy.dx <- function(x,y,order=NULL,stn=0.99,eval.point=median(x),deriv.order=1,h=.01,noise.reduction='mean',deriv.method="FS"){
+dy.dx <- function(x,y,order=NULL,stn=0.99,eval.point=median(x),deriv.order=1,h=.05,noise.reduction='mean',deriv.method="FS"){
 
   if(eval.point=='overall'){
 

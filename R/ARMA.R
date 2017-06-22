@@ -4,11 +4,11 @@
 #'
 #' @param variable a numeric vector.
 #' @param h integer; 1 (default) Number of periods to forecast.
-#' @param training.set \code{NULL} (defualt) numeric; Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.
+#' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor=c(12,24,36))}
 #' @param best.periods integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when \code{(seasonal.factor=FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.
-#' @param method options:("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.
+#' @param method options: ("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
@@ -16,11 +16,11 @@
 #' @return Returns a vector of forecasts of length \code{(h)}.
 #' @note \code{(seasonal.factor=FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
 #'
-#' If error encountered:
+#' If error encountered when \code{(seasonal.factor=TRUE)}:
 #'
 #' \code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) : wrong sign in 'by' argument"}
 #'
-#' when \code{(seasonal.factor=TRUE)}, try the combination of \code{(seasonal.factor=FALSE) and (best.periods=1)} as those two settings are equivalent.
+#' try the combination of \code{(seasonal.factor=FALSE) and (best.periods=1)} as those two settings are equivalent.
 #' @keywords Autoregressive model
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
