@@ -57,7 +57,7 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
     if(is.null(IVs.test)){
       CV.size=0.25}
     else{
-      CV.size=mean(c(.2,length(IVs.test[,1])/l))
+      CV.size=mean(c(.2,min(length(IVs.test[,1])/l,.5)))
     }
   }
 
