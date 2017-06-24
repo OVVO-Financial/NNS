@@ -17,7 +17,7 @@ dy.dx(x, y, order = NULL, stn = 0.99, eval.point = median(x),
 
 \item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
 
-\item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.points="overall")} to find an overall partial derivative estimate.}
+\item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.point="overall")} to find an overall partial derivative estimate.}
 
 \item{deriv.order}{numeric options: (1,2); 1 (default) For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.}
 
