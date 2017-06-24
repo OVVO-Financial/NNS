@@ -71,6 +71,9 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
+#'
+#' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
+#' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
 #' @examples
 #' set.seed(123)
 #' x<-rnorm(100); y<-rnorm(100)

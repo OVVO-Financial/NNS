@@ -20,7 +20,8 @@
 #'
 #' \code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) : wrong sign in 'by' argument"}
 #'
-#' try the combination of \code{(seasonal.factor=FALSE) and (best.periods=1)} as those two settings are equivalent.
+#' use the combination of \code{(seasonal.factor=FALSE, best.periods=1)}.
+#'
 #' @keywords Autoregressive model
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
