@@ -18,6 +18,7 @@
 
 NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
   m  <- colMeans(A)
+  m <- pmax(1e-10,m)
   RG <- m %o% (1/m)
 
   if(linear==FALSE){

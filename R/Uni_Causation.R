@@ -1,6 +1,9 @@
 Uni.caus <- function(x,y,tau,plot=TRUE){
 
 
+  x=scale(x)[,1];y=scale(y)[,1]
+
+
   min.length = min(length(x),length(y))
 
   x.vectors = list()
@@ -59,7 +62,7 @@ Uni.caus <- function(x,y,tau,plot=TRUE){
   ymin = min(c(min(x),min(y)))
   ymax = max(c(max(x),max(y)))
   par(mar=c(2, 4, 0, 1))
-  plot(y,type = 'l', ylim=c(ymin, ymax),ylab='RAW',col='red',lwd = 3)
+  plot(y,type = 'l', ylim=c(ymin, ymax),ylab='STANDARDIZED',col='red',lwd = 3)
   lines(x, col = 'steelblue',lwd = 3)
   legend('top',c("X","Y"), lty = 1,lwd=c(3,3),
          col=c('steelblue','red'),ncol=2)

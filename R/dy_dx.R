@@ -46,8 +46,12 @@ dy.dx <- function(x,y,order=NULL,stn=0.99,eval.point=median(x),deriv.order=1,h=.
   eval.point.min = (1-h)*original.eval.point.min
   eval.point.max = (1+h)*original.eval.point.max
 
-
   run=eval.point.max-eval.point.min
+  if(run==0) {
+    eval.point.max=((max(x)-min(x))*h)+eval.point
+    eval.point.max=eval.point-((max(x)-min(x))*h)
+    run=eval.point.max-eval.point.min
+    }
 
   if(deriv.order==1){
 
