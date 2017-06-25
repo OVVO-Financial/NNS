@@ -7,6 +7,7 @@
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.
 #' @param dim.red logical; \code{FALSE} (default).  Set to \code{(dim.red=TRUE)} for dimension reduction using synthetic X*.
+#' @param dim.red.method options: ("cor", "cause", "both") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")} (default) uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="cause")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="both")} averages both methods for further feature engineering.
 #' @param type \code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
@@ -99,10 +100,14 @@
 #' x<-cbind(rnorm(100),rnorm(100),rnorm(100)); y<-rnorm(100)
 #' NNS.reg(x,y,point.est=c(.25,.5,.75),dim.red=TRUE)
 #'
-#' ## IRIS dataset example:
-#' #Dimension Reduction:
+#' ## IRIS dataset examples:
+#' # Dimension Reduction:
 #' NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,order=5)
-#' #Multiple Regression:
+#'
+#' # Dimension Reduction using causal weights:
+#' NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,dim.red.method="cause",order=5)
+#'
+#' # Multiple Regression:
 #' NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
 #'
 #' ## To call fitted values:
@@ -120,6 +125,7 @@ NNS.reg = function (x,y,
                     order=NULL,
                     stn=.99,
                     dim.red=FALSE,
+                    dim.red.method="cor",
                     type = NULL,
                     point.est = NULL,
                     location = "top",
@@ -186,9 +192,31 @@ NNS.reg = function (x,y,
                   y= as.numeric(y)
 
                   x.star.matrix = matrix(nrow=length(y))
-
                   x.star.dep = NNS.dep(cbind(x,y))
-                  x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+
+
+                  if(dim.red.method=="cor"){
+                    x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+                  }
+
+                  if(dim.red.method=="cause"){
+                    x.star.coef=numeric()
+                    for(i in 1:ncol(x)){
+                      cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
+                      x.star.coef[i]=cause[1]-cause[2]
+                    }
+                  }
+
+                  if(dim.red.method=="both"){
+                    x.star.coef.1=numeric()
+                    for(i in 1:ncol(x)){
+                      cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
+                      x.star.coef.1[i]=cause[1]-cause[2]
+                    }
+                    x.star.coef.2 = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+                    x.star.coef = rowMeans(cbind(x.star.coef.1,x.star.coef.2))
+                  }
+
                   x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]
 
                   x.star.coef[abs(x.star.coef)<threshold]<- 0

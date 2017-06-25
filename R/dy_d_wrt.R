@@ -12,8 +12,13 @@
 #' @param n.best integer; Sets the number of closest regression points to use in weighting.  Defaults to \code{ncol(x)}.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed=TRUE)}.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot=TRUE)} to view plot.
-#' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{noise.reduction="median"} uses medians instead of means for partitions, while \code{noise.reduction="mode"} uses modes instead of means for partitions.  \code{noise.reduction="off"}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{noise.reduction="mean"}.
-#' @return Returns the 1st derivative \code{"First Derivative"}, 2nd derivative \code{"Second Derivative"}, and mixed derivative \code{"Mixed Derivative"} (for two independent variables only).
+#' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.
+#' @return Returns:
+#' \itemize{
+#' \item{\code{dy.d_(...)$"First Derivative"}} the 1st derivative
+#' \item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
+#' \item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
+#' }
 #' @note For known function testing and analysis, regressors should be transformed via \link{expand.grid} to fill the dimensions with \code{(order="max")}.  Example provided below.
 #' @keywords multivaiate partial derivative
 #' @author Fred Viole, OVVO Financial Systems
