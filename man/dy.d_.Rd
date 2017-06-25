@@ -29,10 +29,15 @@ dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.99,
 
 \item{plot}{logical; \code{FALSE} (default) Set to \code{(plot=TRUE)} to view plot.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{noise.reduction="median"} uses medians instead of means for partitions, while \code{noise.reduction="mode"} uses modes instead of means for partitions.  \code{noise.reduction="off"}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{noise.reduction="mean"}.}
+\item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.}
 }
 \value{
-Returns the 1st derivative \code{"First Derivative"}, 2nd derivative \code{"Second Derivative"}, and mixed derivative \code{"Mixed Derivative"} (for two independent variables only).
+Returns:
+\itemize{
+\item{\code{dy.d_(...)$"First Derivative"}} the 1st derivative
+\item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
+\item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
+}
 }
 \description{
 Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x+h)} and \code{f(x-h)} values.
