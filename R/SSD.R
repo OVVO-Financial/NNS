@@ -38,7 +38,7 @@ NNS.SSD <- function(x,y){
                  col=c("red","blue"))
 
 
-    ifelse (x.ssd.y==length(Combined) & min(x)>=min(y),"X SSD Y",
-            ifelse (y.ssd.x==length(Combined) & min(y)>=min(x),"Y SSD X","NO SSD EXISTS"))
+    ifelse (x.ssd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,"X SSD Y",
+            ifelse (y.ssd.x==length(Combined) & min(y)>=min(x) & LPM_x_sort!=LPM_y_sort,"Y SSD X","NO SSD EXISTS"))
 }
 

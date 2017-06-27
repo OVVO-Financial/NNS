@@ -34,7 +34,7 @@ NNS.TSD <- function(x,y){
   legend("topleft", c("X","Y"), lwd=10,
          col=c("red","blue"))
 
-   ifelse (x.tsd.y==length(Combined) & min(x)>=min(y) & mean(x)>=mean(y),"X TSD Y",
-          ifelse (y.tsd.x==length(Combined) & min(y)>=min(x)& mean(y)>=mean(x),"Y TSD X","NO TSD EXISTS"))
+   ifelse (x.tsd.y==length(Combined) & min(x)>=min(y) & mean(x)>=mean(y) & LPM_x_sort!=LPM_y_sort,"X TSD Y",
+          ifelse (y.tsd.x==length(Combined) & min(y)>=min(x)& mean(y)>=mean(x) & LPM_x_sort!=LPM_y_sort,"Y TSD X","NO TSD EXISTS"))
 }
 

@@ -21,17 +21,14 @@ NNS.FSD.uni <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
-  LPM_x_sort = numeric(0)
-  LPM_y_sort = numeric(0)
-
-  output_x <- vector("numeric", length(x))
-  output_y <- vector("numeric", length(x))
+  LPM_x_sort = LPM(0,Combined_sort,x)
+  LPM_y_sort = LPM(0,Combined_sort,y)
 
   if(min(y)>min(x)) {return(0)} else {
 
-    x.fsd.y=sum((LPM(0,Combined_sort,y)-LPM(0,Combined_sort,x))>=0)
+    x.fsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-  ifelse(x.fsd.y==length(Combined) & min(x)>=min(y),return(1),return(0))
+  ifelse(x.fsd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
 
   }
 }
@@ -58,11 +55,14 @@ NNS.SSD.uni <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
+  LPM_x_sort = LPM(1,Combined_sort,x)
+  LPM_y_sort = LPM(1,Combined_sort,y)
+
   if(min(y)>min(x)) {return(0)} else {
 
-    x.ssd.y=sum((LPM(1,Combined_sort,y)-LPM(1,Combined_sort,x))>=0)
+    x.ssd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-    ifelse(x.ssd.y==length(Combined) & min(x)>=min(y),return(1),return(0))
+    ifelse(x.ssd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
 
   }
 }
@@ -90,11 +90,14 @@ NNS.TSD.uni <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
+  LPM_x_sort = LPM(2,Combined_sort,x)
+  LPM_y_sort = LPM(2,Combined_sort,y)
+
   if(min(y)>min(x) | mean(y)>mean(x)) {return(0)} else {
 
-    x.tsd.y=sum((LPM(2,Combined_sort,y)-LPM(2,Combined_sort,x))>=0)
+    x.tsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-    ifelse(x.tsd.y==length(Combined) & min(x)>=min(y),return(1),return(0))
+    ifelse(x.tsd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
 
   }
 }
