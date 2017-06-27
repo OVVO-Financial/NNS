@@ -23,22 +23,22 @@ NNS.SSD <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
-  x.ssd.y=sum((LPM(1,Combined_sort,y)-LPM(1,Combined_sort,x))>=0)
-
-  y.ssd.x=sum((LPM(1,Combined_sort,x)-LPM(1,Combined_sort,y))>=0)
-
   LPM_x_sort=LPM(1,Combined_sort,x)
   LPM_y_sort=LPM(1,Combined_sort,y)
 
+  x.ssd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-    plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
+  y.ssd.x=sum((LPM_x_sort-LPM_y_sort)>=0)
+
+
+  plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
          ylim = c(min(c(LPM_y_sort,LPM_x_sort)),max(c(LPM_y_sort,LPM_x_sort))))
     lines(Combined_sort,LPM_y_sort, type = "l", lwd =3,col = "blue")
     legend("topleft", c("X","Y"), lwd=10,
                  col=c("red","blue"))
 
 
-    ifelse (x.ssd.y==length(Combined) & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),"X SSD Y",
-            ifelse (y.ssd.x==length(Combined) & min(y)>=min(x) & !identical(LPM_x_sort,LPM_y_sort),"Y SSD X","NO SSD EXISTS"))
+    ifelse (x.ssd.y==length(Combined) & min(x)>=min(y) & mean(x)>= mean(y) & !identical(LPM_x_sort,LPM_y_sort),"X SSD Y",
+            ifelse (y.ssd.x==length(Combined) & min(y)>=min(x) & mean(y)>= mean(x) & !identical(LPM_x_sort,LPM_y_sort),"Y SSD X","NO SSD EXISTS"))
 }
 

@@ -58,7 +58,7 @@ NNS.SSD.uni <- function(x,y){
   LPM_x_sort = LPM(1,Combined_sort,x)
   LPM_y_sort = LPM(1,Combined_sort,y)
 
-  if(min(y)>min(x)) {return(0)} else {
+  if(min(y)>min(x) | mean(y)>mean(x)) {return(0)} else {
 
     x.ssd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
