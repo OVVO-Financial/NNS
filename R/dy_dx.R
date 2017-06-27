@@ -7,7 +7,7 @@
 #' @param order integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order=NULL)} which generates a more accurate derivative for well specified cases.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.
 #' @param eval.point numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.point="overall")} to find an overall partial derivative estimate.
-#' @param deriv.order numeric options: (1,2); 1 (default) For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.
+#' @param deriv.order numeric options: (1,2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.
 #' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.05} representing a 5 percent step from the value of the independent variable.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.
 #' @param deriv.method method of derivative estimation, options: ("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).
@@ -16,6 +16,10 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
+#'
+#' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
+#' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
+#'
 #' @examples
 #' x<-seq(0,2*pi,pi/100); y<-sin(x)
 #' dy.dx(x,y,eval.point=1.75)

@@ -37,23 +37,24 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
       challenger <- final_ranked[,i+1]
 
-      if (NNS.FSD.uni(base,challenger)==1){
+      fsd.test = NNS.FSD.uni(base,challenger)
+
+      if (fsd.test==1){
         current_base[i]<- current_base[length(current_base)]
+        Dominated_set[i]<- i+1
         }
 
 
-      if (NNS.FSD.uni(base,challenger)==0){
-
+      if (fsd.test==0){
         for (j in current_base){
           base<- final_ranked[,j]
           if (NNS.FSD.uni(base,challenger)==0){ next }
           else
             {Dominated_set[i] <- i+1  }
           }
+        current_base[i]<- i+1
+        }
 
-       current_base[i]<- i+1}
-
-      else {Dominated_set[i]<- i+1 }
   }
 } # Degree 1
 
@@ -65,23 +66,24 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      challenger <- final_ranked[,i+1]
 
-     if (NNS.SSD.uni(base,challenger)==1){
+     ssd.test = NNS.SSD.uni(base,challenger)
+
+     if (ssd.test==1){
        current_base[i]<- current_base[length(current_base)]
+       Dominated_set[i]<- i+1
        }
 
 
-     if (NNS.SSD.uni(base,challenger)==0){
-
+     if (ssd.test==0){
        for (j in current_base){
          base<- final_ranked[,j]
          if (NNS.SSD.uni(base,challenger)==0){ next }
          else
          {Dominated_set[i] <- i+1  }
        }
+       current_base[i]<- i+1
+      }
 
-       current_base[i]<- i+1}
-
-     else {Dominated_set[i]<- i+1 }
    }
  } # Degree 2
 
@@ -93,22 +95,24 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      challenger <- final_ranked[,i+1]
 
-     if (NNS.TSD.uni(base,challenger)==1){
-       current_base[i]<- current_base[length(current_base)]}
+     tsd.test = NNS.TSD.uni(base,challenger)
+
+     if (tsd.test==1){
+       current_base[i]<- current_base[length(current_base)]
+       Dominated_set[i]<- i+1
+       }
 
 
-     if (NNS.TSD.uni(base,challenger)==0){
-
+     if (tsd.test==0){
        for (j in current_base){
          base<- final_ranked[,j]
          if (NNS.TSD.uni(base,challenger)==0){ next }
          else
          {Dominated_set[i] <- i+1  }
        }
+       current_base[i]<- i+1
+      }
 
-       current_base[i]<- i+1}
-
-     else {Dominated_set[i]<- i+1 }
    }
  } # Degree 3
 
