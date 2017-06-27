@@ -28,7 +28,7 @@ NNS.FSD.uni <- function(x,y){
 
     x.fsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-  ifelse(x.fsd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
+  ifelse(x.fsd.y==length(Combined) & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
   }
 }
@@ -62,7 +62,7 @@ NNS.SSD.uni <- function(x,y){
 
     x.ssd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-    ifelse(x.ssd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
+    ifelse(x.ssd.y==length(Combined) & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
   }
 }
@@ -97,7 +97,7 @@ NNS.TSD.uni <- function(x,y){
 
     x.tsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
-    ifelse(x.tsd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,return(1),return(0))
+    ifelse(x.tsd.y==length(Combined) & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
   }
 }

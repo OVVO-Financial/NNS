@@ -38,7 +38,7 @@ NNS.FSD <- function(x,y){
            col=c("red","blue"))
 
      ## Verification of ***0 instances*** of CDFx > CDFy, and conversely of CDFy > CDFx
-    ifelse (x.fsd.y==length(Combined) & min(x)>=min(y) & LPM_x_sort!=LPM_y_sort,"X FSD Y",
-           ifelse (y.fsd.x==length(Combined) & min(y)>=min(x) & LPM_x_sort!=LPM_y_sort,"Y FSD X","NO FSD EXISTS"))
+    ifelse (x.fsd.y==length(Combined) & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),"X FSD Y",
+           ifelse (y.fsd.x==length(Combined) & min(y)>=min(x) & !identical(LPM_x_sort,LPM_y_sort),"Y FSD X","NO FSD EXISTS"))
 }
 
