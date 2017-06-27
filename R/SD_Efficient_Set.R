@@ -24,7 +24,7 @@ NNS.SD.Efficient.Set <- function(x,degree) {
   current_base<- numeric(0)
 
 
-  LPM_order=sapply(1:n,function(i) LPM(1,max(x),x[,i]))
+  LPM_order=sapply(1:n,function(i) LPM(1,max_target,x[,i]))
 
   final_ranked <- x[,order(LPM_order)]
 
@@ -37,7 +37,9 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
       challenger <- final_ranked[,i+1]
 
-      if (NNS.FSD.uni(base,challenger)==1){ current_base[i]<- current_base[length(current_base)]}
+      if (NNS.FSD.uni(base,challenger)==1){
+        current_base[i]<- current_base[length(current_base)]
+        }
 
 
       if (NNS.FSD.uni(base,challenger)==0){
@@ -53,7 +55,7 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
       else {Dominated_set[i]<- i+1 }
   }
-}
+} # Degree 1
 
 
  if(degree==2){
@@ -63,7 +65,9 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      challenger <- final_ranked[,i+1]
 
-     if (NNS.SSD.uni(base,challenger)==1){ current_base[i]<- current_base[length(current_base)]}
+     if (NNS.SSD.uni(base,challenger)==1){
+       current_base[i]<- current_base[length(current_base)]
+       }
 
 
      if (NNS.SSD.uni(base,challenger)==0){
@@ -79,7 +83,7 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      else {Dominated_set[i]<- i+1 }
    }
- }
+ } # Degree 2
 
 
  if(degree==3){
@@ -89,7 +93,8 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      challenger <- final_ranked[,i+1]
 
-     if (NNS.TSD.uni(base,challenger)==1){ current_base[i]<- current_base[length(current_base)]}
+     if (NNS.TSD.uni(base,challenger)==1){
+       current_base[i]<- current_base[length(current_base)]}
 
 
      if (NNS.TSD.uni(base,challenger)==0){
@@ -105,15 +110,14 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
      else {Dominated_set[i]<- i+1 }
    }
- }
+ } # Degree 3
 
 
   if(length(Dominated_set)>0){
-    SD_x  = data.frame(final_ranked[-na.omit(Dominated_set)])
-    return(SD_x)
+    return(colnames(final_ranked[-na.omit(Dominated_set)]))
     }
-
-    else {print(colnames(final_ranked))}
+    else {
+      return(colnames(final_ranked))}
 
 
 }
