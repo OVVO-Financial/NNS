@@ -3,6 +3,7 @@
 #' Uni-directional test of first degree stochastic dominance using lower partial moments used in SD Efficient Set routine.
 #' @param x a numeric vector.
 #' @param y a numeric vector.
+#' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.
 #' @return Returns (1) if \code{"X FSD Y"}, else (0).
 #' @keywords stochastic dominance
 #' @author Fred Viole, OVVO Financial Systems
@@ -13,7 +14,7 @@
 #' NNS.FSD.uni(x,y)
 #' @export
 
-NNS.FSD.uni <- function(x,y){
+NNS.FSD.uni <- function(x,y,type="discrete"){
 
   x_sort <- sort(x, decreasing=FALSE)
   y_sort <- sort(y, decreasing=FALSE)
@@ -21,8 +22,11 @@ NNS.FSD.uni <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
-  LPM_x_sort = LPM(0,Combined_sort,x)
-  LPM_y_sort = LPM(0,Combined_sort,y)
+  if(type=="discrete"){degree=0}else{degree=1}
+  LPM_x_sort=LPM(degree,Combined_sort,x)/(UPM(degree,Combined_sort,x)+LPM(degree,Combined_sort,x))
+  LPM_y_sort=LPM(degree,Combined_sort,y)/(UPM(degree,Combined_sort,y)+LPM(degree,Combined_sort,y))
+
+  x.fsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
   if(min(y)>min(x)) {return(0)} else {
 

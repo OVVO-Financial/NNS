@@ -3,6 +3,7 @@
 #' Determines the set of stochastic dominant variables for various degrees.
 #' @param x a numeric matrix or data frame.
 #' @param degree numeric options: (1,2,3); Degree of stochastic dominance test from (1,2 or 3).
+#' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.
 #' @return Returns set of stochastic dominant variable names.
 #' @keywords stochastic dominance
 #' @author Fred Viole, OVVO Financial Systems
@@ -16,7 +17,7 @@
 
 
 
-NNS.SD.Efficient.Set <- function(x,degree) {
+NNS.SD.Efficient.Set <- function(x,degree,type="discrete") {
   n <- ncol(x)
   max_target <- max(x)
   LPM_order<- numeric(0)
@@ -30,25 +31,37 @@ NNS.SD.Efficient.Set <- function(x,degree) {
 
   current_base<-1
 
-  if(degree==1){
+
   for (i in 1:(n-1)) {
 
       base<- final_ranked[,current_base[length(current_base)]]
 
       challenger <- final_ranked[,i+1]
 
-      fsd.test = NNS.FSD.uni(base,challenger)
+    if(degree==1){
+      sd.test = NNS.FSD.uni(base,challenger,type=type)}
+    if(degree==2){
+      sd.test = NNS.SSD.uni(base,challenger)}
+    if(degree==3){
+      sd.test = NNS.TSD.uni(base,challenger)}
 
-      if (fsd.test==1){
+      if (sd.test==1){
         current_base[i]<- current_base[length(current_base)]
         Dominated_set[i]<- i+1
         }
 
 
-      if (fsd.test==0){
+      if (sd.test==0){
         for (j in current_base){
           base<- final_ranked[,j]
-          if (NNS.FSD.uni(base,challenger)==0){ next }
+          if(degree==1){
+            new.base.sd.test = NNS.FSD.uni(base,challenger,type=type)}
+          if(degree==2){
+            new.base.sd.test = NNS.SSD.uni(base,challenger)}
+          if(degree==3){
+            new.base.sd.test = NNS.TSD.uni(base,challenger)}
+
+          if (new.base.sd.test==0){ next }
           else
             {Dominated_set[i] <- i+1  }
           }
@@ -56,65 +69,6 @@ NNS.SD.Efficient.Set <- function(x,degree) {
         }
 
   }
-} # Degree 1
-
-
- if(degree==2){
-   for (i in 1:(n-1)) {
-
-     base<- final_ranked[,current_base[length(current_base)]]
-
-     challenger <- final_ranked[,i+1]
-
-     ssd.test = NNS.SSD.uni(base,challenger)
-
-     if (ssd.test==1){
-       current_base[i]<- current_base[length(current_base)]
-       Dominated_set[i]<- i+1
-       }
-
-
-     if (ssd.test==0){
-       for (j in current_base){
-         base<- final_ranked[,j]
-         if (NNS.SSD.uni(base,challenger)==0){ next }
-         else
-         {Dominated_set[i] <- i+1  }
-       }
-       current_base[i]<- i+1
-      }
-
-   }
- } # Degree 2
-
-
- if(degree==3){
-   for (i in 1:(n-1)) {
-
-     base<- final_ranked[,current_base[length(current_base)]]
-
-     challenger <- final_ranked[,i+1]
-
-     tsd.test = NNS.TSD.uni(base,challenger)
-
-     if (tsd.test==1){
-       current_base[i]<- current_base[length(current_base)]
-       Dominated_set[i]<- i+1
-       }
-
-
-     if (tsd.test==0){
-       for (j in current_base){
-         base<- final_ranked[,j]
-         if (NNS.TSD.uni(base,challenger)==0){ next }
-         else
-         {Dominated_set[i] <- i+1  }
-       }
-       current_base[i]<- i+1
-      }
-
-   }
- } # Degree 3
 
 
   if(length(Dominated_set)>0){

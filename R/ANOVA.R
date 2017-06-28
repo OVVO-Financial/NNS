@@ -7,7 +7,7 @@
 #' @param confidence.interval numeric [0,1]; The confidence interval surrounding the control mean when \code{(binary=TRUE)}.  Defaults to \code{(confidence.interval=0.95)}.
 #' @param pairwise logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise=TRUE}.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.
-#' @param extend options:("yes", NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
+#' @param extend options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].
 #'
 #' For \code{(binary=TRUE)} returns:

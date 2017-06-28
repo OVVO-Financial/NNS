@@ -3,6 +3,7 @@
 #' Bi-directional test of first degree stochastic dominance using lower partial moments.
 #' @param x a numeric vector.
 #' @param y a numeric vector.
+#' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.
 #' @return Returns one of the following FSD results: \code{"X FSD Y"}, \code{"Y FSD X"}, or \code{"NO FSD EXISTS"}.
 #' @keywords stochastic dominance
 #' @author Fred Viole, OVVO Financial Systems
@@ -15,7 +16,7 @@
 
 
 
-NNS.FSD <- function(x,y){
+NNS.FSD <- function(x,y,type="discrete"){
 
   x_sort <- sort(x, decreasing=FALSE)
   y_sort <- sort(y, decreasing=FALSE)
@@ -23,9 +24,10 @@ NNS.FSD <- function(x,y){
   Combined = c(x_sort,y_sort)
   Combined_sort = sort(Combined, decreasing=FALSE)
 
- ## Indicator function ***for all values of x and y*** as the CDF target
-  LPM_x_sort=LPM(0,Combined_sort,x)
-  LPM_y_sort=LPM(0,Combined_sort,y)
+ ## Indicator function ***for all values of x and y*** as the continuous CDF target
+  if(type=="discrete"){degree=0}else{degree=1}
+  LPM_x_sort=LPM(degree,Combined_sort,x)/(UPM(degree,Combined_sort,x)+LPM(degree,Combined_sort,x))
+  LPM_y_sort=LPM(degree,Combined_sort,y)/(UPM(degree,Combined_sort,y)+LPM(degree,Combined_sort,y))
 
   x.fsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
 
