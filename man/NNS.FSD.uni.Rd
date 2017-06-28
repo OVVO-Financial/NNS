@@ -4,12 +4,14 @@
 \alias{NNS.FSD.uni}
 \title{NNS FSD Test uni-directional}
 \usage{
-NNS.FSD.uni(x, y)
+NNS.FSD.uni(x, y, type = "discrete")
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
+
+\item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
 }
 \value{
 Returns (1) if \code{"X FSD Y"}, else (0).

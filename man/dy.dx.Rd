@@ -19,7 +19,7 @@ dy.dx(x, y, order = NULL, stn = 0.99, eval.point = median(x),
 
 \item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.point="overall")} to find an overall partial derivative estimate.}
 
-\item{deriv.order}{numeric options: (1,2); 1 (default) For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.}
+\item{deriv.order}{numeric options: (1,2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.}
 
 \item{h}{numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.05} representing a 5 percent step from the value of the independent variable.}
 
@@ -40,6 +40,9 @@ dy.dx(x,y,eval.point=1.75)
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
+
+Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
+\url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
 }
 \author{
 Fred Viole, OVVO Financial Systems

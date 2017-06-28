@@ -20,7 +20,7 @@ NNS.ANOVA(control, treatment, confidence.interval = 0.95, pairwise = FALSE,
 
 \item{binary}{logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.}
 
-\item{extend}{options:("yes", NULL): \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
+\item{extend}{options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
 For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].

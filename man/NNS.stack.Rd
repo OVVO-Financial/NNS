@@ -59,7 +59,7 @@ reduce the \code{CV.size}.
  \dontrun{
  NNS.stack(iris[1:140,1:4],iris[1:140,5],IVs.test=iris[141:150,1:4])}
 
- ## Using 'iris' dataset to determine [n.best] and [logistic.order] with no test set.
+ ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
  \dontrun{
  NNS.stack(iris[,1:4],iris[,5])}
 
@@ -68,7 +68,7 @@ reduce the \code{CV.size}.
  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 }
 \references{
-Viole, F. (2016) "Classification Using NNS Clustering Analyis"
+Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 \url{https://ssrn.com/abstract=2864711}
 }
 \author{

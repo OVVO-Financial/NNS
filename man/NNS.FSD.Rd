@@ -4,12 +4,14 @@
 \alias{NNS.FSD}
 \title{NNS FSD Test}
 \usage{
-NNS.FSD(x, y)
+NNS.FSD(x, y, type = "discrete")
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
+
+\item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
 }
 \value{
 Returns one of the following FSD results: \code{"X FSD Y"}, \code{"Y FSD X"}, or \code{"NO FSD EXISTS"}.
