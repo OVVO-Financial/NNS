@@ -24,9 +24,9 @@ NNS.TSD <- function(x,y){
   LPM_x_sort=LPM(2,Combined_sort,x)
   LPM_y_sort=LPM(2,Combined_sort,y)
 
-  x.tsd.y=sum((LPM_y_sort-LPM_x_sort)>=0)
+  x.tsd.y=any((LPM_y_sort-LPM_x_sort)>=0)
 
-  y.tsd.x=sum((LPM_x_sort-LPM_y_sort)>=0)
+  y.tsd.x=any((LPM_x_sort-LPM_y_sort)>=0)
 
 
 
@@ -36,7 +36,7 @@ NNS.TSD <- function(x,y){
   legend("topleft", c("X","Y"), lwd=10,
          col=c("red","blue"))
 
-   ifelse (x.tsd.y==length(Combined) & min(x)>=min(y) & mean(x)>=mean(y) & !identical(LPM_x_sort,LPM_y_sort),"X TSD Y",
-          ifelse (y.tsd.x==length(Combined) & min(y)>=min(x)& mean(y)>=mean(x) & !identical(LPM_x_sort,LPM_y_sort),"Y TSD X","NO TSD EXISTS"))
+   ifelse (x.tsd.y==FALSE & min(x)>=min(y) & mean(x)>=mean(y) & !identical(LPM_x_sort,LPM_y_sort),"X TSD Y",
+          ifelse (y.tsd.x==FALSE & min(y)>=min(x)& mean(y)>=mean(x) & !identical(LPM_x_sort,LPM_y_sort),"Y TSD X","NO TSD EXISTS"))
 }
 
