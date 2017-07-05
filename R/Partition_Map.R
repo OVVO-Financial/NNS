@@ -85,13 +85,26 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
       #Segments for Voronoi...
       if(Voronoi==T){
         if(l.PART>max.obs){
+          if(noise.reduction=='mean' | noise.reduction=='off'){
           PART[ max.obs.rows ,{
             segments(min(x),mean(y),max(x),mean(y),lty=3)
             segments(mean(x),min(y),mean(x),max(y),lty=3)
           },by=quadrant]
+          }
+          if(noise.reduction=='median'){
+          PART[ max.obs.rows ,{
+            segments(min(x),median(y),max(x),median(y),lty=3)
+            segments(median(x),min(y),median(x),max(y),lty=3)
+          },by=quadrant]
+          }
+          if(noise.reduction=='mode'){
+          PART[ max.obs.rows ,{
+            segments(min(x),mode(y),max(x),mode(y),lty=3)
+            segments(mode(x),min(y),mode(x),max(y),lty=3)
+          },by=quadrant]
+          }
         }
       }
-
 
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
