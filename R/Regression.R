@@ -355,6 +355,7 @@ NNS.reg = function (x,y,
 
 
   Regression.Coefficients=unique(Regression.Coefficients)
+  Regression.Coefficients[Regression.Coefficients==Inf]=1
   regression.points=regression.points[,.(x,y)]
   setkey(regression.points,'x')
   regression.points=unique(regression.points)
