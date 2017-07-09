@@ -28,11 +28,11 @@ NNS.reg(z,g,order='max')
 NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
 
 ## ----nonlinear class-----------------------------------------------------
-NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE)$equation
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor")$equation
 
 ## ----nonlinear class threshold-------------------------------------------
-NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,threshold=.75)$equation
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75)$equation
 
 ## ------------------------------------------------------------------------
-NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,threshold=.75,point.est=iris[1:10,1:4])$Point.est
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75,point.est=iris[1:10,1:4])$Point.est
 
