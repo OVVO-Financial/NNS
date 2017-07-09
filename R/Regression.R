@@ -6,8 +6,7 @@
 #' @param y a numeric or factor vector with compatible dimsensions to \code{x}.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.
-#' @param dim.red logical; \code{FALSE} (default).  Set to \code{(dim.red=TRUE)} for dimension reduction using synthetic X*.
-#' @param dim.red.method options: ("cor", "cause", "both") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")} (default) uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="cause")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="both")} averages both methods for further feature engineering.
+#' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
 #' @param type \code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
@@ -98,14 +97,14 @@
 #'
 #' ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
 #' x<-cbind(rnorm(100),rnorm(100),rnorm(100)); y<-rnorm(100)
-#' NNS.reg(x,y,point.est=c(.25,.5,.75),dim.red=TRUE)
+#' NNS.reg(x,y,point.est=c(.25,.5,.75),dim.red.method="cor")
 #'
 #' ## IRIS dataset examples:
 #' # Dimension Reduction:
-#' NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,order=5)
+#' NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",order=5)
 #'
 #' # Dimension Reduction using causal weights:
-#' NNS.reg(iris[,1:4],iris[,5],dim.red=TRUE,dim.red.method="cause",order=5)
+#' NNS.reg(iris[,1:4],iris[,5],dim.red.method="NNS.caus",order=5)
 #'
 #' # Multiple Regression:
 #' NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
@@ -124,8 +123,7 @@
 NNS.reg = function (x,y,
                     order=NULL,
                     stn=.99,
-                    dim.red=FALSE,
-                    dim.red.method="cor",
+                    dim.red.method=NULL,
                     type = NULL,
                     point.est = NULL,
                     location = "top",
@@ -139,6 +137,7 @@ NNS.reg = function (x,y,
 
   if(plot.regions==TRUE && !is.null(order) && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
 
+  if(is.null(dim.red.method)){dim.red=FALSE}else{dim.red=TRUE}
 
   original.names = names(x)
   original.columns = ncol(x)
@@ -193,13 +192,18 @@ NNS.reg = function (x,y,
 
                   x.star.matrix = matrix(nrow=length(y))
                   x.star.dep = NNS.dep(cbind(x,y))
+                  x.star.cor = cor(cbind(x,y))
 
 
-                  if(dim.red.method=="cor"){
+                  if(dim.red.method=="NNS.cor"){
                     x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
                   }
 
-                  if(dim.red.method=="cause"){
+                  if(dim.red.method=="cor"){
+                    x.star.coef = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
+                  }
+
+                  if(dim.red.method=="NNS.caus"){
                     x.star.coef=numeric()
                     for(i in 1:ncol(x)){
                       cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
@@ -207,14 +211,15 @@ NNS.reg = function (x,y,
                     }
                   }
 
-                  if(dim.red.method=="both"){
+                  if(dim.red.method=="all"){
                     x.star.coef.1=numeric()
                     for(i in 1:ncol(x)){
                       cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
                       x.star.coef.1[i]=cause[1]-cause[2]
                     }
+                    x.star.coef.3 = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
                     x.star.coef.2 = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
-                    x.star.coef = rowMeans(cbind(x.star.coef.1,x.star.coef.2))
+                    x.star.coef = rowMeans(cbind(x.star.coef.1,x.star.coef.2,x.star.coef.3))
                   }
 
                   x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]

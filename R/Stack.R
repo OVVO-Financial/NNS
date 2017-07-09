@@ -7,10 +7,9 @@
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param CV.size numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.
 #' @param weight options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.
-#' @param norm options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL},\code{"LOW"} ,and \code{"HIGH"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
+#' @param norm options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL},\code{"std"} ,and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
-#' @param dim.red.method options: ("cor", "cause", "both") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")}  uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="cause")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="both")} (default) averages both methods for further feature engineering.
-#' @param threshold  numeric [0,1]; Sets the correlation threshold for independent variables in \link{NNS.reg}.  Defaults to \code{(threshold=0)}.
+#' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
 #' @param seed numeric; 123 (default) Sets seed for CV sampling.
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
@@ -51,7 +50,7 @@
 #'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 #' @export
 
-NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",norm=NULL,method=c(1,2),dim.red.method="both",threshold=0,seed=123){
+NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",norm=NULL,method=c(1,2),dim.red.method="cor",seed=123){
 
 
 
@@ -123,13 +122,13 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
 
   # Dimension Reduction Regression Output
   if(2%in%method){
-    var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,dim.red=TRUE,plot=F)$equation$Coefficient,digits = 2))
+    var.cutoffs=abs(round(NNS.reg(CV.IVs.train,CV.DV.train,dim.red.method=dim.red.method,plot=F)$equation$Coefficient,digits = 2))
 
     var.cutoffs=unique(var.cutoffs[var.cutoffs<max(var.cutoffs)])
 
-    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, dim.red=TRUE,threshold = var.cutoffs[i],dim.red.method = dim.red.method)$Point.est-CV.DV.test)^2))
+    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, dim.red.method=dim.red.method,threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
 
-    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red=TRUE,plot=F,threshold = var.cutoffs[which.min(nns.ord)],dim.red.method = dim.red.method)$Point.est
+    nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method=dim.red.method,plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
 
     nns.ord.mse=min(na.omit(nns.ord))
   } else {nns.2=0
