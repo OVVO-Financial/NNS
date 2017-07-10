@@ -142,8 +142,22 @@ NNS.reg = function (x,y,
   original.names = names(x)
   original.columns = ncol(x)
 
-  original.variable = x
+  y=as.numeric(y)
   original.y = y
+
+  if(is.null(names(original.y))){y.label="Y"}else{y.label=names(y)}
+
+
+  if(is.null(ncol(x))){
+    x=as.numeric(x)
+    if(!is.null(point.est)){point.est=as.numeric(point.est)}
+  }else{
+    x=apply(x,2,as.numeric)
+    if(!is.null(point.est)){point.est=apply(point.est,2,as.numeric)}
+  }
+
+  original.variable = x
+
   np = nrow(point.est)
 
   if(noise.reduction=='off'){stn=0}
@@ -153,19 +167,6 @@ NNS.reg = function (x,y,
   }}
 
 
-  y=as.numeric(y)
-  if(is.null(names(original.y))){y.label="Y"}else{y.label=names(y)}
-
-  if(class(x)=='factor'){
-    if(is.null(ncol(x))){
-      x=as.numeric(x)
-      if(!is.null(point.est)){point.est=as.numeric(point.est)}
-    }else{
-        x=apply(x,2,as.numeric)
-        if(!is.null(point.est)){point.est=apply(point.est,2,as.numeric)}
-        }
-
-  }
 
   if(!is.null(ncol(original.variable))){
     if(ncol(original.variable)==1){
@@ -185,7 +186,8 @@ NNS.reg = function (x,y,
                   colnames.list=list()
                   for(i in 1:ncol(x)){
                     colnames.list[i]=paste0("X",i)
-                  }} else {colnames.list=names(x)}
+                  }} else {
+                    colnames.list=original.names}
 
                   x= data.matrix(x)
                   y= as.numeric(y)
