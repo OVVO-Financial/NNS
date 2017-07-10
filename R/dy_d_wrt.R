@@ -45,6 +45,9 @@ dy.d_<- function(x,y,wrt,eval.points="median",order=NULL,stn=0.99,h=.05,n.best=N
   if(eval.points[1]=="last"){
     eval.points=numeric()
     eval.points=as.numeric(x[length(x[,1]),])}
+  if(eval.points[1]=="mean"){
+    eval.points=numeric()
+    eval.points=apply(x,2,mean)}
 
   original.eval.points.min=eval.points
   original.eval.points.max=eval.points
