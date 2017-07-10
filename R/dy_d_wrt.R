@@ -7,9 +7,9 @@
 #' @param wrt integer; Selects the regressor to differentiate with respect to.
 #' @param order integer; \link{NNS.reg} \code{"order"}, defaults to NULL.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.
-#' @param eval.points numeric or options: ("median","last"); Regressor points to be evaluated.  Set to \code{eval.points="median"} to find partial derivatives at the median of every variable.  Set to \code{eval.points="last"} to find partial derivatives at the last value of every variable.
+#' @param eval.points numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{eval.points="median"} (default) to find partial derivatives at the median of every variable.  Set to \code{eval.points="last"} to find partial derivatives at the last value of every variable.  Set to \code{eval.points="mean"} to find partial derivatives at the mean value of every variable.
 #' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.05} representing a 5 percent step from the value of the regressor.
-#' @param n.best integer; Sets the number of closest regression points to use in weighting.  Defaults to \code{ncol(x)}.
+#' @param n.best integer; Sets the number of closest regression points to use in estimating finite difference points in \link{NNS.reg}.  \code{NULL} (default) Uses \code{ceiling(sqrt(ncol(x)))}.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed=TRUE)}.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot=TRUE)} to view plot.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.
@@ -30,14 +30,15 @@
 #' ## To find derivatives of y wrt 1st regressor
 #' dy.d_(B,y,wrt=1,eval.points=c(.5,.5))
 #'
-#' ## Known function analysis
+#' ## Known function analysis: [y = a^2 * b^2]
 #' x_1<-seq(0,1,.1);x_2<-seq(0,1,.1)
 #' B=expand.grid(x_1,x_2); y<-B[,1]^2*B[,2]^2
 #' dy.d_(B,y,wrt=1,eval.points=c(.5,.5),order="max")
 #' @export
 
 
-dy.d_<- function(x,y,wrt,eval.points="median",order=NULL,stn=0.99,h=.05,n.best=ncol(x),mixed=FALSE,plot=FALSE,noise.reduction='mean'){
+dy.d_<- function(x,y,wrt,eval.points="median",order=NULL,stn=0.99,h=.05,n.best=NULL,mixed=FALSE,plot=FALSE,noise.reduction='mean'){
+  if(is.null(n.best)){n.best=ceiling(sqrt(ncol(x)))}else{n.best=n.best}
   if(eval.points[1]=="median"){
     eval.points=numeric()
     eval.points=apply(x,2,median)}
