@@ -153,7 +153,10 @@ NNS.reg = function (x,y,
     if(!is.null(point.est)){point.est=as.numeric(point.est)}
   }else{
     x=apply(x,2,as.numeric)
-    if(!is.null(point.est)){point.est=apply(point.est,2,as.numeric)}
+    if(!is.null(point.est)){
+      if(is.null(ncol(point.est))){point.est=as.numeric(point.est)}else{
+      point.est=apply(point.est,2,as.numeric)}
+    }
   }
 
   original.variable = x
