@@ -150,7 +150,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
 
       if(dist=="L1"){
         row.sums=as.numeric(rowSums(abs(REGRESSION.POINT.MATRIX[,.SD,.SDcols=c(1:n)])))}
-      else{row.sums=as.numeric(sqrt(rowSums(REGRESSION.POINT.MATRIX[,.SD,.SDcols=c(1:n)]^2)))
+      else{row.sums=as.numeric(rowSums(REGRESSION.POINT.MATRIX[,.SD,.SDcols=c(1:n)]^2))
       }
 
       for(j in 1:n){set(REGRESSION.POINT.MATRIX,j=j,value=REGRESSION.POINT.MATRIX[[j]]+as.numeric(dist.est)[j])}
