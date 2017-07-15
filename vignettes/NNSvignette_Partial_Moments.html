@@ -145,11 +145,11 @@ cov.xy/(sd.x*sd.y)</code></pre></div>
 <div id="numerical-integration" class="section level2">
 <h2>Numerical Integration</h2>
 <p>Partial moments are asymptotic area approximations of <span class="math inline">\(f(x)\)</span> akin to the familiar Trapezoidal and Simpson’s rules. More observations, more accuracy…</p>
-<p><span class="math display">\[[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}\]</span></p>
+<p><span class="math display">\[[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}\]</span></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x=<span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">001</span>);y=x^<span class="dv">2</span>
-<span class="kw">UPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)+<span class="kw">LPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)</code></pre></div>
+<span class="kw">UPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)-<span class="kw">LPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)</code></pre></div>
 <pre><code>## [1] 0.3335</code></pre>
-<p><span class="math display">\[0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}\]</span></p>
+<p><span class="math display">\[0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}\]</span> For the total area, not just the definite integral, simply sum the partial moments: <span class="math display">\[[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert\]</span></p>
 </div>
 <div id="bayes-theorem" class="section level2">
 <h2>Bayes’ Theorem</h2>

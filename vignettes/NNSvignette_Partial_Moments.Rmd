@@ -81,14 +81,16 @@ Co.LPM(0,0,x,y,c(0,1),c(0,1))
 ##Numerical Integration
 Partial moments are asymptotic area approximations of $f(x)$ akin to the familiar Trapezoidal and Simpson's rules.  More observations, more accuracy...
 
-$$[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}$$
+$$[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}$$
 
 ```{r numerical integration}
 x=seq(0,1,.001);y=x^2
-UPM(1,0,y)+LPM(1,0,y)
+UPM(1,0,y)-LPM(1,0,y)
 ```
 
 $$0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}$$
+For the total area, not just the definite integral, simply sum the partial moments:
+$$[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert$$
 
 ##Bayes' Theorem
 For example, when ascertaining the probability of an increase in $A$ given an increase in $B$, the `Co.UPM(degree.x,degree.y,x,y,target.x,target.y)` target parameters are set to `target.x=0` and `target.y=0` and the `UPM(degree,target,variable)` target parameter is also set to `target=0`.
