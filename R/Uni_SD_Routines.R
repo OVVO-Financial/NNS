@@ -28,7 +28,7 @@ NNS.FSD.uni <- function(x,y,type="discrete"){
   L.y = LPM(degree,Combined_sort,y)
   LPM_y_sort=L.y/(UPM(degree,Combined_sort,y)+L.y)
 
-  x.fsd.y=any((LPM_y_sort-LPM_x_sort)>=0)
+  x.fsd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
 
   ifelse(x.fsd.y==FALSE & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
@@ -60,7 +60,7 @@ NNS.SSD.uni <- function(x,y){
   LPM_x_sort = LPM(1,Combined_sort,x)
   LPM_y_sort = LPM(1,Combined_sort,y)
 
-    x.ssd.y=any((LPM_y_sort-LPM_x_sort)>=0)
+    x.ssd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
 
     ifelse(x.ssd.y==FALSE & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
@@ -93,7 +93,7 @@ NNS.TSD.uni <- function(x,y){
   LPM_x_sort = LPM(2,Combined_sort,x)
   LPM_y_sort = LPM(2,Combined_sort,y)
 
-    x.tsd.y=any((LPM_y_sort-LPM_x_sort)>=0)
+    x.tsd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
 
     ifelse(x.tsd.y==FALSE & min(x)>=min(y) & !identical(LPM_x_sort,LPM_y_sort),return(1),return(0))
 
