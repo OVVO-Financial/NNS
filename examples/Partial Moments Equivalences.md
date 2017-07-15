@@ -91,11 +91,11 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 > Co.LPM(0,0,x,y,c(0,1),c(0,1))
 [1] 0.28 0.73
 ```
-### Numerical Integration - [UPM(1,0,f(x))+LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
+### Numerical Integration - [UPM(1,0,f(x))-LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
 ```{r}
 # x is uniform sample over interval [a,b]; y = f(x)
 > x=seq(0,1,.001);y=x^2
-> UPM(1,0,y)+LPM(1,0,y)
+> UPM(1,0,y)-LPM(1,0,y)
 [1] 0.3335
 ```
 
