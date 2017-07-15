@@ -24,9 +24,9 @@ NNS.TSD <- function(x,y){
   LPM_x_sort=LPM(2,Combined_sort,x)
   LPM_y_sort=LPM(2,Combined_sort,y)
 
-  x.tsd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
+  x.tsd.y=any((LPM_y_sort-LPM_x_sort)<0)
 
-  y.tsd.x=!any((LPM_x_sort-LPM_y_sort)>=0)
+  y.tsd.x=any((LPM_x_sort-LPM_y_sort)<0)
 
 
 

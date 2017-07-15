@@ -31,9 +31,9 @@ NNS.FSD <- function(x,y,type="discrete"){
   L.y = LPM(degree,Combined_sort,y)
   LPM_y_sort=L.y/(UPM(degree,Combined_sort,y)+L.y)
 
-  x.fsd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
+  x.fsd.y=any((LPM_y_sort-LPM_x_sort)<0)
 
-  y.fsd.x=!any((LPM_x_sort-LPM_y_sort)>=0)
+  y.fsd.x=any((LPM_x_sort-LPM_y_sort)<0)
 
 
     plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "FSD", ylab = "Probability of Cumulative Distribution")

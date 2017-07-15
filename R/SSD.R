@@ -26,9 +26,9 @@ NNS.SSD <- function(x,y){
   LPM_x_sort=LPM(1,Combined_sort,x)
   LPM_y_sort=LPM(1,Combined_sort,y)
 
-  x.ssd.y=!any((LPM_y_sort-LPM_x_sort)>=0)
+  x.ssd.y=any((LPM_y_sort-LPM_x_sort)<0)
 
-  y.ssd.x=!any((LPM_x_sort-LPM_y_sort)>=0)
+  y.ssd.x=any((LPM_x_sort-LPM_y_sort)<0)
 
 
   plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
