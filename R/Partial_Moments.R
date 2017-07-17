@@ -163,3 +163,98 @@ D.UPM<- function(degree.x,degree.y,x,y,target.x,target.y){
   return(sum(x*y)/length(x))
  }
 D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
+
+
+#' Partial Moment Matrix
+#'
+#'
+#' This function generates a co-partial moment matrix for the specified co-partial moment.
+#' @param Co.PM options: ("Co.LPM", "Co.UPM", "D.LPM", "D.UPM"); partial moment quadrant to generate matrix of.
+#' @param degree integer; Degree for \code{variable}.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = "mean")} will set the target as the mean of every variable.
+#' @param variable a numeric matrix or data.frame.
+#' @return Matrix of partial moment quadrant values.  Uncalled quadrants will return a matrix of zeros.
+#' @note For \code{"D.LPM" and "D.UPM"} matrices, upper triangle of matrix is \code{D.LPM(column,row,...)} while lower triangle of matrix is \code{D.LPM(row,column,...)}.
+#' @keywords partial moments, covariance
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{http://amzn.com/1490523995}
+#' @examples
+#' set.seed(123)
+#' x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
+#' A<-cbind(x,y,z)
+#' PM.matrix("Co.LPM", degree=0, target="mean", A)
+#'
+#' ## Calling Multiple Partial Moment Quadrants
+#' PM.matrix(c("Co.LPM","Co.UPM"), degree=0, target="mean", A)
+#' @export
+
+
+PM.matrix <- function(Co.PM,degree,target,variable){
+  n= ncol(variable)
+  if(is.null(n)){stop("supply a matrix-like 'variable'")}
+  if("Co.LPM"%in%Co.PM){
+    clpms=list()
+    for(i in 1:n){
+      if(is.numeric(target)){
+      clpms[[i]]=sapply(i:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = target,target.y=target))} else {
+      clpms[[i]]=sapply(i:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+      }
+    }
+    clpm.matrix <- matrix(, n, n)
+    clpm.matrix[lower.tri(clpm.matrix, diag=TRUE)] <- unlist(clpms)
+    clpm.matrix = pmax(clpm.matrix, t(clpm.matrix), na.rm=TRUE)
+    colnames(clpm.matrix) = colnames(variable);rownames(clpm.matrix) = colnames(variable)
+  } else {clpm.matrix=NULL}
+
+  if("Co.UPM"%in%Co.PM){
+    cupms=list()
+    for(i in 1:n){
+      if(is.numeric(target)){
+        cupms[[i]]=sapply(i:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = target,target.y=target))} else {
+        cupms[[i]]=sapply(i:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        }
+    }
+    cupm.matrix <- matrix(, n, n)
+    cupm.matrix[lower.tri(cupm.matrix, diag=TRUE)] <- unlist(cupms)
+    cupm.matrix = pmax(cupm.matrix, t(cupm.matrix), na.rm=TRUE)
+    colnames(cupm.matrix) = colnames(variable);rownames(cupm.matrix) = colnames(variable)
+  } else {cupm.matrix=NULL}
+
+  if("D.LPM"%in%Co.PM){
+    dlpms1=list();dlpms2=list()
+    for(i in 1:(n-1)){
+      if(is.numeric(target)){
+        dlpms1[[i]]=sapply((i+1):n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = target,target.y=target))
+        dlpms2[[i]]=sapply((i+1):n, function(b) D.LPM(y=variable[,i],x=variable[,b],degree.x = degree,degree.y = degree,target.y = target,target.x=target))
+        } else {
+        dlpms1[[i]]=sapply((i+1):n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        dlpms2[[i]]=sapply((i+1):n, function(b) D.LPM(y=variable[,i],x=variable[,b],degree.x = degree,degree.y = degree,target.y = mean(variable[,i]),target.x=mean(variable[,b])))
+        }
+    }
+    dlpm.matrix <- matrix(, n, n)
+    dlpm.matrix[lower.tri(dlpm.matrix, diag=FALSE)] <- unlist(dlpms1)
+    dlpm.matrix[upper.tri(dlpm.matrix, diag=FALSE)] <- unlist(dlpms2)
+    diag(dlpm.matrix) <- 0
+    colnames(dlpm.matrix) = colnames(variable);rownames(dlpm.matrix) = colnames(variable)
+  } else {dlpm.matrix=matrix(0, n, n)}
+  if("D.UPM"%in%Co.PM){
+    dupms1=list();dupms2=list()
+    for(i in 1:(n-1)){
+      if(is.numeric(target)){
+        dupms1[[i]]=sapply((i+1):n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = target,target.y=target))
+        dupms2[[i]]=sapply((i+1):n, function(b) D.UPM(y=variable[,i],x=variable[,b],degree.x = degree,degree.y = degree,target.y = target,target.x=target))
+      } else {
+        dupms1[[i]]=sapply((i+1):n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = degree,degree.y = degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        dupms2[[i]]=sapply((i+1):n, function(b) D.UPM(y=variable[,i],x=variable[,b],degree.x = degree,degree.y = degree,target.y = mean(variable[,i]),target.x=mean(variable[,b])))
+      }
+    }
+    dupm.matrix <- matrix(0, n, n)
+    dupm.matrix[lower.tri(dupm.matrix, diag=FALSE)] <- unlist(dupms1)
+    dupm.matrix[upper.tri(dupm.matrix, diag=FALSE)] <- unlist(dupms2)
+    diag(dupm.matrix) <- 0
+    colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
+  } else {dupm.matrix=matrix(, n, n)}
+
+  return(list(Co.LPM.matrix=clpm.matrix,Co.UPM.matrix=cupm.matrix,D.LPM.matrix=dlpm.matrix,D.UPM.matrix=dupm.matrix))
+}
