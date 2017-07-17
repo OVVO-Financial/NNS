@@ -36,7 +36,7 @@ NNS.FSD <- function(x,y,type="discrete"){
   y.fsd.x=any(LPM_y_sort>LPM_x_sort)
 
 
-    plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "FSD", ylab = "Probability of Cumulative Distribution")
+    plot(Combined_sort,LPM_x_sort, type = "l", lwd =3,col = "red", main = "FSD", ylab = "Probability of Cumulative Distribution",ylim=c(0,1))
     lines(Combined_sort,LPM_y_sort, type = "l", lwd =3,col = "blue")
     legend("topleft", c("X","Y"), lwd=10,
            col=c("red","blue"))
