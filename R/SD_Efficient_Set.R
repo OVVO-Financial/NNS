@@ -12,12 +12,12 @@
 #' set.seed(123)
 #' x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
 #' x<-data.frame(x,y,z)
-#' NNS.SD.Efficient.Set(x,1)
+#' NNS.SD.efficient.set(x,1)
 #' @export
 
 
 
-NNS.SD.Efficient.Set <- function(x,degree,type="discrete") {
+NNS.SD.efficient.set <- function(x,degree,type="discrete") {
   n <- ncol(x)
   max_target <- max(x)
   LPM_order<- numeric(0)
