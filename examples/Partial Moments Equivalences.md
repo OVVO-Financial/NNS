@@ -114,7 +114,7 @@ y 0.1469182 0.0000000
 > Co.LPM(0,0,x,y,c(0,1),c(0,1))
 [1] 0.28 0.73
 ```
-###PDFs
+### PDFs
 ```r
 > tgt=sort(x)
 # Arbitrary d/dx approximation
