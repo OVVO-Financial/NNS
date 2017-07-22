@@ -269,3 +269,52 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
 
   return(list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix))
 }
+
+
+#' Lower Partial Moment RATIO
+#'
+#' This function generates a standardized univariate lower partial moment for any degree or target.
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.
+#' @return Standardized LPM of variable
+#' @keywords partial moments, mean, variance, continuous CDF
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{http://amzn.com/1490523995}
+#' @examples
+#' set.seed(123)
+#' x<-rnorm(100)
+#' LPM.ratio(0,mean(x),x)
+#'
+#' ## Continuous CDF
+#' LPM.ratio(1,sort(x),x)
+#' @export
+
+LPM.ratio<- function(degree,target,variable){
+  LPM(degree,target,variable)/(LPM(degree,target,variable)+UPM(degree,target,variable))
+}
+
+
+
+#' Upper Partial Moment RATIO
+#'
+#' This function generates a standardized univariate upper partial moment for any degree or target.
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.
+#' @return Standardized UPM of variable
+#' @keywords partial moments, mean, variance, upper continuous CDF
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{http://amzn.com/1490523995}
+#' @examples
+#' set.seed(123)
+#' x<-rnorm(100)
+#' UPM.ratio(0,mean(x),x)
+#' @export
+
+
+UPM.ratio<- function(degree,target,variable){
+  UPM(degree,target,variable)/(LPM(degree,target,variable)+UPM(degree,target,variable))
+}
