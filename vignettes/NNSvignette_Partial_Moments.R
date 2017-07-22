@@ -28,6 +28,9 @@ sd(x)
 cov(x,y)
 (Co.LPM(1,1,x,y,mean(x),mean(y))+Co.UPM(1,1,x,y,mean(x),mean(y))-D.LPM(1,1,x,y,mean(x),mean(y))-D.UPM(1,1,x,y,mean(x),mean(y)))*(length(x)/(length(x)-1))
 
+## ----cov_dec-------------------------------------------------------------
+PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
+
 ## ----pearson-------------------------------------------------------------
 cor(x,y)
 cov.xy=(Co.LPM(1,1,x,y,mean(x),mean(y))+Co.UPM(1,1,x,y,mean(x),mean(y))-D.LPM(1,1,x,y,mean(x),mean(y))-D.UPM(1,1,x,y,mean(x),mean(y)))*(length(x)/(length(x)-1))
@@ -40,14 +43,30 @@ P=ecdf(x)
 P(0);P(1)
 LPM(0,0,x);LPM(0,1,x)
 
-#Vectorized targets:
+# Vectorized targets:
 LPM(0,c(0,1),x)
 
-#Joint CDF:
+plot(ecdf(x))
+points(sort(x),LPM(0,sort(x),x),col='red')
+legend('left',legend=c('ecdf','LPM.CDF'),fill=c('black','red'),border=NA,bty='n')
+
+# Joint CDF:
 Co.LPM(0,0,x,y,0,0)
 
-#Vectorized targets:
+# Vectorized targets:
 Co.LPM(0,0,x,y,c(0,1),c(0,1))
+
+# Continuous CDF:
+plot(LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3)
+
+## ----pdfs----------------------------------------------------------------
+tgt=sort(x)
+# Arbitrary d/dx approximation
+d.dx=abs(mean(x))/100
+  
+PDF=(LPM.ratio(1,tgt+d.dx,x)-LPM.ratio(1,tgt-d.dx,x))
+  
+plot(sort(x),PDF,col='blue',type='l',lwd=3)
 
 ## ----numerical integration-----------------------------------------------
 x=seq(0,1,.001);y=x^2
