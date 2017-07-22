@@ -43,6 +43,29 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 > (Co.LPM(1,1,x,y,mean(x),mean(y))+Co.UPM(1,1,x,y,mean(x),mean(y))-D.LPM(1,1,x,y,mean(x),mean(y))-D.UPM(1,1,x,y,mean(x),mean(y)))*(length(x)/(length(x)-1))
 [1] -0.04372107
 ```
+### Covariance Elements
+```r
+> PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
+$clpm
+          x         y
+x 0.4033078 0.1559295
+y 0.1559295 0.3939005
+
+$cupm
+          x         y
+x 0.4299250 0.1033601
+y 0.1033601 0.5411626
+
+$dlpm
+          x         y
+x 0.0000000 0.1469182
+y 0.1560924 0.0000000
+
+$dupm
+          x         y
+x 0.0000000 0.1560924
+y 0.1469182 0.0000000
+```
 ### Pearson Correlation
 ```r
 > cor(x,y)
@@ -81,13 +104,13 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 > LPM(0,0,x);LPM(0,1,x)
 [1] 0.48
 [1] 0.83
-#Vectorized targets:
+# Vectorized targets:
 > LPM(0,c(0,1),x)
 [1] 0.48 0.83
-#Joint CDF:
+# Joint CDF:
 > Co.LPM(0,0,x,y,0,0)
 [1] 0.28
-#Vectorized targets:
+# Vectorized targets:
 > Co.LPM(0,0,x,y,c(0,1),c(0,1))
 [1] 0.28 0.73
 ```
@@ -100,8 +123,8 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 ```
 
 ### Bayes' Theorem
-```
-See the following example explaining the equivalences: 
+```{r}
+See the following example explaining Bayes' Theorem and partial moments: 
 ```
 https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf
 
@@ -110,9 +133,10 @@ https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Th
 
 Why is this relevant?  The additional information generated from partial moments permits a level of analysis simply not possible with traditional summary statistics.
 There is further introductory material on partial moments and their extension into nonlinear analysis & behavioral finance applications available at:
+
 https://www.linkedin.com/pulse/elements-variance-fred-viole
 
 *Functions are called from the PerformanceAnalytics package
-```r
+```{r}
 require(PerformanceAnalytics)
 ```
