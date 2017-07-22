@@ -11,13 +11,13 @@ UPM(1,0,x)-LPM(1,0,x)
 ## ----variance------------------------------------------------------------
 var(x)
 
-#Sample Variance:
+# Sample Variance:
 UPM(2,mean(x),x)+LPM(2,mean(x),x)
 
-#Population Variance:
+# Population Variance:
 (UPM(2,mean(x),x)+LPM(2,mean(x),x))*(length(x)/(length(x)-1))
 
-#Variance is also the co-variance of itself:
+# Variance is also the co-variance of itself:
 (Co.LPM(1,1,x,x,mean(x),mean(x))+Co.UPM(1,1,x,x,mean(x),mean(x))-D.LPM(1,1,x,x,mean(x),mean(x))-D.UPM(1,1,x,x,mean(x),mean(x)))*(length(x)/(length(x)-1))
 
 ## ----stdev---------------------------------------------------------------
@@ -57,16 +57,16 @@ Co.LPM(0,0,x,y,0,0)
 Co.LPM(0,0,x,y,c(0,1),c(0,1))
 
 # Continuous CDF:
-plot(LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3)
+plot(sort(x),LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3,xlab="x")
 
 ## ----pdfs----------------------------------------------------------------
 tgt=sort(x)
 # Arbitrary d/dx approximation
-d.dx=abs(mean(x))/100
+d.dx=(max(x)+abs(min(x)))/100
   
 PDF=(LPM.ratio(1,tgt+d.dx,x)-LPM.ratio(1,tgt-d.dx,x))
   
-plot(sort(x),PDF,col='blue',type='l',lwd=3)
+plot(sort(x),PDF,col='blue',type='l',lwd=3,xlab="x")
 
 ## ----numerical integration-----------------------------------------------
 x=seq(0,1,.001);y=x^2
