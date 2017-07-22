@@ -19,13 +19,13 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 ```r
 > var(x)
 [1] 0.8332328
-#Sample Variance:
+# Sample Variance:
 > UPM(2,mean(x),x)+LPM(2,mean(x),x)
 [1] 0.8249005
-#Population Variance:
+# Population Variance:
 > (UPM(2,mean(x),x)+LPM(2,mean(x),x))*(length(x)/(length(x)-1))
 [1] 0.8332328
-#Variance is also the co-variance of itself:
+# Variance is also the co-variance of itself:
 > (Co.LPM(1,1,x,x,mean(x),mean(x))+Co.UPM(1,1,x,x,mean(x),mean(x))-D.LPM(1,1,x,x,mean(x),mean(x))-D.UPM(1,1,x,x,mean(x),mean(x)))*(length(x)/(length(x)-1))
 [1] 0.8332328
 ```
@@ -113,6 +113,14 @@ y 0.1469182 0.0000000
 # Vectorized targets:
 > Co.LPM(0,0,x,y,c(0,1),c(0,1))
 [1] 0.28 0.73
+```
+###PDFs
+```r
+> tgt=sort(x)
+# Arbitrary d/dx approximation
+> d.dx=(max(x)+abs(min(x)))/100
+> PDF=(LPM.ratio(1,tgt+d.dx,x)-LPM.ratio(1,tgt-d.dx,x))
+> plot(sort(x),PDF,col='blue',type='l',lwd=3,xlab="x")
 ```
 ### Numerical Integration - [UPM(1,0,f(x))-LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
 ```{r}
