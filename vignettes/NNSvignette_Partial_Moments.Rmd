@@ -68,7 +68,7 @@ sd.y=((UPM(2,mean(y),y)+LPM(2,mean(y),y))*(length(y)/(length(y)-1)))^.5
 cov.xy/(sd.x*sd.y)
 ```
 
-##CDFs
+##CDFs (Discrete and Continuous)
 ```{r cdfs}
 P=ecdf(x)
 P(0);P(1)
