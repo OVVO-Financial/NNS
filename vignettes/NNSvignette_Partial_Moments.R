@@ -60,13 +60,7 @@ Co.LPM(0,0,x,y,c(0,1),c(0,1))
 plot(sort(x),LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3,xlab="x")
 
 ## ----pdfs----------------------------------------------------------------
-tgt=sort(x)
-# Arbitrary d/dx approximation
-d.dx=(max(x)+abs(min(x)))/100
-  
-PDF=(LPM.ratio(1,tgt+d.dx,x)-LPM.ratio(1,tgt-d.dx,x))
-  
-plot(sort(x),PDF,col='blue',type='l',lwd=3,xlab="x")
+NNS.PDF(x)
 
 ## ----numerical integration-----------------------------------------------
 x=seq(0,1,.001);y=x^2
