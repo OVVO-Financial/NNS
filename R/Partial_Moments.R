@@ -318,3 +318,33 @@ LPM.ratio<- function(degree,target,variable){
 UPM.ratio<- function(degree,target,variable){
   UPM(degree,target,variable)/(LPM(degree,target,variable)+UPM(degree,target,variable))
 }
+
+
+#' NNS PDF
+#'
+#' This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
+#' @param variable a numeric vector.
+#' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
+#' @param plot logical; plots PDF.
+#' @return vector representing PDF of a variable
+#' @keywords partial moments, PDF, continuous CDF
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{http://amzn.com/1490523995}
+#' @examples
+#' set.seed(123)
+#' x<-rnorm(100)
+#' NNS.PDF(x)
+#' @export
+
+
+NNS.PDF<-function(variable,bins=NULL,plot=TRUE){
+tgt=sort(variable)
+# Arbitrary d/dx approximation
+if(is.null(bins)){bins=length(variable)}
+d.dx=(max(variable)+abs(min(variable)))/bins
+PDF=(LPM.ratio(1,tgt+d.dx,variable)-LPM.ratio(1,tgt-d.dx,variable))
+if(plot==TRUE){plot(sort(variable),PDF,col='blue',type='l',lwd=3,xlab="X")}
+
+PDF
+}
