@@ -1,8 +1,6 @@
 Uni.caus <- function(x,y,tau,plot=TRUE){
 
-  xy=NNS.norm(cbind(x,y),linear = FALSE)
-  xy=NNS.norm(xy,linear = TRUE)
-
+  xy=NNS.norm(cbind(x,y),linear = TRUE)
   x=xy[,1];y=xy[,2]
 
   min.length = min(length(x),length(y))
