@@ -15,7 +15,7 @@
 #' ## x clearly causes y...
 #' set.seed(123)
 #' x<-rnorm(100); y<-x^2
-#' NNS.caus(x,y,1)
+#' NNS.caus(x,y,tau=0)
 #'
 #' ## Causal matrix
 #' \dontrun{
