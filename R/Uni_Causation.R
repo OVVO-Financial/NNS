@@ -1,8 +1,9 @@
 Uni.caus <- function(x,y,tau,plot=TRUE){
 
 
+  xy=NNS.norm(cbind(x,y),linear = TRUE)
+  x=xy[,1];y=xy[,2]
   x=scale(x)[,1];y=scale(y)[,1]
-
 
   min.length = min(length(x),length(y))
 
@@ -22,11 +23,14 @@ Uni.caus <- function(x,y,tau,plot=TRUE){
 
   x.vectors.tau = do.call(cbind,x.vectors)
   y.vectors.tau = do.call(cbind,y.vectors)
+
+
 ## Normalize x to x.tau
-  x.norm.tau <- NNS.norm(x.vectors.tau)[,1]
+  x.norm.tau <- rowMeans(NNS.norm(x.vectors.tau))
 
 ## Normalize y to y.tau
-  y.norm.tau <- NNS.norm(y.vectors.tau)[,1]
+  y.norm.tau <- rowMeans(NNS.norm(y.vectors.tau))
+
   } else
   {
     x.norm.tau <- x
@@ -46,7 +50,7 @@ Uni.caus <- function(x,y,tau,plot=TRUE){
   }
 
   ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
-  P.x.given.y = UPM(0,min(x.norm.to.y),y.norm.to.x) - UPM(0,max(x.norm.to.y),y.norm.to.x)
+  P.x.given.y = UPM.ratio(1,min(x.norm.to.y),y.norm.to.x) - UPM.ratio(1,max(x.norm.to.y),y.norm.to.x)
 
 
   ## Correlation of Normalized Variables
