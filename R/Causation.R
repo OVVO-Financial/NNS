@@ -29,6 +29,11 @@ NNS.caus <- function(x,y,tau,plot=FALSE){
   Causation.x.given.y = Uni.caus(x,y,tau,plot = FALSE)
   Causation.y.given.x = Uni.caus(y,x,tau,plot = FALSE)
 
+  if(Causation.x.given.y==Causation.y.given.x){
+    Causation.x.given.y = Uni.caus(x,y,tau,plot = FALSE,scale=TRUE)
+    Causation.y.given.x = Uni.caus(y,x,tau,plot = FALSE,scale=TRUE)
+  }
+
   if(abs(Causation.x.given.y)<=abs(Causation.y.given.x)){
     if(plot==TRUE){
     Uni.caus(y,x,tau,plot = plot)}

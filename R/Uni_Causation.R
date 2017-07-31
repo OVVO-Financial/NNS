@@ -1,9 +1,9 @@
-Uni.caus <- function(x,y,tau,plot=TRUE){
+Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE){
 
   xy=NNS.norm(cbind(x,y),linear = T)
   x=xy[,1];y=xy[,2]
 
-  if(cor(x,1:length(x))==1){
+  if(scale){
   x=scale(x)[,1];y=scale(y)[,1]}
 
   min.length = min(length(x),length(y))
