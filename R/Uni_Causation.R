@@ -1,9 +1,9 @@
 Uni.caus <- function(x,y,tau,plot=TRUE){
 
+  xy=NNS.norm(cbind(x,y),linear = FALSE)
+  xy=NNS.norm(xy,linear = TRUE)
 
-  xy=NNS.norm(cbind(x,y),linear = TRUE)
   x=xy[,1];y=xy[,2]
-  x=scale(x)[,1];y=scale(y)[,1]
 
   min.length = min(length(x),length(y))
 
@@ -30,7 +30,6 @@ Uni.caus <- function(x,y,tau,plot=TRUE){
 
 ## Normalize y to y.tau
   y.norm.tau <- rowMeans(NNS.norm(y.vectors.tau))
-
   } else
   {
     x.norm.tau <- x
