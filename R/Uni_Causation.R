@@ -9,7 +9,7 @@ Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE){
   }
 
   if(scale){x=scale(x)[,1];y=scale(y)[,1]}
-
+matplot(cbind(x,y))
   min.length = min(length(x),length(y))
 
   x.vectors = list()

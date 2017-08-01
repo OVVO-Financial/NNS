@@ -4,9 +4,10 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param tau integer; Number of lagged observations to consider.
+#' @param tau integer; Number of lagged observations to consider for time series data.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, gross quantity of association is returned as (x[column] ---> y[row]).
+#' @note \code{tau=ceiling(.01*length(x))} or 1 percent of the number of observations is a typical setting to emphasize the retention of data for time series data.
 #' @keywords causation
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -29,10 +30,12 @@ NNS.caus <- function(x,y,tau,plot=FALSE){
   Causation.x.given.y = Uni.caus(x,y,tau,plot = FALSE)
   Causation.y.given.x = Uni.caus(y,x,tau,plot = FALSE)
 
-  if(Causation.x.given.y==Causation.y.given.x){
+  if(Causation.x.given.y==Causation.y.given.x |
+     Causation.x.given.y==0 | Causation.y.given.x==0){
     Causation.x.given.y = Uni.caus(x,y,tau,plot = FALSE,scale=TRUE)
     Causation.y.given.x = Uni.caus(y,x,tau,plot = FALSE,scale=TRUE)
   }
+
 
   if(abs(Causation.x.given.y)<=abs(Causation.y.given.x)){
     if(plot==TRUE){
