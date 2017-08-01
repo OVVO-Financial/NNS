@@ -1,14 +1,18 @@
 Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE){
 
-  xy=NNS.norm(cbind(x,y),linear = TRUE)
+  xy=NNS.norm(cbind(x,y),linear = T)
   x=xy[,1];y=xy[,2]
 
   if(scale==FALSE){
       if(length(rle(diff(x))$values)==1 |
-         length(rle(diff(y))$values)==1 ){scale=TRUE}
+         length(rle(diff(y))$values)==1 |
+         length(x)<=100 | length(y)<=100
+         ){scale=TRUE}
   }
 
-  if(scale){x=scale(x)[,1];y=scale(y)[,1]}
+  if(scale){
+    x=scale(x)[,1];y=scale(y)[,1]
+    }
 
   min.length = min(length(x),length(y))
 
