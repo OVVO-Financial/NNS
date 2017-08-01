@@ -1,10 +1,14 @@
 Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE){
 
-  xy=NNS.norm(cbind(x,y),linear = T)
+  xy=NNS.norm(cbind(x,y),linear = TRUE)
   x=xy[,1];y=xy[,2]
 
-  if(scale){
-  x=scale(x)[,1];y=scale(y)[,1]}
+  if(scale==FALSE){
+      if(length(rle(diff(x))$values)==1 |
+         length(rle(diff(y))$values)==1 ){scale=TRUE}
+  }
+
+  if(scale){x=scale(x)[,1];y=scale(y)[,1]}
 
   min.length = min(length(x),length(y))
 
@@ -37,17 +41,12 @@ Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE){
     y.norm.tau <- y
   }
 
+
   ## Normalize x.norm.tau to y.norm.tau
-  if((min(y)>=min(x) && max(y)<=max(x)) |
-     (min(y)>=0 && max(y)<=1 && min(x)>=0 && max(x)<=1)){
-    x.norm.to.y = x.norm.tau
-    y.norm.to.x = y.norm.tau
-  }
-  else{
   x.tau.y.tau = NNS.norm(cbind(x.norm.tau,y.norm.tau))
   x.norm.to.y = x.tau.y.tau[,1]
   y.norm.to.x = x.tau.y.tau[,2]
-  }
+
 
   ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
   P.x.given.y = UPM.ratio(1,min(x.norm.to.y),y.norm.to.x) - UPM.ratio(1,max(x.norm.to.y),y.norm.to.x)
