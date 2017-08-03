@@ -3,7 +3,8 @@ Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE,time.series=FALSE){
   xy=NNS.norm(cbind(x,y),linear = TRUE)
   x=xy[,1];y=xy[,2]
 
-  if(time.series | scale | length(x)<=100 | length(y)<=100){
+  if(time.series | scale | length(x)<30 | length(y)<30 | (sd(x)>1&sd(y)>1) )
+    {
     x=scale(x)[,1];y=scale(y)[,1]
   }
 

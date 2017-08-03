@@ -55,10 +55,10 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
 
     if(tau=="ts"){
     tau0=0
-    tau1=ceiling(.01*length(x))
-    tau2=ceiling(.02*length(x))
-    tau3=ceiling(.04*length(x))
-    tau4=ceiling(.08*length(x))
+    tau1=min(2,ceiling(.01*length(x)))
+    tau2=min(2,ceiling(.02*length(x)))
+    tau3=min(2,ceiling(.04*length(x)))
+    tau4=min(2,ceiling(.08*length(x)))
 
 
     Causation.x.given.y.tau0 = Uni.caus(x,y,tau=tau0,plot = FALSE,time.series = TRUE)
