@@ -37,8 +37,8 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
 
       if(Causation.x.given.y==Causation.y.given.x |
          Causation.x.given.y==0 | Causation.y.given.x==0){
-        Causation.x.given.y = Uni.caus(x,y,tau=tau,plot = FALSE,scale=TRUE,time.series=time.series)
-        Causation.y.given.x = Uni.caus(y,x,tau=tau,plot = FALSE,scale=TRUE,time.series=time.series)
+            Causation.x.given.y = Uni.caus(x,y,tau=tau,plot = FALSE,scale=TRUE,time.series=time.series)
+            Causation.y.given.x = Uni.caus(y,x,tau=tau,plot = FALSE,scale=TRUE,time.series=time.series)
       }
     }
 

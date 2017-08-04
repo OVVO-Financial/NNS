@@ -1,12 +1,30 @@
 Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE,time.series=FALSE){
 
   xy=NNS.norm(cbind(x,y),linear = TRUE)
-  x=xy[,1];y=xy[,2]
+  NNS.x=xy[,1];NNS.y=xy[,2]
 
-  if(time.series | scale | length(x)<30 | length(y)<30 | (sd(x)>1&sd(y)>1) )
+  if(mean(NNS.x)!=mean(NNS.y)){
+    xy=apply(cbind(x,y),2,function(b) (b-min(b))/(max(b)-min(b)))
+    x=xy[,1];y=xy[,2]
+    if( time.series | scale |
+        LPM.ratio(2,mean(x),x)<.25 | LPM.ratio(2,mean(y),y)<.25 |
+        LPM.ratio(2,mean(x),x)>.75 | LPM.ratio(2,mean(y),y)>.75
+    )
+    {
+      x=scale(x)[,1];y=scale(y)[,1]
+    }
+  }
+
+  if(mean(NNS.x)==mean(NNS.y)){
+    x=NNS.x;y=NNS.y
+  if( time.series | scale |
+      LPM.ratio(2,mean(x),x)<.25 | LPM.ratio(2,mean(y),y)<.25 |
+      LPM.ratio(2,mean(x),x)>.75 | LPM.ratio(2,mean(y),y)>.75
+      )
     {
     x=scale(x)[,1];y=scale(y)[,1]
   }
+}
 
   min.length = min(length(x),length(y))
 
