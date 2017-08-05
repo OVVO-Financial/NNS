@@ -18,7 +18,7 @@ NNS.caus(x, y, tau, time.series = FALSE, plot = FALSE)
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
 }
 \value{
-Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, gross quantity of association is returned as (x[column] ---> y[row]).
+Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
 }
 \description{
 Returns the causality from observational data between two variables
