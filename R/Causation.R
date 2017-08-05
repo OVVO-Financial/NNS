@@ -7,7 +7,7 @@
 #' @param tau options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{tau="cs"} for cross-sectional data.  \code{tau="ts"} automatically selects the lag of the time series data, while \code{tau=(integer)} specifies a time series lag.
 #' @param time.series logical; \code{FALSE} (default) If analyzing time series data with \code{tau=(integer)}, select \code{time.series=TRUE}.  Not required when \code{tau="ts"}.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
-#' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, gross quantity of association is returned as (x[column] ---> y[row]).
+#' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
 #' @keywords causation
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -29,6 +29,9 @@
 
 NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
 
+  orig.tau=tau
+  orig.time.series=time.series
+  orig.plot=plot
 
   if(!missing(y)){
     if(is.numeric(tau)){
@@ -113,21 +116,7 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
     }
   } else {
 
-    if(tau=="cs"){tau=0}
-    if(tau=="ts"){tau=ceiling(0.03*length(x))}
-    causes = list()
-
-    for(i in 1:ncol(x)){
-      causes[[i]]=sapply(1:ncol(x), function(b) Uni.caus(x[,i],x[,b],plot = F,tau=tau))
-    }
-
-    causes=do.call(cbind,causes)
-    diag(causes)=1
-
-    colnames(causes)=colnames(x)
-    rownames(causes)=colnames(x)
-
-    return(causes)
+    NNS.caus.matrix(x,tau=orig.tau,time.series=orig.time.series,plot=orig.plot)
   }
 
 
