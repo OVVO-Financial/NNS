@@ -5,10 +5,11 @@
 \title{NNS Regression}
 \usage{
 NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
-  type = NULL, point.est = NULL, location = "top", return.values = TRUE,
-  plot = TRUE, plot.regions = FALSE, residual.plot = TRUE,
-  threshold = 0, n.best = NULL, noise.reduction = "mean", norm = NULL,
-  dist = "L2", multivariate.call = FALSE)
+  tau = NULL, type = NULL, point.est = NULL, location = "top",
+  return.values = TRUE, plot = TRUE, plot.regions = FALSE,
+  residual.plot = TRUE, threshold = 0, n.best = NULL,
+  noise.reduction = "mean", norm = NULL, dist = "L2",
+  multivariate.call = FALSE)
 }
 \arguments{
 \item{x}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -20,6 +21,8 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 \item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.}
 
 \item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.}
+
+\item{tau}{options("ts", NULL); \code{NULL}(default) If \code{dim.red.method="NNS.caus"} or \code{dim.red.method="all"} and the regression is using time-series data, set \code{tau="ts"} for more accurate causal analysis.}
 
 \item{type}{\code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.}
 
@@ -74,7 +77,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 \itemize{
  \item{\code{"R2"}} provides the goodness of fit;
 
- \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
+ \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} data.table.
 
  \item{\code{"x.star"}} returns the synthetic X* as a vector;
 
