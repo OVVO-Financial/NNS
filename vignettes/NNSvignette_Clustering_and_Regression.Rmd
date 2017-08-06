@@ -69,12 +69,17 @@ NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
 ```{r nonlinear class}
 NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor")$equation
 ```
+Thus, our model for this regression would be:
+$$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
+
 
 ####Threshold
 `NNS.reg(x,y,dim.red.method="cor",threshold=...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
 ```{r nonlinear class threshold}
 NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75)$equation
 ```
+Thus, our model for this further reduced dimension regression would be:
+$$Species = \frac{0.7825612*Sepal.Length -0*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{3} $$
 
 and the `point.est=(...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r }
