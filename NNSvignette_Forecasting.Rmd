@@ -1,0 +1,104 @@
+---
+title: "Getting Started with NNS: Forecasting"
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with NNS: Forecasting}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(NNS)
+require(knitr)
+require(rgl)
+```
+
+# Forecasting
+The underlying assumptions of traditional autoregressive models are well known.  The resulting complexity with these models leads to observations such as, ``We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.'' [Source](https://research.fb.com/prophet-forecasting-at-scale/)
+
+NNS simplifies the forecasting process.  Below are some examples demonstrating `NNS.ARMA` and its assumption free, minimal parameter forecasting method.
+
+## Linear Regression
+`NNS.ARMA` has the ability to fit a linear regression to the relevant component series, yielding very fast results.  For our running example we will use the `AirPassengers` dataset loaded in base R.
+
+We will forecast 44 periods `h=44` of `AirPassengers` using the first 100 observations `training.set=100`, returning estimates of the final 44 observations.  We will then test this against our validation set of `tail(AirPassengers,44)`.
+
+Below is the linear fit and associated root mean squared error (RMSE) using `method='lin'`.
+```{r linear}
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',plot = TRUE,seasonal.plot = FALSE)
+sqrt(mean((nns-tail(AirPassengers,44))^2))
+```
+
+## Nonlinear Regression
+Now we can try using a nonlinear regression on the relevant component series using `method='nonlin'`.
+```{r nonlinear}
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',plot=TRUE,seasonal.plot = FALSE)
+sqrt(mean((nns-tail(AirPassengers,44))^2))
+```
+
+## Cross-Validation
+Neither seem to fit well using our automatically genereated `seasonal.factor`.  We can test a series of `seasonal.factors` and select the best one to fit.  The largest period to consider would be `0.25 * length(variable)`, in our case 25.  Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
+
+```{r seasonal test}
+seas=t(sapply(1:25,function(i) c(i,sqrt(mean((NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',seasonal.factor=i,plot=FALSE)-tail(AirPassengers,44))^2)))))
+colnames(seas)=c("Period","RMSE")
+seas
+```
+
+
+Now we know `seasonal.factor = 12` is our best fit, we can see if there's any benefit from using a nonlinear regression.  Alternatively, we can define our best fit as the corresponding `seas$Period` entry of the minimum value in our `seas$RMSE` column.
+
+```{r best fit}
+a=seas[which.min(seas[,2]),1]
+```
+
+Below you will notice the use of `seasonal.factor=a`
+```{r best nonlinear}
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',seasonal.factor = a,plot = TRUE,seasonal.plot = FALSE)
+sqrt(mean((nns-tail(AirPassengers,44))^2))
+```
+
+There is a benefit to using a nonlinear regression as our RMSE has been lowered.  We can also test if using both linear and nonlinear estimates combined result in a lower RMSE (`method='both'`).
+
+```{r best both}
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='both',seasonal.factor = a,plot=TRUE,seasonal.plot=FALSE)
+sqrt(mean((nns-tail(AirPassengers,44))^2))
+```
+
+Indeed, using `method='both'` lowered our RMSE.  There are far fewer parameters to test using NNS than traditional methods and the relative simplicity of the method ensures robustness.
+
+## Extension of Estimates
+Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` paramter.
+
+```{r extension,results='hide'}
+NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seasonal.plot = FALSE)
+```
+
+## Brief Notes on Other Parameters
+* `seasonal.factor=c(1,2,...)`
+
+We included the ability to use any number of specified seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+
+* `seasonal.factor=FALSE`
+
+We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+
+* `best.periods`
+
+This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjuction with  `seasonal.factor=FALSE`.
+
+* `dynamic=TRUE`
+
+This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`.  Also computationally expensive due to the recalculation of seasonal periods for each estimated value.
+
+* `plot` , `seasonal.plot` and `intervals`
+
+These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot=TRUE` will not plot without `plot=TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  `intervals` will plot the surrounding estimated values iff `intervals=TRUE & seasonal.factor=FALSE`.
+
+
+# References
+If the user is so motivated, detailed arguments and proofs are provided within the following:
+
+*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)

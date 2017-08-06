@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Partial Moments</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS: Partial Moments</h1>
+<h4 class="author"><em>Fred Viole</em></h4>
+
+
+
+<div id="partial-moments" class="section level1">
+<h1>Partial Moments</h1>
+<p>Why is it necessary to parse the variance with partial moments? The additional information generated from partial moments permits a level of analysis simply not possible with traditional summary statistics.</p>
+<p>Below are some basic equivalences demonstrating partial moments role as the elements of variance.</p>
+<div id="mean" class="section level2">
+<h2>Mean</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">123</span>); x=<span class="kw">rnorm</span>(<span class="dv">100</span>); y=<span class="kw">rnorm</span>(<span class="dv">100</span>)
+
+<span class="kw">mean</span>(x)</code></pre></div>
+<pre><code>## [1] 0.09040591</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">UPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,x)-<span class="kw">LPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,x)</code></pre></div>
+<pre><code>## [1] 0.09040591</code></pre>
+</div>
+<div id="variance" class="section level2">
+<h2>Variance</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">var</span>(x)</code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Sample Variance:</span>
+<span class="kw">UPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x)+<span class="kw">LPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x)</code></pre></div>
+<pre><code>## [1] 0.8249005</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Population Variance:</span>
+(<span class="kw">UPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x)+<span class="kw">LPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>))</code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Variance is also the co-variance of itself:</span>
+(<span class="kw">Co.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,x,<span class="kw">mean</span>(x),<span class="kw">mean</span>(x))+<span class="kw">Co.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,x,<span class="kw">mean</span>(x),<span class="kw">mean</span>(x))-<span class="kw">D.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,x,<span class="kw">mean</span>(x),<span class="kw">mean</span>(x))-<span class="kw">D.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,x,<span class="kw">mean</span>(x),<span class="kw">mean</span>(x)))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>))</code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+</div>
+<div id="standard-deviation" class="section level2">
+<h2>Standard Deviation</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(x)</code></pre></div>
+<pre><code>## [1] 0.9128159</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">((<span class="kw">UPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x)+<span class="kw">LPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>)))^.<span class="dv">5</span></code></pre></div>
+<pre><code>## [1] 0.9128159</code></pre>
+</div>
+<div id="covariance" class="section level2">
+<h2>Covariance</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cov</span>(x,y)</code></pre></div>
+<pre><code>## [1] -0.04372107</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(<span class="kw">Co.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))+<span class="kw">Co.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y)))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>))</code></pre></div>
+<pre><code>## [1] -0.04372107</code></pre>
+</div>
+<div id="covariance-elements" class="section level2">
+<h2>Covariance Elements</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">PM.matrix</span>(<span class="dt">LPM.degree =</span> <span class="dv">1</span>,<span class="dt">UPM.degree =</span> <span class="dv">1</span>,<span class="dt">target =</span> <span class="st">'mean'</span>, <span class="dt">variable =</span> <span class="kw">cbind</span>(x,y), <span class="dt">pop.adj =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## $clpm
+##           x         y
+## x 0.4033078 0.1559295
+## y 0.1559295 0.3939005
+## 
+## $cupm
+##           x         y
+## x 0.4299250 0.1033601
+## y 0.1033601 0.5411626
+## 
+## $dlpm
+##           x         y
+## x 0.0000000 0.1469182
+## y 0.1560924 0.0000000
+## 
+## $dupm
+##           x         y
+## x 0.0000000 0.1560924
+## y 0.1469182 0.0000000</code></pre>
+</div>
+<div id="pearson-correlation" class="section level2">
+<h2>Pearson Correlation</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(x,y)</code></pre></div>
+<pre><code>## [1] -0.04953215</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cov.xy=(<span class="kw">Co.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))+<span class="kw">Co.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y)))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>))
+sd.x=((<span class="kw">UPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x)+<span class="kw">LPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(x),x))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>)))^.<span class="dv">5</span>
+sd.y=((<span class="kw">UPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(y),y)+<span class="kw">LPM</span>(<span class="dv">2</span>,<span class="kw">mean</span>(y),y))*(<span class="kw">length</span>(y)/(<span class="kw">length</span>(y)-<span class="dv">1</span>)))^.<span class="dv">5</span>
+cov.xy/(sd.x*sd.y)</code></pre></div>
+<pre><code>## [1] -0.04953215</code></pre>
+</div>
+<div id="cdfs-discrete-and-continuous" class="section level2">
+<h2>CDFs (Discrete and Continuous)</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">P=<span class="kw">ecdf</span>(x)
+<span class="kw">P</span>(<span class="dv">0</span>);<span class="kw">P</span>(<span class="dv">1</span>)</code></pre></div>
+<pre><code>## [1] 0.48</code></pre>
+<pre><code>## [1] 0.83</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">LPM</span>(<span class="dv">0</span>,<span class="dv">0</span>,x);<span class="kw">LPM</span>(<span class="dv">0</span>,<span class="dv">1</span>,x)</code></pre></div>
+<pre><code>## [1] 0.48</code></pre>
+<pre><code>## [1] 0.83</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Vectorized targets:</span>
+<span class="kw">LPM</span>(<span class="dv">0</span>,<span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),x)</code></pre></div>
+<pre><code>## [1] 0.48 0.83</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="kw">ecdf</span>(x))
+<span class="kw">points</span>(<span class="kw">sort</span>(x),<span class="kw">LPM</span>(<span class="dv">0</span>,<span class="kw">sort</span>(x),x),<span class="dt">col=</span><span class="st">'red'</span>)
+<span class="kw">legend</span>(<span class="st">'left'</span>,<span class="dt">legend=</span><span class="kw">c</span>(<span class="st">'ecdf'</span>,<span class="st">'LPM.CDF'</span>),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">'black'</span>,<span class="st">'red'</span>),<span class="dt">border=</span><span class="ot">NA</span>,<span class="dt">bty=</span><span class="st">'n'</span>)</code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAkFBMVEUAAAAAADoAAGYAOjoAOpAAZmYAZrY6AAA6ADo6AGY6Ojo6kNtmAABmADpmAGZmOpBmZgBmZmZmkJBmtttmtv+QAACQOgCQOjqQOmaQZgCQkGaQtpCQ2/+zs7O2AAC2ZgC2/7a2/9u2///bAADbkDrb2//b/7bb/9vb////AAD/tmb/trb/25D//7b//9v///9gxeP+AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAKS0lEQVR4nO2daWOjuhmFyTS1O43ndst129tMuZ2h7UC9/P9/V60YL+KAkIQw5/kQOzGbn7x6JbFIxZn0Usx9ALlDQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFAfIXVBafvsmfRbE5H3cvH52PDlv5UVwWIqgRfoq3c1W8/uh8dNqLv0VmIYKqQobOnZAbYTHIRJAuQQoVLO/2ry8fUpD8WLxtpKbDVloRroQ38f498pFlIei4kwJUrlGqVHGSDgrzdyOoUotU0l+jJIoVY5exLASpUqS/bCPdiLc672yUMFvEhDEZZeLl9T87XbjK6GUsB0EmDlR86Dqr0hWX/KllKUHirSqGomD9vtDVmV4mJjkIEl9Y8/Iho8OEhImXTpIWy+kCVeoyeD6b5B2THAQ1RVeQydVtvDwQJN4YL+sQ1KmLriPIpJlbQSp768XWIcjGikQnlUZ+7bscZAWJX34p2rcrECRzyrs0IaJCVV0yRN7vazEjUnjaiCWUmXUkadsOMl9Zsbm8vanm2yaiXmQN1fxVVrHdLok09N7palQmxt7OJuoSdMbyEDSQ5jbjHLaxU9CyBImAue56NavprA6kulR3ipKnO6457q4qLZ4wywAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQILCgYjHMJSjs5kJR1/XNXyioS13fGaKgFilHFKkbQ4kFtSX7q0T8IYNXFTTiRb6Tx1V/tcenXtMKirU5f1TYCEMqeAr18+rzNRcxGTpKj5SiS1c9dxGLtTkfOjFjXgsm6Q4qJ5u83JYxVvMXak3Rlqp7OZKVCmqrdKXnkRjLOgWZ4FHJuVfPKgW1eedBxrlnfYJM8Dyq0h+xOkGdzDwkgGIJKgv1LFvhfJx/LkGmbq8fVumPiCOoev0hHG3kMxOOh0jmEWSiZ2DwKKIIOu3fzOOkStXUzYXCtgxrULNfEUXQcSdKVqMesGkcj9nMIKjuMHyt9USQn5/YOUipmry5ELRdr3F+VlOLaTVDq64OK2kH1TaARupZi6BWz2g/0QVVWdRioyv3C3OdtE8qqC1gHuuuoIh51e4tzy9omp9Yguy4a87H1ZMJmugnVkPRDnTQuEY8SCSorb18/UTsamjm7Wpcmj++fiJ2VjWzdlbbCxf+fp46gqaHzzleDjIhNGcOunS/pmwlUi1mxtJyj9oTX5B/9+uKp20HTa3eLc8vaOJ2nl7Q1O08q6BQfnwE2RFVJ41g/bSCLqOF6nEco+/XjwANIMNIQcefuk6uf5uyX48bt3sJFkC55KDRguRFpapwDv4XzI+HoNO/A+w2hCDnZe2QAeQh6LjTSej0tylDEwYR5KomAvrxq8X0eLKTxm4cIUiUJDsmtB78V7y+/PLyj63rfFyoNuKjAx20oD5d6DX2p8tDj6BKjaD9pt/IYlWqiRDcEdSe5PA5wPsj9llQj3Mdcr9uQTrTNJ++2ZRz2Mpdl1BQmADyElQWxV/2E4fXHSxI3wMhrGgx7V0jTkEhTgK5D3TAgmZyiyZRDmrb7YffmfkN+gVNP4fYe6ADFjz+QYdOolqssSNlD4ugsOXr/kADLBh4c62G6xxUPRYU3E8uXY0eKjUzhGw4q+H8N+rVVYsFLl9jDnS+zmplL0Bet4NcgsL6ebLTHUHOQl+TfQ4aQ/gMFFmQrXgCbQ4RuAWk8RAEb0xoL/r0LBVBUOgWkMZDUIlzs7lemDSCYpSvs19LekA39biTPZGUgqKUr7OfoEHVV6k64akE6dIVvHydvc4o7jd9y7VUxdtwQXXtLCGl7RVfpoNqpzKyM9LI9X6WH36v2+XeO+tMaJJ4tYOG7e6w/U1YQeqNLLzt9HRmUiwVP1vx45/Fh13usN10V/bGqzePajHD3RRE7v0OFyS7qaf9b7/ILuzxpz9aQdudWnkvn4Fol5tHUBj8BYlyK0p5qU65vP7dCPouCpdc93/f2uVUKshf0MAbycdG0KaRv5RvpRH0cyc/2xXKSzRNYGxvflgV5t6K47TPmBwkpzbcHD5/Ox+/fFhBu+29IPm/mUeQ8xkn//2OqMXU5M6b0/5dlLAf6sO6R9DkfvWSBLXRoM4KbUQJU3/TdXxORWyAoLE3ko8XdPj8r79+tIK+qxaQboLMmqQHCgp5I7lD0Gn/588qx2it253+YO5qfpigoLcBOwTpRz61IPWopcpNL52G4ts5W0FBbyRvc/ONINWgL1+/6/xTq/armfO509VILwie6TknvZHcngMK3km1xGkopruRPNJZoAuRWtLJbiSP7SeXvpgv0f0sXFB8PxSEWLQgW4WF2JaLpQuKWsVLliwoQQFbtKDobUTFwgVF97NgQWn8LFdQmgK2XEHR+2CWxIKc92qOJJmfpUZQqgK2aEFJ/CxNUN2OjY3GgQ7FsgTZqEkXQMsS1GqJc6/UQ5YmSJaswm9ERD+WJEhFjZ4YJFkALUnQVdWeys/SBKWLHEskQeEHebM1e2I/0a6LhR7kzeaf1H7iCAp/ZbWep3ydIwkKd22+TckjR6IPR8YRpAuVqdWLOLeJYzK8Nm+jRrcJzexos+QfSS7X5i/fvi5uZ4xL2nK+JZN20GXqPBU0dsa44lLGZvKTiSBr5fLWzhjXepvJTyY3klsr9kfPjHGpmeuc9GWaTvmqpu/8Kl2o6TyFn8v0nnNPM5pWkGtz3ek754+aLnnkoNysdFhMZ3UultJZnY3ZuhqLIYagAZ1V7z3N9SkkcAR57+kpBA3orHrv6TkE4c6q956eRFC8PVEQBU3bEwVR0LQ9UdBSoSAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQYBkgtQ1x74z2XJ8t4c0RWFnCBi34oCdYlIJUoMkVYV7ONTjznElSQ451fQYcq44YKcDSCXITHrg/C6N63q2vtZUOr+kc8UBOx1C2hzkjISmeHNciwRf0r0i3ukg0grqG9TbJUjN3NInAQkaMJJ4D0kF9V5vdHxP/f/viwIgyOciZ4eUgpredBlJUP9OMQkFgX9lnCI2MX6SCDJT0VWPD7WdqM4vSbtXNFufOvxqsgiq0NC0ju+JqvleQXCnmHTtIPSvdH1P1FDsEYR3ikklqNK3hfjk2gp0NdyC8E4x7KwCKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAuQuSt5Ydd9Nv8/Emd0HyBjOPwYrCkbugc/Pp1y9TboCaSvaC9OzY85G/oGb6jZhTyF7Qaf+nSY8STCV7QdXrf9E071HJXZAcmtBjTMJw5C6oFFX8aT9jms5d0OxQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEGA/wO188axnrt2egAAAABJRU5ErkJggg==" /><!-- --></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Joint CDF:</span>
+<span class="kw">Co.LPM</span>(<span class="dv">0</span>,<span class="dv">0</span>,x,y,<span class="dv">0</span>,<span class="dv">0</span>)</code></pre></div>
+<pre><code>## [1] 0.28</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Vectorized targets:</span>
+<span class="kw">Co.LPM</span>(<span class="dv">0</span>,<span class="dv">0</span>,x,y,<span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),<span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))</code></pre></div>
+<pre><code>## [1] 0.28 0.73</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Continuous CDF:</span>
+<span class="kw">plot</span>(<span class="kw">sort</span>(x),<span class="kw">LPM.ratio</span>(<span class="dv">1</span>,<span class="kw">sort</span>(x),x),<span class="dt">type =</span> <span class="st">'l'</span>,<span class="dt">col=</span><span class="st">'blue'</span>,<span class="dt">lwd=</span><span class="dv">3</span>,<span class="dt">xlab=</span><span class="st">&quot;x&quot;</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="pdfs" class="section level2">
+<h2>PDFs</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">NNS.PDF</span>(x)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>##   [1] 0.0001908930 0.0007285071 0.0014980128 0.0022942280 0.0042237400
+##   [6] 0.0042325142 0.0054266682 0.0069513933 0.0073122204 0.0090591509
+##  [11] 0.0092175876 0.0113017593 0.0113204089 0.0116220234 0.0191168759
+##  [16] 0.0204883818 0.0215148868 0.0219942331 0.0220772606 0.0261024736
+##  [21] 0.0262712455 0.0277977798 0.0305469292 0.0308359514 0.0344579024
+##  [26] 0.0352717731 0.0367313063 0.0372245482 0.0388351641 0.0418430167
+##  [31] 0.0432844280 0.0439621788 0.0467910999 0.0473519838 0.0487907146
+##  [36] 0.0495633200 0.0502625828 0.0537038739 0.0540519674 0.0543264251
+##  [41] 0.0546516982 0.0548048094 0.0554082181 0.0581059518 0.0595632569
+##  [46] 0.0601059689 0.0605552515 0.0608446207 0.0613330575 0.0616169969
+##  [51] 0.0616335838 0.0614577654 0.0613129338 0.0612448814 0.0608577849
+##  [56] 0.0602793314 0.0593622189 0.0586446327 0.0581712919 0.0563357828
+##  [61] 0.0551982525 0.0537600382 0.0526239004 0.0522934498 0.0512826874
+##  [66] 0.0494158115 0.0488018881 0.0479159433 0.0470473119 0.0446751070
+##  [71] 0.0415831690 0.0412396069 0.0393405615 0.0361399667 0.0335620897
+##  [76] 0.0328964984 0.0292027310 0.0269953109 0.0261800218 0.0239002825
+##  [81] 0.0229820635 0.0216025250 0.0186249960 0.0180587434 0.0171562439
+##  [86] 0.0147430894 0.0131531956 0.0113604868 0.0107867699 0.0097509786
+##  [91] 0.0075870371 0.0074027673 0.0052225746 0.0048134162 0.0041673544
+##  [96] 0.0028583480 0.0021362165 0.0012061997 0.0005320251 0.0003484623</code></pre>
+</div>
+<div id="numerical-integration" class="section level2">
+<h2>Numerical Integration</h2>
+<p>Partial moments are asymptotic area approximations of <span class="math inline">\(f(x)\)</span> akin to the familiar Trapezoidal and Simpson’s rules. More observations, more accuracy…</p>
+<p><span class="math display">\[[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}\]</span></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x=<span class="kw">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">001</span>);y=x^<span class="dv">2</span>
+<span class="kw">UPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)-<span class="kw">LPM</span>(<span class="dv">1</span>,<span class="dv">0</span>,y)</code></pre></div>
+<pre><code>## [1] 0.3335</code></pre>
+<p><span class="math display">\[0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}\]</span> For the total area, not just the definite integral, simply sum the partial moments: <span class="math display">\[[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert\]</span></p>
+</div>
+<div id="bayes-theorem" class="section level2">
+<h2>Bayes’ Theorem</h2>
+<p>For example, when ascertaining the probability of an increase in <span class="math inline">\(A\)</span> given an increase in <span class="math inline">\(B\)</span>, the <code>Co.UPM(degree.x,degree.y,x,y,target.x,target.y)</code> target parameters are set to <code>target.x=0</code> and <code>target.y=0</code> and the <code>UPM(degree,target,variable)</code> target parameter is also set to <code>target=0</code>.</p>
+<p><span class="math display">\[P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}\]</span></p>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments and proofs are provided within the following:</p>
+<p>*<a href="http://a.co/5bpHvUg">Nonlinear Nonparametric Statistics: Using Partial Moments</a></p>
+<p>*<a href="https://ssrn.com/abstract=2148482">Cumulative Distribution Functions and UPM/LPM Analysis</a></p>
+<p>*<a href="https://ssrn.com/abstract=2186471">f(Newton)</a></p>
+<p>*<a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf">Bayes’ Theorem From Partial Moments</a></p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

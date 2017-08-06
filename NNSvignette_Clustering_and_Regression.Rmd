@@ -1,0 +1,101 @@
+---
+title: "Getting Started with NNS: Clustering and Regression"
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with NNS: Clustering and Regression}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(NNS)
+require(knitr)
+require(rgl)
+```
+
+# Clustering and Regression
+Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
+
+##NNS Partitioning `NNS.part`
+`NNS.part` is both a partitional and hierarchal clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification at each partition.
+
+`NNS.part` returns a data.table of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in `NNS.reg`.
+```{r linear}
+x=seq(-5,5,.05); y=x^3
+
+NNS.part(x,y,Voronoi = T)
+```
+
+### X-only Partitioning
+`NNS.part` offers a partitioning based on $x$ values only, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
+```{r x part}
+NNS.part(x,y,Voronoi = T,type="XONLY",order=3)
+```
+
+##Clusters Used in Regression
+```{r depreg,results='hide'}
+for(i in 1:3){NNS.part(x,y,order=i,Voronoi = T);NNS.reg(x,y,order=i)}
+```
+
+
+##NNS Regression `NNS.reg`
+`NNS.reg` can fit any $f(x)$, for both uni- and multivariate cases.  `NNS.reg` returns a self-evident list of values provided below.
+
+###Univariate:
+```{r nonlinear}
+NNS.reg(x,y,order=4,noise.reduction = 'off')
+```
+
+###Multivariate:
+```{r nonlinear multi,results='hide'}
+f= function(x,y) x^3+3*y-y^3-3*x
+y=x; z=expand.grid(x,y)
+g=f(z[,1],z[,2])
+NNS.reg(z,g,order='max')
+```
+
+###Inter/Extrapolation
+`NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x,y,point.est=...)` paramter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
+
+For a classification problem, we simply set `NNS.reg(x,y,type="CLASS",...)`
+```{r iris point.est}
+NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
+```
+
+###NNS Dimension Reduction Regression
+`NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x,y,dim.red.method="cor",...)`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
+```{r nonlinear class}
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor")$equation
+```
+Thus, our model for this regression would be:
+$$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
+
+
+####Threshold
+`NNS.reg(x,y,dim.red.method="cor",threshold=...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
+```{r nonlinear class threshold}
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75)$equation
+```
+Thus, our model for this further reduced dimension regression would be:
+$$Species = \frac{0.7825612*Sepal.Length -0*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{3} $$
+
+and the `point.est=(...)` operates in the same manner as the full regression above, again called with `$Point.est`.
+```{r }
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75,point.est=iris[1:10,1:4])$Point.est
+```
+
+
+#References
+If the user is so motivated, detailed arguments further examples are provided within the following:
+
+*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+
+*[Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+
+*[New Nonparametric Curve-Fitting Using Partitioning, Regression and Partial Derivative Estimation](https://ssrn.com/abstract=2852570)
+
+*[Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
+
+*[Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
