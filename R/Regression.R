@@ -7,6 +7,7 @@
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.
 #' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
+#' @param tau options("ts", NULL); \code{NULL}(default) If \code{dim.red.method="NNS.caus"} or \code{dim.red.method="all"} and the regression is using time-series data, set \code{tau="ts"} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
@@ -46,7 +47,7 @@
 #' \itemize{
 #'  \item{\code{"R2"}} provides the goodness of fit;
 #'
-#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0.
+#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} data.table.
 #'
 #'  \item{\code{"x.star"}} returns the synthetic X* as a vector;
 #'
@@ -123,7 +124,7 @@
 NNS.reg = function (x,y,
                     order=NULL,
                     stn=.99,
-                    dim.red.method=NULL,
+                    dim.red.method=NULL,tau=NULL,
                     type = NULL,
                     point.est = NULL,
                     location = "top",
@@ -209,17 +210,19 @@ NNS.reg = function (x,y,
                   }
 
                   if(dim.red.method=="NNS.caus"){
+                    if(is.null(tau)){tau="cs"}
                     x.star.coef=numeric()
                     for(i in 1:ncol(x)){
-                      cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
+                      cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
                       x.star.coef[i]=cause[1]-cause[2]
                     }
                   }
 
                   if(dim.red.method=="all"){
+                    if(is.null(tau)){tau="cs"}
                     x.star.coef.1=numeric()
                     for(i in 1:ncol(x)){
-                      cause=NNS.caus(x[,i],y,tau=0,plot=FALSE)
+                      cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
                       x.star.coef.1[i]=cause[1]-cause[2]
                     }
                     x.star.coef.3 = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
@@ -233,13 +236,19 @@ NNS.reg = function (x,y,
 
                   x.star.matrix=t(t(original.variable) * x.star.coef)
 
-                  synthetic.x.equation=data.table(Variable=colnames.list,Coefficient=x.star.coef)
+
 
                   #In case all IVs have 0 correlation to DV
                   if(all(x.star.matrix==0)){
                       x.star.matrix=x
                       x.star.coef[x.star.coef==0]<- 1
                   }
+
+                  DENOMINATOR=sum(abs(x.star.coef)>0)
+
+                  synthetic.x.equation.coef=data.table(Variable=colnames.list,Coefficient=x.star.coef)
+
+                  synthetic.x.equation=rbindlist(list(synthetic.x.equation.coef, list("DENOMINATOR",DENOMINATOR)))
 
 
                   if(!is.null(point.est)){
