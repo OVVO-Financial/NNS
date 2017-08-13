@@ -312,6 +312,17 @@ LPM.ratio<- function(degree,target,variable){
 #' set.seed(123)
 #' x<-rnorm(100)
 #' UPM.ratio(0,mean(x),x)
+#'
+#' \dontrun{
+#' ## Plot Degree 0 (frequency) Joint CDF
+#' x=rnorm(100);y=rnorm(100)
+#' intervals=(max(x,y)-min(x,y))/100
+#' grid.points=seq(min(x,y),max(x,y),intervals)
+#' z=expand.grid(grid.points,grid.points)
+#' plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))
+#'
+#' ## Plot Degree 1 (area) Joint CDF
+#' plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))}
 #' @export
 
 
@@ -323,7 +334,10 @@ UPM.ratio<- function(degree,target,variable){
 #' NNS PDF
 #'
 #' This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
+#'
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param variable a numeric vector.
+#' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.
 #' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
 #' @param plot logical; plots PDF.
 #' @return vector representing PDF of a variable
@@ -334,17 +348,19 @@ UPM.ratio<- function(degree,target,variable){
 #' @examples
 #' set.seed(123)
 #' x<-rnorm(100)
-#' NNS.PDF(x)
+#' NNS.PDF(degree=1,x)
 #' @export
 
 
-NNS.PDF<-function(variable,bins=NULL,plot=TRUE){
-tgt=sort(variable)
-# Arbitrary d/dx approximation
+NNS.PDF<-function(degree,variable,target=NULL,bins=NULL,plot=TRUE){
+if(is.null(target)){target=sort(variable)}
+# d/dx approximation
 if(is.null(bins)){bins=length(variable)}
-d.dx=(max(variable)+abs(min(variable)))/bins
-PDF=(LPM.ratio(1,tgt+d.dx,variable)-LPM.ratio(1,tgt-d.dx,variable))
-if(plot==TRUE){plot(sort(variable),PDF,col='blue',type='l',lwd=3,xlab="X")}
+d.dx=(max(target)+abs(min(target)))/bins
+tgt=seq(min(target),max(target),d.dx)
+PDF=(LPM.ratio(degree,tgt+d.dx,variable)-LPM.ratio(degree,tgt-d.dx,variable))
+
+if(plot==TRUE){plot(sort(tgt),PDF,col='blue',type='l',lwd=3,xlab="X")}
 
 PDF
 }

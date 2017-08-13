@@ -5,9 +5,9 @@
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
 #' @param binary logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.
 #' @param confidence.interval numeric [0,1]; The confidence interval surrounding the control mean when \code{(binary=TRUE)}.  Defaults to \code{(confidence.interval=0.95)}.
+#' @param tails options: ("Left", "Right", "Both").  \code{tails="Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise=TRUE}.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.
-#' @param extend options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.
 #' @return For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].
 #'
 #' For \code{(binary=TRUE)} returns:
@@ -43,14 +43,14 @@
 #' @export
 
 
-NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,plot=TRUE,binary=TRUE,extend=NULL){
+NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,tails="Both",pairwise=FALSE,plot=TRUE,binary=TRUE){
 
     if(missing(treatment)){
         n= ncol(control)
         if(is.null(n)){stop("supply both 'control' and 'treatment' or a matrix-like 'control'")}
         if(n==1){stop("supply both 'control' and 'treatment' or a matrix-like 'control'")}
         if(n>=2){A=control}
-    } else {return(NNS.ANOVA.bin(control,treatment,confidence.interval,plot=plot,extend=extend))}
+    } else {return(NNS.ANOVA.bin(control,treatment,confidence.interval,plot=plot,tails=tails))}
 
     mean.of.means <- mean(colMeans(A))
     n<- ncol(A)
@@ -60,7 +60,7 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,pairwise=FALSE,p
 
 
   #Continuous CDF for each variable from Mean of Means
-        LPM_ratio=sapply(1:ncol(A), function(b) LPM(1,mean.of.means,A[,b])/(LPM(1,mean.of.means,A[,b])+UPM(1,mean.of.means,A[,b])))
+        LPM_ratio=sapply(1:ncol(A), function(b) LPM.ratio(1,mean.of.means,A[,b]))
 
   #Continuous CDF Deviation from 0.5
         MAD.CDF=abs(LPM_ratio-.5)
