@@ -66,10 +66,12 @@ UPM<- Vectorize(UPM,vectorize.args = 'target')
 
 
 Co.UPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  x[x<=target.x]<- 0;y[y<=target.y]<- 0
+  zeros=sum(x==target.x,y==target.y)
+  x=x-target.x;y=y-target.y
+  x[x<=0]<- 0;y[y<=0]<- 0
   x[x>0]<- x[x>0]^degree.x
   y[y>0]<- y[y>0]^degree.y
-  return(sum(x*y)/length(x))
+  return(sum(x*y)/(length(x)-zeros))
   }
 Co.UPM<- Vectorize(Co.UPM,vectorize.args = c('target.x','target.y'))
 
@@ -95,10 +97,12 @@ Co.UPM<- Vectorize(Co.UPM,vectorize.args = c('target.x','target.y'))
 #' @export
 
 Co.LPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  x[x>target.x]<- 0;y[y>target.y]<- 0
+  zeros=sum(x==target.x,y==target.y)
+  x=target.x-x;y=target.y-y
+  x[x<0]<- 0;y[y<0]<- 0
   x[x>0]<- x[x>0]^degree.x
   y[y>0]<- y[y>0]^degree.y
-  return(sum(x*y)/length(x))
+  return(sum(x*y)/(length(x)-zeros))
   }
 Co.LPM<- Vectorize(Co.LPM,vectorize.args = c('target.x','target.y'))
 
@@ -124,10 +128,12 @@ Co.LPM<- Vectorize(Co.LPM,vectorize.args = c('target.x','target.y'))
 #' @export
 
 D.LPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  x[x>target.x]<- 0;y[y<=target.y]<- 0
+  zeros=sum(x==target.x,y==target.y)
+  x=x-target.x;y=target.y-y
+  x[x<=0]<- 0;y[y<0]<- 0
   x[x>0]<- x[x>0]^degree.x
   y[y>0]<- y[y>0]^degree.y
-  return(sum(x*y)/length(x))
+  return(sum(x*y)/(length(x)-zeros))
   }
 D.LPM<- Vectorize(D.LPM,vectorize.args = c('target.x','target.y'))
 
@@ -153,10 +159,12 @@ D.LPM<- Vectorize(D.LPM,vectorize.args = c('target.x','target.y'))
 #' @export
 
 D.UPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  x[x<=target.x]<- 0;y[y>target.y]<- 0
+  zeros=sum(x==target.x,y==target.y)
+  x=target.x-x;y=y-target.y
+  x[x<0]<- 0;y[y<=0]<- 0
   x[x>0]<- x[x>0]^degree.x
   y[y>0]<- y[y>0]^degree.y
-  return(sum(x*y)/length(x))
+  return(sum(x*y)/(length(x)-zeros))
  }
 D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
 
