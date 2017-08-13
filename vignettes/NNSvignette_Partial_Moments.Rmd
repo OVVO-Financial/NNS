@@ -94,7 +94,7 @@ plot(sort(x),LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3,xlab="x")
 
 ##PDFs
 ```{r pdfs}
-NNS.PDF(x)
+NNS.PDF(degree=1,x)
 ```
 
 ##Numerical Integration

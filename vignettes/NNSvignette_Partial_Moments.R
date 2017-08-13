@@ -60,7 +60,7 @@ Co.LPM(0,0,x,y,c(0,1),c(0,1))
 plot(sort(x),LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3,xlab="x")
 
 ## ----pdfs----------------------------------------------------------------
-NNS.PDF(x)
+NNS.PDF(degree=1,x)
 
 ## ----numerical integration-----------------------------------------------
 x=seq(0,1,.001);y=x^2
