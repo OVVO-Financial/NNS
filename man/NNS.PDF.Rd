@@ -4,10 +4,14 @@
 \alias{NNS.PDF}
 \title{NNS PDF}
 \usage{
-NNS.PDF(variable, bins = NULL, plot = TRUE)
+NNS.PDF(degree, variable, target = NULL, bins = NULL, plot = TRUE)
 }
 \arguments{
+\item{degree}{integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
+
 \item{variable}{a numeric vector.}
+
+\item{target}{a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.}
 
 \item{bins}{numeric; \code{NULL} (default) Selects number of observations as default bins.}
 
@@ -22,7 +26,7 @@ This function generates an empirical PDF using continuous CDFs from \link{LPM.ra
 \examples{
 set.seed(123)
 x<-rnorm(100)
-NNS.PDF(x)
+NNS.PDF(degree=1,x)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
