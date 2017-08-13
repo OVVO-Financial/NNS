@@ -47,7 +47,8 @@ if(!is.null(confidence.interval)){
             if(plot==TRUE){
             if(tails=="Both"|tails=="Right"){
               abline(v=max(a,b),col="green",lwd=4,lty=3)
-              text(max(a,b),pos=4,0.75,"mu+",col="green")}
+              text(max(a,b),pos=2,0.75,"mu+",col="green")
+              text(max(a,b),pos=4,0.75,paste0((1-CI)*100,"% --->"),col="green")}
             }
 
         #Lower end of CDF confidence interval for control mean
@@ -56,7 +57,8 @@ if(!is.null(confidence.interval)){
             if(plot==TRUE){
             if(tails=="Both"|tails=="Left"){
               abline(v=min(c,d),col="blue",lwd=4,lty=3)
-              text(min(c,d),pos=2,0.75,"mu-",col="blue")}
+              text(min(c,d),pos=4,0.75,"mu-",col="blue")
+              text(min(c,d),pos=2,0.75,paste0( "<--- ",(1-CI)*100,"%"),col='blue')}
             }
 
   #Effect Size Lower Bound
