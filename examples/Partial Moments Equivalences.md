@@ -123,7 +123,7 @@ y 0.1469182 0.0000000
 > plot(sort(x),PDF,col='blue',type='l',lwd=3,xlab="x")
 ```
 ### Numerical Integration - [UPM(1,0,f(x))-LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
-```{r}
+```r
 # x is uniform sample over interval [a,b]; y = f(x)
 > x=seq(0,1,.001);y=x^2
 > UPM(1,0,y)-LPM(1,0,y)
@@ -131,7 +131,7 @@ y 0.1469182 0.0000000
 ```
 
 ### Bayes' Theorem
-```{r}
+```r
 See the following example explaining Bayes' Theorem and partial moments: 
 ```
 https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf
