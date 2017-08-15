@@ -28,10 +28,9 @@ NNS.FSD <- function(x,y,type="discrete"){
 
  ## Indicator function ***for all values of x and y*** as the continuous CDF target
   if(type=="discrete"){degree=0}else{degree=1}
-  L.x = LPM(degree,Combined_sort,x)
-  LPM_x_sort=L.x/(UPM(degree,Combined_sort,x)+L.x)
-  L.y = LPM(degree,Combined_sort,y)
-  LPM_y_sort=L.y/(UPM(degree,Combined_sort,y)+L.y)
+    LPM_x_sort=LPM.ratio(degree,Combined_sort,x)
+    LPM_y_sort=LPM.ratio(degree,Combined_sort,y)
+
 
   x.fsd.y=any(LPM_x_sort>LPM_y_sort)
 
