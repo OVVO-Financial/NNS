@@ -77,16 +77,16 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
 
 
     Causes.xy=c(Causation.x.given.y.tau0,
-                Causation.x.given.y.tau1,
-                Causation.x.given.y.tau2,
-                Causation.x.given.y.tau3,
-                Causation.x.given.y.tau4)
+                Causation.x.given.y.tau1/2,
+                Causation.x.given.y.tau2/4,
+                Causation.x.given.y.tau3/8,
+                Causation.x.given.y.tau4/16)
 
     Causes.yx=c(Causation.y.given.x.tau0,
-                Causation.y.given.x.tau1,
-                Causation.y.given.x.tau2,
-                Causation.y.given.x.tau3,
-                Causation.y.given.x.tau4)
+                Causation.y.given.x.tau1/2,
+                Causation.y.given.x.tau2/4,
+                Causation.y.given.x.tau3/8,
+                Causation.y.given.x.tau4/16)
 
 
     Causation.x.given.y=mean(Causes.xy)
