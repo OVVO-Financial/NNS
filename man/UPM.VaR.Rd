@@ -4,7 +4,7 @@
 \alias{UPM.VaR}
 \title{UPM VaR}
 \usage{
-UPM.VaR(percentile, degree, x, extend = NULL)
+UPM.VaR(percentile, degree, x)
 }
 \arguments{
 \item{percentile}{numeric [0,1]; The percentile for right-tail VaR.}
@@ -12,8 +12,6 @@ UPM.VaR(percentile, degree, x, extend = NULL)
 \item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
-
-\item{extend}{options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
 Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.

@@ -4,7 +4,7 @@
 \alias{LPM.VaR}
 \title{LPM VaR}
 \usage{
-LPM.VaR(percentile, degree, x, extend = NULL)
+LPM.VaR(percentile, degree, x)
 }
 \arguments{
 \item{percentile}{numeric [0,1]; The percentile for left-tail VaR.}
@@ -12,17 +12,12 @@ LPM.VaR(percentile, degree, x, extend = NULL)
 \item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
-
-\item{extend}{options: ("yes", NULL); \code{NULL} (default) Sets the \code{"extendInt"} argument from \link{uniroot}.}
 }
 \value{
 Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 }
 \description{
 Generates a VaR based on the Lower Partial Moment ratio
-}
-\note{
-If endpoint error is generated, set \code{(extend="yes")}.
 }
 \examples{
 set.seed(123)
@@ -37,4 +32,6 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{VaR}
+\keyword{Confidence}
+\keyword{Interval}
+\keyword{VaR,}

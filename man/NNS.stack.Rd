@@ -5,8 +5,8 @@
 \title{NNS stack}
 \usage{
 NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
-  weight = "MSE", norm = NULL, method = c(1, 2), dim.red.method = "cor",
-  seed = 123)
+  weight = "MSE", order = NULL, norm = NULL, method = c(1, 2),
+  dim.red.method = "cor", seed = 123)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -18,6 +18,8 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 \item{CV.size}{numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.}
 
 \item{weight}{options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.}
+
+\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order='max')} is the k-nearest neighbors equivalent.}
 
 \item{norm}{options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
 
