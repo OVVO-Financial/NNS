@@ -42,7 +42,7 @@ if(!is.null(confidence.interval)){
         }
 
 
-            a=UPM.VaR(CI,1,control,extend = "yes")
+            a=UPM.VaR(CI,1,control)
             b=mean(control)
             if(plot==TRUE){
             if(tails=="Both"|tails=="Right"){
@@ -52,7 +52,7 @@ if(!is.null(confidence.interval)){
             }
 
         #Lower end of CDF confidence interval for control mean
-            c=LPM.VaR(CI,1,control,extend = "yes")
+            c=LPM.VaR(CI,1,control)
             d=mean(control)
             if(plot==TRUE){
             if(tails=="Both"|tails=="Left"){

@@ -7,6 +7,7 @@
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param CV.size numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.
 #' @param weight options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.
+#' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order='max')} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
 #' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
@@ -50,7 +51,7 @@
 #'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 #' @export
 
-NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",norm=NULL,method=c(1,2),dim.red.method="cor",seed=123){
+NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",order=NULL,norm=NULL,method=c(1,2),dim.red.method="cor",seed=123){
 
 
 
@@ -105,9 +106,9 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
 
   if(1%in%method){
 
-    nns.cv=sapply(1:(2*n),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i)$Point.est-CV.DV.test)^2))
+    nns.cv=sapply(1:(2*n),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i, order=order)$Point.est-CV.DV.test)^2))
 
-    nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all')$Point.est-CV.DV.test)^2))
+    nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all',order=order)$Point.est-CV.DV.test)^2))
 
     k=which.min(na.omit(nns.cv))
     if(k==length(nns.cv)){k='all'}else{k=k}
@@ -133,7 +134,8 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
     nns.ord.mse=min(na.omit(nns.ord))
   } else {nns.2=0
   nns.ord=1e-10
-  nns.ord.mse='N/A'}
+  nns.ord.mse=NA
+  var.cutoffs=NA}
 
 
 

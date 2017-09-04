@@ -159,7 +159,7 @@ NNS.diff<- function(f,point,h=0.1,tol=1e-10,print.trace=FALSE){
 
       legend('topright',c("Upper y-intercept","Lower y-intercept","Mean y-intercept"),col= c('blue','red','green'),pch=c(1,1,19),bty = 'n')
 
-
+      par(mfrow=c(1,1))
 
       return(as.matrix(c("Value of f(x) at point"=f(point),
                          "Final y-intercept (B)" = final.B,
