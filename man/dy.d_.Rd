@@ -15,7 +15,7 @@ dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.99,
 
 \item{wrt}{integer; Selects the regressor to differentiate with respect to.}
 
-\item{eval.points}{numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{eval.points="median"} (default) to find partial derivatives at the median of every variable.  Set to \code{eval.points="last"} to find partial derivatives at the last value of every variable.  Set to \code{eval.points="mean"} to find partial derivatives at the mean value of every variable.}
+\item{eval.points}{numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{eval.points="median"} (default) to find partial derivatives at the median of every variable.  Set to \code{eval.points="last"} to find partial derivatives at the last value of every variable.  Set to \code{eval.points="mean"} to find partial derivatives at the mean value of every variable. Set to \code{eval.points="all"} to find partial derivatives at every observation.}
 
 \item{order}{integer; \link{NNS.reg} \code{"order"}, defaults to NULL.}
 
@@ -38,6 +38,7 @@ Returns:
 \item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
 \item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
 }
+Retuns a vector of partial derivatives when \code{eval.points="all"}.
 }
 \description{
 Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x+h)} and \code{f(x-h)} values.
