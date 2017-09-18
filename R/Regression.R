@@ -178,7 +178,7 @@ NNS.reg = function (x,y,
     } else {
       if(dim.red==FALSE){
         if(!is.null(original.columns)){
-          if(is.null(n.best)){n.best=2*original.columns} }
+          if(is.null(n.best)){n.best=ceiling(sqrt(original.columns))} }
         else{if(is.null(n.best)){n.best=2} }
 
         return(NNS.M.reg(x,y,point.est=point.est,plot=plot,residual.plot=plot,order=order,n.best=n.best,type=type,location=location,noise.reduction=noise.reduction,norm = norm,dist=dist,stn = stn,return.values=return.values,plot.regions = plot.regions))
