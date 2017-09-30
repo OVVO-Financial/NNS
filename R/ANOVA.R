@@ -20,7 +20,6 @@
 #' \item{\code{"Certainty"}} the certainty of the same population statistic
 #' \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the treatment for the specified confidence interval
 #' }
-#' @note If endpoint error is generated, set \code{(extend="yes")}.
 #' @keywords ANOVA, effect size
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

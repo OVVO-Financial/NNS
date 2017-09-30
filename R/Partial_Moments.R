@@ -348,7 +348,7 @@ UPM.ratio<- function(degree,target,variable){
 #' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.
 #' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
 #' @param plot logical; plots PDF.
-#' @return vector representing PDF of a variable
+#' @return Returns a vector representing PDF of a variable
 #' @keywords partial moments, PDF, continuous CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

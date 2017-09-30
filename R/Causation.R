@@ -4,8 +4,8 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param tau options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{tau="cs"} for cross-sectional data.  \code{tau="ts"} automatically selects the lag of the time series data, while \code{tau=(integer)} specifies a time series lag.
-#' @param time.series logical; \code{FALSE} (default) If analyzing time series data with \code{tau=(integer)}, select \code{time.series=TRUE}.  Not required when \code{tau="ts"}.
+#' @param tau options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau="cs")} for cross-sectional data.  \code{(tau="ts")} automatically selects the lag of the time series data, while \code{(tau=[integer])} specifies a time series lag.
+#' @param time.series logical; \code{FALSE} (default) If analyzing time series data with \code{tau=(integer)}, select \code{(time.series=TRUE)}.  Not required when \code{(tau="ts")}.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
 #' @keywords causation
