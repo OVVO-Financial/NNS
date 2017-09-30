@@ -18,20 +18,20 @@ require(rgl)
 # Clustering and Regression
 Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
 
-##NNS Partitioning `NNS.part`
+##NNS Partitioning <span style="color:red">`NNS.part`</span>
 `NNS.part` is both a partitional and hierarchal clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification at each partition.
 
 `NNS.part` returns a data.table of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in `NNS.reg`.
-```{r linear}
+```{r linear,results='hide'}
 x=seq(-5,5,.05); y=x^3
 
-NNS.part(x,y,Voronoi = T)
+for(i in 1:4){NNS.part(x,y,order=i,Voronoi = T)}
 ```
 
 ### X-only Partitioning
 `NNS.part` offers a partitioning based on $x$ values only, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
-```{r x part}
-NNS.part(x,y,Voronoi = T,type="XONLY",order=3)
+```{r x part,results='hide'}
+for(i in 1:4){NNS.part(x,y,order=i,type="XONLY",Voronoi = T)}
 ```
 
 ##Clusters Used in Regression

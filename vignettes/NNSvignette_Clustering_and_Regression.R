@@ -4,13 +4,13 @@ require(NNS)
 require(knitr)
 require(rgl)
 
-## ----linear--------------------------------------------------------------
+## ----linear,results='hide'-----------------------------------------------
 x=seq(-5,5,.05); y=x^3
 
-NNS.part(x,y,Voronoi = T)
+for(i in 1:4){NNS.part(x,y,order=i,Voronoi = T)}
 
-## ----x part--------------------------------------------------------------
-NNS.part(x,y,Voronoi = T,type="XONLY",order=3)
+## ----x part,results='hide'-----------------------------------------------
+for(i in 1:4){NNS.part(x,y,order=i,type="XONLY",Voronoi = T)}
 
 ## ----depreg,results='hide'-----------------------------------------------
 for(i in 1:3){NNS.part(x,y,order=i,Voronoi = T);NNS.reg(x,y,order=i)}
