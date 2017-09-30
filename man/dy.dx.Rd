@@ -15,7 +15,7 @@ dy.dx(x, y, order = NULL, stn = 0.99, eval.point = median(x),
 
 \item{order}{integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order=NULL)} which generates a more accurate derivative for well specified cases.}
 
-\item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
+\item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
 
 \item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.point="overall")} to find an overall partial derivative estimate.}
 
@@ -33,9 +33,15 @@ Returns the value of the partial derivative estimate for the given order.
 \description{
 Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
 }
+\note{
+If a vector of derivatives is required, ensure \code{(deriv.method="FS")}.
+}
 \examples{
 x<-seq(0,2*pi,pi/100); y<-sin(x)
 dy.dx(x,y,eval.point=1.75)
+
+# Vector of derivatives
+dy.dx(x,y,eval.point=1.75,deriv.method="FS")
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

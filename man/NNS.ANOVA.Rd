@@ -39,9 +39,6 @@ For \code{(binary=TRUE)} returns:
 \description{
 Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
 }
-\note{
-If endpoint error is generated, set \code{(extend="yes")}.
-}
 \examples{
 ### Binary analysis and effect size
 set.seed(123)

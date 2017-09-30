@@ -18,7 +18,7 @@ NNS.PDF(degree, variable, target = NULL, bins = NULL, plot = TRUE)
 \item{plot}{logical; plots PDF.}
 }
 \value{
-vector representing PDF of a variable
+Returns a vector representing PDF of a variable
 }
 \description{
 This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
