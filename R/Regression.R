@@ -7,7 +7,7 @@
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.
 #' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
-#' @param tau options("ts", NULL); \code{NULL}(default) If \code{dim.red.method="NNS.caus"} or \code{dim.red.method="all"} and the regression is using time-series data, set \code{tau="ts"} for more accurate causal analysis.
+#' @param tau options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method="NNS.caus")} or \code{(dim.red.method="all")} and the regression is using time-series data, set \code{(tau="ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
@@ -15,7 +15,7 @@
 #' @param plot  logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
-#' @param threshold  numeric [0,1]; \code{threshold=0} (default) Sets the correlation threshold for independent variables.
+#' @param threshold  numeric [0,1]; \code{(threshold=0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at 2*(# of regressors).  \code{(n.best="all")} will select and weight all generated regression points.  Analogous to \code{k} in \code{k Nearest Neighbors} algorithm and different values are tested using cross-validation in \link{NNS.stack}.
 #' @param noise.reduction the method of determing regression points options: ("mean","median","mode","off"); In low signal:noise situations,\code{(noise.reduction="mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction="median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction="mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit with a specific \code{order}.
 #' @param norm \code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.
@@ -156,7 +156,7 @@ NNS.reg = function (x,y,
     x=apply(x,2,as.numeric)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){point.est=as.numeric(point.est)}else{
-      point.est=apply(point.est,2,as.numeric)}
+        point.est=apply(point.est,2,as.numeric)}
     }
   }
 
@@ -166,9 +166,9 @@ NNS.reg = function (x,y,
 
   if(noise.reduction=='off'){stn=0}
   if(!is.null(type)){
-  if(type=="CLASS"){
-    if(is.null(n.best)){n.best=1}
-  }}
+    if(type=="CLASS"){
+      if(is.null(n.best)){n.best=1}
+    }}
 
 
 
@@ -183,92 +183,92 @@ NNS.reg = function (x,y,
 
         return(NNS.M.reg(x,y,point.est=point.est,plot=plot,residual.plot=plot,order=order,n.best=n.best,type=type,location=location,noise.reduction=noise.reduction,norm = norm,dist=dist,stn = stn,return.values=return.values,plot.regions = plot.regions))
       } # Multivariate dim.red==FALSE
-          else{
-              if(dim.red==TRUE){
+      else{
+        if(dim.red==TRUE){
 
-                if(is.null(original.names)){
-                  colnames.list=list()
-                  for(i in 1:ncol(x)){
-                    colnames.list[i]=paste0("X",i)
-                  }} else {
-                    colnames.list=original.names}
+          if(is.null(original.names)){
+            colnames.list=list()
+            for(i in 1:ncol(x)){
+              colnames.list[i]=paste0("X",i)
+            }} else {
+              colnames.list=original.names}
 
-                  x= data.matrix(x)
-                  y= as.numeric(y)
+          x= data.matrix(x)
+          y= as.numeric(y)
 
-                  x.star.matrix = matrix(nrow=length(y))
-                  x.star.dep = NNS.dep(cbind(x,y))
-                  x.star.cor = cor(cbind(x,y))
-
-
-                  if(dim.red.method=="NNS.cor"){
-                    x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
-                  }
-
-                  if(dim.red.method=="cor"){
-                    x.star.coef = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
-                  }
-
-                  if(dim.red.method=="NNS.caus"){
-                    if(is.null(tau)){tau="cs"}
-                    x.star.coef=numeric()
-                    for(i in 1:ncol(x)){
-                      cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
-                      x.star.coef[i]=cause[1]-cause[2]
-                    }
-                  }
-
-                  if(dim.red.method=="all"){
-                    if(is.null(tau)){tau="cs"}
-                    x.star.coef.1=numeric()
-                    for(i in 1:ncol(x)){
-                      cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
-                      x.star.coef.1[i]=cause[1]-cause[2]
-                    }
-                    x.star.coef.3 = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
-                    x.star.coef.2 = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
-                    x.star.coef = rowMeans(cbind(x.star.coef.1,x.star.coef.2,x.star.coef.3))
-                  }
-
-                  x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]
-
-                  x.star.coef[abs(x.star.coef)<threshold]<- 0
-
-                  x.star.matrix=t(t(original.variable) * x.star.coef)
+          x.star.matrix = matrix(nrow=length(y))
+          x.star.dep = NNS.dep(cbind(x,y))
+          x.star.cor = cor(cbind(x,y))
 
 
+          if(dim.red.method=="NNS.cor"){
+            x.star.coef = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+          }
 
-                  #In case all IVs have 0 correlation to DV
-                  if(all(x.star.matrix==0)){
-                      x.star.matrix=x
-                      x.star.coef[x.star.coef==0]<- 1
-                  }
+          if(dim.red.method=="cor"){
+            x.star.coef = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
+          }
 
-                  DENOMINATOR=sum(abs(x.star.coef)>0)
+          if(dim.red.method=="NNS.caus"){
+            if(is.null(tau)){tau="cs"}
+            x.star.coef=numeric()
+            for(i in 1:ncol(x)){
+              cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
+              x.star.coef[i]=cause[1]-cause[2]
+            }
+          }
 
-                  synthetic.x.equation.coef=data.table(Variable=colnames.list,Coefficient=x.star.coef)
+          if(dim.red.method=="all"){
+            if(is.null(tau)){tau="cs"}
+            x.star.coef.1=numeric()
+            for(i in 1:ncol(x)){
+              cause=NNS.caus(x[,i],y,tau=tau,plot=FALSE)
+              x.star.coef.1[i]=cause[1]-cause[2]
+            }
+            x.star.coef.3 = x.star.cor[-(ncol(x)+1),(ncol(x)+1)]
+            x.star.coef.2 = x.star.dep$Correlation[-(ncol(x)+1),(ncol(x)+1)]
+            x.star.coef = rowMeans(cbind(x.star.coef.1,x.star.coef.2,x.star.coef.3))
+          }
 
-                  synthetic.x.equation=rbindlist(list(synthetic.x.equation.coef, list("DENOMINATOR",DENOMINATOR)))
+          x.star.dep = x.star.dep$Dependence[-(ncol(x)+1),(ncol(x)+1)]
+
+          x.star.coef[abs(x.star.coef)<threshold]<- 0
+
+          x.star.matrix=t(t(original.variable) * x.star.coef)
 
 
-                  if(!is.null(point.est)){
-                      new.point.est=numeric()
-                      if(is.null(np)){
 
-                          new.point.est= sum(point.est*x.star.coef)/sum(abs(x.star.coef)>0)
-                      }
-                        else{
-                          new.point.est=sapply(1:np,function(i) sum(point.est[i,]*x.star.coef)/sum(abs(x.star.coef)>0))
+          #In case all IVs have 0 correlation to DV
+          if(all(x.star.matrix==0)){
+            x.star.matrix=x
+            x.star.coef[x.star.coef==0]<- 1
+          }
 
-                        }
-                    point.est=new.point.est
-                  }
+          DENOMINATOR=sum(abs(x.star.coef)>0)
 
-                  x = rowSums(x.star.matrix/sum(abs(x.star.coef)>0))
-                  x.star = data.table(x.star=x)
-              } # Multivariate "CLASS" type
-          } #Multivariate Not NULL type
-      }
+          synthetic.x.equation.coef=data.table(Variable=colnames.list,Coefficient=x.star.coef)
+
+          synthetic.x.equation=rbindlist(list(synthetic.x.equation.coef, list("DENOMINATOR",DENOMINATOR)))
+
+
+          if(!is.null(point.est)){
+            new.point.est=numeric()
+            if(is.null(np)){
+
+              new.point.est= sum(point.est*x.star.coef)/sum(abs(x.star.coef)>0)
+            }
+            else{
+              new.point.est=sapply(1:np,function(i) sum(point.est[i,]*x.star.coef)/sum(abs(x.star.coef)>0))
+
+            }
+            point.est=new.point.est
+          }
+
+          x = rowSums(x.star.matrix/sum(abs(x.star.coef)>0))
+          x.star = data.table(x.star=x)
+        } # Multivariate "CLASS" type
+      } #Multivariate Not NULL type
+    }
 
   } #Multivariate
 
@@ -284,10 +284,10 @@ NNS.reg = function (x,y,
     if(dim.red==TRUE) dependence=(mean(x.star.dep))^(1/3)}
 
   if(is.null(order)){
-      dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
-      else {
-      dep.reduced.order=order
-      }
+    dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
+  else {
+    dep.reduced.order=order
+  }
 
   if(dependence>stn ){
     if(is.null(type)){
@@ -397,12 +397,12 @@ NNS.reg = function (x,y,
   estimate=((x- regression.points[reg.interval,x])*Regression.Coefficients[coef.interval,Coefficient])+regression.points[reg.interval,y]
 
   if(!is.null(point.est)){
-  coef.point.interval=findInterval(point.est,Regression.Coefficients[,(X.Lower.Range)],left.open = FALSE)
-  reg.point.interval=findInterval(point.est,regression.points[,x],left.open=FALSE)
-  coef.point.interval[coef.point.interval==0]<- 1
-  reg.point.interval[reg.point.interval==0]<- 1
-  point.est.y=((point.est - regression.points[reg.point.interval,x])*Regression.Coefficients[coef.point.interval,Coefficient])+regression.points[reg.point.interval,y]
-  }
+    coef.point.interval=findInterval(point.est,Regression.Coefficients[,(X.Lower.Range)],left.open = FALSE)
+    reg.point.interval=findInterval(point.est,regression.points[,x],left.open=FALSE)
+    coef.point.interval[coef.point.interval==0]<- 1
+    reg.point.interval[reg.point.interval==0]<- 1
+    point.est.y=((point.est - regression.points[reg.point.interval,x])*Regression.Coefficients[coef.point.interval,Coefficient])+regression.points[reg.point.interval,y]
+  } else {point.est.y=NULL}
 
   setkey(part.map$dt,"x")
   fitted=(data.table(x=x,y=y,y.hat=estimate,NNS.ID=part.map$dt$quadrant))
@@ -413,7 +413,9 @@ NNS.reg = function (x,y,
   MSE = fitted[,mean(y.hat-y)^2]
   y.fitted=fitted[,y.hat]
 
-  Prediction.Accuracy=(length(y)-sum(abs(round(y.fitted)-(y))>0))/length(y)
+  if(!is.null(type)){
+  Prediction.Accuracy=(length(y)-sum(abs(round(y.fitted)-(y))>0))/length(y)}
+  else{Prediction.Accuracy=NULL}
 
   R2=  (sum((fitted[,y.hat]-mean(y))*(y-mean(y)))^2)/(sum((y-mean(y))^2)*sum((fitted[,y.hat]-mean(y))^2))
 
@@ -432,7 +434,7 @@ NNS.reg = function (x,y,
 
     plot(x,y,xlim=c(xmin,xmax),ylim=c(ymin,ymax),col='steelblue',main=paste(paste0("NNS Order = ", plot.order),sep="\n"),
          xlab = if(!is.null(original.columns))
-            {if(original.columns>1){paste0("Synthetic X* ","(Segments = ",(p-1),')')}}else{paste0("X  ","(Segments = ",(p-1),")",sep='')},
+         {if(original.columns>1){paste0("Synthetic X* ","(Segments = ",(p-1),')')}}else{paste0("X  ","(Segments = ",(p-1),")",sep='')},
          ylab="Y",mgp=c(2.5,0.5,0),
          cex.lab=2,cex.main=2)
 
@@ -443,7 +445,7 @@ NNS.reg = function (x,y,
 
     if(!is.null(point.est)){
       points(point.est,point.est.y,
-                                    col='green',pch=18,cex=1.5)
+             col='green',pch=18,cex=1.5)
 
       legend(location, bty="n", y.intersp = 0.75,legend=r2.leg)}
 
@@ -452,11 +454,11 @@ NNS.reg = function (x,y,
     }
 
     if(!is.null(point.est)){
-        if(sum(point.est>max(x))>0){
-          segments(point.est[point.est>max(x)],point.est.y[point.est>max(x)],regression.points[.N,x],regression.points[.N,y],col="green",lty=2)}
-        if(sum(point.est<min(x))>0){
-          segments(point.est[point.est<min(x)],point.est.y[point.est<min(x)],regression.points[1,x],regression.points[1,y],col="green",lty=2)
-       }
+      if(sum(point.est>max(x))>0){
+        segments(point.est[point.est>max(x)],point.est.y[point.est>max(x)],regression.points[.N,x],regression.points[.N,y],col="green",lty=2)}
+      if(sum(point.est<min(x))>0){
+        segments(point.est[point.est<min(x)],point.est.y[point.est<min(x)],regression.points[1,x],regression.points[1,y],col="green",lty=2)
+      }
     }
   }# plot TRUE bracket
 

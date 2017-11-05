@@ -92,13 +92,13 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     }
 
 }}
-  #Vectors generator for 1:lag
-  generate.vectors=function(lag,j){
+  # Generator for 1:length(lag) vectors
+  generate.vectors=function(l){
     Component.series = list()
     Component.index = list()
 
-    for (i in 1:length(lag)){
-      CS=rev(variable[seq(length(variable)+1,1,-lag[i])])
+    for (i in 1:length(l)){
+      CS=rev(variable[seq(length(variable)+1,1,-l[i])])
       CS=CS[!is.na(CS)]
       Component.series[[paste('Series.',i,sep="")]] <- CS
       Component.index[[paste('Index.',i,sep="")]] <- (1:length(CS))
@@ -132,7 +132,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       if(method=='nonlin' | method=='both'){
 
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0)$Point.est)
+          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order = NULL,plot = FALSE,stn=0)$Point.est)
 
         if(negative.values==FALSE){
           Regression.Estimates=pmax(0,Regression.Estimates)
@@ -202,7 +202,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
     for (j in 0:(h-1)){
       # Generate vectors for 1:lag
-      GV=generate.vectors(lag,j)
+      GV=generate.vectors(lag)
       Component.index=GV$Component.index
       Component.series=GV$Component.series
 
@@ -212,7 +212,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       if(method=='nonlin' | method=='both'){
 
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = TRUE,order = NULL,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est)
+          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order = NULL,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est)
 
         if(negative.values==FALSE){
           Regression.Estimates=pmax(0,Regression.Estimates)
