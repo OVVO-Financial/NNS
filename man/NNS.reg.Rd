@@ -22,7 +22,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.}
 
-\item{tau}{options("ts", NULL); \code{NULL}(default) If \code{dim.red.method="NNS.caus"} or \code{dim.red.method="all"} and the regression is using time-series data, set \code{tau="ts"} for more accurate causal analysis.}
+\item{tau}{options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method="NNS.caus")} or \code{(dim.red.method="all")} and the regression is using time-series data, set \code{(tau="ts")} for more accurate causal analysis.}
 
 \item{type}{\code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.}
 
@@ -38,7 +38,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{residual.plot}{logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.}
 
-\item{threshold}{numeric [0,1]; \code{threshold=0} (default) Sets the correlation threshold for independent variables.}
+\item{threshold}{numeric [0,1]; \code{(threshold=0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at 2*(# of regressors).  \code{(n.best="all")} will select and weight all generated regression points.  Analogous to \code{k} in \code{k Nearest Neighbors} algorithm and different values are tested using cross-validation in \link{NNS.stack}.}
 
