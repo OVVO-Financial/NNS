@@ -151,13 +151,19 @@ NNS.reg = function (x,y,
 
   if(is.null(ncol(x))){
     x=as.numeric(x)
-    if(!is.null(point.est)){point.est=as.numeric(point.est)}
+    if(!is.null(point.est)){
+      point.est=as.numeric(point.est)
+      point.est.y=numeric()
+      }else {point.est.y=NULL}
   }else{
     x=apply(x,2,as.numeric)
     if(!is.null(point.est)){
-      if(is.null(ncol(point.est))){point.est=as.numeric(point.est)}else{
-        point.est=apply(point.est,2,as.numeric)}
-    }
+      if(is.null(ncol(point.est))){
+        point.est=as.numeric(point.est)
+        point.est.y=numeric()}else{
+        point.est=apply(point.est,2,as.numeric)
+        point.est.y=numeric()}
+    } else {point.est.y=NULL}
   }
 
   original.variable = x
@@ -386,7 +392,7 @@ NNS.reg = function (x,y,
   fitted.order = numeric()
 
   point.order=numeric()
-  point.est.y=numeric()
+
 
   if(is.na(Regression.Coefficients[1,Coefficient])){Regression.Coefficients[1,Coefficient:= Regression.Coefficients[2,Coefficient] ]}
   if(is.na(Regression.Coefficients[.N,Coefficient])){Regression.Coefficients[.N,Coefficient:= Regression.Coefficients[.N-1,Coefficient] ]}
@@ -402,7 +408,7 @@ NNS.reg = function (x,y,
     coef.point.interval[coef.point.interval==0]<- 1
     reg.point.interval[reg.point.interval==0]<- 1
     point.est.y=((point.est - regression.points[reg.point.interval,x])*Regression.Coefficients[coef.point.interval,Coefficient])+regression.points[reg.point.interval,y]
-  } else {point.est.y=NULL}
+  }
 
   setkey(part.map$dt,"x")
   fitted=(data.table(x=x,y=y,y.hat=estimate,NNS.ID=part.map$dt$quadrant))
