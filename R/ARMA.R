@@ -214,12 +214,14 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
           Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order = NULL,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est)
 
+
         if(negative.values==FALSE){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
 
         NL.Regression.Estimates=Regression.Estimates
         Nonlin.estimates=sum(Regression.Estimates*Weights)
+
       }#Linear == F
 
       if(method=='lin' | method=='both'){
@@ -277,7 +279,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     }
     label=names(variable)
     if(is.null(label)){label = "Variable"}
-    plot(OV, type = 'l',lwd=2,main = "Forecast",col='steelblue',
+    plot(OV, type = 'l',lwd=2,main = "NNS.ARMA Forecast",col='steelblue',
           xlim=c(1,max((training.set+h),length(OV))),
           ylab=label, ylim=c(min(Estimates, OV),max( OV,Estimates)))
 
