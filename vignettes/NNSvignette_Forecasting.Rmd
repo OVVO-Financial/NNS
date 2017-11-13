@@ -39,7 +39,7 @@ sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
 
 ## Cross-Validation
-Neither seem to fit well using our automatically genereated `seasonal.factor`.  We can test a series of `seasonal.factors` and select the best one to fit.  The largest period to consider would be `0.25 * length(variable)`, in our case 25.  Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
+Neither seem to fit well using our automatically generated `seasonal.factor`.  We can test a series of `seasonal.factors` and select the best one to fit.  The largest period to consider would be `0.25 * length(variable)`, in our case 25.  Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
 
 ```{r seasonal test}
 seas=t(sapply(1:25,function(i) c(i,sqrt(mean((NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',seasonal.factor=i,plot=FALSE)-tail(AirPassengers,44))^2)))))
@@ -49,6 +49,8 @@ seas
 
 
 Now we know `seasonal.factor = 12` is our best fit, we can see if there's any benefit from using a nonlinear regression.  Alternatively, we can define our best fit as the corresponding `seas$Period` entry of the minimum value in our `seas$RMSE` column.
+
+<span style = "color:red">You may experience instances with monthly data that report `seasonal.factor` close to multiples of 3, 4, 6 or 12.  For instance, if the reported `seasonal.factor = {37, 47, 71, 73}`  use  `(seasonal.factor=c(36,48,72))`.  The same suggestion holds for daily data and multiples of 7, or any other time series with logically inferred cyclical patterns.</span>
 
 ```{r best fit}
 a=seas[which.min(seas[,2]),1]
@@ -70,7 +72,7 @@ sqrt(mean((nns-tail(AirPassengers,44))^2))
 Indeed, using `method='both'` lowered our RMSE.  There are far fewer parameters to test using NNS than traditional methods and the relative simplicity of the method ensures robustness.
 
 ## Extension of Estimates
-Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` paramter.
+Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` parameter.
 
 ```{r extension,results='hide'}
 NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seasonal.plot = FALSE)
@@ -87,7 +89,7 @@ We also included the ability to use all detected seasonal periods simultaneously
 
 * `best.periods`
 
-This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjuction with  `seasonal.factor=FALSE`.
+This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjunction with  `seasonal.factor=FALSE`.
 
 * `dynamic=TRUE`
 

@@ -19,7 +19,7 @@ require(rgl)
 Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
 
 ##NNS Partitioning <span style="color:red">`NNS.part`</span>
-`NNS.part` is both a partitional and hierarchal clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification at each partition.
+`NNS.part` is both a partitional and hierarchical clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification at each partition.
 
 `NNS.part` returns a data.table of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in `NNS.reg`.
 ```{r linear,results='hide'}
@@ -58,7 +58,7 @@ NNS.reg(z,g,order='max')
 ```
 
 ###Inter/Extrapolation
-`NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x,y,point.est=...)` paramter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
+`NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x,y,point.est=...)` parameter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
 
 For a classification problem, we simply set `NNS.reg(x,y,type="CLASS",...)`
 ```{r iris point.est}
