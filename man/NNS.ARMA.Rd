@@ -13,15 +13,19 @@ NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
 
 \item{h}{integer; 1 (default) Number of periods to forecast.}
 
-\item{training.set}{numeric; \code{NULL} (defualt) Sets the number of variable observations \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.}
+\item{training.set}{numeric; \code{NULL} (defualt) Sets the number of variable observations
+\code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.}
 
 \item{seasonal.factor}{logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor=c(12,24,36))}}
 
-\item{best.periods}{integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when \code{(seasonal.factor=FALSE)}.}
+\item{best.periods}{integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+\code{(seasonal.factor=FALSE)}.}
 
-\item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to \code{(negative.values=TRUE)}.}
+\item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
+\code{(negative.values=TRUE)}.}
 
-\item{method}{options: ("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to \code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.}
+\item{method}{options: ("lin","nonlin","both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method="both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to
+\code{(method="nonlin")}; to use a linear regression set to \code{(method="lin")}.}
 
 \item{dynamic}{logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic=TRUE)}.  The default is \code{(dynamic=FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.}
 
@@ -38,11 +42,15 @@ Returns a vector of forecasts of length \code{(h)}.
 Autoregressive model incorporating nonlinear regressions of component series.
 }
 \note{
+For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
+\code{(seasonal.factor=c(36,48,72))}.
+
 \code{(seasonal.factor=FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
 
 If error encountered when \code{(seasonal.factor=TRUE)}:
 
-\code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) : wrong sign in 'by' argument"}
+\code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) :
+ wrong sign in 'by' argument"}
 
 use the combination of \code{(seasonal.factor=FALSE, best.periods=1)}.
 }
