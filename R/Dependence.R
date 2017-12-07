@@ -60,15 +60,23 @@ NNS.dep = function(x,y=NULL,order = NULL,
 
 ### Re-run with order=1 if categorical data...
     if(part.df[,sum(sub.clpm,sub.cupm,sub.dlpm,sub.dupm)]==0){
+
+      mode=function(x) {
+        if(length(x)>1){
+          d <- density(x)
+          d$x[which.max(d$y)]
+        }else{x}
+      }
+
       if(print.map==T){
-        part.map = NNS.part(x,y,order=1, Voronoi=T)}
+        part.map = NNS.part(x,y,order=1, Voronoi=T,noise.reduction = 'mode')}
         else {
-        part.map = NNS.part(x,y,order=1)
+        part.map = NNS.part(x,y,order=1,noise.reduction = 'mode')
         }
 
       part.df = part.map$dt
 
-      part.df[, `:=` (mean.x=mean(x),mean.y=mean(y)),by=prior.quadrant]
+      part.df[, `:=` (mean.x=mode(x),mean.y=mode(y)),by=prior.quadrant]
 
       part.df[, `:=` (sub.clpm=Co.LPM(degree,degree,x,y,mean.x[1],mean.y[1]),
                       sub.cupm=Co.UPM(degree,degree,x,y,mean.x[1],mean.y[1]),
@@ -90,6 +98,7 @@ NNS.dep = function(x,y=NULL,order = NULL,
       zeros=length(x)-part.df[,sum(counts)]
 
       part.df=part.df[,`:=` (weight=counts/(length(x)-zeros)),by=prior.quadrant]
+
 } #Categorical re-run
 
     else{

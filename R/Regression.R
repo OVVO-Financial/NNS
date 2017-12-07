@@ -289,9 +289,7 @@ NNS.reg = function (x,y,
     dependence = (NNS.dep(x,y,print.map = F)$Dependence)^(1/3)
 
   } else {
-
-    if(dim.red==TRUE) dependence=(mean(x.star.dep))^(1/3)}
-
+    if(dim.red==TRUE) dependence=(NNS.dep(x,y,print.map = F)$Dependence)^(1/3)}
   if(is.null(order)){
     dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
   else {
