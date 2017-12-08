@@ -314,14 +314,15 @@ NNS.reg = function (x,y,
 
   if(dependence<=stn){
     if(is.null(type)){
-      part.map = NNS.part(x,y,noise.reduction=noise.reduction, order=dep.reduced.order,type = "XONLY")
+      part.map = NNS.part(x,y,noise.reduction='median', order=dep.reduced.order,type = "XONLY")
       if(length(part.map$regression.points$x)==0){
-        part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
+        part.map=NNS.part(x,y,type = "XONLY",noise.reduction='median',order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
       }
     } # NULL type
 
 
     if(!is.null(type)){
+      if(is.null(noise.reduction)){noise.reduction="median"}
       part.map = NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction, order = dep.reduced.order)
       if(length(part.map$regression.points$x)==0){
         part.map=NNS.part(x,y,type = "XONLY",noise.reduction=noise.reduction,order = min(nchar(part.map$dt$quadrant)),max.obs = 1)
