@@ -390,12 +390,6 @@ NNS.reg = function (x,y,
   ### Fitted Values
   p = length(regression.points[,x])
 
-  fitted = numeric()
-  fitted.order = numeric()
-
-  point.order=numeric()
-
-
   if(is.na(Regression.Coefficients[1,Coefficient])){Regression.Coefficients[1,Coefficient:= Regression.Coefficients[2,Coefficient] ]}
   if(is.na(Regression.Coefficients[.N,Coefficient])){Regression.Coefficients[.N,Coefficient:= Regression.Coefficients[.N-1,Coefficient] ]}
 
@@ -412,8 +406,9 @@ NNS.reg = function (x,y,
     point.est.y=((point.est - regression.points[reg.point.interval,x])*Regression.Coefficients[coef.point.interval,Coefficient])+regression.points[reg.point.interval,y]
   }
 
-  setkey(part.map$dt,"x")
-  fitted=(data.table(x=x,y=y,y.hat=estimate,NNS.ID=part.map$dt$quadrant))
+
+  fitted=(data.table(x=part.map$dt$x,y=part.map$dt$y,y.hat=estimate,NNS.ID=part.map$dt$quadrant))
+
 
   Values = (cbind(x,Fitted=fitted[,y.hat],Actual=fitted[,y],Difference=fitted[,y.hat]-fitted[,y], Accuracy=abs(round(fitted[,y.hat])-fitted[,y])))
 

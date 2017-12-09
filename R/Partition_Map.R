@@ -167,7 +167,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
 
     setnames(RP,"prior.quadrant","quadrant")
     PART[,`:=`(counts = NULL, q_new = NULL)]
-    DT=setorder(PART[], quadrant,x, y)[]
+    DT=PART[]
     RP=setorder(RP[],quadrant)[]
     return(list("order"=i,"dt"=DT,"regression.points"=RP))
 
@@ -245,7 +245,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
 
     setnames(RP,"prior.quadrant","quadrant")
     PART[,`:=`(counts = NULL, q_new = NULL)]
-    DT=setorder(PART[], quadrant,x, y)[]
+    DT=PART[]
     RP=setorder(RP[],quadrant)[]
     return(list("order"=i,"dt"=DT,"regression.points"=RP))
   }
