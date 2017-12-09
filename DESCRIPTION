@@ -1,7 +1,7 @@
 Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
-Version: 0.3.8.1
+Version: 0.3.8.2
 Date: 2017-12-08
 Author: Fred Viole
 Maintainer: Fred Viole <ovvo.financial.systems@gmail.com>
