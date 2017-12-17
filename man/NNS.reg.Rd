@@ -23,6 +23,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 \item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.}
 
 \item{tau}{options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method="NNS.caus")} or
+
 \code{(dim.red.method="all")} and the regression is using time-series data, set \code{(tau="ts")} for more accurate causal analysis.}
 
 \item{type}{\code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.}
