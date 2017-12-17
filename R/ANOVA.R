@@ -53,7 +53,7 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,tails="Both",pai
 
     mean.of.means <- mean(colMeans(A))
     n<- ncol(A)
-    if(pairwise==FALSE){
+    if(!pairwise){
         LPM_ratio = numeric(0L)
         MAD.CDF = numeric(0L)
 
@@ -70,7 +70,7 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,tails="Both",pai
         NNS.ANOVA.rho <- (0.5 - Mean.MAD.CDF)^2/0.25
 
   #Graphs
-        if(plot==TRUE){
+        if(plot){
         boxplot(A, las=2, xlab= "Means", ylab="Variable",horizontal = TRUE,
            main="NNS ANOVA", col=c('steelblue',rainbow(n-1)))
 
@@ -96,7 +96,7 @@ NNS.ANOVA<- function(control,treatment,confidence.interval=0.95,tails="Both",pai
           colnames(certainties) = colnames(A)
           rownames(certainties) = colnames(A)
 
-          if(plot==TRUE){
+          if(plot){
           boxplot(A, las=2, xlab= "Means", ylab="Variable",horizontal = TRUE,
               main="ANOVA", col=c('steelblue',rainbow(n-1)))
           abline(v=mean.of.means,col="red",lwd=4)

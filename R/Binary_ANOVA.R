@@ -18,7 +18,7 @@ NNS.ANOVA.bin<- function(control,treatment,confidence.interval=NULL,tails=NULL,p
 
 
   #Graphs
-        if(plot==TRUE){
+        if(plot){
         boxplot(list(control,treatment), las=2, names=c("Control","Treatment"),
               xlab= "Means", horizontal = TRUE, main= "NNS ANOVA and Effect Size",
               col=c("grey","white"),
@@ -44,7 +44,7 @@ if(!is.null(confidence.interval)){
 
             a=UPM.VaR(CI,1,control)
             b=mean(control)
-            if(plot==TRUE){
+            if(plot){
             if(tails=="Both"|tails=="Right"){
               abline(v=max(a,b),col="green",lwd=4,lty=3)
               text(max(a,b),pos=2,0.75,"mu+",col="green")
@@ -54,7 +54,7 @@ if(!is.null(confidence.interval)){
         #Lower end of CDF confidence interval for control mean
             c=LPM.VaR(CI,1,control)
             d=mean(control)
-            if(plot==TRUE){
+            if(plot){
             if(tails=="Both"|tails=="Left"){
               abline(v=min(c,d),col="blue",lwd=4,lty=3)
               text(min(c,d),pos=4,0.75,"mu-",col="blue")

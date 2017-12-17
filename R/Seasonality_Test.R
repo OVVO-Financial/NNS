@@ -20,8 +20,8 @@
 
 NNS.seas <- function(variable,plot=TRUE){
 
-  output <- vector("numeric", length(variable)/4)
-  instances <- vector("numeric", length(variable)/4)
+  output <- numeric()
+  instances <- numeric()
 
   if(mean(variable)!=0){
   var.cov<- abs(sd(variable)/mean(variable))}
@@ -41,8 +41,9 @@ NNS.seas <- function(variable,plot=TRUE){
         }
   }
 
+  insts=sum(instances>0)>0
 
-  if(length(instances[instances>0])>0){
+  if(insts){
 
       n<- rep(var.cov,length(instances[instances>0]))
 
@@ -53,8 +54,8 @@ NNS.seas <- function(variable,plot=TRUE){
     } else {M="No Seasonality Detected"}
 
 
-    if(sum(instances[instances>0])>0){
-      if(plot==T){
+    if(insts){
+      if(plot){
   plot(instances[instances>0],output[output>0],
          xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",
          ylim = c(0,2*abs(sd(variable)/mean(variable))))
@@ -68,7 +69,7 @@ NNS.seas <- function(variable,plot=TRUE){
   }
 
 
-    if(length(instances[instances>0])>0){
+    if(insts){
       return(list("all.periods"=M,"best.period"=M[1,Period]))
     }
     else { return(M) }

@@ -5,9 +5,11 @@
 #' @param variable a numeric vector.
 #' @param h integer; 1 (default) Number of periods to forecast.
 #' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
+#'
 #'  \code{(variable[1:training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor=FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor=12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor=c(12,24,36))}
 #' @param best.periods integer; to be used in conjuction with \code{(seasonal.factor=FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+#'
 #' \code{(seasonal.factor=FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values=TRUE)}.
@@ -56,11 +58,11 @@
 # Autoregressive Model
 NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,best.periods=NULL,negative.values = FALSE, method = "nonlin", dynamic = FALSE,plot=TRUE,seasonal.plot=TRUE,intervals=FALSE){
 
-  if(intervals==TRUE && is.numeric(seasonal.factor)){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
+  if(intervals && is.numeric(seasonal.factor)){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
 
-  if(intervals==TRUE && seasonal.factor==TRUE){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
+  if(intervals && seasonal.factor){stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')}
 
-  if(is.numeric(seasonal.factor) && dynamic==TRUE){stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')}
+  if(is.numeric(seasonal.factor) && dynamic){stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')}
 
   variable = as.numeric(variable)
   OV = variable
@@ -85,14 +87,14 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       return(list(lag=1,Weights=1))}
 
     if(ncol(M)>1){
-        if(seasonal.factor==TRUE){
+        if(seasonal.factor){
             lag = seas.matrix$best.period
             Weights=1
             return(list(lag=lag,Weights=Weights))
         }
 
       # Determine lag from seasonality test
-      if(seasonal.factor==FALSE){
+      if(!seasonal.factor){
         lag = M$Period
         Observation.weighting = (1/sqrt(lag))
         Lag.weighting = (M$Variable.Coefficient.of.Variance-M$Coefficient.of.Variance)
@@ -133,6 +135,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       GV=generate.vectors(lag)
       Component.index=GV$Component.index
       Component.series=GV$Component.series
+
       # Regression on Component Series
       Regression.Estimates = numeric()
       Coefficients = numeric()
@@ -140,10 +143,13 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
 
       if(method=='nonlin' | method=='both'){
+        for(i in 1:length(lag)){
+          if(length(Component.index[[i]])<=4){order=1}else{order=NULL}
 
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order = NULL,plot = FALSE,stn=0)$Point.est)
+          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order =order,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est
+        }
 
-        if(negative.values==FALSE){
+        if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
 
@@ -157,14 +163,14 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
           Regression.Estimates[[i]]=coefs[1]+(coefs[2]*(length(Component.series[[i]])+1))
         }
 
-        if(negative.values==FALSE){
+        if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
 
         Lin.estimates=sum(Regression.Estimates*Weights)
       }#Linear==T
 
-      if(intervals==TRUE){
+      if(intervals){
         if(method=='both'){
           Estimate.band[[j+1]]=c(Nonlin.estimates,Lin.estimates)}
         if(method=='nonlin'){
@@ -224,10 +230,12 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       Coefficients = numeric()
 
       if(method=='nonlin' | method=='both'){
+        for(i in 1:length(lag)){
+          if(length(Component.index[[i]])<=4){order=1}else{order=NULL}
 
-          Regression.Estimates=sapply(1:length(lag),function(i) NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order = NULL,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est)
-
-        if(negative.values==FALSE){
+          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order =order,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est
+        }
+        if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
 
@@ -243,7 +251,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
           Regression.Estimates[i] = coefs[1] + (coefs[2]*(length(Component.series[[i]])+1))
         }
 
-        if(negative.values==FALSE){
+        if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
 
@@ -252,7 +260,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       }#Linear==T
 
-      if(intervals==TRUE){
+      if(intervals){
         if(method=='both'){
           Estimate.band[[j+1]]=c(NL.Regression.Estimates,L.Regression.Estimates)}
         if(method=='nonlin'){
@@ -274,8 +282,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     }  # ELSE from (if dynamic)
 
   #### PLOTTING
-  if(plot==T){
-    if(seasonal.plot==T){
+  if(plot){
+    if(seasonal.plot){
     if(ncol(M)>1){
       par(mfrow=c(2,1))
       plot(M[,Period],M[,Coefficient.of.Variance],
@@ -286,8 +294,10 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       abline(h=M[1,Variable.Coefficient.of.Variance], col="red",lty=5)
       text((M[,min(Period)]+M[,max(Period)])/2,M[1,Variable.Coefficient.of.Variance],pos=3,"Variable Coefficient of Variance",col='red')
     } else {
+      return('here')
       par(mfrow=c(2,1))
-      plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*abs(sd(FV)/mean(FV))))
+      plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",
+           ylim = c(0,2*abs(sd(FV)/mean(FV))))
 
       text(1,abs(sd(FV)/mean(FV)),pos=3,"NO SEASONALITY DETECTED",col='red')
     }
@@ -298,7 +308,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
           xlim=c(1,max((training.set+h),length(OV))),
           ylab=label, ylim=c(min(Estimates, OV),max( OV,Estimates)))
 
-    if(intervals==T){
+    if(intervals){
       for(i in 1:h){
         ys=unlist(Estimate.band[[i]])
         points(rep(training.set+i,length(ys)),ys,col=rgb(1, 0, 0, 0.0125),pch=15)

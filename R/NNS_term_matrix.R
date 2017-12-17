@@ -84,13 +84,13 @@ NNS.term.matrix <- function(x, oos=NULL,names=FALSE){
 
   NNS.TM=(t(sapply(1:length(x[,1]),function(i) str_count(x[i,1],unique.vocab))))
 
-  if(names==TRUE){
+  if(names){
   colnames(NNS.TM)=c(unique.vocab)
   }
 
   if(!is.null(oos)){
   OOS.TM=(t(sapply(1:length(oos),function(i) str_count(oos[i],unique.vocab))))
-  if(names==TRUE){
+  if(names){
     colnames(OOS.TM)=c(unique.vocab)
   }
   return(list("IV"=NNS.TM,"DV"=as.numeric(as.character(x[,2])),"OOS"=OOS.TM))

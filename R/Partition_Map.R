@@ -79,8 +79,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
 
       PART[counts >= max.obs, counts := .N, by=quadrant]
       l.PART=max(PART$counts)
-      if(min.obs.stop && (min(PART$counts)<= max.obs)) break
-      if (l.PART <= max.obs) break
+      if(min.obs.stop && (min(PART$counts)<= max.obs) && i>=1) break
+      if (l.PART <= max.obs && i>=1) break
       max.obs.rows = PART[counts >= max.obs, which=TRUE]
       #Segments for Voronoi...
       if(Voronoi==T){
@@ -182,8 +182,8 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
 
       PART[counts >= 2*max.obs, counts := .N, by=quadrant]
 
-      if (max(PART$counts) <= 2*max.obs) break
-      if(min.obs.stop && (min(PART$counts)<= 2*max.obs)) break
+      if (max(PART$counts) <= 2*max.obs && i>=1) break
+      if(min.obs.stop && (min(PART$counts)<= 2*max.obs)&& i>=1) break
       max.obs.rows = PART[counts >= 2*max.obs, which=TRUE]
 
 

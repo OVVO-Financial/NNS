@@ -96,7 +96,7 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
 
 
     if(abs(Causation.x.given.y)<=abs(Causation.y.given.x)){
-      if(plot==TRUE){
+      if(plot){
         # For plotting only
         if(tau=="cs"){tau=0}
         if(tau=="ts"){tau=ceiling(0.03*length(x))}
@@ -105,7 +105,7 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
                Causation.y.given.x = Causation.y.given.x,
                "C(y--->x)" =  Causation.y.given.x-Causation.x.given.y))
     } else {
-      if(plot==TRUE){
+      if(plot){
         # For plotting only
         if(tau=="cs"){tau=0}
         if(tau=="ts"){tau=ceiling(0.03*length(x))}

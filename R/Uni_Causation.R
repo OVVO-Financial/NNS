@@ -74,7 +74,7 @@ Uni.caus <- function(x,y,tau,plot=TRUE,scale=FALSE,time.series=FALSE){
   Causation.x.given.y= P.x.given.y*rho.x.y
 
 
-  if(plot==TRUE){
+  if(plot){
     par(mfrow=c(3,1))
 
     ## Raw Variable Plot

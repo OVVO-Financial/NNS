@@ -2,7 +2,8 @@
 #'
 #' Normalizes a matrix of variables based on nonlinear scaling normalization method.
 #' @param A a numeric matrix or data frame.
-#' @param chart.type  options: ("l","b"); \code{NULL} (default).  Set \code{(chart.type="l")} for line, \code{(chart.type="b")} for boxplot.
+#' @param chart.type  options: ("l","b"); \code{NULL} (default).  Set \code{(chart.type="l")} for line,
+#' \code{(chart.type="b")} for boxplot.
 #' @param linear logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.
 #' @return Returns a \link{data.frame} of normalized values.
 #' @keywords normalization
@@ -21,7 +22,7 @@ NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
   m <- pmax(1e-10,m)
   RG <- m %o% (1/m)
 
-  if(linear==FALSE){
+  if(!linear){
       scale.factor=abs(cor(A))
       scales <- colMeans(RG * scale.factor)
   } else {

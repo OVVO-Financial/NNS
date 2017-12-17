@@ -8,6 +8,7 @@
 #' @param stn numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.
 #' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.
 #' @param tau options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method="NNS.caus")} or
+#'
 #' \code{(dim.red.method="all")} and the regression is using time-series data, set \code{(tau="ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
@@ -139,7 +140,7 @@ NNS.reg = function (x,y,
                     norm=NULL,
                     dist="L2",multivariate.call=FALSE){
 
-  if(plot.regions==TRUE && !is.null(order) && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
+  if(plot.regions && !is.null(order) && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
 
   if(is.null(dim.red.method)){dim.red=FALSE}else{dim.red=TRUE}
 
@@ -185,7 +186,7 @@ NNS.reg = function (x,y,
     if(ncol(original.variable)==1){
       x=original.variable
     } else {
-      if(dim.red==FALSE){
+      if(!dim.red){
         if(!is.null(original.columns)){
           if(is.null(n.best)){n.best=ceiling(sqrt(original.columns))} }
         else{if(is.null(n.best)){n.best=2} }
@@ -193,7 +194,7 @@ NNS.reg = function (x,y,
         return(NNS.M.reg(x,y,point.est=point.est,plot=plot,residual.plot=plot,order=order,n.best=n.best,type=type,location=location,noise.reduction=noise.reduction,norm = norm,dist=dist,stn = stn,return.values=return.values,plot.regions = plot.regions))
       } # Multivariate dim.red==FALSE
       else{
-        if(dim.red==TRUE){
+        if(dim.red){
 
           if(is.null(original.names)){
             colnames.list=list()
@@ -289,7 +290,7 @@ NNS.reg = function (x,y,
     dependence = (NNS.dep(x,y,print.map = F)$Dependence)^(1/3)
 
   } else {
-    if(dim.red==TRUE) dependence=(NNS.dep(x,y,print.map = F)$Dependence)^(1/3)}
+    if(dim.red) dependence=(NNS.dep(x,y,print.map = F)$Dependence)^(1/3)}
   if(is.null(order)){
     dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
   else {
@@ -359,7 +360,7 @@ NNS.reg = function (x,y,
 
   ### Regression Equation
 
-  if(multivariate.call==T){
+  if(multivariate.call){
     return(regression.points$x)
   }
 
@@ -425,7 +426,7 @@ NNS.reg = function (x,y,
   R2.adj = R2
 
   ###Plotting and regression equation
-  if(plot==TRUE){
+  if(plot){
     r2.leg=bquote(bold(R^2 == .(format(R2,digits=4))))
     xmin= min(c(point.est,x))
     xmax= max(c(point.est,x))
@@ -466,7 +467,7 @@ NNS.reg = function (x,y,
   }# plot TRUE bracket
 
   ### Return Values
-  if(return.values == TRUE){
+  if(return.values){
     return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   } else {
     invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))

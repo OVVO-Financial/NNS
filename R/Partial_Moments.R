@@ -267,7 +267,7 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
   } else {dupm.matrix=matrix(0, n, n)}
 
-  if(pop.adj==TRUE){
+  if(pop.adj){
     adjustment=(length(variable[,1])/(length(variable[,1])-1))
     clpm.matrix=clpm.matrix*adjustment
     cupm.matrix=cupm.matrix*adjustment
@@ -297,6 +297,14 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
 #'
 #' ## Continuous CDF
 #' LPM.ratio(1,sort(x),x)
+#'
+#'
+#' ## Joint CDF
+#' \dontrun{
+#' x=rnorm(5000);y=rnorm(5000)
+#' plot3d(x,y,Co.LPM(0,0,sort(x),sort(y),x,y), col='blue', xlab="X", ylab="Y",
+#' zlab="Probability", box=FALSE)
+#' }
 #' @export
 
 LPM.ratio<- function(degree,target,variable){
@@ -368,7 +376,7 @@ d.dx=(max(target)+abs(min(target)))/bins
 tgt=seq(min(target),max(target),d.dx)
 PDF=(LPM.ratio(degree,tgt+d.dx,variable)-LPM.ratio(degree,tgt-d.dx,variable))
 
-if(plot==TRUE){plot(sort(tgt),PDF,col='blue',type='l',lwd=3,xlab="X")}
+if(plot){plot(sort(tgt),PDF,col='blue',type='l',lwd=3,xlab="X")}
 
 PDF
 }

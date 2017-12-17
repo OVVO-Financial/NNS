@@ -192,7 +192,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
 
 
   ### 3d plot
-  if(plot==TRUE&&n==2){
+  if(plot && n==2){
     region.1=mean.by.id.matrix[[1]]
     region.2=mean.by.id.matrix[[2]]
     region.3=mean.by.id.matrix[,y.hat]
@@ -203,7 +203,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
     plot3d(x=original.IVs[,1],y=original.IVs[,2],z=original.DV,box=F,size = 3,col='steelblue',xlab=colnames(reg.points.matrix)[1], ylab=colnames(reg.points.matrix)[2], zlab=y.label )
 
 
-    if(plot.regions==TRUE){
+    if(plot.regions){
       region.matrix = data.table(original.IVs,original.DV,NNS.ID)
       region.matrix[,`:=`(min.x1=min(.SD), max.x1=max(.SD)), by=NNS.ID,.SDcols=1]
       region.matrix[,`:=`(min.x2=min(.SD), max.x2=max(.SD)), by=NNS.ID,.SDcols=2]
@@ -236,7 +236,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
   }
 
   ### Residual plot
-  if(residual.plot==TRUE){
+  if(residual.plot){
     resids=cbind(original.DV,y.hat)
     r2.leg=bquote(bold(R^2 == .(format(R2,digits=4))))
     matplot(resids,type = 'l',xlab="Index",ylab=expression(paste("y (black)   ",hat(y), " (red)")),cex.lab=1.5,mgp=c(2,.5,0))
@@ -248,7 +248,7 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
 
   rhs.partitions=data.table(reg.points.matrix)
   ### Return Values
-  if(return.values==T){
+  if(return.values){
 
     return(list(R2=R2,rhs.partitions=rhs.partitions, RPM=REGRESSION.POINT.MATRIX[] ,Point.est=predict.fit,Fitted=fitted.matrix[,.(y.hat)],Fitted.xy=fitted.matrix[]))}
 

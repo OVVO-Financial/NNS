@@ -99,7 +99,7 @@ dy.d_<- function(x,y,wrt,eval.points="median",order=NULL,stn=0.99,h=.05,n.best=N
 
 
 
-  if(mixed==TRUE){
+  if(mixed){
   if(is.null(dim(eval.points))){
   if(length(eval.points)!=2){return("Mixed Derivatives are only for 2 IV")}
     }else{ if(ncol(eval.points)!=2){return("Mixed Derivatives are only for 2 IV")}}

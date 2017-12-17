@@ -42,7 +42,7 @@ NNS.cor.hd <- function (x,plot=FALSE,independence.overlay=FALSE){
   observed = CO_upm+CO_lpm
   independence = 2*(.5^n)
 
-  if(plot==T&&n==3){
+  if(plot && n==3){
 
     plot3d(x=A[,1],y=A[,2],z=A[,3],box=F,size = 3,
            col=ifelse((A[,1]<=mean(A[,1]))&(A[,2]<=mean(A[,2]))&(A[,3]<=mean(A[,3])),'red' ,
