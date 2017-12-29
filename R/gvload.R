@@ -6,7 +6,7 @@
 #' @import rgl
 #' @import data.table
 #' @import stringr
-#' @importFrom utils globalVariables
+#' @importFrom utils globalVariables tail
 
 
 

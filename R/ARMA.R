@@ -119,80 +119,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
 
 
-  if(dynamic == TRUE){
-    for (j in 0:(h-1)){
 
-        seas.matrix = NNS.seas(variable,plot=F)
-        if(!is.list(seas.matrix)){
-          M<- t(1)} else {
-            if(is.null(best.periods)){
-            M<- seas.matrix$all.periods} else {M<- seas.matrix$all.periods[1:best.periods,] }}
-        ASW=ARMA.seas.weighting()
-        lag=ASW$lag
-        Weights=ASW$Weights
-
-      # Generate vectors for 1:lag
-      GV=generate.vectors(lag)
-      Component.index=GV$Component.index
-      Component.series=GV$Component.series
-
-      # Regression on Component Series
-      Regression.Estimates = numeric()
-      Coefficients = numeric()
-      Estimate.band= list()
-
-
-      if(method=='nonlin' | method=='both'){
-        for(i in 1:length(lag)){
-          if(length(Component.index[[i]])<=4){order=1}else{order=NULL}
-
-          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order =order,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est
-        }
-
-        if(!negative.values){
-          Regression.Estimates=pmax(0,Regression.Estimates)
-        }
-
-        Nonlin.estimates=sum(Regression.Estimates*Weights)
-      }#Linear==F
-
-      if(method=='lin' | method=='both'){
-
-        for(i in 1:length(lag)){
-          coefs=coef(lm(Component.series[[i]]~Component.index[[i]]))
-          Regression.Estimates[[i]]=coefs[1]+(coefs[2]*(length(Component.series[[i]])+1))
-        }
-
-        if(!negative.values){
-          Regression.Estimates=pmax(0,Regression.Estimates)
-        }
-
-        Lin.estimates=sum(Regression.Estimates*Weights)
-      }#Linear==T
-
-      if(intervals){
-        if(method=='both'){
-          Estimate.band[[j+1]]=c(Nonlin.estimates,Lin.estimates)}
-        if(method=='nonlin'){
-          Estimate.band[[j+1]]=Nonlin.estimates}
-        if(method=='lin'){
-          Estimate.band[[j+1]]=Lin.estimates}
-      }
-
-
-      if(method=='both'){
-        Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}
-        else{
-            Estimates[j+1] = sum(Regression.Estimates*Weights)
-        }
-
-      variable = c(variable,(Estimates[j+1]))
-      FV=variable
-
-    } #j loop
-  }  #dynamic {}
-
-  else {
     if(is.numeric(seasonal.factor)){
       M<-t(seasonal.factor)
       lag=seasonal.factor
@@ -219,7 +146,21 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
     Estimate.band= list()
 
-    for (j in 0:(h-1)){
+
+
+    for (j in 1:h){
+      # Regenerate seasonal.factor if dynamic
+      if(dynamic){
+        seas.matrix = NNS.seas(variable,plot=F)
+        if(!is.list(seas.matrix)){
+          M<- t(1)} else {
+            if(is.null(best.periods)){
+              M<- seas.matrix$all.periods} else {M<- seas.matrix$all.periods[1:best.periods,] }}
+        ASW=ARMA.seas.weighting()
+        lag=ASW$lag
+        Weights=ASW$Weights
+        }
+
       # Generate vectors for 1:lag
       GV=generate.vectors(lag)
       Component.index=GV$Component.index
@@ -231,10 +172,13 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       if(method=='nonlin' | method=='both'){
         for(i in 1:length(lag)){
-          if(length(Component.index[[i]])<=4){order=1}else{order=NULL}
+          ends=tail(Component.index[[i]],1)
+          if(ends<=4){order=1}else{order=NULL}
 
-          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (length(Component.series[[i]])+1),return.values = FALSE,order =order,plot = FALSE,stn=0,noise.reduction = 'off')$Point.est
+          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (ends+1),return.values = FALSE,order =order,plot = FALSE,noise.reduction = 'off')$Point.est
         }
+
+
         if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
         }
@@ -247,8 +191,9 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       if(method=='lin' | method=='both'){
 
         for(i in 1:length(lag)){
+          ends=tail(Component.index[[i]],1)
           coefs=coef(lm(Component.series[[i]]~Component.index[[i]]))
-          Regression.Estimates[i] = coefs[1] + (coefs[2]*(length(Component.series[[i]])+1))
+          Regression.Estimates[i] = coefs[1] + (coefs[2]*(ends+1))
         }
 
         if(!negative.values){
@@ -262,24 +207,24 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       if(intervals){
         if(method=='both'){
-          Estimate.band[[j+1]]=c(NL.Regression.Estimates,L.Regression.Estimates)}
+          Estimate.band[[j]]=c(NL.Regression.Estimates,L.Regression.Estimates)}
         if(method=='nonlin'){
-          Estimate.band[[j+1]]=NL.Regression.Estimates}
+          Estimate.band[[j]]=NL.Regression.Estimates}
         if(method=='lin'){
-          Estimate.band[[j+1]]=L.Regression.Estimates}
+          Estimate.band[[j]]=L.Regression.Estimates}
       }
 
       if(method=='both'){
-        Estimates[j+1]=mean(c(Lin.estimates,Nonlin.estimates))}
+        Estimates[j]=mean(c(Lin.estimates,Nonlin.estimates))}
         else{
-            Estimates[j+1] = sum(Regression.Estimates*Weights)
+            Estimates[j] = sum(Regression.Estimates*Weights)
         }
 
-      variable = c(variable,(Estimates[j+1]))
+      variable = c(variable,(Estimates[j]))
       FV=variable
 
-    }  # j loop non-dynamic
-    }  # ELSE from (if dynamic)
+    }  # j loop
+
 
   #### PLOTTING
   if(plot){
@@ -294,7 +239,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       abline(h=M[1,Variable.Coefficient.of.Variance], col="red",lty=5)
       text((M[,min(Period)]+M[,max(Period)])/2,M[1,Variable.Coefficient.of.Variance],pos=3,"Variable Coefficient of Variance",col='red')
     } else {
-      return('here')
       par(mfrow=c(2,1))
       plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",
            ylim = c(0,2*abs(sd(FV)/mean(FV))))
@@ -316,7 +260,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       lines((training.set+1):(training.set+h),Estimates,type = 'l',lwd=2,lty=1,col='red')
 
       segments(training.set,FV[training.set],training.set+1,Estimates[1],lwd=2,lty=1,col='red')
-      legend('topleft',bty='n',legend = c("Original", paste("Forecast ",h," period(s)",sep = "")),lty = c(1,1),col=c('steelblue','red'),lwd=2)
+      legend('topleft',bty='n',legend = c("Original", paste0("Forecast ",h," period(s)")),lty = c(1,1),col=c('steelblue','red'),lwd=2)
 
     } else{
 
@@ -324,19 +268,19 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         lines((training.set+1):(training.set+h),Estimates,type = 'l',lwd=2,lty=3,col='red')
 
         segments(training.set,FV[training.set],training.set+1,Estimates[1],lwd=2,lty=3,col='red')
-        legend('topleft',bty='n',legend = c("Original", paste("Forecast ",h," period(s)",sep = "")),lty = c(1,2),col=c('steelblue','red'),lwd=2)
+        legend('topleft',bty='n',legend = c("Original", paste0("Forecast ",h," period(s)")),lty = c(1,2),col=c('steelblue','red'),lwd=2)
 
       } else {
         lines((training.set+1):(training.set+h),Estimates,type = 'l',lwd=2,lty=1,col='red')
 
         segments(training.set,FV[training.set],training.set+1,Estimates[1],lwd=2,lty=1,col='red')
-        legend('topleft',bty='n',legend = c("Original", paste("Forecast ",h," period(s)",sep = "")),lty = c(1,1),col=c('steelblue','red'),lwd=2)
+        legend('topleft',bty='n',legend = c("Original", paste0("Forecast ",h," period(s)")),lty = c(1,1),col=c('steelblue','red'),lwd=2)
       }
 
 
     }
     points(training.set,OV[training.set],col="green",pch=18)
-    points(training.set+h,sum(Regression.Estimates*Weights),col="green",pch=18)
+    points(training.set+h,tail(FV,1),col="green",pch=18)
 
     par(mfrow=c(1,1))
   }
