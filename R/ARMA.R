@@ -125,12 +125,18 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       lag=seasonal.factor
       output=numeric()
       for(i in 1:length(seasonal.factor)){
-        output[i]<- (abs(sd(variable[seq(length(variable),1,-i)])/mean(variable[seq(length(variable),1,-i)])))
+        rev.var=variable[seq(length(variable),1,-i)]
+
+        output[i]<- (abs(sd(rev.var)/mean(rev.var)))
       }
       Relative.seasonal= output/(abs(sd(variable)/mean(variable)))
       Seasonal.weighting = (1/Relative.seasonal)
       Observation.weighting = (1/sqrt(seasonal.factor))
-      Weights = (Seasonal.weighting) / sum( Seasonal.weighting)
+
+      Weights = (Seasonal.weighting*Observation.weighting) / sum(Observation.weighting*Seasonal.weighting)
+
+
+
       seasonal.plot=F
     } else {
 
@@ -229,8 +235,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
   #### PLOTTING
   if(plot){
     if(seasonal.plot){
-    if(ncol(M)>1){
       par(mfrow=c(2,1))
+    if(ncol(M)>1){
       plot(M[,Period],M[,Coefficient.of.Variance],
            xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",         ylim = c(0,2*M[1,Variable.Coefficient.of.Variance]))
 
@@ -239,7 +245,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       abline(h=M[1,Variable.Coefficient.of.Variance], col="red",lty=5)
       text((M[,min(Period)]+M[,max(Period)])/2,M[1,Variable.Coefficient.of.Variance],pos=3,"Variable Coefficient of Variance",col='red')
     } else {
-      par(mfrow=c(2,1))
       plot(1,1,pch=19,col='blue', xlab="Period", ylab="Coefficient of Variance", main = "Seasonality Test",
            ylim = c(0,2*abs(sd(FV)/mean(FV))))
 
