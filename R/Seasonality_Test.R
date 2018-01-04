@@ -41,7 +41,7 @@ NNS.seas <- function(variable,plot=TRUE){
     test=abs(sd(reverse.var)/mean(reverse.var))
     test_1=abs(sd(reverse.var_1)/mean(reverse.var_1))
     test_2=abs(sd(reverse.var_2)/mean(reverse.var_2))
-      if (test < var.cov){
+      if (test <= var.cov){
           instances[i] <- i
           output[i]<- test
       } else {
@@ -49,7 +49,7 @@ NNS.seas <- function(variable,plot=TRUE){
             output[i]<- 0
       }
 
-    if (test_1 < var.cov){
+    if (test_1 <= var.cov){
       instances_1[i] <- i
       output_1[i]<- test_1
     } else {
@@ -57,7 +57,7 @@ NNS.seas <- function(variable,plot=TRUE){
       output_1[i]<- 0
     }
 
-    if (test_2 < var.cov){
+    if (test_2 <= var.cov){
       instances_2[i] <- i
       output_2[i]<- test_2
     } else {
@@ -80,7 +80,7 @@ NNS.seas <- function(variable,plot=TRUE){
       n=rep(var.cov,length(instances[index]))
 
       M=data.table("Period"=instances[index],"Coefficient.of.Variance"=output[index],"Variable.Coefficient.of.Variance"=n,key = "Coefficient.of.Variance")
-      M=M[is.finite(rowSums(M))]
+
     } else {M="No Seasonality Detected"}
 
 
