@@ -66,7 +66,6 @@ NNS.seas <- function(variable,plot=TRUE){
     }
   }
 
-  ref.instances=instances_1[instances_1%in%instances_2]
   ref.output=cbind(instances,output,output_1,output_2,output*output_1*output_2>0)
   output=rowMeans(ref.output[,2:4])*ref.output[,5]
 
@@ -81,12 +80,7 @@ NNS.seas <- function(variable,plot=TRUE){
       n=rep(var.cov,length(instances[index]))
 
       M=data.table("Period"=instances[index],"Coefficient.of.Variance"=output[index],"Variable.Coefficient.of.Variance"=n,key = "Coefficient.of.Variance")
-
       M=M[is.finite(rowSums(M))]
-
-      M =M[which(instances%in%ref.instances),]
-      M =M[complete.cases(M),]
-
     } else {M="No Seasonality Detected"}
 
 
