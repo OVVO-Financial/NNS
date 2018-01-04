@@ -358,14 +358,15 @@ NNS.reg = function (x,y,
 
   setkey(regression.points,x,y)
 
+  ### Consolidate possible duplicated points
+  regression.points=unique(regression.points)
+
+
   ### Regression Equation
 
   if(multivariate.call){
-    return(regression.points$x)
+    return(regression.points)
   }
-
-  ### Consolidate possible duplicated points
-  regression.points=unique(regression.points)
 
   rise = regression.points[,'rise' := y - shift(y)]
   run = regression.points[,'run' := x - shift(x)]

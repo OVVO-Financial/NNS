@@ -178,10 +178,19 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
       if(method=='nonlin' | method=='both'){
         for(i in 1:length(lag)){
-          ends=tail(Component.index[[i]],1)
-          if(ends<=4){order=1}else{order=NULL}
+          x=Component.index[[i]];y=Component.series[[i]]
+          last.x=tail(x,1)
+          last.y=tail(y,1)
 
-          Regression.Estimates[i]=NNS.reg(Component.index[[i]],Component.series[[i]],point.est = (ends+1),return.values = FALSE,order =order,plot = FALSE,noise.reduction = 'off')$Point.est
+          if(last.x<=4){order=1}else{order=NULL}
+
+        ## Skeleton NNS regression for NNS.ARMA
+          reg.points = tail(NNS.reg(x,y,return.values = FALSE,order =order,plot = FALSE,noise.reduction = 'off',multivariate.call = TRUE),2)
+
+          run=diff(reg.points$x)
+          rise=diff(reg.points$y)
+
+          Regression.Estimates[i]=last.y+(rise/run)
         }
 
 
@@ -197,9 +206,9 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       if(method=='lin' | method=='both'){
 
         for(i in 1:length(lag)){
-          ends=tail(Component.index[[i]],1)
+          last.x=tail(Component.index[[i]],1)
           coefs=coef(lm(Component.series[[i]]~Component.index[[i]]))
-          Regression.Estimates[i] = coefs[1] + (coefs[2]*(ends+1))
+          Regression.Estimates[i] = coefs[1] + (coefs[2]*(last.x+1))
         }
 
         if(!negative.values){
