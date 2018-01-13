@@ -44,15 +44,15 @@ dy.d_<- function(x,y,wrt,eval.points="median",order=NULL,stn=0.99,h=.05,n.best=N
   if(is.character(eval.points)){
   if(eval.points=="median"){
     eval.points=numeric()
-    eval.points=apply(x,2,median)}
+    eval.points=apply(x,2,median)} else {
   if(eval.points=="last"){
     eval.points=numeric()
-    eval.points=as.numeric(x[length(x[,1]),])}
+    eval.points=as.numeric(x[length(x[,1]),])} else {
   if(eval.points=="mean"){
     eval.points=numeric()
-    eval.points=apply(x,2,mean)}
+    eval.points=apply(x,2,mean)} else {
   if(eval.points=="all"){
-    eval.points=x}
+    eval.points=x}   }}}
 }
 
 
