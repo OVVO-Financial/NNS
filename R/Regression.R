@@ -158,15 +158,15 @@ NNS.reg = function (x,y,
     if(!is.null(point.est)){
       point.est=as.numeric(point.est)
       point.est.y=numeric()
-      }else {point.est.y=NULL}
+    }else {point.est.y=NULL}
   }else{
     x=apply(x,2,as.numeric)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){
         point.est=as.numeric(point.est)
         point.est.y=numeric()}else{
-        point.est=apply(point.est,2,as.numeric)
-        point.est.y=numeric()}
+          point.est=apply(point.est,2,as.numeric)
+          point.est.y=numeric()}
     } else {point.est.y=NULL}
   }
 
@@ -419,7 +419,7 @@ NNS.reg = function (x,y,
   y.fitted=fitted[,y.hat]
 
   if(!is.null(type)){
-  Prediction.Accuracy=(length(y)-sum(abs(round(y.fitted)-(y))>0))/length(y)}
+    Prediction.Accuracy=(length(y)-sum(abs(round(y.fitted)-(y))>0))/length(y)}
   else{Prediction.Accuracy=NULL}
 
   R2=  (sum((fitted[,y.hat]-mean(y))*(y-mean(y)))^2)/(sum((y-mean(y))^2)*sum((fitted[,y.hat]-mean(y))^2))

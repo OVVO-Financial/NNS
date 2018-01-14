@@ -30,23 +30,28 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
   original.DV=as.numeric(Y)
 
   if(!is.null(norm)){
-    if(norm=='std'){
-      original.IVs=apply(original.IVs,2,function(b) (b-min(b))/(max(b)-min(b)))}else{
-        original.IVs=NNS.norm(original.IVs)}
-    if(!is.null(point.est)){
+    if(is.null(point.est)){
       point.B=rbind(point.est,original.IVs)
       colnames(point.B)=colnames(point.est)
       if(norm=='std'){
-        point.est=apply(point.B,2,function(c) (c-min(c))/(max(c)-min(c)))[1:np,]}else{
+        point.est=apply(point.B,2,function(c) (c-min(c))/(max(c)-min(c)))[1:np,]
+        original.IVs=apply(original.IVs,2,function(b) (b-min(b))/(max(b)-min(b))) }else{
           point.est=NNS.norm(point.B)[1:np,]
+          original.IVs=NNS.norm(original.IVs)}
+        }else{
+            if(norm=='std'){
+        original.IVs=apply(original.IVs,2,function(b) (b-min(b))/(max(b)-min(b)))}
+              else{original.IVs=NNS.norm(original.IVs)}
         }
-    }}
+    }
 
   original.matrix=data.frame(original.IVs,original.DV)
 
+  minimums=apply(original.IVs,2,min)
+  maximums=apply(original.IVs,2,max)
 
   reg.points=list()
-  sections = list()
+  sections=list()
 
   ###  Regression Point Matrix
   if(is.numeric(order)|is.null(order)){
