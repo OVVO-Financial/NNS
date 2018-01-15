@@ -61,7 +61,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
   if(is.null(order)){order=Inf}
 
   if(!is.numeric(order)){
-    max.obs=1
+    max.obs=0
     type=type
   }else{
     max.obs=max.obs

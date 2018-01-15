@@ -17,6 +17,8 @@
 #' @param plot  logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
+#' @param std.errors logical; \code{FALSE} (default) To provide standard errors of each linear segment in the \code{"Fitted.xy"} output.
+#' @param confidence.interval numeric [0,1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
 #' @param threshold  numeric [0,1]; \code{(threshold=0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at 2*(# of regressors).  \code{(n.best="all")} will select and weight all generated regression points.  Analogous to \code{k} in
 #' \code{k Nearest Neighbors} algorithm and different values are tested using cross-validation in \link{NNS.stack}.
@@ -28,7 +30,7 @@
 #' \itemize{
 #'  \item{\code{"R2"}} provides the goodness of fit;
 #'
-#'  \item{\code{"MSE"}} returns the MSE between \code{y} and \code{y.hat};
+#'  \item{\code{"SE"}} returns the overall standard error of the estimate between \code{y} and \code{y.hat};
 #'
 #'  \item{\code{"Prediction.Accuracy"}} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y};
 #'
@@ -134,6 +136,7 @@ NNS.reg = function (x,y,
                     location = "top",
                     return.values = TRUE,
                     plot = TRUE, plot.regions=FALSE,residual.plot=TRUE,
+                    std.errors=FALSE,confidence.interval=NULL,
                     threshold = 0,
                     n.best=NULL,
                     noise.reduction="mean",
@@ -141,6 +144,8 @@ NNS.reg = function (x,y,
                     dist="L2",multivariate.call=FALSE){
 
   if(plot.regions && !is.null(order) && order=='max'){stop('Please reduce the "order" or set "plot.regions = FALSE".')}
+
+  if(!is.null(confidence.interval) && std.errors==FALSE){std.errors=TRUE}
 
   if(is.null(dim.red.method)){dim.red=FALSE}else{dim.red=TRUE}
 
@@ -414,17 +419,47 @@ NNS.reg = function (x,y,
 
   Values = (cbind(x,Fitted=fitted[,y.hat],Actual=fitted[,y],Difference=fitted[,y.hat]-fitted[,y], Accuracy=abs(round(fitted[,y.hat])-fitted[,y])))
 
+  deg.fr=length(y)-2
 
-  MSE = fitted[,mean(y.hat-y)^2]
+  SE = sqrt( sum(fitted[,((y.hat-y)^2)]) / deg.fr )
+
+
+ ##### return(sd(fitted[,((y.hat-y))]))
+
   y.fitted=fitted[,y.hat]
 
   if(!is.null(type)){
     Prediction.Accuracy=(length(y)-sum(abs(round(y.fitted)-(y))>0))/length(y)}
   else{Prediction.Accuracy=NULL}
 
-  R2=  (sum((fitted[,y.hat]-mean(y))*(y-mean(y)))^2)/(sum((y-mean(y))^2)*sum((fitted[,y.hat]-mean(y))^2))
+  R2=(sum((fitted[,y.hat]-mean(y))*(y-mean(y)))^2)/(sum((y-mean(y))^2)*sum((fitted[,y.hat]-mean(y))^2))
 
-  R2.adj = R2
+
+  ###Standard errors estimatation
+  if(std.errors){
+    l=length(regression.points[,x])
+    for(i in 1:l){
+      if(i<l){
+      obs=fitted[ x>=regression.points[,x][i]& x<regression.points[,x][i+1],which=TRUE]
+
+      se.denominator=length(obs-2)
+
+      if(se.denominator>0){
+        fitted[obs, `:=`
+          ( 'standard.errors'=sqrt( sum(((y.hat-y)^2)) / se.denominator ) )]
+        }
+      else {fitted[obs, `:=` ( 'standard.errors'=0 )]}
+      }
+
+
+      if(i==l){
+      obs=fitted[x>=regression.points[,x][i-1],which=TRUE]
+      se.denominator=length(obs-2)
+      fitted[obs, `:=`
+            ( 'standard.errors'=sqrt(sum( ((y.hat-y)^2))/se.denominator ) )]
+      }
+    }
+  }
 
   ###Plotting and regression equation
   if(plot){
@@ -436,13 +471,30 @@ NNS.reg = function (x,y,
 
     if(is.null(order)){
       plot.order = dep.reduced.order} else {plot.order=order}
+    if(is.numeric(confidence.interval)){
+      pval=1-confidence.interval
+      se.max=max(fitted[,y.hat+qnorm(1-(pval/2))*standard.errors])
+      se.min=min(fitted[,y.hat-qnorm(1-(pval/2))*standard.errors])
+
+      plot(x,y,xlim=c(xmin,xmax),
+           ylim=c(min(c(se.min,ymin)),max(c(se.max,ymax))),
+           col='steelblue',main=paste(paste0("NNS Order = ", plot.order),sep="\n"),
+           xlab = if(!is.null(original.columns))
+           {if(original.columns>1){paste0("Synthetic X* ","(Segments = ",(p-1),')')}}else{paste0("X  ","(Segments = ",(p-1),")",sep='')},
+           ylab="Y",mgp=c(2.5,0.5,0),
+           cex.lab=2,cex.main=2)
+
+      points(na.omit(fitted[,.(x,y.hat+qnorm(1 - (pval/2))*standard.errors)]),col='pink',pch=19)
+      points(na.omit(fitted[,.(x,y.hat-qnorm(1 - (pval/2))*standard.errors)]),col='pink',pch=19)
+    } else {
+
 
     plot(x,y,xlim=c(xmin,xmax),ylim=c(ymin,ymax),col='steelblue',main=paste(paste0("NNS Order = ", plot.order),sep="\n"),
          xlab = if(!is.null(original.columns))
          {if(original.columns>1){paste0("Synthetic X* ","(Segments = ",(p-1),')')}}else{paste0("X  ","(Segments = ",(p-1),")",sep='')},
          ylab="Y",mgp=c(2.5,0.5,0),
          cex.lab=2,cex.main=2)
-
+}
     ### Plot Regression points and fitted values and legend
     points(na.omit(regression.points[,.(x,y)]),col='red',pch=15)
     lines(na.omit(regression.points[,.(x,y)]),col='red',lwd=2,lty = 2)
@@ -467,11 +519,12 @@ NNS.reg = function (x,y,
     }
   }# plot TRUE bracket
 
+
   ### Return Values
   if(return.values){
-    return(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    return(list("R2"=R2, "SE"=SE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   } else {
-    invisible(list("R2"=R2, "MSE"=MSE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
+    invisible(list("R2"=R2, "SE"=SE, "Prediction.Accuracy"=Prediction.Accuracy,"equation"=synthetic.x.equation, "x.star"=x.star,"derivative"=Regression.Coefficients[],"Point"=point.est,"Point.est"=point.est.y,"regression.points"=regression.points[],"Fitted"=fitted[,.(y.hat)],"Fitted.xy"=fitted))
   }
 
 }
