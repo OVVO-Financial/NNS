@@ -26,11 +26,11 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
 
   ### For Multiple regressions
   ###  Turn each column into numeric values
-  original.IVs = data.matrix(X_n)
+  original.IVs=data.matrix(X_n)
   original.DV=as.numeric(Y)
 
   if(!is.null(norm)){
-    if(is.null(point.est)){
+    if(!is.null(point.est)){
       point.B=rbind(point.est,original.IVs)
       colnames(point.B)=colnames(point.est)
       if(norm=='std'){
@@ -182,6 +182,9 @@ NNS.M.reg <- function (X_n,Y,order=NULL,stn=0.99,n.best=1,type=NULL,point.est=NU
     predict.fit=numeric()
     predict.fit.iter=numeric()
     if(is.null(np)){
+
+
+
       predict.fit = distance(dist.est = point.est)
     }
     if(!is.null(np)){
