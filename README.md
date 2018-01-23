@@ -11,7 +11,7 @@ NNS offers:
   - Causal Analysis
   - Nonlinear Regression & Classification
   - ANOVA
-  - Seasonality & Autoregressive Modelling
+  - Seasonality & Autoregressive Modeling
   - Normalization 
   - Stochastic Dominance
 
