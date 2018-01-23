@@ -351,12 +351,12 @@ UPM.ratio<- function(degree,target,variable){
 #'
 #' This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
 #'
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param variable a numeric vector.
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.
 #' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.
 #' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
 #' @param plot logical; plots PDF.
-#' @return Returns a vector representing PDF of a variable
+#' @return Returns a data.table containing the intervals used and resulting PDF of the variable.
 #' @keywords partial moments, PDF, continuous CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -364,11 +364,14 @@ UPM.ratio<- function(degree,target,variable){
 #' @examples
 #' set.seed(123)
 #' x<-rnorm(100)
-#' NNS.PDF(degree=1,x)
+#' NNS.PDF(x)
+#'
+#' ## Custom target range
+#' NNS.PDF(x,target=c(-5,5))
 #' @export
 
 
-NNS.PDF<-function(degree,variable,target=NULL,bins=NULL,plot=TRUE){
+NNS.PDF<-function(variable,degree=1,target=NULL,bins=NULL,plot=TRUE){
 if(is.null(target)){target=sort(variable)}
 # d/dx approximation
 if(is.null(bins)){bins=length(variable)}
@@ -378,5 +381,5 @@ PDF=(LPM.ratio(degree,tgt+d.dx,variable)-LPM.ratio(degree,tgt-d.dx,variable))
 
 if(plot){plot(sort(tgt),PDF,col='blue',type='l',lwd=3,xlab="X")}
 
-PDF
+return(data.table(cbind("Intervals"=sort(tgt),PDF)))
 }
