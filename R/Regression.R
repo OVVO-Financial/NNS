@@ -116,6 +116,9 @@
 #' # Multiple Regression:
 #' NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
 #'
+#' # Classification:
+#' NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
+#'
 #' ## To call fitted values:
 #' x<-rnorm(100); y<-rnorm(100)
 #' NNS.reg(x,y)$Fitted
