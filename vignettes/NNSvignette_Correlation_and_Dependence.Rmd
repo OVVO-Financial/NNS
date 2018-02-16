@@ -21,22 +21,25 @@ The limitations of linear correlation are well known.  Often one uses correlatio
 Below are some examples comparing NNS correlation `NNS.cor` and `NNS.dep` with the standard Pearson's correlation coefficient `cor`.
 
 ##Linear Equivalence
+Note the fact that all observations occupy the co-partial moment quadrants.
 ```{r linear}
 x=seq(0,3,.01); y=2*x
 
 cor(x,y)
-NNS.dep(x,y,print.map = T)
+NNS.dep(x,y,print.map = T,order=3)
 ```
 
 ##Nonlinear Relationship
+Note the fact that all observations occupy the co-partial moment quadrants.
 ```{r nonlinear}
 x=seq(0,3,.01); y=x^10
 
 cor(x,y)
-NNS.dep(x,y,print.map = T)
+NNS.dep(x,y,print.map = T,order=3)
 ```
 
 ##Dependence
+Note the fact that all observations occupy only co- or divergent partial moment quadrants for a given subquadrant.
 ```{r dependence}
 set.seed(123)
 df<- data.frame(x=runif(10000,-1,1),y=runif(10000,-1,1))
@@ -48,6 +51,8 @@ NNS.dep(df$x,df$y,print.map = T)
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
 *[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+
+*[Nonlinear Correlation and Dependence Using NNS](https://ssrn.com/abstract=3010414)
 
 *[Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
 

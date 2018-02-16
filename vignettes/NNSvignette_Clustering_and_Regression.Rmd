@@ -50,6 +50,7 @@ NNS.reg(x,y,order=4,noise.reduction = 'off')
 ```
 
 ###Multivariate:
+Multivariate regressions return a plot of $y$ and $\hat{y}$.
 ```{r nonlinear multi,results='hide'}
 f= function(x,y) x^3+3*y-y^3-3*x
 y=x; z=expand.grid(x,y)
@@ -60,6 +61,7 @@ NNS.reg(z,g,order='max')
 ###Inter/Extrapolation
 `NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x,y,point.est=...)` parameter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
 
+###Classification
 For a classification problem, we simply set `NNS.reg(x,y,type="CLASS",...)`
 ```{r iris point.est}
 NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est

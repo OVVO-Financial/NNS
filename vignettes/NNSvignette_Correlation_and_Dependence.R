@@ -8,13 +8,13 @@ require(rgl)
 x=seq(0,3,.01); y=2*x
 
 cor(x,y)
-NNS.dep(x,y,print.map = T)
+NNS.dep(x,y,print.map = T,order=3)
 
 ## ----nonlinear-----------------------------------------------------------
 x=seq(0,3,.01); y=x^10
 
 cor(x,y)
-NNS.dep(x,y,print.map = T)
+NNS.dep(x,y,print.map = T,order=3)
 
 ## ----dependence----------------------------------------------------------
 set.seed(123)
