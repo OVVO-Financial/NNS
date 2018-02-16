@@ -72,7 +72,7 @@
 #' Identical regressors can be used as long as they do not share the same name. For instance,
 #' \code{NNS.reg(cbind(x,1*x),y)} will work as \code{NNS.reg} is not affected by multicollinearity.
 #'
-#' \code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type="CLASS")}.  \code{(type="CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red=TRUE)} enables dimension reduction regressions.
+#' \code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type="CLASS")}.  \code{(type="CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red.method)} enables dimension reduction regressions.
 #'
 #' @keywords nonlinear regression, classifier
 #' @author Fred Viole, OVVO Financial Systems
