@@ -141,6 +141,24 @@ seas</code></pre></div>
 <pre><code>## [1] 28.66274</code></pre>
 <p>Indeed, using <code>method='both'</code> lowered our RMSE. There are far fewer parameters to test using NNS than traditional methods and the relative simplicity of the method ensures robustness.</p>
 </div>
+<div id="testing-all-combinations-of-seasonal.factor" class="section level2">
+<h2>Testing All Combinations of <code>seasonal.factor</code></h2>
+<p>NNS also offers a wrapper function <code>NNS.ARMA.optim()</code> to test a given vector of <code>seasonal.factor</code> and returns the lowest SSE and the optimal periods.</p>
+<p>Given our monthly dataset, we will try multiple years by setting <code>seasonal.factor=seq(12,60,12)</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nns.optimal.periods=<span class="kw">NNS.ARMA.optim</span>(AirPassengers,<span class="dt">training.set =</span> <span class="dv">132</span>,<span class="dt">seasonal.factor =</span> <span class="kw">seq</span>(<span class="dv">12</span>,<span class="dv">60</span>,<span class="dv">12</span>))
+
+nns.optimal.periods</code></pre></div>
+<pre><code>## $periods
+## [1] 36 48
+## 
+## $SSE
+## [1] 6149.566</code></pre>
+<p>Use of a <code>seasonal.factor</code> too large will result in the following error. Please reduce the maximum <code>seasonal.factor</code></p>
+<pre><code>NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,72,12))
+
+Error in NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, : 
+Please set maximum [seasonal.factor] to less than 72</code></pre>
+</div>
 <div id="extension-of-estimates" class="section level2">
 <h2>Extension of Estimates</h2>
 <p>Using our cross-validated parameters (<code>seasonal.factor</code> and <code>method</code>) we can forecast another 50 periods out-of-range (<code>h=50</code>), by dropping the <code>training.set</code> parameter.</p>
