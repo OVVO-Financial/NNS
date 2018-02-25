@@ -39,7 +39,16 @@ install.packages('NNS')
 Please see https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples for basic partial moments equivalences and examples.
 
 
-
+## Citation
+```
+@Manual{,
+    title = {NNS: Nonlinear Nonparametric Statistics},
+    author = {Fred Viole},
+    year = {2016},
+    note = {R package version 0.3.8.3},
+    url = {https://CRAN.R-project.org/package=NNS},
+  }
+```
 
 ## Thank you for your interest in NNS!
 ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/NNS)
