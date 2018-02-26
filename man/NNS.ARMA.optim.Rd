@@ -17,7 +17,7 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor)
 Returns a list containing a vector of optimal seasonal periods \code{$period} and the minimum SSE value \code{$SSE}.
 }
 \description{
-Wrapper function for optimizing any combination of given `seasonal.periods` in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
+Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
 }
 \note{
 The number of combinations will grow prohibitively large, they should be kept to a minimum.
@@ -26,9 +26,9 @@ The number of combinations will grow prohibitively large, they should be kept to
 }
 \examples{
 
-## Nonlinear NNS.ARMA using AirPassengers monthly data
+## Nonlinear NNS.ARMA period optimization using 5 yearly lags on AirPassengers monthly data
 \dontrun{
-NNS.ARMA.optim(AirPassengers,training.set=132,seasonal.periods=seq(12,60,12))
+NNS.ARMA.optim(AirPassengers,training.set=132,seasonal.factor=seq(12,60,12))
 }
 
 }
