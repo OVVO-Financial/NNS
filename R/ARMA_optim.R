@@ -1,6 +1,6 @@
 #' NNS ARMA Optimizer
 #'
-#' Wrapper function for optimizing any combination of given `seasonal.periods` in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
+#' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
 #'
 #' @param variable a numeric vector.
 #' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
@@ -18,9 +18,9 @@
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #'
-#' ## Nonlinear NNS.ARMA using AirPassengers monthly data
+#' ## Nonlinear NNS.ARMA period optimization using 5 yearly lags on AirPassengers monthly data
 #' \dontrun{
-#' NNS.ARMA.optim(AirPassengers,training.set=132,seasonal.periods=seq(12,60,12))
+#' NNS.ARMA.optim(AirPassengers,training.set=132,seasonal.factor=seq(12,60,12))
 #' }
 #'
 #' @export
@@ -38,18 +38,16 @@ NNS.ARMA.optim=function(variable,training.set,seasonal.factor){
   nns.estimates=list()
   seasonal.combs=list()
 
-  seasonals=seasonal.factor
-
-for(i in 1:length(seasonals)){
+for(i in 1:length(seasonal.factor)){
   # Combinations of seasonal factors
-  seasonal.combs[[i]]=combn(seasonals,i)
+  seasonal.combs[[i]]=combn(seasonal.factor,i)
 
   nns.estimates.indiv=numeric()
 
   for(k in 1:ncol(seasonal.combs[[i]])){
 
     # Find the min SSE for a given seasonals sequence
-    nns.estimates.indiv[[k]]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
+    nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
   }
 
   nns.estimates[[i]]=nns.estimates.indiv
