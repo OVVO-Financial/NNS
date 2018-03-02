@@ -6,7 +6,7 @@
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param CV.size numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.
-#' @param weight options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.
+#' @param weight options: ("SSE","Features") method for selecting model output weight; Set \code{(weight="SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.
 #' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order='max')} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.
@@ -14,9 +14,9 @@
 #' @param seed numeric; 123 (default) Sets seed for CV sampling.
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
-#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
+#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
-#' \item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"SSE.dim.red"}} returns the SSE for the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
 #' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
 #' \item{\code{"stack"}} returns the output of the stacked model.
@@ -51,7 +51,7 @@
 #'  NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
 #' @export
 
-NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE",order=NULL,norm=NULL,method=c(1,2),dim.red.method="cor",seed=123){
+NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="SSE",order=NULL,norm=NULL,method=c(1,2),dim.red.method="cor",seed=123){
 
 
 
@@ -106,20 +106,20 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
 
   if(1%in%method){
 
-    nns.cv=sapply(1:(2*n),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i, order=order)$Point.est-CV.DV.test)^2))
+    nns.cv=sapply(1:(2*n),function(i) sum((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = i, order=order)$Point.est-CV.DV.test)^2))
 
-    nns.cv=c(nns.cv,mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all',order=order)$Point.est-CV.DV.test)^2))
+    nns.cv=c(nns.cv,sum((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test, plot=F, n.best = 'all',order=order)$Point.est-CV.DV.test)^2))
 
     k=which.min(na.omit(nns.cv))
     if(k==length(nns.cv)){k='all'}else{k=k}
 
     nns.1=NNS.reg(IVs.train, DV.train,point.est = IVs.test, plot=F, n.best = k)$Point.est
-    nns.cv.mse=min(nns.cv)
+    nns.cv.sse=min(nns.cv)
   } else {
     k='N/A'
     nns.1=0
     nns.cv=1e-10
-    nns.cv.mse='N/A'}
+    nns.cv.sse='N/A'}
 
   # Dimension Reduction Regression Output
   if(2%in%method){
@@ -127,14 +127,14 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
 
     var.cutoffs=unique(var.cutoffs[var.cutoffs<max(var.cutoffs)])
 
-    nns.ord=sapply(1:length(var.cutoffs),function(i) mean((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, dim.red.method=dim.red.method,threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
+    nns.ord=sapply(1:length(var.cutoffs),function(i) sum((NNS.reg(CV.IVs.train, CV.DV.train,point.est = CV.IVs.test,plot=F, dim.red.method=dim.red.method,threshold = var.cutoffs[i])$Point.est-CV.DV.test)^2))
 
     nns.2=NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method=dim.red.method,plot=F,threshold = var.cutoffs[which.min(nns.ord)])$Point.est
 
-    nns.ord.mse=min(na.omit(nns.ord))
+    nns.ord.sse=min(na.omit(nns.ord))
   } else {nns.2=0
   nns.ord=1e-10
-  nns.ord.mse=NA
+  nns.ord.sse=NA
   var.cutoffs=NA}
 
 
@@ -146,7 +146,7 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
   nns.ord[nns.ord==0]<- 1e-10
 
 
-  if(weight=="MSE"){weights=c(max(1e-10,1/min(na.omit(nns.cv))),max(1e-10,1/min(na.omit(nns.ord))))}
+  if(weight=="SSE"){weights=c(max(1e-10,1/min(na.omit(nns.cv))),max(1e-10,1/min(na.omit(nns.ord))))}
 
 
   weights=pmax(weights,c(0,0))
@@ -156,6 +156,6 @@ NNS.stack <- function(IVs.train,DV.train,IVs.test=NULL,CV.size=NULL,weight="MSE"
 
   estimates = (weights[1]*nns.1+weights[2]*nns.2)
 
-  return(list(NNS.reg.n.best=k,MSE.reg=nns.cv.mse,NNS.dim.red.threshold=var.cutoffs[which.min(nns.ord)],MSE.dim.red=nns.ord.mse,reg=nns.1,dim.red=nns.2,stack=estimates))
+  return(list(NNS.reg.n.best=k,sse.reg=nns.cv.sse,NNS.dim.red.threshold=var.cutoffs[which.min(nns.ord)],SSE.dim.red=nns.ord.sse,reg=nns.1,dim.red=nns.2,stack=estimates))
 
 }
