@@ -77,7 +77,7 @@ NNS also offers a wrapper function `NNS.ARMA.optim()` to test a given vector of 
 Given our monthly dataset, we will try multiple years by setting `seasonal.factor=seq(12,60,12)`
 
 ```{r best optim}
-nns.optimal.periods=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12))
+nns.optimal.periods=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
 
 nns.optimal.periods
 ```
