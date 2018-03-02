@@ -44,6 +44,7 @@ for(i in 1:length(seasonal.factor)){
 
   # Combinations of seasonal factors
   if(method=='comb'){
+
     seasonal.combs[[i]]=combn(seasonal.factor,i)
 
     for(k in 1:ncol(seasonal.combs[[i]])){
@@ -51,11 +52,10 @@ for(i in 1:length(seasonal.factor)){
       # Find the min SSE for a given seasonals sequence
       nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
     }
-    nns.estimates.indiv=numeric()
-
-
 
     nns.estimates[[i]]=nns.estimates.indiv
+
+    nns.estimates.indiv=numeric()
 
     }
   else{
