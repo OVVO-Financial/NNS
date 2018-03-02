@@ -29,10 +29,10 @@ nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='both',seasonal.factor
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 
 ## ----best optim----------------------------------------------------------
-nns.optimal.periods=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
+nns.optimal=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
 
-nns.optimal.periods
+nns.optimal
 
 ## ----extension,results='hide'--------------------------------------------
-NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal.periods$periods,method = 'both',plot = TRUE,seasonal.plot = FALSE)
+NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)
 

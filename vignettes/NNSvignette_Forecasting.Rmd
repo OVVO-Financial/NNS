@@ -77,9 +77,9 @@ NNS also offers a wrapper function `NNS.ARMA.optim()` to test a given vector of 
 Given our monthly dataset, we will try multiple years by setting `seasonal.factor=seq(12,60,12)`
 
 ```{r best optim}
-nns.optimal.periods=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
+nns.optimal=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
 
-nns.optimal.periods
+nns.optimal
 ```
 
 Use of a `seasonal.factor` too large will result in the following error.  Please reduce the maximum `seasonal.factor`
@@ -95,7 +95,7 @@ Please set maximum [seasonal.factor] to less than 72
 Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` parameter.
 
 ```{r extension,results='hide'}
-NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal.periods$periods,method = 'both',plot = TRUE,seasonal.plot = FALSE)
+NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)
 ```
 
 ## Brief Notes on Other Parameters
