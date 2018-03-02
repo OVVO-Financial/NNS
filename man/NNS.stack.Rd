@@ -5,7 +5,7 @@
 \title{NNS stack}
 \usage{
 NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
-  weight = "MSE", order = NULL, norm = NULL, method = c(1, 2),
+  weight = "SSE", order = NULL, norm = NULL, method = c(1, 2),
   dim.red.method = "cor", seed = 123)
 }
 \arguments{
@@ -17,7 +17,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 
 \item{CV.size}{numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.}
 
-\item{weight}{options: ("MSE","Features") method for selecting model output weight; Set \code{(weight="MSE")} for optimum parameters and weighting based on each base model's \code{"MSE"}.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"MSE"}.}
+\item{weight}{options: ("SSE","Features") method for selecting model output weight; Set \code{(weight="SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.}
 
 \item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order='max')} is the k-nearest neighbors equivalent.}
 
@@ -32,9 +32,9 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
-\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"MSE.reg"} returns the MSE for the \link{NNS.reg} multivariate regression.
+\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
-\item{\code{"MSE.dim.red"}} returns the MSE for the \link{NNS.reg} dimension reduction regression.
+\item{\code{"SSE.dim.red"}} returns the SSE for the \link{NNS.reg} dimension reduction regression.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
 \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
 \item{\code{"stack"}} returns the output of the stacked model.
