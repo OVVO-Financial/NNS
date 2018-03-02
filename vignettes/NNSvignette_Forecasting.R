@@ -34,5 +34,5 @@ nns.optimal.periods=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.fac
 nns.optimal.periods
 
 ## ----extension,results='hide'--------------------------------------------
-NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seasonal.plot = FALSE)
+NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal.periods$periods,method = 'both',plot = TRUE,seasonal.plot = FALSE)
 

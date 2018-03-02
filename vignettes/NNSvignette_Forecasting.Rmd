@@ -95,7 +95,7 @@ Please set maximum [seasonal.factor] to less than 72
 Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` parameter.
 
 ```{r extension,results='hide'}
-NNS.ARMA(AirPassengers,h=50,seasonal.factor = a,method = 'both',plot = TRUE,seasonal.plot = FALSE)
+NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal.periods$periods,method = 'both',plot = TRUE,seasonal.plot = FALSE)
 ```
 
 ## Brief Notes on Other Parameters
