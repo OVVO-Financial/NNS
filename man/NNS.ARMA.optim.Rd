@@ -4,7 +4,7 @@
 \alias{NNS.ARMA.optim}
 \title{NNS ARMA Optimizer}
 \usage{
-NNS.ARMA.optim(variable, training.set, seasonal.factor)
+NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq")
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -12,6 +12,8 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor)
 \item{training.set}{numeric; \code{NULL} (defualt) Sets the number of variable observations}
 
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor=c(12,24,36))}}
+
+\item{method}{options: ("comb","seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
 }
 \value{
 Returns a list containing a vector of optimal seasonal periods \code{$period} and the minimum SSE value \code{$SSE}.
@@ -20,7 +22,7 @@ Returns a list containing a vector of optimal seasonal periods \code{$period} an
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
 }
 \note{
-The number of combinations will grow prohibitively large, they should be kept to a minimum.
+The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method="comb")}.
 
 \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 }

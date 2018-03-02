@@ -96,7 +96,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
  \item{\code{"Fitted"}} returns a vector containing only the fitted values, \code{y.hat};
 
- \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID}.
+ \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 }
 }
 \description{
