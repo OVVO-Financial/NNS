@@ -1,6 +1,6 @@
 #' NNS ARMA Optimizer
 #'
-#' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum.
+#' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 #'
 #' @param variable a numeric vector.
 #' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
