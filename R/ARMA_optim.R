@@ -5,10 +5,11 @@
 #' @param variable a numeric vector.
 #' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor=c(12,24,36))}
+#' @param method options: ("comb","seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period} and the minimum SSE value \code{$SSE}.
 #'
-#' @note The number of combinations will grow prohibitively large, they should be kept to a minimum.
+#' @note The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method="comb")}.
 #'
 #' \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 #'
@@ -25,7 +26,7 @@
 #'
 #' @export
 
-NNS.ARMA.optim=function(variable,training.set,seasonal.factor){
+NNS.ARMA.optim=function(variable,training.set,seasonal.factor,method='seq'){
 
   limit=length(variable)/2
   if(max(seasonal.factor)>=limit){stop(paste0("Please set maximum [seasonal.factor] to less than ",floor(limit)))}
@@ -39,25 +40,42 @@ NNS.ARMA.optim=function(variable,training.set,seasonal.factor){
   seasonal.combs=list()
 
 for(i in 1:length(seasonal.factor)){
-  # Combinations of seasonal factors
-  seasonal.combs[[i]]=combn(seasonal.factor,i)
-
   nns.estimates.indiv=numeric()
 
-  for(k in 1:ncol(seasonal.combs[[i]])){
+  # Combinations of seasonal factors
+  if(method=='comb'){
+    seasonal.combs[[i]]=combn(seasonal.factor,i)
 
-    # Find the min SSE for a given seasonals sequence
-    nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
+    for(k in 1:ncol(seasonal.combs[[i]])){
+
+      # Find the min SSE for a given seasonals sequence
+      nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
+    }
+    nns.estimates.indiv=numeric()
+
+
+
+    nns.estimates[[i]]=nns.estimates.indiv
+
+    }
+  else{
+    nns.estimates.indiv[i]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.factor[1:i],method='lin',plot=FALSE)-test.set)^2)
   }
 
-  nns.estimates[[i]]=nns.estimates.indiv
 
 }
 
-min.estimate=sapply(nns.estimates,min)
-min.estimate.index=which.min(min.estimate)
-min.estimate.entry=which.min(nns.estimates[[min.estimate.index]])
+  if(method=='comb'){
+      min.estimate=sapply(nns.estimates,min)
+      min.estimate.index=which.min(min.estimate)
+      min.estimate.entry=which.min(nns.estimates[[min.estimate.index]])
 
-return(list(periods=seasonal.combs[[min.estimate.index]][,min.estimate.entry],SSE=min(min.estimate)))
+      return(list(periods=seasonal.combs[[min.estimate.index]][,min.estimate.entry],SSE=min(min.estimate)))
+  } else{
+      min.estimate=which.min(nns.estimates.indiv)
+
+      return(list(periods=seasonal.factor[1:min.estimate],SSE=nns.estimates.indiv[min.estimate]))
+  }
+
 
 }
