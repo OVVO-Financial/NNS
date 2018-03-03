@@ -5,11 +5,11 @@ require(knitr)
 require(rgl)
 
 ## ----linear--------------------------------------------------------------
-nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',plot = TRUE,seasonal.plot = FALSE)
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',plot = TRUE,seasonal.factor = 12,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 
 ## ----nonlinear-----------------------------------------------------------
-nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',plot=TRUE,seasonal.plot = FALSE)
+nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',plot=TRUE,seasonal.factor = 12,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 
 ## ----seasonal test-------------------------------------------------------
@@ -29,9 +29,13 @@ nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='both',seasonal.factor
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 
 ## ----best optim----------------------------------------------------------
-nns.optimal=NNS.ARMA.optim(AirPassengers,training.set = 132,seasonal.factor = seq(12,60,12),method = "comb")
+nns.optimal=NNS.ARMA.optim(AirPassengers,training.set = 100,seasonal.factor = seq(12,48,12),method = "comb")
 
 nns.optimal
+
+## ----best optim2---------------------------------------------------------
+nns=NNS.ARMA(AirPassengers,training.set = 100,h=44,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)
+sqrt(mean((nns-tail(AirPassengers,44))^2))
 
 ## ----extension,results='hide'--------------------------------------------
 NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)

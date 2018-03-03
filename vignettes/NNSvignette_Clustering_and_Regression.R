@@ -7,7 +7,7 @@ require(rgl)
 ## ----linear,results='hide'-----------------------------------------------
 x=seq(-5,5,.05); y=x^3
 
-for(i in 1:4){NNS.part(x,y,order=i,Voronoi = T)}
+for(i in 1:4){NNS.part(x,y,order=i,noise.reduction = 'off',Voronoi = T)}
 
 ## ----x part,results='hide'-----------------------------------------------
 for(i in 1:4){NNS.part(x,y,order=i,type="XONLY",Voronoi = T)}
