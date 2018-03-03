@@ -143,7 +143,7 @@ seas</code></pre></div>
 </div>
 <div id="testing-all-combinations-of-seasonal.factor" class="section level2">
 <h2>Testing All Combinations of <code>seasonal.factor</code></h2>
-<p>NNS also offers a wrapper function <code>NNS.ARMA.optim()</code> to test a given vector of <code>seasonal.factor</code> and returns the lowest SSE and the optimal periods.</p>
+<p>NNS also offers a wrapper function <code>NNS.ARMA.optim()</code> to test a given vector of <code>seasonal.factor</code> and returns the lowest SSE and the optimal periods, as well as the <code>NNS.ARMA</code> regression method used.</p>
 <p>Given our monthly dataset, we will try multiple years by setting <code>seasonal.factor=seq(12,60,12)</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nns.optimal=<span class="kw">NNS.ARMA.optim</span>(AirPassengers,<span class="dt">training.set =</span> <span class="dv">132</span>,<span class="dt">seasonal.factor =</span> <span class="kw">seq</span>(<span class="dv">12</span>,<span class="dv">60</span>,<span class="dv">12</span>),<span class="dt">method =</span> <span class="st">&quot;comb&quot;</span>)
 
