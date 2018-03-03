@@ -295,10 +295,10 @@ NNS.reg = function (x,y,
   if(is.null(original.columns)){
     synthetic.x.equation=NULL
     x.star=NULL
-    dependence = (NNS.dep(x,y,print.map = F)$Dependence)^(1/3)
+    dependence = (NNS.dep(x,y,print.map = F)$Dependence)^(1/2)
 
   } else {
-    if(dim.red) dependence=(NNS.dep(x,y,print.map = F)$Dependence)^(1/3)}
+    if(dim.red) dependence=(NNS.dep(x,y,print.map = F)$Dependence)^(1/2)}
   if(is.null(order)){
     dep.reduced.order=floor(NNS.part(x,y,order='max')$order*dependence)}
   else {
