@@ -45,7 +45,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
   if(!is.null(order)){if(order==0) {order=1} else {order=order}}
   x=as.numeric(x);y=as.numeric(y)
 
-  PART = data.table(x,y,quadrant="q",prior.quadrant="pq")[, counts := .N]
+  PART = data.table(x,y,quadrant="q",prior.quadrant="pq")[, counts := .N,by="quadrant"][, old.counts := .N,by="prior.quadrant"]
 
   mode=function(x) {
     if(length(x)>1){
@@ -78,10 +78,14 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
       if(i==order) break
 
       PART[counts >= max.obs, counts := .N, by=quadrant]
+      PART[old.counts >= max.obs, old.counts := .N, by=prior.quadrant]
       l.PART=max(PART$counts)
       if(min.obs.stop && (min(PART$counts)<= max.obs) && i>=1) break
       if (l.PART <= max.obs && i>=1) break
       max.obs.rows = PART[counts >= max.obs, which=TRUE]
+      old.max.obs.rows= PART[old.counts >= max.obs, which=TRUE]
+      if(max.obs>0 & length(max.obs.rows)<length(old.max.obs.rows)) break
+
       #Segments for Voronoi...
       if(Voronoi==T){
         if(l.PART>max.obs){
@@ -109,6 +113,9 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP= PART[max.obs.rows, lapply(.SD, mean), by=quadrant, .SDcols = x:y]
+
+        RP.prior=PART[max.obs.rows, lapply(.SD, mean), by=prior.quadrant, .SDcols = x:y]
+
         RP[, prior.quadrant := (quadrant)]
 
         PART[max.obs.rows , prior.quadrant := (quadrant)]
@@ -155,10 +162,13 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
         new.parts=length(unique(PART$quadrant))
       }
 
-      if(old.parts==new.parts) break
+
+      if(max.obs==0 & old.parts==new.parts) break
+
 
       i=i+1L
     }
+
 
     if(Voronoi==T){
       points(RP$x,RP$y,pch=15,lwd=2,col='red')
@@ -181,11 +191,12 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
       if(i==order) break
 
       PART[counts >= 2*max.obs, counts := .N, by=quadrant]
-
+      PART[old.counts >= 2*max.obs, old.counts := .N, by=prior.quadrant]
       if (max(PART$counts) <= 2*max.obs && i>=1) break
       if(min.obs.stop && (min(PART$counts)<= 2*max.obs)&& i>=1) break
       max.obs.rows = PART[counts >= 2*max.obs, which=TRUE]
-
+      old.max.obs.rows= PART[old.counts >= 2*max.obs, which=TRUE]
+      if(max.obs>0 & length(max.obs.rows)<length(old.max.obs.rows)) break
 
       if(noise.reduction=='mean' | noise.reduction=='off'){
         RP= PART[max.obs.rows, lapply(.SD, mean), by=quadrant, .SDcols = x:y]
@@ -232,7 +243,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
         new.parts=length(unique(PART$quadrant))
       }
 
-      if(old.parts==new.parts) break
+      if(max.obs==0 & old.parts==new.parts) break
       i=i+1L
     }
 
