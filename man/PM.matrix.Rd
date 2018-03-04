@@ -4,12 +4,9 @@
 \alias{PM.matrix}
 \title{Partial Moment Matrix}
 \usage{
-PM.matrix(Co.PM = NULL, LPM.degree, UPM.degree, target, variable,
-  pop.adj = FALSE)
+PM.matrix(LPM.degree, UPM.degree, target, variable, pop.adj = FALSE)
 }
 \arguments{
-\item{Co.PM}{options: ("Co.LPM", "Co.UPM", "D.LPM", "D.UPM"); partial moment quadrant to generate matrix of.  \code{NULL} (default) returns all partial moment matrices.}
-
 \item{LPM.degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
 
 \item{UPM.degree}{integer; Degree for \code{variable} above \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
@@ -33,10 +30,14 @@ For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D
 set.seed(123)
 x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
 A<-cbind(x,y,z)
-PM.matrix(LPM.degree=0, UPM.degree=0, target="mean", variable=A)
+PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
 
-## Calling Multiple Partial Moment Quadrants
-PM.matrix(c("Co.LPM","Co.UPM"), LPM.degree=0, UPM.degree=0, target="mean", variable=A)
+## Calling Individual Partial Moment Quadrants
+cov.mtx=PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+cov.mtx$cupm
+
+## Full covariance matrix
+cov.mtx$matrix
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
