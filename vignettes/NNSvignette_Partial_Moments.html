@@ -113,8 +113,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(<span class="kw">Co.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))+<span class="kw">Co.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.LPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y))-<span class="kw">D.UPM</span>(<span class="dv">1</span>,<span class="dv">1</span>,x,y,<span class="kw">mean</span>(x),<span class="kw">mean</span>(y)))*(<span class="kw">length</span>(x)/(<span class="kw">length</span>(x)-<span class="dv">1</span>))</code></pre></div>
 <pre><code>## [1] -0.04372107</code></pre>
 </div>
-<div id="covariance-elements" class="section level2">
-<h2>Covariance Elements</h2>
+<div id="covariance-elements-and-covariance-matrix" class="section level2">
+<h2>Covariance Elements and Covariance Matrix</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">PM.matrix</span>(<span class="dt">LPM.degree =</span> <span class="dv">1</span>,<span class="dt">UPM.degree =</span> <span class="dv">1</span>,<span class="dt">target =</span> <span class="st">'mean'</span>, <span class="dt">variable =</span> <span class="kw">cbind</span>(x,y), <span class="dt">pop.adj =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre><code>## $clpm
 ##           x         y
@@ -134,7 +134,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 ## $dupm
 ##           x         y
 ## x 0.0000000 0.1560924
-## y 0.1469182 0.0000000</code></pre>
+## y 0.1469182 0.0000000
+## 
+## $matrix
+##           x         y
+## x 0.8332328 0.5623002
+## y 0.5623002 0.9350631</code></pre>
 </div>
 <div id="pearson-correlation" class="section level2">
 <h2>Pearson Correlation</h2>
