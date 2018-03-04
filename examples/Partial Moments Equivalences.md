@@ -43,9 +43,10 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 > (Co.LPM(1,1,x,y,mean(x),mean(y))+Co.UPM(1,1,x,y,mean(x),mean(y))-D.LPM(1,1,x,y,mean(x),mean(y))-D.UPM(1,1,x,y,mean(x),mean(y)))*(length(x)/(length(x)-1))
 [1] -0.04372107
 ```
-### Covariance Elements
+### Covariance Elements and Covariance Matrix
 ```r
-> PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
+> cov.mtx=PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
+> cov.mtx
 $clpm
           x         y
 x 0.4033078 0.1559295
@@ -65,6 +66,11 @@ $dupm
           x         y
 x 0.0000000 0.1560924
 y 0.1469182 0.0000000
+
+> Reduce("+",cov.mtx)
+          x         y
+x 0.8332328 0.5623002
+y 0.5623002 0.9350631
 ```
 ### Pearson Correlation
 ```r
