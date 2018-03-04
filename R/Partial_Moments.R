@@ -177,7 +177,6 @@ D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
 #'
 #'
 #' This function generates a co-partial moment matrix for the specified co-partial moment.
-#' @param Co.PM options: ("Co.LPM", "Co.UPM", "D.LPM", "D.UPM"); partial moment quadrant to generate matrix of.  \code{NULL} (default) returns all partial moment matrices.
 #' @param LPM.degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param UPM.degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = "mean")} will set the target as the mean of every variable.
@@ -193,18 +192,22 @@ D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
 #' set.seed(123)
 #' x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
 #' A<-cbind(x,y,z)
-#' PM.matrix(LPM.degree=0, UPM.degree=0, target="mean", variable=A)
+#' PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
 #'
-#' ## Calling Multiple Partial Moment Quadrants
-#' PM.matrix(c("Co.LPM","Co.UPM"), LPM.degree=0, UPM.degree=0, target="mean", variable=A)
+#' ## Calling Individual Partial Moment Quadrants
+#' cov.mtx=PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+#' cov.mtx$cupm
+#'
+#' ## Full covariance matrix
+#' cov.mtx$matrix
 #' @export
 
 
-PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
-  if(is.null(Co.PM)){Co.PM=c("Co.LPM", "Co.UPM", "D.LPM","D.UPM")}
+PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
+
   n= ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
-  if("Co.LPM"%in%Co.PM){
+
     clpms=list()
     for(i in 1:n){
       if(is.numeric(target)){
@@ -216,9 +219,8 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     clpm.matrix[lower.tri(clpm.matrix, diag=TRUE)] <- unlist(clpms)
     clpm.matrix = pmax(clpm.matrix, t(clpm.matrix), na.rm=TRUE)
     colnames(clpm.matrix) = colnames(variable);rownames(clpm.matrix) = colnames(variable)
-  } else {clpm.matrix=matrix(0, n, n)}
 
-  if("Co.UPM"%in%Co.PM){
+
     cupms=list()
     for(i in 1:n){
       if(is.numeric(target)){
@@ -230,9 +232,9 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     cupm.matrix[lower.tri(cupm.matrix, diag=TRUE)] <- unlist(cupms)
     cupm.matrix = pmax(cupm.matrix, t(cupm.matrix), na.rm=TRUE)
     colnames(cupm.matrix) = colnames(variable);rownames(cupm.matrix) = colnames(variable)
-  } else {cupm.matrix=matrix(0, n, n)}
 
-  if("D.LPM"%in%Co.PM){
+
+
     dlpms1=list();dlpms2=list()
     for(i in 1:(n-1)){
       if(is.numeric(target)){
@@ -248,8 +250,8 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     dlpm.matrix[upper.tri(dlpm.matrix, diag=FALSE)] <- unlist(dlpms2)
     diag(dlpm.matrix) <- 0
     colnames(dlpm.matrix) = colnames(variable);rownames(dlpm.matrix) = colnames(variable)
-  } else {dlpm.matrix=matrix(0, n, n)}
-  if("D.UPM"%in%Co.PM){
+
+
     dupms1=list();dupms2=list()
     for(i in 1:(n-1)){
       if(is.numeric(target)){
@@ -265,7 +267,7 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     dupm.matrix[upper.tri(dupm.matrix, diag=FALSE)] <- unlist(dupms2)
     diag(dupm.matrix) <- 0
     colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
-  } else {dupm.matrix=matrix(0, n, n)}
+
 
   if(pop.adj){
     adjustment=(length(variable[,1])/(length(variable[,1])-1))
@@ -275,7 +277,9 @@ PM.matrix <- function(Co.PM=NULL,LPM.degree,UPM.degree,target,variable,pop.adj=F
     dupm.matrix=dupm.matrix*adjustment
   }
 
-  return(list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix))
+  components=list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix)
+
+  return(list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix,matrix=Reduce("+",components)))
 }
 
 
