@@ -4,19 +4,19 @@ require(NNS)
 require(knitr)
 require(rgl)
 
-## ----linear--------------------------------------------------------------
+## ----linear,fig.width=5,fig.height=3,fig.align = "center"----------------
 x=seq(0,3,.01); y=2*x
 
 cor(x,y)
 NNS.dep(x,y,print.map = T,order=3)
 
-## ----nonlinear-----------------------------------------------------------
+## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center"-------------
 x=seq(0,3,.01); y=x^10
 
 cor(x,y)
 NNS.dep(x,y,print.map = T,order=3)
 
-## ----dependence----------------------------------------------------------
+## ----dependence,fig.width=5,fig.height=3,fig.align = "center"------------
 set.seed(123)
 df<- data.frame(x=runif(10000,-1,1),y=runif(10000,-1,1))
 df<- subset(df, (x^2 + y^2 <= 1 & x^2 + y^2 >= 0.95))

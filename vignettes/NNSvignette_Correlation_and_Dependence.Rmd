@@ -22,7 +22,7 @@ Below are some examples comparing NNS correlation `NNS.cor` and `NNS.dep` with t
 
 ##Linear Equivalence
 Note the fact that all observations occupy the co-partial moment quadrants.
-```{r linear}
+```{r linear,fig.width=5,fig.height=3,fig.align = "center"}
 x=seq(0,3,.01); y=2*x
 
 cor(x,y)
@@ -31,7 +31,7 @@ NNS.dep(x,y,print.map = T,order=3)
 
 ##Nonlinear Relationship
 Note the fact that all observations occupy the co-partial moment quadrants.
-```{r nonlinear}
+```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 x=seq(0,3,.01); y=x^10
 
 cor(x,y)
@@ -40,7 +40,7 @@ NNS.dep(x,y,print.map = T,order=3)
 
 ##Dependence
 Note the fact that all observations occupy only co- or divergent partial moment quadrants for a given subquadrant.
-```{r dependence}
+```{r dependence,fig.width=5,fig.height=3,fig.align = "center"}
 set.seed(123)
 df<- data.frame(x=runif(10000,-1,1),y=runif(10000,-1,1))
 df<- subset(df, (x^2 + y^2 <= 1 & x^2 + y^2 >= 0.95))
@@ -50,11 +50,11 @@ NNS.dep(df$x,df$y,print.map = T)
 #References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
 
-*[Nonlinear Correlation and Dependence Using NNS](https://ssrn.com/abstract=3010414)
+* [Nonlinear Correlation and Dependence Using NNS](https://ssrn.com/abstract=3010414)
 
-*[Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
 
-*[Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+* [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
 

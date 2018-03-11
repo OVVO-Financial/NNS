@@ -45,13 +45,13 @@ for(i in 1:3){NNS.part(x,y,order=i,Voronoi = T);NNS.reg(x,y,order=i)}
 `NNS.reg` can fit any $f(x)$, for both uni- and multivariate cases.  `NNS.reg` returns a self-evident list of values provided below.
 
 ###Univariate:
-```{r nonlinear}
+```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 NNS.reg(x,y,order=4,noise.reduction = 'off')
 ```
 
 ###Multivariate:
 Multivariate regressions return a plot of $y$ and $\hat{y}$.
-```{r nonlinear multi,results='hide'}
+```{r nonlinear multi,results='hide',fig.width=5,fig.height=3,fig.align = "center"}
 f= function(x,y) x^3+3*y-y^3-3*x
 y=x; z=expand.grid(x,y)
 g=f(z[,1],z[,2])
@@ -63,14 +63,14 @@ NNS.reg(z,g,order='max')
 
 ###Classification
 For a classification problem, we simply set `NNS.reg(x,y,type="CLASS",...)`
-```{r iris point.est}
-NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
+```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS",location = 'topleft')$Point.est
 ```
 
 ###NNS Dimension Reduction Regression
 `NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x,y,dim.red.method="cor",...)`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
-```{r nonlinear class}
-NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor")$equation
+```{r nonlinear class,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",location = 'topleft')$equation
 ```
 Thus, our model for this regression would be:
 $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
@@ -78,27 +78,27 @@ $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Peta
 
 ####Threshold
 `NNS.reg(x,y,dim.red.method="cor",threshold=...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
-```{r nonlinear class threshold}
-NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75)$equation
+```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75,location = 'topleft')$equation
 ```
 Thus, our model for this further reduced dimension regression would be:
 $$Species = \frac{0.7825612*Sepal.Length -0*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{3} $$
 
 and the `point.est=(...)` operates in the same manner as the full regression above, again called with `$Point.est`.
-```{r }
-NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75,point.est=iris[1:10,1:4])$Point.est
+```{r final,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",threshold=.75,point.est=iris[1:10,1:4],location = 'topleft')$Point.est
 ```
 
 
 #References
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
-*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
 
-*[Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
 
-*[New Nonparametric Curve-Fitting Using Partitioning, Regression and Partial Derivative Estimation](https://ssrn.com/abstract=2852570)
+* [New Nonparametric Curve-Fitting Using Partitioning, Regression and Partial Derivative Estimation](https://ssrn.com/abstract=2852570)
 
-*[Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
+* [Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
 
-*[Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
+* [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)

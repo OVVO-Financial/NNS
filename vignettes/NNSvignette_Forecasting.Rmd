@@ -28,14 +28,14 @@ We will forecast 44 periods `h=44` of `AirPassengers` using the first 100 observ
 Since this is monthly data, we will try a `seasonal.factor=12`.
 
 Below is the linear fit and associated root mean squared error (RMSE) using `method='lin'`.
-```{r linear}
+```{r linear,fig.width=5,fig.height=3,fig.align = "center"}
 nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',plot = TRUE,seasonal.factor = 12,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
 
 ## Nonlinear Regression
 Now we can try using a nonlinear regression on the relevant component series using `method='nonlin'`.
-```{r nonlinear}
+```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',plot=TRUE,seasonal.factor = 12,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
@@ -43,7 +43,7 @@ sqrt(mean((nns-tail(AirPassengers,44))^2))
 ## Cross-Validation
 We can test a series of `seasonal.factors` and select the best one to fit.  The largest period to consider would be `0.25 * length(variable)`, in our case 25.  Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
 
-```{r seasonal test}
+```{r seasonal test,fig.width=5,fig.height=3,fig.align = "center"}
 seas=t(sapply(1:25,function(i) c(i,sqrt(mean((NNS.ARMA(AirPassengers,h=44,training.set = 100,method='lin',seasonal.factor=i,plot=FALSE)-tail(AirPassengers,44))^2)))))
 colnames(seas)=c("Period","RMSE")
 seas
@@ -59,14 +59,14 @@ a=seas[which.min(seas[,2]),1]
 ```
 
 Below you will notice the use of `seasonal.factor=a`
-```{r best nonlinear}
+```{r best nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='nonlin',seasonal.factor = a,plot = TRUE,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
 
 There is a benefit to using a nonlinear regression as our RMSE has been lowered.  We can also test if using both linear and nonlinear estimates combined result in a lower RMSE (`method='both'`).
 
-```{r best both}
+```{r best both,fig.width=5,fig.height=3,fig.align = "center"}
 nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='both',seasonal.factor = a,plot=TRUE,seasonal.plot=FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
@@ -78,14 +78,14 @@ NNS also offers a wrapper function `NNS.ARMA.optim()` to test a given vector of 
 
 Given our monthly dataset, we will try multiple years by setting `seasonal.factor=seq(12,48,12)`.
 
-```{r best optim}
+```{r best optim,fig.width=5,fig.height=3,fig.align = "center"}
 nns.optimal=NNS.ARMA.optim(AirPassengers,training.set = 100,seasonal.factor = seq(12,48,12),method = "comb")
 
 nns.optimal
 ```
 
 Using our new parameters yields the same results:
-```{r best optim2}
+```{r best optim2,fig.width=5,fig.height=3,fig.align = "center"}
 nns=NNS.ARMA(AirPassengers,training.set = 100,h=44,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
@@ -103,7 +103,7 @@ Please set maximum [seasonal.factor] to less than 72
 ## Extension of Estimates
 Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h=50`), by dropping the `training.set` parameter.
 
-```{r extension,results='hide'}
+```{r extension,results='hide',fig.width=5,fig.height=3,fig.align = "center"}
 NNS.ARMA(AirPassengers,h=50,seasonal.factor = nns.optimal$periods,method =nns.optimal$method,plot = TRUE,seasonal.plot = FALSE)
 ```
 
@@ -132,4 +132,4 @@ These are the plotting arguments, easily enabled or disabled with `TRUE` or `FAL
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-*[Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
