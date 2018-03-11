@@ -129,14 +129,11 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
         output[i]<- (abs(sd(rev.var)/mean(rev.var)))
       }
+
       Relative.seasonal= output/(abs(sd(variable)/mean(variable)))
       Seasonal.weighting = (1/Relative.seasonal)
       Observation.weighting = (1/sqrt(seasonal.factor))
-
       Weights = (Seasonal.weighting*Observation.weighting) / sum(Observation.weighting*Seasonal.weighting)
-
-
-
       seasonal.plot=F
     } else {
 
@@ -153,9 +150,9 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
     Estimate.band= list()
 
 
-
+    # Regression for each estimate in h
     for (j in 1:h){
-      # Regenerate seasonal.factor if dynamic
+      ## Regenerate seasonal.factor if dynamic
       if(dynamic){
         seas.matrix = NNS.seas(variable,plot=F)
         if(!is.list(seas.matrix)){
@@ -167,12 +164,12 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         Weights=ASW$Weights
         }
 
-      # Generate vectors for 1:lag
+      ## Generate vectors for 1:lag
       GV=generate.vectors(lag)
       Component.index=GV$Component.index
       Component.series=GV$Component.series
 
-      # Regression on Component Series
+      ## Regression on Component Series
       Regression.Estimates = numeric()
       Coefficients = numeric()
 
@@ -184,7 +181,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
           if(last.x<=4){order=1}else{order=NULL}
 
-        ## Skeleton NNS regression for NNS.ARMA
+          ## Skeleton NNS regression for NNS.ARMA
           reg.points = tail(NNS.reg(x,y,return.values = FALSE,order =order,plot = FALSE,noise.reduction = 'off',multivariate.call = TRUE),2)
 
           run=diff(reg.points$x)
@@ -192,7 +189,6 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
           Regression.Estimates[i]=last.y+(rise/run)
         }
-
 
         if(!negative.values){
           Regression.Estimates=pmax(0,Regression.Estimates)
@@ -218,7 +214,7 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
         L.Regression.Estimates=Regression.Estimates
         Lin.estimates=sum(Regression.Estimates*Weights)
 
-      }#Linear==T
+      }#Linear == T
 
       if(intervals){
         if(method=='both'){
@@ -230,15 +226,15 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
       }
 
       if(method=='both'){
-        Estimates[j]=mean(c(Lin.estimates,Nonlin.estimates))}
-        else{
+        Estimates[j]=mean(c(Lin.estimates,Nonlin.estimates))
+      } else {
             Estimates[j] = sum(Regression.Estimates*Weights)
         }
 
       variable = c(variable,(Estimates[j]))
       FV=variable
 
-    }  # j loop
+    } # j loop
 
 
   #### PLOTTING

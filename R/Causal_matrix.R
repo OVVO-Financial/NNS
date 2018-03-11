@@ -8,9 +8,10 @@ indiv.causes=list()
 for(i in 1:(n-1)){
   indiv.causes[[i]]=sapply((i+1):n, function(b) NNS.caus(x[,i],x[,b],plot=plot,tau=tau,time.series = time.series))
 }
-for(i in 1:length(indiv.causes)){
-indiv.causes[[i]]=indiv.causes[[i]][1,]-indiv.causes[[i]][2,]}
 
+for(i in 1:length(indiv.causes)){
+  indiv.causes[[i]]=indiv.causes[[i]][1,]-indiv.causes[[i]][2,]
+  }
 
 causes <- matrix(, n, n)
 causes[lower.tri(causes, diag=FALSE)] <- unlist(indiv.causes)

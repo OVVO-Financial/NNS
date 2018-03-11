@@ -22,9 +22,9 @@
 NNS.SD.efficient.set <- function(x,degree,type="discrete") {
   n <- ncol(x)
   max_target <- max(x)
-  LPM_order<- numeric(0)
-  Dominated_set<- numeric(0)
-  current_base<- numeric(0)
+  LPM_order<- numeric()
+  Dominated_set<- numeric()
+  current_base<- numeric()
 
 
   LPM_order=sapply(1:n,function(i) LPM(1,max_target,x[,i]))

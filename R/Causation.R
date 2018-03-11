@@ -57,37 +57,14 @@ NNS.caus <- function(x,y,tau,time.series=FALSE,plot=FALSE){
     }
 
     if(tau=="ts"){
-      tau0=ceiling(.01*length(x))
-      tau1=ceiling(.02*length(x))
-      tau2=ceiling(.04*length(x))
-      tau3=ceiling(.08*length(x))
-      tau4=ceiling(.16*length(x))
+      Causes.xy=numeric()
+      Causes.yx=numeric()
 
-
-    Causation.x.given.y.tau0 = Uni.caus(x,y,tau=tau0,plot = FALSE,time.series = TRUE)
-    Causation.y.given.x.tau0 = Uni.caus(y,x,tau=tau0,plot = FALSE,time.series = TRUE)
-    Causation.x.given.y.tau1 = Uni.caus(x,y,tau=tau1,plot = FALSE,time.series = TRUE)
-    Causation.y.given.x.tau1 = Uni.caus(y,x,tau=tau1,plot = FALSE,time.series = TRUE)
-    Causation.x.given.y.tau2 = Uni.caus(x,y,tau=tau2,plot = FALSE,time.series = TRUE)
-    Causation.y.given.x.tau2 = Uni.caus(y,x,tau=tau2,plot = FALSE,time.series = TRUE)
-    Causation.x.given.y.tau3 = Uni.caus(x,y,tau=tau3,plot = FALSE,time.series = TRUE)
-    Causation.y.given.x.tau3 = Uni.caus(y,x,tau=tau3,plot = FALSE,time.series = TRUE)
-    Causation.x.given.y.tau4 = Uni.caus(x,y,tau=tau4,plot = FALSE,time.series = TRUE)
-    Causation.y.given.x.tau4 = Uni.caus(y,x,tau=tau4,plot = FALSE,time.series = TRUE)
-
-
-    Causes.xy=c(Causation.x.given.y.tau0,
-                Causation.x.given.y.tau1/2,
-                Causation.x.given.y.tau2/4,
-                Causation.x.given.y.tau3/8,
-                Causation.x.given.y.tau4/16)
-
-    Causes.yx=c(Causation.y.given.x.tau0,
-                Causation.y.given.x.tau1/2,
-                Causation.y.given.x.tau2/4,
-                Causation.y.given.x.tau3/8,
-                Causation.y.given.x.tau4/16)
-
+      for(i in 0:4){
+      # Populate scaling taus and calculate uni causation
+        Causes.xy[i]= Uni.caus(x,y,tau=ceiling((2^i)/100*length(x)),plot = FALSE,time.series = TRUE)/(2^i)
+        Causes.yx[i]=Uni.caus(y,x,tau=ceiling((2^i)/100*length(x)),plot = FALSE,time.series = TRUE)/(2^i)
+      }
 
     Causation.x.given.y=mean(Causes.xy)
 

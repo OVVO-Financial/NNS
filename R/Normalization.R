@@ -33,8 +33,7 @@ NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
 
   n <- ncol(A)
   i <- seq_len(n)
-  labels <- c(colnames(A),
-              paste0(colnames(A)," Normalized"))
+  labels <- c(colnames(A),paste0(colnames(A)," Normalized"))
 
 
 if(!is.null(chart.type)){
