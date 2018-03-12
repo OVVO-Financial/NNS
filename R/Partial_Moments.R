@@ -279,7 +279,9 @@ PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
 
   components=list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix)
 
-  return(list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix,matrix=Reduce("+",components)))
+  cov.matrix=components$clpm+components$cupm-components$dlpm-components$dupm
+
+  return(list(clpm=components$clpm,cupm=components$cupm,dlpm=components$dlpm,dupm=components$dupm,matrix=cov.matrix))
 }
 
 
