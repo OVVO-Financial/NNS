@@ -45,6 +45,11 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 ```
 ### Covariance Elements and Covariance Matrix
 ```r
+> cov(cbind(x,y))
+            x           y
+x  0.83323283 -0.04372107
+y -0.04372107  0.93506310
+
 > cov.mtx=PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
 > cov.mtx
 $clpm
@@ -68,9 +73,9 @@ x 0.0000000 0.1560924
 y 0.1469182 0.0000000
 
 $matrix
-          x         y
-x 0.8332328 0.5623002
-y 0.5623002 0.9350631
+            x           y
+x  0.83323283 -0.04372107
+y -0.04372107  0.93506310
 ```
 ### Pearson Correlation
 ```r
