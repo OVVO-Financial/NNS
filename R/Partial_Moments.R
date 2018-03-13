@@ -211,54 +211,51 @@ PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
     clpms=list()
     for(i in 1:n){
       if(is.numeric(target)){
-      clpms[[i]]=sapply(i:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))} else {
-      clpms[[i]]=sapply(i:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+      clpms[[i]]=sapply(1:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))} else {
+      clpms[[i]]=sapply(1:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
       }
     }
-    clpm.matrix <- matrix(, n, n)
-    clpm.matrix[lower.tri(clpm.matrix, diag=TRUE)] <- unlist(clpms)
-    clpm.matrix = pmax(clpm.matrix, t(clpm.matrix), na.rm=TRUE)
+    clpm.matrix <- matrix(unlist(clpms), n, n)
+
     colnames(clpm.matrix) = colnames(variable);rownames(clpm.matrix) = colnames(variable)
 
 
     cupms=list()
     for(i in 1:n){
       if(is.numeric(target)){
-        cupms[[i]]=sapply(i:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))} else {
-        cupms[[i]]=sapply(i:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        cupms[[i]]=sapply(1:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))} else {
+        cupms[[i]]=sapply(1:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
         }
     }
-    cupm.matrix <- matrix(, n, n)
-    cupm.matrix[lower.tri(cupm.matrix, diag=TRUE)] <- unlist(cupms)
-    cupm.matrix = pmax(cupm.matrix, t(cupm.matrix), na.rm=TRUE)
+    cupm.matrix <- matrix(unlist(cupms), n, n)
     colnames(cupm.matrix) = colnames(variable);rownames(cupm.matrix) = colnames(variable)
 
 
 
-    dlpms1=list()
+    dlpms=list()
     for(i in 1:(n)){
       if(is.numeric(target)){
-        dlpms1[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))
+        dlpms[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))
 
         } else {
-        dlpms1[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        dlpms[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
         }
     }
-    dlpm.matrix <- matrix(unlist(dlpms1), n, n)
+    dlpm.matrix <- matrix(unlist(dlpms), n, n)
     diag(dlpm.matrix) <- 0
     colnames(dlpm.matrix) = colnames(variable);rownames(dlpm.matrix) = colnames(variable)
 
 
-    dupms1=list()
+    dupms=list()
     for(i in 1:(n)){
       if(is.numeric(target)){
-        dupms1[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))
+        dupms[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))
       } else {
-        dupms1[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        dupms[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
       }
     }
 
-    dupm.matrix <- matrix(unlist(dupms1), n, n)
+    dupm.matrix <- matrix(unlist(dupms), n, n)
     diag(dupm.matrix) <- 0
     colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
 
