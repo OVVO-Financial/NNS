@@ -235,36 +235,30 @@ PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
 
 
 
-    dlpms1=list();dlpms2=list()
-    for(i in 1:(n-1)){
+    dlpms1=list()
+    for(i in 1:(n)){
       if(is.numeric(target)){
-        dlpms1[[i]]=sapply((i+1):n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))
-        dlpms2[[i]]=sapply((i+1):n, function(b) D.LPM(y=variable[,i],x=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.y = target,target.x=target))
+        dlpms1[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))
+
         } else {
-        dlpms1[[i]]=sapply((i+1):n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
-        dlpms2[[i]]=sapply((i+1):n, function(b) D.LPM(y=variable[,i],x=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.y = mean(variable[,i]),target.x=mean(variable[,b])))
+        dlpms1[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
         }
     }
-    dlpm.matrix <- matrix(, n, n)
-    dlpm.matrix[lower.tri(dlpm.matrix, diag=FALSE)] <- unlist(dlpms1)
-    dlpm.matrix[upper.tri(dlpm.matrix, diag=FALSE)] <- unlist(dlpms2)
+    dlpm.matrix <- matrix(unlist(dlpms1), n, n)
     diag(dlpm.matrix) <- 0
     colnames(dlpm.matrix) = colnames(variable);rownames(dlpm.matrix) = colnames(variable)
 
 
-    dupms1=list();dupms2=list()
-    for(i in 1:(n-1)){
+    dupms1=list()
+    for(i in 1:(n)){
       if(is.numeric(target)){
-        dupms1[[i]]=sapply((i+1):n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))
-        dupms2[[i]]=sapply((i+1):n, function(b) D.UPM(y=variable[,i],x=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.y = target,target.x=target))
+        dupms1[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))
       } else {
-        dupms1[[i]]=sapply((i+1):n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
-        dupms2[[i]]=sapply((i+1):n, function(b) D.UPM(y=variable[,i],x=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.y = mean(variable[,i]),target.x=mean(variable[,b])))
+        dupms1[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
       }
     }
-    dupm.matrix <- matrix(0, n, n)
-    dupm.matrix[lower.tri(dupm.matrix, diag=FALSE)] <- unlist(dupms1)
-    dupm.matrix[upper.tri(dupm.matrix, diag=FALSE)] <- unlist(dupms2)
+
+    dupm.matrix <- matrix(unlist(dupms1), n, n)
     diag(dupm.matrix) <- 0
     colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
 
