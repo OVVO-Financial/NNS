@@ -29,12 +29,23 @@ NNS.norm <- function(A,chart.type=NULL,linear=FALSE) {
         scales <- colMeans(RG)
     }
 
+
   A_Normalized <- t(t(A) * scales)
 
   n <- ncol(A)
   i <- seq_len(n)
+
+  if(is.null(colnames(A))){
+    new.names=list()
+    for(i in 1:n){
+      new.names[[i]]=paste0("x_",i)
+    }
+    colnames(A)=unlist(new.names)
+    }
+
   labels <- c(colnames(A),paste0(colnames(A)," Normalized"))
 
+  colnames(A_Normalized) <- labels[(n+1):(2*n)]
 
 if(!is.null(chart.type)){
     if(chart.type== 'b' ){

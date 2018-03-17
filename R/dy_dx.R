@@ -26,7 +26,7 @@
 #' dy.dx(x,y,eval.point=1.75)
 #'
 #' # Vector of derivatives
-#' dy.dx(x,y,eval.point=1.75,deriv.method="FS")
+#' dy.dx(x,y,eval.point=c(1.75,2.5),deriv.method="FS")
 #' @export
 
 dy.dx <- function(x,y,order=NULL,stn=0.99,eval.point=median(x),deriv.order=1,h=.05,noise.reduction='mean',deriv.method="FS"){
