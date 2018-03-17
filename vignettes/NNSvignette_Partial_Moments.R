@@ -38,7 +38,7 @@ sd.x=((UPM(2,mean(x),x)+LPM(2,mean(x),x))*(length(x)/(length(x)-1)))^.5
 sd.y=((UPM(2,mean(y),y)+LPM(2,mean(y),y))*(length(y)/(length(y)-1)))^.5
 cov.xy/(sd.x*sd.y)
 
-## ----cdfs----------------------------------------------------------------
+## ----cdfs,fig.align="center",fig.width=5,fig.height=3--------------------
 P=ecdf(x)
 P(0);P(1)
 LPM(0,0,x);LPM(0,1,x)
@@ -59,7 +59,7 @@ Co.LPM(0,0,x,y,c(0,1),c(0,1))
 # Continuous CDF:
 plot(sort(x),LPM.ratio(1,sort(x),x),type = 'l',col='blue',lwd=3,xlab="x")
 
-## ----pdfs----------------------------------------------------------------
+## ----pdfs,fig.align="center",fig.width=5,fig.height=3--------------------
 NNS.PDF(degree=1,x)
 
 ## ----numerical integration-----------------------------------------------
