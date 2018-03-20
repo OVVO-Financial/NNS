@@ -4,7 +4,8 @@
 \alias{NNS.ARMA.optim}
 \title{NNS ARMA Optimizer}
 \usage{
-NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq")
+NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
+  negative.values = FALSE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -14,6 +15,9 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq")
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor=c(12,24,36))}}
 
 \item{method}{options: ("comb","seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
+
+\item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
+\code{(negative.values=TRUE)}.}
 }
 \value{
 Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum SSE value \code{$SSE}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
