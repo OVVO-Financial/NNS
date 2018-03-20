@@ -59,6 +59,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
   }
 
   if(is.null(order)){order=Inf}
+  hard.stop=floor(log(length(x)))
 
   if(!is.numeric(order)){
     max.obs=0
@@ -75,7 +76,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
   if(is.null(type)){
     i=0L
     while(i>=0){
-      if(i==order) break
+      if(i==order|i==hard.stop) break
 
       PART[counts >= max.obs, counts := .N, by=quadrant]
       PART[old.counts >= max.obs, old.counts := .N, by=prior.quadrant]
@@ -187,8 +188,9 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs=4,min.obs.s
   ### X ONLY partition
   if(!is.null(type)){
     i=0L
+
     while(i>=0){
-      if(i==order) break
+      if(i==order|i==hard.stop) break
 
       PART[counts >= 2*max.obs, counts := .N, by=quadrant]
       PART[old.counts >= 2*max.obs, old.counts := .N, by=prior.quadrant]

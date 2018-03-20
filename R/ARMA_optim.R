@@ -6,6 +6,8 @@
 #' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor=c(12,24,36))}
 #' @param method options: ("comb","seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.
+#' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
+#' \code{(negative.values=TRUE)}.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum SSE value \code{$SSE}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 #'
@@ -31,7 +33,7 @@
 #'
 #' @export
 
-NNS.ARMA.optim=function(variable,training.set,seasonal.factor,method='seq'){
+NNS.ARMA.optim=function(variable,training.set,seasonal.factor,method='seq',negative.values=FALSE){
 
   limit=length(variable)/2
   if(max(seasonal.factor)>=limit){stop(paste0("Please set maximum [seasonal.factor] to less than ",floor(limit)))}
@@ -55,7 +57,7 @@ for(i in 1:length(seasonal.factor)){
     for(k in 1:ncol(seasonal.combs[[i]])){
 
       # Find the min SSE for a given seasonals sequence
-      nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE)-test.set)^2)
+      nns.estimates.indiv[k]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.combs[[i]][,k],method='lin',plot=FALSE,negative.values=negative.values)-test.set)^2)
     }
 
     nns.estimates[[i]]=nns.estimates.indiv
@@ -64,7 +66,7 @@ for(i in 1:length(seasonal.factor)){
 
     }
   else{
-    nns.estimates.indiv[i]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.factor[1:i],method='lin',plot=FALSE)-test.set)^2)
+    nns.estimates.indiv[i]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =seasonal.factor[1:i],method='lin',plot=FALSE,negative.values=negative.values)-test.set)^2)
   }
 
 
@@ -80,7 +82,7 @@ for(i in 1:length(seasonal.factor)){
 
 
       for(j in c("lin","both","nonlin")){
-        methods.SSE[j]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =nns.periods,method=j,plot=FALSE)-test.set)^2)
+        methods.SSE[j]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =nns.periods,method=j,plot=FALSE,negative.values=negative.values)-test.set)^2)
       }
 
       nns.SSE=min(methods.SSE)
@@ -93,7 +95,7 @@ for(i in 1:length(seasonal.factor)){
       benchmark.SSE=nns.estimates.indiv[min.estimate]
 
       for(j in c("lin","both","nonlin")){
-        methods.SSE[j]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =nns.periods,method=j,plot=FALSE)-test.set)^2)
+        methods.SSE[j]=sum((NNS.ARMA(variable,training.set = training.set,h=h,seasonal.factor =nns.periods,method=j,plot=FALSE,negative.values=negative.values)-test.set)^2)
       }
 
       nns.SSE=min(methods.SSE)
