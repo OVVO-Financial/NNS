@@ -71,7 +71,7 @@ nns=NNS.ARMA(AirPassengers,h=44,training.set = 100,method='both',seasonal.factor
 sqrt(mean((nns-tail(AirPassengers,44))^2))
 ```
 
-Indeed, using `method='both'` lowered our RMSE.  There are far fewer parameters to test using NNS than traditional methods and the relative simplicity of the method ensures robustness.
+Using `method='both'` did not lower our RMSE.  There are far fewer parameters to test using NNS than traditional methods and the relative simplicity of the method ensures robustness.
 
 ## Testing All Combinations of `seasonal.factor`
 NNS also offers a wrapper function `NNS.ARMA.optim()` to test a given vector of `seasonal.factor` and returns the lowest SSE and the optimal periods, as well as the `NNS.ARMA` regression method used.
