@@ -41,10 +41,10 @@ NNS.dep = function(x,y=NULL,order = NULL,
   if(!missing(y)){
 
     if(print.map==T){
-      part.map = NNS.part(x,y,order=order,max.obs=max.obs, Voronoi=T,min.obs.stop=TRUE)
+      part.map = NNS.part(x,y,order=order,max.obs.req=max.obs, Voronoi=T,min.obs.stop=TRUE)
     }
     else {
-      part.map = NNS.part(x,y,order=order,max.obs=max.obs,min.obs.stop=TRUE)
+      part.map = NNS.part(x,y,order=order,max.obs.req=max.obs,min.obs.stop=TRUE)
     }
 
     part.df = part.map$dt
