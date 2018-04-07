@@ -59,14 +59,16 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs.req=4,min.o
   }
 
   if(is.null(order)){order=Inf}
-  hard.stop=floor(log(length(x)))
+
 
   if(!is.numeric(order)){
     max.obs.req=0
     type=type
+    hard.stop=Inf
   }else{
     max.obs.req=max.obs.req
     type=type
+    hard.stop=floor(log(length(x)))
   }
 
 
@@ -85,7 +87,7 @@ NNS.part = function(x, y,Voronoi=FALSE,type=NULL,order= NULL,max.obs.req=4,min.o
       if (l.PART <= max.obs.req && i>=1) break
       max.obs.req.rows = PART[counts >= max.obs.req, which=TRUE]
       old.max.obs.req.rows= PART[old.counts >= max.obs.req, which=TRUE]
-      if(max.obs.req>0 & length(max.obs.req.rows)<length(old.max.obs.req.rows)) break
+      if(max.obs.req>0 && length(max.obs.req.rows)<length(old.max.obs.req.rows)) break
 
       #Segments for Voronoi...
       if(Voronoi==T){

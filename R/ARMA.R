@@ -64,6 +64,8 @@ NNS.ARMA <- function(variable,h=1,training.set = NULL, seasonal.factor = TRUE ,b
 
   if(is.numeric(seasonal.factor) && dynamic){stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')}
 
+  if(!is.null(best.periods)){seasonal.factor=FALSE}
+
   variable = as.numeric(variable)
   OV = variable
 

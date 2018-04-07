@@ -152,7 +152,7 @@ NNS.reg = function (x,y,
 
   if(is.null(dim.red.method)){dim.red=FALSE}else{dim.red=TRUE}
 
-  original.names = names(x)
+  original.names = colnames(x)
   original.columns = ncol(x)
 
   y=as.numeric(y)
