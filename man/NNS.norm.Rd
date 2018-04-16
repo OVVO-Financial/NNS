@@ -9,8 +9,8 @@ NNS.norm(A, chart.type = NULL, linear = FALSE)
 \arguments{
 \item{A}{a numeric matrix or data frame.}
 
-\item{chart.type}{options: ("l","b"); \code{NULL} (default).  Set \code{(chart.type="l")} for line,
-\code{(chart.type="b")} for boxplot.}
+\item{chart.type}{options: ("l", "b"); \code{NULL} (default).  Set \code{(chart.type = "l")} for line,
+\code{(chart.type = "b")} for boxplot.}
 
 \item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
 }
@@ -22,8 +22,8 @@ Normalizes a matrix of variables based on nonlinear scaling normalization method
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-A<-cbind(x,y)
+x <- rnorm(100) ; y<-rnorm(100)
+A <- cbind(x, y)
 NNS.norm(A)
 }
 \references{

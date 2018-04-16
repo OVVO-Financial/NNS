@@ -19,7 +19,7 @@ Seasonality test based on the coefficient of variance for the variable and lagge
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
+x <- rnorm(100)
 
 ## To call strongest period based on coefficient of variance:
 NNS.seas(x)$best.period

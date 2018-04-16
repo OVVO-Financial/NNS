@@ -21,19 +21,15 @@ This function generates a standardized univariate upper partial moment for any d
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
-UPM.ratio(0,mean(x),x)
+x <- rnorm(100)
+UPM.ratio(0, mean(x), x)
 
+## Joint Upper CDF
 \dontrun{
-## Plot Degree 0 (frequency) Joint CDF
-x=rnorm(100);y=rnorm(100)
-intervals=(max(x,y)-min(x,y))/100
-grid.points=seq(min(x,y),max(x,y),intervals)
-z=expand.grid(grid.points,grid.points)
-plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))
-
-## Plot Degree 1 (area) Joint CDF
-plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))}
+x <- rnorm(5000) ; y <- rnorm(5000)
+plot3d(x, y, Co.UPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+zlab = "Probability", box = FALSE)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

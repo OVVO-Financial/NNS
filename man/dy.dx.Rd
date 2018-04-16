@@ -13,19 +13,20 @@ dy.dx(x, y, order = NULL, stn = 0.99, eval.point = median(x),
 
 \item{y}{a numeric vector.}
 
-\item{order}{integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order=NULL)} which generates a more accurate derivative for well specified cases.}
+\item{order}{integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order = NULL)} which generates a more accurate derivative for well specified cases.}
 
-\item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
+\item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
 
-\item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point=median(x))}.  Set to \code{(eval.point="overall")} to find an overall partial derivative estimate.}
+\item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.}
 
-\item{deriv.order}{numeric options: (1,2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order=2)}.}
+\item{deriv.order}{numeric options: (1, 2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order = 2)}.}
 
-\item{h}{numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h=.05} representing a 5 percent step from the value of the independent variable.}
+\item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the independent variable.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal to noise situations, \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit in \link{NNS.reg}. Default setting is \code{(noise.reduction="mean")}.}
+\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal to noise situations, \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit in \link{NNS.reg}.
+Default setting is \code{(noise.reduction = "mean")}.}
 
-\item{deriv.method}{method of derivative estimation, options: ("NNS","FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method="NNS")} or generates a partial derivative using the finite step method \code{(deriv.method="FS")} (Defualt).}
+\item{deriv.method}{method of derivative estimation, options: ("NNS", "FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite step method \code{(deriv.method = "FS")} (Defualt).}
 }
 \value{
 Returns the value of the partial derivative estimate for the given order.
@@ -34,14 +35,14 @@ Returns the value of the partial derivative estimate for the given order.
 Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
 }
 \note{
-If a vector of derivatives is required, ensure \code{(deriv.method="FS")}.
+If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
 }
 \examples{
-x<-seq(0,2*pi,pi/100); y<-sin(x)
-dy.dx(x,y,eval.point=1.75)
+x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
+dy.dx(x, y, eval.point = 1.75)
 
 # Vector of derivatives
-dy.dx(x,y,eval.point=c(1.75,2.5),deriv.method="FS")
+dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

@@ -21,9 +21,9 @@ Determines higher dimension correlation coefficients based on degree 0 co-partia
 }
 \examples{
 set.seed(123)
-x<-rnorm(1000); y<-rnorm(1000); z<-rnorm(1000)
-A<-data.frame(x,y,z)
-NNS.cor.hd(A,plot=TRUE,independence.overlay=TRUE)
+x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
+A <- data.frame(x, y, z)
+NNS.cor.hd(A, plot = TRUE, independence.overlay = TRUE)
 }
 \references{
 Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{http://ssrn.com/abstract=2745308}.

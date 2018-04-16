@@ -7,9 +7,9 @@
 LPM.VaR(percentile, degree, x)
 }
 \arguments{
-\item{percentile}{numeric [0,1]; The percentile for left-tail VaR.}
+\item{percentile}{numeric [0, 1]; The percentile for left-tail VaR.}
 
-\item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
+\item{degree}{integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
 }
@@ -21,9 +21,10 @@ Generates a VaR based on the Lower Partial Moment ratio
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
+x <- rnorm(100)
+
 ## For 95th percentile VaR (left-tail)
-LPM.VaR(0.95,0,x)
+LPM.VaR(0.95, 0, x)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

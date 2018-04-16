@@ -28,8 +28,8 @@ This function generates a divergent upper partial moment between two equal lengt
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-D.UPM(0,0,x,y,mean(x),mean(y))
+x <- rnorm(100) ; y <- rnorm(100)
+D.UPM(0, 0, x, y, mean(x), mean(y))
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

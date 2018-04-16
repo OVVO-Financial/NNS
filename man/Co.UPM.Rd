@@ -28,7 +28,7 @@ This function generates a co-upper partial moment between two equal length varia
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
+x<-rnorm(100) ; y<-rnorm(100)
 Co.UPM(0,0,x,y,mean(x),mean(y))
 }
 \references{

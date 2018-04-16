@@ -11,9 +11,9 @@ NNS.caus(x, y, tau, time.series = FALSE, plot = FALSE)
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
 
-\item{tau}{options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau="cs")} for cross-sectional data.  \code{(tau="ts")} automatically selects the lag of the time series data, while \code{(tau=[integer])} specifies a time series lag.}
+\item{tau}{options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.}
 
-\item{time.series}{logical; \code{FALSE} (default) If analyzing time series data with \code{tau=(integer)}, select \code{(time.series=TRUE)}.  Not required when \code{(tau="ts")}.}
+\item{time.series}{logical; \code{FALSE} (default) If analyzing time series data with \code{tau = [integer]}, select \code{(time.series = TRUE)}.  Not required when \code{(tau = "ts")}.}
 
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
 }
@@ -26,15 +26,15 @@ Returns the causality from observational data between two variables
 \examples{
 ## x clearly causes y...
 set.seed(123)
-x<-rnorm(100); y<-x^2
-NNS.caus(x,y,tau="cs")
+x <- rnorm(100) ; y <- x ^ 2
+NNS.caus(x, y, tau = "cs")
 
-x<- 1:100; y<-x^2
-NNS.caus(x,y,tau="ts",time.series=TRUE)
+x <- 1:100 ; y <- x^2
+NNS.caus(x, y, tau = "ts", time.series = TRUE)
 
 ## Causal matrix
 \dontrun{
-NNS.caus(data.matrix(iris),tau = 0)
+NNS.caus(data.matrix(iris), tau = 0)
 }
 }
 \references{

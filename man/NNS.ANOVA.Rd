@@ -12,20 +12,20 @@ NNS.ANOVA(control, treatment, confidence.interval = 0.95, tails = "Both",
 
 \item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
 
-\item{confidence.interval}{numeric [0,1]; The confidence interval surrounding the control mean when \code{(binary=TRUE)}.  Defaults to \code{(confidence.interval=0.95)}.}
+\item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the control mean when \code{(binary = TRUE)}.  Defaults to \code{(confidence.interval = 0.95)}.}
 
-\item{tails}{options: ("Left", "Right", "Both").  \code{tails="Both"}(Default) Selects the tail of the distribution to determine effect size.}
+\item{tails}{options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.}
 
-\item{pairwise}{logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise=TRUE}.}
+\item{pairwise}{logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.}
 
-\item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary=TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.}
+\item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary = TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.}
 
 \item{binary}{logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.}
 }
 \value{
-For \code{(binary=FALSE)} returns the degree certainty the difference in sample means is zero [0,1].
+For \code{(binary = FALSE)} returns the degree certainty the difference in sample means is zero [0, 1].
 
-For \code{(binary=TRUE)} returns:
+For \code{(binary = TRUE)} returns:
 \itemize{
 \item{\code{"Control Mean"}}
 \item{\code{"Treatment Mean"}}
@@ -42,17 +42,17 @@ Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple var
 \examples{
 ### Binary analysis and effect size
 set.seed(123)
-x<- rnorm(100); y<- rnorm(100)
-NNS.ANOVA(control=x,treatment=y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.ANOVA(control = x, treatment = y)
 
 ### Two variable analysis with no control variable
-A<- cbind(x,y)
+A <- cbind(x, y)
 NNS.ANOVA(A)
 
 ### Multiple variable analysis with no control variable
 set.seed(123)
-x<- rnorm(100); y<- rnorm(100); z<- rnorm(100)
-A<- cbind(x,y,z)
+x <- rnorm(100) ; y<- rnorm(100) ; z<- rnorm(100)
+A <- cbind(x, y, z)
 NNS.ANOVA(A)
 }
 \references{

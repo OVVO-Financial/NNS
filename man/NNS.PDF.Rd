@@ -25,11 +25,11 @@ This function generates an empirical PDF using continuous CDFs from \link{LPM.ra
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
+x <- rnorm(100)
 NNS.PDF(x)
 
 ## Custom target range
-NNS.PDF(x,target=c(-5,5))
+NNS.PDF(x, target = c(-5, 5))
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

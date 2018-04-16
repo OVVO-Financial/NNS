@@ -21,8 +21,8 @@ This function generates a univariate lower partial moment for any degree or targ
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
-LPM(0,mean(x),x)
+x <- rnorm(100)
+LPM(0, mean(x), x)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

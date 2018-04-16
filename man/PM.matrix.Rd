@@ -28,12 +28,12 @@ For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
-A<-cbind(x,y,z)
-PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+A <- cbind(x,y,z)
+PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 
 ## Calling Individual Partial Moment Quadrants
-cov.mtx=PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+cov.mtx = PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 cov.mtx$cupm
 
 ## Full covariance matrix

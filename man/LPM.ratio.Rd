@@ -21,18 +21,18 @@ This function generates a standardized univariate lower partial moment for any d
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
-LPM.ratio(0,mean(x),x)
+x <- rnorm(100)
+LPM.ratio(0, mean(x), x)
 
 ## Continuous CDF
-LPM.ratio(1,sort(x),x)
+LPM.ratio(1, sort(x), x)
 
 
 ## Joint CDF
 \dontrun{
-x=rnorm(5000);y=rnorm(5000)
-plot3d(x,y,Co.LPM(0,0,sort(x),sort(y),x,y), col='blue', xlab="X", ylab="Y",
-zlab="Probability", box=FALSE)
+x <- rnorm(5000) ; y <- rnorm(5000)
+plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+zlab = "Probability", box = FALSE)
 }
 }
 \references{

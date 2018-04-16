@@ -19,7 +19,7 @@ Bi-directional test of second degree stochastic dominance using lower partial mo
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
+x<-rnorm(100) ; y<-rnorm(100)
 NNS.SSD(x,y)
 }
 \references{

@@ -28,8 +28,8 @@ This function generates a co-lower partial moment for between two equal length v
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-Co.LPM(0,0,x,y,mean(x),mean(y))
+x <- rnorm(100) ; y <- rnorm(100)
+Co.LPM(0, 0, x, y, mean(x), mean(y))
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

@@ -15,17 +15,17 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 
 \item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types.}
 
-\item{CV.size}{numeric [0,1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test=NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size=NULL)}.}
+\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
-\item{weight}{options: ("SSE","Features") method for selecting model output weight; Set \code{(weight="SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight="Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.}
+\item{weight}{options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.}
 
-\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order='max')} is the k-nearest neighbors equivalent.}
+\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.}
 
-\item{norm}{options: ("std","NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
+\item{norm}{options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
 
-\item{method}{numeric options: (1,2); Select the NNS method to include in stack.  \code{(method=1)} selects \link{NNS.reg}; \code{(method=2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method=c(1,2)}, including both NNS regression methods in the stack.}
+\item{method}{numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.}
 
-\item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method="cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.}
+\item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{seed}{numeric; 123 (default) Sets seed for CV sampling.}
 }
@@ -44,7 +44,7 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 }
 \note{
-If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data <- sapply(data,function(x){as.factor(x);as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
+If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data <- sapply(data,function(x){as.factor(x) ; as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
 
 Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 
@@ -57,15 +57,15 @@ reduce the \code{CV.size}.
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
  \dontrun{
- NNS.stack(iris[1:140,1:4],iris[1:140,5],IVs.test=iris[141:150,1:4])}
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4])}
 
  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
  \dontrun{
- NNS.stack(iris[,1:4],iris[,5])}
+ NNS.stack(iris[ , 1:4], iris[ , 5])}
 
  ## Selecting NNS.reg and dimension reduction techniques.
  \dontrun{
- NNS.stack(iris[1:140,1:4],iris[1:140,5],iris[141:150,1:4],method=c(1,2))}
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2))}
 }
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analysis"

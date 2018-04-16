@@ -11,7 +11,7 @@ NNS.dep(x, y = NULL, order = NULL, degree = NULL, print.map = FALSE)
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
 
-\item{order}{integer; Controls the level of quadrant partitioning.  Defaults to \code{(order=NULL)}.  Errors can generally be rectified by setting \code{(order=1)}.  Will not partition further if less than 4 observations exist in a quadrant.}
+\item{order}{integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = NULL)}.  Errors can generally be rectified by setting \code{(order = 1)}.  Will not partition further if less than 4 observations exist in a quadrant.}
 
 \item{degree}{integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.}
 
@@ -25,12 +25,12 @@ Returns the dependence and nonlinear correlation between two variables based on 
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-NNS.dep(x,y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.dep(x, y)
 
 ## Correlation / Dependence Matrix
-x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
-B<-cbind(x,y,z)
+x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+B <- cbind(x, y, z)
 NNS.dep(B)
 }
 \references{

@@ -7,9 +7,9 @@
 UPM.VaR(percentile, degree, x)
 }
 \arguments{
-\item{percentile}{numeric [0,1]; The percentile for right-tail VaR.}
+\item{percentile}{numeric [0, 1]; The percentile for right-tail VaR.}
 
-\item{degree}{integer; \code{(degree=0)} for discrete distributions, \code{(degree=1)} for continuous distributions.}
+\item{degree}{integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.}
 
 \item{x}{a numeric vector.}
 }
@@ -21,8 +21,9 @@ Generates an upside VaR based on the Upper Partial Moment ratio
 }
 \examples{
 set.seed(123)
-x<-rnorm(100)
+x <- rnorm(100)
+
 ## For 95th percentile VaR (right-tail)
-UPM.VaR(0.95,0,x)
+UPM.VaR(0.95, 0, x)
 }
 \keyword{VaR}

@@ -14,21 +14,21 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
 
 \item{Voronoi}{logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.}
 
-\item{type}{\code{NULL} (default) Controls the partitioning basis.  Set to \code{(type="XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.}
+\item{type}{\code{NULL} (default) Controls the partitioning basis.  Set to \code{(type = "XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.}
 
-\item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order="max")} will institute a perfect fit.}
+\item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.}
 
-\item{max.obs.req}{integer; (4 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs.req=1)}.}
+\item{max.obs.req}{integer; (4 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs.req = 1)}.}
 
 \item{min.obs.stop}{logical; \code{FALSE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs.req}.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); \code{(noise.reduction="median")} uses medians instead of means for partitions, while \code{(noise.reduction="mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction="mean")}, while \code{(noise.reduction="off")} will partition quadrant to a single observation for a given \code{(order=...)}.}
+\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "mean")}, while \code{(noise.reduction = "off")} will partition quadrant to a single observation for a given \code{(order = ...)}.}
 }
 \value{
 Returns:
  \itemize{
   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-  \item{\code{"regression.points"}} the \link{data.table} of regression points for that given \code{(order=...)}.
+  \item{\code{"regression.points"}} the \link{data.table} of regression points for that given \code{(order = ...)}.
   \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
   }
 }
@@ -37,21 +37,21 @@ Creates partitions based on partial moment quadrant means, iteratively assigning
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-NNS.part(x,y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.part(x, y)
 
 ## Data.table of observations and partitions
-NNS.part(x,y,order=1)$dt
+NNS.part(x, y, order = 1)$dt
 
 ## Regression points
-NNS.part(x,y,order=1)$regression.points
+NNS.part(x, y, order = 1)$regression.points
 
 ## Voronoi style plot
-NNS.part(x,y,Voronoi=TRUE)
+NNS.part(x, y, Voronoi = TRUE)
 
 ## Examine final counts by quadrant
-DT=NNS.part(x,y)$dt
-DT[,counts := .N,by=quadrant]
+DT = NNS.part(x, y)$dt
+DT[ , counts := .N, by = quadrant]
 DT
 }
 \references{

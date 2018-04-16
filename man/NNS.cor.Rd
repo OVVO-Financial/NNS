@@ -11,7 +11,7 @@ NNS.cor(x, y = NULL, order = NULL, degree = NULL)
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
 
-\item{order}{integer; Controls the level of quadrant partitioning.  Defualts to \code{(order=NULL)}.  Errors can generally be rectified by setting \code{(order=1)}.}
+\item{order}{integer; Controls the level of quadrant partitioning.  Defualts to \code{(order = NULL)}.  Errors can generally be rectified by setting \code{(order = 1)}.}
 
 \item{degree}{integer; \code{(degree = 0)} is frequency based correlations, while \code{(degree = 1)} is for area based correlations.  Defaults to \code{(degree = 0)} for smaller number of observations.}
 }
@@ -24,12 +24,12 @@ Returns the nonlinear correlation between two variables based on higher order pa
 \examples{
 set.seed(123)
 ## Pairwise Correlation
-x<-rnorm(100); y<-rnorm(100)
-NNS.cor(x,y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.cor(x, y)
 
 ## Correlation Matrix
-x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
-B<-cbind(x,y,z)
+x <- rnorm(100) ; y <- rnorm(100) ; z<-rnorm(100)
+B <- cbind(x, y, z)
 NNS.cor(B)
 
 }

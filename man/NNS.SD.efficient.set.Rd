@@ -9,7 +9,7 @@ NNS.SD.efficient.set(x, degree, type = "discrete")
 \arguments{
 \item{x}{a numeric matrix or data frame.}
 
-\item{degree}{numeric options: (1,2,3); Degree of stochastic dominance test from (1,2 or 3).}
+\item{degree}{numeric options: (1, 2, 3); Degree of stochastic dominance test from (1, 2 or 3).}
 
 \item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
 }
@@ -21,9 +21,9 @@ Determines the set of stochastic dominant variables for various degrees.
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
-A<-cbind(x,y,z)
-NNS.SD.efficient.set(A,1)
+x <- rnorm(100) ; y<-rnorm(100) ; z<-rnorm(100)
+A <- cbind(x, y, z)
+NNS.SD.efficient.set(A, 1)
 }
 \references{
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.

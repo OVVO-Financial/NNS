@@ -16,17 +16,17 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{y}{a numeric or factor vector with compatible dimsensions to \code{x}.}
 
-\item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order=...)} integer settings with \code{(noise.reduction="off")}.  \code{(order="max")} will force a limit condition perfect fit.}
+\item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction="off")}.  \code{(order = "max")} will force a limit condition perfect fit.}
 
-\item{stn}{numeric [0,1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order=NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.  \code{(noise.reduction="off")} sets \code{(stn=0)} to allow for maximum fit.}
+\item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.}
 
-\item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method="NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method="NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method="cor")} uses standard linear correlation for weights.  \code{(dim.red.method="all")} averages all methods for further feature engineering.}
+\item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
-\item{tau}{options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method="NNS.caus")} or
+\item{tau}{options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method = "NNS.caus")} or
 
-\code{(dim.red.method="all")} and the regression is using time-series data, set \code{(tau="ts")} for more accurate causal analysis.}
+\code{(dim.red.method = "all")} and the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.}
 
-\item{type}{\code{NULL} (default).  To perform logistic regression, set to \code{(type = "LOGIT")}.  To perform a classification, set to \code{(type = "CLASS")}.}
+\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.}
 
 \item{point.est}{a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.}
 
@@ -44,16 +44,16 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{confidence.interval}{numeric [0,1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.}
 
-\item{threshold}{numeric [0,1]; \code{(threshold=0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
+\item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
 
-\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at 2*(# of regressors).  \code{(n.best="all")} will select and weight all generated regression points.  Analogous to \code{k} in
-\code{k Nearest Neighbors} algorithm and different values are tested using cross-validation in \link{NNS.stack}.}
+\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
+\code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean","median","mode","off"); In low signal:noise situations,\code{(noise.reduction="mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction="median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction="mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction="off")}  allows for maximum possible fit with a specific \code{order}.}
+\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit with a specific \code{order}.}
 
-\item{norm}{\code{NULL} (default) the method of normalization options: ("NNS","std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm="std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm="NNS")}.}
+\item{norm}{\code{NULL} (default) the method of normalization options: ("NNS", "std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm = "std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm = "NNS")}.}
 
-\item{dist}{options:("L1","L2") the method of distance calculation; Selects the distance calculation used. \code{dist="L2"} (default) selects the Euclidean distance and \code{(dist="L1")} seclects the Manhattan distance.}
+\item{dist}{options:("L1", "L2") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance.}
 
 \item{multivariate.call}{Internal parameter for multivariate regressions.}
 }
@@ -103,58 +103,55 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 Generates a nonlinear regression based on partial moment quadrant means.
 }
 \note{
-Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn=0)} or \code{(order="max")} to ensure a proper fit.
+Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn = 0)} or \code{(order = "max")} to ensure a proper fit.
 
 Identical regressors can be used as long as they do not share the same name. For instance,
-\code{NNS.reg(cbind(x,1*x),y)} will work as \code{NNS.reg} is not affected by multicollinearity.
+\code{NNS.reg(cbind(x, 1 * x), y)} will work as \code{NNS.reg} is not affected by multicollinearity.
 
-\code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type="CLASS")}.  \code{(type="CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red.method)} enables dimension reduction regressions.
+\code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type = "CLASS")}.  \code{(type = "CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red.method)} enables dimension reduction regressions.
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-NNS.reg(x,y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.reg(x, y)
 
 ## Manual {order} selection
-NNS.reg(x,y,order=2)
+NNS.reg(x, y, order = 2)
 
 ## Maximum {order} selection
-NNS.reg(x,y,order="max")
+NNS.reg(x, y, order = "max")
 
 ## x-only paritioning (Univariate only)
-NNS.reg(x,y,type="XONLY")
-
-## Logistic Regression (Univariate only)
-NNS.reg(x,y,type="LOGIT")
+NNS.reg(x, y, type = "XONLY")
 
 ## For Multiple Regression:
-x<-cbind(rnorm(100),rnorm(100),rnorm(100)); y<-rnorm(100)
-NNS.reg(x,y,point.est=c(.25,.5,.75))
+x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
+NNS.reg(x, y, point.est = c(.25, .5, .75))
 
 ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
-x<-cbind(rnorm(100),rnorm(100),rnorm(100)); y<-rnorm(100)
-NNS.reg(x,y,point.est=c(.25,.5,.75),dim.red.method="cor")
+x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y<-rnorm(100)
+NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
 
 ## IRIS dataset examples:
 # Dimension Reduction:
-NNS.reg(iris[,1:4],iris[,5],dim.red.method="cor",order=5)
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)
 
 # Dimension Reduction using causal weights:
-NNS.reg(iris[,1:4],iris[,5],dim.red.method="NNS.caus",order=5)
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)
 
 # Multiple Regression:
-NNS.reg(iris[,1:4],iris[,5],order=2,noise.reduction="off")
+NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
 
 # Classification:
-NNS.reg(iris[,1:4],iris[,5],point.est=iris[1:10,1:4],type="CLASS")$Point.est
+NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est
 
 ## To call fitted values:
-x<-rnorm(100); y<-rnorm(100)
-NNS.reg(x,y)$Fitted
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.reg(x, y)$Fitted
 
 ## To call partial derivative (univariate regression only):
-x<-rnorm(100); y<-rnorm(100)
-NNS.reg(x,y)$derivative
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.reg(x, y)$derivative
 
 }
 \references{

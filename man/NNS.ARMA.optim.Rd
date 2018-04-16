@@ -12,12 +12,12 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
 
 \item{training.set}{numeric; \code{NULL} (defualt) Sets the number of variable observations}
 
-\item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor=c(12,24,36))}}
+\item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
-\item{method}{options: ("comb","seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
+\item{method}{options: ("comb", "seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
-\code{(negative.values=TRUE)}.}
+\code{(negative.values = TRUE)}.}
 }
 \value{
 Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum SSE value \code{$SSE}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
@@ -26,7 +26,7 @@ Returns a list containing a vector of optimal seasonal periods \code{$period}, t
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 }
 \note{
-The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method="comb")}.
+The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method = "comb")}.
 
 \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 }
@@ -34,12 +34,13 @@ The number of combinations will grow prohibitively large, they should be kept to
 
 ## Nonlinear NNS.ARMA period optimization using 5 yearly lags on AirPassengers monthly data
 \dontrun{
-nns.optims <- NNS.ARMA.optim(AirPassengers,training.set=132,seasonal.factor=seq(12,60,12))
+nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 60, 12))
 }
 
 ## Then use optimal parameters in NNS.ARMA
 \dontrun{
-NNS.ARMA(AirPassengers,training.set=132,seasonal.factor=nns.optims$periods,method=nns.optims$method)
+NNS.ARMA(AirPassengers, training.set=132, seasonal.factor = nns.optims$periods,
+method = nns.optims$method)
 }
 
 }
