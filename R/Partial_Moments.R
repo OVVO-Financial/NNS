@@ -11,13 +11,14 @@
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100)
-#' LPM(0,mean(x),x)
+#' x <- rnorm(100)
+#' LPM(0, mean(x), x)
 #' @export
 
-LPM<- function(degree,target,variable){
-sum((target - (variable[variable <= target]))^degree)/length(variable)}
-LPM<- Vectorize(LPM,vectorize.args = 'target')
+LPM <-  function(degree, target, variable){
+          sum((target - (variable[variable <= target])) ^ degree) / length(variable)
+        }
+LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 
 
@@ -34,14 +35,15 @@ LPM<- Vectorize(LPM,vectorize.args = 'target')
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100)
-#' UPM(0,mean(x),x)
+#' x <- rnorm(100)
+#' UPM(0, mean(x), x)
 #' @export
 
 
-UPM<- function(degree,target,variable){
-  sum(((variable[variable > target]) - target)^degree)/length(variable)}
-UPM<- Vectorize(UPM,vectorize.args = 'target')
+UPM <-  function(degree, target, variable){
+          sum(((variable[variable > target]) - target) ^ degree) / length(variable)
+        }
+UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 #' Co-Upper Partial Moment
 #' (Upper Right Quadrant 1)
@@ -60,21 +62,23 @@ UPM<- Vectorize(UPM,vectorize.args = 'target')
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
+#' x<-rnorm(100) ; y<-rnorm(100)
 #' Co.UPM(0,0,x,y,mean(x),mean(y))
 #' @export
 
 
-Co.UPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  if(degree.x==0){x[x==target.x]<- target.x-1}
-  if(degree.y==0){y[y==target.y]<- target.y-1}
-  x=x-target.x;y=y-target.y
-  x[x<0]<- 0;y[y<0]<- 0
-  x[x>0]<- x[x>0]^degree.x
-  y[y>0]<- y[y>0]^degree.y
-  return(x%*%y/length(x))
+Co.UPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+  if(degree.x == 0){x[x == target.x] = target.x - 1}
+  if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x - target.x
+  y = y - target.y
+  x[x < 0] = 0
+  y[y < 0] = 0
+  x[x > 0] = x[x > 0] ^ degree.x
+  y[y > 0] = y[y > 0] ^ degree.y
+  return(x %*% y / length(x))
   }
-Co.UPM<- Vectorize(Co.UPM,vectorize.args = c('target.x','target.y'))
+Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Co-Lower Partial Moment
 #' (Lower Left Quadrant 4)
@@ -93,20 +97,22 @@ Co.UPM<- Vectorize(Co.UPM,vectorize.args = c('target.x','target.y'))
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
-#' Co.LPM(0,0,x,y,mean(x),mean(y))
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' Co.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-Co.LPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  if(degree.x==0){x[x==target.x]<- target.x-1}
-  if(degree.y==0){y[y==target.y]<- target.y-1}
-  x=target.x-x;y=target.y-y
-  x[x<0]<- 0;y[y<0]<- 0
-  x[x>0]<- x[x>0]^degree.x
-  y[y>0]<- y[y>0]^degree.y
-  return(x%*%y/(length(x)))
+Co.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+  if(degree.x == 0){x[x == target.x] = target.x - 1}
+  if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = target.x - x
+  y = target.y - y
+  x[x < 0] = 0
+  y[y < 0] = 0
+  x[x > 0] = x[x > 0] ^ degree.x
+  y[y > 0] = y[y > 0] ^ degree.y
+  return(x %*% y / length(x))
   }
-Co.LPM<- Vectorize(Co.LPM,vectorize.args = c('target.x','target.y'))
+Co.LPM<- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Lower Partial Moment
 #' (Lower Right Quadrant 3)
@@ -125,20 +131,22 @@ Co.LPM<- Vectorize(Co.LPM,vectorize.args = c('target.x','target.y'))
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
-#' D.LPM(0,0,x,y,mean(x),mean(y))
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' D.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-D.LPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  if(degree.x==0){x[x==target.x]<- target.x-1}
-  if(degree.y==0){y[y==target.y]<- target.y-1}
-  x=x-target.x;y=target.y-y
-  x[x<0]<- 0;y[y<0]<- 0
-  x[x>0]<- x[x>0]^degree.x
-  y[y>0]<- y[y>0]^degree.y
-  return(x%*%y/length(x))
+D.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+  if(degree.x == 0){x[x == target.x] = target.x - 1}
+  if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x - target.x
+  y = target.y - y
+  x[x < 0] = 0
+  y[y < 0] = 0
+  x[x > 0] = x[x > 0] ^ degree.x
+  y[y > 0] = y[y > 0] ^ degree.y
+  return(x %*% y / length(x))
   }
-D.LPM<- Vectorize(D.LPM,vectorize.args = c('target.x','target.y'))
+D.LPM<- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Upper Partial Moment
 #' (Upper Left Quadrant 2)
@@ -157,20 +165,22 @@ D.LPM<- Vectorize(D.LPM,vectorize.args = c('target.x','target.y'))
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
-#' D.UPM(0,0,x,y,mean(x),mean(y))
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' D.UPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-D.UPM<- function(degree.x,degree.y,x,y,target.x,target.y){
-  if(degree.x==0){x[x==target.x]<- target.x-1}
-  if(degree.y==0){y[y==target.y]<- target.y-1}
-  x=target.x-x;y=y-target.y
-  x[x<0]<- 0;y[y<0]<- 0
-  x[x>0]<- x[x>0]^degree.x
-  y[y>0]<- y[y>0]^degree.y
-  return(x%*%y/length(x))
+D.UPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+  if(degree.x == 0){x[x == target.x] = target.x - 1}
+  if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = target.x - x
+  y = y - target.y
+  x[x < 0] = 0
+  y[y < 0] = 0
+  x[x > 0] = x[x > 0] ^ degree.x
+  y[y > 0] = y[y > 0] ^ degree.y
+  return(x %*% y / length(x))
  }
-D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
+D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 
 
 #' Partial Moment Matrix
@@ -190,12 +200,12 @@ D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100); z<-rnorm(100)
-#' A<-cbind(x,y,z)
-#' PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+#' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+#' A <- cbind(x,y,z)
+#' PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 #'
 #' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx=PM.matrix(LPM.degree=1, UPM.degree=1, target="mean", variable=A)
+#' cov.mtx = PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 #' cov.mtx$cupm
 #'
 #' ## Full covariance matrix
@@ -203,76 +213,90 @@ D.UPM<- Vectorize(D.UPM,vectorize.args = c('target.x','target.y'))
 #' @export
 
 
-PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
+PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
-  n= ncol(variable)
+  n <- ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
 
-    clpms=list()
+    clpms <- list()
     for(i in 1:n){
       if(is.numeric(target)){
-      clpms[[i]]=sapply(1:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))} else {
-      clpms[[i]]=sapply(1:n, function(b) Co.LPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+      clpms[[i]] = sapply(1:n, function(b) Co.LPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+      } else {
+      clpms[[i]] = sapply(1:n, function(b) Co.LPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
       }
     }
+
     clpm.matrix <- matrix(unlist(clpms), n, n)
+    colnames(clpm.matrix) = colnames(variable)
+    rownames(clpm.matrix) = colnames(variable)
 
-    colnames(clpm.matrix) = colnames(variable);rownames(clpm.matrix) = colnames(variable)
 
-
-    cupms=list()
+    cupms<- list()
     for(i in 1:n){
       if(is.numeric(target)){
-        cupms[[i]]=sapply(1:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))} else {
-        cupms[[i]]=sapply(1:n, function(b) Co.UPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
-        }
-    }
-    cupm.matrix <- matrix(unlist(cupms), n, n)
-    colnames(cupm.matrix) = colnames(variable);rownames(cupm.matrix) = colnames(variable)
-
-
-
-    dlpms=list()
-    for(i in 1:(n)){
-      if(is.numeric(target)){
-        dlpms[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = target,target.y=target))
-
+        cupms[[i]] = sapply(1:n, function(b) Co.UPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
         } else {
-        dlpms[[i]]=sapply(1:n, function(b) D.LPM(x=variable[,i],y=variable[,b],degree.x = UPM.degree,degree.y = LPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        cupms[[i]] = sapply(1:n, function(b) Co.UPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
         }
     }
-    dlpm.matrix <- matrix(unlist(dlpms), n, n)
-    diag(dlpm.matrix) <- 0
-    colnames(dlpm.matrix) = colnames(variable);rownames(dlpm.matrix) = colnames(variable)
+
+    cupm.matrix <- matrix(unlist(cupms), n, n)
+    colnames(cupm.matrix) = colnames(variable)
+    rownames(cupm.matrix) = colnames(variable)
 
 
-    dupms=list()
+
+    dlpms<- list()
     for(i in 1:(n)){
       if(is.numeric(target)){
-        dupms[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = target,target.y=target))
+        dlpms[[i]] = sapply(1:n, function(b) D.LPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+        } else {
+        dlpms[[i]] = sapply(1:n, function(b) D.LPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
+        }
+    }
+
+    dlpm.matrix <- matrix(unlist(dlpms), n, n)
+    diag(dlpm.matrix) = 0
+    colnames(dlpm.matrix) <- colnames(variable)
+    rownames(dlpm.matrix) <- colnames(variable)
+
+
+    dupms<- list()
+    for(i in 1:(n)){
+      if(is.numeric(target)){
+        dupms[[i]] = sapply(1:n, function(b) D.UPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
       } else {
-        dupms[[i]]=sapply(1:n, function(b) D.UPM(x=variable[,i],y=variable[,b],degree.x = LPM.degree,degree.y = UPM.degree,target.x = mean(variable[,i]),target.y=mean(variable[,b])))
+        dupms[[i]] = sapply(1:n, function(b) D.UPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
       }
     }
 
     dupm.matrix <- matrix(unlist(dupms), n, n)
-    diag(dupm.matrix) <- 0
-    colnames(dupm.matrix) = colnames(variable);rownames(dupm.matrix) = colnames(variable)
+    diag(dupm.matrix) = 0
+    colnames(dupm.matrix) = colnames(variable)
+    rownames(dupm.matrix) = colnames(variable)
 
 
   if(pop.adj){
-    adjustment=(length(variable[,1])/(length(variable[,1])-1))
-    clpm.matrix=clpm.matrix*adjustment
-    cupm.matrix=cupm.matrix*adjustment
-    dlpm.matrix=dlpm.matrix*adjustment
-    dupm.matrix=dupm.matrix*adjustment
+    adjustment = length(variable[,1])/(length(variable[,1])-1)
+    clpm.matrix = clpm.matrix*adjustment
+    cupm.matrix = cupm.matrix*adjustment
+    dlpm.matrix = dlpm.matrix*adjustment
+    dupm.matrix = dupm.matrix*adjustment
   }
 
-  components=list(clpm=clpm.matrix,cupm=cupm.matrix,dlpm=dlpm.matrix,dupm=dupm.matrix)
+  components = list(clpm = clpm.matrix,
+                    cupm = cupm.matrix,
+                    dlpm = dlpm.matrix,
+                    dupm = dupm.matrix)
 
-  cov.matrix=components$clpm+components$cupm-components$dlpm-components$dupm
+  cov.matrix = components$clpm+components$cupm-components$dlpm-components$dupm
 
-  return(list(clpm=components$clpm,cupm=components$cupm,dlpm=components$dlpm,dupm=components$dupm,matrix=cov.matrix))
+  return(list(clpm = components$clpm,
+              cupm = components$cupm,
+              dlpm = components$dlpm,
+              dupm = components$dupm,
+              matrix = cov.matrix))
 }
 
 
@@ -289,23 +313,23 @@ PM.matrix <- function(LPM.degree,UPM.degree,target,variable,pop.adj=FALSE){
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100)
-#' LPM.ratio(0,mean(x),x)
+#' x <- rnorm(100)
+#' LPM.ratio(0, mean(x), x)
 #'
 #' ## Continuous CDF
-#' LPM.ratio(1,sort(x),x)
+#' LPM.ratio(1, sort(x), x)
 #'
 #'
 #' ## Joint CDF
 #' \dontrun{
-#' x=rnorm(5000);y=rnorm(5000)
-#' plot3d(x,y,Co.LPM(0,0,sort(x),sort(y),x,y), col='blue', xlab="X", ylab="Y",
-#' zlab="Probability", box=FALSE)
+#' x <- rnorm(5000) ; y <- rnorm(5000)
+#' plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' zlab = "Probability", box = FALSE)
 #' }
 #' @export
 
-LPM.ratio<- function(degree,target,variable){
-  LPM(degree,target,variable)/(LPM(degree,target,variable)+UPM(degree,target,variable))
+LPM.ratio <- function(degree, target, variable){
+  LPM(degree, target, variable) / (LPM(degree, target, variable) + UPM(degree, target, variable))
 }
 
 
@@ -323,24 +347,20 @@ LPM.ratio<- function(degree,target,variable){
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100)
-#' UPM.ratio(0,mean(x),x)
+#' x <- rnorm(100)
+#' UPM.ratio(0, mean(x), x)
 #'
+#' ## Joint Upper CDF
 #' \dontrun{
-#' ## Plot Degree 0 (frequency) Joint CDF
-#' x=rnorm(100);y=rnorm(100)
-#' intervals=(max(x,y)-min(x,y))/100
-#' grid.points=seq(min(x,y),max(x,y),intervals)
-#' z=expand.grid(grid.points,grid.points)
-#' plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))
-#'
-#' ## Plot Degree 1 (area) Joint CDF
-#' plot3d(z[,1],z[,2],LPM.ratio(0,z[,1],x)*LPM.ratio(0,z[,2],y))}
+#' x <- rnorm(5000) ; y <- rnorm(5000)
+#' plot3d(x, y, Co.UPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' zlab = "Probability", box = FALSE)
+#' }
 #' @export
 
 
-UPM.ratio<- function(degree,target,variable){
-  UPM(degree,target,variable)/(LPM(degree,target,variable)+UPM(degree,target,variable))
+UPM.ratio <- function(degree, target, variable){
+  UPM(degree, target, variable) / (LPM(degree, target, variable) + UPM(degree, target, variable))
 }
 
 
@@ -360,23 +380,23 @@ UPM.ratio<- function(degree,target,variable){
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100)
+#' x <- rnorm(100)
 #' NNS.PDF(x)
 #'
 #' ## Custom target range
-#' NNS.PDF(x,target=c(-5,5))
+#' NNS.PDF(x, target = c(-5, 5))
 #' @export
 
 
-NNS.PDF<-function(variable,degree=1,target=NULL,bins=NULL,plot=TRUE){
-if(is.null(target)){target=sort(variable)}
+NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE){
+if(is.null(target)){target = sort(variable)}
 # d/dx approximation
-if(is.null(bins)){bins=length(variable)}
-d.dx=(max(target)+abs(min(target)))/bins
-tgt=seq(min(target),max(target),d.dx)
-PDF=(LPM.ratio(degree,tgt+d.dx,variable)-LPM.ratio(degree,tgt-d.dx,variable))
+if(is.null(bins)){bins = length(variable)}
+d.dx = (max(target) + abs(min(target))) / bins
+tgt = seq(min(target), max(target), d.dx)
+PDF = LPM.ratio(degree, tgt+d.dx, variable) - LPM.ratio(degree, tgt-d.dx, variable)
 
-if(plot){plot(sort(tgt),PDF,col='blue',type='l',lwd=3,xlab="X")}
+if(plot){plot(sort(tgt), PDF, col = 'blue', type = 'l', lwd = 3, xlab = "X")}
 
-return(data.table(cbind("Intervals"=sort(tgt),PDF)))
+return(data.table(cbind("Intervals" = sort(tgt), PDF)))
 }

@@ -10,12 +10,12 @@
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
 #' @examples
-#' x<- data.frame(cbind(c("sunny","rainy"),c(1,-1)))
+#' x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))
 #' NNS.term.matrix(x)
 #'
 #' ### Concatenate Text with space seperator, cbind with "DV"
-#' x<- data.frame(cbind(c("sunny","rainy"),c("windy","cloudy"),c(1,-1)))
-#' x<- data.frame(cbind(paste(x[,1],x[,2],sep=" "),as.numeric(as.character(x[,3]))))
+#' x <- data.frame(cbind(c("sunny", "rainy"), c("windy", "cloudy"), c(1, -1)))
+#' x <- data.frame(cbind(paste(x[ , 1], x[ , 2], sep = " "), as.numeric(as.character(x[ , 3]))))
 #' NNS.term.matrix(x)
 #'
 #'
@@ -25,18 +25,18 @@
 #' data(NYTimes)
 #'
 #' ### Concatenate Columns 3 and 4 containing text, with column 5 as DV
-#' NYT=data.frame(cbind(paste(NYTimes[,3],NYTimes[,4],sep = " "),
-#'                      as.numeric(as.character(NYTimes[,5]))))
+#' NYT=data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
+#'                      as.numeric(as.character(NYTimes[ , 5]))))
 #' NNS.term.matrix(NYT)}
 #' @export
 
 
-NNS.term.matrix <- function(x, oos=NULL,names=FALSE){
+NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
 
-  p=length(oos)
+  p = length(oos)
 
-  x=t(t(x))
-  n=nrow(x)
+  x = t(t(x))
+  n = nrow(x)
 
   #Remove commas, etc.
   mgsub <- function(pattern, x, ...) {
@@ -48,54 +48,55 @@ NNS.term.matrix <- function(x, oos=NULL,names=FALSE){
   }
 
   #Use all lowercase to simplify instances
-  x[,1]=tolower(mgsub(c(",",";",":","'s"," . "),x[,1]))
+  x[ , 1] = tolower(mgsub(c(",", ";", ":", "'s", " . "), x[ , 1]))
 
-  unique.vocab=unique(unlist(strsplit(as.character(x[,1]), " ", fixed = TRUE)))
+  unique.vocab = unique(unlist(strsplit(as.character(x[ , 1]), " ", fixed = TRUE)))
 
   #Sub with a longer .csv to be called to reduce IVs
-  prepositions = c("a","in", "of", "our", "the", "is", "for","with", "we", "this", "it","but","was",
-                   "at","to","on","aboard","aside","by","means","spite","about","as", "concerning",
-                   "instead","above", "at", "considering", "into","according", "atop", "despite", "view",
-                   "across", "because", "during", "near", "like","across","after","against","ahead","along",
-                   "alongside","amid","among","apart","around","out","outside","over","owing","past","prior",
-                   "before","behind","below","beneath","beside","besides","between", "beyond","regarding",
-                   "round", "since", "through", "throughout", "till", "down", "except","from", "addition",
-                   "back","front","place","regard","inside","together","toward","under","underneath","until",
-                   "nearby","next","off","account","onto", "top","opposite","out","unto","up","within","without","what")
+  prepositions = c("a", "in", "of", "our", "the", "is", "for", "with", "we", "this", "it", "but", "was",
+                   "at", "to", "on", "aboard", "aside", "by", "means", "spite", "about", "as", "concerning",
+                   "instead", "above", "at", "considering", "into", "according", "atop", "despite", "view",
+                   "across", "because", "during", "near", "like", "across", "after", "against", "ahead", "along",
+                   "alongside", "amid", "among", "apart", "around", "out", "outside", "over", "owing", "past", "prior",
+                   "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "regarding",
+                   "round", "since", "through", "throughout", "till", "down", "except", "from", "addition",
+                   "back", "front", "place", "regard", "inside", "together", "toward", "under", "underneath", "until",
+                   "nearby", "next", "off", "account", "onto", "top", "opposite", "out", "unto", "up", "within", "without", "what")
 
 
 
   #Remove prepositions
-  preps=unique.vocab%in%c(prepositions)
-  z=sum(preps)
+  preps = unique.vocab %in% c(prepositions)
 
-
-  if(z>0){unique.vocab=unique.vocab[!preps]
-  }else{
-    unique.vocab=unique.vocab
+  if(sum(preps) > 0){
+    unique.vocab = unique.vocab[!preps]
   }
 
   if(!is.null(oos)){
-    oos.preps=oos%in%c(prepositions)
-    zz=sum(oos.preps)
-    if(zz>0){oos=oos[!oos.preps]}else{
-      oos=oos
-    }}
+    oos.preps = oos %in% c(prepositions)
+    if(sum(oos.preps) > 0){
+      oos=oos[!oos.preps]
+    }
+  }
 
-  NNS.TM=(t(sapply(1:length(x[,1]),function(i) str_count(x[i,1],unique.vocab))))
+  NNS.TM = (t(sapply(1 : length(x[ , 1]), function(i) str_count(x[i, 1], unique.vocab))))
 
   if(names){
-  colnames(NNS.TM)=c(unique.vocab)
+    colnames(NNS.TM) = c(unique.vocab)
   }
 
   if(!is.null(oos)){
-  OOS.TM=(t(sapply(1:length(oos),function(i) str_count(oos[i],unique.vocab))))
+    OOS.TM = (t(sapply(1 : length(oos), function(i) str_count(oos[i], unique.vocab))))
   if(names){
-    colnames(OOS.TM)=c(unique.vocab)
+    colnames(OOS.TM) = c(unique.vocab)
   }
-  return(list("IV"=NNS.TM,"DV"=as.numeric(as.character(x[,2])),"OOS"=OOS.TM))
-  }else{
-    return(list("IV"=NNS.TM,"DV"=as.numeric(as.character(x[,2]))))
+
+  return(list("IV" = NNS.TM,
+              "DV" = as.numeric(as.character(x[ , 2])),
+              "OOS" = OOS.TM))
+  } else {
+    return(list("IV" = NNS.TM,
+                "DV" = as.numeric(as.character(x[ , 2]))))
     }
 
 }
