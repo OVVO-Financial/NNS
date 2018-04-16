@@ -52,7 +52,6 @@ For monthly data series, increased accuracy may be realized from forcing seasona
 If error encountered when \code{(seasonal.factor = TRUE)}:
 
 \code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) :
-
  wrong sign in 'by' argument"}
 
 use the combination of \code{(seasonal.factor = FALSE, best.periods = 1)}.

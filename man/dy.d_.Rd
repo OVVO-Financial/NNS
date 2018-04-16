@@ -2,7 +2,7 @@
 % Please edit documentation in R/dy_d_wrt.R
 \name{dy.d_}
 \alias{dy.d_}
-\title{Partial Derivative dy/d[wrt]}
+\title{Partial Derivative dy/d_[wrt]}
 \usage{
 dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.99,
   h = 0.05, n.best = NULL, mixed = FALSE, plot = FALSE,
