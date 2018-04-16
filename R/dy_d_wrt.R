@@ -1,4 +1,4 @@
-#' Partial Derivative dy/d[wrt]
+#' Partial Derivative dy/d_[wrt]
 #'
 #' Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
 #'
