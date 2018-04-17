@@ -35,75 +35,79 @@
 #' @export
 
 NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq", negative.values = FALSE){
-
+  
   limit = length(variable) / 2
   if(max(seasonal.factor) >= limit){
     stop(paste0("Please set maximum [seasonal.factor] to less than ", floor(limit)))
   }
-
+  
   variable = as.numeric(variable)
-
+  
   h = length(variable) - training.set
   test.set = tail(variable, h)
-
+  
   nns.estimates = list()
   seasonal.combs = list()
-
-for(i in 1 : length(seasonal.factor)){
-  nns.estimates.indiv = numeric()
-
-  # Combinations of seasonal factors
-  if(method == 'comb'){
-
-    seasonal.combs[[i]] = combn(seasonal.factor, i)
-
-    for(k in 1 : ncol(seasonal.combs[[i]])){
-
-      # Find the min SSE for a given seasonals sequence
-      nns.estimates.indiv[k] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-    }
-
-    nns.estimates[[i]] = nns.estimates.indiv
-
+  
+  for(i in 1 : length(seasonal.factor)){
     nns.estimates.indiv = numeric()
-
-  } else {
-    nns.estimates.indiv[i] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
+    
+    # Combinations of seasonal factors
+    if(method == 'comb'){
+      
+      seasonal.combs[[i]] = combn(seasonal.factor, i)
+      
+      for(k in 1 : ncol(seasonal.combs[[i]])){
+        
+        # Find the min SSE for a given seasonals sequence
+        nns.estimates.indiv[k] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
+        nns.estimates[is.na(nns.estimates)] = 0
+      }
+      
+      nns.estimates[[i]] = nns.estimates.indiv
+      nns.estimates.indiv = numeric()
+      
+    } else {
+      nns.estimates.indiv[i] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
+      nns.estimates.indiv[is.na(nns.estimates.indiv)] = 0
+    }
+    
+    
   }
-
-
-}
   methods.SSE = numeric()
   if(method == 'comb'){
-      min.estimate = sapply(nns.estimates,min)
-      min.estimate.index = which.min(min.estimate)
-      min.estimate.entry = which.min(nns.estimates[[min.estimate.index]])
-
-      nns.periods = seasonal.combs[[min.estimate.index]][ , min.estimate.entry]
-      benchmark.SSE = min(min.estimate)
-
-
-      for(j in c("lin", "both", "nonlin")){
-        methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-      }
-
-      nns.SSE = min(methods.SSE)
-      nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
-
+    min.estimate = sapply(nns.estimates,min)
+    min.estimate.index = which.min(min.estimate)
+    min.estimate.entry = which.min(nns.estimates[[min.estimate.index]])
+    
+    nns.periods = seasonal.combs[[min.estimate.index]][ , min.estimate.entry]
+    benchmark.SSE = min(min.estimate)
+    
+    
+    
+    for(j in c("lin", "both", "nonlin")){
+      methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
+      methods.SSE[is.na(methods.SSE)] = 0
+    }
+    
+    nns.SSE = min(methods.SSE)
+    nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
+    
   } else{
-      min.estimate = which.min(nns.estimates.indiv)
-      nns.periods = seasonal.factor[1 : min.estimate]
-      benchmark.SSE = nns.estimates.indiv[min.estimate]
-
-      for(j in c("lin", "both", "nonlin")){
-        methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-      }
-
-      nns.SSE = min(methods.SSE)
-      nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
-
+    min.estimate = which.min(nns.estimates.indiv)
+    nns.periods = seasonal.factor[1 : min.estimate]
+    benchmark.SSE = nns.estimates.indiv[min.estimate]
+    
+    for(j in c("lin", "both", "nonlin")){
+      methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
+      methods.SSE[is.na(methods.SSE)] = 0
+    }
+    
+    nns.SSE = min(methods.SSE)
+    nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
+    
   }
-
+  
   return(list(periods = nns.periods,
               SSE = nns.SSE,
               method = nns.method))
