@@ -61,7 +61,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
         
         # Find the min SSE for a given seasonals sequence
         nns.estimates.indiv[k] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-        nns.estimates[is.na(nns.estimates)] = 0
+        nns.estimates.indiv[is.na(nns.estimates.indiv)] = 0
       }
       
       nns.estimates[[i]] = nns.estimates.indiv
