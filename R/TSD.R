@@ -10,10 +10,10 @@
 #' @examples
 #' set.seed(123)
 #' x<-rnorm(100); y<-rnorm(100)
-#' NNS.TSD(x,y)
+#' NNS.TSD(x, y)
 #' @export
 
-NNS.TSD <- function(x,y){
+NNS.TSD <- function(x, y){
   x_sort <- sort(x, decreasing = FALSE)
   y_sort <- sort(y, decreasing = FALSE)
 

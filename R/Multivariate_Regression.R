@@ -13,11 +13,11 @@ NNS.M.reg <- function (X_n, Y, order = NULL, stn = 0.99, n.best = 1, type = NULL
   }
 
   ### Mode calculation
-  mode=function(x) {
+  mode = function(x) {
     if(length(x) > 1){
       d <- density(x)
       d$x[which.max(d$y)]
-    }else{
+    } else {
       x
     }
   }

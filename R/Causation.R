@@ -1,6 +1,6 @@
 #' NNS Causation
 #'
-#' Returns the causality from observational data between two variables
+#' Returns the causality from observational data between two variables.
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.

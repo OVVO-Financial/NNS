@@ -26,8 +26,8 @@
 NNS.dep = function(x,
                    y = NULL,
                    order = NULL,
-                   degree=NULL,
-                   print.map=FALSE){
+                   degree = NULL,
+                   print.map = FALSE){
 
 
   if(is.null(degree)){degree = ifelse(length(x) < 100, 0, 1)

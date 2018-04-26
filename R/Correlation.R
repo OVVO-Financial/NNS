@@ -25,7 +25,7 @@
 #' @export
 
 NNS.cor = function(x,
-                   y=NULL,
+                   y = NULL,
                    order = NULL,
                    degree= NULL){
 

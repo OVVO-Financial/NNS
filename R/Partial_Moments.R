@@ -112,7 +112,7 @@ Co.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
   }
-Co.LPM<- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
+Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Lower Partial Moment
 #' (Lower Right Quadrant 3)
@@ -146,7 +146,7 @@ D.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
   }
-D.LPM<- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
+D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Upper Partial Moment
 #' (Upper Left Quadrant 2)
@@ -232,7 +232,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
     rownames(clpm.matrix) = colnames(variable)
 
 
-    cupms<- list()
+    cupms <- list()
     for(i in 1:n){
       if(is.numeric(target)){
         cupms[[i]] = sapply(1:n, function(b) Co.UPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
@@ -247,7 +247,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 
 
-    dlpms<- list()
+    dlpms <- list()
     for(i in 1:(n)){
       if(is.numeric(target)){
         dlpms[[i]] = sapply(1:n, function(b) D.LPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
@@ -262,7 +262,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
     rownames(dlpm.matrix) <- colnames(variable)
 
 
-    dupms<- list()
+    dupms <- list()
     for(i in 1:(n)){
       if(is.numeric(target)){
         dupms[[i]] = sapply(1:n, function(b) D.UPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))

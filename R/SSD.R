@@ -10,11 +10,11 @@
 #' @examples
 #' set.seed(123)
 #' x<-rnorm(100) ; y<-rnorm(100)
-#' NNS.SSD(x,y)
+#' NNS.SSD(x, y)
 #' @export
 
 
-NNS.SSD <- function(x,y){
+NNS.SSD <- function(x, y){
   x_sort <- sort(x, decreasing = FALSE)
   y_sort <- sort(y, decreasing = FALSE)
 

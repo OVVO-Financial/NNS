@@ -9,7 +9,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
 
 
   #Continuous CDF Deviation from 0.5
-        MAD.CDF<- mean(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5)))
+        MAD.CDF <- mean(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5)))
 
 
   #Certainty associated with samples

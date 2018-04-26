@@ -100,7 +100,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
   while(i >= 1L){
     Bl[i] = lower.B
     Bu[i] = upper.B
-    new.f = function(x) -f.x + ((f.x - f(point - x)) / x) * point + new.B
+    new.f = function(x) - f.x + ((f.x - f(point - x)) / x) * point + new.B
 
     ###  SOLVE FOR h, we just need the negative or positive sign from the tested B
 
@@ -170,7 +170,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
                          "Averaged Finite Step Initial h " = Finite.step(f, point, h)[3],
                          "Inferred h" = Finite.step(f, point, inferred.h)[1 : 2],
                          "Inferred h Averaged Finite Step" = Finite.step(f, point, inferred.h)[3],
-                        "Complex Step Derivative (Initial h)" = Im(f(z)) / Im(z))))
+                         "Complex Step Derivative (Initial h)" = Im(f(z)) / Im(z))))
     }
 
 
