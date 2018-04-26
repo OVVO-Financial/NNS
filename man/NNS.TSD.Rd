@@ -20,7 +20,7 @@ Bi-directional test of third degree stochastic dominance using lower partial mom
 \examples{
 set.seed(123)
 x<-rnorm(100); y<-rnorm(100)
-NNS.TSD(x,y)
+NNS.TSD(x, y)
 }
 \references{
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.

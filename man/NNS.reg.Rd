@@ -16,7 +16,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{y}{a numeric or factor vector with compatible dimsensions to \code{x}.}
 
-\item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction="off")}.  \code{(order = "max")} will force a limit condition perfect fit.}
+\item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.}
 
 \item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.}
 
@@ -42,7 +42,7 @@ NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
 
 \item{std.errors}{logical; \code{FALSE} (default) To provide standard errors of each linear segment in the \code{"Fitted.xy"} output.}
 
-\item{confidence.interval}{numeric [0,1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.}
+\item{confidence.interval}{numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.}
 
 \item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
 

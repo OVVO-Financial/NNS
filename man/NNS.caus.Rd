@@ -21,7 +21,7 @@ NNS.caus(x, y, tau, time.series = FALSE, plot = FALSE)
 Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
 }
 \description{
-Returns the causality from observational data between two variables
+Returns the causality from observational data between two variables.
 }
 \examples{
 ## x clearly causes y...
