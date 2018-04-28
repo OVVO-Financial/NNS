@@ -199,11 +199,11 @@ NNS.reg = function (x, y,
   np = nrow(point.est)
 
   if(noise.reduction == 'off'){
-    stn=0
+    stn = 0
   }
 
   if(!is.null(type) && type == "CLASS" && is.null(n.best)){
-   n.best=1
+   n.best = 1
    }
 
 
@@ -256,7 +256,7 @@ NNS.reg = function (x, y,
             }
             x.star.coef = numeric()
             for(i in 1:ncol(x)){
-              cause = NNS.caus(x[,i], y, tau = tau, plot = FALSE)
+              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
               x.star.coef[i] = cause[1] - cause[2]
             }
           }
@@ -267,7 +267,7 @@ NNS.reg = function (x, y,
             }
             x.star.coef.1 = numeric()
             for(i in 1 : ncol(x)){
-              cause = NNS.caus(x[,i], y, tau = tau, plot = FALSE)
+              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
               x.star.coef.1[i] = cause[1] - cause[2]
             }
             x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
@@ -320,7 +320,7 @@ NNS.reg = function (x, y,
     dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
 
   } else {
-    if(dim.red) dependence = NNS.dep(x,y,print.map = FALSE)$Dependence ^ (1 / exp(1))
+    if(dim.red) dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
   }
 
   if(is.null(order)){
@@ -338,7 +338,7 @@ NNS.reg = function (x, y,
     } else {
       part.map = NNS.part(x, y, type = "XONLY", noise.reduction='off', order = dep.reduced.order, max.obs.req = 0)
       if(length(part.map$regression.points$x) == 0){
-        part.map=NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), max.obs.req = 0)
+        part.map = NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), max.obs.req = 0)
       }
     } # type
   } else {
@@ -351,7 +351,7 @@ NNS.reg = function (x, y,
       if(is.null(noise.reduction)){noise.reduction = "median"}
       part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order)
       if(length(part.map$regression.points$x) == 0){
-        part.map=NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), max.obs.req = 1)
+        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), max.obs.req = 1)
       }
     } # type
   } # Dependence < stn
@@ -406,15 +406,15 @@ NNS.reg = function (x, y,
     return(regression.points)
   }
 
-  rise = regression.points[ ,'rise' := y - shift(y)]
-  run = regression.points[ ,'run' := x - shift(x)]
+  rise = regression.points[ , 'rise' := y - shift(y)]
+  run = regression.points[ , 'run' := x - shift(x)]
 
 
-  Regression.Coefficients = regression.points[,.(rise,run)]
+  Regression.Coefficients = regression.points[ , .(rise,run)]
 
   Regression.Coefficients = Regression.Coefficients[complete.cases(Regression.Coefficients)]
 
-  upper.x = regression.points[(2:.N), x]
+  upper.x = regression.points[(2 : .N), x]
 
   Regression.Coefficients = Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
 
@@ -423,7 +423,7 @@ NNS.reg = function (x, y,
 
   Regression.Coefficients = unique(Regression.Coefficients)
   Regression.Coefficients[Regression.Coefficients == Inf] = 1
-  regression.points = regression.points[ ,.(x,y)]
+  regression.points = regression.points[ , .(x,y)]
   setkey(regression.points, 'x')
   regression.points = unique(regression.points)
 
@@ -433,14 +433,14 @@ NNS.reg = function (x, y,
   if(is.na(Regression.Coefficients[1, Coefficient])){
     Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
   }
-  if(is.na(Regression.Coefficients[.N,Coefficient])){
+  if(is.na(Regression.Coefficients[.N, Coefficient])){
     Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
   }
 
   coef.interval = findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-  reg.interval = findInterval(x, regression.points[,x], left.open = FALSE)
+  reg.interval = findInterval(x, regression.points[, x], left.open = FALSE)
 
-  estimate = ((x- regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
+  estimate = ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
 
   if(!is.null(point.est)){
     coef.point.interval = findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
@@ -511,7 +511,7 @@ NNS.reg = function (x, y,
     if(is.null(order)){
       plot.order = dep.reduced.order
     } else {
-      plot.order=order
+      plot.order = order
     }
 
     if(is.numeric(confidence.interval)){
@@ -562,7 +562,7 @@ NNS.reg = function (x, y,
 
     if(!is.null(point.est)){
       if(sum(point.est > max(x)) > 0){
-        segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[ .N, y], col = "green", lty = 2)
+        segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[.N, y], col = "green", lty = 2)
       }
 
       if(sum(point.est < min(x)) > 0){

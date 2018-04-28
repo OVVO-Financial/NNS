@@ -27,18 +27,18 @@ NNS.SD.efficient.set <- function(x,degree,type="discrete") {
   current_base <- numeric()
 
 
-  LPM_order = sapply(1:n,function(i) LPM(1, max_target, x[,i]))
+  LPM_order = sapply(1 : n,function(i) LPM(1, max_target, x[ , i]))
 
-  final_ranked <- x[, order(LPM_order)]
+  final_ranked <- x[ , order(LPM_order)]
 
   current_base <- 1
 
 
   for (i in 1:(n-1)) {
 
-      base <- final_ranked[,current_base[length(current_base)]]
+      base <- final_ranked[ , current_base[length(current_base)]]
 
-      challenger <- final_ranked[,i+1]
+      challenger <- final_ranked[ , i + 1]
 
     if(degree == 1){
       sd.test = NNS.FSD.uni(base, challenger, type = type)
@@ -52,13 +52,13 @@ NNS.SD.efficient.set <- function(x,degree,type="discrete") {
 
       if (sd.test == 1){
         current_base[i] <- current_base[length(current_base)]
-        Dominated_set[i] <- i+1
+        Dominated_set[i] <- i + 1
       }
 
 
       if (sd.test == 0){
         for (j in current_base){
-          base <- final_ranked[,j]
+          base <- final_ranked[ , j]
           if(degree == 1){
             new.base.sd.test = NNS.FSD.uni(base, challenger, type = type)
           }
@@ -71,18 +71,18 @@ NNS.SD.efficient.set <- function(x,degree,type="discrete") {
 
           if (new.base.sd.test == 0){ next
           } else {
-            Dominated_set[i] <- i+1
+            Dominated_set[i] <- i + 1
             }
         }
 
-        current_base[i]<- i+1
+        current_base[i]<- i + 1
       }
 
   }
 
 
-  if(length(Dominated_set)>0){
-    return(colnames(final_ranked[,-na.omit(Dominated_set)]))
+  if(length(Dominated_set) > 0){
+    return(colnames(final_ranked[ , - na.omit(Dominated_set)]))
   } else {
       return(colnames(final_ranked))
     }

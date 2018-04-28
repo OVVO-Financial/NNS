@@ -12,7 +12,7 @@
 #' Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://ssrn.com/abstract=3002675}.
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100) ; y<-rnorm(100)
+#' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.FSD.uni(x, y)
 #' @export
 
@@ -54,8 +54,8 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
-#' NNS.SSD.uni(x,y)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' NNS.SSD.uni(x, y)
 #' @export
 
 
@@ -66,7 +66,7 @@ NNS.SSD.uni <- function(x, y){
       x_sort <- sort(x, decreasing = FALSE)
       y_sort <- sort(y, decreasing = FALSE)
 
-      Combined = c(x_sort,y_sort)
+      Combined = c(x_sort, y_sort)
       Combined_sort = sort(Combined, decreasing = FALSE)
 
       LPM_x_sort = LPM(1, Combined_sort, x)
@@ -90,8 +90,8 @@ NNS.SSD.uni <- function(x, y){
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
 #' @examples
 #' set.seed(123)
-#' x<-rnorm(100); y<-rnorm(100)
-#' NNS.TSD.uni(x,y)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' NNS.TSD.uni(x, y)
 #' @export
 
 
@@ -108,7 +108,7 @@ NNS.TSD.uni <- function(x, y){
       LPM_x_sort = LPM(2, Combined_sort, x)
       LPM_y_sort = LPM(2, Combined_sort, y)
 
-      x.tsd.y = any(LPM_x_sort>LPM_y_sort)
+      x.tsd.y = any(LPM_x_sort > LPM_y_sort)
 
       ifelse(!x.tsd.y & min(x) >= min(y) & !identical(LPM_x_sort, LPM_y_sort), return(1), return(0))
 

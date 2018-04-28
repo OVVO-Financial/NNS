@@ -219,11 +219,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
 
     clpms <- list()
-    for(i in 1:n){
+    for(i in 1 : n){
       if(is.numeric(target)){
-      clpms[[i]] = sapply(1:n, function(b) Co.LPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+      clpms[[i]] = sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
       } else {
-      clpms[[i]] = sapply(1:n, function(b) Co.LPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
+      clpms[[i]] = sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
       }
     }
 
@@ -233,11 +233,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 
     cupms <- list()
-    for(i in 1:n){
+    for(i in 1 : n){
       if(is.numeric(target)){
-        cupms[[i]] = sapply(1:n, function(b) Co.UPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
+        cupms[[i]] = sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
         } else {
-        cupms[[i]] = sapply(1:n, function(b) Co.UPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
+        cupms[[i]] = sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
         }
     }
 
@@ -248,11 +248,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 
     dlpms <- list()
-    for(i in 1:(n)){
+    for(i in 1 : n){
       if(is.numeric(target)){
-        dlpms[[i]] = sapply(1:n, function(b) D.LPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+        dlpms[[i]] = sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
         } else {
-        dlpms[[i]] = sapply(1:n, function(b) D.LPM(x = variable[,i], y = variable[,b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
+        dlpms[[i]] = sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
         }
     }
 
@@ -263,11 +263,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 
     dupms <- list()
-    for(i in 1:(n)){
+    for(i in 1 : n){
       if(is.numeric(target)){
-        dupms[[i]] = sapply(1:n, function(b) D.UPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
+        dupms[[i]] = sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
       } else {
-        dupms[[i]] = sapply(1:n, function(b) D.UPM(x = variable[,i], y = variable[,b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[,i]), target.y = mean(variable[,b])))
+        dupms[[i]] = sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
       }
     }
 
@@ -278,7 +278,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 
   if(pop.adj){
-    adjustment = length(variable[,1])/(length(variable[,1])-1)
+    adjustment = length(variable[ , 1]) / (length(variable[ , 1]) - 1)
     clpm.matrix = clpm.matrix*adjustment
     cupm.matrix = cupm.matrix*adjustment
     dlpm.matrix = dlpm.matrix*adjustment
@@ -290,7 +290,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
                     dlpm = dlpm.matrix,
                     dupm = dupm.matrix)
 
-  cov.matrix = components$clpm+components$cupm-components$dlpm-components$dupm
+  cov.matrix = components$clpm + components$cupm - components$dlpm - components$dupm
 
   return(list(clpm = components$clpm,
               cupm = components$cupm,

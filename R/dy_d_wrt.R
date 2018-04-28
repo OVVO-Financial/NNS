@@ -8,7 +8,7 @@
 #' @param order integer; \link{NNS.reg} \code{"order"}, defaults to NULL.
 #' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.
 #' @param eval.points numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.
-#' @param h numeric [0,...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.
+#' @param h numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.
 #' @param n.best integer; Sets the number of closest regression points to use in estimating finite difference points in \link{NNS.reg}.  \code{NULL} (default) Uses \code{ceiling(sqrt(ncol(x)))}.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.  Only for single valued \code{eval.points}.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.

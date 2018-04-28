@@ -12,7 +12,7 @@
 #' Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://ssrn.com/abstract=3002675}.
 #' @examples
 #' set.seed(123)
-#' x <- rnorm(100) ; y<-rnorm(100)
+#' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.FSD(x, y)
 #' @export
 
@@ -24,10 +24,11 @@ NNS.FSD <- function(x, y, type="discrete"){
   y_sort <- sort(y, decreasing = FALSE)
 
   Combined = c(x_sort, y_sort)
-  Combined_sort = sort(Combined, decreasing=FALSE)
+  Combined_sort = sort(Combined, decreasing = FALSE)
 
  ## Indicator function ***for all values of x and y*** as the continuous CDF target
-  if(type == "discrete"){degree = 0
+  if(type == "discrete"){
+    degree = 0
   } else {
     degree = 1
   }
@@ -41,7 +42,7 @@ NNS.FSD <- function(x, y, type="discrete"){
   y.fsd.x = any(LPM_y_sort > LPM_x_sort)
 
 
-    plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "FSD", ylab = "Probability of Cumulative Distribution", ylim = c(0,1))
+    plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "FSD", ylab = "Probability of Cumulative Distribution", ylim = c(0, 1))
     lines(Combined_sort, LPM_y_sort, type = "l", lwd = 3,col = "blue")
     legend("topleft", c("X", "Y"), lwd = 10, col = c("red", "blue"))
 
