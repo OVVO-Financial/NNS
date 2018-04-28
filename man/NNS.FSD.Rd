@@ -21,7 +21,7 @@ Bi-directional test of first degree stochastic dominance using lower partial mom
 }
 \examples{
 set.seed(123)
-x <- rnorm(100) ; y<-rnorm(100)
+x <- rnorm(100) ; y <- rnorm(100)
 NNS.FSD(x, y)
 }
 \references{

@@ -19,8 +19,8 @@ Uni-directional test of second degree stochastic dominance using lower partial m
 }
 \examples{
 set.seed(123)
-x<-rnorm(100); y<-rnorm(100)
-NNS.SSD.uni(x,y)
+x <- rnorm(100) ; y <- rnorm(100)
+NNS.SSD.uni(x, y)
 }
 \references{
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.

@@ -21,7 +21,7 @@ Uni-directional test of first degree stochastic dominance using lower partial mo
 }
 \examples{
 set.seed(123)
-x<-rnorm(100) ; y<-rnorm(100)
+x <- rnorm(100) ; y <- rnorm(100)
 NNS.FSD.uni(x, y)
 }
 \references{
