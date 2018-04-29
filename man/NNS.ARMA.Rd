@@ -5,7 +5,7 @@
 \title{NNS ARMA}
 \usage{
 NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
-  best.periods = NULL, negative.values = FALSE, method = "nonlin",
+  best.periods = 2, negative.values = FALSE, method = "nonlin",
   dynamic = FALSE, plot = TRUE, seasonal.plot = TRUE, intervals = FALSE)
 }
 \arguments{
@@ -19,7 +19,7 @@ NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
 
 \item{seasonal.factor}{logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
-\item{best.periods}{integer; to be used in conjuction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+\item{best.periods}{integer; [2] (default) used in conjuction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 
 \code{(seasonal.factor = FALSE)}.}
 
