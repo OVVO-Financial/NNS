@@ -8,7 +8,7 @@
 #'
 #'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
-#' @param best.periods integer; to be used in conjuction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+#' @param best.periods integer; [2] (default) used in conjuction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #'
 #' \code{(seasonal.factor = FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
@@ -60,7 +60,7 @@ NNS.ARMA <- function(variable,
                      h = 1,
                      training.set = NULL,
                      seasonal.factor = TRUE ,
-                     best.periods = NULL,
+                     best.periods = 2,
                      negative.values = FALSE,
                      method = "nonlin",
                      dynamic = FALSE,
@@ -80,9 +80,10 @@ NNS.ARMA <- function(variable,
     stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')
   }
 
-  if(!is.null(best.periods)){
+  if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
     seasonal.factor = FALSE
   }
+
 
   variable = as.numeric(variable)
   OV = variable
@@ -145,7 +146,7 @@ NNS.ARMA <- function(variable,
   if(is.numeric(seasonal.factor)){
     M <- t(seasonal.factor)
     lag = seasonal.factor
-    output = numeric()
+    output = numeric(length(seasonal.factor))
     for(i in 1 : length(seasonal.factor)){
       rev.var = variable[seq(length(variable), 1, -i)]
       output[i] = abs(sd(rev.var) / mean(rev.var))
@@ -165,7 +166,9 @@ NNS.ARMA <- function(variable,
         M <- seas.matrix$all.periods
       } else {
         if(!seasonal.factor && is.numeric(best.periods) && length(seas.matrix$all.periods$Period) < best.periods){
-          stop(paste0("Please set best.periods <= ",length(seas.matrix$all.periods$Period)))
+          print('here')
+          best.periods = length(seas.matrix$all.periods$Period)
+         # stop(paste0("Please set best.periods <= ", length(seas.matrix$all.periods$Period)))
         }
         M <- seas.matrix$all.periods[1 : best.periods, ]
       }
@@ -206,7 +209,7 @@ NNS.ARMA <- function(variable,
 
     ## Regression on Component Series
     Regression.Estimates = numeric()
-    Coefficients = numeric()
+
 
     if(method == 'nonlin' | method == 'both'){
       for(i in 1 : length(lag)){

@@ -299,7 +299,7 @@ NNS.reg = function (x, y,
             new.point.est = numeric()
             if(is.null(np)){
               new.point.est = sum(point.est * x.star.coef) / sum( abs( x.star.coef) > 0)
-            } else{
+            } else {
               new.point.est = sapply(1 : np, function(i) sum(point.est[i, ] * x.star.coef) / sum( abs( x.star.coef) > 0))
             }
             point.est = new.point.est
@@ -479,7 +479,7 @@ NNS.reg = function (x, y,
     l = length(regression.points[ , x])
     for(i in 1 : l){
       if(i < l){
-      obs = fitted[ x >= regression.points[ , x][i] & x < regression.points[ ,x][i+1], which = TRUE]
+      obs = fitted[ x >= regression.points[ , x][i] & x < regression.points[ , x][i + 1], which = TRUE]
 
       se.denominator = length(obs - 2)
 
@@ -492,7 +492,7 @@ NNS.reg = function (x, y,
       }
 
       if(i == l){
-      obs = fitted[x >= regression.points[ , x][i-1], which = TRUE]
+      obs = fitted[x >= regression.points[ , x][i - 1], which = TRUE]
       se.denominator = length(obs - 2)
       fitted[obs, `:=`
             ( 'standard.errors' = sqrt(sum( ((y.hat - y) ^ 2))/ se.denominator ) )]
@@ -536,7 +536,7 @@ NNS.reg = function (x, y,
       points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
     } else {
 
-    plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue',main = paste(paste0("NNS Order = ", plot.order),sep = "\n"),
+    plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
          xlab = if(!is.null(original.columns)){
                   if(original.columns > 1){
                     paste0("Synthetic X* ", "(Segments = ", (p - 1), ')')
