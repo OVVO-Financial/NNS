@@ -49,7 +49,7 @@
 #'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
 #' \dontrun{
-#' NNS.ARMA(AirPassengers, h = 45, training.set = 100, seasonal.factor = FALSE, best.periods = 2)}
+#' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = FALSE, best.periods = 2)}
 #'
 #' @export
 
@@ -166,9 +166,7 @@ NNS.ARMA <- function(variable,
         M <- seas.matrix$all.periods
       } else {
         if(!seasonal.factor && is.numeric(best.periods) && length(seas.matrix$all.periods$Period) < best.periods){
-          print('here')
           best.periods = length(seas.matrix$all.periods$Period)
-         # stop(paste0("Please set best.periods <= ", length(seas.matrix$all.periods$Period)))
         }
         M <- seas.matrix$all.periods[1 : best.periods, ]
       }
@@ -295,7 +293,7 @@ NNS.ARMA <- function(variable,
       } else {
         plot(1, 1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test",
              ylim = c(0, 2 * abs(sd(FV) / mean(FV))))
-        text(1, abs(sd(FV) / mean(FV)), pos = 3,"NO SEASONALITY DETECTED", col = 'red')
+        text(1, abs(sd(FV) / mean(FV)), pos = 3, "NO SEASONALITY DETECTED", col = 'red')
       }
     }
 
@@ -322,12 +320,12 @@ NNS.ARMA <- function(variable,
         lines((training.set + 1) : (training.set + h), Estimates, type = 'l',lwd = 2, lty = 3, col = 'red')
 
         segments(training.set, FV[training.set], training.set + 1, Estimates[1], lwd = 2, lty = 3, col = 'red')
-        legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h," period(s)")), lty = c(1, 2), col = c('steelblue', 'red'), lwd = 2)
+        legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h, " period(s)")), lty = c(1, 2), col = c('steelblue', 'red'), lwd = 2)
       } else {
         lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
 
         segments(training.set, FV[training.set], training.set + 1, Estimates[1], lwd = 2, lty = 1, col = 'red')
-        legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h," period(s)")),lty = c(1, 1), col = c('steelblue', 'red'), lwd = 2)
+        legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h, " period(s)")),lty = c(1, 1), col = c('steelblue', 'red'), lwd = 2)
       }
 
 
