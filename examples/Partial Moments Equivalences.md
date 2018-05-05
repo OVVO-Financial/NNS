@@ -1,5 +1,5 @@
 ## Partial Moments Equivalences
-Below are some basic equivalences demonstrating partial moments role as the elements of variance.
+Below are some basic equivalences demonstrating partial moments' role as the elements of variance.
 
 ## Installation
 ```r
@@ -7,6 +7,7 @@ require(devtools); install_github('OVVO-Financial/NNS',ref = "NNS-Beta-Version")
 ```
 
 ### Mean
+A difference between the upside area and the downside area.
 ```r
 set.seed(123); x=rnorm(100); y=rnorm(100)
 
@@ -16,6 +17,7 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 [1] 0.09040591
 ```
 ### Variance
+A sum of the upside area and the downside area.
 ```r
 > var(x)
 [1] 0.8332328
@@ -88,6 +90,7 @@ y -0.04372107  0.93506310
 [1] -0.04953215
 ```
 ### Skewness*
+A normalized difference between upside area and downside area.
 ```r
 > skewness(x)
 [1] 0.06049948
@@ -100,6 +103,7 @@ y -0.04372107  0.93506310
 [1] 1.282673
 ```
 ### Kurtosis*
+A normalized sum of upside area and downside area.
 ```r
 > kurtosis(x)
 [1] -0.161053
