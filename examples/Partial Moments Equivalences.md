@@ -91,7 +91,7 @@ y -0.04372107  0.93506310
 ```r
 > skewness(x)
 [1] 0.06049948
-> ((UPM(3,mean(x),x)-LPM(3,mean(x),x))*length(x)/(UPM(2,mean(x),x)+LPM(2,mean(x),x))^(3/2))/length(x)
+> ((UPM(3,mean(x),x)-LPM(3,mean(x),x))/(UPM(2,mean(x),x)+LPM(2,mean(x),x))^(3/2))
 [1] 0.06049948
 ```
 ### UPM/LPM - a more intuitive measure of skewness.  (Upside area / Downside area)
