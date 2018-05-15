@@ -45,7 +45,7 @@ Please see https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples 
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 0.3.8.6},
+    note = {R package version 0.3.8.7},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```
