@@ -67,7 +67,7 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 #' @export
 
 
-Co.UPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
   x = x - target.x
@@ -101,7 +101,7 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 #' Co.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-Co.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
   x = target.x - x
@@ -135,7 +135,7 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 #' D.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-D.LPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
   x = x - target.x
@@ -169,7 +169,7 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 #' D.UPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
-D.UPM <- function(degree.x, degree.y, x, y, target.x, target.y){
+D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
   x = target.x - x

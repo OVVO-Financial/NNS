@@ -115,7 +115,6 @@ NNS.stack <- function(IVs.train,
   }
 
   if(1 %in% method){
-
     nns.cv = sapply(1 : (2 * n), function(i) sum((NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = i, order=order)$Point.est - CV.DV.test) ^ 2))
 
     nns.cv = c(nns.cv, sum((NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = 'all', order = order)$Point.est - CV.DV.test) ^ 2))
@@ -183,6 +182,6 @@ NNS.stack <- function(IVs.train,
               SSE.dim.red = nns.ord.sse,
               reg = nns.1,
               dim.red = nns.2,
-              stack=estimates))
+              stack = estimates))
 
 }
