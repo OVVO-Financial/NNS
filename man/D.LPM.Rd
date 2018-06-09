@@ -5,7 +5,7 @@
 \title{Divergent-Lower Partial Moment
 (Lower Right Quadrant 3)}
 \usage{
-D.LPM(degree.x, degree.y, x, y, target.x, target.y)
+D.LPM(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y))
 }
 \arguments{
 \item{degree.x}{integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.}

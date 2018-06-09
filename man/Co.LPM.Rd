@@ -5,7 +5,7 @@
 \title{Co-Lower Partial Moment
 (Lower Left Quadrant 4)}
 \usage{
-Co.LPM(degree.x, degree.y, x, y, target.x, target.y)
+Co.LPM(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y))
 }
 \arguments{
 \item{degree.x}{integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.}
