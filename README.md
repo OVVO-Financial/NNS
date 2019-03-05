@@ -24,7 +24,7 @@ Companion R-package and datasets to:
 
 *Current [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) CRAN version is  [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NNS)](https://cran.r-project.org/package=NNS)
 
-## Installation
+## Installation (You may have to call `library(data.table)`, `library(rgl)` and `library(stringr)` after installation.)
 [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) requires [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.3.0-6666ff.svg)](https://cran.r-project.org/).  See https://cran.r-project.org/ or [![installr](https://img.shields.io/badge/installr-0.18.0-blue.svg)](https://cran.r-project.org/package=installr) for upgrading to latest R release.
 
 ```r
