@@ -7,7 +7,7 @@ require(devtools); install_github('OVVO-Financial/NNS',ref = "NNS-Beta-Version")
 ```
 
 ### Mean
-A difference between the upside area and the downside area.
+A difference between the upside area and the downside area of f(x).
 ```r
 set.seed(123); x=rnorm(100); y=rnorm(100)
 
@@ -17,7 +17,7 @@ set.seed(123); x=rnorm(100); y=rnorm(100)
 [1] 0.09040591
 ```
 ### Variance
-A sum of the upside area and the downside area.
+A sum of the squared upside area and the squared downside area.
 ```r
 > var(x)
 [1] 0.8332328
