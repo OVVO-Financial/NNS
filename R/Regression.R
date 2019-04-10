@@ -4,6 +4,7 @@
 #'
 #' @param x a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param y a numeric or factor vector with compatible dimsensions to \code{x}.
+#' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
 #' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.
 #' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
@@ -128,7 +129,7 @@
 
 
 NNS.reg = function (x, y,
-                    order = NULL,
+                    factor.2.dummy = TRUE, order = NULL,
                     stn = .99,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
@@ -158,11 +159,39 @@ NNS.reg = function (x, y,
   }
 
 
+  if(factor.2.dummy){
+    factor_2_dummy = function(x){
+      if(class(x) == "factor"){
+        n = length(x)
+        data.fac = data.frame(x=x, y=1:n)
+        output = model.matrix(y~x, data.fac)[,-1]
+      }
+      else{
+        output = x
+      }
+      output
+    }
+
+    x = colwise(factor_2_dummy)(as.data.frame(x))
+    x = do.call(cbind, x)
+    x = as.data.frame(x)
+    if(dim(x)[2]==1){x = as.vector(x[,1])}
+
+      if(!is.null(point.est)){
+        point.est = colwise(factor_2_dummy)(as.data.frame(point.est))
+        point.est = do.call(cbind, point.est)
+        point.est = as.data.frame(point.est)
+        if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+      }
+  }
+
+
   original.names = colnames(x)
   original.columns = ncol(x)
 
   y = as.numeric(y)
   original.y = y
+
 
   if(is.null(names(original.y))){
     y.label = "Y"
@@ -222,7 +251,7 @@ NNS.reg = function (x, y,
           }
         }
 
-        return(NNS.M.reg(x, y, point.est = point.est, plot = plot, residual.plot = plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions))
+        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions))
       } else { # Multivariate dim.red == FALSE
 
         if(is.null(original.names)){
@@ -312,15 +341,11 @@ NNS.reg = function (x, y,
     } #Univariate
   } #Multivariate
 
-
+  dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
 
   if(is.null(original.columns)){
     synthetic.x.equation = NULL
     x.star = NULL
-    dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
-
-  } else {
-    if(dim.red) dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
   }
 
   if(is.null(order)){
@@ -450,8 +475,15 @@ NNS.reg = function (x, y,
     point.est.y = ((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y]
   }
 
+  colnames(estimate) = NULL
 
-  fitted = data.table(x = part.map$dt$x, y = part.map$dt$y, y.hat = estimate, NNS.ID = part.map$dt$quadrant)
+  fitted = data.table(x = part.map$dt$x,
+                      y = part.map$dt$y,
+                      y.hat = estimate,
+                      NNS.ID = part.map$dt$quadrant)
+
+  colnames(fitted) = gsub("y.hat.V1", "y.hat", colnames(fitted))
+
 
   Values = cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
 

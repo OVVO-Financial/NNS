@@ -1,4 +1,4 @@
-NNS.M.reg <- function (X_n, Y, order = NULL, stn = 0.99, n.best = 1, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE){
+NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE){
 
   if(is.null(ncol(X_n))){
     X_n = t(t(X_n))
@@ -72,7 +72,7 @@ NNS.M.reg <- function (X_n, Y, order = NULL, stn = 0.99, n.best = 1, type = NULL
   ###  Regression Point Matrix
   if(is.numeric(order) | is.null(order)){
 
-    reg.points = apply(original.IVs, 2, function(b) NNS.reg(b, original.DV, order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE)$x)
+    reg.points = apply(original.IVs, 2, function(b) NNS.reg(b, original.DV, factor.2.dummy = factor.2.dummy ,order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE)$x)
 
     if(all(sapply(reg.points, length) == length(reg.points[[1]])) == FALSE){
       reg.points.matrix = do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))

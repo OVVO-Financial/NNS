@@ -258,8 +258,8 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
     dlpm.matrix <- matrix(unlist(dlpms), n, n)
     diag(dlpm.matrix) = 0
-    colnames(dlpm.matrix) <- colnames(variable)
-    rownames(dlpm.matrix) <- colnames(variable)
+    colnames(dlpm.matrix) = colnames(variable)
+    rownames(dlpm.matrix) = colnames(variable)
 
 
     dupms <- list()
@@ -389,14 +389,16 @@ UPM.ratio <- function(degree, target, variable){
 
 
 NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE){
-if(is.null(target)){target = sort(variable)}
+
+  if(is.null(target)){target = sort(variable)}
+
 # d/dx approximation
-if(is.null(bins)){bins = length(variable)}
-d.dx = (max(target) + abs(min(target))) / bins
-tgt = seq(min(target), max(target), d.dx)
-PDF = LPM.ratio(degree, tgt+d.dx, variable) - LPM.ratio(degree, tgt-d.dx, variable)
+  if(is.null(bins)){bins = length(variable)}
+  d.dx = (max(target) + abs(min(target))) / bins
+  tgt = seq(min(target), max(target), d.dx)
+  PDF = LPM.ratio(degree, tgt+d.dx, variable) - LPM.ratio(degree, tgt-d.dx, variable)
 
-if(plot){plot(sort(tgt), PDF, col = 'blue', type = 'l', lwd = 3, xlab = "X")}
+  if(plot){plot(sort(tgt), PDF, col = 'blue', type = 'l', lwd = 3, xlab = "X")}
 
-return(data.table(cbind("Intervals" = sort(tgt), PDF)))
+  return(data.table(cbind("Intervals" = sort(tgt), PDF)))
 }
