@@ -4,17 +4,20 @@
 \alias{NNS.reg}
 \title{NNS Regression}
 \usage{
-NNS.reg(x, y, order = NULL, stn = 0.99, dim.red.method = NULL,
-  tau = NULL, type = NULL, point.est = NULL, location = "top",
-  return.values = TRUE, plot = TRUE, plot.regions = FALSE,
-  residual.plot = TRUE, std.errors = FALSE, confidence.interval = NULL,
-  threshold = 0, n.best = NULL, noise.reduction = "mean", norm = NULL,
-  dist = "L2", multivariate.call = FALSE)
+NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.99,
+  dim.red.method = NULL, tau = NULL, type = NULL, point.est = NULL,
+  location = "top", return.values = TRUE, plot = TRUE,
+  plot.regions = FALSE, residual.plot = TRUE, std.errors = FALSE,
+  confidence.interval = NULL, threshold = 0, n.best = NULL,
+  noise.reduction = "mean", norm = NULL, dist = "L2",
+  multivariate.call = FALSE)
 }
 \arguments{
 \item{x}{a vector, matrix or data frame of variables of numeric or factor data types.}
 
 \item{y}{a numeric or factor vector with compatible dimsensions to \code{x}.}
+
+\item{factor.2.dummy}{logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.}
 
 \item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.}
 
