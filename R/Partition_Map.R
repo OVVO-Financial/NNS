@@ -102,7 +102,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
       if(max.obs.req > 0 && length(max.obs.req.rows) < length(old.max.obs.req.rows)) break
 
       #Segments for Voronoi...
-      if(Voronoi == T){
+      if(Voronoi){
         if(l.PART > max.obs.req){
           if(noise.reduction == 'mean' | noise.reduction == 'off'){
             PART[ max.obs.req.rows , {
@@ -185,7 +185,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
     }
 
 
-    if(Voronoi == T){
+    if(Voronoi){
       points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
       title(main = paste0("NNS Order = ", i), cex.main = 2)
     }
@@ -266,7 +266,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
     }
 
 
-    if(Voronoi == T){
+    if(Voronoi){
       abline(v = RP$x, lty = 3)
       points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
       title(main = paste0("NNS Order = ", i), cex.main = 2)
