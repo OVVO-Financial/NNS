@@ -172,23 +172,24 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     n.best = n.best
   }
 
+  n2=(dim(REGRESSION.POINT.MATRIX[])[2]-1)
   ### DISTANCES
   ### Calculate distance from each point in REGRESSION.POINT.MATRIX
   if(!is.null(point.est)){
     distance <- function(dist.est){
 
-      for(j in 1 : n){
+      for(j in 1 : n2){
         set(REGRESSION.POINT.MATRIX, j = j, value = REGRESSION.POINT.MATRIX[[j]] - as.numeric(dist.est)[j])
       }
 
 
       if(dist == "L1"){
-        row.sums = as.numeric(rowSums(abs(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n)])))
+        row.sums = as.numeric(rowSums(abs(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)])))
       } else {
-        row.sums = as.numeric(rowSums(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n)] ^ 2))
+        row.sums = as.numeric(rowSums(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)] ^ 2))
       }
 
-      for(j in 1 : n){
+      for(j in 1 : n2){
         set(REGRESSION.POINT.MATRIX, j = j, value = REGRESSION.POINT.MATRIX[[j]] + as.numeric(dist.est)[j])
       }
 

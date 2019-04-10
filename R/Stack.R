@@ -63,9 +63,8 @@ NNS.stack <- function(IVs.train,
                       seed = 123){
 
 
-
-  IVs.train <- apply(IVs.train, 2, as.numeric)
   DV.train <- as.numeric(DV.train)
+
 
   n <- ncol(IVs.train)
 
@@ -97,6 +96,7 @@ NNS.stack <- function(IVs.train,
 
   IVs.train <- CV.IVs.train
   DV.train <- CV.DV.train
+
 
   ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:
   np = nrow(CV.IVs.test)
