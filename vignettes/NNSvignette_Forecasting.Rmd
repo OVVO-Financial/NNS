@@ -10,10 +10,16 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2, message=FALSE}
 require(NNS)
 require(knitr)
 require(rgl)
+require(data.table)
+require(plyr)
 ```
+
 
 # Forecasting
 The underlying assumptions of traditional autoregressive models are well known.  The resulting complexity with these models leads to observations such as, ``We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.'' [Source](https://research.fb.com/prophet-forecasting-at-scale/)

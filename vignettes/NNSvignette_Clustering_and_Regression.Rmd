@@ -10,10 +10,16 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2, message=FALSE}
 require(NNS)
 require(knitr)
 require(rgl)
+require(data.table)
+require(plyr)
 ```
+
 
 # Clustering and Regression
 Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
@@ -97,7 +103,7 @@ If the user is so motivated, detailed arguments further examples are provided wi
 
 * [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
 
-* [New Nonparametric Curve-Fitting Using Partitioning, Regression and Partial Derivative Estimation](https://ssrn.com/abstract=2852570)
+* [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
 
 * [Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
 

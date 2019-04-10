@@ -1,8 +1,12 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+
+## ----setup2, message=FALSE-----------------------------------------------
 require(NNS)
 require(knitr)
 require(rgl)
+require(data.table)
+require(plyr)
 
 ## ----linear,fig.width=5,fig.height=3,fig.align = "center"----------------
 nns = NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", plot = TRUE, seasonal.factor = 12, seasonal.plot = FALSE)

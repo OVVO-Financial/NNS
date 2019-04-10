@@ -10,9 +10,14 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2,message=FALSE}
 require(NNS)
 require(knitr)
 require(rgl)
+require(data.table)
+require(plyr)
 ```
 
 # Correlation and Dependence

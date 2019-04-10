@@ -1,8 +1,12 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+
+## ----setup2, message=FALSE-----------------------------------------------
 require(NNS)
 require(knitr)
 require(rgl)
+require(data.table)
+require(plyr)
 
 ## ----linear,results='hide'-----------------------------------------------
 x = seq(-5, 5, .05); y = x ^ 3
