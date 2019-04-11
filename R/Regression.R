@@ -88,13 +88,16 @@
 #' NNS.reg(x, y)
 #'
 #' ## Manual {order} selection
-#' NNS.reg(x, y, order = 2)
+#' \dontrun{
+#' NNS.reg(x, y, order = 2)}
 #'
 #' ## Maximum {order} selection
-#' NNS.reg(x, y, order = "max")
+#' \dontrun{
+#' NNS.reg(x, y, order = "max")}
 #'
 #' ## x-only paritioning (Univariate only)
-#' NNS.reg(x, y, type = "XONLY")
+#' \dontrun{
+#' NNS.reg(x, y, type = "XONLY")}
 #'
 #' ## For Multiple Regression:
 #' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
@@ -106,23 +109,26 @@
 #'
 #' ## IRIS dataset examples:
 #' # Dimension Reduction:
-#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)
+#' \dontrun{
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)}
 #'
 #' # Dimension Reduction using causal weights:
-#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)
+#' \dontrun{
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)}
 #'
 #' # Multiple Regression:
-#' NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
+#' \dontrun{
+#' NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")}
 #'
 #' # Classification:
-#' NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est
+#' \dontrun{
+#' NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est}
 #'
 #' ## To call fitted values:
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.reg(x, y)$Fitted
 #'
 #' ## To call partial derivative (univariate regression only):
-#' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.reg(x, y)$derivative
 #'
 #' @export
@@ -219,13 +225,13 @@ NNS.reg = function (x, y,
       point.est.y = NULL
     }
   } else {
-    x = apply(x, 2, as.numeric)
+    x = sapply(x, as.numeric)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){
         point.est = as.numeric(point.est)
         point.est.y = numeric()
         } else {
-          point.est = apply(point.est, 2, as.numeric)
+          point.est = sapply(point.est, as.numeric)
           point.est.y = numeric()
         }
     } else {

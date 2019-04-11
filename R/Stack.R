@@ -78,11 +78,6 @@ NNS.stack <- function(IVs.train,
     }
   }
 
-  #IV test provided...
- # if(!is.null(IVs.test)){
- #   IVs.test <- data.matrix(IVs.test)
- # }
-
   #No IV test provided...
 
   set.seed(seed * l)
