@@ -408,8 +408,29 @@ NNS.reg = function (x, y,
   min.range = min(regression.points$x)
   max.range = max(regression.points$x)
 
-  Dynamic.average.min = mean(y[x <= min.range])
-  Dynamic.average.max = mean(y[x >= max.range])
+#  if(noise.reduction=="mean"){
+#    Dynamic.average.min = mean(y[x <= min.range])
+#    Dynamic.average.max = mean(y[x >= max.range])
+#  }
+
+#  if(noise.reduction=="median"){
+#    Dynamic.average.min = mean(y[x <= min.range])
+#    Dynamic.average.max = mean(y[x >= max.range])
+#  }
+
+  mode = function(x){
+    if(length(x) > 1){
+      d <- density(x)
+      d$x[which.max(d$y)]
+    } else {
+      x
+    }
+  }
+
+ # if(noise.reduction=="mode"){
+    Dynamic.average.min = mode(y[x <= min.range])
+    Dynamic.average.max = mode(y[x >= max.range])
+ # }
 
   ###Endpoints
   if(length(x[x < min.range]) > 0){
