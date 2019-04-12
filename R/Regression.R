@@ -248,8 +248,8 @@ NNS.reg = function (x, y,
   }
 
   if(!is.null(type) && type == "CLASS" && is.null(n.best)){
-   n.best = 1
-   }
+    n.best = 1
+  }
 
 
   if(!is.null(ncol(original.variable))){
@@ -383,16 +383,16 @@ NNS.reg = function (x, y,
       }
     } # type
   } else {
+    noise.reduction2 = ifelse(noise.reduction%in%c("median","mode"),noise.reduction,"median")
     if(is.null(type)){
-      part.map = NNS.part(x, y, noise.reduction = 'median', order = dep.reduced.order, type = "XONLY")
+      part.map = NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY")
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = 'median', order = min( nchar(part.map$dt$quadrant)), max.obs.req = 1)
+        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), max.obs.req = 1)
       }
     } else {
-      if(is.null(noise.reduction)){noise.reduction = "median"}
-      part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order)
+      part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = dep.reduced.order)
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), max.obs.req = 1)
+        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min(nchar(part.map$dt$quadrant)), max.obs.req = 1)
       }
     } # type
   } # Dependence < stn
