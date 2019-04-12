@@ -70,10 +70,12 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x[!is.na(x)]
+  y = y[!is.na(y)]
   x = x - target.x
   y = y - target.y
-  x[x < 0] = 0
-  y[y < 0] = 0
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -104,10 +106,12 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x[!is.na(x)]
+  y = y[!is.na(y)]
   x = target.x - x
   y = target.y - y
-  x[x < 0] = 0
-  y[y < 0] = 0
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -138,10 +142,12 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x[!is.na(x)]
+  y = y[!is.na(y)]
   x = x - target.x
   y = target.y - y
-  x[x < 0] = 0
-  y[y < 0] = 0
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -172,10 +178,12 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
   if(degree.x == 0){x[x == target.x] = target.x - 1}
   if(degree.y == 0){y[y == target.y] = target.y - 1}
+  x = x[!is.na(x)]
+  y = y[!is.na(y)]
   x = target.x - x
   y = y - target.y
-  x[x < 0] = 0
-  y[y < 0] = 0
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
