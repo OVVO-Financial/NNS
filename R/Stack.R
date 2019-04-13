@@ -133,7 +133,9 @@ NNS.stack <- function(IVs.train,
   if(2 %in% method){
     var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE)$equation$Coefficient, digits = 2))
 
-    var.cutoffs = var.cutoffs[var.cutoffs <= 1]
+    var.cutoffs = var.cutoffs - .01
+
+    var.cutoffs = var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
 
     var.cutoffs = rev(sort(unique(var.cutoffs)))
 
