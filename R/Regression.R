@@ -182,21 +182,26 @@ NNS.reg = function (x, y,
     }
 
 
-
     x = colwise(factor_2_dummy)(as.data.frame(x))
     x = do.call(cbind, x)
     x = as.data.frame(x)
     if(dim(x)[2]==1){x = as.vector(x[,1])}
 
       if(!is.null(point.est)){
+
         point.est = colwise(factor_2_dummy)(as.data.frame(point.est))
         point.est = do.call(cbind, point.est)
         point.est = as.data.frame(point.est)
+
         if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+
+
         ### Add 0's to data for missing regressors
         Missing = setdiff(names(x),names(point.est))
-        point.est[Missing] <- 0
-        point.est = point.est[names(x)]
+          if(!is.null(Missing)){
+            point.est[Missing] <- 0
+            point.est = point.est[names(x)]
+          }
       }
   }
 
