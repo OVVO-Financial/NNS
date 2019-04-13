@@ -89,8 +89,6 @@ NNS.stack <- function(IVs.train,
   CV.DV.train <- DV.train[c(-test.set)]
   CV.DV.test <- DV.train[c(test.set)]
 
-  IVs.train <- CV.IVs.train
-  DV.train <- CV.DV.train
 
 
   ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:
