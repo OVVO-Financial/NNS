@@ -100,7 +100,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
       max.obs.req.rows = PART[counts >= max.obs.req, which = TRUE]
       old.max.obs.req.rows = PART[old.counts >= max.obs.req, which = TRUE]
       # Stop if diminishing returns
-      if(max.obs.req > 0 && length(max.obs.req.rows) < (1-(1/exp(1)))*length(old.max.obs.req.rows)) break
+      if(max.obs.req > 0 && length(max.obs.req.rows) < length(old.max.obs.req.rows)) break
 
       #Segments for Voronoi...
       if(Voronoi){
@@ -216,7 +216,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
       max.obs.req.rows = PART[counts >= 2 * max.obs.req, which = TRUE]
       old.max.obs.req.rows = PART[old.counts >= 2 * max.obs.req, which = TRUE]
       # Stop if diminishing returns
-      if(max.obs.req > 0 & length(max.obs.req.rows) < (1-(1/exp(1)))*length(old.max.obs.req.rows)) break
+      if(max.obs.req > 0 & length(max.obs.req.rows) < length(old.max.obs.req.rows)) break
 
       if(noise.reduction == 'mean' | noise.reduction == 'off'){
         RP = PART[max.obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
