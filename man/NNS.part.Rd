@@ -5,7 +5,7 @@
 \title{NNS Partition Map}
 \usage{
 NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
-  max.obs.req = 4, min.obs.stop = FALSE, noise.reduction = "mean")
+  max.obs.req = 8, min.obs.stop = FALSE, noise.reduction = "mean")
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -18,7 +18,7 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
 
 \item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.}
 
-\item{max.obs.req}{integer; (4 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs.req = 1)}.}
+\item{max.obs.req}{integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(max.obs.req = 1)}.}
 
 \item{min.obs.stop}{logical; \code{FALSE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{max.obs.req}.}
 

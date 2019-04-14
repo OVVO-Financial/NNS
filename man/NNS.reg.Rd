@@ -4,7 +4,7 @@
 \alias{NNS.reg}
 \title{NNS Regression}
 \usage{
-NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.99,
+NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.98,
   dim.red.method = NULL, tau = NULL, type = NULL, point.est = NULL,
   location = "top", return.values = TRUE, plot = TRUE,
   plot.regions = FALSE, residual.plot = TRUE, std.errors = FALSE,
@@ -21,7 +21,7 @@ NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.99,
 
 \item{order}{integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.}
 
-\item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{("order")} and endpoint determination.}
+\item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.98 to ensure high dependence for higher \code{("order")} and endpoint determination.}
 
 \item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
@@ -119,42 +119,52 @@ x <- rnorm(100) ; y <- rnorm(100)
 NNS.reg(x, y)
 
 ## Manual {order} selection
-NNS.reg(x, y, order = 2)
+\dontrun{
+NNS.reg(x, y, order = 2)}
 
 ## Maximum {order} selection
-NNS.reg(x, y, order = "max")
+\dontrun{
+NNS.reg(x, y, order = "max")}
 
 ## x-only paritioning (Univariate only)
-NNS.reg(x, y, type = "XONLY")
+\dontrun{
+NNS.reg(x, y, type = "XONLY")}
 
 ## For Multiple Regression:
+\dontrun{
 x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
-NNS.reg(x, y, point.est = c(.25, .5, .75))
+NNS.reg(x, y, point.est = c(.25, .5, .75))}
 
 ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
+\dontrun{
 x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y<-rnorm(100)
-NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
+NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")}
 
 ## IRIS dataset examples:
 # Dimension Reduction:
-NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)
+\dontrun{
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)}
 
 # Dimension Reduction using causal weights:
-NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)
+\dontrun{
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)}
 
 # Multiple Regression:
-NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
+\dontrun{
+NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")}
 
 # Classification:
-NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est
+\dontrun{
+NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est}
 
 ## To call fitted values:
+\dontrun{
 x <- rnorm(100) ; y <- rnorm(100)
-NNS.reg(x, y)$Fitted
+NNS.reg(x, y)$Fitted}
 
 ## To call partial derivative (univariate regression only):
-x <- rnorm(100) ; y <- rnorm(100)
-NNS.reg(x, y)$derivative
+\dontrun{
+NNS.reg(x, y)$derivative}
 
 }
 \references{
