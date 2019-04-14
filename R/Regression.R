@@ -100,12 +100,14 @@
 #' NNS.reg(x, y, type = "XONLY")}
 #'
 #' ## For Multiple Regression:
+#' \dontrun{
 #' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
-#' NNS.reg(x, y, point.est = c(.25, .5, .75))
+#' NNS.reg(x, y, point.est = c(.25, .5, .75))}
 #'
 #' ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
+#' \dontrun{
 #' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y<-rnorm(100)
-#' NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
+#' NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")}
 #'
 #' ## IRIS dataset examples:
 #' # Dimension Reduction:
@@ -125,18 +127,20 @@
 #' NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est}
 #'
 #' ## To call fitted values:
+#' \dontrun{
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS.reg(x, y)$Fitted
+#' NNS.reg(x, y)$Fitted}
 #'
 #' ## To call partial derivative (univariate regression only):
-#' NNS.reg(x, y)$derivative
+#' \dontrun{
+#' NNS.reg(x, y)$derivative}
 #'
 #' @export
 
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .99,
+                    stn = .98,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
