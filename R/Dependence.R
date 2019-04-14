@@ -43,7 +43,7 @@ NNS.dep = function(x,
       max.obs = NULL
       }
 
-  if(length(unique(x)==2)){order = 1}
+  if(length(unique(x))==2){order = 1}
 
   if(!missing(y)){
 
