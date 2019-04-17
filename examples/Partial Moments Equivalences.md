@@ -154,7 +154,8 @@ https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Th
 
 
 
-Why is this relevant?  The additional information generated from partial moments permits a level of analysis simply not possible with traditional summary statistics.
+### Why is this relevant?  
+The additional information generated from partial moments permits a level of analysis simply not possible with traditional summary statistics.
 There is further introductory material on partial moments and their extension into nonlinear analysis & behavioral finance applications available at:
 
 https://www.linkedin.com/pulse/elements-variance-fred-viole
