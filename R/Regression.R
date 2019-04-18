@@ -154,6 +154,7 @@ NNS.reg = function (x, y,
                     norm = NULL,
                     dist = "L2", multivariate.call = FALSE){
 
+
   if(plot.regions && !is.null(order) && order == 'max'){
     stop('Please reduce the "order" or set "plot.regions = FALSE".')
   }
@@ -175,9 +176,8 @@ NNS.reg = function (x, y,
   if(factor.2.dummy){
     factor_2_dummy = function(x){
       if(class(x) == "factor"){
-        n = length(x)
-        data.fac = data.frame(x=x, y=1:n)
-        output = model.matrix(y~x, data.fac)[,-1]
+        n=length(unique(x))
+        output = model.matrix(~x -1, x)[,-(n+1)]
       }
       else{
         output = x
@@ -189,7 +189,8 @@ NNS.reg = function (x, y,
     x = colwise(factor_2_dummy)(as.data.frame(x))
     x = do.call(cbind, x)
     x = as.data.frame(x)
-    if(dim(x)[2]==1){x = as.vector(x[,1])}
+      if(dim(x)[2]==1) {x = as.vector(x[,1])}
+
 
       if(!is.null(point.est)){
 

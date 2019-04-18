@@ -89,6 +89,11 @@ NNS.stack <- function(IVs.train,
   CV.DV.train <- DV.train[c(-test.set)]
   CV.DV.test <- DV.train[c(test.set)]
 
+  training <- cbind(IVs.train[c(-test.set),],DV.train[c(-test.set)])
+  training <- training[complete.cases(training),]
+
+  CV.IVs.train <- training[,-(ncol(training))]
+  CV.DV.train <- training[,ncol(training)]
 
 
   ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:
@@ -170,7 +175,6 @@ NNS.stack <- function(IVs.train,
   if(weight == "SSE"){
     weights = c(max(1e-10, 1 / min(na.omit(nns.cv))), max(1e-10, 1 / min(na.omit(nns.ord))))
   }
-
 
 
   weights = pmax(weights, c(0, 0))

@@ -43,7 +43,7 @@ NNS.dep = function(x,
       max.obs = NULL
       }
 
-  if(length(unique(x))==2){order = 1}
+  if(length(unique(x))<=2){order = 1}
 
   if(!missing(y)){
 
@@ -66,49 +66,7 @@ NNS.dep = function(x,
                     ), by = prior.quadrant]
 
 ### Re-run with order=1 if categorical data...
-    if(part.df[ , sum(sub.clpm, sub.cupm, sub.dlpm, sub.dupm)] == 0){
-
-      mode = function(x) {
-        if(length(x) > 1){
-          d <- density(x)
-          d$x[which.max(d$y)]
-        } else {
-          x
-        }
-      }
-
-      if(print.map == TRUE){
-        part.map = NNS.part(x, y, order = 1, Voronoi = TRUE, noise.reduction = 'mode')
-      } else {
-        part.map = NNS.part(x, y, order = 1, noise.reduction = 'mode')
-      }
-
-      part.df = part.map$dt
-
-      part.df[ , `:=` (mean.x = mode(x), mean.y = mode(y)), by = prior.quadrant]
-
-      part.df[ , `:=` (sub.clpm = Co.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                      sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                      sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                      sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                      counts = .N
-                      ), by = prior.quadrant]
-
-      part.df[ , c("x", "y", "quadrant", "mean.x", "mean.y") := NULL]
-
-      setkey(part.df,prior.quadrant)
-      part.df = unique(part.df[])
-
-      part.df[ , `:=` (nns.cor = (sub.clpm + sub.cupm - sub.dlpm - sub.dupm) / (sub.clpm + sub.cupm + sub.dlpm + sub.dupm),
-                       nns.dep = abs(sub.clpm + sub.cupm - sub.dlpm - sub.dupm) / (sub.clpm + sub.cupm + sub.dlpm + sub.dupm))]
-
-      part.df = part.df[counts == 1, counts := 0]
-      part.df = part.df[(sub.clpm == 0 & sub.cupm == 0 & sub.dlpm == 0 & sub.dupm == 0), counts := 0]
-      zeros = length(x) - part.df[ , sum(counts)]
-
-      part.df = part.df[ , `:=` (weight = counts / (length(x) - zeros)), by = prior.quadrant]
-
-  } else {#Categorical re-run
+     {#Categorical re-run
 
       part.df[ ,c("x", "y", "quadrant", "mean.x", "mean.y") := NULL]
 
