@@ -29,19 +29,33 @@ NNS.dep = function(x,
                    degree = NULL,
                    print.map = FALSE){
 
+  if(!missing(y)){
+    if(length(x) < 20){
+        order = 1
+        max.obs = 1
+      } else {
+        order = order
+        max.obs = NULL
+      }
+    if(is.null(degree)){degree = ifelse(length(x) < 100, 0, 1)
+    } else {
+      degree = degree
+    }
 
-  if(is.null(degree)){degree = ifelse(length(x) < 100, 0, 1)
   } else {
-    degree = degree
+    if(length(x[,1]) < 20){
+        order = 1
+        max.obs = 1
+    } else {
+        order = order
+        max.obs = NULL
+    }
+    if(is.null(degree)){degree = ifelse(length(x[,1]) < 100, 0, 1)
+    } else {
+      degree = degree
+    }
   }
 
-  if(length(x) < 20){
-    order = 1
-    max.obs = 1
-    }else{
-      order = order
-      max.obs = NULL
-      }
 
   if(length(unique(x))<=2){order = 1}
 

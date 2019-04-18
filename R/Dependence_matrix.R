@@ -5,6 +5,7 @@ NNS.dep.matrix = function(x, order = NULL, degree= NULL){
     stop("supply both 'x' and 'y' or a matrix-like 'x'")
   }
 
+
 raw.rhos = list()
 raw.deps = list()
 
