@@ -4,12 +4,15 @@
 \alias{NNS.caus}
 \title{NNS Causation}
 \usage{
-NNS.caus(x, y, tau, time.series = FALSE, plot = FALSE)
+NNS.caus(x, y, factor.2.dummy = TRUE, tau, time.series = FALSE,
+  plot = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
+
+\item{factor.2.dummy}{logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.}
 
 \item{tau}{options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.}
 

@@ -54,9 +54,10 @@ B = cbind(x_1, x_2)
 dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
 
 ## Known function analysis: [y = a ^ 2 * b ^ 2]
+\dontrun{
 x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
 B = expand.grid(x_1, x_2) ; y <- B[ , 1] ^ 2 * B[ , 2] ^ 2
-dy.d_(B, y, wrt = 1, eval.points = c(.5, .5), order = "max")
+dy.d_(B, y, wrt = 1, eval.points = c(.5, .5), order = "max")}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
