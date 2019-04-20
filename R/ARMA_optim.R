@@ -65,7 +65,6 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
         predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values)
 
         nns.estimates.indiv[k] = obj.fn
-
         nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
       }
 
