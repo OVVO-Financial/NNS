@@ -60,7 +60,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
       seasonal.combs[[i]] = combn(seasonal.factor, i)
 
-      if(i > 1){
+      if(i > 2){
         best.path = unlist(best.path[[i-1]])
         seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(best.path%in%z))==length(best.path)]
       }
