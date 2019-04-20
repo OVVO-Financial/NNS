@@ -8,7 +8,7 @@
 #' @param method options: ("comb", "seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
-#' @param obj.fn expression; \code{sum((predicted - actual)^2)} (default) Sum of squared errors is the default objective function.  Any expression using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 #'
@@ -35,7 +35,7 @@
 #'
 #' @export
 
-NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq", negative.values = FALSE, obj.fn = sum((predicted - actual)^2)){
+NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq", negative.values = FALSE, obj.fn = expression(sum((predicted - actual)^2))){
 
   if(!is.null(training.set)){
     seasonal.factor = seasonal.factor[seasonal.factor<training.set/exp(1)]
@@ -64,7 +64,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
         # Find the min SSE for a given seasonals sequence
         predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values)
 
-        nns.estimates.indiv[k] = obj.fn
+        nns.estimates.indiv[k] = eval(obj.fn)
         nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
       }
 
@@ -75,7 +75,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
     } else {
       predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values)
 
-      nns.estimates.indiv[k] = obj.fn
+      nns.estimates.indiv[k] = eval(obj.fn)
       nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
     }
 
@@ -95,7 +95,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
     for(j in c("lin", "both", "nonlin")){
       predictions = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values)
 
-      methods.SSE[j] = obj.fn
+      methods.SSE[j] = eval(obj.fn)
       methods.SSE[is.na(methods.SSE)] = Inf
       if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
@@ -110,7 +110,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
     for(j in c("lin", "both", "nonlin")){predictions = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values)
 
-      methods.SSE[j] = obj.fn
+      methods.SSE[j] = eval(obj.fn)
       methods.SSE[is.na(methods.SSE)] = Inf
       if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
