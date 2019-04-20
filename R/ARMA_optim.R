@@ -36,9 +36,10 @@
 
 NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq", negative.values = FALSE){
 
-  if(!is.null(training.set)) {limit = training.set / exp(1)} else {limit = length(variable) / exp(1)}
-  if(max(seasonal.factor) >= limit){
-    stop(paste0("Please set maximum [seasonal.factor] to less than ", floor(limit)))
+  if(!is.null(training.set)){
+    seasonal.factor = seasonal.factor[seasonal.factor<training.set/exp(1)]
+  } else {
+    seasonal.factor = seasonal.factor[seasonal.factor<length(variable)/exp(1)]
   }
 
   variable = as.numeric(variable)
