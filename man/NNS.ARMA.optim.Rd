@@ -5,7 +5,7 @@
 \title{NNS ARMA Optimizer}
 \usage{
 NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
-  negative.values = FALSE, obj.fn = sum((predicted - actual)^2))
+  negative.values = FALSE, obj.fn = expression(sum((predicted - actual)^2)))
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -19,7 +19,7 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
 \code{(negative.values = TRUE)}.}
 
-\item{obj.fn}{expression; \code{sum((predicted - actual)^2)} (default) Sum of squared errors is the default objective function.  Any expression using the specific terms \code{predicted} and \code{actual} can be used.}
+\item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 }
 \value{
 Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
