@@ -50,6 +50,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
   nns.estimates = list()
   seasonal.combs = list()
+  best.path = list()
 
   for(i in 1 : length(seasonal.factor)){
     nns.estimates.indiv = numeric()
@@ -58,6 +59,11 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
     if(method == 'comb'){
 
       seasonal.combs[[i]] = combn(seasonal.factor, i)
+
+      if(i > 1){
+        best.path = unlist(best.path[[i-1]])
+        seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(best.path%in%z))==length(best.path)]
+      }
 
       for(k in 1 : ncol(seasonal.combs[[i]])){
 
@@ -70,12 +76,15 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
       nns.estimates[[i]] = nns.estimates.indiv
       nns.estimates.indiv = numeric()
+      best.path[[i]] = seasonal.combs[[i]][which.min(nns.estimates[[i]])]
+
+
       if(i > 1 && (min(nns.estimates[[i]]) > min(nns.estimates[[i-1]]))) break
 
     } else {
       predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values)
 
-      nns.estimates.indiv[k] = eval(obj.fn)
+      nns.estimates.indiv = eval(obj.fn)
       nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
     }
 
@@ -97,7 +106,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
       methods.SSE[j] = eval(obj.fn)
       methods.SSE[is.na(methods.SSE)] = Inf
-      if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
+  #    if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
 
     nns.SSE = min(methods.SSE)
@@ -112,7 +121,7 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
       methods.SSE[j] = eval(obj.fn)
       methods.SSE[is.na(methods.SSE)] = Inf
-      if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
+  #    if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
 
     nns.SSE = min(methods.SSE)
