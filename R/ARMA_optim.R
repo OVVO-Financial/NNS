@@ -23,7 +23,7 @@
 #'
 #' ## Nonlinear NNS.ARMA period optimization using 5 yearly lags on AirPassengers monthly data
 #' \dontrun{
-#' nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 60, 12))
+#' nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 36, 12))
 #'}
 #'
 #' ## Then use optimal parameters in NNS.ARMA
@@ -36,7 +36,7 @@
 
 NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq", negative.values = FALSE){
 
-  limit = length(variable) / 2
+  if(!is.null(training.set)) {limit = training.set / exp(1)} else {limit = length(variable) / exp(1)}
   if(max(seasonal.factor) >= limit){
     stop(paste0("Please set maximum [seasonal.factor] to less than ", floor(limit)))
   }
@@ -61,15 +61,16 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
         # Find the min SSE for a given seasonals sequence
         nns.estimates.indiv[k] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-        nns.estimates.indiv[is.na(nns.estimates.indiv)] = 0
+        nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
       }
 
       nns.estimates[[i]] = nns.estimates.indiv
       nns.estimates.indiv = numeric()
+      if(i > 1 && (min(nns.estimates[[i]]) > min(nns.estimates[[i-1]]))) break
 
     } else {
       nns.estimates.indiv[i] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-      nns.estimates.indiv[is.na(nns.estimates.indiv)] = 0
+      nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
     }
 
 
@@ -87,7 +88,8 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
     for(j in c("lin", "both", "nonlin")){
       methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-      methods.SSE[is.na(methods.SSE)] = 0
+      methods.SSE[is.na(methods.SSE)] = Inf
+      if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
 
     nns.SSE = min(methods.SSE)
@@ -100,7 +102,8 @@ NNS.ARMA.optim=function(variable, training.set, seasonal.factor, method = "seq",
 
     for(j in c("lin", "both", "nonlin")){
       methods.SSE[j] = sum((NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values) - test.set) ^ 2)
-      methods.SSE[is.na(methods.SSE)] = 0
+      methods.SSE[is.na(methods.SSE)] = Inf
+      if(j==2 && (methods.SSE[2] > methods.SSE[1])) break
     }
 
     nns.SSE = min(methods.SSE)
