@@ -5,7 +5,7 @@
 \title{NNS ARMA Optimizer}
 \usage{
 NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
-  negative.values = FALSE)
+  negative.values = FALSE, obj.fn = sum((predicted - actual)^2))
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -18,9 +18,11 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
 \code{(negative.values = TRUE)}.}
+
+\item{obj.fn}{expression; \code{sum((predicted - actual)^2)} (default) Sum of squared errors is the default objective function.  Any expression using the specific terms \code{predicted} and \code{actual} can be used.}
 }
 \value{
-Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum SSE value \code{$SSE}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
+Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 }
 \description{
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
