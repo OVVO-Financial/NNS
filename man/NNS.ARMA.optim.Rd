@@ -39,9 +39,9 @@ The number of combinations will grow prohibitively large, they should be kept to
 }
 \examples{
 
-## Nonlinear NNS.ARMA period optimization using 5 yearly lags on AirPassengers monthly data
+## Nonlinear NNS.ARMA period optimization using 2 yearly lags on AirPassengers monthly data
 \dontrun{
-nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 36, 12))
+nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 24, 6))
 }
 
 ## Then use optimal parameters in NNS.ARMA
