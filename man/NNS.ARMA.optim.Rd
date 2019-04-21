@@ -4,8 +4,9 @@
 \alias{NNS.ARMA.optim}
 \title{NNS ARMA Optimizer}
 \usage{
-NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
-  negative.values = FALSE, obj.fn = expression(sum((predicted - actual)^2)))
+NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "comb",
+  negative.values = FALSE, obj.fn = expression(sum((predicted - actual)^2)),
+  depth = 1, print.trace = TRUE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -14,12 +15,16 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor, method = "seq",
 
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
-\item{method}{options: ("comb", "seq"); \code{"comb"} Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"} (default) tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
+\item{method}{options: ("comb", "seq"); \code{"comb"} (default) Tries all combinations of \code{"seasonal.factor"} provided, while \code{"seq"}  tests each by adding element to previous iteration of \code{"seasonal.factor"}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
 \code{(negative.values = TRUE)}.}
 
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+
+\item{depth}{integer; 1 (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.}
+
+\item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 }
 \value{
 Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
