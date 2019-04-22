@@ -9,7 +9,7 @@
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
-#' @param depth integer; 1 (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
+#' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
@@ -58,97 +58,125 @@ NNS.ARMA.optim=function(variable, training.set,
 
   nns.estimates = list()
   seasonal.combs = list()
-  best.path = list()
-  seasonal.methods = list()
-  estimate.methods = list()
+
+  overall.seasonals = list()
+  overall.estimates = list()
+
+  previous.estimates = list()
+  previous.seasonals = list()
 
 for(j in c('lin','nonlin','both')){
+    current.seasonals = list()
+    current.estimate = numeric()
 
-  for(i in 1 : length(seasonal.factor)){
-    nns.estimates.indiv = numeric()
+    for(i in 1 : length(seasonal.factor)){
+        nns.estimates.indiv = numeric()
 
-    # Combinations of seasonal factors
-    if(method == 'comb'){
+        # Combinations of seasonal factors
+        if(method == 'comb'){
 
-      seasonal.combs[[i]] = combn(seasonal.factor, i)
+            seasonal.combs[[i]] = combn(seasonal.factor, i)
 
-      if(i > depth){
-        best.path[[i]] = unlist(best.path[[i-1]])
-        seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(best.path[[i]]%in%z))==length(best.path[[i]])]
-      }
+            if(i > depth){
+                if(i == 1){
+                    current.seasonals[[i]] = unlist(seasonal.combs[[1]])
+                } else {
+                    current.seasonals[[i]] = unlist(current.seasonals[[i-1]])
+                }
 
-      if(is.null(ncol(seasonal.combs[[i]]))){ break }
+                seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(current.seasonals[[i]]%in%z))==length(current.seasonals[[i]])]
+            }
 
-      for(k in 1 : ncol(seasonal.combs[[i]])){
+            if(is.null(ncol(seasonal.combs[[i]]))){ break }
 
-          # Find the min SSE for a given seasonals sequence
-          predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
+            for(k in 1 : ncol(seasonal.combs[[i]])){
+                # Find the min SSE for a given seasonals sequence
+                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
 
-          nns.estimates.indiv[k] = eval(obj.fn)
-          nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
-      } # for k in ncol(seasonal.combs)
-
-
-      nns.estimates[[i]] = nns.estimates.indiv
-      nns.estimates.indiv = numeric()
-
-      best.path[[i]] = seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
-      nns.estimates[[i]] = min(nns.estimates[[i]])
-
-      if(print.trace){
-        print(paste("CURRENT ", j, " PATH MEMBER = ", paste("c(", paste(unlist(best.path[[i]]), collapse = ", ")),")"))
-        print(paste0("CURRENT ", j, " PREDICTION = ", nns.estimates[[i]]))
-      }
+                nns.estimates.indiv[k] = eval(obj.fn)
+                nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+            } # for k in ncol(seasonal.combs)
 
 
-      if(i > 1 && (nns.estimates[[i]] > nns.estimates[[i-1]])) break
+            nns.estimates[[i]] = nns.estimates.indiv
+            nns.estimates.indiv = numeric()
 
-    } else {
-        predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values)
+            current.seasonals[[i]] = seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
+            current.estimate[i] = min(nns.estimates[[i]])
 
-        nns.estimates.indiv = eval(obj.fn)
-        nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+            if(i > 1 && current.estimate[i] > current.estimate[i-1]){
+                current.seasonals = current.seasonals[-length(current.estimate)]
+                current.estimate = current.estimate[-length(current.estimate)]
+                break
+            }
+
+            if(print.trace){
+                if(i == 1){
+                  print(j)
+                  print("COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:")
+                }
+                print(paste("CURRENT method = ", paste0("'",j,"'"), ", seasonal.factors = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),")"))
+                print(paste0("CURRENT ", j, " OBJECTIVE FUNCTION = ", current.estimate[i]))
+            }
+
+        } else {
+            predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.factor[1 : i], method = 'lin', plot = FALSE, negative.values = negative.values)
+
+            nns.estimates.indiv = eval(obj.fn)
+            nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+        }
+
+
+### BREAKING PROCEDURE FOR IDENTICAL PERIODS ACROSS METHODS
+        if(which(c("lin",'nonlin','both')==j) > 1 ){
+            if(sum(current.seasonals[[i]]%in%previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])==length(current.seasonals[[i]]) && current.estimate[i] > previous.estimates[i]){ break }
+        }
+
+
+    } # for i in 1:length(seasonal factor)
+
+    previous.seasonals[[which(c("lin",'nonlin','both')==j)]] = current.seasonals
+    previous.estimates[[which(c("lin",'nonlin','both')==j)]] = current.estimate
+
+    overall.seasonals[[which(c("lin",'nonlin','both')==j)]] = current.seasonals[length(current.estimate)]
+    overall.estimates[[which(c("lin",'nonlin','both')==j)]] = current.estimate[length(current.estimate)]
+
+    if(print.trace){
+        if(i > 1){
+            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factors = ", paste("c(", paste(unlist(current.seasonals[[i-1]]), collapse = ", ")),")"))
+            print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[i-1]))
+        } else {
+            print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals[[1]]), collapse = ", ")),")"))
+            print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[1]))
+        }
     }
 
 
-  } # for i in 1:length(seasonal factor)
 
-
-  # Need 3 estimates with their seasonal.combs...
-  seasonal.methods[[which(c("lin",'nonlin','both')==j)]] = best.path[[i-1]]
-  estimate.methods[[which(c("lin",'nonlin','both')==j)]] = nns.estimates[[i-1]]
-
-  if(print.trace){
-    print(paste0("BEST ", j, " PATH MEMBER = ", paste("c(", paste(unlist(best.path[[i-1]]), collapse = ", ")),")"))
-    print(paste0("BEST ", j, " PREDICTION = ", nns.estimates[[i-1]]))
-  }
 } # for j in c('lin','nonlin','both')
 
 
+    if(method == 'comb'){
+        nns.periods = unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
+        nns.method = c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
+        nns.SSE = min(unlist(overall.estimates))
+    } else {
+        methods.SSE = numeric()
+        min.estimate = which.min(nns.estimates.indiv)
+        nns.periods = seasonal.factor[1 : min.estimate]
+        benchmark.SSE = nns.estimates.indiv[min.estimate]
 
-  if(method == 'comb'){
-    nns.periods = seasonal.methods[[which.min(unlist(estimate.methods))]]
-    nns.method = c("lin","nonlin","both")[which.min(unlist(estimate.methods))]
-    nns.SSE = min(unlist(estimate.methods))
-  } else {
-    methods.SSE = numeric()
-    min.estimate = which.min(nns.estimates.indiv)
-    nns.periods = seasonal.factor[1 : min.estimate]
-    benchmark.SSE = nns.estimates.indiv[min.estimate]
+        for(j in c("lin", "both", "nonlin")){
+            predictions = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values)
+            methods.SSE[j] = eval(obj.fn)
+            methods.SSE[is.na(methods.SSE)] = Inf
+        }
 
-    for(j in c("lin", "both", "nonlin")){predictions = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = j, plot = FALSE, negative.values = negative.values)
-
-      methods.SSE[j] = eval(obj.fn)
-      methods.SSE[is.na(methods.SSE)] = Inf
-
+        nns.SSE = min(methods.SSE)
+        nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
     }
 
-    nns.SSE = min(methods.SSE)
-    nns.method = c("lin", "both", "nonlin")[which.min(methods.SSE)]
-
-  }
-
-  return(list(periods = nns.periods,
-              obj.fn = nns.SSE,
-              method = nns.method))
+return(list(periods = nns.periods,
+            obj.fn = nns.SSE,
+            method = nns.method))
 }
