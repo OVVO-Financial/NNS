@@ -71,6 +71,7 @@ NNS.ARMA.optim=function(variable, training.set,
 for(j in c('lin','nonlin','both')){
     current.seasonals = list()
     current.estimate = numeric()
+    seasonal.combs = list()
 
     for(i in 1 : length(seasonal.factor)){
         nns.estimates.indiv = numeric()
@@ -83,9 +84,9 @@ for(j in c('lin','nonlin','both')){
 
             if(i > depth){
                 if(i == 1){
-                    current.seasonals[[i]] = unlist(seasonal.combs[[1]])
+                    current.seasonals[[i]] = as.numeric(unlist(seasonal.combs[[1]]))
                 } else {
-                    current.seasonals[[i]] = unlist(current.seasonals[[i-1]])
+                    current.seasonals[[i]] = as.numeric(unlist(current.seasonals[[i-1]]))
                 }
 
                 seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(current.seasonals[[i]]%in%z))==length(current.seasonals[[i]])]
@@ -94,7 +95,7 @@ for(j in c('lin','nonlin','both')){
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
 
             for(k in 1 : ncol(seasonal.combs[[i]])){
-                # Find the min SSE for a given seasonals sequence
+                # Find the min (obj.fn) for a given seasonals sequence
                 predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
 
                 nns.estimates.indiv[k] = eval(obj.fn)
@@ -131,11 +132,15 @@ for(j in c('lin','nonlin','both')){
         }
 
 
+
 ### BREAKING PROCEDURE FOR IDENTICAL PERIODS ACROSS METHODS
         if(which(c("lin",'nonlin','both')==j) > 1 ){
-            if(sum(current.seasonals[[i]]%in%previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])==length(current.seasonals[[i]]) && current.estimate[i] > previous.estimates[i]){ break }
+            if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
+                if(current.estimate[i] > previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]){
+                    break
+                }
+            }
         }
-
 
     } # for i in 1:length(seasonal factor)
 
