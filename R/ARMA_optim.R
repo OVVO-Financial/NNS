@@ -45,11 +45,14 @@ NNS.ARMA.optim=function(variable, training.set,
                         depth = 1,
                         print.trace = TRUE){
 
-  if(!is.null(training.set)){
-    seasonal.factor = seasonal.factor[seasonal.factor<training.set/exp(1) & seasonal.factor>0]
+    training.set = floor(training.set)
+
+    if(!is.null(training.set)){
+        seasonal.factor = seasonal.factor[seasonal.factor<training.set/3 & seasonal.factor>0]
   } else {
-    seasonal.factor = seasonal.factor[seasonal.factor<length(variable)/exp(1) & seasonal.factor>0]
+        seasonal.factor = seasonal.factor[seasonal.factor<length(variable)/3 & seasonal.factor>0]
   }
+
 
   variable = as.numeric(variable)
 
@@ -74,6 +77,7 @@ for(j in c('lin','nonlin','both')){
 
         # Combinations of seasonal factors
         if(method == 'comb'){
+
 
             seasonal.combs[[i]] = combn(seasonal.factor, i)
 
@@ -115,7 +119,7 @@ for(j in c('lin','nonlin','both')){
                   print(j)
                   print("COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:")
                 }
-                print(paste("CURRENT method = ", paste0("'",j,"'"), ", seasonal.factors = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),")"))
+                print(paste("CURRENT method = ", paste0("'",j,"'"), ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),")"))
                 print(paste0("CURRENT ", j, " OBJECTIVE FUNCTION = ", current.estimate[i]))
             }
 
@@ -143,7 +147,7 @@ for(j in c('lin','nonlin','both')){
 
     if(print.trace){
         if(i > 1){
-            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factors = ", paste("c(", paste(unlist(current.seasonals[[i-1]]), collapse = ", ")),")"))
+            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i-1]]), collapse = ", ")),")"))
             print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[i-1]))
         } else {
             print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals[[1]]), collapse = ", ")),")"))

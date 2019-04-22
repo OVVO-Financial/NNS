@@ -56,6 +56,11 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
   x = as.numeric(x)
   y = as.numeric(y)
 
+  if(length(x)<8){
+    order=1
+    max.obs.req=0
+  }
+
   PART = data.table(x, y, quadrant = "q", prior.quadrant = "pq")[ , counts := .N, by = "quadrant"][ , old.counts := .N, by = "prior.quadrant"]
 
   mode = function(x){
