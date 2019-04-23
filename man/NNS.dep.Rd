@@ -4,7 +4,8 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(x, y = NULL, order = NULL, degree = NULL, print.map = FALSE)
+NNS.dep(x, y = NULL, order = NULL, degree = NULL,
+  print.map = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}

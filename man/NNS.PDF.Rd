@@ -4,7 +4,8 @@
 \alias{NNS.PDF}
 \title{NNS PDF}
 \usage{
-NNS.PDF(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE)
+NNS.PDF(variable, degree = 1, target = NULL, bins = NULL,
+  plot = TRUE)
 }
 \arguments{
 \item{variable}{a numeric vector.}

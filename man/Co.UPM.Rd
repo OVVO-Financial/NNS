@@ -5,7 +5,8 @@
 \title{Co-Upper Partial Moment
 (Upper Right Quadrant 1)}
 \usage{
-Co.UPM(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y))
+Co.UPM(degree.x, degree.y, x, y, target.x = mean(x),
+  target.y = mean(y))
 }
 \arguments{
 \item{degree.x}{integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.}

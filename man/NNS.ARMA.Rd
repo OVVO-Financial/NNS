@@ -4,9 +4,10 @@
 \alias{NNS.ARMA}
 \title{NNS ARMA}
 \usage{
-NNS.ARMA(variable, h = 1, training.set = NULL, seasonal.factor = TRUE,
-  best.periods = 2, negative.values = FALSE, method = "nonlin",
-  dynamic = FALSE, plot = TRUE, seasonal.plot = TRUE, intervals = FALSE)
+NNS.ARMA(variable, h = 1, training.set = NULL,
+  seasonal.factor = TRUE, best.periods = 2, negative.values = FALSE,
+  method = "nonlin", dynamic = FALSE, plot = TRUE,
+  seasonal.plot = TRUE, intervals = FALSE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
