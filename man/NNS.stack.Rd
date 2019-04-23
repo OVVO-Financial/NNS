@@ -5,8 +5,9 @@
 \title{NNS stack}
 \usage{
 NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
-  weight = "SSE", order = NULL, norm = NULL, method = c(1, 2),
-  dim.red.method = "cor", seed = 123)
+  obj.fn = expression(sum((predicted - actual)^2)), order = NULL,
+  norm = NULL, method = c(1, 2), dim.red.method = "cor",
+  seed = 123)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -17,7 +18,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
-\item{weight}{options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.}
+\item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.}
 
@@ -28,13 +29,16 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 \item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{seed}{numeric; 123 (default) Sets seed for CV sampling.}
+
+\item{weight}{options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
 \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+\item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
-\item{\code{"SSE.dim.red"}} returns the SSE for the \link{NNS.reg} dimension reduction regression.
+\item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
 \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
 \item{\code{"stack"}} returns the output of the stacked model.
@@ -66,6 +70,10 @@ reduce the \code{CV.size}.
  ## Selecting NNS.reg and dimension reduction techniques.
  \dontrun{
  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2))}
+
+ ## Using classification accuracy in the [obj.fn].
+ \dontrun{
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ) )}
 }
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analysis"
