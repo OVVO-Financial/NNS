@@ -7,6 +7,7 @@
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param weight options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.
+#' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
@@ -15,8 +16,9 @@
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+#' \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
-#' \item{\code{"SSE.dim.red"}} returns the SSE for the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
 #' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
 #' \item{\code{"stack"}} returns the output of the stacked model.
@@ -49,13 +51,17 @@
 #'  ## Selecting NNS.reg and dimension reduction techniques.
 #'  \dontrun{
 #'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2))}
+#'
+#'  ## Using classification accuracy in the [obj.fn].
+#'  \dontrun{
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ) )}
 #' @export
 
 NNS.stack <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
                       CV.size = NULL,
-                      weight = "SSE",
+                      obj.fn = expression( sum((predicted - actual)^2) ),
                       order = NULL,
                       norm = NULL,
                       method = c(1, 2),
@@ -113,30 +119,42 @@ NNS.stack <- function(IVs.train,
   }
 
   if(1 %in% method){
-    nns.cv = sapply(1 : (2 * n), function(i) sum((NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = i, order=order)$Point.est - CV.DV.test) ^ 2))
+    actual = CV.DV.test
+    nns.cv.1 = numeric()
 
-    nns.cv = c(nns.cv, sum((NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = 'all', order = order)$Point.est - CV.DV.test) ^ 2))
+      for(i in 1:(2*n)){
+          predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = i, order=order)$Point.est
 
-    k = which.min(na.omit(nns.cv))
-    if(k == length(nns.cv)){
+          nns.cv.1[i] = eval(obj.fn)
+      }
+
+      predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = 'all', order = order)$Point.est
+
+      nns.cv.1[i+1] = eval(obj.fn)
+
+    k = which.min(na.omit(nns.cv.1))
+    if(k == length(nns.cv.1)){
       k = 'all'
     }
 
-    nns.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = k)$Point.est
-    nns.cv.sse = min(nns.cv)
+    nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = k)$Point.est
+    nns.cv.1 = min(nns.cv.1)
+    nns.cv = nns.cv.1
 
   } else {
-    k = 'N/A'
-    nns.1 = 0
-    nns.cv = 1e-10
-    nns.cv.sse = 'N/A'
+    k = NA
+    nns.method.1 = NA
+    nns.cv = Inf
+    nns.cv.1 = NA
   }
 
   # Dimension Reduction Regression Output
   if(2 %in% method){
+    actual = CV.DV.test
+
     var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE)$equation$Coefficient, digits = 2))
 
-    var.cutoffs = var.cutoffs - .01
+    var.cutoffs = var.cutoffs - .005
 
     var.cutoffs = var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
 
@@ -146,50 +164,50 @@ NNS.stack <- function(IVs.train,
     nns.ord[1] = Inf
 
     for(i in 2:length(var.cutoffs)){
-      nns.ord[i] = sum((NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i])$Point.est - CV.DV.test) ^ 2)
+        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i])$Point.est
+
+        nns.ord[i] = eval(obj.fn)
 
       if(nns.ord[i] > nns.ord[i-1]) break
     }
 
-    nns.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, threshold = var.cutoffs[which.min(nns.ord)])$Point.est
+    nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, threshold = var.cutoffs[which.min(nns.ord)])$Point.est
 
-    nns.ord.sse = min(na.omit(nns.ord))
+    nns.ord.2 = min(na.omit(nns.ord))
+    nns.ord.threshold = var.cutoffs[which.min(nns.ord)]
   } else {
-    nns.2 = 0
-    nns.ord = 1e-10
-    nns.ord.sse = NA
+    nns.method.2 = NA
+    nns.ord = Inf
+    nns.ord.2 = NA
     var.cutoffs = NA
+    nns.ord.threshold = NA
   }
 
 
 
   ### Weights for combining NNS techniques
-  if(weight == "Features"){
-    weights = c(n, n - 1)
-  }
-
   nns.cv[nns.cv == 0] <- 1e-10
   nns.ord[nns.ord == 0] <- 1e-10
 
-
-  if(weight == "SSE"){
-    weights = c(max(1e-10, 1 / min(na.omit(nns.cv))), max(1e-10, 1 / min(na.omit(nns.ord))))
-  }
-
+  weights = c(max(1e-10, 1 / min(na.omit(nns.cv))), max(1e-10, 1 / min(na.omit(nns.ord))))
 
   weights = pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0
   weights = weights / sum(weights)
 
+  if(identical(sort(method),c(1,2))){estimates = (weights[1] * nns.method.1 + weights[2] * nns.method.2)} else {
+      if(method==1){estimates = (nns.method.1)} else {
+          if(method==2) {estimates = (nns.method.2)}
+          }
+      }
 
-  estimates = (weights[1] * nns.1 + weights[2] * nns.2)
 
   return(list(NNS.reg.n.best = k,
-              sse.reg = nns.cv.sse,
-              NNS.dim.red.threshold = var.cutoffs[which.min(nns.ord)],
-              SSE.dim.red = nns.ord.sse,
-              reg = nns.1,
-              dim.red = nns.2,
+              OBJfn.reg = nns.cv.1,
+              NNS.dim.red.threshold = nns.ord.threshold,
+              OBJfn.dim.red = nns.ord.2,
+              reg = nns.method.1,
+              dim.red = nns.method.2,
               stack = estimates))
 
 }
