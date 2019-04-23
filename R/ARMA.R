@@ -180,10 +180,7 @@ NNS.ARMA <- function(variable,
   Estimate.band = list()
 
 
-    ## Generate vectors for 1:lag
-    GV = generate.vectors(lag)
-    Component.index = GV$Component.index
-    Component.series = GV$Component.series
+
 
 
   # Regression for each estimate in h
@@ -206,7 +203,10 @@ NNS.ARMA <- function(variable,
       Weights = ASW$Weights
     }
 
-
+    ## Generate vectors for 1:lag
+    GV = generate.vectors(lag)
+    Component.index = GV$Component.index
+    Component.series = GV$Component.series
 
     ## Regression on Component Series
     Regression.Estimates = numeric()
