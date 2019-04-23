@@ -179,10 +179,6 @@ NNS.ARMA <- function(variable,
 
   Estimate.band = list()
 
-
-
-
-
   # Regression for each estimate in h
   for (j in 1 : h){
     ## Regenerate seasonal.factor if dynamic

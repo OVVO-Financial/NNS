@@ -28,10 +28,9 @@
 #' nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 24, 6))
 #'}
 #'
-#' ## Then use optimal parameters in NNS.ARMA
+#' ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
 #' \dontrun{
-#' NNS.ARMA(AirPassengers, training.set=132, seasonal.factor = nns.optims$periods,
-#' method = nns.optims$method)
+#' NNS.ARMA(AirPassengers, h=12, training.set=132, seasonal.factor = nns.optims$periods, method = nns.optims$method)
 #' }
 #'
 #' @export
