@@ -6,7 +6,8 @@
 \usage{
 NNS.ARMA.optim(variable, training.set, seasonal.factor,
   negative.values = FALSE, obj.fn = expression(sum((predicted -
-  actual)^2)), objective = "min", depth = 1, print.trace = TRUE)
+  actual)^2)), objective = "min", linear.approximation = TRUE,
+  depth = 1, print.trace = TRUE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -21,6 +22,8 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor,
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+
+\item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
 
 \item{depth}{integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.}
 
@@ -41,7 +44,7 @@ The number of combinations will grow prohibitively large, they should be kept to
 
 ## Nonlinear NNS.ARMA period optimization using 2 yearly lags on AirPassengers monthly data
 \dontrun{
-nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 24, 6))
+nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120, seasonal.factor = seq(12, 24, 6))
 }
 
 ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
