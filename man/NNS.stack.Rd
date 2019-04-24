@@ -5,9 +5,9 @@
 \title{NNS stack}
 \usage{
 NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
-  obj.fn = expression(sum((predicted - actual)^2)), order = NULL,
-  norm = NULL, method = c(1, 2), dim.red.method = "cor",
-  seed = 123)
+  obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
+  order = NULL, norm = NULL, method = c(1, 2),
+  dim.red.method = "cor", seed = 123)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -19,6 +19,8 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, CV.size = NULL,
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+
+\item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.}
 
@@ -73,7 +75,7 @@ reduce the \code{CV.size}.
 
  ## Using classification accuracy in the [obj.fn].
  \dontrun{
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ) )}
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ), objective = 'max' )}
 }
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analysis"
