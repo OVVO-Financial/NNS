@@ -9,6 +9,7 @@
 #' \code{(negative.values = TRUE)}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #'
@@ -26,7 +27,7 @@
 #'
 #' ## Nonlinear NNS.ARMA period optimization using 2 yearly lags on AirPassengers monthly data
 #' \dontrun{
-#' nns.optims <- NNS.ARMA.optim(AirPassengers, training.set = 132, seasonal.factor = seq(12, 24, 6))
+#' nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120, seasonal.factor = seq(12, 24, 6))
 #'}
 #'
 #' ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
@@ -41,6 +42,7 @@ NNS.ARMA.optim=function(variable, training.set,
                         negative.values = FALSE,
                         obj.fn = expression(sum((predicted - actual)^2)),
                         objective = "min",
+                        linear.approximation = TRUE,
                         depth = 1,
                         print.trace = TRUE){
 
@@ -77,17 +79,27 @@ for(j in c('lin','nonlin','both')){
 
             seasonal.combs[[i]] = combn(seasonal.factor, i)
 
-            if(i > depth){
+
                 if(i == 1){
-                    current.seasonals[[i]] = as.numeric(unlist(seasonal.combs[[1]]))
+                    if(linear.approximation  && j!="lin"){
+                        seasonal.combs[[1]] = matrix(unlist(overall.seasonals[[1]]),ncol=1)
+                        current.seasonals[[1]] = unlist(overall.seasonals[[1]])
+                    } else {current.seasonals[[i]] = as.numeric(unlist(seasonal.combs[[1]]))}
                 } else {
-                    current.seasonals[[i]] = as.numeric(unlist(current.seasonals[[i-1]]))
+                    if(linear.approximation  && j!="lin"){
+                        next
+                    } else {
+                        current.seasonals[[i]] = as.numeric(unlist(current.seasonals[[i-1]])) }
                 }
 
+            if(i > depth){
                 seasonal.combs[[i]] = seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(current.seasonals[[i]]%in%z))==length(current.seasonals[[i]])]
             }
 
+
+
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
+            if(dim(seasonal.combs[[i]])[2]==0){ break }
 
             for(k in 1 : ncol(seasonal.combs[[i]])){
                 # Find the min (obj.fn) for a given seasonals sequence
@@ -116,7 +128,7 @@ for(j in c('lin','nonlin','both')){
             } else {
                 current.seasonals[[i]] = seasonal.combs[[i]][,which.max(nns.estimates[[i]])]
                 current.estimate[i] = max(nns.estimates[[i]])
-                if(i > 1 && current.estimate[i] < current.estimate[i-1]){
+                if(i > 1 && current.estimate[i] <= current.estimate[i-1]){
                   current.seasonals = current.seasonals[-length(current.estimate)]
                   current.estimate = current.estimate[-length(current.estimate)]
                   break
@@ -139,9 +151,9 @@ for(j in c('lin','nonlin','both')){
             if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
 
               if(objective=='min'){
-                if(current.estimate[i] > previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
+                if(current.estimate[i] >= previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
                 } else{
-                  if(current.estimate[i] < previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i])  break
+                  if(current.estimate[i] <= previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i])  break
                 }
             }
         }
@@ -156,10 +168,11 @@ for(j in c('lin','nonlin','both')){
 
     if(print.trace){
         if(i > 1){
-            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i-1]]), collapse = ", ")),")"))
-            print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[i-1]))
-        } else {
-            print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals[[1]]), collapse = ", ")),")"))
+            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[length(current.estimate)]), collapse = ", ")),")"))
+            print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[length(current.estimate)]))
+        }
+      else {
+            print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals), collapse = ", ")),")"))
             print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[1]))
         }
     }
