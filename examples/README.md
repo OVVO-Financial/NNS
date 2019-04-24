@@ -8,4 +8,4 @@ http://amzn.com/1490523995
 
 <a href="http://amzn.com/1490523995" rel="NNS Book"> ![NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20Cover.jpg)
 
-# Thank you for your interest in NNS!
+# Thank you for your interest in NNS! 
