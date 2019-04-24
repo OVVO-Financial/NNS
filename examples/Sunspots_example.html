@@ -1662,8 +1662,8 @@ $(document).ready(function () {
 <h2>NNS.ARMA</h2>
 <p><code>NNS</code> in its forecasting routine <code>NNS.ARMA</code> also maintains the dependencies between the time series and lagged values of itself, and then uses these dependencies in a regression (either linear or nonlinear).<br />
 See here for a thorough description: <a href="https://www.researchgate.net/publication/327495856_Forecasting" class="uri">https://www.researchgate.net/publication/327495856_Forecasting</a></p>
-<div id="install-the-latest-version-of-nns" class="section level3">
-<h3>Install the Latest Version of <code>NNS</code></h3>
+<div id="install-the-latest-version-of-nns-3.9.1" class="section level3">
+<h3>Install the Latest Version of <code>NNS (&gt;= 3.9.1)</code></h3>
 <pre class="r"><code>library(devtools); install_github(&#39;OVVO-Financial/NNS&#39;, ref = &quot;NNS-Beta-Version&quot;)
 library(NNS)
 library(foreach)
@@ -1780,7 +1780,7 @@ b=NNS.ARMA.optim(variable = training,
 ## $method
 ## [1] &quot;both&quot;</code></pre>
 <pre class="r"><code>Sys.time() - start.time</code></pre>
-<pre><code>## Time difference of 1.298712 mins</code></pre>
+<pre><code>## Time difference of 1.327452 mins</code></pre>
 </div>
 <div id="step-4-implement-the-optimal-parameters" class="section level1">
 <h1>Step 4: Implement the Optimal Parameters</h1>
@@ -1849,7 +1849,7 @@ NNS.RMSE &lt;- foreach(i = 1:11,.packages=&quot;NNS&quot; ) %dopar% {
 
 stopCluster(cl)
 print(Sys.time()-start.time)</code></pre>
-<pre><code>## Time difference of 6.949478 mins</code></pre>
+<pre><code>## Time difference of 7.038885 mins</code></pre>
 </div>
 <div id="results-comments" class="section level1">
 <h1>Results &amp; Comments</h1>
