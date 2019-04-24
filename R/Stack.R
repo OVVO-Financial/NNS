@@ -8,6 +8,7 @@
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param weight options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
@@ -54,7 +55,7 @@
 #'
 #'  ## Using classification accuracy in the [obj.fn].
 #'  \dontrun{
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ) )}
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ), objective = 'max' )}
 #' @export
 
 NNS.stack <- function(IVs.train,
@@ -62,6 +63,7 @@ NNS.stack <- function(IVs.train,
                       IVs.test = NULL,
                       CV.size = NULL,
                       obj.fn = expression( sum((predicted - actual)^2) ),
+                      objective = 'min',
                       order = NULL,
                       norm = NULL,
                       method = c(1, 2),
@@ -132,13 +134,20 @@ NNS.stack <- function(IVs.train,
 
       nns.cv.1[i+1] = eval(obj.fn)
 
-    k = which.min(na.omit(nns.cv.1))
+    if(objective=='min'){
+        k = which.min(na.omit(nns.cv.1))
+        nns.cv.1 = min(nns.cv.1)
+    } else {
+        k = which.max(na.omit(nns.cv.1))
+        nns.cv.1 = max(nns.cv.1)
+    }
+
     if(k == length(nns.cv.1)){
-      k = 'all'
+        k = 'all'
     }
 
     nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = k)$Point.est
-    nns.cv.1 = min(nns.cv.1)
+
     nns.cv = nns.cv.1
 
   } else {
@@ -167,14 +176,21 @@ NNS.stack <- function(IVs.train,
         predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i])$Point.est
 
         nns.ord[i] = eval(obj.fn)
-
-      if(nns.ord[i] > nns.ord[i-1]) break
+      if(objective=='min'){
+          best.threshold = var.cutoffs[which.min(nns.ord)]
+          if(nns.ord[i] > nns.ord[i-1]) break
+      } else {
+          best.threshold = var.cutoffs[which.max(nns.ord)]
+          if(nns.ord[i] < nns.ord[i-1]) break
+      }
     }
 
-    nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, threshold = var.cutoffs[which.min(nns.ord)])$Point.est
+
+
+    nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, threshold = best.threshold)$Point.est
 
     nns.ord.2 = min(na.omit(nns.ord))
-    nns.ord.threshold = var.cutoffs[which.min(nns.ord)]
+    nns.ord.threshold = best.threshold
   } else {
     nns.method.2 = NA
     nns.ord = Inf

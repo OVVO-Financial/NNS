@@ -8,6 +8,7 @@
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #'
@@ -39,6 +40,7 @@ NNS.ARMA.optim=function(variable, training.set,
                         seasonal.factor,
                         negative.values = FALSE,
                         obj.fn = expression(sum((predicted - actual)^2)),
+                        objective = "min",
                         depth = 1,
                         print.trace = TRUE){
 
@@ -92,21 +94,35 @@ for(j in c('lin','nonlin','both')){
                 predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
 
                 nns.estimates.indiv[k] = eval(obj.fn)
-                nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+                if(objective=='min'){
+                    nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+                } else {
+                    nns.estimates.indiv[is.na(nns.estimates.indiv)] = -Inf
+                }
             } # for k in ncol(seasonal.combs)
 
 
             nns.estimates[[i]] = nns.estimates.indiv
             nns.estimates.indiv = numeric()
 
-            current.seasonals[[i]] = seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
-            current.estimate[i] = min(nns.estimates[[i]])
-
-            if(i > 1 && current.estimate[i] > current.estimate[i-1]){
-                current.seasonals = current.seasonals[-length(current.estimate)]
-                current.estimate = current.estimate[-length(current.estimate)]
-                break
+            if(objective=='min'){
+                current.seasonals[[i]] = seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
+                current.estimate[i] = min(nns.estimates[[i]])
+                if(i > 1 && current.estimate[i] > current.estimate[i-1]){
+                  current.seasonals = current.seasonals[-length(current.estimate)]
+                  current.estimate = current.estimate[-length(current.estimate)]
+                  break
+                }
+            } else {
+                current.seasonals[[i]] = seasonal.combs[[i]][,which.max(nns.estimates[[i]])]
+                current.estimate[i] = max(nns.estimates[[i]])
+                if(i > 1 && current.estimate[i] < current.estimate[i-1]){
+                  current.seasonals = current.seasonals[-length(current.estimate)]
+                  current.estimate = current.estimate[-length(current.estimate)]
+                  break
+                }
             }
+
 
             if(print.trace){
                 if(i == 1){
@@ -118,13 +134,14 @@ for(j in c('lin','nonlin','both')){
             }
 
 
-
-
 ### BREAKING PROCEDURE FOR IDENTICAL PERIODS ACROSS METHODS
         if(which(c("lin",'nonlin','both')==j) > 1 ){
             if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
-                if(current.estimate[i] > previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]){
-                    break
+
+              if(objective=='min'){
+                if(current.estimate[i] > previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
+                } else{
+                  if(current.estimate[i] < previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i])  break
                 }
             }
         }
@@ -151,11 +168,15 @@ for(j in c('lin','nonlin','both')){
 
 } # for j in c('lin','nonlin','both')
 
-
-        nns.periods = unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
-        nns.method = c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
-        nns.SSE = min(unlist(overall.estimates))
-
+        if(objective=='min'){
+            nns.periods = unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
+            nns.method = c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
+            nns.SSE = min(unlist(overall.estimates))
+        } else {
+            nns.periods = unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
+            nns.method = c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
+            nns.SSE = max(unlist(overall.estimates))
+        }
 
 return(list(periods = nns.periods,
             obj.fn = nns.SSE,
