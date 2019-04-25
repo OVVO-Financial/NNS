@@ -296,9 +296,13 @@ NNS.reg = function (x, y,
           y = as.numeric(y)
 
           x.star.matrix = matrix(nrow = length(y))
-          x.star.dep = NNS.dep(cbind(x, y))
-          x.star.cor = cor(cbind(x, y))
 
+          if(dim.red.method!="cor"){
+              x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
+              x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+          } else {
+              x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+          }
 
           if(dim.red.method == "NNS.cor"){
             x.star.coef = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
@@ -340,7 +344,6 @@ NNS.reg = function (x, y,
             x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
           }
 
-          x.star.dep = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
 
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
@@ -378,6 +381,7 @@ NNS.reg = function (x, y,
   } #Multivariate
 
   dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
+  dependence[is.na(dependence)] = 0
 
   if(is.null(original.columns)){
     synthetic.x.equation = NULL
@@ -389,6 +393,7 @@ NNS.reg = function (x, y,
   } else {
     dep.reduced.order = order
   }
+
 
   if(dependence > stn ){
     if(is.null(type)){

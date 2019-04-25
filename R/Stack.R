@@ -92,7 +92,6 @@ NNS.stack <- function(IVs.train,
   test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
   CV.IVs.train <- IVs.train[c(-test.set), ]
-
   CV.IVs.test <- IVs.train[c(test.set), ]
   CV.DV.train <- DV.train[c(-test.set)]
   CV.DV.test <- DV.train[c(test.set)]
@@ -128,6 +127,10 @@ NNS.stack <- function(IVs.train,
           predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = i, order=order)$Point.est
 
           nns.cv.1[i] = eval(obj.fn)
+          if(i > 1){
+            if(objective=='min' && nns.cv.1[i]>nns.cv.1[i-1]){ break }
+            if(objective=='max' && nns.cv.1[i]<nns.cv.1[i-1]){ break }
+          }
       }
 
       predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = 'all', order = order)$Point.est
