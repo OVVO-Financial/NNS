@@ -215,7 +215,6 @@ NNS.reg = function (x, y,
   }
 
 
-
   original.names = colnames(x)
   original.columns = ncol(x)
 
@@ -303,10 +302,12 @@ NNS.reg = function (x, y,
 
           if(dim.red.method == "NNS.cor"){
             x.star.coef = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef[is.na(x.star.coef)] = 0
           }
 
           if(dim.red.method == "cor"){
             x.star.coef = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef[is.na(x.star.coef)] = 0
           }
 
           if(dim.red.method == "NNS.caus"){
@@ -316,6 +317,7 @@ NNS.reg = function (x, y,
             x.star.coef = numeric()
             for(i in 1:ncol(x)){
               cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+              cause[is.na(cause)] = 0
               x.star.coef[i] = cause[1] - cause[2]
             }
           }
@@ -327,10 +329,14 @@ NNS.reg = function (x, y,
             x.star.coef.1 = numeric()
             for(i in 1 : ncol(x)){
               cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+              cause[is.na(cause)] = 0
               x.star.coef.1[i] = cause[1] - cause[2]
             }
             x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.3[is.na(x.star.coef.3)] = 0
             x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.2[is.na(x.star.coef.2)] = 0
+            x.star.coef[is.na(x.star.coef)] = 0
             x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
           }
 
@@ -425,7 +431,7 @@ NNS.reg = function (x, y,
 
 
   mode = function(x){
-    if(length(x) > 1){
+    if(length(na.omit(x)) > 1){
       d <- density(na.omit(x))
       d$x[which.max(d$y)]
     } else {

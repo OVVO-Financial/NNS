@@ -64,8 +64,8 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
   PART = data.table(x, y, quadrant = "q", prior.quadrant = "pq")[ , counts := .N, by = "quadrant"][ , old.counts := .N, by = "prior.quadrant"]
 
   mode = function(x){
-    if(length(x) > 1){
-      d <- density(x)
+    if(length(na.omit(x)) > 1){
+      d <- density(na.omit(x))
       d$x[which.max(d$y)]
     } else {
       x

@@ -159,6 +159,7 @@ NNS.stack <- function(IVs.train,
 
   # Dimension Reduction Regression Output
   if(2 %in% method){
+
     actual = CV.DV.test
 
     var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE)$equation$Coefficient, digits = 2))
@@ -173,6 +174,7 @@ NNS.stack <- function(IVs.train,
     nns.ord[1] = Inf
 
     for(i in 2:length(var.cutoffs)){
+
         predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i])$Point.est
 
         nns.ord[i] = eval(obj.fn)
