@@ -397,7 +397,7 @@ NNS.reg = function (x, y,
       }
     } # type
   } else {
-    noise.reduction2 = ifelse(noise.reduction%in%c("median","mode"),noise.reduction,"median")
+    noise.reduction2 = ifelse(noise.reduction=="mean","median",noise.reduction)
     if(is.null(type)){
       part.map = NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY")
       if(length(part.map$regression.points$x) == 0){
