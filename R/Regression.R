@@ -173,6 +173,8 @@ NNS.reg = function (x, y,
     type = "CLASS"
   }
 
+
+
   if(factor.2.dummy){
     factor_2_dummy = function(x){
       if(class(x) == "factor"){
@@ -194,16 +196,18 @@ NNS.reg = function (x, y,
 
       if(!is.null(point.est)){
 
-        point.est = colwise(factor_2_dummy)(as.data.frame(point.est))
-        point.est = do.call(cbind, point.est)
-        point.est = as.data.frame(point.est)
+          if(is.null(dim(point.est))){ point.est = t(point.est)}
 
-        if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+          point.est = colwise(factor_2_dummy)(as.data.frame(point.est))
+          point.est = do.call(cbind, point.est)
+          point.est = as.data.frame(point.est)
+
+          if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
 
 
         ### Add 0's to data for missing regressors
         Missing = setdiff(names(x),names(point.est))
-          if(!is.null(Missing)){
+          if(!is.null(Missing) && dim(x)[2]!= dim(point.est)[2]){
             point.est[Missing] <- 0
             point.est = point.est[names(x)]
           }
@@ -235,13 +239,13 @@ NNS.reg = function (x, y,
       point.est.y = NULL
     }
   } else {
-    x = sapply(x, as.numeric)
+    x = apply(x,2 ,as.numeric)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){
         point.est = as.numeric(point.est)
         point.est.y = numeric()
         } else {
-          point.est = sapply(point.est, as.numeric)
+          point.est = apply(point.est,2,as.numeric)
           point.est.y = numeric()
         }
     } else {
@@ -422,15 +426,15 @@ NNS.reg = function (x, y,
 
   mode = function(x){
     if(length(x) > 1){
-      d <- density(x)
+      d <- density(na.omit(x))
       d$x[which.max(d$y)]
     } else {
       x
     }
   }
 
-    Dynamic.average.min = mean(median(y[x <= min.range]), mode(y[x <= min.range]))
-    Dynamic.average.max = mean(median(y[x >= max.range]), mode(y[x >= max.range]))
+    Dynamic.average.min = mean(median(na.omit(y[x <= min.range])), mode(na.omit(y[x <= min.range])))
+    Dynamic.average.max = mean(median(na.omit(y[x >= max.range])), mode(na.omit(y[x >= max.range])))
 
   ###Endpoints
   if(length(x[x < min.range]) > 0){
@@ -604,6 +608,8 @@ NNS.reg = function (x, y,
       points(na.omit(fitted[ , .(x,y.hat + qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
       points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
     } else {
+
+
 
     plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
          xlab = if(!is.null(original.columns)){
