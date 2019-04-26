@@ -307,9 +307,15 @@ NNS.reg = function (x, y,
 
           if(dim.red.method!="cor"){
               x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
-              x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+              oldw <- getOption("warn")
+              options(warn = -1)
+                x.star.cor = cor(cbind(x, y))
+              options(warn = oldw); x.star.cor[is.na(x.star.cor)] = 0
           } else {
-              x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+              oldw <- getOption("warn")
+              options(warn = -1)
+                x.star.cor = cor(cbind(x, y))
+              options(warn = oldw); x.star.cor[is.na(x.star.cor)] = 0
           }
 
           if(dim.red.method == "NNS.dep"){

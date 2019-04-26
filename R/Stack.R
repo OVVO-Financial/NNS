@@ -5,10 +5,10 @@
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
-#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
-#' @param weight options: ("SSE", "Features") method for selecting model output weight; Set \code{(weight = "SSE")} for optimum parameters and weighting based on each base model's sum of squared errors.  \code{(weight = "Feautures")} uses a weighting based on the number of features present, whereby logistic \link{NNS.reg} receives higher relative weights for more regressors.  Defaults to \code{"SSE"}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
+#' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
 #' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
@@ -61,9 +61,10 @@
 NNS.stack <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
-                      CV.size = NULL,
                       obj.fn = expression( sum((predicted - actual)^2) ),
                       objective = 'min',
+                      CV.size = NULL,
+                      folds = 5,
                       order = NULL,
                       norm = NULL,
                       method = c(1, 2),
@@ -91,7 +92,7 @@ best.k = list()
 best.nns.cv = list()
 best.nns.ord = list()
 
-for(b in 1 : 5){
+for(b in 1 : folds){
   if(b==1){
       set.seed(seed * l)
       test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
@@ -157,7 +158,7 @@ for(b in 1 : 5){
     best.k[[b]] = k
     best.nns.cv[[b]] = nns.cv.1
 
-    if(b==5){
+    if(b==folds){
         best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
         best.k = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
 
@@ -213,7 +214,7 @@ for(b in 1 : 5){
 
     test.set.2 = test.set[rev(order(abs(predicted - actual)))]
 
-    if(b==5){
+    if(b==folds){
       nns.ord.threshold = as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
       best.nns.ord = mean(na.omit(unlist(best.nns.ord)))
 
