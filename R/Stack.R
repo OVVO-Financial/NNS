@@ -86,10 +86,17 @@ NNS.stack <- function(IVs.train,
     }
   }
 
-  #No IV test provided...
+THRESHOLDS = list()
+best.k = list()
+best.nns.cv = list()
+best.nns.ord = list()
 
-  set.seed(seed * l)
-  test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
+for(b in 1 : 5){
+  if(b==1){
+      set.seed(seed * l)
+      test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
+  }
+
 
   CV.IVs.train <- IVs.train[c(-test.set), ]
   CV.IVs.test <- IVs.train[c(test.set), ]
@@ -133,9 +140,10 @@ NNS.stack <- function(IVs.train,
           }
       }
 
-      predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = 'all', order = order)$Point.est
 
-      nns.cv.1[i+1] = eval(obj.fn)
+
+       test.set.1 = test.set[rev(order(abs(predicted - actual)))]
+
 
     if(objective=='min'){
         k = which.min(na.omit(nns.cv.1))
@@ -145,20 +153,28 @@ NNS.stack <- function(IVs.train,
         nns.cv.1 = max(nns.cv.1)
     }
 
-    if(k == length(nns.cv.1)){
-        k = 'all'
+
+    best.k[[b]] = k
+    best.nns.cv[[b]] = nns.cv.1
+
+    if(b==5){
+        best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
+        K = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
+
+        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE
+                              ,n.best = K
+                              )$Point.est
+
     }
 
-    nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = k)$Point.est
-
-    nns.cv = nns.cv.1
-
-  } else {
-    k = NA
+} else {
+    test.set.1=NULL
+    best.k = NA
     nns.method.1 = NA
-    nns.cv = Inf
-    nns.cv.1 = NA
-  }
+    if(objective=='min'){best.nns.cv = Inf} else {best.nns.cv = -Inf}
+  }# 1 %in% method
+
+
 
   # Dimension Reduction Regression Output
   if(2 %in% method){
@@ -184,34 +200,50 @@ NNS.stack <- function(IVs.train,
 
       if(objective=='min'){
           best.threshold = var.cutoffs[which.min(nns.ord)]
+          THRESHOLDS[[b]] = best.threshold
+          best.nns.ord[[b]] = min(nns.ord)
           if(nns.ord[i] > nns.ord[i-1]) break
       } else {
           best.threshold = var.cutoffs[which.max(nns.ord)]
+          THRESHOLDS[[b]] = best.threshold
+          best.nns.ord[[b]] = max(nns.ord)
           if(nns.ord[i] < nns.ord[i-1]) break
       }
     }
 
-    best.threshold = var.cutoffs[which.min(nns.ord)]
 
-    nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, threshold = best.threshold)$Point.est
+    test.set.2 = test.set[rev(order(abs(predicted - actual)))]
 
-    nns.ord.2 = min(na.omit(nns.ord))
-    nns.ord.threshold = best.threshold
+    if(b==5){
+      nns.ord.threshold = as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
+      best.nns.ord = mean(na.omit(unlist(best.nns.ord)))
+
+      nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE,
+                threshold = nns.ord.threshold)$Point.est
+    }
+
+
+
   } else {
+    THRESHOLDS = NA
+    test.set.2 = NULL
     nns.method.2 = NA
-    nns.ord = Inf
-    nns.ord.2 = NA
-    var.cutoffs = NA
+    if(objective=='min'){best.nns.ord = Inf} else {best.nns.ord = -Inf}
     nns.ord.threshold = NA
-  }
+  } # 2 %in% method
 
+
+  test.set_half = unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
+  test.set = unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+
+} # errors (b) loop
 
 
   ### Weights for combining NNS techniques
-  nns.cv[nns.cv == 0] <- 1e-10
-  nns.ord[nns.ord == 0] <- 1e-10
+  best.nns.cv[best.nns.cv == 0] <- 1e-10
+  best.nns.ord[best.nns.ord == 0] <- 1e-10
 
-  weights = c(max(1e-10, 1 / min(na.omit(nns.cv))), max(1e-10, 1 / min(na.omit(nns.ord))))
+  weights = c(max(1e-10, 1 / min(na.omit(best.nns.cv))), max(1e-10, 1 / min(na.omit(best.nns.ord))))
 
   weights = pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0
@@ -224,10 +256,14 @@ NNS.stack <- function(IVs.train,
       }
 
 
-  return(list(NNS.reg.n.best = k,
-              OBJfn.reg = nns.cv.1,
+
+
+
+
+  return(list(NNS.reg.n.best = best.k,
+              OBJfn.reg = best.nns.cv,
               NNS.dim.red.threshold = nns.ord.threshold,
-              OBJfn.dim.red = nns.ord.2,
+              OBJfn.dim.red = best.nns.ord,
               reg = nns.method.1,
               dim.red = nns.method.2,
               stack = estimates))
