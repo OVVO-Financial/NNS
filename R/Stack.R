@@ -53,9 +53,6 @@
 #'  \dontrun{
 #'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2))}
 #'
-#'  ## Using classification accuracy in the [obj.fn].
-#'  \dontrun{
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2),  obj.fn = expression( mean(round(predicted) == actual) ), objective = 'max' )}
 #' @export
 
 NNS.stack <- function(IVs.train,
