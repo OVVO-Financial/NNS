@@ -23,7 +23,7 @@ NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.98,
 
 \item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.98 to ensure high dependence for higher \code{("order")} and endpoint determination.}
 
-\item{dim.red.method}{options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
+\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{tau}{options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method = "NNS.caus")} or
 
