@@ -159,11 +159,10 @@ for(b in 1 : 5){
 
     if(b==5){
         best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
-        K = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
+        best.k = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
 
         nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE
-                              ,n.best = K
-                              )$Point.est
+                              ,n.best = best.k)$Point.est
 
     }
 
