@@ -159,8 +159,7 @@ for(b in 1 : folds){
         best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
         best.k = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
 
-        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE
-                              ,n.best = best.k)$Point.est
+        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = best.k, order=order)$Point.est
 
     }
 
@@ -178,7 +177,7 @@ for(b in 1 : folds){
 
     actual = CV.DV.test
 
-    var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE)$equation$Coefficient, digits = 2))
+    var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, order=order)$equation$Coefficient, digits = 2))
 
     var.cutoffs = var.cutoffs - .005
 
@@ -191,7 +190,7 @@ for(b in 1 : folds){
 
     for(i in 2:length(var.cutoffs)){
 
-        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i])$Point.est
+        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order)$Point.est
 
         nns.ord[i] = eval(obj.fn)
 
@@ -215,7 +214,7 @@ for(b in 1 : folds){
       nns.ord.threshold = as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
       best.nns.ord = mean(na.omit(unlist(best.nns.ord)))
 
-      nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE,
+      nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order,
                 threshold = nns.ord.threshold)$Point.est
     }
 

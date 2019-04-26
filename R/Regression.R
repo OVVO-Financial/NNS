@@ -154,6 +154,8 @@ NNS.reg = function (x, y,
                     norm = NULL,
                     dist = "L2", multivariate.call = FALSE){
 
+  oldw <- getOption("warn")
+  options(warn = -1)
 
   if(plot.regions && !is.null(order) && order == 'max'){
     stop('Please reduce the "order" or set "plot.regions = FALSE".')
@@ -306,16 +308,10 @@ NNS.reg = function (x, y,
           x.star.matrix = matrix(nrow = length(y))
 
           if(dim.red.method!="cor"){
-              x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
-              oldw <- getOption("warn")
-              options(warn = -1)
-                x.star.cor = cor(cbind(x, y))
-              options(warn = oldw); x.star.cor[is.na(x.star.cor)] = 0
+                x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
+                x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
           } else {
-              oldw <- getOption("warn")
-              options(warn = -1)
-                x.star.cor = cor(cbind(x, y))
-              options(warn = oldw); x.star.cor[is.na(x.star.cor)] = 0
+                x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
           }
 
           if(dim.red.method == "NNS.dep"){
@@ -671,7 +667,7 @@ NNS.reg = function (x, y,
     }
   }# plot TRUE bracket
 
-
+  options(warn = oldw)
   ### Return Values
   if(return.values){
     return(list("R2" = R2,
