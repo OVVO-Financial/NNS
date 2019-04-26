@@ -7,7 +7,7 @@
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
 #' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.98 to ensure high dependence for higher \code{("order")} and endpoint determination.
-#' @param dim.red.method options: ("cor", "NNS.cor", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.cor")} uses \link{NNS.cor} for nonlinear correlation weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param tau options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method = "NNS.caus")} or
 #'
 #' \code{(dim.red.method = "all")} and the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
@@ -176,23 +176,32 @@ NNS.reg = function (x, y,
 
 
   if(factor.2.dummy){
-    factor_2_dummy = function(x){
-      if(class(x) == "factor"){
-        n=length(unique(x))
-        output = model.matrix(~x -1, x)[,-(n+1)]
+    if(!dim.red){
+      factor_2_dummy = function(x){
+        if(class(x) == "factor"){
+          n=length(unique(x))
+          output = model.matrix(~x -1, x)[,-(n+1)]
+        } else {
+          output = x
+        }
+          output
       }
-      else{
-        output = x
-      }
-      output
+    } else {
+        factor_2_dummy = function(x){
+          if(class(x) == "factor"){
+              n=length(unique(x))
+              output = model.matrix(~x -1, x)[,-1]
+            } else {
+                output = x
+            }
+            output
+        }
     }
-
 
     x = colwise(factor_2_dummy)(as.data.frame(x))
     x = do.call(cbind, x)
     x = as.data.frame(x)
       if(dim(x)[2]==1) {x = as.vector(x[,1])}
-
 
       if(!is.null(point.est)){
 
@@ -202,15 +211,14 @@ NNS.reg = function (x, y,
           point.est = do.call(cbind, point.est)
           point.est = as.data.frame(point.est)
 
-          if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
-
-
         ### Add 0's to data for missing regressors
         Missing = setdiff(names(x),names(point.est))
           if(!is.null(Missing) && dim(x)[2]!= dim(point.est)[2]){
             point.est[Missing] <- 0
             point.est = point.est[names(x)]
           }
+
+          if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
       }
   }
 
@@ -304,8 +312,8 @@ NNS.reg = function (x, y,
               x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
           }
 
-          if(dim.red.method == "NNS.cor"){
-            x.star.coef = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+          if(dim.red.method == "NNS.dep"){
+            x.star.coef = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef[is.na(x.star.coef)] = 0
           }
 

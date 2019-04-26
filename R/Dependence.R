@@ -30,7 +30,7 @@ NNS.dep = function(x,
                    print.map = FALSE){
 
   if(!missing(y)){
-    if(length(x) < 20){
+    if(length(x) < 20 | class(x)=='factor' | class(y)=='factor'){
         order = 1
         max.obs = 1
       } else {
@@ -43,7 +43,7 @@ NNS.dep = function(x,
     }
 
   } else {
-    if(length(x[,1]) < 20){
+    if(length(x[,1]) < 20 | any(unlist(lapply(x,is.factor)))){
         order = 1
         max.obs = 1
     } else {
