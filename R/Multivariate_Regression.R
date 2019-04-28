@@ -309,7 +309,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     r2.leg = bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     matplot(resids, type = 'l', xlab = "Index", ylab = expression(paste("y (black)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
 
-    title(main = paste0("NNS Order = ", order), cex.main = 2)
+    title(main = paste0("NNS Order = multiple"), cex.main = 2)
     legend(location, legend = r2.leg, bty = 'n')
   }
 
