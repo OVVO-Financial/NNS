@@ -2,7 +2,7 @@
 % Please edit documentation in R/Stack.R
 \name{NNS.stack}
 \alias{NNS.stack}
-\title{NNS stack}
+\title{NNS Stack}
 \usage{
 NNS.stack(IVs.train, DV.train, IVs.test = NULL,
   obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
@@ -14,7 +14,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL,
 
 \item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
 
-\item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types.}
+\item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
 
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 

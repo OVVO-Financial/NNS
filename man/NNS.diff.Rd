@@ -27,9 +27,6 @@ Determines numerical derivative of a given function using projected secant lines
 f <- function(x) sin(x) / x
 NNS.diff(f, 4.1)
 
-g <- function(x) sin(x)
-NNS.diff(g, 1)
-
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
