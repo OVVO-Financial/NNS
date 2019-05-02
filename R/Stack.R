@@ -128,6 +128,8 @@ for(b in 1 : folds){
     actual = CV.DV.test
     nns.cv.1 = numeric()
 
+    if(objective=='min'){nns.cv.1[1] = Inf} else {nns.cv.1[1] = -Inf}
+
       for(i in 1:(2*n)){
           predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, n.best = i, order=order)$Point.est
 
@@ -184,16 +186,16 @@ for(b in 1 : folds){
     var.cutoffs = var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
 
     var.cutoffs = rev(sort(unique(var.cutoffs)))
-
+    print(var.cutoffs)
     nns.ord = numeric()
-    nns.ord[1] = Inf
+    if(objective=='min'){nns.ord[1] = Inf} else {nns.ord[1] = -Inf}
 
     for(i in 2:length(var.cutoffs)){
 
         predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order)$Point.est
 
         nns.ord[i] = eval(obj.fn)
-
+        print(nns.ord)
       if(objective=='min'){
           best.threshold = var.cutoffs[which.min(nns.ord)]
           THRESHOLDS[[b]] = best.threshold
