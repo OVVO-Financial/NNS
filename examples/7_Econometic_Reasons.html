@@ -3057,6 +3057,10 @@ NNS.dep(x,y,print.map = TRUE)</code></pre>
 <h3><span style="color:red"><code>NNS</code> Machine Learning </span></h3>
 <p>See the following link for <code>NNS</code> comparisons vs. other machine learning methods on classical problem sets:</p>
 <p><span style="color:red"><code>Classification Using NNS Clustering Analysis</code></span> <a href="https://ssrn.com/abstract=2864711" class="uri">https://ssrn.com/abstract=2864711</a></p>
+</div>
+<div id="nns-boost" class="section level3">
+<h3><span style="color:red"> <code>NNS Boost</code> </span></h3>
+<p>See the following link for a brief comparison of <code>NNS Boost</code> method vs. <code>xgboost</code>: <a href="https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html" class="uri">https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html</a></p>
 <p>Below is the example Marcos uses for the missing interaction term and correlation between predicted and actual observations using <code>NNS</code>.</p>
 <pre class="r"><code>set.seed(123);x_1=rnorm(1000);x_2=rnorm(1000);e=rnorm(1000)
 
@@ -3121,9 +3125,40 @@ dTrain &lt;- mkData(1000)
 dTest &lt;- mkData(1000)
 
 # Find optimal threshold and store output 
-optimal.threshold = NNS.stack(dTrain[,-1], dTrain[,1], method = 2, dim.red.method = &#39;cor&#39;)$NNS.dim.red.threshold
-
-# Print synthetic regressor equation using &#39;optimal.threshold&#39;
+optimal.threshold = NNS.stack(dTrain[,-1], dTrain[,1], method = 2, dim.red.method = &#39;cor&#39;)$NNS.dim.red.threshold</code></pre>
+<pre><code>##  [1] 0.425 0.405 0.375 0.355 0.065 0.045 0.035 0.025 0.015 0.005
+## [1]      Inf 616.3136
+## [1]      Inf 616.3136 494.9244
+## [1]      Inf 616.3136 494.9244 476.5037
+## [1]      Inf 616.3136 494.9244 476.5037 487.1367
+##  [1] 0.435 0.405 0.375 0.365 0.105 0.095 0.065 0.055 0.045 0.035 0.025
+## [12] 0.015 0.005
+## [1]      Inf 677.3283
+## [1]      Inf 677.3283 616.6754
+## [1]      Inf 677.3283 616.6754 587.5076
+## [1]      Inf 677.3283 616.6754 587.5076 627.8497
+##  [1] 0.445 0.425 0.395 0.375 0.365 0.125 0.075 0.065 0.055 0.045 0.035
+## [12] 0.025 0.015 0.005
+## [1]      Inf 853.3337
+## [1]      Inf 853.3337 760.0729
+## [1]      Inf 853.3337 760.0729 700.3289
+## [1]      Inf 853.3337 760.0729 700.3289 662.7611
+## [1]      Inf 853.3337 760.0729 700.3289 662.7611 761.9682
+##  [1] 0.445 0.425 0.385 0.375 0.365 0.145 0.085 0.055 0.045 0.035 0.025
+## [12] 0.015 0.005
+## [1]     Inf 927.429
+## [1]     Inf 927.429 835.595
+## [1]      Inf 927.4290 835.5950 803.4769
+## [1]      Inf 927.4290 835.5950 803.4769 707.5192
+## [1]      Inf 927.4290 835.5950 803.4769 707.5192 870.6578
+##  [1] 0.445 0.435 0.385 0.375 0.365 0.135 0.105 0.065 0.055 0.045 0.035
+## [12] 0.025 0.015 0.005
+## [1]      Inf 963.4081
+## [1]      Inf 963.4081 875.2746
+## [1]      Inf 963.4081 875.2746 856.1670
+## [1]      Inf 963.4081 875.2746 856.1670 761.9583
+## [1]      Inf 963.4081 875.2746 856.1670 761.9583 906.1737</code></pre>
+<pre class="r"><code># Print synthetic regressor equation using &#39;optimal.threshold&#39;
 print( NNS.reg(dTrain[,-1], dTrain[,1], dim.red.method = &#39;cor&#39;, threshold = optimal.threshold, plot = FALSE)$equation )</code></pre>
 <pre><code>##        Variable Coefficient
 ##  1:        x.01   0.4212180
