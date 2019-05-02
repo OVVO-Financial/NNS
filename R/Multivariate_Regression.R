@@ -62,7 +62,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     }
   }
 
-  original.matrix = data.frame(original.IVs, original.DV)
+  original.matrix = cbind.data.frame(original.IVs, original.DV)
 
   minimums = apply(original.IVs, 2, min)
   maximums = apply(original.IVs, 2, max)
