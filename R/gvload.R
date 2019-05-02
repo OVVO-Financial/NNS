@@ -8,7 +8,9 @@
 #' @import rgl
 #' @import data.table
 #' @import stringr
-
+#' @import foreach
+#' @import doParallel
+#' @import parallel
 
 
 
