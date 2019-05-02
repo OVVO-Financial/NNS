@@ -2837,9 +2837,10 @@ require(methods)</code></pre>
 </div>
 </div>
 <div id="example-1-uci-credit-screening" class="section level1">
-<h1>Example 1: UCI Credit Screening</h1>
+<h1>Example #1: UCI Credit Screening</h1>
 <p>Basic example provided here <a href="https://rpubs.com/omicsdata/credit" class="uri">https://rpubs.com/omicsdata/credit</a>.</p>
-<p>##Step 1: Load Data UCI Credit Screening</p>
+<div id="step-1-load-data-uci-credit-screening" class="section level2">
+<h2>Step 1: Load Data UCI Credit Screening</h2>
 <pre class="r"><code>dataset = read.table(&quot;http://archive.ics.uci.edu/ml/machine-learning-databases/credit-screening/crx.data&quot;,sep=&quot;,&quot;, header=F, na.strings=&quot;?&quot;)
 dataset = dataset[complete.cases(dataset),]
 head(dataset)</code></pre>
@@ -2847,6 +2848,7 @@ head(dataset)</code></pre>
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["V1"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["V2"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["V3"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["V4"],"name":[4],"type":["fctr"],"align":["left"]},{"label":["V5"],"name":[5],"type":["fctr"],"align":["left"]},{"label":["V6"],"name":[6],"type":["fctr"],"align":["left"]},{"label":["V7"],"name":[7],"type":["fctr"],"align":["left"]},{"label":["V8"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["V9"],"name":[9],"type":["fctr"],"align":["left"]},{"label":["V10"],"name":[10],"type":["fctr"],"align":["left"]},{"label":["V11"],"name":[11],"type":["int"],"align":["right"]},{"label":["V12"],"name":[12],"type":["fctr"],"align":["left"]},{"label":["V13"],"name":[13],"type":["fctr"],"align":["left"]},{"label":["V14"],"name":[14],"type":["int"],"align":["right"]},{"label":["V15"],"name":[15],"type":["int"],"align":["right"]},{"label":["V16"],"name":[16],"type":["fctr"],"align":["left"]}],"data":[{"1":"b","2":"30.83","3":"0.000","4":"u","5":"g","6":"w","7":"v","8":"1.25","9":"t","10":"t","11":"1","12":"f","13":"g","14":"202","15":"0","16":"+","_rn_":"1"},{"1":"a","2":"58.67","3":"4.460","4":"u","5":"g","6":"q","7":"h","8":"3.04","9":"t","10":"t","11":"6","12":"f","13":"g","14":"43","15":"560","16":"+","_rn_":"2"},{"1":"a","2":"24.50","3":"0.500","4":"u","5":"g","6":"q","7":"h","8":"1.50","9":"t","10":"f","11":"0","12":"f","13":"g","14":"280","15":"824","16":"+","_rn_":"3"},{"1":"b","2":"27.83","3":"1.540","4":"u","5":"g","6":"w","7":"v","8":"3.75","9":"t","10":"t","11":"5","12":"t","13":"g","14":"100","15":"3","16":"+","_rn_":"4"},{"1":"b","2":"20.17","3":"5.625","4":"u","5":"g","6":"w","7":"v","8":"1.71","9":"t","10":"f","11":"0","12":"f","13":"s","14":"120","15":"0","16":"+","_rn_":"5"},{"1":"b","2":"32.08","3":"4.000","4":"u","5":"g","6":"m","7":"v","8":"2.50","9":"t","10":"f","11":"0","12":"t","13":"g","14":"360","15":"0","16":"+","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
+</div>
 </div>
 <div id="step-2-run-nns.boost-and-xgboost-over-10-iterations" class="section level2">
 <h2>Step 2: Run <code>NNS.boost</code> and <code>xgboost</code> over 10 iterations</h2>
@@ -2933,22 +2935,22 @@ xgb.accuracy[i]= mean(pre1 == label2)
 <p><code>NNS</code> performs just as well, and a majority of the time better than <code>xgboost</code>.</p>
 <pre class="r"><code>cbind(nns.accuracy,xgb.accuracy)</code></pre>
 <pre><code>##       nns.accuracy xgb.accuracy
-##  [1,]    0.8673469    0.8265306
-##  [2,]    0.8418367    0.8469388
-##  [3,]    0.8928571    0.8520408
+##  [1,]    0.8724490    0.8265306
+##  [2,]    0.8469388    0.8469388
+##  [3,]    0.8775510    0.8520408
 ##  [4,]    0.8571429    0.8571429
 ##  [5,]    0.8418367    0.8367347
-##  [6,]    0.7602041    0.8214286
+##  [6,]    0.7857143    0.8214286
 ##  [7,]    0.8724490    0.8622449
-##  [8,]    0.8571429    0.8469388
-##  [9,]    0.8571429    0.8214286
-## [10,]    0.7346939    0.8520408</code></pre>
+##  [8,]    0.8520408    0.8469388
+##  [9,]    0.8673469    0.8214286
+## [10,]    0.7397959    0.8520408</code></pre>
 <pre class="r"><code>sum(nns.accuracy&gt;=xgb.accuracy)</code></pre>
-<pre><code>## [1] 7</code></pre>
+<pre><code>## [1] 8</code></pre>
 </div>
 </div>
-<div id="example-2-agaricus" class="section level1">
-<h1>Example #2: <code>agaricus</code></h1>
+<div id="example-2-agaricus-dataset" class="section level1">
+<h1>Example #2: <code>agaricus</code> Dataset</h1>
 <p>This time we will utilize the data from within <code>xgboost</code>, the <code>agaricus</code> dataset.</p>
 <pre class="r"><code>### Load [agaricus] dataset
 data(agaricus.train, package=&#39;xgboost&#39;)
@@ -2982,12 +2984,12 @@ a=NNS.boost(IVs.train = agaricus.iv.train, DV.train = agaricus.dv.train, IVs.tes
 ### Evaluate accuracy  
 mean(round(a)==as.numeric(agaricus.dv.test))</code></pre>
 <pre><code>## [1] 1</code></pre>
-<p>As we can see, <code>NNS</code> achieves a perfect classification of the substantial (1,611 observations) out-of-sample test set!</p>
+<p>As we can see, <code>NNS</code> achieves a perfect classification of the substantial (1,611 observations) out-of-sample test set while the <code>xgboost</code> auc is approximately 97%.</p>
 </div>
 <div id="comments" class="section level1">
 <h1>Comments</h1>
 <p><code>NNS</code> is a full machine learning methodology, all based on the seamless underlying clustering <code>NNS.part</code> embedded within the regression method <code>NNS.reg</code>.</p>
-<p><code>xgboost</code> is maintained by an army of computer scientists, <code>NNS</code> is maintained by a single economist. Speed overwhelmingly favors <code>xgboost</code>, but with ample resources and collaboration, <code>NNS</code> should be able to compete on that front as well.</p>
+<p><code>xgboost</code> is maintained by an army of computer scientists, <code>NNS</code> is maintained by a single economist! Speed overwhelmingly favors <code>xgboost</code>, but with ample resources and collaboration, <code>NNS</code> should be able to compete on that front as well. Additional computational efficiency would permit even more <code>NNS</code> testing and further improvement!</p>
 <p><code>NNS</code> is not a one-trick pony, as it has been demonstrated to excel in time-series forecasting, nonlinear continuous regressions, and provide solutions for econometric applications. See the following examples:</p>
 <ul>
 <li><p><span style="color:red"><code>NNS</code> Forecasting Presentation </span> Download the .pdf file here: <a href="https://www.researchgate.net/publication/327495856_Forecasting" class="uri">https://www.researchgate.net/publication/327495856_Forecasting</a></p></li>
