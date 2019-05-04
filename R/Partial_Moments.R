@@ -75,6 +75,8 @@ Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean
   y = z[,2]
   x = x - target.x
   y = y - target.y
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -110,6 +112,8 @@ Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean
   y = z[,2]
   x = target.x - x
   y = target.y - y
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -145,6 +149,8 @@ D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(
   y = z[,2]
   x = x - target.x
   y = target.y - y
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
@@ -180,6 +186,8 @@ D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(
   y = z[,2]
   x = target.x - x
   y = y - target.y
+  x[x <= 0] = 0
+  y[y <= 0] = 0
   x[x > 0] = x[x > 0] ^ degree.x
   y[y > 0] = y[y > 0] ^ degree.y
   return(x %*% y / length(x))
