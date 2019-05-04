@@ -305,66 +305,67 @@ NNS.reg = function (x, y,
           x = data.matrix(x)
           y = as.numeric(y)
 
-          x.star.matrix = matrix(nrow = length(y))
+          if(!is.null(dim.red.method)){
+              x.star.matrix = matrix(nrow = length(y))
 
-          if(dim.red.method!="cor"){
-                x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
-                x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
-          } else {
-                x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
-          }
+              if(dim.red.method!="cor"){
+                    x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
+                    x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+              } else {
+                    x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+              }
 
-          if(dim.red.method == "NNS.dep"){
-            x.star.coef = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef[is.na(x.star.coef)] = 0
-          }
+              if(dim.red.method == "NNS.dep"){
+                    x.star.coef = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+                    x.star.coef[is.na(x.star.coef)] = 0
+              }
 
-          if(dim.red.method == "cor"){
-            x.star.coef = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef[is.na(x.star.coef)] = 0
-          }
+              if(dim.red.method == "cor"){
+                    x.star.coef = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+                    x.star.coef[is.na(x.star.coef)] = 0
+              }
 
-          if(dim.red.method == "NNS.caus"){
-            if(is.null(tau)){
-              tau = "cs"
-            }
-            x.star.coef = numeric()
-            for(i in 1:ncol(x)){
-              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
-              cause[is.na(cause)] = 0
-              x.star.coef[i] = cause[1] - cause[2]
-            }
-          }
+              if(dim.red.method == "NNS.caus"){
+                    if(is.null(tau)){
+                        tau = "cs"
+                    }
+                    x.star.coef = numeric()
+                    for(i in 1:ncol(x)){
+                        cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+                        cause[is.na(cause)] = 0
+                        x.star.coef[i] = cause[1] - cause[2]
+                    }
+              }
 
-          if(dim.red.method == "all"){
-            if(is.null(tau)){
-              tau = "cs"
-            }
-            x.star.coef.1 = numeric()
-            for(i in 1 : ncol(x)){
-              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
-              cause[is.na(cause)] = 0
-              x.star.coef.1[i] = cause[1] - cause[2]
-            }
-            x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef.3[is.na(x.star.coef.3)] = 0
-            x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef.2[is.na(x.star.coef.2)] = 0
-            x.star.coef[is.na(x.star.coef)] = 0
-            x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
-          }
-
-
-          x.star.coef[abs(x.star.coef) < threshold] <- 0
-
-          x.star.matrix = t( t(original.variable) * x.star.coef)
+              if(dim.red.method == "all"){
+                  if(is.null(tau)){
+                      tau = "cs"
+                  }
+                  x.star.coef.1 = numeric()
+                  for(i in 1 : ncol(x)){
+                      cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+                      cause[is.na(cause)] = 0
+                      x.star.coef.1[i] = cause[1] - cause[2]
+                  }
+                  x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+                  x.star.coef.3[is.na(x.star.coef.3)] = 0
+                  x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+                  x.star.coef.2[is.na(x.star.coef.2)] = 0
+                  x.star.coef[is.na(x.star.coef)] = 0
+                  x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+              }
 
 
-          #In case all IVs have 0 correlation to DV
-          if(all(x.star.matrix == 0)){
-            x.star.matrix = x
-            x.star.coef[x.star.coef == 0] <- 1
-          }
+              x.star.coef[abs(x.star.coef) < threshold] <- 0
+
+              x.star.matrix = t( t(original.variable) * x.star.coef)
+
+
+              #In case all IVs have 0 correlation to DV
+              if(all(x.star.matrix == 0)){
+                  x.star.matrix = x
+                  x.star.coef[x.star.coef == 0] <- 1
+              }
 
           DENOMINATOR = sum( abs( x.star.coef) > 0)
 
@@ -386,6 +387,7 @@ NNS.reg = function (x, y,
           x = rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
           x.star = data.table(x.star = x)
 
+        } # if(!is.null(dim.red.method))
       } #Multivariate Not NULL type
     } #Univariate
   } #Multivariate
