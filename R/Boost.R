@@ -81,7 +81,7 @@ NNS.boost <- function(IVs.train,
   # Add test loop for highest threshold
   if(is.null(threshold)){
 
-    for(i in rep(seq(.99,.5,-.01),each=1)){
+    for(i in rep(seq(.99,0,-.01),each=1)){
       features= sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
       #If estimate is > threshold, store 'features'
