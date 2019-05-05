@@ -190,16 +190,20 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
       i = i + 1L
     }
 
+    if(!is.numeric(order)){RP=PART[,c("quadrant","x","y")]}
+    else{ RP[ , `:=` (prior.quadrant = NULL)] }
+
+    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
+    DT = PART[]
+    RP = setorder(RP[], quadrant)[]
+
 
     if(Voronoi){
       points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
       title(main = paste0("NNS Order = ", i), cex.main = 2)
     }
 
-    RP[ , `:=` (prior.quadrant = NULL)]
-    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
-    DT = PART[]
-    RP = setorder(RP[], quadrant)[]
+
     return(list("order" = i,
                 "dt" = DT,
                 "regression.points" = RP))
@@ -272,6 +276,13 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
       i = i + 1L
     }
 
+    if(!is.numeric(order)){RP=PART[,c("quadrant","x","y")]}
+    else{ RP[ , `:=` (prior.quadrant = NULL)] }
+
+    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
+    DT = PART[]
+
+    RP = setorder(RP[], quadrant)[]
 
     if(Voronoi){
       abline(v = RP$x, lty = 3)
@@ -280,11 +291,6 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL, order = NULL, max.obs.re
     }
 
 
-    RP[ ,`:=` (prior.quadrant = NULL)]
-    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
-    DT = PART[]
-
-    RP = setorder(RP[], quadrant)[]
     return(list("order" = i,
                 "dt" = DT,
                 "regression.points" = RP))
