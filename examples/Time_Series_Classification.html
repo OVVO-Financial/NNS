@@ -446,10 +446,10 @@ hist(series[ , &quot;class.id&quot;][test.index])</code></pre>
 </div>
 <div id="use-nns.reg-to-find-the-most-similar" class="section level1">
 <h1>Use <code>NNS.reg</code> to find the most similar</h1>
-<p>The following settings in <code>NNS.reg(..., order = &quot;max&quot;, n.best = 1, ...)</code> are very similar to a KNN = 1 (with the <code>NNS</code> general case exhibiting significant weighting differences and less sensitivity to the curse of dimensionality). We set up the following independent variables for training <code>IVs.train</code>, the dependent variable <code>DV</code> which is the <code>class.id</code> from our earlier training data.table, and our independent variables for testing <code>IVs.test</code>.</p>
-<pre class="r"><code>IVs.train = training.ts.set[,colnames(training.ts.set) != &quot;class.id&quot;]
-DV = training.ts.set[, &quot;class.id&quot;]
-IVs.test = test.ts.set[,colnames(test.ts.set) != &quot;class.id&quot;]</code></pre>
+<p>The following settings in <code>NNS.reg(..., order = &quot;max&quot;, n.best = 1, ...)</code> are very similar to a KNN = 1 (with the <code>NNS</code> general case exhibiting significant weighting differences and less sensitivity to the curse of dimensionality). We set up the following independent variables for training <code>IVs.train</code>, the dependent variable <code>DV</code> which is the <code>class.id</code> from our earlier training set <code>training.ts.set</code>, and our independent variables for testing <code>IVs.test</code>.</p>
+<pre class="r"><code>IVs.train = training.ts.set[ , colnames(training.ts.set) != &quot;class.id&quot;]
+DV = training.ts.set[ , &quot;class.id&quot;]
+IVs.test = test.ts.set[ , colnames(test.ts.set) != &quot;class.id&quot;]</code></pre>
 <p>Using these variables in our <code>NNS.reg</code> we store our <code>Point.est</code> as <code>predictions</code></p>
 <pre class="r"><code>predictions = NNS.reg(IVs.train, DV, point.est = IVs.test, order = &quot;max&quot;, n.best = 1, plot = FALSE, residual.plot = FALSE)$Point.est</code></pre>
 <p>Finally, a check of our accuracy yields:</p>
