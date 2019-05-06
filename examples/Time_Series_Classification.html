@@ -412,7 +412,13 @@ dim(tsdata)</code></pre>
 <p>The following were put into columns of the matrix <code>tsdata</code>:</p>
 <ul>
 <li><p>There are 60 observations per time series, as features or columns</p></li>
-<li><p>We have the classification ID, per time series class it belongs to. The classes are organized as follows: 1-100 Normal 101-200 Cyclic 201-300 Increasing trend 301-400 Decreasing trend 401-500 Upward shift 501-600 Downward shift</p></li>
+<li><p>We have the classification ID, per time series class it belongs to. The classes are organized as follows:</p>
+<pre><code>  1-100   Normal
+  101-200 Cyclic
+  201-300 Increasing trend
+  301-400 Decreasing trend
+  401-500 Upward shift
+  501-600 Downward shift</code></pre></li>
 </ul>
 <p>This leaves us with a matrix of 600 rows and 61 columns.</p>
 <pre class="r"><code>series = cbind(tsdata ,class.id = rep(1:6, each = 100))
