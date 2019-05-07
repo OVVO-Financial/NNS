@@ -180,13 +180,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     distance <- function(dist.est){
 
         if(dist == "L1"){
-            row.sums = as.numeric(rowSums(abs(
-       sweep( as.matrix(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)], 2, as.numeric(dist.est)[1 : n2], FUN = "-"  ))
-          )))
+            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i]))), .SDcols=c(1:n2)][,Sum]
         } else {
-            row.sums = as.numeric( sweep( as.matrix(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)]), 2, as.numeric(dist.est)[1 : n2], FUN = "-"  )^2)
+            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2)), .SDcols=c(1:n2)][,Sum]
         }
-
 
       row.sums[row.sums == 0] <- 1e-10
       total.row.sums = sum(1 / row.sums)
@@ -239,6 +236,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
       }
       predict.fit = as.vector(predict.fit.iter)
     }
+
+    REGRESSION.POINT.MATRIX[, Sum := NULL]
 
   } else {
     predict.fit = NULL
