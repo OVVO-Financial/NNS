@@ -180,9 +180,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     distance <- function(dist.est){
 
         if(dist == "L1"){
-            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i]))), .SDcols=c(1:n2)][,Sum]
+            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])))][,Sum]
         } else {
-            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2)), .SDcols=c(1:n2)][,Sum]
+            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2))][,Sum]
         }
 
       row.sums[row.sums == 0] <- 1e-10
