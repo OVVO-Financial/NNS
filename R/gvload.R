@@ -27,5 +27,8 @@
       "i.x","i.y","q_new","x.x","x.y","standard.errors"
     ))
   invisible()
-
+  library(data.table)
+  library(plyr)
+  library(rgl)
+  library(stringr)
 }

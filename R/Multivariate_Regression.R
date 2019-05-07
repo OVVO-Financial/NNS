@@ -179,20 +179,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
   if(!is.null(point.est)){
     distance <- function(dist.est){
 
-      for(j in 1 : n2){
-        set(REGRESSION.POINT.MATRIX, j = j, value = REGRESSION.POINT.MATRIX[[j]] - as.numeric(dist.est)[j])
-      }
+        if(dist == "L1"){
+            row.sums = as.numeric(rowSums(abs(
+       sweep( as.matrix(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)], 2, as.numeric(dist.est)[1 : n2], FUN = "-"  ))
+          )))
+        } else {
+            row.sums = as.numeric( sweep( as.matrix(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)]), 2, as.numeric(dist.est)[1 : n2], FUN = "-"  )^2)
+        }
 
-
-      if(dist == "L1"){
-        row.sums = as.numeric(rowSums(abs(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)])))
-      } else {
-        row.sums = as.numeric(rowSums(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = c(1 : n2)] ^ 2))
-      }
-
-      for(j in 1 : n2){
-        set(REGRESSION.POINT.MATRIX, j = j, value = REGRESSION.POINT.MATRIX[[j]] + as.numeric(dist.est)[j])
-      }
 
       row.sums[row.sums == 0] <- 1e-10
       total.row.sums = sum(1 / row.sums)
@@ -212,7 +206,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
 
     ### Point estimates
-    central.points = apply(original.IVs,2,mean)
+    central.points = apply(original.IVs,2,function(x) mean(c(median(x),mode(x))))
     predict.fit = numeric()
     predict.fit.iter = numeric()
     if(is.null(np)){
