@@ -27,7 +27,10 @@
       "%do%"
     ))
 
+  requireNamespace("data.table")
+
   .datatable.aware = TRUE
+
   invisible()
 
 

@@ -127,7 +127,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
   }
 
   NNS.ID = matrix(unlist(NNS.ID), nrow = length(Y),ncol = n)
-#stopCluster(cl)
+
+
+
   ### Create unique identifier of each observation's interval
   NNS.ID = apply(NNS.ID, 1 , paste , collapse = "." )
 
@@ -186,6 +188,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
   ### DISTANCES
   ### Calculate distance from each point in REGRESSION.POINT.MATRIX
   if(!is.null(point.est)){
+
     distance <- function(dist.est){
 
         if(dist == "L1"){
@@ -217,8 +220,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
     ### Point estimates
     central.points = apply(original.IVs,2,function(x) mean(c(median(x),mode(x))))
+
     predict.fit = numeric()
     predict.fit.iter = numeric()
+
     if(is.null(np)){
       l = length(point.est)
 
@@ -228,37 +233,39 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
         last.known.distance = sqrt(sum((pmin(pmax(point.est, minimums), maximums) - central.points) ^ 2))
         last.known.gradient = (distance(dist.est = pmin(pmax(point.est, minimums), maximums)) - distance(dist.est = central.points)) / last.known.distance
 
-      last.distance = sqrt(sum((point.est - pmin(pmax(point.est, minimums), maximums)) ^ 2))
-      predict.fit = last.distance * last.known.gradient + distance(dist.est = pmin(pmax(point.est, minimums), maximums))
+        last.distance = sqrt(sum((point.est - pmin(pmax(point.est, minimums), maximums)) ^ 2))
+        predict.fit = last.distance * last.known.gradient + distance(dist.est = pmin(pmax(point.est, minimums), maximums))
       }
     }
 
     if(!is.null(np)){
 
-        predict.fit.iter <- foreach(i = 1 : np,.packages = "data.table") %dopar% {
+        predict.fit.iter = list()
+
+        for(i in 1 : np){
             p = as.vector(point.est[i, ])
             l = length(p)
             if(sum(p >= minimums & p <= maximums) == l){
 
-                distance(dist.est = p)
+              predict.fit.iter[[i]] <- distance(dist.est = p)
             } else {
                 last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
                 last.known.gradient = (distance(dist.est = pmin(pmax(p, minimums), maximums)) - distance(dist.est = central.points)) / last.known.distance
 
                 last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
 
-                last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
+                predict.fit.iter[[i]] <- last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
             }
         }
       predict.fit = as.vector(unlist(predict.fit.iter))
     }
-    stopCluster(cl)
 
 
   } else {
     predict.fit = NULL
   } #is.null point.est
 
+  stopCluster(cl)
 
   R2 = (sum((y.hat - mean(original.DV)) * (original.DV - mean(original.DV))) ^ 2) / (sum((original.DV - mean(original.DV)) ^ 2) * sum((y.hat - mean(original.DV)) ^ 2))
 
