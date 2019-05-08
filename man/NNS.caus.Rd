@@ -28,12 +28,13 @@ Returns the causality from observational data between two variables.
 }
 \examples{
 ## x clearly causes y...
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y <- x ^ 2
 NNS.caus(x, y, tau = "cs")
 
 x <- 1:100 ; y <- x^2
-NNS.caus(x, y, tau = "ts", time.series = TRUE)
+NNS.caus(x, y, tau = "ts", time.series = TRUE)}
 
 ## Causal matrix
 \dontrun{

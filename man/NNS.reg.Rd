@@ -10,7 +10,7 @@ NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.98,
   plot.regions = FALSE, residual.plot = TRUE, std.errors = FALSE,
   confidence.interval = NULL, threshold = 0, n.best = NULL,
   noise.reduction = "mean", norm = NULL, dist = "L2",
-  multivariate.call = FALSE)
+  ncores = NULL, multivariate.call = FALSE)
 }
 \arguments{
 \item{x}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -57,6 +57,8 @@ NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.98,
 \item{norm}{\code{NULL} (default) the method of normalization options: ("NNS", "std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm = "std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm = "NNS")}.}
 
 \item{dist}{options:("L1", "L2") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance.}
+
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
 \item{multivariate.call}{Internal parameter for multivariate regressions.}
 }
@@ -114,9 +116,10 @@ Identical regressors can be used as long as they do not share the same name. For
 \code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type = "CLASS")}.  \code{(type = "CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red.method)} enables dimension reduction regressions.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
-NNS.reg(x, y)
+NNS.reg(x, y)}
 
 ## Manual {order} selection
 \dontrun{

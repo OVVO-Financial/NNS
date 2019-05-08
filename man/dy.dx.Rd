@@ -38,8 +38,9 @@ Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of i
 If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
 }
 \examples{
+\dontrun{
 x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
-dy.dx(x, y, eval.point = 1.75)
+dy.dx(x, y, eval.point = 1.75)}
 
 # Vector of derivatives
 \dontrun{

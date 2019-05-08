@@ -48,10 +48,11 @@ Returns the numerical partial derivate of \code{y} with respect to [wrt] any reg
 For known function testing and analysis, regressors should be transformed via \link{expand.grid} to fill the dimensions with \code{(order = "max")}.  Example provided below.
 }
 \examples{
+\dontrun{
 set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 B = cbind(x_1, x_2)
 ## To find derivatives of y wrt 1st regressor
-dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
+dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))}
 
 ## Known function analysis: [y = a ^ 2 * b ^ 2]
 \dontrun{
