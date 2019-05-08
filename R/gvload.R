@@ -4,6 +4,7 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix
 #' @importFrom utils globalVariables tail combn
+#' @importFrom data.table data.table
 #' @import data.table
 #' @import doParallel
 #' @import rgl
@@ -25,5 +26,9 @@
       "detectCores","makeCluster","%dopar%","foreach","stopCluster",
       "%do%"
     ))
+
+  .datatable.aware = TRUE
   invisible()
+
+
 }
