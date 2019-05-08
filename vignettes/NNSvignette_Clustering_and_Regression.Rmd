@@ -69,8 +69,7 @@ NNS.reg(z, g, order = "max", ncores = 1)
 ###Classification
 For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.  
 ```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", 
-        location = "topleft")
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[141:150, 1 : 4], location = "topleft")$Point.est
 ```
 
 ###NNS Dimension Reduction Regression
