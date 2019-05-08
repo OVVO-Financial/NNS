@@ -17,7 +17,6 @@ require(NNS)
 require(knitr)
 require(rgl)
 require(data.table)
-require(plyr)
 ```
 
 # Correlation and Dependence

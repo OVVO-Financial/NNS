@@ -17,7 +17,6 @@ require(NNS)
 require(knitr)
 require(rgl)
 require(data.table)
-require(plyr)
 ```
 
 
@@ -61,16 +60,17 @@ Multivariate regressions return a plot of $y$ and $\hat{y}$.
 f= function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
 y = x ; z = expand.grid(x, y)
 g = f(z[ , 1], z[ , 2])
-NNS.reg(z, g, order = "max")
+NNS.reg(z, g, order = "max", ncores = 1)
 ```
 
 ###Inter/Extrapolation
 `NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x, y, point.est = ...)` parameter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
 
 ###Classification
-For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`
+For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.  
 ```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], point.est = iris[1 : 10, 1 : 4], type = "CLASS", location = "topleft")$Point.est
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", 
+        location = "topleft")
 ```
 
 ###NNS Dimension Reduction Regression
