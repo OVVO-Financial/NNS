@@ -119,11 +119,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   NNS.ID = list()
 
-#for(j in 1 : n){
     NNS.ID <- foreach(j = 1:n) %dopar% {
     sorted.reg.points = sort(reg.points.matrix[ , j])
     sorted.reg.points = sorted.reg.points[!is.na(sorted.reg.points)]
-#NNS.ID[[j]] =
+
       findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
   }
 
@@ -190,9 +189,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     distance <- function(dist.est){
 
         if(dist == "L1"){
-            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])))][,Sum]
+            sums = Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])))
+
+            row.sums = REGRESSION.POINT.MATRIX[, Sum := sums][,Sum]
         } else {
-            row.sums = REGRESSION.POINT.MATRIX[, Sum := Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2))][,Sum]
+          sums = Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2))
+
+          row.sums = REGRESSION.POINT.MATRIX[, Sum := sums][,Sum]
         }
 
       row.sums[row.sums == 0] <- 1e-10
@@ -231,20 +234,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     }
 
     if(!is.null(np)){
- #     cl <- makeCluster(num_cores)
-  #    registerDoParallel(cl)
+
         predict.fit.iter <- foreach(i = 1 : np,.packages = "data.table") %dopar% {
             p = as.vector(point.est[i, ])
             l = length(p)
             if(sum(p >= minimums & p <= maximums) == l){
-#predict.fit.iter[i] =
+
                 distance(dist.est = p)
             } else {
                 last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
                 last.known.gradient = (distance(dist.est = pmin(pmax(p, minimums), maximums)) - distance(dist.est = central.points)) / last.known.distance
 
                 last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
-#predict.fit.iter[i] =
+
                 last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
             }
         }
