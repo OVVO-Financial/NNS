@@ -15,12 +15,13 @@
 #' \url{http://amzn.com/1490523995}
 #' @examples
 #' ## x clearly causes y...
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- x ^ 2
 #' NNS.caus(x, y, tau = "cs")
 #'
 #' x <- 1:100 ; y <- x^2
-#' NNS.caus(x, y, tau = "ts", time.series = TRUE)
+#' NNS.caus(x, y, tau = "ts", time.series = TRUE)}
 #'
 #' ## Causal matrix
 #' \dontrun{
@@ -51,8 +52,8 @@ NNS.caus <- function(x, y,
     }
 
 
-    x = colwise(factor_2_dummy)(as.data.frame(x))
-    x = do.call(cbind, x)
+    x = apply(as.data.frame(x),2,factor_2_dummy)
+    x = do.call(cbind, as.data.frame(x))
     x = as.data.frame(x)
       if(dim(x)[2]==1) {x = as.vector(x[,1])}
   }

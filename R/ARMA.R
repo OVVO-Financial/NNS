@@ -19,6 +19,7 @@
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
 #' @param intervals logical; \code{FALSE} (default) Plots the surrounding forecasts around the final estimate when \code{(intervals = TRUE)} and \code{(seasonal.factor = FALSE)}.  There are no other forecasts to plot when a single \code{seasonal.factor} is selected.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns a vector of forecasts of length \code{(h)}.
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
@@ -66,7 +67,8 @@ NNS.ARMA <- function(variable,
                      dynamic = FALSE,
                      plot = TRUE,
                      seasonal.plot = TRUE,
-                     intervals = FALSE){
+                     intervals = FALSE,
+                     ncores = NULL){
 
   if(intervals && is.numeric(seasonal.factor)){
     stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
@@ -79,6 +81,17 @@ NNS.ARMA <- function(variable,
   if(is.numeric(seasonal.factor) && dynamic){
     stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')
   }
+
+
+  if (is.null(ncores)) {
+    num_cores <- detectCores() - 1
+  } else {
+    num_cores <- ncores
+  }
+
+  cl <- makeCluster(num_cores)
+  registerDoParallel(cl)
+
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
     seasonal.factor = FALSE
@@ -209,7 +222,7 @@ NNS.ARMA <- function(variable,
 
 
     if(method == 'nonlin' | method == 'both'){
-      for(i in 1 : length(lag)){
+      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS") %dopar% {
         x = Component.index[[i]] ; y = Component.series[[i]]
         last.x = tail(x, 1)
         last.y = tail(y, 1)
@@ -226,8 +239,10 @@ NNS.ARMA <- function(variable,
         run = diff(reg.points$x)
         rise = diff(reg.points$y)
 
-        Regression.Estimates[i] = last.y + (rise / run)
+        last.y + (rise / run)
       }
+
+      Regression.Estimates = unlist(Regression.Estimates)
 
       if(!negative.values){
         Regression.Estimates = pmax(0, Regression.Estimates)
@@ -240,15 +255,18 @@ NNS.ARMA <- function(variable,
 
     if(method == 'lin' | method == 'both'){
 
-      for(i in 1 : length(lag)){
+      Regression.Estimates <- foreach(i = 1 : length(lag)) %dopar% {
         last.x = tail(Component.index[[i]], 1)
         coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
         Regression.Estimates[i] = coefs[1] + (coefs[2] * (last.x + 1))
       }
 
+      Regression.Estimates = unlist(Regression.Estimates)
+
       if(!negative.values){
         Regression.Estimates = pmax(0, Regression.Estimates)
       }
+
 
       L.Regression.Estimates = Regression.Estimates
       Lin.estimates = sum(Regression.Estimates * Weights)
@@ -278,7 +296,7 @@ NNS.ARMA <- function(variable,
 
   } # j loop
 
-
+  stopCluster(cl)
   #### PLOTTING
   if(plot){
     if(seasonal.plot){

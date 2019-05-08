@@ -23,8 +23,9 @@
 #' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
 #'
 #' @examples
+#' \dontrun{
 #' x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
-#' dy.dx(x, y, eval.point = 1.75)
+#' dy.dx(x, y, eval.point = 1.75)}
 #'
 #' # Vector of derivatives
 #' \dontrun{
