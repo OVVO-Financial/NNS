@@ -341,7 +341,10 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 #' @export
 
 LPM.ratio <- function(degree, target, variable){
-  LPM(degree, target, variable) / (LPM(degree, target, variable) + UPM(degree, target, variable))
+  lpm = LPM(degree, target, variable)
+  upm = UPM(degree, target, variable)
+
+  lpm / (lpm + upm)
 }
 
 
@@ -372,7 +375,10 @@ LPM.ratio <- function(degree, target, variable){
 
 
 UPM.ratio <- function(degree, target, variable){
-  UPM(degree, target, variable) / (LPM(degree, target, variable) + UPM(degree, target, variable))
+  lpm = LPM(degree, target, variable)
+  upm = UPM(degree, target, variable)
+
+  upm / (lpm + upm)
 }
 
 

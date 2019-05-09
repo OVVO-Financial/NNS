@@ -89,8 +89,8 @@ NNS.ARMA <- function(variable,
     num_cores <- ncores
   }
 
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
+#  cl <- makeCluster(num_cores)
+#  registerDoParallel(cl)
 
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
@@ -298,7 +298,8 @@ NNS.ARMA <- function(variable,
 
   } # j loop
 
-  stopCluster(cl)
+#  stopCluster(cl)
+
   #### PLOTTING
   if(plot){
     if(seasonal.plot){
