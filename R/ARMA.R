@@ -222,7 +222,7 @@ NNS.ARMA <- function(variable,
 
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS") %dopar% {
+      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS") %do% {
         x = Component.index[[i]] ; y = Component.series[[i]]
         last.x = tail(x, 1)
         last.y = tail(y, 1)
@@ -255,7 +255,7 @@ NNS.ARMA <- function(variable,
 
     if(method == 'lin' | method == 'both'){
 
-      Regression.Estimates <- foreach(i = 1 : length(lag)) %dopar% {
+      Regression.Estimates <- foreach(i = 1 : length(lag)) %do% {
         last.x = tail(Component.index[[i]], 1)
         coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
         Regression.Estimates[i] = coefs[1] + (coefs[2] * (last.x + 1))
