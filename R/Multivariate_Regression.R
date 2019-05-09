@@ -184,27 +184,21 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     n.best = n.best
   }
 
-  n2=(dim(REGRESSION.POINT.MATRIX[])[2]-1)
+
   ### DISTANCES
   ### Calculate distance from each point in REGRESSION.POINT.MATRIX
+
+  n2=(dim(REGRESSION.POINT.MATRIX[])[2]-1)
+
   if(!is.null(point.est)){
 
-    distance <- function(dist.est){
+    distance_l1 <- function(dist.est){
 
-        if(dist == "L1"){
-            sums = Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])))
-
-            row.sums = REGRESSION.POINT.MATRIX[, Sum := sums][,Sum]
-        } else {
-          sums = Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2))
-
-          row.sums = REGRESSION.POINT.MATRIX[, Sum := sums][,Sum]
-        }
+      row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i]))))][,Sum]
 
       row.sums[row.sums == 0] <- 1e-10
       total.row.sums = sum(1 / row.sums)
       weights = (1 / row.sums) / total.row.sums
-
 
       highest = rev(order(weights))[1 : min(n.best, length(weights))]
 
@@ -218,11 +212,32 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     }
 
 
+    distance_l2 <- function(dist.est){
+      row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2)))][,Sum]
+
+      row.sums[row.sums == 0] <- 1e-10
+      total.row.sums = sum(1 / row.sums)
+      weights = (1 / row.sums) / total.row.sums
+
+      highest = rev(order(weights))[1 : min(n.best, length(weights))]
+
+      weights[-highest] <- 0
+      weights.sum = sum(weights)
+
+      weights = weights / weights.sum
+      single.estimate = sum(weights * REGRESSION.POINT.MATRIX$y.hat)
+
+      return(single.estimate)
+    }
+
+
+    if(dist=="L2"){distance = distance_l2} else {distance = distance_l1}
+
     ### Point estimates
     central.points = apply(original.IVs,2,function(x) mean(c(median(x),mode(x))))
 
     predict.fit = numeric()
-    predict.fit.iter = numeric()
+    predict.fit.iter = list()
 
     if(is.null(np)){
       l = length(point.est)
@@ -240,24 +255,29 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
     if(!is.null(np)){
 
-        predict.fit.iter = list()
+        DISTANCES = apply(point.est,1,function(x) distance(x))
 
-        for(i in 1 : np){
-            p = as.vector(point.est[i, ])
-            l = length(p)
-            if(sum(p >= minimums & p <= maximums) == l){
+        lows = do.call(pmin,as.data.frame(point.est))<minimums
+        highs = do.call(pmax,as.data.frame(point.est))>maximums
 
-              predict.fit.iter[[i]] <- distance(dist.est = p)
-            } else {
+        outside.index = lows * highs
+
+        if(sum(outside.index)>0){
+              index = which(outside.index==1)
+              for(i in index){
+                p = point.est[i,]
+
                 last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
                 last.known.gradient = (distance(dist.est = pmin(pmax(p, minimums), maximums)) - distance(dist.est = central.points)) / last.known.distance
 
                 last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
 
-                predict.fit.iter[[i]] <- last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
-            }
+                DISTANCES[i] <- last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
+              }
         }
-      predict.fit = as.vector(unlist(predict.fit.iter))
+
+      predict.fit = DISTANCES
+
     }
 
 
