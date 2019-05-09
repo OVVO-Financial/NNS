@@ -222,7 +222,8 @@ NNS.ARMA <- function(variable,
 
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS") %do% {
+      Regression.Estimates = list()
+      for(i in 1 : length(lag)){
         x = Component.index[[i]] ; y = Component.series[[i]]
         last.x = tail(x, 1)
         last.y = tail(y, 1)
@@ -239,7 +240,7 @@ NNS.ARMA <- function(variable,
         run = diff(reg.points$x)
         rise = diff(reg.points$y)
 
-        last.y + (rise / run)
+        Regression.Estimates[i] = last.y + (rise / run)
       }
 
       Regression.Estimates = unlist(Regression.Estimates)
@@ -255,7 +256,8 @@ NNS.ARMA <- function(variable,
 
     if(method == 'lin' | method == 'both'){
 
-      Regression.Estimates <- foreach(i = 1 : length(lag)) %do% {
+      Regression.Estimates = numeric()
+      for(i in 1 : length(lag)){
         last.x = tail(Component.index[[i]], 1)
         coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
         Regression.Estimates[i] = coefs[1] + (coefs[2] * (last.x + 1))

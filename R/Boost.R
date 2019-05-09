@@ -50,8 +50,6 @@ NNS.boost <- function(IVs.train,
     num_cores <- ncores
   }
 
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
 
   mode = function(x){
     if(length(na.omit(x)) > 1){
@@ -106,7 +104,7 @@ NNS.boost <- function(IVs.train,
     new.dv.train = y[-new.index]
 
 
-    keeper.features <- foreach(j = 1:as.integer(epochs/folds),.packages = "NNS") %do% {
+    for(j in 1:as.integer(epochs/folds)){
 
       actual = y[new.index]
       features = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
@@ -115,7 +113,7 @@ NNS.boost <- function(IVs.train,
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
       results = eval(obj.fn)
-      if(results>threshold){features} else {NULL}
+      if(results>threshold){keeper.features[[j]]=features} else {NULL}
     }
 
     keeper.features[sapply(keeper.features, is.null)] <- NULL
@@ -129,12 +127,12 @@ NNS.boost <- function(IVs.train,
   final.features = do.call(c,fold)
 
 
-  estimates <- foreach(i = 1:length(final.features),.packages = "NNS") %do% {
+  estimates = list()
+  for(i in 1:length(final.features)){
     estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
   }
 
-  stopCluster(cl)
 
   return(apply(do.call(cbind,estimates),1,mode))
 }
