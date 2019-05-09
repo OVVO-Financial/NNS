@@ -222,7 +222,7 @@ NNS.ARMA <- function(variable,
 
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates = list()
+      Regression.Estimates = numeric()
       for(i in 1 : length(lag)){
         x = Component.index[[i]] ; y = Component.series[[i]]
         last.x = tail(x, 1)

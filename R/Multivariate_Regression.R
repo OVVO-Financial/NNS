@@ -254,25 +254,43 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     }
 
     if(!is.null(np)){
+        lows = logical(); highs = logical()
+        outsiders = numeric(); outside.matrix = matrix(ncol=n2)
+        DISTANCES = numeric()
 
         DISTANCES = apply(point.est,1,function(x) distance(x))
 
-        lows = do.call(pmin,as.data.frame(point.est))<minimums
-        highs = do.call(pmax,as.data.frame(point.est))>maximums
+        lows = do.call(pmin,as.data.frame(t(point.est)))<minimums
+        highs = do.call(pmax,as.data.frame(t(point.est)))>maximums
 
-        outside.index = lows * highs
+        outsiders = lows + highs
+        outside.matrix = matrix(outsiders,ncol=n2,byrow=TRUE)
 
-        if(sum(outside.index)>0){
-              index = which(outside.index==1)
-              for(i in index){
+        if(sum(outside.matrix)>0){
+              outside.columns = numeric()
+              outside.columns = which(outsiders>0)
+
+              # Find rows from those columns
+              outside.index = list()
+              for(i in 1:length(outside.columns)){
+              outside.index[[i]] = which(point.est[,outside.columns[i]]>maximums[outside.columns[i]]
+              | point.est[,outside.columns[i]]<minimums[outside.columns[i]])
+              }
+
+              outside.index = unique(unlist(outside.index))
+
+              for(i in outside.index){
                 p = point.est[i,]
 
                 last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
-                last.known.gradient = (distance(dist.est = pmin(pmax(p, minimums), maximums)) - distance(dist.est = central.points)) / last.known.distance
+
+                q = distance(dist.est = pmin(pmax(p, minimums), maximums))
+                last.known.gradient = (q - distance(dist.est = central.points)) / last.known.distance
 
                 last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
 
-                DISTANCES[i] <- last.distance * last.known.gradient + distance(dist.est = pmin(pmax(p, minimums), maximums))
+                DISTANCES[i] <- last.distance * last.known.gradient + q
+
               }
         }
 

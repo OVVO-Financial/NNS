@@ -147,10 +147,10 @@ for(b in 1 : folds){
 
 
     if(objective=='min'){
-        k = which.min(na.omit(nns.cv.1))
+        k = which.min(na.omit(nns.cv.1))-1
         nns.cv.1 = min(nns.cv.1)
     } else {
-        k = which.max(na.omit(nns.cv.1))
+        k = which.max(na.omit(nns.cv.1))-1
         nns.cv.1 = max(nns.cv.1)
     }
 
