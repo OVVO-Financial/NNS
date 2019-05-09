@@ -109,19 +109,20 @@ for(b in 1 : folds){
 
 
   ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:
-  np = nrow(CV.IVs.test)
-  points.norm = rbind(CV.IVs.test, CV.IVs.train)
-  colnames(points.norm) = colnames(CV.IVs.test)
   if(!is.null(norm)){
-    if(norm == "std"){
-      CV.IVs.train = apply(CV.IVs.train, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-      CV.IVs.test = apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))[1 : np, ]
-    }
+      np = nrow(CV.IVs.test)
+      points.norm = rbind(CV.IVs.test, CV.IVs.train)
+      colnames(points.norm) = colnames(CV.IVs.test)
 
-    if(norm == "NNS"){
-      CV.IVs.train = NNS.norm(CV.IVs.train)
-      CV.IVs.test = NNS.norm(points.norm)[1 : np, ]
-    }
+      if(norm == "std"){
+          CV.IVs.train = apply(CV.IVs.train, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+          CV.IVs.test = apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))[1 : np, ]
+      }
+
+      if(norm == "NNS"){
+          CV.IVs.train = NNS.norm(CV.IVs.train)
+          CV.IVs.test = NNS.norm(points.norm)[1 : np, ]
+      }
   }
 
   if(1 %in% method){
@@ -133,7 +134,7 @@ for(b in 1 : folds){
       for(i in 1:(2*n)){
           predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order)$Point.est
 
-          nns.cv.1[i] = eval(obj.fn)
+          nns.cv.1[i+1] = eval(obj.fn)
           if(i > 1){
             if(objective=='min' && nns.cv.1[i]>nns.cv.1[i-1]){ break }
             if(objective=='max' && nns.cv.1[i]<nns.cv.1[i-1]){ break }
