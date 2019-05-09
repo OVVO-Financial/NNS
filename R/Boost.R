@@ -94,8 +94,8 @@ NNS.boost <- function(IVs.train,
     }
   }
 
-
-  fold <-  foreach(i = 1:folds,.packages = "NNS") %do% {
+  fold = list()
+  for(i in 1:folds){
     keeper.features = list()
 
     new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
@@ -106,18 +106,17 @@ NNS.boost <- function(IVs.train,
     new.dv.train = y[-new.index]
 
 
-    keeper.features <- foreach(j = 1:as.integer(epochs/folds),.packages = "NNS") %dopar% {
+    keeper.features <- foreach(j = 1:as.integer(epochs/folds),.packages = "NNS") %do% {
 
       actual = y[new.index]
-      features= sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
+      features = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
+
       results = eval(obj.fn)
-
-      if(results>threshold){ features } else { NULL }
+      if(results>threshold){features} else {NULL}
     }
-
 
     keeper.features[sapply(keeper.features, is.null)] <- NULL
     keeper.features = unique(keeper.features)
@@ -130,7 +129,7 @@ NNS.boost <- function(IVs.train,
   final.features = do.call(c,fold)
 
 
-  estimates <- foreach(i = 1:length(final.features),.packages = "NNS") %dopar% {
+  estimates <- foreach(i = 1:length(final.features),.packages = "NNS") %do% {
     estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
   }
