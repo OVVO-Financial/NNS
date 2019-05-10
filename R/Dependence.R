@@ -41,7 +41,7 @@ NNS.dep = function(x,
 
         l = length(x)
 
-        if(l <= 500){return(NNS.dep.base(x,y,order=order, degree = degree,print.map = TRUE))}
+        if(l <= 500){return(NNS.dep.base(x,y,order=order, degree = degree,print.map = print.map))}
 
         seg = as.integer(.2*l)
 
@@ -55,14 +55,14 @@ NNS.dep = function(x,
 #cl <- makeCluster(num_cores)
 #registerDoParallel(cl)
 #  foreach(i = 1:5,.packages = "NNS")%dopar%{
-        nns.dep[1] = NNS.dep.base(x[seg.1],y[seg.1])$Dependence
-        nns.dep[2] = NNS.dep.base(x[seg.2],y[seg.2])$Dependence
-        nns.dep[3] = NNS.dep.base(x[seg.3],y[seg.3])$Dependence
-        nns.dep[4] = NNS.dep.base(x[seg.4],y[seg.4])$Dependence
-        nns.dep[5] = NNS.dep.base(x[seg.5],y[seg.5])$Dependence
+        nns.dep[1] = NNS.dep.base(x[seg.1],y[seg.1],print.map = FALSE)$Dependence
+        nns.dep[2] = NNS.dep.base(x[seg.2],y[seg.2],print.map = FALSE)$Dependence
+        nns.dep[3] = NNS.dep.base(x[seg.3],y[seg.3],print.map = FALSE)$Dependence
+        nns.dep[4] = NNS.dep.base(x[seg.4],y[seg.4],print.map = FALSE)$Dependence
+        nns.dep[5] = NNS.dep.base(x[seg.5],y[seg.5],print.map = FALSE)$Dependence
 
 #stopCluster(cl)
-        if(print.map){
+        if(print.map==TRUE){
           nns.cor = NNS.dep.base(x,y,order=order, degree = degree,print.map = TRUE)$Correlation
         } else {
           nns.cor = NNS.dep.base(x,y,order=order, degree = degree,print.map = FALSE)$Correlation

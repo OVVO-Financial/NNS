@@ -36,11 +36,11 @@ NNS.dep.base = function(x,
 
   if(!missing(y)){
 
-    if(print.map == T){
+    if(print.map == TRUE){
       part.map = NNS.part(x, y, order = order, max.obs.req = max.obs, Voronoi = TRUE, min.obs.stop = TRUE)
     }
     else {
-      part.map = NNS.part(x, y, order = order, max.obs.req = max.obs, min.obs.stop = TRUE)
+      part.map = NNS.part(x, y, order = order, max.obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE)
     }
 
     part.df = part.map$dt

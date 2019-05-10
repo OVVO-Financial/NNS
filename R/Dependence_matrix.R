@@ -10,8 +10,8 @@ raw.rhos = list()
 raw.deps = list()
 
 for(i in 1 : (n - 1)){
-        raw.rhos[[i]] = sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = F, order = order, degree = degree)$Correlation)
-        raw.deps[[i]] = sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = F, order = order, degree = degree)$Dependence)
+        raw.rhos[[i]] = sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree)$Correlation)
+        raw.deps[[i]] = sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree)$Dependence)
         }
 
 

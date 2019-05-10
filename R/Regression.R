@@ -297,7 +297,7 @@ NNS.reg = function (x, y,
               x.star.matrix = matrix(nrow = length(y))
 
               if(dim.red.method!="cor"){
-                    x.star.dep = NNS.dep(cbind(x, y)); x.star.dep[is.na(x.star.dep)] = 0
+                    x.star.dep = NNS.dep(cbind(x, y),print.map = FALSE); x.star.dep[is.na(x.star.dep)] = 0
                     x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
               } else {
                     x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
