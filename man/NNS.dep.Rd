@@ -5,7 +5,7 @@
 \title{NNS Dependence}
 \usage{
 NNS.dep(x, y = NULL, order = NULL, degree = NULL,
-  print.map = FALSE)
+  print.map = FALSE, ncores = NULL)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -17,6 +17,8 @@ NNS.dep(x, y = NULL, order = NULL, degree = NULL,
 \item{degree}{integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means.}
+
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
