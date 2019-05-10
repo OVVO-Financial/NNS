@@ -444,8 +444,21 @@ NNS.reg = function (x, y,
     }
   }
 
-    Dynamic.average.min = mean(median(y[x <= min.range]), mode(y[x <= min.range]))
-    Dynamic.average.max = mean(median(y[x >= max.range]), mode(y[x >= max.range]))
+    if(length(na.omit(y[x <= min.range]))==0){a = y[1]; b=a
+    } else {
+        a=median(na.omit(y[x <= min.range]))
+        b=mode(na.omit(y[x <= min.range]))
+    }
+
+    if(length(na.omit(y[x <= min.range]))==0){d = tail(y,1); e=d
+    } else {
+        d=median(na.omit(y[x >= max.range]))
+        e=mode(na.omit(y[x >= max.range]))
+    }
+
+
+    Dynamic.average.min = mean(c(a, b))
+    Dynamic.average.max = mean(c(d, e))
 
   ###Endpoints
   if(length(x[x < min.range]) > 0){
