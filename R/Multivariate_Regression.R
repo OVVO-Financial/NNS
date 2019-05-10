@@ -1,42 +1,6 @@
 NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
 
 
-  if(factor.2.dummy){
-      factor_2_dummy = function(x){
-        if(class(x) == "factor"){
-          n=length(unique(x))
-          output = model.matrix(~x -1, x)[,-(n+1)]
-        } else {
-          output = x
-        }
-        output
-      }
-
-
-    original.IVs = apply(as.data.frame(X_n),2,factor_2_dummy)
-    original.IVs = do.call(cbind, as.data.frame(X_n))
-    original.IVs = as.data.frame(X_n)
-
-    if(dim(original.IVs)[2]==1) {original.IVs = as.vector(original.IVs[,1])}
-
-    if(!is.null(point.est)){
-
-        if(is.null(dim(point.est))){ point.est = t(point.est)}
-
-        point.est = apply(as.data.frame(point.est),2,factor_2_dummy)
-        point.est = do.call(cbind, as.data.frame(point.est))
-        point.est = as.data.frame(point.est)
-
-      ### Add 0's to data for missing regressors
-        Missing = setdiff(names(original.IVs),names(point.est))
-        if(!is.null(Missing) && dim(original.IVs)[2]!= dim(point.est)[2]){
-            point.est[Missing] <- 0
-            point.est = point.est[names(original.IVs)]
-        }
-
-        if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
-    }
-  } # factor.2.dummy
 
   ### For Multiple regressions
   ###  Turn each column into numeric values

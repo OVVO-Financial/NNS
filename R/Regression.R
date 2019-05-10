@@ -173,9 +173,9 @@ NNS.reg = function (x, y,
     type = "CLASS"
   }
 
-
+if(factor.2.dummy){
   if(!is.null(dim.red.method)){
-      if(factor.2.dummy){
+
           factor_2_dummy = function(x){
           if(class(x) == "factor"){
               n=length(unique(x))
@@ -185,7 +185,7 @@ NNS.reg = function (x, y,
             }
             output
         }
-    }
+
 
     x = apply(as.data.frame(x),2,factor_2_dummy)
     x = do.call(cbind, as.data.frame(x))
@@ -211,7 +211,47 @@ NNS.reg = function (x, y,
           if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
       }
   } # Dimension Reduction with factor.2.dummy
+  else{
 
+      factor_2_dummy = function(x){
+        if(class(x) == "factor"){
+          n=length(unique(x))
+          output = model.matrix(~x -1, x)[,-(n+1)]
+        } else {
+          output = x
+        }
+        output
+      }
+
+
+      x = apply(as.data.frame(x),2,factor_2_dummy)
+      x = do.call(cbind, as.data.frame(x))
+      x = as.data.frame(x)
+
+      if(dim(x)[2]==1) {x = as.vector(x[,1])}
+
+      if(!is.null(point.est)){
+
+        if(is.null(dim(point.est))){ point.est = t(point.est)}
+
+        point.est = apply(as.data.frame(point.est),2,factor_2_dummy)
+        point.est = do.call(cbind, as.data.frame(point.est))
+        point.est = as.data.frame(point.est)
+
+        ### Add 0's to data for missing regressors
+        Missing = setdiff(names(x),names(point.est))
+        if(!is.null(Missing) && dim(x)[2]!= dim(point.est)[2]){
+          point.est[Missing] <- 0
+          point.est = point.est[names(x)]
+        }
+
+        if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+      }
+
+
+
+  }
+}
 
   original.names = colnames(x)
   original.columns = ncol(x)
