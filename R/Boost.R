@@ -61,7 +61,12 @@ NNS.boost <- function(IVs.train,
   }
 
 
+
   x=data.frame(IVs.train); y=DV.train; z=data.frame(IVs.test)
+
+  n = ncol(x)
+
+  epochs = min(epochs, sum(choose(n,1:n)), length(y))
 
   estimates=list()
   fold = list()
@@ -105,7 +110,11 @@ NNS.boost <- function(IVs.train,
 
 
     for(j in 1:as.integer(epochs/folds)){
-
+      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits = 2),"\r",appendLF=FALSE)
+      if(j == as.integer(epochs/folds)){
+        message("% of Fold ",i," = 1.00","\r",appendLF=FALSE)
+        flush.console()
+      }
       actual = y[new.index]
       features = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
@@ -130,6 +139,12 @@ NNS.boost <- function(IVs.train,
 
 
   for(i in 1:length(final.features)){
+    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 2)),"\r",appendLF=FALSE)
+    if(i == length(final.features)){
+      message("% of Final Estimate  = 1.00","\r",appendLF=FALSE)
+      flush.console()
+    }
+
     estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
   }
