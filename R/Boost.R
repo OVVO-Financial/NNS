@@ -116,7 +116,7 @@ NNS.boost <- function(IVs.train,
       if(results>threshold){keeper.features[[j]]=features} else {NULL}
     }
 
-    keeper.features[sapply(keeper.features, is.null)] <- NULL
+    keeper.features = keeper.features[!sapply(keeper.features, is.null)]
     keeper.features = unique(keeper.features)
     fold[[i]]= keeper.features
 
@@ -126,8 +126,9 @@ NNS.boost <- function(IVs.train,
 
   final.features = do.call(c,fold)
 
-
   estimates = list()
+
+
   for(i in 1:length(final.features)){
     estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 

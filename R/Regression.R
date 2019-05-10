@@ -6,7 +6,7 @@
 #' @param y a numeric or factor vector with compatible dimsensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
-#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.98 to ensure high dependence for higher \code{("order")} and endpoint determination.
+#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.95 to ensure high dependence for higher \code{("order")} and endpoint determination.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param tau options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method = "NNS.caus")} or
 #'
@@ -142,7 +142,7 @@
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .98,
+                    stn = .95,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
@@ -168,31 +168,15 @@ NNS.reg = function (x, y,
     std.errors = TRUE
   }
 
-  if(is.null(dim.red.method)){
-    dim.red = FALSE
-  } else {
-      dim.red = TRUE
-  }
 
   if(class(y) == "factor"){
     type = "CLASS"
   }
 
 
-
-  if(factor.2.dummy){
-    if(!dim.red){
-      factor_2_dummy = function(x){
-        if(class(x) == "factor"){
-          n=length(unique(x))
-          output = model.matrix(~x -1, x)[,-(n+1)]
-        } else {
-          output = x
-        }
-          output
-      }
-    } else {
-        factor_2_dummy = function(x){
+  if(!is.null(dim.red.method)){
+      if(factor.2.dummy){
+          factor_2_dummy = function(x){
           if(class(x) == "factor"){
               n=length(unique(x))
               output = model.matrix(~x -1, x)[,-1]
@@ -206,9 +190,10 @@ NNS.reg = function (x, y,
     x = apply(as.data.frame(x),2,factor_2_dummy)
     x = do.call(cbind, as.data.frame(x))
     x = as.data.frame(x)
-      if(dim(x)[2]==1) {x = as.vector(x[,1])}
 
-      if(!is.null(point.est)){
+        if(dim(x)[2]==1) {x = as.vector(x[,1])}
+
+        if(!is.null(point.est)){
 
           if(is.null(dim(point.est))){ point.est = t(point.est)}
 
@@ -225,7 +210,7 @@ NNS.reg = function (x, y,
 
           if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
       }
-  }
+  } # Dimension Reduction with factor.2.dummy
 
 
   original.names = colnames(x)
@@ -251,7 +236,7 @@ NNS.reg = function (x, y,
       point.est.y = NULL
     }
   } else {
-    x = apply(x,2 ,as.numeric)
+    x = apply(x, 2, as.numeric)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){
         point.est = as.numeric(point.est)
@@ -282,7 +267,7 @@ NNS.reg = function (x, y,
     if(ncol(original.variable) == 1){
       x = original.variable
     } else {
-      if(!dim.red){
+      if(is.null(dim.red.method)){
         if(!is.null(original.columns)){
           if(is.null(n.best)){
             n.best = ceiling(sqrt(original.columns))
