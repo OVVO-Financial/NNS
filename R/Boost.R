@@ -100,7 +100,7 @@ NNS.boost <- function(IVs.train,
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
-        threshold = rep(seq(.99,0,-.01),each=10)[i]
+        threshold = max(results)
         break
       }
     }
