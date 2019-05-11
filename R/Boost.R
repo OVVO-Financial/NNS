@@ -87,18 +87,25 @@ NNS.boost <- function(IVs.train,
     for(i in 1:1000){
       current.threshold = rep(seq(.99,0,-.01),each=10)[i]
       message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"   ","\r",appendLF=FALSE)
-      test.features[[i]] = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
+      test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+
+      if(i > 1){
+          if(any(test.features[[i]]%in%test.features[-i])){
+              next
+          }
+      }
 
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
-        threshold = max(results)
+        threshold = rep(seq(.99,0,-.01),each=10)[i]
         break
       }
     }
   }
+
   message("                                       ","\r",appendLF=FALSE)
   fold = list()
   for(i in 1:folds){
@@ -106,7 +113,6 @@ NNS.boost <- function(IVs.train,
 
     new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
-    #actual = y[new.index]
     new.iv.test = x[new.index,]
     new.iv.train = x[-new.index,]
     new.dv.train = y[-new.index]
@@ -119,21 +125,27 @@ NNS.boost <- function(IVs.train,
         flush.console()
       }
       actual = y[new.index]
-      features = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
+      features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
-      if(i>1 && (list(features)%in%fold)){next}
-
+      if(i>1){
+        if(any(fold %in% list(features))){
+        keeper.features[[j]]=NULL
+      print(fold%in%list(features))
+      print(list(features))
+next}
+}
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
-      results = eval(obj.fn)
-      if(results>threshold){keeper.features[[j]]=features[order(features)]} else {NULL}
+      new.results = eval(obj.fn)
+      if(new.results>threshold){keeper.features[[j]]=features} else {keeper.features[[j]]=NULL}
+
     }
 
     keeper.features = keeper.features[!sapply(keeper.features, is.null)]
     keeper.features = unique(keeper.features)
     fold[[i]]= keeper.features
-
+    print(fold)
 
   }
 
@@ -144,6 +156,8 @@ NNS.boost <- function(IVs.train,
 
   final.features = do.call(c,fold)
   final.features = unique(final.features)
+
+  print(final.features)
 
   if(length(final.features)==0){final.features = test.features[which.max(results)]}
 
