@@ -33,7 +33,7 @@
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
-                      depth = 2,
+                      depth = NULL,
                       epochs=500,
                       folds=5,
                       CV.size=.2,
