@@ -141,7 +141,7 @@ NNS.boost <- function(IVs.train,
   fold = unique(fold)
 
   final.features = do.call(c,fold)
-
+  final.features = unique(final.features)
 
   estimates = list()
 
