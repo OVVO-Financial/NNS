@@ -79,9 +79,10 @@ NNS.boost <- function(IVs.train,
   new.iv.train = x[-new.index,]
   new.dv.train = y[-new.index]
 
-
+old.threshold = 0
   # Add test loop for highest threshold of order 1...
   if(is.null(threshold)){
+    old.threshold = 1
     test.features = list()
     results = numeric()
     for(i in 1:1000){
@@ -158,7 +159,7 @@ NNS.boost <- function(IVs.train,
   final.features = unique(final.features)
 
   if(length(final.features)==0){
-    if(length(test.features)==0){stop("Please reduce [threshold].")} else{
+    if(length(test.features)==0 && old.threshold==0 ){stop("Please reduce [threshold].")} else{
     final.features = test.features[which.max(results)]}
 }
 
