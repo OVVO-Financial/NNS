@@ -123,19 +123,16 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     num_cores <- ncores
   }
 
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
 
-    NNS.ID <- foreach(j = 1:n) %dopar% {
+  for(j in 1:n){
     sorted.reg.points = sort(reg.points.matrix[ , j])
     sorted.reg.points = sorted.reg.points[!is.na(sorted.reg.points)]
 
-      findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+    NNS.ID[[i]] =  findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
   }
 
   NNS.ID = matrix(unlist(NNS.ID), nrow = length(Y),ncol = n)
 
-  stopCluster(cl)
 
 
   ### Create unique identifier of each observation's interval
