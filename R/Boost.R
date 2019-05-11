@@ -111,7 +111,7 @@ NNS.boost <- function(IVs.train,
 
 
     for(j in 1:as.integer(epochs/folds)){
-      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"\r",appendLF=FALSE)
+      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
       if(j == as.integer(epochs/folds)){
         message("% of Fold ",i," = 1.000     ","\r",appendLF=FALSE)
         flush.console()
@@ -135,17 +135,19 @@ NNS.boost <- function(IVs.train,
 
   }
 
+  fold = fold[!sapply(fold, is.null)]
   if(length(fold)==0) stop("Please reduce [threshold]")
 
   fold = unique(fold)
 
   final.features = do.call(c,fold)
 
+
   estimates = list()
 
 
   for(i in 1:length(final.features)){
-    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2)),"\r",appendLF=FALSE)
+    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
     if(i == length(final.features)){
       message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
       flush.console()
