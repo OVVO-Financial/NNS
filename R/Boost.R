@@ -82,17 +82,17 @@ NNS.boost <- function(IVs.train,
 
   # Add test loop for highest threshold
   if(is.null(threshold)){
-
+    results = numeric()
     for(i in rep(seq(.99,0,-.01),each=1)){
       message("Current Threshold = ",i,"\r",appendLF=FALSE)
       features= sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
-      results = eval(obj.fn)
+      results[which(i%in%rep(seq(.99,0,-.01),each=1))] = eval(obj.fn)
 
-      if(results>=i){
-        threshold = i
+      if(results[which(i%in%rep(seq(.99,0,-.01),each=1))]>=i){
+        threshold = max(results,i)
         break
       }
     }
@@ -136,12 +136,14 @@ NNS.boost <- function(IVs.train,
   }
 
   fold = fold[!sapply(fold, is.null)]
-  if(length(fold)==0) stop("Please reduce [threshold]")
-
   fold = unique(fold)
+
+  if(length(fold)==0) stop("Please reduce [threshold]")
 
   final.features = do.call(c,fold)
   final.features = unique(final.features)
+
+  if(length(final.features)==0) stop("Please reduce [threshold]")
 
   estimates = list()
 
