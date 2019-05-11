@@ -159,7 +159,7 @@ old.threshold = 0
   final.features = unique(final.features)
 
   if(length(final.features)==0){
-    if(length(test.features)==0 && old.threshold==0 ){stop("Please reduce [threshold].")} else{
+    if(old.threshold==0){stop("Please reduce [threshold].")} else{
     final.features = test.features[which.max(results)]}
 }
 
