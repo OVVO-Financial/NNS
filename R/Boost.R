@@ -84,6 +84,7 @@ NNS.boost <- function(IVs.train,
   if(is.null(threshold)){
 
     for(i in rep(seq(.99,0,-.01),each=1)){
+      message("Current Threshold = ",i,"\r",appendLF=FALSE)
       features= sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
       #If estimate is > threshold, store 'features'
@@ -96,42 +97,47 @@ NNS.boost <- function(IVs.train,
       }
     }
   }
-
+  message("                           ","\r",appendLF=FALSE)
   fold = list()
   for(i in 1:folds){
     keeper.features = list()
 
     new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
-    actual = y[new.index]
+    #actual = y[new.index]
     new.iv.test = x[new.index,]
     new.iv.train = x[-new.index,]
     new.dv.train = y[-new.index]
 
 
     for(j in 1:as.integer(epochs/folds)){
-      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits = 2),"\r",appendLF=FALSE)
+      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"\r",appendLF=FALSE)
       if(j == as.integer(epochs/folds)){
-        message("% of Fold ",i," = 1.00","\r",appendLF=FALSE)
+        message("% of Fold ",i," = 1.000     ","\r",appendLF=FALSE)
         flush.console()
       }
       actual = y[new.index]
       features = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
+      if(i>1 && (list(features)%in%fold)){next}
+
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
       results = eval(obj.fn)
-      if(results>threshold){keeper.features[[j]]=features} else {NULL}
+      if(results>threshold){keeper.features[[j]]=features[order(features)]} else {NULL}
     }
 
     keeper.features = keeper.features[!sapply(keeper.features, is.null)]
     keeper.features = unique(keeper.features)
     fold[[i]]= keeper.features
 
+
   }
 
   if(length(fold)==0) stop("Please reduce [threshold]")
+
+  fold = unique(fold)
 
   final.features = do.call(c,fold)
 
@@ -139,9 +145,9 @@ NNS.boost <- function(IVs.train,
 
 
   for(i in 1:length(final.features)){
-    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 2)),"\r",appendLF=FALSE)
+    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2)),"\r",appendLF=FALSE)
     if(i == length(final.features)){
-      message("% of Final Estimate  = 1.00","\r",appendLF=FALSE)
+      message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
       flush.console()
     }
 
