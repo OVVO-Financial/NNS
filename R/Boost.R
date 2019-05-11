@@ -80,7 +80,7 @@ NNS.boost <- function(IVs.train,
   new.dv.train = y[-new.index]
 
 
-  # Add test loop for highest threshold
+  # Add test loop for highest threshold of order 1...
   if(is.null(threshold)){
     test.features = list()
     results = numeric()
@@ -96,7 +96,7 @@ NNS.boost <- function(IVs.train,
       }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=1)$Point.est
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
@@ -157,12 +157,10 @@ NNS.boost <- function(IVs.train,
   final.features = do.call(c,fold)
   final.features = unique(final.features)
 
-
-
-  if(length(final.features)==0){final.features = test.features[which.max(results)]}
-
-  estimates = list()
-
+  if(length(final.features)==0){
+    if(length(test.features)==0){stop("Please reduce [threshold].")} else{
+    final.features = test.features[which.max(results)]}
+}
 
   for(i in 1:length(final.features)){
     message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
