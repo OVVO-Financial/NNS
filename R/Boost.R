@@ -86,7 +86,7 @@ NNS.boost <- function(IVs.train,
     results = numeric()
     for(i in 1:1000){
       current.threshold = rep(seq(.99,0,-.01),each=10)[i]
-      message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"\r",appendLF=FALSE)
+      message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"   ","\r",appendLF=FALSE)
       test.features[[i]] = sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
       #If estimate is > threshold, store 'features'
