@@ -83,7 +83,7 @@ NNS.boost <- function(IVs.train,
   # Add test loop for highest threshold
   if(is.null(threshold)){
     results = numeric()
-    for(i in rep(seq(.99,0,-.01),each=1)){
+    for(i in rep(seq(.99,0,-.01),each=10)){
       message("Current Threshold = ",i,"\r",appendLF=FALSE)
       features= sample(ncol(x),sample(2:ncol(x),1),replace = FALSE)
 
