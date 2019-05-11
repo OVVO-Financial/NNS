@@ -129,11 +129,11 @@ NNS.boost <- function(IVs.train,
 
       if(i>1){
         if(any(fold %in% list(features))){
-        keeper.features[[j]]=NULL
-      print(fold%in%list(features))
-      print(list(features))
-next}
-}
+            keeper.features[[j]]=NULL
+            next
+        }
+      }
+
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
 
@@ -145,7 +145,7 @@ next}
     keeper.features = keeper.features[!sapply(keeper.features, is.null)]
     keeper.features = unique(keeper.features)
     fold[[i]]= keeper.features
-    print(fold)
+
 
   }
 
@@ -157,7 +157,7 @@ next}
   final.features = do.call(c,fold)
   final.features = unique(final.features)
 
-  print(final.features)
+
 
   if(length(final.features)==0){final.features = test.features[which.max(results)]}
 
