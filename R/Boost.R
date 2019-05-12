@@ -69,7 +69,8 @@ NNS.boost <- function(IVs.train,
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
   if(representative.sample){
-      x = data.table(IVs.train)
+      x = data.matrix(IVs.train)
+      x = data.table(x)
 
       fivenum.x = x[,lapply(.SD,fivenum), by = .(y)][-c(1,5),]
       mode.x = x[,lapply(.SD,mode), by = .(y)]
@@ -80,7 +81,7 @@ NNS.boost <- function(IVs.train,
       y = unlist(x[,1])
       x = as.data.frame(x[,-1])
 
-      depth='max';n.best=1
+      depth='max'; n.best=1
   }
 
   n = ncol(x)
