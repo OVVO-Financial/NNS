@@ -4,9 +4,10 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, n.best = NULL,
-  epochs = NULL, folds = 5, CV.size = 0.2, threshold = NULL,
-  feature.importance = TRUE, ncores = NULL)
+NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
+  depth = NULL, n.best = NULL, epochs = NULL, folds = 5,
+  CV.size = 0.2, threshold = NULL, feature.importance = TRUE,
+  ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -14,6 +15,8 @@ NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, n.best = NULL,
 \item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
+
+\item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
 \item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
 
