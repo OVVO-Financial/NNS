@@ -64,11 +64,11 @@ NNS.boost <- function(IVs.train,
 
 
 
-  x=data.frame(IVs.train); y=DV.train; z=data.frame(IVs.test)
+  x = data.frame(IVs.train); y=DV.train; z=data.frame(IVs.test)
 
   n = ncol(x)
 
-  epochs = min(epochs, sum(choose(n,1:n)), length(y))
+  epochs = 2*length(y)
 
   estimates=list()
   fold = list()
@@ -81,74 +81,86 @@ NNS.boost <- function(IVs.train,
   new.iv.train = x[-new.index,]
   new.dv.train = y[-new.index]
 
-old.threshold = 0
+  old.threshold = 0
+
+
   # Add test loop for highest threshold of order 1...
   if(is.null(threshold)){
-    old.threshold = 1
-    test.features = list()
-    results = numeric()
-    for(i in 1:1000){
-      current.threshold = rep(seq(.99,0,-.01),each=10)[i]
-      message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"   ","\r",appendLF=FALSE)
-      test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+      old.threshold = 1
+      test.features = list()
+      results = numeric()
 
-      if(i > 1){
-          if(any(test.features[[i]]%in%test.features[-i])){
-              next
+      for(i in 1:1000){
+          current.threshold = rep(seq(.99,0,-.01),each=10)[i]
+          message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"   ","\r",appendLF=FALSE)
+
+          test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+
+          if(i > 1){
+              if(any(test.features[[i]]%in%test.features[-i])){
+                  next
+              }
           }
-      }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order='max',n.best = 1)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
+
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
-        threshold = max(results)
-        break
+          threshold = max(results)
+          message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
+          break
       }
     }
   }
 
+  # Clear message line
   message("                                       ","\r",appendLF=FALSE)
+
+
   fold = list()
   for(i in 1:folds){
-    keeper.features = list()
+      keeper.features = list()
 
-    new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
+      new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
-    new.iv.test = x[new.index,]
-    new.iv.train = x[-new.index,]
-    new.dv.train = y[-new.index]
+      new.iv.test = x[new.index,]
+      new.iv.train = x[-new.index,]
+      new.dv.train = y[-new.index]
 
+      for(j in 1:as.integer(epochs/folds)){
+          message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
-    for(j in 1:as.integer(epochs/folds)){
-      message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
-      if(j == as.integer(epochs/folds)){
-        message("% of Fold ",i," = 1.000     ","\r",appendLF=FALSE)
-        flush.console()
+          if(j == as.integer(epochs/folds)){
+              message("% of Fold ",i," = 1.000     ","\r",appendLF=FALSE)
+              flush.console()
+          }
+
+          actual = y[new.index]
+          features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+
+          if(i>1){
+              if(any(fold %in% list(features))){
+                  keeper.features[[j]]=NULL
+                  next
+              }
+          }
+
+          #If estimate is > threshold, store 'features'
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
+
+          new.results = eval(obj.fn)
+          if(new.results>threshold){
+              keeper.features[[j]]=features
+          } else {keeper.features[[j]]=NULL
+          }
+
       }
-      actual = y[new.index]
-      features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
-      if(i>1){
-        if(any(fold %in% list(features))){
-            keeper.features[[j]]=NULL
-            next
-        }
-      }
-
-      #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order="max",n.best = 1)$Point.est
-
-      new.results = eval(obj.fn)
-      if(new.results>threshold){keeper.features[[j]]=features} else {keeper.features[[j]]=NULL}
-
-    }
-
-    keeper.features = keeper.features[!sapply(keeper.features, is.null)]
-    keeper.features = unique(keeper.features)
-    fold[[i]]= keeper.features
-
+      keeper.features = keeper.features[!sapply(keeper.features, is.null)]
+      keeper.features = unique(keeper.features)
+      fold[[i]]= keeper.features
 
   }
 
@@ -161,36 +173,46 @@ old.threshold = 0
   final.features = unique(final.features)
 
   if(length(final.features)==0){
-    if(old.threshold==0){stop("Please reduce [threshold].")} else{
-    final.features = test.features[which.max(results)]}
-}
+      if(old.threshold==0){
+          stop("Please reduce [threshold].")
+      } else {
+          final.features = test.features[which.max(results)]
+      }
+  }
 
   for(i in 1:length(final.features)){
-    message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
-    if(i == length(final.features)){
-      message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
-      flush.console()
-    }
+      message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
 
-    estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order='max',n.best = 1)$Point.est
+      if(i == length(final.features)){
+          message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
+          flush.console()
+      }
+
+      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
 
   }
 
-  plot.table = table(unlist(final.features))
-  names(plot.table)==names(IVs.train)
 
   if(feature.importance==TRUE){
-    plot.table = table(unlist(final.features))
-    names(plot.table)==names(IVs.train)
+      plot.table = table(unlist(final.features))
+      names(plot.table)=names(IVs.train[as.numeric(names(plot.table))])
 
-    linch <-  max(strwidth(names(plot.table), "inch")+1.4, na.rm = TRUE)
-    par(mai=c(1.02,linch,0.82,0.42))
+      linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
+      par(mai=c(1.02,linch,0.82,0.42))
 
-    barplot(rev(sort(a,decreasing = TRUE)),
-            horiz = TRUE,
-            col='steelblue',
-            main="Feature Importance",
-            xlab = "Frequency",las=1)
+      if(length(plot.table)!=1){
+          barplot(rev(sort(plot.table,decreasing = TRUE)),
+                horiz = TRUE,
+                col='steelblue',
+                main="Feature Importance",
+                xlab = "Frequency",las=1)
+      } else {
+          barplot(plot.table,
+                horiz = TRUE,
+                col='steelblue',
+                main="Feature Importance in Final Estimate",
+                xlab = "Frequency",las=1)
+      }
 
     par(mar = c(0, 0, 0, 0))
   }
