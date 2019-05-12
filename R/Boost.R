@@ -10,6 +10,7 @@
 #' @param folds integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
+#' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns a vector of fitted values for the dependent variable test set.
 #'
@@ -37,7 +38,8 @@ NNS.boost <- function(IVs.train,
                       epochs=500,
                       folds=5,
                       CV.size=.2,
-                      threshold=NULL,
+                      threshold = NULL,
+                      feature.importance = TRUE,
                       ncores = NULL){
 
 
@@ -97,7 +99,7 @@ old.threshold = 0
       }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=1)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order='max',n.best = 1)$Point.est
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
@@ -136,7 +138,7 @@ old.threshold = 0
       }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
+      predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order="max",n.best = 1)$Point.est
 
       new.results = eval(obj.fn)
       if(new.results>threshold){keeper.features[[j]]=features} else {keeper.features[[j]]=NULL}
@@ -170,10 +172,28 @@ old.threshold = 0
       flush.console()
     }
 
-    estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth)$Point.est
+    estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order='max',n.best = 1)$Point.est
 
   }
 
+  plot.table = table(unlist(final.features))
+  names(plot.table)==names(IVs.train)
+
+  if(feature.importance==TRUE){
+    plot.table = table(unlist(final.features))
+    names(plot.table)==names(IVs.train)
+
+    linch <-  max(strwidth(names(plot.table), "inch")+1.4, na.rm = TRUE)
+    par(mai=c(1.02,linch,0.82,0.42))
+
+    barplot(rev(sort(a,decreasing = TRUE)),
+            horiz = TRUE,
+            col='steelblue',
+            main="Feature Importance",
+            xlab = "Frequency",las=1)
+
+    par(mar = c(0, 0, 0, 0))
+  }
 
   return(apply(do.call(cbind,estimates),1,mode))
 }
