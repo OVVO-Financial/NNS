@@ -103,7 +103,7 @@ NNS.boost <- function(IVs.train,
           }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
 
       results[i] = eval(obj.fn)
 
@@ -148,7 +148,7 @@ NNS.boost <- function(IVs.train,
           }
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
 
           new.results = eval(obj.fn)
           if(new.results>threshold){
@@ -188,7 +188,7 @@ NNS.boost <- function(IVs.train,
           flush.console()
       }
 
-      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL,factor.2.dummy = FALSE)$Point.est
+      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
 
   }
 
