@@ -5,6 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
+#' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.  Also, sets \code{depth = "max"} and \code{n.best = 1} for this reduced dataset.
 #' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
@@ -35,6 +36,7 @@
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
+                      representative.sample = TRUE,
                       depth = NULL,
                       n.best = NULL,
                       epochs = NULL,
@@ -64,9 +66,22 @@ NNS.boost <- function(IVs.train,
     }
   }
 
+  x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
+  if(representative.sample){
+      x = data.table(IVs.train)
 
-  x = data.frame(IVs.train); y=DV.train; z=data.frame(IVs.test)
+      fivenum.x = x[,lapply(.SD,fivenum), by = .(y)][-c(1,5),]
+      mode.x = x[,lapply(.SD,mode), by = .(y)]
+      mean.x = x[,lapply(.SD,mean), by = .(y)]
+
+      x = rbind(fivenum.x,mode.x,mean.x)
+
+      y = unlist(x[,1])
+      x = as.data.frame(x[,-1])
+
+      depth='max';n.best=1
+  }
 
   n = ncol(x)
 
@@ -152,7 +167,7 @@ NNS.boost <- function(IVs.train,
           }
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
+          predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
 
           new.results = eval(obj.fn)
           if(new.results>threshold){
@@ -208,7 +223,7 @@ NNS.boost <- function(IVs.train,
           barplot(rev(sort(plot.table,decreasing = TRUE)),
                 horiz = TRUE,
                 col='steelblue',
-                main="Feature Importance",
+                main="Feature Importance in Final Estimate",
                 xlab = "Frequency",las=1)
       } else {
           barplot(plot.table,
