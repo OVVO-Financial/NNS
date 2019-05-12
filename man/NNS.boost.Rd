@@ -16,7 +16,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
 
-\item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.  Also, sets \code{depth = "max"} and \code{n.best = 1} for this reduced dataset.}
+\item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
 \item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
 
