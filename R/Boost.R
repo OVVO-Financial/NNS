@@ -6,7 +6,8 @@
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
 #' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
-#' @param epochs integer; 500 (default) Total number of feature combinations to run.
+#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
+#' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param folds integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
@@ -35,7 +36,8 @@ NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
                       depth = NULL,
-                      epochs=500,
+                      n.best = NULL,
+                      epochs = NULL,
                       folds=5,
                       CV.size=.2,
                       threshold = NULL,
@@ -68,7 +70,9 @@ NNS.boost <- function(IVs.train,
 
   n = ncol(x)
 
-  epochs = 2*length(y)
+  if(is.null(epochs)){
+      epochs = 2*length(y)
+  }
 
   estimates=list()
   fold = list()
@@ -103,7 +107,7 @@ NNS.boost <- function(IVs.train,
           }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
 
       results[i] = eval(obj.fn)
 
@@ -148,7 +152,7 @@ NNS.boost <- function(IVs.train,
           }
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
 
           new.results = eval(obj.fn)
           if(new.results>threshold){
@@ -188,7 +192,7 @@ NNS.boost <- function(IVs.train,
           flush.console()
       }
 
-      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=NULL)$Point.est
+      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
 
   }
 
