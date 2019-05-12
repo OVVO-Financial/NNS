@@ -4,8 +4,9 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, depth = 2, epochs = 500,
-  folds = 5, CV.size = 0.2, threshold = NULL, ncores = NULL)
+NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, epochs = 500,
+  folds = 5, CV.size = 0.2, threshold = NULL,
+  feature.importance = TRUE, ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -23,6 +24,8 @@ NNS.boost(IVs.train, DV.train, IVs.test, depth = 2, epochs = 500,
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
 \item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+
+\item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
