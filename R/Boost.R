@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
-#' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.  Also, sets \code{depth = "max"} and \code{n.best = 1} for this reduced dataset.
+#' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
@@ -81,7 +81,7 @@ NNS.boost <- function(IVs.train,
       y = unlist(x[,1])
       x = as.data.frame(x[,-1])
 
-      depth='max'; n.best=1
+#      depth='max'; n.best=1
   }
 
   n = ncol(x)
