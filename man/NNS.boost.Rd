@@ -4,8 +4,8 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, epochs = 500,
-  folds = 5, CV.size = 0.2, threshold = NULL,
+NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, n.best = NULL,
+  epochs = NULL, folds = 5, CV.size = 0.2, threshold = NULL,
   feature.importance = TRUE, ncores = NULL)
 }
 \arguments{
@@ -17,7 +17,9 @@ NNS.boost(IVs.train, DV.train, IVs.test, depth = NULL, epochs = 500,
 
 \item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
 
-\item{epochs}{integer; 500 (default) Total number of feature combinations to run.}
+\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.}
+
+\item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
 \item{folds}{integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.}
 
