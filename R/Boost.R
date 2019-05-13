@@ -142,8 +142,8 @@ NNS.boost <- function(IVs.train,
         } else {
             actual = DV.train[new.index]
             new.iv.test = IVs.train[new.index,]
-            new.iv.train = x
-            new.dv.train = y
+            new.iv.train = IVs.train[-new.index,]
+            new.dv.train = DV.train[-new.index]
         }
 
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
