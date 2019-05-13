@@ -8,6 +8,7 @@
 #' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
+#' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param folds integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
@@ -39,6 +40,7 @@ NNS.boost <- function(IVs.train,
                       representative.sample = TRUE,
                       depth = NULL,
                       n.best = NULL,
+                      learner.trials = NULL,
                       epochs = NULL,
                       folds=5,
                       CV.size=.2,
@@ -105,26 +107,46 @@ NNS.boost <- function(IVs.train,
   estimates=list()
   fold = list()
 
-  # Test sample for threshold
-  new.index = sample(length(x[,1]), as.integer(CV.size*length(x[,1])), replace = FALSE)
-
-  actual = y[new.index]
-  new.iv.test = x[new.index,]
-  new.iv.train = x[-new.index,]
-  new.dv.train = y[-new.index]
-
   old.threshold = 0
 
 
-  # Add test loop for highest threshold of order 1...
+  # Add test loop for highest threshold ...
   if(is.null(threshold)){
       old.threshold = 1
       test.features = list()
       results = numeric()
 
-      for(i in 1:1000){
-          current.threshold = rep(seq(.99,0,-.01),each=10)[i]
-          message("Current Threshold = ",current.threshold," iteration = " ,i%%10,"   ","\r",appendLF=FALSE)
+      if(is.null(learner.trials)){learner.trials = length(DV.train)}
+
+      for(i in 1:learner.trials){
+        new.index = sample(length(DV.train), as.integer(CV.size*length(DV.train)), replace = FALSE)
+
+        if(representative.sample){
+          new.iv.train = apply(as.data.frame(IVs.train[-new.index,]),2,factor_2_dummy)
+          new.iv.train = do.call(cbind, as.data.frame(new.iv.train))
+          new.iv.train = data.matrix(new.iv.train)
+
+          new.iv.train = data.table(new.iv.train)
+
+          fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(DV.train[-new.index])]
+          mode.new.iv.train = new.iv.train[,lapply(.SD,mode), by = .(DV.train[-new.index])]
+          mean.new.iv.train = new.iv.train[,lapply(.SD,mean), by = .(DV.train[-new.index])]
+
+          new.iv.train = rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+
+          new.dv.train = unlist(new.iv.train[,1])
+          new.iv.train = as.data.frame(new.iv.train[,-1])
+          new.iv.test = IVs.train[new.index,]
+          actual = DV.train[new.index]
+
+        } else {
+            actual = y[new.index]
+            new.iv.test = x[new.index,]
+            new.iv.train = x[-new.index,]
+            new.dv.train = y[-new.index]
+        }
+
+          message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
 
           test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
@@ -138,17 +160,21 @@ NNS.boost <- function(IVs.train,
       predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
       results[i] = eval(obj.fn)
-
-      if(max(results)>=current.threshold){
-          threshold = mean(c(max(results),current.threshold))
-          message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
-          break
-      }
     }
   }
+    if(feature.importance){
+          par(mfrow=c(2,1))
+          par(mai=c(1.0,.5,0.8,0.5))
+          hist(results,main = "Distribution of Learner Trials Accuracy",
+               xlab = "Accuracy",col = "steelblue")
+    }
 
-  # Clear message line
-  message("                                       ","\r",appendLF=FALSE)
+    threshold = fivenum(results)[4]
+
+    message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
+
+    # Clear message line
+    message("                                       ","\r",appendLF=FALSE)
 
 
   fold = list()
@@ -157,6 +183,7 @@ NNS.boost <- function(IVs.train,
 
       new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
+      actual = y[new.index]
       new.iv.test = x[new.index,]
       new.iv.train = x[-new.index,]
       new.dv.train = y[-new.index]
@@ -169,7 +196,7 @@ NNS.boost <- function(IVs.train,
               flush.console()
           }
 
-          actual = y[new.index]
+
           features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
           if(i>1){
@@ -191,19 +218,16 @@ NNS.boost <- function(IVs.train,
       }
 
       keeper.features = keeper.features[!sapply(keeper.features, is.null)]
-      keeper.features = unique(keeper.features)
       fold[[i]]= keeper.features
       if(is.null(fold[[i]])){break}
 
   }
 
   fold = fold[!sapply(fold, is.null)]
-  fold = unique(fold)
 
   if(length(fold)==0) stop("Please reduce [threshold]")
 
   final.features = do.call(c,fold)
-  final.features = unique(final.features)
 
   if(length(final.features)==0){
       if(old.threshold==0){
@@ -231,7 +255,7 @@ NNS.boost <- function(IVs.train,
       names(plot.table)=names(IVs.train[as.numeric(names(plot.table))])
 
       linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
-      par(mai=c(1.02,linch,0.82,0.42))
+      par(mai=c(1.0,linch,0.8,0.5))
 
       if(length(plot.table)!=1){
           barplot(rev(sort(plot.table,decreasing = TRUE)),
@@ -248,6 +272,7 @@ NNS.boost <- function(IVs.train,
       }
 
     par(mar = c(0, 0, 0, 0))
+    par(mfrow=c(1,1))
   }
 
   return(apply(do.call(cbind,estimates),1,mode))
