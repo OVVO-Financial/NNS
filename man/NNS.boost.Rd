@@ -40,7 +40,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 Returns a vector of fitted values for the dependent variable test set.
 }
 \description{
-Ensemble method using the predictions of the NNS base models \link{NNS.reg} for various uncorrelated feature combinations.
+Ensemble method for classification using the predictions of the NNS base models \link{NNS.reg} collected from uncorrelated feature combinations.
 }
 \note{
 Currently only objective function is to maximize \code{mean(round(predicted)==as.numeric(actual))} since it is a classifier.  For a regression problem, simply use \code{NNS.reg}!
