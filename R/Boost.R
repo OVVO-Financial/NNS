@@ -10,9 +10,9 @@
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
-#' @param folds integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
+#' @param extreme logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns a vector of fitted values for the dependent variable test set.
@@ -42,9 +42,9 @@ NNS.boost <- function(IVs.train,
                       n.best = NULL,
                       learner.trials = NULL,
                       epochs = NULL,
-                      folds=5,
                       CV.size=.2,
                       threshold = NULL,
+                      extreme = FALSE,
                       feature.importance = TRUE,
                       ncores = NULL){
 
@@ -159,8 +159,9 @@ NNS.boost <- function(IVs.train,
 
       results[i] = eval(obj.fn)
 
-    }
-  }
+    } # i in learner.trials
+  } # NULL thresholde
+
     if(feature.importance){
           original.par = par()
           par(mfrow=c(2,1))
@@ -177,12 +178,11 @@ NNS.boost <- function(IVs.train,
     message("                                       ","\r",appendLF=FALSE)
 
 
-  fold = list()
-  for(i in 1:folds){
+
       keeper.features = list()
 
 
-      for(j in 1:as.integer(epochs/folds)){
+      for(j in 1:epochs){
 
       new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
@@ -207,15 +207,15 @@ NNS.boost <- function(IVs.train,
       new.iv.test = x[new.index,]
 
 
-          message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
+          message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
-          if(j == as.integer(epochs/folds)){
-              message("% of Fold ",i," = 1.000     ","\r",appendLF=FALSE)
+          if(j == epochs){
+              message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
               flush.console()
           }
 
 
-          features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+          features = sort(sample(n,sample(2:n,1),replace = FALSE))
 
           #If estimate is > threshold, store 'features'
           predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
@@ -227,42 +227,33 @@ NNS.boost <- function(IVs.train,
 
           if(new.results>=threshold){
               keeper.features[[j]]=features
-          } else {keeper.features[[j]]=NULL
+          } else {
+              keeper.features[[j]]=NULL
           }
 
       }
 
       keeper.features = keeper.features[!sapply(keeper.features, is.null)]
-      fold[[i]]= keeper.features
-      if(is.null(fold[[i]])){break}
-
-  }
-
-  fold = fold[!sapply(fold, is.null)]
-
-  if(length(fold)==0) stop("Please reduce [threshold]")
-
-  final.features = do.call(c,fold)
-
-  if(length(final.features)==0){
-      if(old.threshold==0){
-          stop("Please reduce [threshold].")
-      } else {
-          final.features = test.features[which.max(results)]
+      if(length(keeper.features)==0){
+          if(old.threshold==0){
+                stop("Please reduce [threshold].")
+          } else {
+                keeper.features = test.features[which.max(results)]
+          }
       }
-  }
 
-  for(i in 1:length(final.features)){
+      for(i in 1:length(keeper.features)){
+
       message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
 
-      if(i == length(final.features)){
+      if(i == length(keeper.features)){
           message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
           flush.console()
       }
 
     x = rbind(rep.x,x); y = c(rep.y,y)
 
-      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+      estimates[[i]]= NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
 
 
@@ -272,7 +263,7 @@ NNS.boost <- function(IVs.train,
       estimates = lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
 
   if(feature.importance==TRUE){
-      plot.table = table(unlist(final.features))
+      plot.table = table(unlist(keeper.features))
       names(plot.table)=names(IVs.train[as.numeric(names(plot.table))])
 
       linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
