@@ -170,7 +170,11 @@ NNS.boost <- function(IVs.train,
                xlab = "Accuracy",col = "steelblue")
     }
 
-    threshold = fivenum(results)[4]
+    if(extreme){
+        threshold = max(results)
+    } else {
+        threshold = fivenum(results)[4]
+    }
 
     message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
 
