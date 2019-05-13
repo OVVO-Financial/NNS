@@ -5,9 +5,9 @@
 \title{NNS Boost}
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
-  depth = NULL, n.best = NULL, epochs = NULL, folds = 5,
-  CV.size = 0.2, threshold = NULL, feature.importance = TRUE,
-  ncores = NULL)
+  depth = NULL, n.best = NULL, learner.trials = NULL,
+  epochs = NULL, folds = 5, CV.size = 0.2, threshold = NULL,
+  feature.importance = TRUE, ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -21,6 +21,8 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 \item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.}
+
+\item{learner.trials}{integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.}
 
 \item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
