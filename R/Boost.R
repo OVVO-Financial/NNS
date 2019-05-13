@@ -69,10 +69,24 @@ NNS.boost <- function(IVs.train,
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
   if(representative.sample){
-      x = data.matrix(IVs.train)
+    factor_2_dummy = function(x){
+      if(class(x) == "factor"){
+        n=length(unique(x))
+        output = model.matrix(~x -1, x)[,-1]
+      } else {
+        output = x
+      }
+      output
+    }
+
+
+      x = apply(as.data.frame(IVs.train),2,factor_2_dummy)
+      x = do.call(cbind, as.data.frame(x))
+      x = data.matrix(x)
+
       x = data.table(x)
 
-      fivenum.x = x[,lapply(.SD,fivenum), by = .(y)][-c(1,5),]
+      fivenum.x = x[,lapply(.SD,fivenum), by = .(y)]
       mode.x = x[,lapply(.SD,mode), by = .(y)]
       mean.x = x[,lapply(.SD,mean), by = .(y)]
 
@@ -80,8 +94,6 @@ NNS.boost <- function(IVs.train,
 
       y = unlist(x[,1])
       x = as.data.frame(x[,-1])
-
-#      depth='max'; n.best=1
   }
 
   n = ncol(x)
@@ -123,7 +135,7 @@ NNS.boost <- function(IVs.train,
           }
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
       results[i] = eval(obj.fn)
 
@@ -168,7 +180,7 @@ NNS.boost <- function(IVs.train,
           }
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
+          predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
           new.results = eval(obj.fn)
           if(new.results>threshold){
@@ -181,6 +193,7 @@ NNS.boost <- function(IVs.train,
       keeper.features = keeper.features[!sapply(keeper.features, is.null)]
       keeper.features = unique(keeper.features)
       fold[[i]]= keeper.features
+      if(is.null(fold[[i]])){break}
 
   }
 
@@ -208,7 +221,7 @@ NNS.boost <- function(IVs.train,
           flush.console()
       }
 
-      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best)$Point.est
+      estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
   }
 
