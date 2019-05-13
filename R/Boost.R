@@ -181,6 +181,9 @@ NNS.boost <- function(IVs.train,
   for(i in 1:folds){
       keeper.features = list()
 
+
+      for(j in 1:as.integer(epochs/folds)){
+
       new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
       if(representative.sample){
@@ -195,7 +198,7 @@ NNS.boost <- function(IVs.train,
           new.dv.train = DV.train[-new.index]
       }
 
-      for(j in 1:as.integer(epochs/folds)){
+
           message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
           if(j == as.integer(epochs/folds)){
