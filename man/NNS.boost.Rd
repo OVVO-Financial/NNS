@@ -6,7 +6,7 @@
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
   depth = NULL, n.best = NULL, learner.trials = NULL,
-  epochs = NULL, folds = 5, CV.size = 0.2, threshold = NULL,
+  epochs = NULL, CV.size = 0.2, threshold = NULL, extreme = FALSE,
   feature.importance = TRUE, ncores = NULL)
 }
 \arguments{
@@ -26,11 +26,11 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
-\item{folds}{integer; 5 (default) Number of times to resample the training data.  Splits the \code{epochs} over the dataset evenly over each \code{folds}.}
-
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
 \item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+
+\item{extreme}{logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.}
 
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
