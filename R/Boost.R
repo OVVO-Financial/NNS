@@ -248,7 +248,7 @@ NNS.boost <- function(IVs.train,
 
       for(i in 1:length(keeper.features)){
 
-      message(paste0("% of Final Estimate  = ", format(i/length(final.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
+      message(paste0("% of Final Estimate  = ", format(i/length(keeper.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
 
       if(i == length(keeper.features)){
           message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
