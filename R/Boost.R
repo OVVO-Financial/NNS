@@ -140,10 +140,10 @@ NNS.boost <- function(IVs.train,
           actual = DV.train[new.index]
 
         } else {
-            actual = y[new.index]
-            new.iv.test = x[new.index,]
-            new.iv.train = x[-new.index,]
-            new.dv.train = y[-new.index]
+            actual = DV.train[new.index]
+            new.iv.test = IVs.train[new.index,]
+            new.iv.train = x
+            new.dv.train = y
         }
 
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
@@ -183,10 +183,17 @@ NNS.boost <- function(IVs.train,
 
       new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
-      actual = y[new.index]
-      new.iv.test = x[new.index,]
-      new.iv.train = x[-new.index,]
-      new.dv.train = y[-new.index]
+      if(representative.sample){
+          actual = DV.train[new.index]
+          new.iv.test = IVs.train[new.index,]
+          new.iv.train = x
+          new.dv.train = y
+      } else {
+          actual = DV.train[new.index]
+          new.iv.test = IVs.train[new.index,]
+          new.iv.train = IVs.train[-new.index,]
+          new.dv.train = DV.train[-new.index]
+      }
 
       for(j in 1:as.integer(epochs/folds)){
           message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
