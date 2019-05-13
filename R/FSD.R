@@ -28,9 +28,9 @@ NNS.FSD <- function(x, y, type="discrete"){
 
  ## Indicator function ***for all values of x and y*** as the continuous CDF target
   if(type == "discrete"){
-    degree = 0
+      degree = 0
   } else {
-    degree = 1
+      degree = 1
   }
 
     LPM_x_sort = LPM.ratio(degree, Combined_sort, x)

@@ -90,22 +90,20 @@ best.nns.cv = list()
 best.nns.ord = list()
 
 for(b in 1 : folds){
-  if(b==1){
-      set.seed(seed * l)
-      test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
-  }
+    set.seed(seed * l)
+    test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
 
-  CV.IVs.train <- IVs.train[c(-test.set), ]
-  CV.IVs.test <- IVs.train[c(test.set), ]
-  CV.DV.train <- DV.train[c(-test.set)]
-  CV.DV.test <- DV.train[c(test.set)]
+    CV.IVs.train <- IVs.train[c(-test.set), ]
+    CV.IVs.test <- IVs.train[c(test.set), ]
+    CV.DV.train <- DV.train[c(-test.set)]
+    CV.DV.test <- DV.train[c(test.set)]
 
-  training <- cbind(IVs.train[c(-test.set),],DV.train[c(-test.set)])
-  training <- training[complete.cases(training),]
+    training <- cbind(IVs.train[c(-test.set),],DV.train[c(-test.set)])
+    training <- training[complete.cases(training),]
 
-  CV.IVs.train <- training[,-(ncol(training))]
-  CV.DV.train <- training[,ncol(training)]
+    CV.IVs.train <- training[,-(ncol(training))]
+    CV.DV.train <- training[,ncol(training)]
 
 
   ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:

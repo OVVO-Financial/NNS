@@ -82,12 +82,13 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
   ## Return "Derivative Does Not Exist" if lower.B and upper.B are identical to 20 digits
   if(lower.B == upper.B){
-
+    original.par=par()
     par(mfrow = c(1, 2))
     plot(f, xlim = c(point - (100 * h), point + (100 * h)), col = 'blue', ylab = 'f(x)')
     points(point, f.x, pch = 19, col = 'red')
     plot(f, xlim = c(point - 1, point + 1), col = 'blue', ylab = 'f(x)')
     points(point, f.x, pch = 19, col = 'red')
+    par(original.par)
     return(c("Derivative Does Not Exist"))}
 
 
@@ -116,6 +117,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
       z = complex(real = point, imaginary = inferred.h)
 
+      original.par=par()
       par(mfrow=c(1, 3))
 
       ## Plot #1
@@ -156,7 +158,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
       legend('topright', c("Upper y-intercept", "Lower y-intercept", "Mean y-intercept"), col = c('blue', 'red', 'green'), pch = c(1, 1, 19), bty = 'n')
 
-      par(mfrow = c(1, 1))
+      par(original.par)
 
       return(as.matrix(c("Value of f(x) at point" = f(point),
                          "Final y-intercept (B)" = final.B,

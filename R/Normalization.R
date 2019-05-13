@@ -23,7 +23,7 @@ NNS.norm <- function(A, chart.type = NULL, linear = FALSE) {
   RG <- m %o% (1 / m)
 
   if(!linear){
-      scale.factor = abs(cor(A))
+      scale.factor = abs(NNS.dep(A)$Dependence)
       scales <- colMeans(RG * scale.factor)
   } else {
         scales <- colMeans(RG)

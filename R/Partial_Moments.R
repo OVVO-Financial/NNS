@@ -412,6 +412,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 
 # d/dx approximation
   if(is.null(bins)){bins = length(variable)}
+
   d.dx = (max(target) + abs(min(target))) / bins
   tgt = seq(min(target), max(target), d.dx)
   PDF = LPM.ratio(degree, tgt+d.dx, variable) - LPM.ratio(degree, tgt-d.dx, variable)
