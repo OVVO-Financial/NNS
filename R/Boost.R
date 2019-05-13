@@ -140,7 +140,7 @@ NNS.boost <- function(IVs.train,
       results[i] = eval(obj.fn)
 
       if(max(results)>=current.threshold){
-          threshold = max(results)
+          threshold = mean(c(max(results),current.threshold))
           message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
           break
       }
