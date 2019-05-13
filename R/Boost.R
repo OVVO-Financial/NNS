@@ -1,6 +1,6 @@
 #' NNS Boost
 #'
-#' Ensemble method using the predictions of the NNS base models \link{NNS.reg} for various uncorrelated feature combinations.
+#' Ensemble method for classification using the predictions of the NNS base models \link{NNS.reg} collected from uncorrelated feature combinations.
 #'
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
