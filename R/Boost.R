@@ -183,7 +183,7 @@ NNS.boost <- function(IVs.train,
           predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
           new.results = eval(obj.fn)
-          if(new.results>threshold){
+          if(new.results>=threshold){
               keeper.features[[j]]=features
           } else {keeper.features[[j]]=NULL
           }
