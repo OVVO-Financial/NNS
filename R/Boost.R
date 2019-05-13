@@ -70,7 +70,6 @@ NNS.boost <- function(IVs.train,
 
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
-  if(representative.sample){
     factor_2_dummy = function(x){
       if(class(x) == "factor"){
         n=length(unique(x))
@@ -81,22 +80,22 @@ NNS.boost <- function(IVs.train,
       output
     }
 
+  ### Representative samples
+      rep.x = apply(as.data.frame(IVs.train),2,factor_2_dummy)
+      rep.x = do.call(cbind, as.data.frame(rep.x))
+      rep.x = data.matrix(rep.x)
 
-      x = apply(as.data.frame(IVs.train),2,factor_2_dummy)
-      x = do.call(cbind, as.data.frame(x))
-      x = data.matrix(x)
+      rep.x = data.table(rep.x)
 
-      x = data.table(x)
+      fivenum.x = rep.x[,lapply(.SD,fivenum), by = .(y)]
+      mode.x = rep.x[,lapply(.SD,mode), by = .(y)]
+      mean.x = rep.x[,lapply(.SD,mean), by = .(y)]
 
-      fivenum.x = x[,lapply(.SD,fivenum), by = .(y)]
-      mode.x = x[,lapply(.SD,mode), by = .(y)]
-      mean.x = x[,lapply(.SD,mean), by = .(y)]
+      rep.x = rbind(fivenum.x,mode.x,mean.x)
 
-      x = rbind(fivenum.x,mode.x,mean.x)
+      rep.y = unlist(rep.x[,1])
+      rep.x = as.data.frame(rep.x[,-1])
 
-      y = unlist(x[,1])
-      x = as.data.frame(x[,-1])
-  }
 
   n = ncol(x)
 
@@ -121,7 +120,7 @@ NNS.boost <- function(IVs.train,
       for(i in 1:learner.trials){
         new.index = sample(length(DV.train), as.integer(CV.size*length(DV.train)), replace = FALSE)
 
-        if(representative.sample){
+
           new.iv.train = apply(as.data.frame(IVs.train[-new.index,]),2,factor_2_dummy)
           new.iv.train = do.call(cbind, as.data.frame(new.iv.train))
           new.iv.train = data.matrix(new.iv.train)
@@ -134,17 +133,17 @@ NNS.boost <- function(IVs.train,
 
           new.iv.train = rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
 
-          new.dv.train = unlist(new.iv.train[,1])
-          new.iv.train = as.data.frame(new.iv.train[,-1])
-          new.iv.test = IVs.train[new.index,]
-          actual = DV.train[new.index]
 
-        } else {
-            actual = DV.train[new.index]
-            new.iv.test = IVs.train[new.index,]
-            new.iv.train = IVs.train[-new.index,]
-            new.dv.train = DV.train[-new.index]
-        }
+          if(representative.sample){
+              new.dv.train = unlist(new.iv.train[,1])
+              new.iv.train = as.data.frame(new.iv.train[,-1])
+          } else {
+              new.iv.train = rbind(as.data.frame(new.iv.train[,-1]),IVs.train[-new.index,])
+              new.dv.train = rbind(unlist(new.iv.train[,1]),DV.train[-new.index])
+          }
+
+        actual = DV.train[new.index]
+        new.iv.test = IVs.train[new.index,]
 
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
 
@@ -181,17 +180,29 @@ NNS.boost <- function(IVs.train,
 
       new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
 
+      new.iv.train = apply(as.data.frame(IVs.train[-new.index,]),2,factor_2_dummy)
+      new.iv.train = do.call(cbind, as.data.frame(new.iv.train))
+      new.iv.train = data.matrix(new.iv.train)
+
+      new.iv.train = data.table(new.iv.train)
+
+      fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(DV.train[-new.index])]
+      mode.new.iv.train = new.iv.train[,lapply(.SD,mode), by = .(DV.train[-new.index])]
+      mean.new.iv.train = new.iv.train[,lapply(.SD,mean), by = .(DV.train[-new.index])]
+
+      new.iv.train = rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+
+
       if(representative.sample){
-          actual = DV.train[new.index]
-          new.iv.test = IVs.train[new.index,]
-          new.iv.train = x
-          new.dv.train = y
+        new.dv.train = unlist(new.iv.train[,1])
+        new.iv.train = as.data.frame(new.iv.train[,-1])
       } else {
-          actual = DV.train[new.index]
-          new.iv.test = IVs.train[new.index,]
-          new.iv.train = IVs.train[-new.index,]
-          new.dv.train = DV.train[-new.index]
+        new.iv.train = rbind(as.data.frame(new.iv.train[,-1]),IVs.train[-new.index,])
+        new.dv.train = rbind(unlist(new.iv.train[,1]),DV.train[-new.index])
       }
+
+      actual = DV.train[new.index]
+      new.iv.test = IVs.train[new.index,]
 
 
           message("% of Fold ",i," = ", format(j/as.integer(epochs/folds),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
@@ -205,7 +216,7 @@ NNS.boost <- function(IVs.train,
           features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
           new.results = eval(obj.fn)
           if(new.results>=threshold){
