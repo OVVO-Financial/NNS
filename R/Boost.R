@@ -150,12 +150,6 @@ NNS.boost <- function(IVs.train,
 
           test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
 
-          if(i > 1){
-              if(any(test.features[[i]]%in%test.features[-i])){
-                  next
-              }
-          }
-
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
@@ -163,6 +157,7 @@ NNS.boost <- function(IVs.train,
     }
   }
     if(feature.importance){
+          original.par = par()
           par(mfrow=c(2,1))
           par(mai=c(1.0,.5,0.8,0.5))
           hist(results,main = "Distribution of Learner Trials Accuracy",
@@ -208,13 +203,6 @@ NNS.boost <- function(IVs.train,
 
 
           features = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
-
-          if(i>1){
-              if(any(fold %in% list(features))){
-                  keeper.features[[j]]=NULL
-                  next
-              }
-          }
 
           #If estimate is > threshold, store 'features'
           predicted = NNS.reg(x[,features],y,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
@@ -281,8 +269,7 @@ NNS.boost <- function(IVs.train,
                 xlab = "Frequency",las=1)
       }
 
-    par(mar = c(0, 0, 0, 0))
-    par(mfrow=c(1,1))
+    par(original.par)
   }
 
   return(apply(do.call(cbind,estimates),1,mode))

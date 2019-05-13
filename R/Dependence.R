@@ -32,12 +32,21 @@ NNS.dep = function(x,
                    ncores = NULL){
 
     if(!is.null(y)){
-        #original.x = x; original.y = y
-      if (is.null(ncores)) {
-        num_cores <- detectCores() - 1
-      } else {
-        num_cores <- ncores
-      }
+        # No dependence if only a single value
+        if(length(unique(x))==1 | length(unique(y))==1){
+            if(print.map==TRUE){
+                NNS.part(x, y, order=1, Voronoi = TRUE)
+            }
+
+            return(list("Correlation" = 0,
+                       "Dependence" = 0))
+        }
+# Future parallel process...
+# if (is.null(ncores)) {
+#        num_cores <- detectCores() - 1
+#      } else {
+#        num_cores <- ncores
+#      }
 
         l = length(x)
 
@@ -52,6 +61,7 @@ NNS.dep = function(x,
         seg.5 = max(1,(l-100)):max(l,100)
 
         nns.dep = numeric(5L)
+
 #cl <- makeCluster(num_cores)
 #registerDoParallel(cl)
 #  foreach(i = 1:5,.packages = "NNS")%dopar%{
@@ -71,11 +81,8 @@ NNS.dep = function(x,
          return(list("Correlation" = nns.cor,
                 "Dependence" = mean(nns.dep)))
 
-
     } else {
       return(NNS.dep.matrix(x, order=order, degree = degree))
     }
-
-
 
 }
