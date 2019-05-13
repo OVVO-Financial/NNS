@@ -80,7 +80,17 @@ NNS.boost <- function(IVs.train,
       output
     }
 
-  ### Representative samples
+      x = apply(as.data.frame(x),2,factor_2_dummy)
+      x = do.call(cbind, as.data.frame(x))
+      x = as.data.frame(x)
+
+      z = apply(as.data.frame(z),2,factor_2_dummy)
+      z = do.call(cbind, as.data.frame(z))
+      z = as.data.frame(z)
+
+
+
+    ### Representative samples
       rep.x = data.matrix(x)
 
       rep.x = data.table(rep.x)
@@ -113,14 +123,12 @@ NNS.boost <- function(IVs.train,
       test.features = list()
       results = numeric()
 
-      if(is.null(learner.trials)){learner.trials = length(DV.train)}
+      if(is.null(learner.trials)){learner.trials = length(y)}
 
       for(i in 1:learner.trials){
-          new.index = sample(length(DV.train), as.integer(CV.size*length(DV.train)), replace = FALSE)
+          new.index = sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-          new.iv.train = data.matrix(x[-new.index,])
-
-          new.iv.train = data.table(new.iv.train)
+          new.iv.train = data.table(x[-new.index,])
 
           fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
           mode.new.iv.train = new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
@@ -141,7 +149,7 @@ NNS.boost <- function(IVs.train,
 
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
 
-          test.features[[i]] = sort(sample(ncol(x),sample(2:ncol(x),1),replace = FALSE))
+          test.features[[i]] = sort(sample(n,sample(2:n,1),replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
@@ -176,11 +184,9 @@ NNS.boost <- function(IVs.train,
 
       for(j in 1:as.integer(epochs/folds)){
 
-      new.index = sample(1:length(x[,1]),as.integer(CV.size*length(x[,1])),replace = FALSE)
+      new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
-      new.iv.train = data.matrix(x[-new.index,])
-
-      new.iv.train = data.table(new.iv.train)
+      new.iv.train = data.table(x[-new.index,])
 
       fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
       mode.new.iv.train = new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
