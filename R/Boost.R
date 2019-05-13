@@ -146,7 +146,11 @@ NNS.boost <- function(IVs.train,
       #If estimate is > threshold, store 'features'
       predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
+      predicted = pmin(predicted,max(as.numeric(y)))
+      predicted = pmax(predicted,min(as.numeric(y)))
+
       results[i] = eval(obj.fn)
+
     }
   }
     if(feature.importance){
@@ -210,7 +214,11 @@ NNS.boost <- function(IVs.train,
           #If estimate is > threshold, store 'features'
           predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
+          predicted = pmin(predicted,max(as.numeric(y)))
+          predicted = pmax(predicted,min(as.numeric(y)))
+
           new.results = eval(obj.fn)
+
           if(new.results>=threshold){
               keeper.features[[j]]=features
           } else {keeper.features[[j]]=NULL
@@ -250,8 +258,12 @@ NNS.boost <- function(IVs.train,
 
       estimates[[i]]= NNS.reg(x[,final.features[[i]]],y,point.est = z[,final.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
 
+
+
   }
 
+      estimates = lapply(estimates, function(i) pmin(i,max(as.numeric(y))))
+      estimates = lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
 
   if(feature.importance==TRUE){
       plot.table = table(unlist(final.features))
