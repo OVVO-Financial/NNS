@@ -26,7 +26,9 @@
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
-#'  a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], epochs = 100, learner.trials = 100)
+#'  a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
+#'  IVs.test = iris[141:150, 1:4],
+#'  epochs = 100, learner.trials = 100)
 #'
 #'  ## Test accuracy
 #'  mean(round(a)==as.numeric(iris[141:150,5]))
