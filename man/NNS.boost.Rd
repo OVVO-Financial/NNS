@@ -5,9 +5,9 @@
 \title{NNS Boost}
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
-  depth = NULL, n.best = NULL, learner.trials = NULL,
-  epochs = NULL, CV.size = 0.2, threshold = NULL, extreme = FALSE,
-  feature.importance = TRUE, ncores = NULL)
+  depth = "max", n.best = 3, learner.trials = NULL, epochs = NULL,
+  CV.size = 0.25, threshold = NULL, extreme = FALSE,
+  feature.importance = TRUE, status = TRUE, ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -18,21 +18,23 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
+\item{depth}{integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
 
-\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.}
+\item{n.best}{integer; \code{3} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.}
 
 \item{learner.trials}{integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.}
 
 \item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
-\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
+\item{CV.size}{numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.}
 
-\item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+\item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.}
 
 \item{extreme}{logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.}
 
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
+
+\item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
@@ -40,7 +42,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 Returns a vector of fitted values for the dependent variable test set.
 }
 \description{
-Ensemble method for classification using the predictions of the NNS base models \link{NNS.reg} collected from uncorrelated feature combinations.
+Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
 }
 \note{
 Currently only objective function is to maximize \code{mean(round(predicted)==as.numeric(actual))} since it is a classifier.  For a regression problem, simply use \code{NNS.reg}!
@@ -48,7 +50,9 @@ Currently only objective function is to maximize \code{mean(round(predicted)==as
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
  \dontrun{
- a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], epochs = 100)
+ a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
+ IVs.test = iris[141:150, 1:4],
+ epochs = 100, learner.trials = 100)
 
  ## Test accuracy
  mean(round(a)==as.numeric(iris[141:150,5]))
