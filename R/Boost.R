@@ -1,19 +1,20 @@
 #' NNS Boost
 #'
-#' Ensemble method for classification using the predictions of the NNS base models \link{NNS.reg} collected from uncorrelated feature combinations.
+#' Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
 #'
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
 #' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
-#' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
-#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
+#' @param depth integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.
+#' @param n.best integer; \code{3} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
-#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
-#' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
+#' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
+#' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
+#' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns a vector of fitted values for the dependent variable test set.
 #'
@@ -25,7 +26,7 @@
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
-#'  a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], epochs = 100)
+#'  a = NNS.boost(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], epochs = 100, learner.trials = 100)
 #'
 #'  ## Test accuracy
 #'  mean(round(a)==as.numeric(iris[141:150,5]))
@@ -38,14 +39,15 @@ NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
                       representative.sample = TRUE,
-                      depth = NULL,
-                      n.best = NULL,
+                      depth = "max",
+                      n.best = 3,
                       learner.trials = NULL,
                       epochs = NULL,
-                      CV.size=.2,
+                      CV.size=.25,
                       threshold = NULL,
                       extreme = FALSE,
                       feature.importance = TRUE,
+                      status = TRUE,
                       ncores = NULL){
 
 
@@ -147,7 +149,9 @@ NNS.boost <- function(IVs.train,
         actual = y[new.index]
         new.iv.test = x[new.index,]
 
+        if(status){
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
+        }
 
           test.features[[i]] = sort(sample(n,sample(2:n,1),replace = FALSE))
 
@@ -176,11 +180,12 @@ NNS.boost <- function(IVs.train,
         threshold = fivenum(results)[4]
     }
 
+    if(status){
     message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
 
     # Clear message line
     message("                                       ","\r",appendLF=FALSE)
-
+    }
 
 
       keeper.features = list()
@@ -210,14 +215,14 @@ NNS.boost <- function(IVs.train,
       actual = y[new.index]
       new.iv.test = x[new.index,]
 
-
+          if(status){
           message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
           if(j == epochs){
               message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
               flush.console()
           }
-
+          }
 
           features = sort(sample(n,sample(2:n,1),replace = FALSE))
 
@@ -247,14 +252,14 @@ NNS.boost <- function(IVs.train,
       }
 
       for(i in 1:length(keeper.features)){
-
+      if(status){
       message(paste0("% of Final Estimate  = ", format(i/length(keeper.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
 
       if(i == length(keeper.features)){
           message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
           flush.console()
       }
-
+      }
     x = rbind(rep.x,x); y = c(rep.y,y)
 
       estimates[[i]]= NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
