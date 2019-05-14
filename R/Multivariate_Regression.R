@@ -1,4 +1,4 @@
-NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
+NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
 
 
 
@@ -115,7 +115,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   ### PARALLEL
-  NNS.ID = list()
+
 
   if (is.null(ncores)) {
     num_cores <- detectCores() - 1
@@ -123,15 +123,17 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
     num_cores <- ncores
   }
 
+  NNS.ID = list()
 
   for(j in 1:n){
     sorted.reg.points = sort(reg.points.matrix[ , j])
     sorted.reg.points = sorted.reg.points[!is.na(sorted.reg.points)]
 
-    NNS.ID[[i]] =  findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+    NNS.ID[[j]] =  findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
   }
 
-  NNS.ID = matrix(unlist(NNS.ID), nrow = length(Y),ncol = n)
+
+  NNS.ID = do.call(cbind,NNS.ID)
 
 
 
@@ -143,6 +145,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
   obs = c(1 : length(Y))
 
   mean.by.id.matrix = data.table(original.IVs, original.DV, NNS.ID, obs)
+
   setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
 
   if(noise.reduction == 'mean' | noise.reduction == 'off'){
@@ -157,6 +160,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
   y.identifier = mean.by.id.matrix[ , NNS.ID]
 
+
   ###Order y.hat to order of original Y
   resid.plot = mean.by.id.matrix[]
   setkey(resid.plot, 'obs')
@@ -166,7 +170,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.99, 
 
   setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX = mean.by.id.matrix[ , obs := NULL]
-
 
 
   if(noise.reduction == 'mean' | noise.reduction == 'off'){
