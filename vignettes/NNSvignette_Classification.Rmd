@@ -3,7 +3,7 @@ title: 'Getting Started with NNS: Classification'
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Clustering and Regression}
+  %\VignetteIndexEntry{Getting Started with NNS: Classification}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
