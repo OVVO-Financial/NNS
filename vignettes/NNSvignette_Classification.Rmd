@@ -1,0 +1,82 @@
+---
+title: 'Getting Started with NNS: Classification'
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with NNS: Clustering and Regression}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup2, message=FALSE}
+require(NNS)
+require(knitr)
+require(rgl)
+require(data.table)
+```
+
+# Classification
+`NNS.reg` is a very robust regression technique capable of nonlinear regressions of continuous variables and classification tasks in machine learning problems.
+
+We have extended the `NNS.reg` applications per the use of an ensemble method of classification in `NNS.boost`.
+
+## Splits vs. Partitions
+Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs.  `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable.  We can directly control the number of "splits" with the `NNS.reg(..., order = , ...)` parameter.
+
+### NNS Partitions
+We can see how `NNS` partitions each regressor by calling the `$rhs.partitions` output.  You will notice that each partition is not an equal interval, nor of equal length, which differentiates `NNS` from other bandwidth techniques.
+
+Higher dependence between a regressor and the dependent variable will allow for a larger number of partitions.  This is determined internally with the `NNS.dep` measure.
+
+```{r rhs}
+NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE)$rhs.partitions
+```
+
+# `NNS.boost`
+Through resampling of the training set and letting each iterated set of data speak for themselves, we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value.  From there we simply aggregate the predictions.
+
+`NNS.boost` will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console.  A plot of the frequency of the learning accuracy on the test set is also provided.
+
+Once a `threshold` is obtained, `NNS.boost` will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
+
+Let's have a look and see how it works.  We use 140 random `iris` observations as our training set and 10 observations as our test set.
+
+```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
+set.seed(123)
+test.set = sample(150,10)
+
+a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
+              IVs.test = iris[test.set, 1:4],
+              epochs = 100, learner.trials = 100, status = FALSE)
+
+mean(round(a)==as.numeric(iris[test.set,5]))
+```
+
+A perfect classification.
+
+## Brief Notes on Other Parameters
+* `representative.sample` uses a representation of each of the regressors via Tukey's five number summary as well as mean and mode.  This encoding of the regressors greatly reduces large datasets runtimes.
+
+* `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression.  In essence, this is the basis for a `kNN` type of classification.
+
+* `n.best = 1` will use the single nearest neighbor.  When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` but as the dimensions increase the results diverge demonstrating `NNS` is less sensitive to the curse of dimensionality than `kNN`.
+
+* `extreme` will use the maximum `threshold` obtained, and may result in errors if that threshold cannot be eclipsed by subsequent iterations.
+
+
+# References
+
+If the user is so motivated, detailed arguments further examples are provided within the following:
+
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+
+* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+
+* [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
+
+* [Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
+
+* [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)

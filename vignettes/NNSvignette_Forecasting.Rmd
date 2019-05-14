@@ -63,7 +63,7 @@ Now we know `seasonal.factor = 12` is our best fit, we can see if there's any be
 a = seas[which.min(seas[ , 2]), 1]
 ```
 
-Below you will notice the use of `seasonal.factor=a` generates the same output.
+Below you will notice the use of `seasonal.factor = a` generates the same output.
 ```{r best nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 nns = NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "nonlin",seasonal.factor = a, plot = TRUE, seasonal.plot = FALSE)
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
@@ -141,3 +141,5 @@ These are the plotting arguments, easily enabled or disabled with `TRUE` or `FAL
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
 * [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+
+* [Forecasting Using NNS](https://ssrn.com/abstract=3382300)

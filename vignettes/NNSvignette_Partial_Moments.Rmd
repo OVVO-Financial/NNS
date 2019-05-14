@@ -19,7 +19,7 @@ Why is it necessary to parse the variance with partial moments?  The additional 
 
 Below are some basic equivalences demonstrating partial moments role as the elements of variance.
 
-##Mean
+## Mean
 ```{r mean}
 set.seed(123) ; x = rnorm(100) ; y = rnorm(100)
 
@@ -27,7 +27,7 @@ mean(x)
 UPM(1, 0, x) - LPM(1, 0, x)
 ```
 
-##Variance
+## Variance
 ```{r variance}
 var(x)
 
@@ -42,24 +42,24 @@ UPM(2, mean(x), x) + LPM(2, mean(x), x)
 ```
 
 
-##Standard Deviation
+## Standard Deviation
 ```{r stdev}
 sd(x)
 ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 ```
 
-##Covariance
+## Covariance
 ```{r covariance}
 cov(x, y)
 (Co.LPM(1, 1, x, y, mean(x), mean(y)) + Co.UPM(1, 1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
 ```
 
-##Covariance Elements and Covariance Matrix
+## Covariance Elements and Covariance Matrix
 ```{r cov_dec}
 PM.matrix(LPM.degree = 1, UPM.degree = 1,target = 'mean', variable = cbind(x, y), pop.adj = TRUE)
 ```
 
-##Pearson Correlation
+## Pearson Correlation
 ```{r pearson}
 cor(x, y)
 cov.xy = (Co.LPM(1, 1, x, y, mean(x), mean(y)) + Co.UPM(1, 1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
@@ -68,7 +68,7 @@ sd.y = ((UPM(2, mean(y), y) + LPM(2, mean(y) , y)) * (length(y) / (length(y) - 1
 cov.xy / (sd.x * sd.y)
 ```
 
-##CDFs (Discrete and Continuous)
+## CDFs (Discrete and Continuous)
 ```{r cdfs,fig.align="center",fig.width=5,fig.height=3}
 P = ecdf(x)
 P(0) ; P(1)
@@ -92,12 +92,12 @@ plot(sort(x), LPM.ratio(1, sort(x), x), type = "l", col = "blue", lwd = 3, xlab 
 ```
 
 
-##PDFs
+## PDFs
 ```{r pdfs,fig.align="center",fig.width=5,fig.height=3}
 NNS.PDF(degree = 1, x)
 ```
 
-##Numerical Integration
+## Numerical Integration
 Partial moments are asymptotic area approximations of $f(x)$ akin to the familiar Trapezoidal and Simpson's rules.  More observations, more accuracy...
 
 $$[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}$$
@@ -111,12 +111,12 @@ $$0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}$$
 For the total area, not just the definite integral, simply sum the partial moments:
 $$[UPM(1,0,f(x))+LPM(1,0,f(x))]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert$$
 
-##Bayes' Theorem
+## Bayes' Theorem
 For example, when ascertaining the probability of an increase in $A$ given an increase in $B$, the `Co.UPM(degree.x, degree.y, x, y, target.x, target.y)` target parameters are set to `target.x = 0` and `target.y = 0` and the `UPM(degree, target, variable)` target parameter is also set to `target = 0`.
 
 $$P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}$$
 
-#References
+# References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
 * [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
