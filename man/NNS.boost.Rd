@@ -37,7 +37,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
-\item{extreme}{logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.}
+\item{extreme}{logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.}
 
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
@@ -50,9 +50,6 @@ Returns a vector of fitted values for the dependent variable test set.
 }
 \description{
 Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
-}
-\note{
-Currently only objective function is to maximize \code{mean(round(predicted)==as.numeric(actual))} since it is a classifier.  For a regression problem, simply use \code{NNS.reg}!
 }
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
@@ -73,4 +70,5 @@ Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{classifier}
+\keyword{classifier,}
+\keyword{regression}
