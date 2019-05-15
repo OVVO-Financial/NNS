@@ -12,6 +12,9 @@
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.
+#' @param obj.fn expression;
+#' \code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
@@ -47,14 +50,15 @@ NNS.boost <- function(IVs.train,
                       epochs = NULL,
                       CV.size=.25,
                       threshold = NULL,
+                      obj.fn = expression(mean(round(predicted)==as.numeric(actual))),
+                      objective = "max",
                       extreme = FALSE,
                       feature.importance = TRUE,
                       status = TRUE,
                       ncores = NULL){
 
 
-  obj.fn = expression(mean(round(predicted)==as.numeric(actual)))
-  objective = "max"
+
 
   if (is.null(ncores)) {
     num_cores <- detectCores() - 1
@@ -95,7 +99,7 @@ NNS.boost <- function(IVs.train,
 
 
     ### Representative samples
-      rep.x = data.matrix(x)
+      rep.x = apply(data.matrix(x),2,as.double)
 
       rep.x = data.table(rep.x)
 
@@ -177,9 +181,17 @@ NNS.boost <- function(IVs.train,
     }
 
     if(extreme){
-        threshold = max(results)
+        if(objective=="max"){
+            threshold = max(results)
+        } else {
+            threshold = min(results)
+        }
     } else {
-        threshold = fivenum(results)[4]
+        if(objective=="max"){
+            threshold = fivenum(results)[4]
+        } else {
+            threshold = fivenum(results)[2]
+        }
     }
 
     if(status){
@@ -236,12 +248,19 @@ NNS.boost <- function(IVs.train,
 
           new.results = eval(obj.fn)
 
-          if(new.results>=threshold){
-              keeper.features[[j]]=features
+          if(objective=="max"){
+              if(new.results>=threshold){
+                  keeper.features[[j]]=features
+              } else {
+                  keeper.features[[j]]=NULL
+              }
           } else {
-              keeper.features[[j]]=NULL
+              if(new.results<=threshold){
+                  keeper.features[[j]]=features
+            } else {
+                  keeper.features[[j]]=NULL
+            }
           }
-
       }
 
       keeper.features = keeper.features[!sapply(keeper.features, is.null)]
@@ -275,9 +294,9 @@ NNS.boost <- function(IVs.train,
 
   if(feature.importance==TRUE){
       plot.table = table(unlist(keeper.features))
-      names(plot.table)=names(IVs.train[as.numeric(names(plot.table))])
+      names(plot.table) = names(IVs.train[as.numeric(names(plot.table))])
 
-      linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
+      linch =  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
       par(mai=c(1.0,linch,0.8,0.5))
 
       if(length(plot.table)!=1){
