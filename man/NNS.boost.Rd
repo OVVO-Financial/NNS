@@ -6,8 +6,10 @@
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
   depth = "max", n.best = 3, learner.trials = NULL, epochs = NULL,
-  CV.size = 0.25, threshold = NULL, extreme = FALSE,
-  feature.importance = TRUE, status = TRUE, ncores = NULL)
+  CV.size = 0.25, threshold = NULL,
+  obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
+  objective = "max", extreme = FALSE, feature.importance = TRUE,
+  status = TRUE, ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -29,6 +31,11 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 \item{CV.size}{numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.}
 
 \item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.}
+
+\item{obj.fn}{expression;
+\code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+
+\item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{extreme}{logical; \code{FALSE} (default) Uses the maximum \code{threshold} obtained from the \code{learner.trials}, rather than the upper quintile level.}
 
