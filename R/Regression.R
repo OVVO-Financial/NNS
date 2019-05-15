@@ -330,7 +330,7 @@ if(factor.2.dummy){
           colnames.list = original.names
         }
 
-          x = data.matrix(x)
+          x = apply(data.matrix(x),2,as.numeric)
           y = as.numeric(y)
 
           if(!is.null(dim.red.method)){

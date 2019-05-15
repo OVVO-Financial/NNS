@@ -133,6 +133,7 @@ NNS.boost <- function(IVs.train,
       if(is.null(learner.trials)){learner.trials = length(y)}
 
       for(i in 1:learner.trials){
+        set.seed(123 + i)
           new.index = sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
           new.iv.train = data.table(x[-new.index,])
@@ -205,7 +206,7 @@ NNS.boost <- function(IVs.train,
 
 
       for(j in 1:epochs){
-
+          set.seed(123 * j)
       new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
       new.iv.train = data.table(x[-new.index,])

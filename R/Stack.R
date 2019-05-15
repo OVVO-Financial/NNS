@@ -13,7 +13,6 @@
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
-#' @param seed numeric; 123 (default) Sets seed for CV sampling.
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
@@ -65,8 +64,7 @@ NNS.stack <- function(IVs.train,
                       order = NULL,
                       norm = NULL,
                       method = c(1, 2),
-                      dim.red.method = "cor",
-                      seed = 123){
+                      dim.red.method = "cor"){
 
 
   DV.train <- as.numeric(DV.train)
@@ -90,9 +88,13 @@ best.nns.cv = list()
 best.nns.ord = list()
 
 for(b in 1 : folds){
-    set.seed(seed * l)
+    set.seed(123 * b)
     test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
+    if(b > 1){
+        test.set_half = unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
+        test.set = unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+    }
 
     CV.IVs.train <- IVs.train[c(-test.set), ]
     CV.IVs.test <- IVs.train[c(test.set), ]
@@ -146,10 +148,10 @@ for(b in 1 : folds){
 
     if(objective=='min'){
         k = which.min(na.omit(nns.cv.1))-1
-        nns.cv.1 = min(nns.cv.1)
+        nns.cv.1 = min(na.omit((nns.cv.1)))
     } else {
         k = which.max(na.omit(nns.cv.1))-1
-        nns.cv.1 = max(nns.cv.1)
+        nns.cv.1 = max(na.omit((nns.cv.1)))
     }
 
 
@@ -196,14 +198,14 @@ for(b in 1 : folds){
         nns.ord[i] = eval(obj.fn)
 
       if(objective=='min'){
-          best.threshold = var.cutoffs[which.min(nns.ord)]
+          best.threshold = var.cutoffs[which.min(na.omit(nns.ord))]
           THRESHOLDS[[b]] = best.threshold
-          best.nns.ord[[b]] = min(nns.ord)
+          best.nns.ord[[b]] = min(na.omit(nns.ord))
           if(nns.ord[i] > nns.ord[i-1]) break
       } else {
-          best.threshold = var.cutoffs[which.max(nns.ord)]
+          best.threshold = var.cutoffs[which.max(na.omit(nns.ord))]
           THRESHOLDS[[b]] = best.threshold
-          best.nns.ord[[b]] = max(nns.ord)
+          best.nns.ord[[b]] = max(na.omit(nns.ord))
           if(nns.ord[i] < nns.ord[i-1]) break
       }
     }
@@ -230,9 +232,6 @@ for(b in 1 : folds){
   } # 2 %in% method
 
 
-  test.set_half = unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
-  test.set = unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
-
 } # errors (b) loop
 
 
@@ -240,7 +239,11 @@ for(b in 1 : folds){
   best.nns.cv[best.nns.cv == 0] <- 1e-10
   best.nns.ord[best.nns.ord == 0] <- 1e-10
 
-  weights = c(max(1e-10, 1 / min(na.omit(best.nns.cv))), max(1e-10, 1 / min(na.omit(best.nns.ord))))
+  if(objective=="min"){
+      weights = c(max(1e-10, 1 / best.nns.cv), max(1e-10, 1 / best.nns.ord))
+  } else {
+      weights = c(max(1e-10,best.nns.cv), max(1e-10, best.nns.ord))
+  }
 
   weights = pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0
