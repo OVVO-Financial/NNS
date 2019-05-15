@@ -136,6 +136,12 @@ NNS.boost <- function(IVs.train,
         set.seed(123 + i)
           new.index = sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
+          if(i > 1){
+            new.index_half = new.index.1[1:(length(y)/2)]
+            new.index = na.omit(unique(c(new.index_half,new.index))[1:length(y)])
+          }
+
+
           new.iv.train = data.table(x[-new.index,])
 
           fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
@@ -152,7 +158,7 @@ NNS.boost <- function(IVs.train,
               new.dv.train = c(new.dv.train,y[-new.index])
           }
 
-        actual = y[new.index]
+        actual = as.numeric(y[new.index])
         new.iv.test = x[new.index,]
 
         if(status){
@@ -166,6 +172,9 @@ NNS.boost <- function(IVs.train,
 
       predicted = pmin(predicted,max(as.numeric(y)))
       predicted = pmax(predicted,min(as.numeric(y)))
+
+
+      new.index.1 = rev(order(abs(predicted - actual)))
 
       results[i] = eval(obj.fn)
 
@@ -209,6 +218,12 @@ NNS.boost <- function(IVs.train,
           set.seed(123 * j)
       new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
+      if(i > 1){
+        new.index_half = new.index.1[1:(length(y)/2)]
+        new.index = na.omit(unique(c(new.index_half,new.index))[1:length(y)])
+      }
+
+
       new.iv.train = data.table(x[-new.index,])
 
       fivenum.new.iv.train = new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
@@ -226,7 +241,7 @@ NNS.boost <- function(IVs.train,
         new.dv.train = c(new.dv.train,y[-new.index])
       }
 
-      actual = y[new.index]
+      actual = as.numeric(y[new.index])
       new.iv.test = x[new.index,]
 
           if(status){
@@ -245,6 +260,8 @@ NNS.boost <- function(IVs.train,
 
           predicted = pmin(predicted,max(as.numeric(y)))
           predicted = pmax(predicted,min(as.numeric(y)))
+
+          new.index.1 = rev(order(abs(predicted - actual)))
 
           new.results = eval(obj.fn)
 
