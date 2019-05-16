@@ -5,7 +5,7 @@
 \title{NNS Boost}
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
-  depth = "max", n.best = 3, learner.trials = NULL, epochs = NULL,
+  depth = NULL, n.best = 3, learner.trials = NULL, epochs = NULL,
   CV.size = 0.25, threshold = NULL,
   obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
   objective = "max", extreme = FALSE, feature.importance = TRUE,
@@ -20,7 +20,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.}
+\item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.}
 
 \item{n.best}{integer; \code{3} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.}
 
