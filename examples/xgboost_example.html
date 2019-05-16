@@ -2828,8 +2828,8 @@ div.tocify {
 <p>Abstract:</p>
 <p><code>xgboost</code> is a highly effective and widely used machine learning method. In this paper, we describe a scalable end-to-end tree boosting system called XGBoost, which is used widely by data scientists to achieve state-of-the-art results on many machine learning challenges. We propose a novel sparsity-aware algorithm for sparse data and weighted quantile sketch for approximate tree learning. More importantly, we provide insights on cache access patterns, data compression and sharding to build a scalable tree boosting system. By combining these insights, XGBoost scales beyond billions of examples using far fewer resources than existing systems.</p>
 <p>Full paper available here: <a href="https://arxiv.org/abs/1603.02754" class="uri">https://arxiv.org/abs/1603.02754</a></p>
-<div id="install-the-latest-version-of-nns-0.4.0-and-xgboost" class="section level3">
-<h3>Install the Latest Version of <code>NNS (&gt;= 0.4.0)</code> and <code>xgboost</code></h3>
+<div id="install-the-latest-version-of-nns-0.4.1-and-xgboost" class="section level3">
+<h3>Install the Latest Version of <code>NNS (&gt;= 0.4.1)</code> and <code>xgboost</code></h3>
 <pre class="r"><code>library(devtools); install_github(&#39;OVVO-Financial/NNS&#39;, ref = &quot;NNS-Beta-Version&quot;)
 require(NNS)
 require(plyr)
@@ -2853,17 +2853,17 @@ head(dataset)</code></pre>
   </script>
 </div>
 </div>
-<div id="step-2-run-nns.boost-and-xgboost-over-10-iterations" class="section level2">
-<h2>Step 2: Run <span style="color:red"><code>NNS.boost</code></span> and <code>xgboost</code> over 10 iterations</h2>
-<pre class="r"><code>xgb.accuracy=numeric()
-nns.accuracy=numeric()
+<div id="step-2-run-nns.boost-and-xgboost-over-1000-iterations" class="section level2">
+<h2>Step 2: Run <span style="color:red"><code>NNS.boost</code></span> and <code>xgboost</code> over 1,000 iterations</h2>
+<pre class="r"><code>accuracy = list()
 
+## convert factor into dummy variable matrix
 into_factor = function(x){
      if(class(x) == &quot;factor&quot;){
          n = length(x)
          data.fac = data.frame(x=x, y=1:n)
          output = model.matrix(y~x, data.fac)[,-1]
-         ## convert factor into dummy variable matrix
+         
      }
      else{
         output = x
@@ -2871,35 +2871,37 @@ into_factor = function(x){
      output
 }
 
-for(i in 1:10){
+### Prepare dataset for xgboost
+dataset2 = dataset
+
+dataset2 = colwise(into_factor)(dataset2)
+dataset2 = do.call(cbind, dataset2)
+dataset2 = as.data.frame(dataset2)
+
+
+## For parallel processing
+cores = detectCores()
+cl &lt;- makeCluster(cores[1]-1)
+registerDoParallel(cl)
+
+
+accuracy &lt;- foreach(i = 1:1000,.packages = c(&quot;NNS&quot;,&quot;pROC&quot;,&quot;xgboost&quot;,&quot;plyr&quot;))%dopar%{
 set.seed(123+i)
 n = dim(dataset)[1]
 index = sample(n, round(0.7*n))
-
 
 ### NNS.dataset
 train = dataset[index,]
 test=dataset[-index,]
 
-nns.predictions=NNS.boost(IVs.train = train[,1:15], 
+nns.predictions = NNS.boost(IVs.train = train[,1:15], 
                           DV.train = train[,16],
                           IVs.test= test[,1:15], feature.importance = FALSE,
-                          representative.sample = FALSE, depth = NULL,
-                          epochs = 100, learner.trials = 100)
+                          representative.sample = FALSE, 
+                          epochs = 100, learner.trials = 100,
+                          depth = &quot;max&quot;)
 
-nns.accuracy[i] = auc(roc(as.numeric(test[,16]),round(nns.predictions)))
-
-
-
-### Prepare dataset for xgboost
-dataset2 = dataset
-
-
-
-
-dataset2 = colwise(into_factor)(dataset2)
-dataset2 = do.call(cbind, dataset2)
-dataset2 = as.data.frame(dataset2)
+accuracy$nns = auc(roc(as.numeric(test[,16]),round(nns.predictions)))
 
 
 ### xgboost dataset
@@ -2910,9 +2912,8 @@ data = as.matrix(train.xg[,-38, drop=F])
 data2 = as.matrix(test.xg[,-38, drop=F])
 label2 = as.matrix(test.xg[,38,drop=F])
 
-
 ### Prepare xgboost parameters
-xgmat =xgb.DMatrix(data, label=label, missing = -10000)
+xgmat = xgb.DMatrix(data, label=label, missing = -10000)
 param = list(&quot;object&quot; = &quot;binary:logistic&quot;, &quot;best:eta&quot; = 1, &quot;bst:max_depth&quot;=10, &quot;eval_metric&quot; = &quot;logloss&quot;, &quot;silent&quot;=1,&quot;nthread&quot;=16,&quot;min_child_weight&quot;=1.45)
 nround = 500
 
@@ -2922,53 +2923,69 @@ res1 = predict(bst, data2)
 
 pre1 = ifelse(res1&gt;0.5, 1, 0)
 
-xgb.accuracy[i] = auc(roc(as.numeric(label2), pre1))
+accuracy$xgb = auc(roc(as.numeric(label2), pre1))
 
+return(accuracy)
+}
 
-}</code></pre>
+stopCluster(cl)</code></pre>
 </div>
 <div id="step-3-compare-accuracy" class="section level2">
 <h2>Step 3: Compare Accuracy</h2>
-<p>A majority of the time <code>NNS</code> performs just as well or better than <code>xgboost</code> on varous seeds.</p>
-<pre class="r"><code>sum(nns.accuracy&gt;=xgb.accuracy)</code></pre>
-<pre><code>## [1] 8</code></pre>
+<p>A majority of the time <code>NNS</code> performs just as well or better than <code>xgboost</code> on varous seeds. Instead of using just the standard deviation of results, we are comparing the lower partial moment <code>LPM()</code>, because (like finance) really good estimates to the upside should not be penalized as merely an increase in variance!</p>
+<pre class="r"><code>nns.accuracy=unlist(lapply(accuracy, `[[`, 1))
+xgb.accuracy=unlist(lapply(accuracy, `[[`, 2))
+
+
+rbind(
+  &quot;Mean NNS&quot; = mean(nns.accuracy),
+  &quot;Mean XGB&quot; = mean(xgb.accuracy),
+  &quot;LPM NNS&quot; = LPM(2, mean(nns.accuracy), nns.accuracy),
+  &quot;LPM XGB&quot; = LPM(2, mean(xgb.accuracy), xgb.accuracy))</code></pre>
+<pre><code>##                  [,1]
+## Mean NNS 0.8597219726
+## Mean XGB 0.8558886609
+## LPM NNS  0.0002643629
+## LPM XGB  0.0002693473</code></pre>
 </div>
 </div>
 <div id="example-2-agaricus-dataset" class="section level1">
 <h1>Example #2: <code>agaricus</code> Dataset</h1>
 <p>This time we will utilize the data from within <code>xgboost</code>, the <code>agaricus</code> dataset. Mushrooms described in terms of physical characteristics; classification: poisonous or edible.</p>
 <pre class="r"><code>### Load [agaricus] dataset
-data(agaricus.train, package=&#39;xgboost&#39;)
-data(agaricus.test, package=&#39;xgboost&#39;)
+data(agaricus.train, package = &#39;xgboost&#39;)
+data(agaricus.test, package = &#39;xgboost&#39;)
 
 ### Set up data for xgboost
-dtrain &lt;- xgb.DMatrix(agaricus.train$data, label = agaricus.train$label)
-dtest &lt;- xgb.DMatrix(agaricus.test$data, label = agaricus.test$label)
+dtrain = xgb.DMatrix(agaricus.train$data, label = agaricus.train$label)
+dtest = xgb.DMatrix(agaricus.test$data, label = agaricus.test$label)
 
 
 ### Create parameters and run xgboost
-watchlist &lt;- list(train = dtrain, eval = dtest)
+watchlist = list(train = dtrain, eval = dtest)
 
-param &lt;- list(max_depth = 2, eta = 1, silent = 1, nthread = 2, 
+param = list(max_depth = 2, eta = 1, silent = 1, nthread = 2, 
               objective = &quot;binary:logistic&quot;, eval_metric = &quot;auc&quot;)
 
-bst &lt;- xgb.train(param, dtrain, nrounds = 2, watchlist)</code></pre>
+bst = xgb.train(param, dtrain, nrounds = 2, watchlist)</code></pre>
 <pre><code>## [1]  train-auc:0.958228  eval-auc:0.960373 
 ## [2]  train-auc:0.981413  eval-auc:0.979930</code></pre>
 <pre class="r"><code>### Set up data for NNS
-agaricus.iv.train=as.matrix(agaricus.train$data)
-agaricus.dv.train=(agaricus.train$label)
-agaricus.iv.test=as.matrix(agaricus.test$data)
-agaricus.dv.test=(agaricus.test$label)
+agaricus.iv.train = as.matrix(agaricus.train$data)
+agaricus.dv.train = agaricus.train$label
+agaricus.iv.test = as.matrix(agaricus.test$data)
+agaricus.dv.test = agaricus.test$label
 
 
 ### Run NNS.boost
-a=NNS.boost(IVs.train = agaricus.iv.train, DV.train = agaricus.dv.train, IVs.test = agaricus.iv.test,
-            feature.importance = FALSE, representative.sample = FALSE, epochs = 100, learner.trials = 100)
+a = NNS.boost(IVs.train = agaricus.iv.train, DV.train = agaricus.dv.train, 
+            IVs.test = agaricus.iv.test, feature.importance = FALSE, 
+            representative.sample = TRUE, epochs = 100, learner.trials = 100,
+            depth = &quot;max&quot;)
 
 
 ### Evaluate accuracy  
-mean(round(a)==as.numeric(agaricus.dv.test))</code></pre>
+mean(round(a) == as.numeric(agaricus.dv.test))</code></pre>
 <pre><code>## [1] 1</code></pre>
 <pre class="r"><code>### Evaluate AUC
 auc(roc(as.numeric(agaricus.dv.test), round(a)))</code></pre>
