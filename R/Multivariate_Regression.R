@@ -19,16 +19,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
     y.label = names(Y)
   }
 
-  ### Mode calculation
-  mode = function(x) {
-    if(length(x) > 1){
-      d <- density(x)
-      d$x[which.max(d$y)]
-    } else {
-      x
-    }
-  }
-
   np = nrow(point.est)
 
   if(is.null(np) & !is.null(point.est)){

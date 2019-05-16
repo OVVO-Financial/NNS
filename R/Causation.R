@@ -40,18 +40,6 @@ NNS.caus <- function(x, y,
   orig.plot = plot
 
   if(factor.2.dummy){
-    factor_2_dummy = function(x){
-      if(class(x) == "factor"){
-        n=length(unique(x))
-        output = model.matrix(~x -1, x)[,-(n+1)]
-      }
-      else{
-        output = x
-      }
-      output
-    }
-
-
     x = apply(as.data.frame(x),2,factor_2_dummy)
     x = do.call(cbind, as.data.frame(x))
     x = as.data.frame(x)

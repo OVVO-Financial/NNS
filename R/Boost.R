@@ -65,16 +65,6 @@ NNS.boost <- function(IVs.train,
     num_cores <- ncores
   }
 
-
-  mode = function(x){
-    if(length(na.omit(x)) > 1){
-      d <- density(na.omit(x))
-      d$x[which.max(d$y)]
-    } else {
-      x
-    }
-  }
-
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
     factor_2_dummy = function(x){

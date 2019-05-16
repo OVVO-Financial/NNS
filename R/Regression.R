@@ -175,18 +175,6 @@ NNS.reg = function (x, y,
 
 if(factor.2.dummy){
   if(!is.null(dim.red.method)){
-
-          factor_2_dummy = function(x){
-          if(class(x) == "factor"){
-              n=length(unique(x))
-              output = model.matrix(~x -1, x)[,-1]
-            } else {
-                output = x
-            }
-            output
-        }
-
-
     x = apply(as.data.frame(x),2,factor_2_dummy)
     x = do.call(cbind, as.data.frame(x))
     x = as.data.frame(x)
@@ -212,19 +200,7 @@ if(factor.2.dummy){
       }
   } # Dimension Reduction with factor.2.dummy
   else{
-
-      factor_2_dummy = function(x){
-        if(class(x) == "factor"){
-          n=length(unique(x))
-          output = model.matrix(~x -1, x)[,-(n+1)]
-        } else {
-          output = x
-        }
-        output
-      }
-
-
-      x = apply(as.data.frame(x),2,factor_2_dummy)
+      x = apply(as.data.frame(x),2,dim.red_factor_2_dummy)
       x = do.call(cbind, as.data.frame(x))
       x = as.data.frame(x)
 
@@ -472,17 +448,6 @@ if(factor.2.dummy){
 
   min.range = min(regression.points$x)
   max.range = max(regression.points$x)
-
-
-
-  mode = function(x){
-    if(length(na.omit(x)) > 1){
-      d <- density(na.omit(x))
-      d$x[which.max(d$y)]
-    } else {
-      x
-    }
-  }
 
     if(length(na.omit(y[x <= min.range]))==0){a = y[1]; b=a
     } else {
