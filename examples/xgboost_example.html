@@ -2932,10 +2932,9 @@ stopCluster(cl)</code></pre>
 </div>
 <div id="step-3-compare-accuracy" class="section level2">
 <h2>Step 3: Compare Accuracy</h2>
-<p>A majority of the time <code>NNS</code> performs just as well or better than <code>xgboost</code> on varous seeds. Instead of using just the standard deviation of results, we are comparing the lower partial moment <code>LPM()</code>, because (like finance) really good estimates to the upside should not be penalized as merely an increase in variance!</p>
+<p>On average <code>NNS</code> performs just as well or better than <code>xgboost</code> on varous seeds. Instead of using just the standard deviation of results, we are comparing the lower partial moment <code>LPM()</code>, because (like finance) really good estimates to the upside should not be penalized as merely an increase in variance!</p>
 <pre class="r"><code>nns.accuracy=unlist(lapply(accuracy, `[[`, 1))
 xgb.accuracy=unlist(lapply(accuracy, `[[`, 2))
-
 
 rbind(
   &quot;Mean NNS&quot; = mean(nns.accuracy),
@@ -2947,6 +2946,18 @@ rbind(
 ## Mean XGB 0.8558886609
 ## LPM NNS  0.0002643629
 ## LPM XGB  0.0002693473</code></pre>
+<pre class="r"><code>t.test(nns.accuracy,xgb.accuracy)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  nns.accuracy and xgb.accuracy
+## t = 3.7843, df = 1997.5, p-value = 0.0001587
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.001846738 0.005819886
+## sample estimates:
+## mean of x mean of y 
+## 0.8597220 0.8558887</code></pre>
 </div>
 </div>
 <div id="example-2-agaricus-dataset" class="section level1">
