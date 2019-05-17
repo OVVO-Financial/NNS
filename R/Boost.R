@@ -67,16 +67,6 @@ NNS.boost <- function(IVs.train,
 
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
-    factor_2_dummy = function(x){
-      if(class(x) == "factor"){
-        n=length(unique(x))
-        output = model.matrix(~x -1, x)[,-1]
-      } else {
-        output = x
-      }
-      output
-    }
-
       x = apply(as.data.frame(x),2,factor_2_dummy)
       x = do.call(cbind, as.data.frame(x))
       x = as.data.frame(x)

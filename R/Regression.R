@@ -173,61 +173,57 @@ NNS.reg = function (x, y,
     type = "CLASS"
   }
 
-if(factor.2.dummy){
-  if(!is.null(dim.red.method)){
+  if(factor.2.dummy){
+    if(is.null(dim(x))){ x = t(x)}
+
     x = apply(as.data.frame(x),2,factor_2_dummy)
-    x = do.call(cbind, as.data.frame(x))
-    x = as.data.frame(x)
 
-        if(dim(x)[2]==1) {x = as.vector(x[,1])}
+    if(is.null(dim(x))){ x = as.double(x) }
 
-        if(!is.null(point.est)){
-
-          if(is.null(dim(point.est))){ point.est = t(point.est)}
-
-          point.est = apply(as.data.frame(point.est),2,factor_2_dummy)
-          point.est = do.call(cbind, as.data.frame(point.est))
-          point.est = as.data.frame(point.est)
-
-        ### Add 0's to data for missing regressors
-        Missing = setdiff(names(x),names(point.est))
-          if(!is.null(Missing) && dim(x)[2]!= dim(point.est)[2]){
-            point.est[Missing] <- 0
-            point.est = point.est[names(x)]
-          }
-
-          if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+    if(!is.null(dim(x))){
+      if(dim(x)[2]==1){x = as.double(x) }
+      if(dim(x)[2]>1){
+        x = apply(as.data.frame(x),2,as.double)
+        x = do.call(cbind, as.data.frame(x))
+        x = as.data.frame(x)
       }
-  } # Dimension Reduction with factor.2.dummy
-  else{
-      x = apply(as.data.frame(x),2,dim.red_factor_2_dummy)
-      x = do.call(cbind, as.data.frame(x))
-      x = as.data.frame(x)
+    }
 
-      if(dim(x)[2]==1) {x = as.vector(x[,1])}
 
       if(!is.null(point.est)){
+        point.est.y = numeric()
 
         if(is.null(dim(point.est))){ point.est = t(point.est)}
 
         point.est = apply(as.data.frame(point.est),2,factor_2_dummy)
-        point.est = do.call(cbind, as.data.frame(point.est))
-        point.est = as.data.frame(point.est)
+
+        if(is.null(dim(point.est))){ point.est = as.double(point.est) }
+
+        if(!is.null(dim(point.est))){
+            if(dim(point.est)[2]==1){point.est = as.double(point.est) }
+            if(dim(point.est)[2]>1){
+                point.est = apply(as.data.frame(point.est),2,as.double)
+                point.est = do.call(cbind, as.data.frame(point.est))
+                point.est = as.data.frame(point.est)
+            }
+        } else { point.est = t(point.est)}
 
         ### Add 0's to data for missing regressors
         Missing = setdiff(names(x),names(point.est))
-        if(!is.null(Missing) && dim(x)[2]!= dim(point.est)[2]){
+
+        if(length(Missing)>0 && dim(x)[2]!= dim(point.est)[2]){
           point.est[Missing] <- 0
           point.est = point.est[names(x)]
         }
 
-        if(dim(point.est)[2]==1){point.est = as.vector(point.est[,1])}
+      } else {
+        point.est.y = NULL
       }
 
 
 
+
   }
-}
 
   original.names = colnames(x)
   original.columns = ncol(x)
@@ -239,32 +235,34 @@ if(factor.2.dummy){
   if(is.null(names(original.y))){
     y.label = "Y"
   } else {
-      y.label = names(y)
+    y.label = names(y)
   }
 
-
+if(!factor.2.dummy){
   if(is.null(ncol(x))){
-    x = as.numeric(x)
+    x = as.double(x)
     if(!is.null(point.est)){
-      point.est = as.numeric(point.est)
+      point.est = as.double(point.est)
       point.est.y = numeric()
     } else {
       point.est.y = NULL
     }
   } else {
-    x = apply(x, 2, as.numeric)
+    x = apply(x, 2, as.double)
     if(!is.null(point.est)){
       if(is.null(ncol(point.est))){
-        point.est = as.numeric(point.est)
+        point.est = as.double(point.est)
         point.est.y = numeric()
-        } else {
-          point.est = apply(point.est,2,as.numeric)
-          point.est.y = numeric()
-        }
+      } else {
+        point.est = apply(point.est,2,as.double)
+        point.est.y = numeric()
+      }
     } else {
       point.est.y = NULL
     }
   }
+} # !factor to dummy
+
 
   original.variable = x
 
@@ -294,82 +292,82 @@ if(factor.2.dummy){
           }
         }
 
-       return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,ncores = ncores))
+        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,ncores = ncores))
       } else { # Multivariate dim.red == FALSE
 
         if(is.null(original.names)){
-            colnames.list = list()
-            for(i in 1 : ncol(x)){
-              colnames.list[i] = paste0("X", i)
-            }
+          colnames.list = list()
+          for(i in 1 : ncol(x)){
+            colnames.list[i] = paste0("X", i)
+          }
         } else {
           colnames.list = original.names
         }
 
-          x = apply(data.matrix(x),2,as.numeric)
-          y = as.numeric(y)
+        x = apply(data.matrix(x),2,as.numeric)
+        y = as.numeric(y)
 
-          if(!is.null(dim.red.method)){
-              x.star.matrix = matrix(nrow = length(y))
+        if(!is.null(dim.red.method)){
+          x.star.matrix = matrix(nrow = length(y))
 
-              if(dim.red.method!="cor"){
-                    x.star.dep = NNS.dep(cbind(x, y),print.map = FALSE); x.star.dep[is.na(x.star.dep)] = 0
-                    x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
-              } else {
-                    x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
-              }
+          if(dim.red.method!="cor"){
+            x.star.dep = NNS.dep(cbind(x, y),print.map = FALSE); x.star.dep[is.na(x.star.dep)] = 0
+            x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+          } else {
+            x.star.cor = cor(cbind(x, y)); x.star.cor[is.na(x.star.cor)] = 0
+          }
 
-              if(dim.red.method == "NNS.dep"){
-                    x.star.coef = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
-                    x.star.coef[is.na(x.star.coef)] = 0
-              }
+          if(dim.red.method == "NNS.dep"){
+            x.star.coef = x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef[is.na(x.star.coef)] = 0
+          }
 
-              if(dim.red.method == "cor"){
-                    x.star.coef = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-                    x.star.coef[is.na(x.star.coef)] = 0
-              }
+          if(dim.red.method == "cor"){
+            x.star.coef = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef[is.na(x.star.coef)] = 0
+          }
 
-              if(dim.red.method == "NNS.caus"){
-                    if(is.null(tau)){
-                        tau = "cs"
-                    }
-                    x.star.coef = numeric()
-                    for(i in 1:ncol(x)){
-                        cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
-                        cause[is.na(cause)] = 0
-                        x.star.coef[i] = cause[1] - cause[2]
-                    }
-              }
+          if(dim.red.method == "NNS.caus"){
+            if(is.null(tau)){
+              tau = "cs"
+            }
+            x.star.coef = numeric()
+            for(i in 1:ncol(x)){
+              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+              cause[is.na(cause)] = 0
+              x.star.coef[i] = cause[1] - cause[2]
+            }
+          }
 
-              if(dim.red.method == "all"){
-                  if(is.null(tau)){
-                      tau = "cs"
-                  }
-                  x.star.coef.1 = numeric()
-                  for(i in 1 : ncol(x)){
-                      cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
-                      cause[is.na(cause)] = 0
-                      x.star.coef.1[i] = cause[1] - cause[2]
-                  }
-                  x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-                  x.star.coef.3[is.na(x.star.coef.3)] = 0
-                  x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
-                  x.star.coef.2[is.na(x.star.coef.2)] = 0
-                  x.star.coef[is.na(x.star.coef)] = 0
-                  x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
-              }
-
-
-              x.star.coef[abs(x.star.coef) < threshold] <- 0
-
-              x.star.matrix = t( t(original.variable) * x.star.coef)
+          if(dim.red.method == "all"){
+            if(is.null(tau)){
+              tau = "cs"
+            }
+            x.star.coef.1 = numeric()
+            for(i in 1 : ncol(x)){
+              cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+              cause[is.na(cause)] = 0
+              x.star.coef.1[i] = cause[1] - cause[2]
+            }
+            x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.3[is.na(x.star.coef.3)] = 0
+            x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.2[is.na(x.star.coef.2)] = 0
+            x.star.coef[is.na(x.star.coef)] = 0
+            x.star.coef = rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+          }
 
 
-              #In case all IVs have 0 correlation to DV
-              if(all(x.star.matrix == 0)){
-                  x.star.matrix = x
-                  x.star.coef[x.star.coef == 0] <- 1
-              }
+          x.star.coef[abs(x.star.coef) < threshold] <- 0
+
+          x.star.matrix = t( t(original.variable) * x.star.coef)
+
+
+          #In case all IVs have 0 correlation to DV
+          if(all(x.star.matrix == 0)){
+            x.star.matrix = x
+            x.star.coef[x.star.coef == 0] <- 1
+          }
 
           DENOMINATOR = sum( abs( x.star.coef) > 0)
 
@@ -449,29 +447,29 @@ if(factor.2.dummy){
   min.range = min(regression.points$x)
   max.range = max(regression.points$x)
 
-    if(length(na.omit(y[x <= min.range]))==0){a = y[1]; b=a
-    } else {
-        a=median(na.omit(y[x <= min.range]))
-        b=mode(na.omit(y[x <= min.range]))
-    }
+  if(length(na.omit(y[x <= min.range]))==0){a = y[1]; b=a
+  } else {
+    a=median(na.omit(y[x <= min.range]))
+    b=mode(na.omit(y[x <= min.range]))
+  }
 
-    if(length(na.omit(y[x <= min.range]))==0){d = tail(y,1); e=d
-    } else {
-        d=median(na.omit(y[x >= max.range]))
-        e=mode(na.omit(y[x >= max.range]))
-    }
+  if(length(na.omit(y[x <= min.range]))==0){d = tail(y,1); e=d
+  } else {
+    d=median(na.omit(y[x >= max.range]))
+    e=mode(na.omit(y[x >= max.range]))
+  }
 
 
-    Dynamic.average.min = mean(c(a, b))
-    Dynamic.average.max = mean(c(d, e))
+  Dynamic.average.min = mean(c(a, b))
+  Dynamic.average.max = mean(c(d, e))
 
   ###Endpoints
   if(length(x[x < min.range]) > 0){
     if(dependence < stn){
       x0 = Dynamic.average.min
-      } else {
-        x0 = unique(y[x == min(x)])
-      }
+    } else {
+      x0 = unique(y[x == min(x)])
+    }
   } else {
     x0 = unique(y[x == min(x)])
   }
@@ -480,10 +478,10 @@ if(factor.2.dummy){
     if(dependence < stn){
       x.max = Dynamic.average.max
     } else {
-        x.max = unique(y[x == max(x)])
+      x.max = unique(y[x == max(x)])
     }
   } else {
-      x.max = unique(y[x == max(x)])
+    x.max = unique(y[x == max(x)])
   }
 
   regression.points = rbindlist(list(regression.points, list(max(x), mean(x.max))))
@@ -581,23 +579,23 @@ if(factor.2.dummy){
     l = length(regression.points[ , x])
     for(i in 1 : l){
       if(i < l){
-      obs = fitted[ x >= regression.points[ , x][i] & x < regression.points[ , x][i + 1], which = TRUE]
+        obs = fitted[ x >= regression.points[ , x][i] & x < regression.points[ , x][i + 1], which = TRUE]
 
-      se.denominator = length(obs - 2)
+        se.denominator = length(obs - 2)
 
         if(se.denominator > 0){
           fitted[obs, `:=`
-          ( 'standard.errors' = sqrt( sum(((y.hat - y) ^ 2)) / se.denominator ) )]
+                 ( 'standard.errors' = sqrt( sum(((y.hat - y) ^ 2)) / se.denominator ) )]
         } else {
           fitted[obs, `:=` ( 'standard.errors' = 0 )]
         }
       }
 
       if(i == l){
-      obs = fitted[x >= regression.points[ , x][i - 1], which = TRUE]
-      se.denominator = length(obs - 2)
-      fitted[obs, `:=`
-            ( 'standard.errors' = sqrt(sum( ((y.hat - y) ^ 2))/ se.denominator ) )]
+        obs = fitted[x >= regression.points[ , x][i - 1], which = TRUE]
+        se.denominator = length(obs - 2)
+        fitted[obs, `:=`
+               ( 'standard.errors' = sqrt(sum( ((y.hat - y) ^ 2))/ se.denominator ) )]
       }
     }
   }
@@ -625,12 +623,12 @@ if(factor.2.dummy){
            ylim = c(min(c(se.min, ymin)), max(c(se.max,ymax))),
            col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
-                    if(original.columns > 1){
-                      paste0("Synthetic X* ","(Segments = ",(p-1),')')
-                    }
-                  } else {
-                    paste0("X  ","(Segments = ",(p-1),")",sep='')
-                    },
+             if(original.columns > 1){
+               paste0("Synthetic X* ","(Segments = ",(p-1),')')
+             }
+           } else {
+             paste0("X  ","(Segments = ",(p-1),")",sep='')
+           },
            ylab = "Y", mgp = c(2.5, 0.5, 0),
            cex.lab = 2, cex.main = 2)
 
@@ -640,16 +638,16 @@ if(factor.2.dummy){
 
 
 
-    plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
-         xlab = if(!is.null(original.columns)){
-                  if(original.columns > 1){
-                    paste0("Synthetic X* ", "(Segments = ", (p - 1), ')')
-                    }
-                } else {
-                  paste0("X  ", "(Segments = ", (p - 1), ")", sep = '')
-                  },
-         ylab = "Y",mgp = c(2.5, 0.5, 0),
-         cex.lab = 2, cex.main = 2)
+      plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
+           xlab = if(!is.null(original.columns)){
+             if(original.columns > 1){
+               paste0("Synthetic X* ", "(Segments = ", (p - 1), ')')
+             }
+           } else {
+             paste0("X  ", "(Segments = ", (p - 1), ")", sep = '')
+           },
+           ylab = "Y",mgp = c(2.5, 0.5, 0),
+           cex.lab = 2, cex.main = 2)
     }
 
     ### Plot Regression points and fitted values and legend
@@ -660,9 +658,9 @@ if(factor.2.dummy){
     if(!is.null(point.est)){
       points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)
       legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
-      } else {
+    } else {
       legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
-      }
+    }
 
     if(!is.null(point.est)){
       if(sum(point.est > max(x)) > 0){

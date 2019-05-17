@@ -44,8 +44,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
         point.est = apply(point.B, 2, function(c) (c - min(c)) / (max(c) - min(c)))[1 : np, ]
         original.IVs = apply(original.IVs, 2, function(b) (b - min(b)) / (max(b) - min(b)))
       } else {
-          point.est = NNS.norm(point.B)[1 : np, ]
-          original.IVs = NNS.norm(original.IVs)
+        point.est = NNS.norm(point.B)[1 : np, ]
+        original.IVs = NNS.norm(original.IVs)
       }
     } else {
       if(norm == 'std'){
@@ -190,27 +190,27 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
   if(!is.null(point.est)){
 
-      distance <- function(dist.est){
-          if(dist=="L2"){
-              row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2)))][,Sum]
-          } else {
-              row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i]))))][,Sum]
-          }
-
-          row.sums[row.sums == 0] <- 1e-10
-          total.row.sums = sum(1 / row.sums)
-          weights = (1 / row.sums) / total.row.sums
-
-          highest = rev(order(weights))[1 : min(n.best, length(weights))]
-
-          weights[-highest] <- 0
-          weights.sum = sum(weights)
-
-          weights = weights / weights.sum
-          single.estimate = sum(weights * REGRESSION.POINT.MATRIX$y.hat)
-
-          return(single.estimate)
+    distance <- function(dist.est){
+      if(dist=="L2"){
+        row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i])^2)))][,Sum]
+      } else {
+        row.sums = REGRESSION.POINT.MATRIX[,  `:=`(Sum= Reduce(`+`, lapply(1 : n2,function(i)(REGRESSION.POINT.MATRIX[[i]]-as.numeric(dist.est)[i]))))][,Sum]
       }
+
+      row.sums[row.sums == 0] <- 1e-10
+      total.row.sums = sum(1 / row.sums)
+      weights = (1 / row.sums) / total.row.sums
+
+      highest = rev(order(weights))[1 : min(n.best, length(weights))]
+
+      weights[-highest] <- 0
+      weights.sum = sum(weights)
+
+      weights = weights / weights.sum
+      single.estimate = sum(weights * REGRESSION.POINT.MATRIX$y.hat)
+
+      return(single.estimate)
+    }
 
 
     ### Point estimates
@@ -234,44 +234,44 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
     }
 
     if(!is.null(np)){
-        lows = logical(); highs = logical()
-        outsiders = numeric()
-        DISTANCES = numeric()
+      lows = logical(); highs = logical()
+      outsiders = numeric()
+      DISTANCES = numeric()
 
-        DISTANCES = apply(point.est,1,function(x) distance(x))
+      DISTANCES = apply(point.est,1,function(x) distance(x))
 
-        lows = do.call(pmin,as.data.frame(t(point.est)))<minimums
-        highs = do.call(pmax,as.data.frame(t(point.est)))>maximums
+      lows = do.call(pmin,as.data.frame(t(point.est)))<minimums
+      highs = do.call(pmax,as.data.frame(t(point.est)))>maximums
 
-        outsiders = lows + highs
+      outsiders = lows + highs
 
-        if(sum(outsiders)>0){
-              outside.columns = numeric()
-              outside.columns = which(outsiders>0)
+      if(sum(outsiders)>0){
+        outside.columns = numeric()
+        outside.columns = which(outsiders>0)
 
-              # Find rows from those columns
-              outside.index = list()
-              for(i in 1:length(outside.columns)){
-                  outside.index[[i]] = which(point.est[,outside.columns[i]]>maximums[outside.columns[i]]
-              | point.est[,outside.columns[i]]<minimums[outside.columns[i]])
-              }
-
-              outside.index = unique(unlist(outside.index))
-
-              for(i in outside.index){
-                  p = point.est[i,]
-
-                  last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
-
-                  q = distance(dist.est = pmin(pmax(p, minimums), maximums))
-                  last.known.gradient = (q - distance(dist.est = central.points)) / last.known.distance
-
-                  last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
-
-                  DISTANCES[i] <- last.distance * last.known.gradient + q
-
-              }
+        # Find rows from those columns
+        outside.index = list()
+        for(i in 1:length(outside.columns)){
+          outside.index[[i]] = which(point.est[,outside.columns[i]]>maximums[outside.columns[i]]
+                                     | point.est[,outside.columns[i]]<minimums[outside.columns[i]])
         }
+
+        outside.index = unique(unlist(outside.index))
+
+        for(i in outside.index){
+          p = point.est[i,]
+
+          last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
+
+          q = distance(dist.est = pmin(pmax(p, minimums), maximums))
+          last.known.gradient = (q - distance(dist.est = central.points)) / last.known.distance
+
+          last.distance = sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
+
+          DISTANCES[i] <- last.distance * last.known.gradient + q
+
+        }
+      }
 
       predict.fit = DISTANCES
 
