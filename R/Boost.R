@@ -18,7 +18,8 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param subcores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.
 #' @return Returns a vector of fitted values for the dependent variable test set.
 #'
 #' @keywords classifier, regression
@@ -54,16 +55,21 @@ NNS.boost <- function(IVs.train,
                       extreme = FALSE,
                       feature.importance = TRUE,
                       status = TRUE,
-                      ncores = NULL){
+                      ncores = NULL, subcores = 1){
 
 
 
 # Parallel process...
   if (is.null(ncores)) {
-      num_cores <- as.integer(detectCores() / 2) - 1
+    cores = detectCores()
+    num_cores <- as.integer(cores / 2) - 1
   } else {
-      num_cores <- ncores
+    cores = detectCores()
+    num_cores <- ncores
   }
+
+  if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
+
 
   if(num_cores>1){
     cl <- makeCluster(num_cores)
@@ -155,7 +161,7 @@ NNS.boost <- function(IVs.train,
       test.features[[i]] = sort(sample(n,sample(2:n,1),replace = FALSE))
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
 
       predicted = pmin(predicted,max(as.numeric(y)))
       predicted = pmax(predicted,min(as.numeric(y)))
@@ -246,7 +252,7 @@ NNS.boost <- function(IVs.train,
           features = sort(sample(n,sample(2:n,1),replace = FALSE))
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
 
           predicted = pmin(predicted,max(as.numeric(y)))
           predicted = pmax(predicted,min(as.numeric(y)))
@@ -289,7 +295,7 @@ NNS.boost <- function(IVs.train,
 
       estimates <- foreach(i = 1:length(keeper.features))%dopar%{
 
-        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
+        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
 
       } } else {
         for(i in 1:length(keeper.features)){
@@ -302,7 +308,7 @@ NNS.boost <- function(IVs.train,
             }
             }
 
-        estimates[[i]]=NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
+        estimates[[i]]=NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
         }
 
       }

@@ -13,6 +13,8 @@
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#'
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
@@ -132,7 +134,7 @@ for(b in 1 : folds){
     if(objective=='min'){nns.cv.1[1] = Inf} else {nns.cv.1[1] = -Inf}
 
       for(i in 1:(2*n)){
-          predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order)$Point.est
+          predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order, ncores = ncores)$Point.est
 
           nns.cv.1[i+1] = eval(obj.fn)
           if(i > 1){
@@ -162,7 +164,7 @@ for(b in 1 : folds){
         best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
         best.k = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
 
-        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order)$Point.est
+        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
 
     }
 
@@ -180,7 +182,7 @@ for(b in 1 : folds){
 
     actual = CV.DV.test
 
-    var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order)$equation$Coefficient, digits = 2))
+    var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores)$equation$Coefficient, digits = 2))
 
     var.cutoffs = var.cutoffs - .005
 
@@ -193,7 +195,7 @@ for(b in 1 : folds){
 
     for(i in 2:length(var.cutoffs)){
 
-        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order)$Point.est
+        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
 
         nns.ord[i] = eval(obj.fn)
 
@@ -218,7 +220,7 @@ for(b in 1 : folds){
       best.nns.ord = mean(na.omit(unlist(best.nns.ord)))
 
       nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order,
-                threshold = nns.ord.threshold)$Point.est
+                threshold = nns.ord.threshold, ncores = ncores)$Point.est
     }
 
 

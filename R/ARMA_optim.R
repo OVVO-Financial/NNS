@@ -12,7 +12,8 @@
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param subcores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 #'
@@ -48,7 +49,17 @@ NNS.ARMA.optim=function(variable, training.set,
                         linear.approximation = TRUE,
                         depth = 1,
                         print.trace = TRUE,
-                        ncores = NULL){
+                        ncores = NULL, subcores = 1){
+
+  if (is.null(ncores)) {
+    cores = detectCores()
+    num_cores <- as.integer(cores / 2) - 1
+  } else {
+    cores = detectCores()
+    num_cores <- ncores
+  }
+
+  if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
 
     training.set = floor(training.set)
 
@@ -105,14 +116,6 @@ for(j in c('lin','nonlin','both')){
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
             if(dim(seasonal.combs[[i]])[2]==0){ break }
 
-            if (is.null(ncores)) {
-              num_cores <- as.integer(detectCores() / 2) - 1
-            } else {
-              num_cores <- ncores
-            }
-
-
-
 
 
       if(j!="lin" && linear.approximation  && num_cores>1){
@@ -126,7 +129,7 @@ for(j in c('lin','nonlin','both')){
                 # Find the min (obj.fn) for a given seasonals sequence
                 actual = tail(variable, h)
 
-                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = ncores)
+                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = subcores)
 
                 eval(obj.fn)
             } # for k in ncol(seasonal.combs)
@@ -139,7 +142,7 @@ for(j in c('lin','nonlin','both')){
       } else {
 
         for(k in 1 : ncol(seasonal.combs[[i]])){
-        predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = ncores)
+        predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = subcores)
 
         nns.estimates.indiv[[k]] = eval(obj.fn)
         }
