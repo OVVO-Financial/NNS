@@ -112,7 +112,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
     num_cores <- ncores
   }
 
-  if(num_cores>=1){
+  if(num_cores>1){
     cl <- makeCluster(num_cores)
     registerDoParallel(cl)
   } else {cl = NULL}

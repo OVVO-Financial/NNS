@@ -89,7 +89,7 @@ NNS.ARMA <- function(variable,
     num_cores <- ncores
   }
 
-  if(num_cores>=1){
+  if(num_cores>1){
     cl <- makeCluster(num_cores)
     registerDoParallel(cl)
   } else {cl = NULL}

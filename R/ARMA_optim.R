@@ -112,11 +112,14 @@ for(j in c('lin','nonlin','both')){
             }
 
 
-      if(j!="lin" && !linear.approximation){
-            if(num_cores>=1){
+
+
+
+      if(j!="lin" && linear.approximation  && num_cores>1){
+       if(num_cores>1){
               cl <- makeCluster(num_cores)
               registerDoParallel(cl)
-            } else {cl = NULL}
+} else {cl = NULL}
 
 
             nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = "NNS")%dopar%{
