@@ -7,7 +7,7 @@
 NNS.stack(IVs.train, DV.train, IVs.test = NULL,
   obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
   CV.size = NULL, folds = 5, order = NULL, norm = NULL,
-  method = c(1, 2), dim.red.method = "cor")
+  method = c(1, 2), dim.red.method = "cor", ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -32,7 +32,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL,
 
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.

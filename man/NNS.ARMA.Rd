@@ -38,7 +38,7 @@ NNS.ARMA(variable, h = 1, training.set = NULL,
 
 \item{intervals}{logical; \code{FALSE} (default) Plots the surrounding forecasts around the final estimate when \code{(intervals = TRUE)} and \code{(seasonal.factor = FALSE)}.  There are no other forecasts to plot when a single \code{seasonal.factor} is selected.}
 
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of forecasts of length \code{(h)}.
