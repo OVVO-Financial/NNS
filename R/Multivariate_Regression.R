@@ -184,7 +184,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
     n.best = n.best
   }
 
-### Point estimates
+  ### Point estimates
   if(!is.null(point.est)){
 
     ### Point estimates
@@ -212,9 +212,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
       outsiders = numeric()
       DISTANCES = list()
 
-      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
+      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%do%{
         NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate=point.est[i,],type=dist,k=n.best)
-        }
+      }
 
       DISTANCES = unlist(DISTANCES)
 
@@ -262,7 +262,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
 
   if(!is.null(cl)){
-      stopCluster(cl)
+    stopCluster(cl)
     registerDoSEQ()
   }
 
@@ -352,3 +352,4 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
   }
 
 }
+
