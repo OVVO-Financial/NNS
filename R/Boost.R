@@ -279,13 +279,36 @@ NNS.boost <- function(IVs.train,
           }
       }
 
-      estimates <- foreach(i = 1:length(keeper.features))%dopar%{
-
       x = rbind(rep.x,x); y = c(rep.y,y)
+
+      if(!is.null(cl)){
+        clusterExport(cl,c("x","y"))
+        if(status){
+            message("Parallel process running, status unavailable...","\r",appendLF=FALSE)}
+
+
+      estimates <- foreach(i = 1:length(keeper.features))%dopar%{
 
         NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
 
+      } } else {
+        for(i in 1:length(keeper.features)){
+
+          if(status){
+            message("% of Final Estimate = ", format(i/length(keeper.features),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
+            if(i == length(keeper.features)){
+              message("% of Final Estimate = 1.000             ","\r",appendLF=FALSE)
+              flush.console()
+            }
+            }
+
+        estimates[[i]]=NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
+        }
+
       }
+
+
+
 
 
       if(!is.null(cl)){
