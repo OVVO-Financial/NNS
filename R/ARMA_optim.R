@@ -112,7 +112,7 @@ for(j in c('lin','nonlin','both')){
             }
 
             if(num_cores>=1){
-              cl <- makeCluster(num_cores,type = "MPI")
+              cl <- makeCluster(num_cores)
               registerDoParallel(cl)
             } else {cl = NULL}
 
