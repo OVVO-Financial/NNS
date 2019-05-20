@@ -12,6 +12,7 @@
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 #'
@@ -46,7 +47,8 @@ NNS.ARMA.optim=function(variable, training.set,
                         objective = "min",
                         linear.approximation = TRUE,
                         depth = 1,
-                        print.trace = TRUE){
+                        print.trace = TRUE,
+                        ncores = NULL){
 
     training.set = floor(training.set)
 
@@ -77,7 +79,7 @@ for(j in c('lin','nonlin','both')){
     seasonal.combs = list()
 
     for(i in 1 : length(seasonal.factor)){
-        nns.estimates.indiv = numeric()
+        nns.estimates.indiv = list()
 
             seasonal.combs[[i]] = combn(seasonal.factor, i)
 
@@ -103,18 +105,20 @@ for(j in c('lin','nonlin','both')){
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
             if(dim(seasonal.combs[[i]])[2]==0){ break }
 
-            for(k in 1 : ncol(seasonal.combs[[i]])){
+            nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = "NNS")%dopar%{
                 # Find the min (obj.fn) for a given seasonals sequence
-                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
+                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = ncores)
 
-                nns.estimates.indiv[k] = eval(obj.fn)
-                if(objective=='min'){
-                    nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
-                } else {
-                    nns.estimates.indiv[is.na(nns.estimates.indiv)] = -Inf
-                }
+                eval(obj.fn)
             } # for k in ncol(seasonal.combs)
 
+            nns.estimates.indiv = unlist(nns.estimates.indiv)
+
+            if(objective=='min'){
+                nns.estimates.indiv[is.na(nns.estimates.indiv)] = Inf
+            } else {
+                nns.estimates.indiv[is.na(nns.estimates.indiv)] = -Inf
+            }
 
             nns.estimates[[i]] = nns.estimates.indiv
             nns.estimates.indiv = numeric()

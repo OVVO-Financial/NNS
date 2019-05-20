@@ -58,12 +58,17 @@ NNS.boost <- function(IVs.train,
 
 
 
-
+# Future parallel process...
   if (is.null(ncores)) {
-    num_cores <- detectCores() - 1
+      num_cores <- detectCores() - 1
   } else {
-    num_cores <- ncores
+      num_cores <- ncores
   }
+
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else {cl = NULL}
 
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
@@ -274,26 +279,23 @@ NNS.boost <- function(IVs.train,
           }
       }
 
-      for(i in 1:length(keeper.features)){
-      if(status){
-          message(paste0("% of Final Estimate  = ", format(i/length(keeper.features),digits = 3,nsmall = 2),"     "),"\r",appendLF=FALSE)
-
-          if(i == length(keeper.features)){
-              message("% of Final Estimate  = 1.000     ","\r",appendLF=FALSE)
-              flush.console()
-          }
-      }
+      estimates <- foreach(i = 1:length(keeper.features))%dopar%{
 
       x = rbind(rep.x,x); y = c(rep.y,y)
 
-      estimates[[i]]= NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+
+      }
 
 
+      if(!is.null(cl)){
+          stopCluster(cl)
+      }
 
-  }
 
       estimates = lapply(estimates, function(i) pmin(i,max(as.numeric(y))))
       estimates = lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
+
 
   if(feature.importance==TRUE){
       plot.table = table(unlist(keeper.features))

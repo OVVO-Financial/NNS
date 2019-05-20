@@ -24,7 +24,7 @@
       "Period","Coefficient.of.Variance","Variable.Coefficient.of.Variance", "Sum", "j","lpm","upm",
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
       "detectCores","makeCluster","%dopar%","foreach","stopCluster",
-      "%do%"
+      "%do%", "k"
     ))
 
   requireNamespace("data.table")

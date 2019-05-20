@@ -89,9 +89,10 @@ NNS.ARMA <- function(variable,
     num_cores <- ncores
   }
 
-#  cl <- makeCluster(num_cores)
-#  registerDoParallel(cl)
-
+if(num_cores>1){
+  cl <- makeCluster(num_cores)
+  registerDoParallel(cl)
+} else {cl = NULL}
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
     seasonal.factor = FALSE
@@ -112,49 +113,6 @@ NNS.ARMA <- function(variable,
 
   Estimates = numeric()
 
-  # Weight and lag function for seasonality...
-  ARMA.seas.weighting = function(){
-    if(is.null(ncol(M))){
-      return(list(lag = M[1], Weights = 1))
-    }
-
-    if(ncol(M) == 1){
-      return(list(lag = 1, Weights = 1))
-    }
-
-    if(ncol(M) > 1){
-      if(seasonal.factor){
-        lag = seas.matrix$best.period
-        Weights = 1
-        return(list(lag = lag, Weights = Weights))
-      }
-
-      # Determine lag from seasonality test
-      if(!seasonal.factor){
-        lag = M$Period
-        Observation.weighting = (1 / sqrt(lag))
-        Lag.weighting = (M$Variable.Coefficient.of.Variance - M$Coefficient.of.Variance)
-        Weights = (Lag.weighting * Observation.weighting) / sum(Lag.weighting * Observation.weighting)
-        return(list(lag = lag, Weights = Weights))
-      }
-    }
-  }
-
-
-  # Generator for 1:length(lag) vectors
-  generate.vectors = function(l){
-    Component.series = list()
-    Component.index = list()
-
-    for (i in 1:length(l)){
-      CS = rev(variable[seq(length(variable)+1, 1, -l[i])])
-      CS = CS[!is.na(CS)]
-      Component.series[[paste('Series.', i, sep = "")]] <- CS
-      Component.index[[paste('Index.', i, sep = "")]] <- (1 : length(CS))
-    }
-    return(list(Component.index = Component.index, Component.series = Component.series))
-  }
-
 
   if(is.numeric(seasonal.factor)){
     M <- t(seasonal.factor)
@@ -171,21 +129,22 @@ NNS.ARMA <- function(variable,
     Weights = (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
     seasonal.plot = FALSE
   } else {
-    seas.matrix = NNS.seas(variable, plot=FALSE)
-    if(!is.list(seas.matrix)){
+    M = NNS.seas(variable, plot=FALSE)
+    if(!is.list(M)){
       M <- t(1)
     } else {
       if(is.null(best.periods)){
-        M <- seas.matrix$all.periods
+        M <- M$all.periods
       } else {
-        if(!seasonal.factor && is.numeric(best.periods) && length(seas.matrix$all.periods$Period) < best.periods){
-          best.periods = length(seas.matrix$all.periods$Period)
+        if(!seasonal.factor && is.numeric(best.periods) && length(M$all.periods$Period) < best.periods){
+          best.periods = length(M$all.periods$Period)
         }
-        M <- seas.matrix$all.periods[1 : best.periods, ]
+        M <- M$all.periods[1 : best.periods, ]
       }
     }
 
-    ASW = ARMA.seas.weighting()
+
+    ASW = ARMA.seas.weighting(seasonal.factor,M)
     lag = ASW$lag
     Weights = ASW$Weights
   }
@@ -207,13 +166,13 @@ NNS.ARMA <- function(variable,
         }
       }
 
-      ASW = ARMA.seas.weighting()
+      ASW = ARMA.seas.weighting(seasonal.factor,M)
       lag = ASW$lag
       Weights = ASW$Weights
     }
 
     ## Generate vectors for 1:lag
-    GV = generate.vectors(lag)
+    GV = generate.vectors(variable,lag)
     Component.index = GV$Component.index
     Component.series = GV$Component.series
 
@@ -222,32 +181,23 @@ NNS.ARMA <- function(variable,
 
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates = numeric()
-      for(i in 1 : length(lag)){
+      Regression.Estimates = list()
+
+      Regression.Estimates<- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
         x = Component.index[[i]] ; y = Component.series[[i]]
         last.x = tail(x, 1)
         last.y = tail(y, 1)
 
-        if(last.x <= 4){
-          order = 1
-        } else {
-          order = NULL
-        }
-
         ## Skeleton NNS regression for NNS.ARMA
-        reg.points = tail(NNS.reg(x, y, return.values = FALSE, order = order, plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 2)
+        reg.points = tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 2)
 
         run = diff(reg.points$x)
         rise = diff(reg.points$y)
 
-        Regression.Estimates[i] = last.y + (rise / run)
+        last.y + (rise / run)
       }
 
       Regression.Estimates = unlist(Regression.Estimates)
-
-      if(!negative.values){
-        Regression.Estimates = pmax(0, Regression.Estimates)
-      }
 
       NL.Regression.Estimates = Regression.Estimates
       Nonlin.estimates = sum(Regression.Estimates * Weights)
@@ -256,24 +206,27 @@ NNS.ARMA <- function(variable,
 
     if(method == 'lin' | method == 'both'){
 
-      Regression.Estimates = numeric()
-      for(i in 1 : length(lag)){
+      Regression.Estimates = list()
+
+      Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
         last.x = tail(Component.index[[i]], 1)
         coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
-        Regression.Estimates[i] = coefs[1] + (coefs[2] * (last.x + 1))
+        #Regression.Estimates[i] =
+        coefs[1] + (coefs[2] * (last.x + 1))
       }
 
       Regression.Estimates = unlist(Regression.Estimates)
-
-      if(!negative.values){
-        Regression.Estimates = pmax(0, Regression.Estimates)
-      }
-
 
       L.Regression.Estimates = Regression.Estimates
       Lin.estimates = sum(Regression.Estimates * Weights)
 
     }#Linear == T
+
+
+    if(!negative.values){
+        Regression.Estimates = pmax(0, Regression.Estimates)
+    }
+
 
     if(intervals){
       if(method == 'both'){
@@ -298,8 +251,9 @@ NNS.ARMA <- function(variable,
 
   } # j loop
 
-#  stopCluster(cl)
-
+if(!is.null(cl)){
+  stopCluster(cl)
+}
   #### PLOTTING
   if(plot){
       original.par = par()
