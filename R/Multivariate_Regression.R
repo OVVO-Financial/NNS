@@ -119,7 +119,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
   NNS.ID = list()
 
-  NNS.ID <- foreach(j = 1:n)%dopar%{
+  NNS.ID <- foreach(j = 1:n,.packages = "NNS")%dopar%{
     sorted.reg.points = sort(reg.points.matrix[ , j])
     sorted.reg.points = sorted.reg.points[!is.na(sorted.reg.points)]
 
