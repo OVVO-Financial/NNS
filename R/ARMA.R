@@ -84,15 +84,15 @@ NNS.ARMA <- function(variable,
 
 
   if (is.null(ncores)) {
-    num_cores <- detectCores() - 1
+    num_cores <- as.integer(detectCores() / 2) - 1
   } else {
     num_cores <- ncores
   }
 
-if(num_cores>1){
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
-} else {cl = NULL}
+  if(num_cores>=1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else {cl = NULL}
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
     seasonal.factor = FALSE

@@ -105,16 +105,16 @@ for(j in c('lin','nonlin','both')){
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
             if(dim(seasonal.combs[[i]])[2]==0){ break }
 
-    if (is.null(ncores)) {
-          num_cores <- detectCores() - 1
-    } else {
-          num_cores <- ncores
-    }
+            if (is.null(ncores)) {
+              num_cores <- as.integer(detectCores() / 2) - 1
+            } else {
+              num_cores <- ncores
+            }
 
-    if(num_cores>1){
-        cl <- makeCluster(num_cores)
-        registerDoParallel(cl)
-    } else {cl = NULL}
+            if(num_cores>=1){
+              cl <- makeCluster(num_cores)
+              registerDoParallel(cl)
+            } else {cl = NULL}
 
             nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = "NNS")%dopar%{
                 # Find the min (obj.fn) for a given seasonals sequence

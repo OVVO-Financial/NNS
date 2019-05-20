@@ -107,14 +107,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
   ### PARALLEL
 
   if (is.null(ncores)) {
-    num_cores <- detectCores() - 1
+    num_cores <- as.integer(detectCores() / 2) - 1
   } else {
     num_cores <- ncores
   }
 
-  if(num_cores>1){
-      cl <- makeCluster(num_cores)
-      registerDoParallel(cl)
+  if(num_cores>=1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
   } else {cl = NULL}
 
   NNS.ID = list()
