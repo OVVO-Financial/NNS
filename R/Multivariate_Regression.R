@@ -237,7 +237,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
         outside.index = unique(unlist(outside.index))
 
-        DISTANCES <- foreach(i = outside.index,.packages = "NNS")%dopar%{
+        for(i in outside.index){
           p = point.est[i,]
 
           last.known.distance = sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
