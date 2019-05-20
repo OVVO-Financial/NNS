@@ -12,8 +12,8 @@
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-#' @param subcores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param subcores integer; NULL (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #'
 #' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
 #'
@@ -49,7 +49,9 @@ NNS.ARMA.optim=function(variable, training.set,
                         linear.approximation = TRUE,
                         depth = 1,
                         print.trace = TRUE,
-                        ncores = NULL, subcores = 1){
+                        ncores = NULL, subcores = NULL){
+
+
 
   if (is.null(ncores)) {
     cores = detectCores()
@@ -57,6 +59,10 @@ NNS.ARMA.optim=function(variable, training.set,
   } else {
     cores = detectCores()
     num_cores <- ncores
+  }
+
+  if (is.null(subcores)) {
+    subcores <- as.integer(cores / 2)
   }
 
   if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
