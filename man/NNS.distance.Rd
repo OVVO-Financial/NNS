@@ -15,6 +15,9 @@ NNS.distance(rpm, dist.estimate, type, k)
 
 \item{k}{\code{n.best} from \link{NNS.reg}}
 }
+\value{
+Returns sum of weighted distances.
+}
 \description{
 Internal function for NNS multivariate regression \link{NNS.reg} parallel instances.
 }
