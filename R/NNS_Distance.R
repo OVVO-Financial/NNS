@@ -5,6 +5,10 @@
 #' @param dist.estimate Vector to generate distances from.
 #' @param type "L1" or "L2"
 #' @param k \code{n.best} from \link{NNS.reg}
+#'
+#' @return Returns sum of weighted distances.
+#'
+#'
 #' @export
 
 NNS.distance <- function(rpm,dist.estimate,type,k){

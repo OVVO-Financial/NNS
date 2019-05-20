@@ -119,7 +119,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
   NNS.ID = list()
 
-  NNS.ID <- foreach(j = 1:n,.packages = "NNS")%dopar%{
+  NNS.ID <- foreach(j = 1:n)%dopar%{
     sorted.reg.points = sort(reg.points.matrix[ , j])
     sorted.reg.points = sorted.reg.points[!is.na(sorted.reg.points)]
 
@@ -212,7 +212,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
       outsiders = numeric()
       DISTANCES = list()
 
-      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = "NNS")%dopar%{
+      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
         NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate=point.est[i,],type=dist,k=n.best)
         }
 
