@@ -42,7 +42,7 @@ for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
 ## Clusters Used in Regression
 The right column of plots shows the corresponding regression for the order of `NNS` partitioning.
 ```{r depreg,results='hide'}
-for(i in 1 : 3){NNS.part(x, y, order = i, Voronoi = TRUE) ; NNS.reg(x, y, order = i)}
+for(i in 1 : 3){NNS.part(x, y, order = i, Voronoi = TRUE) ; NNS.reg(x, y, order = i, ncores = 1)}
 ```
 
 
@@ -51,7 +51,7 @@ for(i in 1 : 3){NNS.part(x, y, order = i, Voronoi = TRUE) ; NNS.reg(x, y, order 
 
 ### Univariate:
 ```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(x, y, order = 4, noise.reduction = "off")
+NNS.reg(x, y, order = 4, noise.reduction = "off", ncores = 1)
 ```
 
 ### Multivariate:
@@ -69,13 +69,13 @@ NNS.reg(z, g, order = "max", ncores = 1)
 ### Classification
 For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.  
 ```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[141:150, 1 : 4], location = "topleft")$Point.est
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[141:150, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
 
 ### NNS Dimension Reduction Regression
 `NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x, y, dim.red.method = "cor", ...)`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
 ```{r nonlinear class,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft")$equation
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
 ```
 Thus, our model for this regression would be:
 $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
@@ -84,14 +84,14 @@ $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Peta
 #### Threshold
 `NNS.reg(x, y, dim.red.method = "cor", threshold = ...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
 ```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft")$equation
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
 ```
 Thus, our model for this further reduced dimension regression would be:
 $$Species = \frac{0.7825612*Sepal.Length -0*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{3} $$
 
 and the `point.est = (...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r final,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft")$Point.est
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
 
 
