@@ -290,6 +290,7 @@ NNS.boost <- function(IVs.train,
 
       if(!is.null(cl)){
           stopCluster(cl)
+        registerDoSEQ()
       }
 
 

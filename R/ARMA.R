@@ -253,6 +253,7 @@ if(num_cores>1){
 
 if(!is.null(cl)){
   stopCluster(cl)
+  registerDoSEQ()
 }
   #### PLOTTING
   if(plot){

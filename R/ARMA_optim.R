@@ -105,12 +105,28 @@ for(j in c('lin','nonlin','both')){
             if(is.null(ncol(seasonal.combs[[i]]))){ break }
             if(dim(seasonal.combs[[i]])[2]==0){ break }
 
+    if (is.null(ncores)) {
+          num_cores <- detectCores() - 1
+    } else {
+          num_cores <- ncores
+    }
+
+    if(num_cores>1){
+        cl <- makeCluster(num_cores)
+        registerDoParallel(cl)
+    } else {cl = NULL}
+
             nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = "NNS")%dopar%{
                 # Find the min (obj.fn) for a given seasonals sequence
                 predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = ncores)
 
                 eval(obj.fn)
             } # for k in ncol(seasonal.combs)
+
+      if(!is.null(cl)){
+         stopCluster(cl)
+         registerDoSEQ()
+      }
 
             nns.estimates.indiv = unlist(nns.estimates.indiv)
 

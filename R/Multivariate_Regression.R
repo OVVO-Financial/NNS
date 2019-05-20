@@ -263,6 +263,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
   if(!is.null(cl)){
       stopCluster(cl)
+    registerDoSEQ()
   }
 
   R2 = (sum((y.hat - mean(original.DV)) * (original.DV - mean(original.DV))) ^ 2) / (sum((original.DV - mean(original.DV)) ^ 2) * sum((y.hat - mean(original.DV)) ^ 2))
