@@ -90,7 +90,7 @@ NNS.ARMA <- function(variable,
   }
 
   if(num_cores>=1){
-    cl <- makeCluster(num_cores)
+    cl <- makeCluster(num_cores,type = "MPI")
     registerDoParallel(cl)
   } else {cl = NULL}
 

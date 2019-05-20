@@ -113,7 +113,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
   }
 
   if(num_cores>=1){
-    cl <- makeCluster(num_cores)
+    cl <- makeCluster(num_cores,type = "MPI")
     registerDoParallel(cl)
   } else {cl = NULL}
 

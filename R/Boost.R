@@ -66,7 +66,7 @@ NNS.boost <- function(IVs.train,
   }
 
   if(num_cores>=1){
-    cl <- makeCluster(num_cores)
+    cl <- makeCluster(num_cores,type = "MPI")
     registerDoParallel(cl)
   } else {cl = NULL}
 
@@ -155,7 +155,7 @@ NNS.boost <- function(IVs.train,
       test.features[[i]] = sort(sample(n,sample(2:n,1),replace = FALSE))
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
 
       predicted = pmin(predicted,max(as.numeric(y)))
       predicted = pmax(predicted,min(as.numeric(y)))
@@ -246,7 +246,7 @@ NNS.boost <- function(IVs.train,
           features = sort(sample(n,sample(2:n,1),replace = FALSE))
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
 
           predicted = pmin(predicted,max(as.numeric(y)))
           predicted = pmax(predicted,min(as.numeric(y)))
@@ -283,7 +283,7 @@ NNS.boost <- function(IVs.train,
 
       x = rbind(rep.x,x); y = c(rep.y,y)
 
-        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std")$Point.est
+        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=ncores)$Point.est
 
       }
 
