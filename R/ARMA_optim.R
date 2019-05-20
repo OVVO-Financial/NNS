@@ -118,6 +118,8 @@ for(j in c('lin','nonlin','both')){
 
             nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = "NNS")%dopar%{
                 # Find the min (obj.fn) for a given seasonals sequence
+                actual = tail(variable, h)
+
                 predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = ncores)
 
                 eval(obj.fn)
