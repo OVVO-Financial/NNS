@@ -43,6 +43,8 @@ See the following for NNS detailed examples and specific applications:
    3.3 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
 
    3.4 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   
+   3.5 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
 
 
 # 4. Time-Series Forecasting
@@ -71,8 +73,8 @@ Aside from the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/Ab
 
 ## Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" <http://amzn.com/1490523995>
 
-<p align="center">
-<a href="http://amzn.com/1490523995" rel="NNS Book" src=https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20Cover.jpg>
- </p>
+
+<a href="http://amzn.com/1490523995" rel="NNS Book"> ![NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20Cover.jpg)
+
 
 # Thank you for your interest in NNS! 
