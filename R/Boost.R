@@ -91,7 +91,7 @@ NNS.boost <- function(IVs.train,
       z = do.call(cbind, as.data.frame(z))
       z = as.data.frame(z)
 
-      y = as.double(as.numeric(y))
+      y = as.double(as.numeric(unlist(y)))
 
 
     ### Representative samples
