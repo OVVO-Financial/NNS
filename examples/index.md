@@ -23,20 +23,26 @@ See the following for NNS detailed examples and specific applications:
    1.3 [CDFs and ANOVA](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/CDFs%20and%20ANOVA.pdf)
 
    1.4 [Correlation and Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Correlation%20and%20Dependence.pdf)
+   
+   1.5 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
 
-   1.5 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+   1.6 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
 
 # 2. Regression
    
    2.1 [Curve Fitting](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Curve_Fitting.html)
+   
+   2.2 [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
+   
+   2.3 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
 
-   2.2 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
+   2.4 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
 
 # 3. Machine Learning
 
-   3.1 [Classification Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
+   3.1 [Classification Using NNS Clustering Analysis](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
    
    3.2 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
    
