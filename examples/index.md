@@ -34,7 +34,7 @@ See the following for NNS detailed examples and specific applications:
    2.2 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
 
-# 3. Classification
+# 3. Machine Learning
 
    3.1 [Classification Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
    
