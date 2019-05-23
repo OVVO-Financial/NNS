@@ -41,37 +41,44 @@ NNS.dep = function(x,
             return(list("Correlation" = 0,
                        "Dependence" = 0))
         }
-# Future parallel process...
-# if (is.null(ncores)) {
-#        num_cores <- detectCores() - 1
-#      } else {
-#        num_cores <- ncores
-#      }
+
+ if (is.null(ncores)) {
+        num_cores <- detectCores() - 1
+      } else {
+        num_cores <- ncores
+      }
 
         l = length(x)
 
         if(l <= 500){return(NNS.dep.base(x,y,order=order, degree = degree,print.map = print.map))}
 
         seg = as.integer(.2*l)
+        segs = list(5L)
 
-        seg.1 = 1:min(l,100)
-        seg.2 = max(1,(seg - 50)):min(l,(seg+50))
-        seg.3 = max(1,(2*seg - 50)):min(l,(2*seg+50))
-        seg.4 = max(1,(3*seg - 50)):min(l,(3*seg+50))
-        seg.5 = max(1,(l-100)):max(l,100)
+        for (i in 1:5){
+            if(i == 1){
+                segs[[i]] = 1:min(l,100)
+            }
+            if(i > 1 & i < 5){
+                segs[[i]] = max(1,(i*seg - 50)):min(l,(i*seg+50))
+            }
+            if(i == 5){
+                segs[[i]] = max(1,(l-100)):max(l,100)
+            }
+        }
 
-        nns.dep = numeric(5L)
+        nns.dep = list(5L)
 
-#cl <- makeCluster(num_cores)
-#registerDoParallel(cl)
-#  foreach(i = 1:5,.packages = "NNS")%dopar%{
-        nns.dep[1] = NNS.dep.base(x[seg.1],y[seg.1],print.map = FALSE)$Dependence
-        nns.dep[2] = NNS.dep.base(x[seg.2],y[seg.2],print.map = FALSE)$Dependence
-        nns.dep[3] = NNS.dep.base(x[seg.3],y[seg.3],print.map = FALSE)$Dependence
-        nns.dep[4] = NNS.dep.base(x[seg.4],y[seg.4],print.map = FALSE)$Dependence
-        nns.dep[5] = NNS.dep.base(x[seg.5],y[seg.5],print.map = FALSE)$Dependence
+cl <- makeCluster(num_cores)
+registerDoParallel(cl)
 
-#stopCluster(cl)
+  nns.dep <- foreach(i = 1:5,.packages = "NNS")%dopar%{
+        NNS.dep.base(x[segs[[i]]],y[segs[[i]]],print.map = FALSE)$Dependence
+  }
+
+stopCluster(cl)
+registerDoSEQ()
+
         if(print.map==TRUE){
           nns.cor = NNS.dep.base(x,y,order=order, degree = degree,print.map = TRUE)$Correlation
         } else {
@@ -79,7 +86,7 @@ NNS.dep = function(x,
         }
 
          return(list("Correlation" = nns.cor,
-                "Dependence" = mean(nns.dep)))
+                "Dependence" = mean(unlist(nns.dep))))
 
     } else {
       return(NNS.dep.matrix(x, order=order, degree = degree))

@@ -411,14 +411,14 @@ if(!factor.2.dummy){
 
   if(dependence > stn ){
     if(is.null(type)){
-      part.map = NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, max.obs.req = 0)
+      part.map = NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 0)
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), max.obs.req = 0)
+        part.map = NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0)
       }
     } else {
-      part.map = NNS.part(x, y, type = "XONLY", noise.reduction='off', order = dep.reduced.order, max.obs.req = 0)
+      part.map = NNS.part(x, y, type = "XONLY", noise.reduction='off', order = dep.reduced.order, obs.req = 0)
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), max.obs.req = 0)
+        part.map = NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
       }
     } # type
   } else {
@@ -426,12 +426,12 @@ if(!factor.2.dummy){
     if(is.null(type)){
       part.map = NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY")
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), max.obs.req = 1)
+        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1)
       }
     } else {
       part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = dep.reduced.order)
       if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min(nchar(part.map$dt$quadrant)), max.obs.req = 1)
+        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min(nchar(part.map$dt$quadrant)), obs.req = 1)
       }
     } # type
   } # Dependence < stn
