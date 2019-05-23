@@ -31,13 +31,15 @@ See the following for NNS detailed examples and specific applications:
 
 # 2. Regression
    
-   2.1 [Curve Fitting](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Curve_Fitting.html)
+   2.1 [Overview](https://ssrn.com/abstract=3389938)
    
-   2.2 [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
+   2.2 [Curve Fitting](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Curve_Fitting.html)
    
-   2.3 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
+   2.3 [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
+   
+   2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
 
-   2.4 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
+   2.5 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
 
 # 3. Machine Learning
@@ -55,7 +57,7 @@ See the following for NNS detailed examples and specific applications:
 
 # 4. Time-Series Forecasting
 
-   4.1 [Overview](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20ARMA.pdf)
+   4.1 [Overview](https://ssrn.com/abstract=3382300)
    
    4.2 [NNS vs. KERAS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sunspots_example.html)
 
