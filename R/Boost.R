@@ -104,6 +104,8 @@ NNS.boost <- function(IVs.train,
     }
   }
 
+  colnames(x) = make.unique(colnames(x),sep = "_")
+
   if(!is.null(dim(z))){
     if(!is.numeric(z)){
       z = sapply(z,factor_2_dummy)
@@ -125,6 +127,8 @@ NNS.boost <- function(IVs.train,
     }
   }
 
+  colnames(z) = make.unique(colnames(z),sep = "_")
+
       y = as.double(as.numeric(unlist(y)))
 
 
@@ -136,9 +140,17 @@ NNS.boost <- function(IVs.train,
       mean.x = rep.x[,lapply(.SD,mean), by = .(y)]
 
       rep.x = rbind(fivenum.x,mode.x,mean.x)
-
       rep.y = unlist(rep.x[,1])
-      rep.x = as.data.frame(rep.x[,-1])
+      rep.x = rep.x[,-1]
+
+      Missing = setdiff(colnames(x),colnames(rep.x))
+
+      if(length(Missing)>0 && dim(x)[2]!=dim(rep.x)[2]){
+        rep.x[Missing] <- 0
+        rep.x = rep.x[colnames(x)]
+      }
+
+      rep.x = as.data.frame(rep.x)
 
 
   n = ncol(x)
@@ -190,6 +202,15 @@ NNS.boost <- function(IVs.train,
 
         actual = y[new.index]
         new.iv.test = x[new.index,]
+
+
+        Missing = setdiff(colnames(new.iv.train),colnames(new.iv.test))
+
+        if(length(Missing)>0 && dim(new.iv.train)[2]!=dim(new.iv.test)[2]){
+          new.iv.test[Missing] <- 0
+          new.iv.test = new.iv.test[colnames(new.iv.train)]
+        }
+
 
         if(status){
           message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)

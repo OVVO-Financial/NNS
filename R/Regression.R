@@ -177,13 +177,14 @@ NNS.reg = function (x, y,
     if(!is.null(dim(x))){
       if(!is.numeric(x)){
         x = sapply(x,factor_2_dummy)
-
       } else {
         x = apply(x,2,as.double)
+        colnames(x) = make.unique(colnames(x),sep = "_")
       }
         if(is.list(x)){
             x = do.call(cbind,x)
             x = apply(x,2,as.double)
+            colnames(x) = make.unique(colnames(x),sep = "_")
         }
 
     } else {
@@ -192,6 +193,7 @@ NNS.reg = function (x, y,
             x = as.double(x)
         } else {
             x = apply(x,2,as.double)
+            colnames(x) = make.unique(colnames(x),sep = "_")
         }
     }
 
@@ -203,13 +205,14 @@ NNS.reg = function (x, y,
         if(!is.null(dim(point.est))){
           if(!is.numeric(point.est)){
             point.est = sapply(point.est,factor_2_dummy)
-
           } else {
             point.est = apply(point.est,2,as.double)
+            colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
           if(is.list(point.est)){
             point.est = do.call(cbind,point.est)
             point.est = apply(point.est,2,as.double)
+            colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
 
         } else {
@@ -218,15 +221,16 @@ NNS.reg = function (x, y,
             point.est = as.double(point.est)
           } else {
             point.est = apply(point.est,2,as.double)
+            colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
         }
 
         ### Add 0's to data for missing regressors
-        Missing = setdiff(names(x),names(point.est))
+        Missing = setdiff(colnames(x),colnames(point.est))
 
-        if(length(Missing)>0 && dim(x)[2]!= dim(point.est)[2]){
+        if(length(Missing)>0 && dim(x)[2]!=dim(point.est)[2]){
           point.est[Missing] <- 0
-          point.est = point.est[names(x)]
+          point.est = point.est[colnames(x)]
         }
 
       } else {
