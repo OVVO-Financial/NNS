@@ -179,11 +179,13 @@ NNS.reg = function (x, y,
         x = sapply(x,factor_2_dummy)
       } else {
         x = apply(x,2,as.double)
+        if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
         colnames(x) = make.unique(colnames(x),sep = "_")
       }
         if(is.list(x)){
             x = do.call(cbind,x)
             x = apply(x,2,as.double)
+            if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
             colnames(x) = make.unique(colnames(x),sep = "_")
         }
 
@@ -193,6 +195,7 @@ NNS.reg = function (x, y,
             x = as.double(x)
         } else {
             x = apply(x,2,as.double)
+            if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
             colnames(x) = make.unique(colnames(x),sep = "_")
         }
     }
@@ -207,11 +210,13 @@ NNS.reg = function (x, y,
             point.est = sapply(point.est,factor_2_dummy)
           } else {
             point.est = apply(point.est,2,as.double)
+            if(is.null(colnames(point.est))) {colnames(point.est) = colnames(point.est, do.NULL = FALSE)}
             colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
           if(is.list(point.est)){
             point.est = do.call(cbind,point.est)
             point.est = apply(point.est,2,as.double)
+            if(is.null(colnames(point.est))) {colnames(point.est) = colnames(point.est, do.NULL = FALSE)}
             colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
 
@@ -221,6 +226,7 @@ NNS.reg = function (x, y,
             point.est = as.double(point.est)
           } else {
             point.est = apply(point.est,2,as.double)
+            if(is.null(colnames(point.est))) {colnames(point.est) = colnames(point.est, do.NULL = FALSE)}
             colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
         }
