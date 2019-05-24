@@ -175,16 +175,25 @@ NNS.reg = function (x, y,
 
   if(factor.2.dummy && !multivariate.call){
     if(!is.null(dim(x))){
+      if(class(x)[1]=="matrix" | class(x)[1]=="data.frame"){
+        x = apply(x,2,factor_2_dummy)
+      } else {
         x = sapply(x,factor_2_dummy)
+      }
         if(is.list(x)){
             x = do.call(cbind,x)
         }
+        x = apply(x,2,as.double)
     } else {
-        x = sapply(x,factor_2_dummy)
-        x = t(x)
+        x = factor_2_dummy(x)
+        if(is.null(dim(x))){
+            x = as.double(x)
+        } else {
+            x = apply(x,2,as.double)
+        }
     }
 
-    x = apply(x,2,as.double)
+
 
 
       if(!is.null(point.est)){
