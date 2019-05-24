@@ -81,7 +81,7 @@ NNS.boost <- function(IVs.train,
     registerDoParallel(cl)
   } else {cl = NULL}
 
-  x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
+  #x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
   if(!is.null(dim(x))){
     x = sapply(x,factor_2_dummy)
