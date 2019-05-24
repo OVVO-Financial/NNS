@@ -175,15 +175,17 @@ NNS.reg = function (x, y,
 
   if(factor.2.dummy && !multivariate.call){
     if(!is.null(dim(x))){
-      if(class(x)[1]=="matrix" | class(x)[1]=="data.frame"){
-        x = apply(x,2,factor_2_dummy)
-      } else {
+      if(!is.numeric(x)){
         x = sapply(x,factor_2_dummy)
+
+      } else {
+        x = apply(x,2,as.double)
       }
         if(is.list(x)){
             x = do.call(cbind,x)
+            x = apply(x,2,as.double)
         }
-        x = apply(x,2,as.double)
+
     } else {
         x = factor_2_dummy(x)
         if(is.null(dim(x))){
@@ -195,21 +197,29 @@ NNS.reg = function (x, y,
 
 
 
-
       if(!is.null(point.est)){
         point.est.y = numeric()
 
         if(!is.null(dim(point.est))){
-          point.est = sapply(point.est,factor_2_dummy)
+          if(!is.numeric(point.est)){
+            point.est = sapply(point.est,factor_2_dummy)
+
+          } else {
+            point.est = apply(point.est,2,as.double)
+          }
           if(is.list(point.est)){
             point.est = do.call(cbind,point.est)
+            point.est = apply(point.est,2,as.double)
           }
-        } else {
-          point.est = sapply(point.est,factor_2_dummy)
-          point.est = t(point.est)
-        }
 
-        point.est = apply(point.est,2,as.double)
+        } else {
+          point.est = factor_2_dummy(point.est)
+          if(is.null(dim(point.est))){
+            point.est = as.double(point.est)
+          } else {
+            point.est = apply(point.est,2,as.double)
+          }
+        }
 
         ### Add 0's to data for missing regressors
         Missing = setdiff(names(x),names(point.est))

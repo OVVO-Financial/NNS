@@ -41,18 +41,26 @@ NNS.caus <- function(x, y,
 
   if(factor.2.dummy){
     if(!is.null(dim(x))){
-      x = sapply(x,factor_2_dummy_FR)
+      if(!is.numeric(x)){
+        x = sapply(x,factor_2_dummy_FR)
+
+      } else {
+        x = apply(x,2,as.double)
+      }
       if(is.list(x)){
         x = do.call(cbind,x)
+        x = apply(x,2,as.double)
       }
+
     } else {
-      x = sapply(x,factor_2_dummy_FR)
-      x = t(x)
+      x = factor_2_dummy(x)
+      if(is.null(dim(x))){
+        x = as.double(x)
+      } else {
+        x = apply(x,2,as.double)
+      }
     }
-    x = apply(x,2,as.double)
-  }
-
-
+    }
 
   if(!missing(y)){
     if(is.numeric(tau)){
