@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
+#' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
 #' @param tau options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
 #' @param time.series logical; \code{FALSE} (default) If analyzing time series data with \code{tau = [integer]}, select \code{(time.series = TRUE)}.  Not required when \code{(tau = "ts")}.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
@@ -40,10 +40,16 @@ NNS.caus <- function(x, y,
   orig.plot = plot
 
   if(factor.2.dummy){
-    x = apply(as.data.frame(x),2,factor_2_dummy)
-    x = do.call(cbind, as.data.frame(x))
-    x = as.data.frame(x)
-      if(dim(x)[2]==1) {x = as.vector(x[,1])}
+    if(!is.null(dim(x))){
+      x = sapply(x,factor_2_dummy_FR)
+      if(is.list(x)){
+        x = do.call(cbind,x)
+      }
+    } else {
+      x = sapply(x,factor_2_dummy_FR)
+      x = t(x)
+    }
+    x = apply(x,2,as.double)
   }
 
 

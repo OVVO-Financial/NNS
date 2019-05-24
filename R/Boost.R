@@ -83,13 +83,29 @@ NNS.boost <- function(IVs.train,
 
   x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
 
-      x = apply(as.data.frame(x),2,factor_2_dummy)
-      x = do.call(cbind, as.data.frame(x))
-      x = as.data.frame(x)
+  if(!is.null(dim(x))){
+    x = sapply(x,factor_2_dummy)
+    if(is.list(x)){
+      x = do.call(cbind,x)
+    }
+  } else {
+    x = sapply(x,factor_2_dummy)
+    x = t(x)
+  }
 
-      z = apply(as.data.frame(z),2,factor_2_dummy)
-      z = do.call(cbind, as.data.frame(z))
-      z = as.data.frame(z)
+  x = apply(x,2,as.double)
+
+  if(!is.null(dim(z))){
+    z = sapply(z,factor_2_dummy)
+    if(is.list(z)){
+      z = do.call(cbind,z)
+    }
+  } else {
+    z = sapply(z,factor_2_dummy)
+    z = t(z)
+  }
+
+  z = apply(z,2,as.double)
 
       y = as.double(as.numeric(unlist(y)))
 
@@ -166,7 +182,9 @@ NNS.boost <- function(IVs.train,
       test.features[[i]] = sort(sample(n,sample(2:n,1),replace = FALSE))
 
       #If estimate is > threshold, store 'features'
-      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
+      predicted = NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],
+                        plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                        norm="std", factor.2.dummy = FALSE,ncores=subcores)$Point.est
 
       predicted = pmin(predicted,max(as.numeric(y)))
       predicted = pmax(predicted,min(as.numeric(y)))
@@ -214,11 +232,11 @@ NNS.boost <- function(IVs.train,
 
       for(j in 1:epochs){
           set.seed(123 * j)
-      new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
+          new.index = sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
       if(i > 1){
-        new.index_half = new.index.1[1:(length(y)/2)]
-        new.index = na.omit(unique(c(new.index_half,new.index))[1:length(y)])
+          new.index_half = new.index.1[1:(length(y)/2)]
+          new.index = na.omit(unique(c(new.index_half,new.index))[1:length(y)])
       }
 
 
@@ -236,9 +254,9 @@ NNS.boost <- function(IVs.train,
         new.dv.train = unlist(new.iv.train[,1])
 
         if(!representative.sample){
-        new.iv.train = rbind(new.iv.train,x[-new.index,])
-        new.dv.train = c(new.dv.train,y[-new.index])
-      }
+            new.iv.train = rbind(new.iv.train,x[-new.index,])
+            new.dv.train = c(new.dv.train,y[-new.index])
+        }
 
 
 
@@ -257,7 +275,9 @@ NNS.boost <- function(IVs.train,
           features = sort(sample(n,sample(2:n,1),replace = FALSE))
 
           #If estimate is > threshold, store 'features'
-          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
+          predicted = NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],
+                            plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                            norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
 
           predicted = pmin(predicted,max(as.numeric(y)))
           predicted = pmax(predicted,min(as.numeric(y)))
@@ -300,7 +320,9 @@ NNS.boost <- function(IVs.train,
 
       estimates <- foreach(i = 1:length(keeper.features))%dopar%{
 
-        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
+        NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
+                plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
 
       } } else {
         for(i in 1:length(keeper.features)){
@@ -313,7 +335,9 @@ NNS.boost <- function(IVs.train,
             }
             }
 
-        estimates[[i]]=NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],plot=FALSE,residual.plot = FALSE,order=depth,n.best=n.best,norm="std",ncores=subcores)$Point.est
+        estimates[[i]]=NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
+                          plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                          norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
         }
 
       }

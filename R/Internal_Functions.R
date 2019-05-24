@@ -18,6 +18,15 @@ factor_2_dummy = function(x){
   output
 }
 
+### Factor to dummy variable FULL RANK
+factor_2_dummy_FR = function(x){
+  if(class(x) == "factor"){
+    output = model.matrix(~x -1, x)
+  } else {
+    output = x
+  }
+  output
+}
 
 
 ### Generator for 1:length(lag) vectors in NNS.ARMA

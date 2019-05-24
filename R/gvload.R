@@ -11,7 +11,6 @@
 #' @import stringr
 
 
-
 .onLoad <- function(libname = find.package("NNS"), pkgname = "NNS"){
 
   # CRAN Note avoidance
