@@ -129,9 +129,7 @@ NNS.boost <- function(IVs.train,
 
 
     ### Representative samples
-      rep.x = apply(data.matrix(x),2,as.double)
-
-      rep.x = data.table(rep.x)
+      rep.x = data.table(x)
 
       fivenum.x = rep.x[,lapply(.SD,fivenum), by = .(y)]
       mode.x = rep.x[,lapply(.SD,mode), by = .(y)]
