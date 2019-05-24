@@ -391,7 +391,8 @@ NNS.boost <- function(IVs.train,
 
   if(feature.importance==TRUE){
       plot.table = table(unlist(keeper.features))
-      names(plot.table) = names(IVs.train[as.numeric(names(plot.table))])
+
+      names(plot.table) = colnames(x[as.numeric(names(plot.table))])
 
       linch =  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
       par(mai=c(1.0,linch,0.8,0.5))
