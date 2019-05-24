@@ -81,31 +81,49 @@ NNS.boost <- function(IVs.train,
     registerDoParallel(cl)
   } else {cl = NULL}
 
-  #x = data.frame(IVs.train); y = DV.train; z = data.frame(IVs.test)
+  x = IVs.train; y = DV.train; z = IVs.test
 
   if(!is.null(dim(x))){
-    x = sapply(x,factor_2_dummy)
+    if(!is.numeric(x)){
+      x = sapply(x,factor_2_dummy)
+
+    } else {
+      x = apply(x,2,as.double)
+    }
     if(is.list(x)){
       x = do.call(cbind,x)
+      x = apply(x,2,as.double)
     }
-  } else {
-    x = sapply(x,factor_2_dummy)
-    x = t(x)
-  }
 
-  x = apply(x,2,as.double)
+  } else {
+    x = factor_2_dummy(x)
+    if(is.null(dim(x))){
+      x = as.double(x)
+    } else {
+      x = apply(x,2,as.double)
+    }
+  }
 
   if(!is.null(dim(z))){
-    z = sapply(z,factor_2_dummy)
+    if(!is.numeric(z)){
+      z = sapply(z,factor_2_dummy)
+
+    } else {
+      z = apply(z,2,as.double)
+    }
     if(is.list(z)){
       z = do.call(cbind,z)
+      z = apply(z,2,as.double)
     }
-  } else {
-    z = sapply(z,factor_2_dummy)
-    z = t(z)
-  }
 
-  z = apply(z,2,as.double)
+  } else {
+    z = factor_2_dummy(z)
+    if(is.null(dim(z))){
+      z = as.double(z)
+    } else {
+      z = apply(z,2,as.double)
+    }
+  }
 
       y = as.double(as.numeric(unlist(y)))
 
