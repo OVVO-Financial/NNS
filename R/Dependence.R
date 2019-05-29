@@ -79,11 +79,8 @@ registerDoParallel(cl)
 stopCluster(cl)
 registerDoSEQ()
 
-        if(print.map==TRUE){
-          nns.cor = NNS.dep.base(x,y,order=order, degree = degree,print.map = TRUE)$Correlation
-        } else {
-          nns.cor = NNS.dep.base(x,y,order=order, degree = degree,print.map = FALSE)$Correlation
-        }
+
+          nns.cor = NNS.dep.base(x,y,order=order, degree = degree, print.map = print.map)$Correlation
 
          return(list("Correlation" = nns.cor,
                 "Dependence" = mean(unlist(nns.dep))))

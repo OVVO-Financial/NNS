@@ -413,11 +413,13 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 # d/dx approximation
   if(is.null(bins)){bins = length(variable)}
 
-  d.dx = (max(target) + abs(min(target))) / bins
+  d.dx = (abs(max(target)) + abs(min(target))) / bins
   tgt = seq(min(target), max(target), d.dx)
-  PDF = LPM.ratio(degree, tgt+d.dx, variable) - LPM.ratio(degree, tgt-d.dx, variable)
+  PDF = abs((diff(LPM.ratio(degree, tgt, variable),2)))
 
-  if(plot){plot(sort(tgt), PDF, col = 'blue', type = 'l', lwd = 3, xlab = "X")}
+  Intervals = (sort(tgt)+(d.dx/2))[1:length(PDF)]
 
-  return(data.table(cbind("Intervals" = sort(tgt), PDF)))
+  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X")}
+
+  return(data.table(cbind("Intervals" = Intervals, PDF)))
 }
