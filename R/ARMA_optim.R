@@ -70,9 +70,9 @@ NNS.ARMA.optim=function(variable, training.set,
     training.set = floor(training.set)
 
     if(!is.null(training.set)){
-        seasonal.factor = seasonal.factor[seasonal.factor<training.set/3 & seasonal.factor>0]
+        seasonal.factor = seasonal.factor[seasonal.factor<=training.set/2 & seasonal.factor>0]
   } else {
-        seasonal.factor = seasonal.factor[seasonal.factor<length(variable)/3 & seasonal.factor>0]
+        seasonal.factor = seasonal.factor[seasonal.factor<=length(variable)/2 & seasonal.factor>0]
   }
 
 

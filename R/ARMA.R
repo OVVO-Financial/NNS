@@ -211,7 +211,7 @@ NNS.ARMA <- function(variable,
       Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
         last.x = tail(Component.index[[i]], 1)
         coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
-        #Regression.Estimates[i] =
+
         coefs[1] + (coefs[2] * (last.x + 1))
       }
 

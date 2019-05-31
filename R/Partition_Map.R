@@ -71,7 +71,6 @@ NNS.part = function(x, y,
   PART = data.table(x, y, quadrant = "q", prior.quadrant = "pq")[ , counts := .N, by = "quadrant"][ , old.counts := .N, by = "prior.quadrant"]
 
 
-
   if(Voronoi){
       plot(x, y, col = 'steelblue', cex.lab = 2, xlab = "X", ylab = "Y")
   }
@@ -85,7 +84,7 @@ NNS.part = function(x, y,
   } else {
       obs.req = obs.req
       type = type
-      hard.stop = floor(log(length(x)))
+      hard.stop = max(floor(log(length(x))),1)
   }
 
 

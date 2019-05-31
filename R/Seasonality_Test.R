@@ -33,7 +33,7 @@ NNS.seas <- function(variable, plot = TRUE){
     var.cov = Inf
   }
 
-  for(i in 1 : (length(variable) / 4)){
+  for(i in 1 : (length(variable) / 2)){
     reverse.var = variable[seq(length(variable), 1, -i)]
     reverse.var_1 = variable_1[seq(length(variable_1), 1, -i)]
     reverse.var_2 = variable_2[seq(length(variable_2), 1, -i)]
