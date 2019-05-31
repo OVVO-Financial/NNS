@@ -20,6 +20,10 @@
 
 NNS.seas <- function(variable, plot = TRUE){
 
+  if(length(variable)<5){
+    return(data.table("Period" = 0, "Coefficient.of.Variance" = NA, "Variable.Coefficient.of.Variance" = n, key = "Coefficient.of.Variance"))
+  }
+
   variable_1 = variable[1 : (length(variable) - 1)]
   variable_2 = variable_1[1 : (length(variable_1) - 1)]
 
@@ -80,7 +84,7 @@ NNS.seas <- function(variable, plot = TRUE){
 
       M = data.table("Period" = instances[index], "Coefficient.of.Variance" = output[index], "Variable.Coefficient.of.Variance" = n, key = "Coefficient.of.Variance")
   } else {
-      M ="No Seasonality Detected"
+      M = data.table("Period" = 0, "Coefficient.of.Variance" = NA, "Variable.Coefficient.of.Variance" = n, key = "Coefficient.of.Variance")
   }
 
 
