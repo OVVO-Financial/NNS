@@ -21,7 +21,7 @@
 NNS.seas <- function(variable, plot = TRUE){
 
   if(length(variable)<5){
-    return(data.table("Period" = 0, "Coefficient.of.Variance" = NA, "Variable.Coefficient.of.Variance" = n, key = "Coefficient.of.Variance"))
+    return(data.table("Period" = 0, "Coefficient.of.Variance" = 0, "Variable.Coefficient.of.Variance" = 0, key = "Coefficient.of.Variance"))
   }
 
   variable_1 = variable[1 : (length(variable) - 1)]
