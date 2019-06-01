@@ -34,7 +34,13 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor,
 \item{subcores}{integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
-Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
+Returns a list containing:
+\itemize{
+\item{\code{$period}} a vector of optimal seasonal periods
+\item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
+\item{\code{$obj.fn}} the minimum objective function value
+\item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+}
 }
 \description{
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
