@@ -101,7 +101,7 @@ nns.optimal
 
 Using our new parameters yields the same results:
 ```{r best optim2,fig.width=5,fig.height=3,fig.align = "center"}
-nns = NNS.ARMA(AirPassengers, training.set = 100, h = 44, seasonal.factor = nns.optimal$periods, method = nns.optimal$method, plot = TRUE, seasonal.plot = FALSE, ncores = 1)
+nns = NNS.ARMA(AirPassengers, training.set = 100, h = 44, seasonal.factor = nns.optimal$periods, weights = nns.optimal$weights, method = nns.optimal$method, plot = TRUE, seasonal.plot = FALSE, ncores = 1)
 
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
@@ -118,6 +118,11 @@ NNS.ARMA(AirPassengers, h = 50, seasonal.factor = nns.optimal$periods, method  =
 * `seasonal.factor = c(1, 2, ...)`
 
 We included the ability to use any number of specified seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+
+* `weights`
+
+Instead of weighting by the `seasonal.factor` strength of seasonality, we offer the ability to weight each per any defined compatible vector summing to 1.  
+Equal weighting would be `weights = rep((1/length(seasonal.factor)), length(seasonal.factor))`.
 
 * `seasonal.factor = FALSE`
 
