@@ -15,8 +15,13 @@
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
-#' @return Returns a list containing a vector of optimal seasonal periods \code{$period}, the minimum objective function value \code{$obj.fn}, and the \code{$method} identifying which \link{NNS.ARMA} method was used.
-#'
+#' @return Returns a list containing:
+#' \itemize{
+#' \item{\code{$period}} a vector of optimal seasonal periods
+#' \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
+#' \item{\code{$obj.fn}} the minimum objective function value
+#' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+#'}
 #' @note The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method = "comb")}.
 #'
 #' \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
@@ -233,13 +238,32 @@ for(j in c('lin','nonlin','both')){
             nns.periods = unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
             nns.method = c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
             nns.SSE = min(unlist(overall.estimates))
+
+            if(length(nns.periods)>1){
+                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores, weights = rep((1/length(nns.periods)),length(nns.periods)))
+
+                weight.SSE = eval(obj.fn)
+
+                if(weight.SSE<nns.SSE){nns.weights = rep((1/length(nns.periods)),length(nns.periods))} else {nns.weights = NULL}
+            } else {nns.weights = NULL}
+
         } else {
             nns.periods = unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
             nns.method = c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
             nns.SSE = max(unlist(overall.estimates))
+
+            if(length(nns.periods)>1){
+                predicted = NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores, weights = rep((1/length(nns.periods)),length(nns.periods)))
+
+                weight.SSE = eval(obj.fn)
+
+                if(weight.SSE>nns.SSE){nns.weights = rep((1/length(nns.periods)),length(nns.periods))} else {nns.weights = NULL}
+            } else {nns.weights = NULL}
+
         }
 
 return(list(periods = nns.periods,
+            weights = nns.weights,
             obj.fn = nns.SSE,
             method = nns.method))
 }
