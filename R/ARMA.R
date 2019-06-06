@@ -117,7 +117,8 @@ NNS.ARMA <- function(variable,
 
 
   if(is.numeric(seasonal.factor)){
-    M <- t(seasonal.factor)
+    M <- matrix(seasonal.factor,ncol=1)
+    colnames(M) = "Period"
     lag = seasonal.factor
     output = numeric(length(seasonal.factor))
     for(i in 1 : length(seasonal.factor)){
@@ -278,7 +279,7 @@ if(!is.null(cl)){
               abline(h = M[1, Variable.Coefficient.of.Variance], col = "red", lty = 5)
               text((M[ , min(Period)] + M[ , max(Period)]) / 2, M[1, Variable.Coefficient.of.Variance], pos = 3, "Variable Coefficient of Variance", col = 'red')
           } else {
-              plot(1, 1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test",
+              plot(1,1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test",
                     ylim = c(0, 2 * abs(sd(FV) / mean(FV))))
               text(1, abs(sd(FV) / mean(FV)), pos = 3, "NO SEASONALITY DETECTED", col = 'red')
           }
