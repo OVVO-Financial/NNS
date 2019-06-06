@@ -191,10 +191,10 @@ for(j in c('lin','nonlin','both')){
 
             if(print.trace){
                 if(i == 1){
-                  print(j)
+                  print(paste0("CURRNET METHOD: ",j))
                   print("COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:")
                 }
-                print(paste("CURRENT method = ", paste0("'",j,"'"), ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),")"))
+                print(paste("NNS.ARMA(... method = ", paste0("'",j,"'"), ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),") ...)"))
                 print(paste0("CURRENT ", j, " OBJECTIVE FUNCTION = ", current.estimate[i]))
             }
 

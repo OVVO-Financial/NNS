@@ -8,9 +8,7 @@
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
 #' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.95 to ensure high dependence for higher \code{("order")} and endpoint determination.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
-#' @param tau options("ts", NULL); \code{NULL}(default) If \code{(dim.red.method = "NNS.caus")} or
-#'
-#' \code{(dim.red.method = "all")} and the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
+#' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjuction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param point.est a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
@@ -69,12 +67,7 @@
 #'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 #' }
 #'
-#' @note Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.  Also, upon visual inspection of the data, if a highly periodic variable is observed set \code{(stn = 0)} or \code{(order = "max")} to ensure a proper fit.
-#'
-#' Identical regressors can be used as long as they do not share the same name. For instance,
-#' \code{NNS.reg(cbind(x, 1 * x), y)} will work as \code{NNS.reg} is not affected by multicollinearity.
-#'
-#' \code{NNS (>= v.0.3.4)} has repurposed parameter \code{(type = "CLASS")}.  \code{(type = "CLASS")} is now restricted to signifying a classification analysis for \code{NNS.reg} while \code{(dim.red.method)} enables dimension reduction regressions.
+#' @note Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
 #'
 #' @keywords nonlinear regression, classifier
 #' @author Fred Viole, OVVO Financial Systems
@@ -315,7 +308,7 @@ if(!factor.2.dummy){
           }
         }
 
-        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,ncores = ncores))
+        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
       } else { # Multivariate dim.red == FALSE
 
         if(is.null(original.names)){
@@ -413,9 +406,9 @@ if(!factor.2.dummy){
           x.star = data.table(x.star = x)
 
         } # if(!is.null(dim.red.method))
-      } #Multivariate Not NULL type
-    } #Univariate
-  } #Multivariate
+      } # Multivariate Not NULL type
+    } # Univariate
+  } # Multivariate
 
   dependence = NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
   dependence[is.na(dependence)] = 0
@@ -445,18 +438,12 @@ if(!factor.2.dummy){
       }
     } # type
   } else {
-    noise.reduction2 = ifelse(noise.reduction=="mean","median",noise.reduction)
-    if(is.null(type)){
+    noise.reduction2 = ifelse(noise.reduction=="mean", "median", noise.reduction)
+
       part.map = NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY")
       if(length(part.map$regression.points$x) == 0){
         part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1)
       }
-    } else {
-      part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = dep.reduced.order)
-      if(length(part.map$regression.points$x) == 0){
-        part.map = NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction2, order = min(nchar(part.map$dt$quadrant)), obs.req = 1)
-      }
-    } # type
   } # Dependence < stn
 
 
