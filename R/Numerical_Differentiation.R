@@ -82,7 +82,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
   ## Return "Derivative Does Not Exist" if lower.B and upper.B are identical to 20 digits
   if(lower.B == upper.B){
-    original.par=par()
+    original.par=par(no.readonly = TRUE)
     par(mfrow = c(1, 2))
     plot(f, xlim = c(point - (100 * h), point + (100 * h)), col = 'blue', ylab = 'f(x)')
     points(point, f.x, pch = 19, col = 'red')
@@ -117,7 +117,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
       z = complex(real = point, imaginary = inferred.h)
 
-      original.par=par()
+      original.par=par(no.readonly = TRUE)
       par(mfrow=c(1, 3))
 
       ## Plot #1

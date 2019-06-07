@@ -80,6 +80,7 @@ Uni.caus <- function(x, y, tau, plot = TRUE, scale = FALSE, time.series = FALSE)
 
 
   if(plot){
+    original.par=par(no.readonly = TRUE)
     par(mfrow = c(3, 1))
 
     ## Raw Variable Plot
@@ -111,7 +112,7 @@ Uni.caus <- function(x, y, tau, plot = TRUE, scale = FALSE, time.series = FALSE)
     legend('top',c("X","Y"), lty = 1,lwd=c(3,3),
            col = c('steelblue', 'red'), ncol = 2)
 
-    par(mfrow = c(1, 1))
+    par(original.par)
   }
 
   return(Causation.x.given.y)

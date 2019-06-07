@@ -17,6 +17,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
 
 
   #Graphs
+        original.par=par(no.readonly = TRUE)
         if(plot){
         boxplot(list(control, treatment), las = 2, names = c("Control", "Treatment"),
               xlab = "Means", horizontal = TRUE, main = "NNS ANOVA and Effect Size",
@@ -88,6 +89,7 @@ if(!is.null(confidence.interval)){
           Upper.Bound.Effect = max(mean(treatment) - min(a, b), 0)
         }
 
+        par(original.par)
   #Certainty Statistic and Effect Size Given Confidence Interval
         return(list("Control Mean" = mean(control),
                     "Treatment Mean" = mean(treatment),

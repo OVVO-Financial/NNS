@@ -269,7 +269,7 @@ if(!is.null(cl)){
 }
   #### PLOTTING
   if(plot){
-      original.par = par()
+      original.par = par(no.readonly = TRUE)
       if(seasonal.plot){
           par(mfrow = c(2, 1))
           if(ncol(M) > 1){

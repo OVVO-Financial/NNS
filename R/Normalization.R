@@ -48,6 +48,7 @@ NNS.norm <- function(A, chart.type = NULL, linear = FALSE) {
   colnames(A_Normalized) <- labels[(n + 1) : (2 * n)]
 
 if(!is.null(chart.type)){
+  original.par=par(no.readonly = TRUE)
     if(chart.type == 'b' ){
         par(mar = c(10, 4, 3, 2) + 0.1)
         boxplot(cbind(A, A_Normalized),
@@ -67,9 +68,12 @@ if(!is.null(chart.type)){
         axis(1, at = seq(length(A[ , 1]), 1, -round(sqrt(length(A[ , 1])))), labels = rownames(A[seq(length(A[ , 1]), 1, -round(sqrt(length(A[ , 1])))),]), las = 1, cex.axis = 1)
         legend('top', c(paste0(colnames(A), " Normalized")), lty = 1, col = c('steelblue', rainbow(n)), bty = 'n', horiz = TRUE, lwd = 2)
     }
+
+  par(original.par)
+
   }
 
-  par(mfrow=c(1, 1))
+
 
   return(A_Normalized)
 

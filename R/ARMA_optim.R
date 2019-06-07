@@ -72,19 +72,22 @@ NNS.ARMA.optim=function(variable, training.set,
 
   if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
 
+    if(is.null(training.set)){training.set = 0}
     training.set = floor(training.set)
-
-    if(!is.null(training.set)){
-        seasonal.factor = seasonal.factor[seasonal.factor<=training.set/5 & seasonal.factor>0]
-  } else {
-        seasonal.factor = seasonal.factor[seasonal.factor<=length(variable)/5 & seasonal.factor>0]
-  }
-
 
   variable = as.numeric(variable)
 
   h = length(variable) - training.set
   actual = tail(variable, h)
+
+  if(is.null(training.set)){
+      l = length(variable)
+  } else {
+      l = training.set}
+
+  denominator = min(5,max(2, as.integer(l/100)))
+
+  seasonal.factor = seasonal.factor[seasonal.factor<=(l/denominator) && seasonal.factor>0]
 
   nns.estimates = list()
   seasonal.combs = list()

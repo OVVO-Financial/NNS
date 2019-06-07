@@ -235,7 +235,7 @@ NNS.boost <- function(IVs.train,
   } # NULL thresholde
 
     if(feature.importance){
-          original.par = par()
+          original.par = par(no.readonly = TRUE)
           par(mfrow=c(2,1))
           par(mai=c(1.0,.5,0.8,0.5))
           hist(results,main = "Distribution of Learner Trials Accuracy",
