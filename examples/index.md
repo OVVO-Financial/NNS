@@ -39,20 +39,21 @@ See the following for NNS detailed examples and specific applications:
    
    2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
 
-   2.5 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
-
+   
 
 # 3. Machine Learning
 
-   3.1 [Classification Using NNS Clustering Analysis](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
-   
-   3.2 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
-   
-   3.3 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
+   3.1 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
-   3.4 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   3.2 [Classification Using NNS Clustering Analysis](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
    
-   3.5 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
+   3.3 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
+   
+   3.4 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
+
+   3.5 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   
+   3.6 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
 
 
 # 4. Time-Series Forecasting
