@@ -413,6 +413,6 @@ NNS.boost <- function(IVs.train,
      par(mar=c(5.1, 4.1, 4.1, 2.1))
      par(original.par)
   }
-
+gc()
   return(apply(do.call(cbind,estimates),1,mode))
 }

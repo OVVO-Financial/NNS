@@ -262,6 +262,8 @@ for(j in c('lin','nonlin','both')){
 
         }
 
+gc()
+
 return(list(periods = nns.periods,
             weights = nns.weights,
             obj.fn = nns.SSE,

@@ -260,7 +260,7 @@ NNS.stack <- function(IVs.train,
 
 
 
-
+gc()
 
 
   return(list(NNS.reg.n.best = best.k,
