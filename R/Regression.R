@@ -212,22 +212,25 @@ NNS.reg = function (x, y,
             if(is.null(colnames(point.est))) {colnames(point.est) = colnames(point.est, do.NULL = FALSE)}
             colnames(point.est) = make.unique(colnames(point.est),sep = "_")
           }
-
+          point.est = as.matrix(point.est)
+          l = dim(point.est)[2]
         } else {
           point.est = factor_2_dummy(point.est)
           if(is.null(dim(point.est))){
             point.est = as.double(point.est)
+            l=length(point.est)
           } else {
             point.est = apply(point.est,2,as.double)
             if(is.null(colnames(point.est))) {colnames(point.est) = colnames(point.est, do.NULL = FALSE)}
             colnames(point.est) = make.unique(colnames(point.est),sep = "_")
+            point.est = as.matrix(point.est)
+            l = dim(point.est)[2]
           }
         }
 
         ### Add 0's to data for missing regressors
-        Missing = setdiff(colnames(x),colnames(point.est))
-
-        if(length(Missing)>0 && dim(x)[2]!=dim(point.est)[2]){
+        if(dim(x)[2]!=l){
+          Missing = setdiff(colnames(x),colnames(point.est))
           point.est[Missing] <- 0
           point.est = point.est[colnames(x)]
         }
@@ -359,12 +362,15 @@ if(!factor.2.dummy){
             if(is.null(tau)){
               tau = "cs"
             }
+
             x.star.coef.1 = numeric()
+
             for(i in 1 : ncol(x)){
               cause = NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
               cause[is.na(cause)] = 0
               x.star.coef.1[i] = cause[1] - cause[2]
             }
+
             x.star.coef.3 = x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.3[is.na(x.star.coef.3)] = 0
             x.star.coef.2 = x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
@@ -376,7 +382,9 @@ if(!factor.2.dummy){
 
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
-          x.star.matrix = t( t(original.variable) * x.star.coef)
+          norm.x = apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+
+          x.star.matrix = t( t(norm.x) * x.star.coef)
 
 
           #In case all IVs have 0 correlation to DV
@@ -394,15 +402,21 @@ if(!factor.2.dummy){
 
           if(!is.null(point.est)){
             new.point.est = numeric()
+            points.norm = rbind(point.est, original.variable)
+
+            points.norm = apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+
             if(is.null(np)){
-              new.point.est = sum(point.est * x.star.coef) / sum( abs( x.star.coef) > 0)
+              new.point.est = sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
             } else {
-              new.point.est = sapply(1 : np, function(i) sum(point.est[i, ] * x.star.coef) / sum( abs( x.star.coef) > 0))
+              point.est2 = points.norm[1:np,]
+              new.point.est = sapply(1 : np, function(i) sum(point.est2[i, ] * x.star.coef) / sum( abs( x.star.coef) > 0))
             }
             point.est = new.point.est
           }
 
           x = rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
+
           x.star = data.table(x.star = x)
 
         } # if(!is.null(dim.red.method))
