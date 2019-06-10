@@ -35,98 +35,97 @@ NNS.caus <- function(x, y,
                      time.series=FALSE,
                      plot=FALSE){
 
-  orig.tau = tau
-  orig.time.series = time.series
-  orig.plot = plot
+  orig.tau <- tau
+  orig.time.series <- time.series
+  orig.plot <- plot
 
   if(factor.2.dummy){
-    if(!is.null(dim(x))){
-      if(!is.numeric(x)){
-        x = sapply(x,factor_2_dummy_FR)
+      if(!is.null(dim(x))){
+          if(!is.numeric(x)){
+              x <- sapply(x,factor_2_dummy_FR)
+          } else {
+              x <- apply(x,2,as.double)
+          }
+          if(is.list(x)){
+              x <- do.call(cbind,x)
+              x <- apply(x,2,as.double)
+          }
 
       } else {
-        x = apply(x,2,as.double)
+          x <- factor_2_dummy(x)
+          if(is.null(dim(x))){
+              x <- as.double(x)
+          } else {
+              x <- apply(x,2,as.double)
+          }
       }
-      if(is.list(x)){
-        x = do.call(cbind,x)
-        x = apply(x,2,as.double)
-      }
-
-    } else {
-      x = factor_2_dummy(x)
-      if(is.null(dim(x))){
-        x = as.double(x)
-      } else {
-        x = apply(x,2,as.double)
-      }
-    }
-    }
+  }
 
   if(!missing(y)){
-    if(is.numeric(tau)){
-      Causation.x.given.y = Uni.caus(x,y,tau=tau,plot = FALSE,time.series=time.series)
-      Causation.y.given.x = Uni.caus(y,x,tau=tau,plot = FALSE,time.series=time.series)
+      if(is.numeric(tau)){
+          Causation.x.given.y <- Uni.caus(x,y,tau=tau,plot = FALSE,time.series=time.series)
+          Causation.y.given.x <- Uni.caus(y,x,tau=tau,plot = FALSE,time.series=time.series)
 
       if(Causation.x.given.y == Causation.y.given.x |
          Causation.x.given.y == 0 | Causation.y.given.x == 0){
-            Causation.x.given.y = Uni.caus(x, y, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
-            Causation.y.given.x = Uni.caus(y, x, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
+            Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
+            Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
       }
     }
 
     if(tau == "cs"){
-    Causation.x.given.y = Uni.caus(x, y, tau = 0, plot = FALSE)
-    Causation.y.given.x = Uni.caus(y, x, tau = 0, plot = FALSE)
+        Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
+        Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
 
-    if(Causation.x.given.y == Causation.y.given.x |
-       Causation.x.given.y == 0 | Causation.y.given.x == 0){
-      Causation.x.given.y = Uni.caus(x, y, tau = 0, plot = FALSE, scale = TRUE)
-      Causation.y.given.x = Uni.caus(y, x, tau = 0, plot = FALSE, scale = TRUE)
-    }
+        if(Causation.x.given.y == Causation.y.given.x |
+            Causation.x.given.y == 0 | Causation.y.given.x == 0){
+                Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE, scale = TRUE)
+                Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE, scale = TRUE)
+        }
     }
 
     if(tau == "ts"){
-      Causes.xy = numeric()
-      Causes.yx = numeric()
+        Causes.xy <- numeric()
+        Causes.yx <- numeric()
 
-      for(i in 0 : 4){
-      # Populate scaling taus and calculate uni causation
-        Causes.xy[i] = Uni.caus(x, y, tau = ceiling((2 ^ i) / 100 * length(x)), plot = FALSE, time.series = TRUE) / (2 ^ i)
-        Causes.yx[i] = Uni.caus(y, x, tau = ceiling((2 ^ i) / 100 * length(x)) , plot = FALSE, time.series = TRUE) / (2 ^ i)
-      }
+        for(i in 0 : 4){
+        # Populate scaling taus and calculate uni causation
+            Causes.xy[i] <- Uni.caus(x, y, tau = ceiling((2 ^ i) / 100 * length(x)), plot = FALSE, time.series = TRUE) / (2 ^ i)
+            Causes.yx[i] <- Uni.caus(y, x, tau = ceiling((2 ^ i) / 100 * length(x)) , plot = FALSE, time.series = TRUE) / (2 ^ i)
+        }
 
-    Causation.x.given.y = mean(Causes.xy)
+        Causation.x.given.y <- mean(Causes.xy)
 
-    Causation.y.given.x = mean(Causes.yx)
+        Causation.y.given.x <- mean(Causes.yx)
     }
 
 
     if(abs(Causation.x.given.y) <= abs(Causation.y.given.x)){
-      if(plot){
-        # For plotting only
-        if(tau == "cs"){
-          tau = 0
+        if(plot){
+            # For plotting only
+            if(tau == "cs"){
+                tau <- 0
+            }
+            if(tau == "ts"){
+                tau <- ceiling(0.03 * length(x))
+            }
+            Uni.caus(y, x, tau = tau, plot = plot)
         }
-        if(tau == "ts"){
-          tau = ceiling(0.03 * length(x))
-        }
-        Uni.caus(y, x, tau = tau, plot = plot)
-      }
-      return(c(Causation.x.given.y = Causation.x.given.y,
+        return(c(Causation.x.given.y = Causation.x.given.y,
                Causation.y.given.x = Causation.y.given.x,
                "C(y--->x)" =  Causation.y.given.x - Causation.x.given.y))
     } else {
-      if(plot){
-        # For plotting only
-        if(tau == "cs"){
-          tau = 0
+        if(plot){
+            # For plotting only
+            if(tau == "cs"){
+                tau <- 0
+            }
+            if(tau == "ts"){
+                tau <- ceiling(0.03 * length(x))
+            }
+            Uni.caus(x, y, tau = tau, plot = plot)
         }
-        if(tau == "ts"){
-          tau = ceiling(0.03 * length(x))
-        }
-        Uni.caus(x, y, tau = tau, plot = plot)
-      }
-      return(c(Causation.x.given.y = Causation.x.given.y,
+    return(c(Causation.x.given.y = Causation.x.given.y,
                Causation.y.given.x = Causation.y.given.x,
                "C(x--->y)" = Causation.x.given.y - Causation.y.given.x))
     }

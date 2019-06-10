@@ -30,9 +30,7 @@ NNS.cor = function(x,
                    degree= NULL){
 
   if(is.null(y)){
-    NNS.dep(x, order = order, degree = degree)$Correlation
+      NNS.dep(x, order = order, degree = degree)$Correlation
   } else {
-    NNS.dep(x, y, order = order, degree = degree)$Correlation}
-
-
-}
+      NNS.dep(x, y, order = order, degree = degree)$Correlation}
+  }

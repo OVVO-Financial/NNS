@@ -42,7 +42,7 @@
 #' @export
 
 
-NNS.ANOVA<- function(control,
+NNS.ANOVA <- function(control,
                      treatment,
                      confidence.interval = 0.95,
                      tails = "Both",
@@ -51,33 +51,33 @@ NNS.ANOVA<- function(control,
                      binary = TRUE){
 
     if(missing(treatment)){
-        n = ncol(control)
+        n <- ncol(control)
         if(is.null(n)){
-          stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+            stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         }
         if(n == 1){
-          stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+            stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         }
         if(n >= 2){
-          A = control
+            A <- control
         }
     } else {
-      return(NNS.ANOVA.bin(control, treatment, confidence.interval, plot = plot, tails = tails))
+        return(NNS.ANOVA.bin(control, treatment, confidence.interval, plot = plot, tails = tails))
     }
 
 
     mean.of.means <- mean(colMeans(A))
     n <- ncol(A)
     if(!pairwise){
-        LPM_ratio = numeric(0L)
-        MAD.CDF = numeric(0L)
+        LPM_ratio <- numeric(0L)
+        MAD.CDF <- numeric(0L)
 
 
   #Continuous CDF for each variable from Mean of Means
-        LPM_ratio = sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
+        LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
 
   #Continuous CDF Deviation from 0.5
-        MAD.CDF = abs(LPM_ratio - .5)
+        MAD.CDF <- abs(LPM_ratio - .5)
 
         Mean.MAD.CDF <- mean(MAD.CDF)
 
@@ -86,39 +86,36 @@ NNS.ANOVA<- function(control,
 
   #Graphs
         if(plot){
-        boxplot(A, las = 2, xlab = "Means", ylab = "Variable", horizontal = TRUE,
-           main = "NNS ANOVA", col = c('steelblue', rainbow(n - 1)))
+            boxplot(A, las = 2, xlab = "Means", ylab = "Variable", horizontal = TRUE, main = "NNS ANOVA", col = c('steelblue', rainbow(n - 1)))
 
   #For ANOVA Visualization
-        abline(v = mean.of.means, col = "red", lwd = 4)
-        mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+            abline(v = mean.of.means, col = "red", lwd = 4)
+            mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
         }
 
         return(c("Certainty"=NNS.ANOVA.rho))
 
     } else {
 
-          raw.certainties = list()
+          raw.certainties <- list()
           n <- ncol(A)
           for(i in 1:(n - 1)){
-            raw.certainties[[i]] = sapply((i + 1) : n, function(b) NNS.ANOVA(cbind(A[ , i],A[ , b])))
-            i = i + 1
+              raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA(cbind(A[ , i],A[ , b])))
           }
 
           certainties <- matrix(, n, n)
           certainties[lower.tri(certainties, diag = FALSE)] <- unlist(raw.certainties)
           diag(certainties) <- 1
-          certainties = pmax(certainties, t(certainties), na.rm = TRUE)
+          certainties <- pmax(certainties, t(certainties), na.rm = TRUE)
 
-          colnames(certainties) = colnames(A)
-          rownames(certainties) = colnames(A)
+          colnames(certainties) <- colnames(A)
+          rownames(certainties) <- colnames(A)
 
           if(plot){
-          boxplot(A, las = 2, xlab = "Means", ylab = "Variable", horizontal = TRUE,
-              main = "ANOVA", col = c('steelblue', rainbow(n - 1)))
-          abline(v = mean.of.means, col = "red", lwd = 4)
-          mtext("Grand Mean", side = 3,col = "red",
-                at = mean.of.means)}
+              boxplot(A, las = 2, xlab = "Means", ylab = "Variable", horizontal = TRUE, main = "ANOVA", col = c('steelblue', rainbow(n - 1)))
+              abline(v = mean.of.means, col = "red", lwd = 4)
+              mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+          }
 
           return(certainties)
       }

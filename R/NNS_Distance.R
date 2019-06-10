@@ -12,25 +12,25 @@
 #' @export
 
 NNS.distance <- function(rpm,dist.estimate,type,k){
-  n=length(dist.estimate)
+  n <- length(dist.estimate)
 
   if(type=="L2"){
-    row.sums = rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
+      row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
   } else {
-    row.sums = rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
+      row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
   }
 
   row.sums[row.sums == 0] <- 1e-10
-  total.row.sums = sum(1 / row.sums)
-  weights = (1 / row.sums) / total.row.sums
+  total.row.sums <- sum(1 / row.sums)
+  weights <- (1 / row.sums) / total.row.sums
 
-  highest = rev(order(weights))[1 : min(k, length(weights))]
+  highest <- rev(order(weights))[1 : min(k, length(weights))]
 
   weights[-highest] <- 0
-  weights.sum = sum(weights)
+  weights.sum <- sum(weights)
 
-  weights = weights / weights.sum
-  single.estimate = sum(weights * rpm$y.hat)
+  weights <- weights / weights.sum
+  single.estimate <- sum(weights * rpm$y.hat)
 
   return(single.estimate)
 }

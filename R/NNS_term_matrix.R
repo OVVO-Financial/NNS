@@ -33,27 +33,27 @@
 
 NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
 
-  p = length(oos)
+  p <- length(oos)
 
-  x = t(t(x))
-  n = nrow(x)
+  x <- t(t(x))
+  n <- nrow(x)
 
   #Remove commas, etc.
   mgsub <- function(pattern, x, ...) {
-    result <- x
-    for (i in 1:length(pattern)) {
-      result <- gsub(pattern[i], "", result, ...)
-    }
-    result
+      result <- x
+      for (i in 1:length(pattern)) {
+          result <- gsub(pattern[i], "", result, ...)
+      }
+      result
   }
 
   #Use all lowercase to simplify instances
-  x[ , 1] = tolower(mgsub(c(",", ";", ":", "'s", " . "), x[ , 1]))
+  x[ , 1] <- tolower(mgsub(c(",", ";", ":", "'s", " . "), x[ , 1]))
 
-  unique.vocab = unique(unlist(strsplit(as.character(x[ , 1]), " ", fixed = TRUE)))
+  unique.vocab <- unique(unlist(strsplit(as.character(x[ , 1]), " ", fixed = TRUE)))
 
   #Sub with a longer .csv to be called to reduce IVs
-  prepositions = c("a", "in", "of", "our", "the", "is", "for", "with", "we", "this", "it", "but", "was",
+  prepositions <- c("a", "in", "of", "our", "the", "is", "for", "with", "we", "this", "it", "but", "was",
                    "at", "to", "on", "aboard", "aside", "by", "means", "spite", "about", "as", "concerning",
                    "instead", "above", "at", "considering", "into", "according", "atop", "despite", "view",
                    "across", "because", "during", "near", "like", "across", "after", "against", "ahead", "along",
@@ -66,37 +66,37 @@ NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
 
 
   #Remove prepositions
-  preps = unique.vocab %in% c(prepositions)
+  preps <- unique.vocab %in% c(prepositions)
 
   if(sum(preps) > 0){
-    unique.vocab = unique.vocab[!preps]
+      unique.vocab <- unique.vocab[!preps]
   }
 
   if(!is.null(oos)){
-    oos.preps = oos %in% c(prepositions)
-    if(sum(oos.preps) > 0){
-      oos=oos[!oos.preps]
-    }
+      oos.preps <- oos %in% c(prepositions)
+      if(sum(oos.preps) > 0){
+          oos <- oos[!oos.preps]
+      }
   }
 
-  NNS.TM = (t(sapply(1 : length(x[ , 1]), function(i) str_count(x[i, 1], unique.vocab))))
+  NNS.TM <- (t(sapply(1 : length(x[ , 1]), function(i) str_count(x[i, 1], unique.vocab))))
 
   if(names){
-    colnames(NNS.TM) = c(unique.vocab)
+      colnames(NNS.TM) <- c(unique.vocab)
   }
 
   if(!is.null(oos)){
-    OOS.TM = (t(sapply(1 : length(oos), function(i) str_count(oos[i], unique.vocab))))
+      OOS.TM <- (t(sapply(1 : length(oos), function(i) str_count(oos[i], unique.vocab))))
   if(names){
-    colnames(OOS.TM) = c(unique.vocab)
+      colnames(OOS.TM) <- c(unique.vocab)
   }
 
   return(list("IV" = NNS.TM,
               "DV" = as.numeric(as.character(x[ , 2])),
               "OOS" = OOS.TM))
   } else {
-    return(list("IV" = NNS.TM,
+      return(list("IV" = NNS.TM,
                 "DV" = as.numeric(as.character(x[ , 2]))))
-    }
+  }
 
 }

@@ -43,9 +43,8 @@ LPM.VaR <- function(percentile, degree, x){
 
 UPM.VaR <- function(percentile, degree, x){
 
+    f <- function(tgt) UPM.ratio(degree, tgt, x) - (1 - percentile)
 
-  f<- function(tgt) UPM.ratio(degree, tgt, x) - (1 - percentile)
-
-  return(uniroot(f, lower = min(x), upper = max(x), extendInt = 'yes')$root)
+    return(uniroot(f, lower = min(x), upper = max(x), extendInt = 'yes')$root)
 
 }

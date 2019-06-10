@@ -35,7 +35,7 @@
 #' NNS.part(x, y, Voronoi = TRUE)
 #'
 #' ## Examine final counts by quadrant
-#' DT = NNS.part(x, y)$dt
+#' DT <- NNS.part(x, y)$dt
 #' DT[ , counts := .N, by = quadrant]
 #' DT
 #' @export
@@ -48,289 +48,288 @@ NNS.part = function(x, y,
                     min.obs.stop = FALSE,
                     noise.reduction = "mean"){
 
-  if(is.null(obs.req)) obs.req=8
+    if(is.null(obs.req)) obs.req <- 8
 
-  if(!is.null(order)){
-      if(order == 0){
-          order=1
-      } else {
-          order=order
-      }
-  } else {
-      order=Inf
-  }
+    if(!is.null(order)){
+        if(order == 0){
+            order <- 1
+        } else {
+            order <- order
+        }
+    } else {
+        order=Inf
+    }
 
-  x = as.numeric(x)
-  y = as.numeric(y)
+    x <- as.numeric(x)
+    y <- as.numeric(y)
 
-  if(length(x)<8){
-    order=1
-    obs.req=0
-  }
+    if(length(x)<8){
+        order <- 1
+        obs.req <- 0
+    }
 
-  PART = data.table(x, y, quadrant = "q", prior.quadrant = "pq")[ , counts := .N, by = "quadrant"][ , old.counts := .N, by = "prior.quadrant"]
-
-
-  if(Voronoi){
-      plot(x, y, col = 'steelblue', cex.lab = 2, xlab = "X", ylab = "Y")
-  }
+    PART <- data.table(x, y, quadrant = "q", prior.quadrant = "pq")[ , counts := .N, by = "quadrant"][ , old.counts := .N, by = "prior.quadrant"]
 
 
-
-  if(!is.numeric(order)){
-      obs.req = 0
-      type = type
-      hard.stop = Inf
-  } else {
-      obs.req = obs.req
-      type = type
-      hard.stop = max(floor(log(length(x))),1)
-  }
+    if(Voronoi){
+        plot(x, y, col = 'steelblue', cex.lab = 2, xlab = "X", ylab = "Y")
+    }
 
 
-  if(noise.reduction == 'off'){
-      obs.req = 1
-  } else {
-      obs.req = obs.req
-  }
-
-  ### X and Y partition
-  if(is.null(type)){
-      i = 0L
-      while(i >= 0){
-          if(i == order | i == hard.stop) break
-
-          PART[counts >= obs.req, counts := .N, by = quadrant]
-
-          PART[old.counts >= obs.req, old.counts := .N, by = prior.quadrant]
-
-          l.PART = max(PART$counts)
-
-          if(min.obs.stop && (min(PART$counts) <= obs.req) && i>=1) break
-
-          if(l.PART <= obs.req && i >= 1) break
-
-          obs.req.rows = PART[counts >= obs.req, which = TRUE]
-
-          old.obs.req.rows = PART[old.counts >= obs.req, which = TRUE]
-
-      # Stop if diminishing returns
-          if(obs.req > 0 && length(obs.req.rows) < length(old.obs.req.rows)) break
-
-      #Segments for Voronoi...
-      if(Voronoi){
-          if(l.PART > obs.req){
-              if(noise.reduction == 'mean' | noise.reduction == 'off'){
-                  PART[ obs.req.rows , {segments(min(x), mean(y), max(x), mean(y), lty = 3)
-                                            segments(mean(x), min(y), mean(x), max(y), lty = 3)
-                                            }, by = quadrant]
-              }
-
-              if(noise.reduction == 'median'){
-                  PART[ obs.req.rows , {segments(min(x), median(y), max(x), median(y), lty = 3)
-                                            segments(median(x), min(y), median(x), max(y), lty = 3)
-                                            }, by = quadrant]
-              }
-
-              if(noise.reduction == 'mode'){
-                  PART[ obs.req.rows , {segments(min(x), mode(y), max(x), mode(y), lty = 3)
-                                            segments(mode(x), min(y), mode(x), max(y), lty = 3)
-                                            }, by = quadrant]
-              }
-          }
-      }
+    if(!is.numeric(order)){
+        obs.req <- 0
+        type <- type
+        hard.stop <- Inf
+    } else {
+        obs.req <- obs.req
+        type <- type
+        hard.stop <- max(floor(log(length(x))),1)
+    }
 
 
-      if(noise.reduction == 'mean' | noise.reduction == 'off'){
-          RP = PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
+    if(noise.reduction == 'off'){
+        obs.req <- 1
+    } else {
+        obs.req <- obs.req
+    }
 
-          RP[, prior.quadrant := (quadrant)]
+    ### X and Y partition
+    if(is.null(type)){
+        i <- 0L
+        while(i >= 0){
+            if(i == order | i == hard.stop) break
 
-          PART[obs.req.rows , prior.quadrant := (quadrant)]
+            PART[counts >= obs.req, counts := .N, by = quadrant]
 
-          old.parts = length(unique(PART$quadrant))
+            PART[old.counts >= obs.req, old.counts := .N, by = prior.quadrant]
 
-          PART[RP, on = .(quadrant), q_new := { lox = x.x <= i.x
+            l.PART <- max(PART$counts)
+
+            if(min.obs.stop && (min(PART$counts) <= obs.req) && i>=1) break
+
+            if(l.PART <= obs.req && i >= 1) break
+
+            obs.req.rows <- PART[counts >= obs.req, which = TRUE]
+
+            old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
+
+            # Stop if diminishing returns
+            if(obs.req > 0 && length(obs.req.rows) < length(old.obs.req.rows)) break
+
+            #Segments for Voronoi...
+            if(Voronoi){
+                if(l.PART > obs.req){
+                    if(noise.reduction == 'mean' | noise.reduction == 'off'){
+                        PART[ obs.req.rows , {segments(min(x), mean(y), max(x), mean(y), lty = 3)
+                                              segments(mean(x), min(y), mean(x), max(y), lty = 3)
+                                              }, by = quadrant]
+                    }
+
+                    if(noise.reduction == 'median'){
+                        PART[ obs.req.rows , {segments(min(x), median(y), max(x), median(y), lty = 3)
+                                              segments(median(x), min(y), median(x), max(y), lty = 3)
+                                              }, by = quadrant]
+                    }
+
+                    if(noise.reduction == 'mode'){
+                        PART[ obs.req.rows , {segments(min(x), mode(y), max(x), mode(y), lty = 3)
+                                              segments(mode(x), min(y), mode(x), max(y), lty = 3)
+                                              }, by = quadrant]
+                    }
+                }
+            }
+
+
+            if(noise.reduction == 'mean' | noise.reduction == 'off'){
+                RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
+
+                RP[, prior.quadrant := (quadrant)]
+
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
+
+                old.parts <- length(unique(PART$quadrant))
+
+                PART[RP, on = .(quadrant), q_new := { lox = x.x <= i.x
                                                 loy = x.y <= i.y
                                                 1L + lox + loy * 2L
                                                 }]
 
-          PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-          new.parts = length(unique(PART$quadrant))
-      }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-      if(noise.reduction == 'median'){
-          RP= PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x : y]
+            if(noise.reduction == 'median'){
+                RP <- PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x : y]
 
-          RP[ , prior.quadrant := (quadrant)]
+                RP[ , prior.quadrant := (quadrant)]
 
-          PART[obs.req.rows , prior.quadrant := (quadrant)]
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
 
-          old.parts = length(unique(PART$quadrant))
+                old.parts <- length(unique(PART$quadrant))
 
-          PART[RP, on = .(quadrant), q_new := {lox = x.x <= i.x
+                PART[RP, on = .(quadrant), q_new := {lox = x.x <= i.x
                                                loy = x.y <= i.y
                                                1L + lox + loy * 2L
                                               }]
 
-          PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-          new.parts = length(unique(PART$quadrant))
-      }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-      if(noise.reduction == 'mode'){
-          RP = PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x : y]
+            if(noise.reduction == 'mode'){
+                RP <- PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x : y]
 
-          RP[ , prior.quadrant := (quadrant)]
+                RP[ , prior.quadrant := (quadrant)]
 
-          PART[obs.req.rows , prior.quadrant := (quadrant)]
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
 
-          old.parts=length(unique(PART$quadrant))
+                old.parts <- length(unique(PART$quadrant))
 
-          PART[RP, on=.(quadrant), q_new := {lox = x.x <= i.x
+                PART[RP, on=.(quadrant), q_new := {lox = x.x <= i.x
                                              loy = x.y <= i.y
                                              1L + lox + loy * 2L
                                             }]
 
-          PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-          new.parts = length(unique(PART$quadrant))
-      }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-      if(obs.req == 0 & old.parts == new.parts) break
+            if(obs.req == 0 & old.parts == new.parts) break
 
-      i = i + 1L
+            i = i + 1L
+        }
+
+        if(!is.numeric(order)){
+            RP <- PART[,c("quadrant","x","y")]
+        } else {
+            RP[ , `:=` (prior.quadrant = NULL)]
+        }
+
+        PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
+
+        DT <- PART[]
+
+        RP <- setorder(RP[], quadrant)[]
+
+
+        if(Voronoi){
+            points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
+            title(main = paste0("NNS Order = ", i), cex.main = 2)
+        }
+
+
+        return(list("order" = i,
+                    "dt" = DT,
+                    "regression.points" = RP))
+
     }
 
-    if(!is.numeric(order)){
-        RP=PART[,c("quadrant","x","y")]
-    } else {
-        RP[ , `:=` (prior.quadrant = NULL)]
-    }
 
-    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
+    ### X ONLY partition
+    if(!is.null(type)){
+        i <- 0L
+        while(i >= 0){
+            if(i == order | i == hard.stop) break
 
-    DT = PART[]
+            PART[counts >= 2 * obs.req, counts := .N, by = quadrant]
 
-    RP = setorder(RP[], quadrant)[]
+            PART[old.counts >= 2 * obs.req, old.counts := .N, by = prior.quadrant]
 
+            if(max(PART$counts) <= 2 * obs.req && i >= 1) break
 
-    if(Voronoi){
-        points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
-        title(main = paste0("NNS Order = ", i), cex.main = 2)
-    }
+            if(min.obs.stop && (min(PART$counts) <= 2 * obs.req) && i >= 1) break
 
+            obs.req.rows <- PART[counts >= 2 * obs.req, which = TRUE]
 
-    return(list("order" = i,
-                "dt" = DT,
-                "regression.points" = RP))
+            old.obs.req.rows <- PART[old.counts >= 2 * obs.req, which = TRUE]
 
-  }
+            # Stop if diminishing returns
+            if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
 
+            if(noise.reduction == 'mean' | noise.reduction == 'off'){
+                RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
 
-  ### X ONLY partition
-  if(!is.null(type)){
-      i = 0L
-      while(i >= 0){
-          if(i == order | i == hard.stop) break
+                RP[ , prior.quadrant := (quadrant)]
 
-          PART[counts >= 2 * obs.req, counts := .N, by = quadrant]
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
 
-          PART[old.counts >= 2 * obs.req, old.counts := .N, by = prior.quadrant]
+                old.parts <- length(unique(PART$quadrant))
 
-          if(max(PART$counts) <= 2 * obs.req && i >= 1) break
-
-          if(min.obs.stop && (min(PART$counts) <= 2 * obs.req) && i >= 1) break
-
-          obs.req.rows = PART[counts >= 2 * obs.req, which = TRUE]
-
-          old.obs.req.rows = PART[old.counts >= 2 * obs.req, which = TRUE]
-
-      # Stop if diminishing returns
-          if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
-
-          if(noise.reduction == 'mean' | noise.reduction == 'off'){
-              RP = PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
-
-              RP[ , prior.quadrant := (quadrant)]
-
-              PART[obs.req.rows , prior.quadrant := (quadrant)]
-
-              old.parts = length(unique(PART$quadrant))
-
-              PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
+                PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
                                                    1L + lox
                                                   }]
 
-              PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-              new.parts = length(unique(PART$quadrant))
-          }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-          if(noise.reduction == 'mode'){
-              RP = PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x : y]
+            if(noise.reduction == 'mode'){
+                RP <- PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x : y]
 
-              RP[ , prior.quadrant := (quadrant)]
+                RP[ , prior.quadrant := (quadrant)]
 
-              PART[obs.req.rows , prior.quadrant := (quadrant)]
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
 
-              old.parts = length(unique(PART$quadrant))
+                old.parts <- length(unique(PART$quadrant))
 
-              PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
+                PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
                                                    1L + lox
                                                   }]
 
-              PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-              new.parts = length(unique(PART$quadrant))
-          }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-          if(noise.reduction == 'median'){
-              RP = PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x : y]
+            if(noise.reduction == 'median'){
+                RP <- PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x : y]
 
-              RP[ , prior.quadrant := (quadrant)]
+                RP[ , prior.quadrant := (quadrant)]
 
-              PART[obs.req.rows , prior.quadrant := (quadrant)]
+                PART[obs.req.rows , prior.quadrant := (quadrant)]
 
-              old.parts = length(unique(PART$quadrant))
+                old.parts <- length(unique(PART$quadrant))
 
-              PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
+                PART[RP, on = .(quadrant), q_new := {lox = x.x > i.x
                                                    1L + lox
                                                   }]
 
-              PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
+                PART[obs.req.rows, quadrant := paste0(quadrant, q_new)]
 
-              new.parts = length(unique(PART$quadrant))
-          }
+                new.parts <- length(unique(PART$quadrant))
+            }
 
-          if(obs.req == 0 & old.parts == new.parts) break
+            if(obs.req == 0 & old.parts == new.parts) break
 
-          i = i + 1L
+            i <- i + 1L
+        }
+
+        if(!is.numeric(order)){
+            RP <- PART[,c("quadrant","x","y")]
+        } else {
+            RP[ , `:=` (prior.quadrant = NULL)]
+        }
+
+        PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
+
+        DT <- PART[]
+
+        RP <- setorder(RP[], quadrant)[]
+
+        if(Voronoi){
+            abline(v = RP$x, lty = 3)
+            points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
+            title(main = paste0("NNS Order = ", i), cex.main = 2)
+        }
+
+
+        return(list("order" = i,
+                    "dt" = DT,
+                    "regression.points" = RP))
     }
-
-    if(!is.numeric(order)){
-        RP=PART[,c("quadrant","x","y")]
-    } else {
-        RP[ , `:=` (prior.quadrant = NULL)]
-    }
-
-    PART[ ,`:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
-
-    DT = PART[]
-
-    RP = setorder(RP[], quadrant)[]
-
-    if(Voronoi){
-        abline(v = RP$x, lty = 3)
-        points(RP$x, RP$y, pch = 15, lwd = 2, col = 'red')
-        title(main = paste0("NNS Order = ", i), cex.main = 2)
-    }
-
-
-    return(list("order" = i,
-                "dt" = DT,
-                "regression.points" = RP))
-  }
 
 }

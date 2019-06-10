@@ -22,12 +22,13 @@
 NNS.SD.efficient.set <- function(x,degree,type="discrete") {
   n <- ncol(x)
   max_target <- max(x)
+
   LPM_order <- numeric()
   Dominated_set <- numeric()
   current_base <- numeric()
 
 
-  LPM_order = sapply(1 : n,function(i) LPM(1, max_target, x[ , i]))
+  LPM_order <- sapply(1 : n,function(i) LPM(1, max_target, x[ , i]))
 
   final_ranked <- x[ , order(LPM_order)]
 
@@ -40,40 +41,41 @@ NNS.SD.efficient.set <- function(x,degree,type="discrete") {
 
       challenger <- final_ranked[ , i + 1]
 
-    if(degree == 1){
-      sd.test = NNS.FSD.uni(base, challenger, type = type)
-    }
-    if(degree == 2){
-      sd.test = NNS.SSD.uni(base, challenger)
-    }
-    if(degree == 3){
-      sd.test = NNS.TSD.uni(base, challenger)
-    }
+      if(degree == 1){
+          sd.test <- NNS.FSD.uni(base, challenger, type = type)
+      }
+      if(degree == 2){
+          sd.test <- NNS.SSD.uni(base, challenger)
+      }
+      if(degree == 3){
+          sd.test <- NNS.TSD.uni(base, challenger)
+      }
 
       if (sd.test == 1){
-        current_base[i] <- current_base[length(current_base)]
-        Dominated_set[i] <- i + 1
+          current_base[i] <- current_base[length(current_base)]
+          Dominated_set[i] <- i + 1
       }
 
 
       if (sd.test == 0){
-        for (j in current_base){
-          base <- final_ranked[ , j]
-          if(degree == 1){
-            new.base.sd.test = NNS.FSD.uni(base, challenger, type = type)
-          }
-          if(degree == 2){
-            new.base.sd.test = NNS.SSD.uni(base, challenger)
-          }
-          if(degree == 3){
-            new.base.sd.test = NNS.TSD.uni(base, challenger)
-          }
+          for (j in current_base){
+              base <- final_ranked[ , j]
+              if(degree == 1){
+                  new.base.sd.test <- NNS.FSD.uni(base, challenger, type = type)
+              }
+              if(degree == 2){
+                  new.base.sd.test <- NNS.SSD.uni(base, challenger)
+              }
+              if(degree == 3){
+                  new.base.sd.test <- NNS.TSD.uni(base, challenger)
+              }
 
-          if (new.base.sd.test == 0){ next
-          } else {
-            Dominated_set[i] <- i + 1
-            }
-        }
+              if (new.base.sd.test == 0){
+                  next
+              } else {
+                  Dominated_set[i] <- i + 1
+                }
+          }
 
         current_base[i]<- i + 1
       }

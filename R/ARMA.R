@@ -73,199 +73,199 @@ NNS.ARMA <- function(variable,
                      ncores = NULL){
 
   if(intervals && is.numeric(seasonal.factor)){
-    stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
   }
 
   if(intervals && seasonal.factor){
-    stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
   }
 
   if(is.numeric(seasonal.factor) && dynamic){
-    stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')
   }
 
 
   if (is.null(ncores)) {
-    num_cores <- as.integer(detectCores() / 2) - 1
+      num_cores <- as.integer(detectCores() / 2) - 1
   } else {
-    num_cores <- ncores
+      num_cores <- ncores
   }
 
   if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else {cl = NULL}
+      cl <- makeCluster(num_cores)
+      registerDoParallel(cl)
+  } else { cl <- NULL }
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
-    seasonal.factor = FALSE
+      seasonal.factor <- FALSE
   }
 
 
-  variable = as.numeric(variable)
-  OV = variable
+  variable <- as.numeric(variable)
+  OV <- variable
 
   if(!is.null(training.set)){
-    variable = variable[1 : training.set]
-    FV = variable[1 : training.set]
+      variable <- variable[1 : training.set]
+      FV <- variable[1 : training.set]
   } else {
-    training.set = length(variable)
-    variable = variable
-    FV = variable
+      training.set <- length(variable)
+      variable <- variable
+      FV <- variable
   }
 
-  Estimates = numeric()
+  Estimates <- numeric()
 
 
   if(is.numeric(seasonal.factor)){
-    M <- matrix(seasonal.factor,ncol=1)
-    colnames(M) = "Period"
-    lag = seasonal.factor
-    output = numeric(length(seasonal.factor))
-    for(i in 1 : length(seasonal.factor)){
-      rev.var = variable[seq(length(variable), 1, -i)]
-      output[i] = abs(sd(rev.var) / mean(rev.var))
-    }
+      M <- matrix(seasonal.factor,ncol=1)
+      colnames(M) <- "Period"
+      lag <- seasonal.factor
+      output <- numeric(length(seasonal.factor))
+      for(i in 1 : length(seasonal.factor)){
+          rev.var <- variable[seq(length(variable), 1, -i)]
+          output[i] <- abs(sd(rev.var) / mean(rev.var))
+      }
 
-    if(is.null(weights)){
-    Relative.seasonal = output / abs(sd(variable)/mean(variable))
-    Seasonal.weighting = 1 / Relative.seasonal
-    Observation.weighting = 1 / sqrt(seasonal.factor)
-    Weights = (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
-    seasonal.plot = FALSE
-    } else {
-      Weights = weights
-    }
+      if(is.null(weights)){
+          Relative.seasonal <- output / abs(sd(variable)/mean(variable))
+          Seasonal.weighting <- 1 / Relative.seasonal
+          Observation.weighting <- 1 / sqrt(seasonal.factor)
+          Weights <- (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
+          seasonal.plot <- FALSE
+      } else {
+          Weights <- weights
+      }
 
   } else {
-    M = NNS.seas(variable, plot=FALSE)
+    M <- NNS.seas(variable, plot=FALSE)
     if(!is.list(M)){
-      M <- t(1)
+        M <- t(1)
     } else {
-      if(is.null(best.periods)){
-        M <- M$all.periods
-      } else {
-        if(!seasonal.factor && is.numeric(best.periods) && length(M$all.periods$Period) < best.periods){
-          best.periods = length(M$all.periods$Period)
-        }
+        if(is.null(best.periods)){
+            M <- M$all.periods
+        } else {
+            if(!seasonal.factor && is.numeric(best.periods) && length(M$all.periods$Period) < best.periods){
+                best.periods <- length(M$all.periods$Period)
+            }
         M <- M$all.periods[1 : best.periods, ]
       }
     }
 
 
-    ASW = ARMA.seas.weighting(seasonal.factor,M)
-    lag = ASW$lag
+    ASW <- ARMA.seas.weighting(seasonal.factor,M)
+    lag <- ASW$lag
     if(is.null(weights)){
-        Weights = ASW$Weights
+        Weights <- ASW$Weights
     } else {
-        Weights = weights
+        Weights <- weights
     }
   }
 
-  Estimate.band = list()
+  Estimate.band <- list()
 
   # Regression for each estimate in h
   for (j in 1 : h){
-    ## Regenerate seasonal.factor if dynamic
-    if(dynamic){
-      seas.matrix = NNS.seas(variable, plot=FALSE)
-      if(!is.list(seas.matrix)){
-        M <- t(1)
-      } else {
-        if(is.null(best.periods)){
-          M<- seas.matrix$all.periods
-        } else {
-          M<- seas.matrix$all.periods[1 : best.periods, ]
-        }
-      }
+      ## Regenerate seasonal.factor if dynamic
+      if(dynamic){
+          seas.matrix = NNS.seas(variable, plot=FALSE)
+          if(!is.list(seas.matrix)){
+              M <- t(1)
+          } else {
+              if(is.null(best.periods)){
+                  M<- seas.matrix$all.periods
+              } else {
+              M<- seas.matrix$all.periods[1 : best.periods, ]
+              }
+          }
 
-      ASW = ARMA.seas.weighting(seasonal.factor,M)
-      lag = ASW$lag
-      Weights = ASW$Weights
+      ASW <- ARMA.seas.weighting(seasonal.factor,M)
+      lag <- ASW$lag
+      Weights <- ASW$Weights
     }
 
     ## Generate vectors for 1:lag
-    GV = generate.vectors(variable,lag)
-    Component.index = GV$Component.index
-    Component.series = GV$Component.series
+    GV <- generate.vectors(variable,lag)
+    Component.index <- GV$Component.index
+    Component.series <- GV$Component.series
 
     ## Regression on Component Series
-    Regression.Estimates = numeric()
+    Regression.Estimates <- numeric()
 
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates = list()
+      Regression.Estimates <- list()
 
-      Regression.Estimates<- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
-        x = Component.index[[i]] ; y = Component.series[[i]]
-        last.x = tail(x, 1)
-        last.y = tail(y, 1)
+      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
+        x <- Component.index[[i]] ; y = Component.series[[i]]
+        last.x <- tail(x, 1)
+        last.y <- tail(y, 1)
 
         ## Skeleton NNS regression for NNS.ARMA
-        reg.points = tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 2)
+        reg.points <- tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 2)
 
-        run = diff(reg.points$x)
-        rise = diff(reg.points$y)
+        run <- diff(reg.points$x)
+        rise <- diff(reg.points$y)
 
         last.y + (rise / run)
       }
 
-      Regression.Estimates = unlist(Regression.Estimates)
+      Regression.Estimates <- unlist(Regression.Estimates)
 
-      NL.Regression.Estimates = Regression.Estimates
-      Nonlin.estimates = sum(Regression.Estimates * Weights)
+      NL.Regression.Estimates <- Regression.Estimates
+      Nonlin.estimates <- sum(Regression.Estimates * Weights)
 
     }#Linear == F
 
     if(method == 'lin' | method == 'both'){
 
-      Regression.Estimates = list()
+      Regression.Estimates <- list()
 
       Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
-        last.x = tail(Component.index[[i]], 1)
-        coefs = coef(lm(Component.series[[i]] ~ Component.index[[i]]))
+          last.x <- tail(Component.index[[i]], 1)
+          coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
 
-        coefs[1] + (coefs[2] * (last.x + 1))
+          coefs[1] + (coefs[2] * (last.x + 1))
       }
 
-      Regression.Estimates = unlist(Regression.Estimates)
+      Regression.Estimates <- unlist(Regression.Estimates)
 
-      L.Regression.Estimates = Regression.Estimates
-      Lin.estimates = sum(Regression.Estimates * Weights)
+      L.Regression.Estimates <- Regression.Estimates
+      Lin.estimates <- sum(Regression.Estimates * Weights)
 
     }#Linear == T
 
 
     if(!negative.values){
-        Regression.Estimates = pmax(0, Regression.Estimates)
+        Regression.Estimates <- pmax(0, Regression.Estimates)
     }
 
 
     if(intervals){
       if(method == 'both'){
-        Estimate.band[[j]] = c(NL.Regression.Estimates, L.Regression.Estimates)
+        Estimate.band[[j]] <- c(NL.Regression.Estimates, L.Regression.Estimates)
       }
       if(method == 'nonlin'){
-        Estimate.band[[j]] = NL.Regression.Estimates
+        Estimate.band[[j]] <- NL.Regression.Estimates
       }
       if(method == 'lin'){
-        Estimate.band[[j]] = L.Regression.Estimates
+        Estimate.band[[j]] <- L.Regression.Estimates
       }
     }
 
     if(method == 'both'){
-      Estimates[j] = mean(c(Lin.estimates, Nonlin.estimates))
+        Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
     } else {
-      Estimates[j] = sum(Regression.Estimates * Weights)
+        Estimates[j] <- sum(Regression.Estimates * Weights)
     }
 
-    variable = c(variable, Estimates[j])
-    FV = variable
+    variable <- c(variable, Estimates[j])
+    FV <- variable
 
   } # j loop
 
 if(!is.null(cl)){
-  stopCluster(cl)
-  registerDoSEQ()
+    stopCluster(cl)
+    registerDoSEQ()
 }
   #### PLOTTING
   if(plot){
@@ -285,9 +285,9 @@ if(!is.null(cl)){
           }
       }
 
-    label = names(variable)
+    label <- names(variable)
     if(is.null(label)){
-      label = "Variable"
+        label <- "Variable"
     }
 
     plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
@@ -296,7 +296,7 @@ if(!is.null(cl)){
 
     if(intervals){
         for(i in 1 : h){
-            ys = unlist(Estimate.band[[i]])
+            ys <- unlist(Estimate.band[[i]])
             points(rep(training.set + i, length(ys)), ys, col = rgb(1, 0, 0, 0.0125), pch = 15)
         }
 

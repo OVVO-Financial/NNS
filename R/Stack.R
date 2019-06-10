@@ -75,29 +75,29 @@ NNS.stack <- function(IVs.train,
 
   n <- ncol(IVs.train)
 
-  l = length(IVs.train[ , 1])
+  l <- length(IVs.train[ , 1])
 
   if(is.null(CV.size)){
-    if(is.null(IVs.test)){
-      CV.size = 0.25
-    } else {
-      CV.size = mean(c(.2, min(length(IVs.test[ , 1]) / l, .5)))
-    }
+      if(is.null(IVs.test)){
+          CV.size <- 0.25
+      } else {
+          CV.size <- mean(c(.2, min(length(IVs.test[ , 1]) / l, .5)))
+      }
   }
 
-  THRESHOLDS = list()
-  best.k = list()
-  best.nns.cv = list()
-  best.nns.ord = list()
+  THRESHOLDS <- list()
+  best.k <- list()
+  best.nns.cv <- list()
+  best.nns.ord <- list()
 
   for(b in 1 : folds){
-    set.seed(123 * b)
-    test.set = sample(1 : l, as.integer(CV.size * l), replace = FALSE)
+      set.seed(123 * b)
+      test.set <- sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
-    if(b > 1){
-      test.set_half = unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
-      test.set = unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
-    }
+      if(b > 1){
+          test.set_half <- unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
+          test.set <- unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+      }
 
     CV.IVs.train <- IVs.train[c(-test.set), ]
     CV.IVs.test <- IVs.train[c(test.set), ]
@@ -113,125 +113,121 @@ NNS.stack <- function(IVs.train,
 
     ### NORMALIZATION OF VARIABLES and SELECTION OF ORDER:
     if(!is.null(norm)){
-      np = nrow(CV.IVs.test)
-      points.norm = rbind(CV.IVs.test, CV.IVs.train)
-      colnames(points.norm) = colnames(CV.IVs.test)
+        np <- nrow(CV.IVs.test)
+        points.norm <- rbind(CV.IVs.test, CV.IVs.train)
+        colnames(points.norm) <- colnames(CV.IVs.test)
 
-      if(norm == "std"){
-        CV.IVs.train = apply(CV.IVs.train, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-        CV.IVs.test = apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))[1 : np, ]
-      }
+        if(norm == "std"){
+            CV.IVs.train <- apply(CV.IVs.train, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+            CV.IVs.test <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))[1 : np, ]
+        }
 
-      if(norm == "NNS"){
-        CV.IVs.train = NNS.norm(CV.IVs.train)
-        CV.IVs.test = NNS.norm(points.norm)[1 : np, ]
-      }
+        if(norm == "NNS"){
+            CV.IVs.train <- NNS.norm(CV.IVs.train)
+            CV.IVs.test <- NNS.norm(points.norm)[1 : np, ]
+        }
     }
 
     if(1 %in% method){
-      actual = CV.DV.test
-      nns.cv.1 = numeric()
+        actual <- CV.DV.test
+        nns.cv.1 <- numeric()
 
-      if(objective=='min'){nns.cv.1[1] = Inf} else {nns.cv.1[1] = -Inf}
-
-      for(i in 1:(2*n)){
-        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order, ncores = ncores)$Point.est
-
-        nns.cv.1[i+1] = eval(obj.fn)
-        if(i > 1){
-          if(objective=='min' && nns.cv.1[i]>nns.cv.1[i-1]){ break }
-          if(objective=='max' && nns.cv.1[i]<nns.cv.1[i-1]){ break }
+        if(objective=='min'){
+            nns.cv.1[1] <- Inf
+        } else {
+            nns.cv.1[1] <- -Inf
         }
-      }
+
+        for(i in 1:(2*n)){
+            predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order, ncores = ncores)$Point.est
+
+            nns.cv.1[i+1] <- eval(obj.fn)
+            if(i > 1){
+                if(objective=='min' && nns.cv.1[i]>nns.cv.1[i-1]){ break }
+                if(objective=='max' && nns.cv.1[i]<nns.cv.1[i-1]){ break }
+            }
+        }
+
+        test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
+
+        if(objective=='min'){
+            k <- which.min(na.omit(nns.cv.1))-1
+            nns.cv.1 <- min(na.omit((nns.cv.1)))
+        } else {
+            k <- which.max(na.omit(nns.cv.1))-1
+            nns.cv.1 <- max(na.omit((nns.cv.1)))
+        }
 
 
-
-      test.set.1 = test.set[rev(order(abs(predicted - actual)))]
-
-
-      if(objective=='min'){
-        k = which.min(na.omit(nns.cv.1))-1
-        nns.cv.1 = min(na.omit((nns.cv.1)))
-      } else {
-        k = which.max(na.omit(nns.cv.1))-1
-        nns.cv.1 = max(na.omit((nns.cv.1)))
-      }
-
-
-      best.k[[b]] = k
-      best.nns.cv[[b]] = nns.cv.1
+      best.k[[b]] <- k
+      best.nns.cv[[b]] <- nns.cv.1
 
       if(b==folds){
-        best.nns.cv = mean(na.omit(unlist(best.nns.cv)))
-        best.k = as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
+          best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
+          best.k <- as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
 
-        nns.method.1 = NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
-
+          nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
       }
 
     } else {
-      test.set.1=NULL
-      best.k = NA
-      nns.method.1 = NA
-      if(objective=='min'){best.nns.cv = Inf} else {best.nns.cv = -Inf}
+        test.set.1 <- NULL
+        best.k <- NA
+        nns.method.1 <- NA
+        if(objective=='min'){best.nns.cv <- Inf} else {best.nns.cv <- -Inf}
     }# 1 %in% method
 
 
 
     # Dimension Reduction Regression Output
     if(2 %in% method){
+        actual <- CV.DV.test
 
-      actual = CV.DV.test
+        var.cutoffs <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores)$equation$Coefficient, digits = 2))
 
-      var.cutoffs = abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores)$equation$Coefficient, digits = 2))
+        var.cutoffs <- var.cutoffs - .005
 
-      var.cutoffs = var.cutoffs - .005
+        var.cutoffs <- var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
 
-      var.cutoffs = var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
+        var.cutoffs <- rev(sort(unique(var.cutoffs)))
 
-      var.cutoffs = rev(sort(unique(var.cutoffs)))
+        nns.ord <- numeric()
 
-      nns.ord = numeric()
-      if(objective=='min'){nns.ord[1] = Inf} else {nns.ord[1] = -Inf}
+        if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
 
-      for(i in 2:length(var.cutoffs)){
+        for(i in 2:length(var.cutoffs)){
+            predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
 
-        predicted = NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
+            nns.ord[i] <- eval(obj.fn)
 
-        nns.ord[i] = eval(obj.fn)
-
-        if(objective=='min'){
-          best.threshold = var.cutoffs[which.min(na.omit(nns.ord))]
-          THRESHOLDS[[b]] = best.threshold
-          best.nns.ord[[b]] = min(na.omit(nns.ord))
-          if(nns.ord[i] > nns.ord[i-1]) break
-        } else {
-          best.threshold = var.cutoffs[which.max(na.omit(nns.ord))]
-          THRESHOLDS[[b]] = best.threshold
-          best.nns.ord[[b]] = max(na.omit(nns.ord))
-          if(nns.ord[i] < nns.ord[i-1]) break
+            if(objective=='min'){
+                best.threshold <- var.cutoffs[which.min(na.omit(nns.ord))]
+                THRESHOLDS[[b]] <- best.threshold
+                best.nns.ord[[b]] <- min(na.omit(nns.ord))
+                if(nns.ord[i] > nns.ord[i-1]) break
+                } else {
+                    best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
+                    THRESHOLDS[[b]] <- best.threshold
+                    best.nns.ord[[b]] <- max(na.omit(nns.ord))
+                    if(nns.ord[i] < nns.ord[i-1]) break
+                }
         }
-      }
 
 
-      test.set.2 = test.set[rev(order(abs(predicted - actual)))]
+        test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
-      if(b==folds){
-        nns.ord.threshold = as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
-        best.nns.ord = mean(na.omit(unlist(best.nns.ord)))
-
-        nns.method.2 = NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order,
+        if(b==folds){
+            nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
+            best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
+            nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order,
                                threshold = nns.ord.threshold, ncores = ncores)$Point.est
-      }
-
-
+        }
 
     } else {
-      THRESHOLDS = NA
-      test.set.2 = NULL
-      nns.method.2 = NA
-      if(objective=='min'){best.nns.ord = Inf} else {best.nns.ord = -Inf}
-      nns.ord.threshold = NA
+        THRESHOLDS <- NA
+        test.set.2 <- NULL
+        nns.method.2 <- NA
+        if(objective=='min'){best.nns.ord <- Inf} else {best.nns.ord <- -Inf}
+        nns.ord.threshold <- NA
     } # 2 %in% method
 
 
@@ -243,19 +239,25 @@ NNS.stack <- function(IVs.train,
   best.nns.ord[best.nns.ord == 0] <- 1e-10
 
   if(objective=="min"){
-    weights = c(max(1e-10, 1 / best.nns.cv), max(1e-10, 1 / best.nns.ord))
+      weights <- c(max(1e-10, 1 / best.nns.cv), max(1e-10, 1 / best.nns.ord))
   } else {
-    weights = c(max(1e-10,best.nns.cv), max(1e-10, best.nns.ord))
+      weights <- c(max(1e-10,best.nns.cv), max(1e-10, best.nns.ord))
   }
 
-  weights = pmax(weights, c(0, 0))
+  weights <- pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0
-  weights = weights / sum(weights)
+  weights <- weights / sum(weights)
 
-  if(identical(sort(method),c(1,2))){estimates = (weights[1] * nns.method.1 + weights[2] * nns.method.2)} else {
-    if(method==1){estimates = (nns.method.1)} else {
-      if(method==2) {estimates = (nns.method.2)}
-    }
+  if(identical(sort(method),c(1,2))){
+      estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
+  } else {
+      if(method==1){
+          estimates <- (nns.method.1)
+      } else {
+          if(method==2) {
+              estimates <- (nns.method.2)
+          }
+      }
   }
 
 
@@ -263,10 +265,10 @@ NNS.stack <- function(IVs.train,
 gc()
 
 
-  return(list(NNS.reg.n.best = best.k,
-              OBJfn.reg = best.nns.cv,
-              NNS.dim.red.threshold = nns.ord.threshold,
+  return(list(OBJfn.reg = best.nns.cv,
+              NNS.reg.n.best = best.k,
               OBJfn.dim.red = best.nns.ord,
+              NNS.dim.red.threshold = nns.ord.threshold,
               reg = nns.method.1,
               dim.red = nns.method.2,
               stack = estimates))
