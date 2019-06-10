@@ -33,11 +33,11 @@ A <- cbind(x,y,z)
 PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 
 ## Calling Individual Partial Moment Quadrants
-cov.mtx = PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
+cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
 cov.mtx$cupm
 
 ## Full covariance matrix
-cov.mtx$matrix
+cov.mtx$cov.matrix
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

@@ -50,7 +50,7 @@ NNS.part(x, y, order = 1)$regression.points
 NNS.part(x, y, Voronoi = TRUE)
 
 ## Examine final counts by quadrant
-DT = NNS.part(x, y)$dt
+DT <- NNS.part(x, y)$dt
 DT[ , counts := .N, by = quadrant]
 DT
 }
