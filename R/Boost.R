@@ -126,7 +126,7 @@ NNS.boost <- function(IVs.train,
           z <- apply(z,2,as.double)
       }
   }
-  if(is.null(colnames(z))) {colnames(Z) <- colnames(z, do.NULL = FALSE)}
+  if(is.null(colnames(z))) {colnames(z) <- colnames(z, do.NULL = FALSE)}
   colnames(z) <- make.unique(colnames(z),sep = "_")
 
       y <- as.double(as.numeric(unlist(y)))
