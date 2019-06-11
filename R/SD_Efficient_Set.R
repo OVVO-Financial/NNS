@@ -5,7 +5,6 @@
 #' @param degree numeric options: (1, 2, 3); Degree of stochastic dominance test from (1, 2 or 3).
 #' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.
 #' @return Returns set of stochastic dominant variable names.
-#' @keywords stochastic dominance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
 #'

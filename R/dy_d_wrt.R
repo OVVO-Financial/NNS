@@ -22,7 +22,6 @@
 #' }
 #' Retuns a vector of partial derivatives when \code{(eval.points = "all")}.
 #' @note For known function testing and analysis, regressors should be transformed via \link{expand.grid} to fill the dimensions with \code{(order = "max")}.  Example provided below.
-#' @keywords multivaiate partial derivative
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

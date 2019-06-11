@@ -14,7 +14,6 @@
 #' @param deriv.method method of derivative estimation, options: ("NNS", "FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite step method \code{(deriv.method = "FS")} (Defualt).
 #' @return Returns the value of the partial derivative estimate for the given order.
 #' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
-#' @keywords partial derivative
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

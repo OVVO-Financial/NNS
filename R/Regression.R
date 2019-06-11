@@ -69,7 +69,6 @@
 #'
 #' @note Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
 #'
-#' @keywords nonlinear regression, classifier
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -220,7 +219,7 @@ NNS.reg = function (x, y,
               point.est <- factor_2_dummy(point.est)
               if(is.null(dim(point.est))){
                   point.est <- as.double(point.est)
-                  l <- length(point.est)
+                  l <- dim(t(t(point.est)))[2]
               } else {
                   point.est <- apply(point.est,2,as.double)
                   if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(point.est, do.NULL = FALSE)}
@@ -231,7 +230,7 @@ NNS.reg = function (x, y,
           }
 
           ### Add 0's to data for missing regressors
-          if(dim(x)[2]!=l){
+          if(dim(t(t(x)))[2]!=l){
               Missing <- setdiff(colnames(x),colnames(point.est))
               point.est[Missing] <- 0
               point.est <- point.est[colnames(x)]

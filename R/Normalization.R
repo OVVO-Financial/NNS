@@ -6,7 +6,6 @@
 #' \code{(chart.type = "b")} for boxplot.
 #' @param linear logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.
 #' @return Returns a \link{data.frame} of normalized values.
-#' @keywords normalization
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

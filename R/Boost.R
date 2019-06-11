@@ -23,7 +23,6 @@
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set.
 #'
-#' @keywords classifier, regression
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 #' \url{https://ssrn.com/abstract=2864711}
@@ -143,7 +142,7 @@ NNS.boost <- function(IVs.train,
       rep.y <- unlist(rep.x[,1])
       rep.x <- rep.x[,-1]
 
-      if(dim(x)[2]!=dim(rep.x)[2]){
+      if(dim(t(t(x)))[2]!=dim(rep.x)[2]){
         Missing <- setdiff(colnames(x),colnames(rep.x))
         if(length(Missing)>0){
             rep.x[Missing] <- 0

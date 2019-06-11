@@ -5,7 +5,6 @@
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return LPM of variable
-#' @keywords partial moments, mean, variance, CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -29,7 +28,6 @@ LPM <- Vectorize(LPM, vectorize.args = 'target')
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return UPM of variable
-#' @keywords partial moments, mean, variance, upper CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -56,7 +54,6 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 #' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @return Co-UPM of two variables
-#' @keywords partial moments, covariance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -94,7 +91,6 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @return Co-LPM of two variables
-#' @keywords partial moments, covariance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -131,7 +127,6 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @return Divergent LPM of two variables
-#' @keywords partial moments, covariance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -168,7 +163,6 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
 #' @return Divergent UPM of two variables
-#' @keywords partial moments, covariance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -206,7 +200,6 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @param pop.adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
 #' @return Matrix of partial moment quadrant values.  Uncalled quadrants will return a matrix of zeros.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
-#' @keywords partial moments, covariance
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -318,7 +311,6 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return Standardized LPM of variable
-#' @keywords partial moments, mean, variance, continuous CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -355,7 +347,6 @@ LPM.ratio <- function(degree, target, variable){
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return Standardized UPM of variable
-#' @keywords partial moments, mean, variance, upper continuous CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -391,7 +382,6 @@ UPM.ratio <- function(degree, target, variable){
 #' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
 #' @param plot logical; plots PDF.
 #' @return Returns a data.table containing the intervals used and resulting PDF of the variable.
-#' @keywords partial moments, PDF, continuous CDF
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

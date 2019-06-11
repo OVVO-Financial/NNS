@@ -6,7 +6,6 @@
 #' @param oos Out-of-sample text dataset to be classified.
 #' @param names Column names for \code{"IV"} and \code{"oos"}.  Defaults to FALSE.
 #' @return Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.
-#' @keywords document term matrix
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
 #' @examples

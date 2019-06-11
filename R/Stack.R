@@ -26,7 +26,6 @@
 #' \item{\code{"stack"}} returns the output of the stacked model.
 #' }
 #'
-#' @keywords classifier
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 #' \url{https://ssrn.com/abstract=2864711}

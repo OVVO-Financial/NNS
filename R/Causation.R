@@ -9,7 +9,6 @@
 #' @param time.series logical; \code{FALSE} (default) If analyzing time series data with \code{tau = [integer]}, select \code{(time.series = TRUE)}.  Not required when \code{(tau = "ts")}.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
-#' @keywords causation
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

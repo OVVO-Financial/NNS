@@ -35,7 +35,6 @@
 #'
 #' use the combination of \code{(seasonal.factor = FALSE, best.periods = 1)}.
 #'
-#' @keywords Autoregressive model
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

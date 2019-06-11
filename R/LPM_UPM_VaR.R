@@ -5,7 +5,6 @@
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
-#' @keywords VaR, Confidence Interval
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -32,7 +31,6 @@ LPM.VaR <- function(percentile, degree, x){
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
-#' @keywords VaR
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
