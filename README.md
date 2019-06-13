@@ -38,7 +38,7 @@ install.packages('NNS')
 ```
 
 ## Examples
-Please see https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples for basic partial moments equivalences and examples.
+Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md for basic partial moments equivalences and hands-on statistics, machine learning and econometrics examples.
 
 
 ## Citation
