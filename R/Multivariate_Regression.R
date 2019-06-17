@@ -151,8 +151,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = 0.95, 
 
 
   ###Order y.hat to order of original Y
-  resid.plot <- mean.by.id.matrix[]
-  setkey(resid.plot, 'obs')
   y.hat <- mean.by.id.matrix[ , .(y.hat)]
 
   fitted.matrix <- data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])

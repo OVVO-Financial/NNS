@@ -145,7 +145,7 @@ NNS.stack <- function(IVs.train,
 
         for(i in 1:(2*n)){
             if(status){
-                message("Current NNS.reg(... , n.best , ...) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
+                message("Current NNS.reg(... , n.best = ", i ," ) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
             }
 
             predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order, ncores = ncores)$Point.est
@@ -207,7 +207,7 @@ NNS.stack <- function(IVs.train,
 
         for(i in 2:length(var.cutoffs)){
             if(status){
-                message("Current NNS.reg(... , threshold , ...) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
+                message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
             }
 
             predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
