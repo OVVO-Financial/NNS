@@ -13,6 +13,7 @@
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, including both NNS regression methods in the stack.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
@@ -66,6 +67,7 @@ NNS.stack <- function(IVs.train,
                       norm = NULL,
                       method = c(1, 2),
                       dim.red.method = "cor",
+                      status = TRUE,
                       ncores = NULL){
 
 
@@ -90,6 +92,10 @@ NNS.stack <- function(IVs.train,
   best.nns.ord <- list()
 
   for(b in 1 : folds){
+      if(status){
+          message("Folds Remaining = " ,folds-b," ","\r",appendLF=TRUE)
+      }
+
       set.seed(123 * b)
       test.set <- sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
@@ -138,6 +144,10 @@ NNS.stack <- function(IVs.train,
         }
 
         for(i in 1:(2*n)){
+            if(status){
+                message("Current NNS.reg(... , n.best , ...) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
+            }
+
             predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order=order, ncores = ncores)$Point.est
 
             nns.cv.1[i+1] <- eval(obj.fn)
@@ -179,6 +189,8 @@ NNS.stack <- function(IVs.train,
 
     # Dimension Reduction Regression Output
     if(2 %in% method){
+
+
         actual <- CV.DV.test
 
         var.cutoffs <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores)$equation$Coefficient, digits = 2))
@@ -194,6 +206,10 @@ NNS.stack <- function(IVs.train,
         if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
 
         for(i in 2:length(var.cutoffs)){
+            if(status){
+                message("Current NNS.reg(... , threshold , ...) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
+            }
+
             predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
 
             nns.ord[i] <- eval(obj.fn)
