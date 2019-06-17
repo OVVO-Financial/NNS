@@ -56,5 +56,3 @@ Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{derivative}
-\keyword{partial}

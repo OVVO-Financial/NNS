@@ -26,4 +26,3 @@ x <- rnorm(100)
 ## For 95th percentile VaR (right-tail)
 UPM.VaR(0.95, 0, x)
 }
-\keyword{VaR}

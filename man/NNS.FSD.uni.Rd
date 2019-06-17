@@ -32,5 +32,3 @@ Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://ssrn.com/abstrac
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{dominance}
-\keyword{stochastic}

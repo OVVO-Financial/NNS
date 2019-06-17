@@ -39,8 +39,3 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{CDF}
-\keyword{PDF,}
-\keyword{continuous}
-\keyword{moments,}
-\keyword{partial}

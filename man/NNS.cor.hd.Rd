@@ -31,5 +31,3 @@ Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditi
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{correlation}
-\keyword{dependence,}

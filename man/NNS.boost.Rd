@@ -72,5 +72,3 @@ Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{classifier,}
-\keyword{regression}

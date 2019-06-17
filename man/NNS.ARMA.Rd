@@ -84,5 +84,3 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{Autoregressive}
-\keyword{model}

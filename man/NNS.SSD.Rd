@@ -28,5 +28,3 @@ Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of 
 \author{
 Fred Viole, OVVO Financial Systems
 }
-\keyword{dominance}
-\keyword{stochastic}
