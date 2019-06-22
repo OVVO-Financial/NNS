@@ -50,10 +50,12 @@ See the following for NNS detailed examples and specific applications:
    3.3 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
    
    3.4 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
-
-   3.5 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
    
-   3.6 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
+   3.5 [Time-Series Classification II](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
+
+   3.6 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   
+   3.7 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
 
 
 # 4. Time-Series Forecasting
