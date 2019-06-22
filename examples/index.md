@@ -51,7 +51,7 @@ See the following for NNS detailed examples and specific applications:
    
    3.4 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
    
-   3.5 [Time-Series Classification II](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
+   3.5 [Time-Series Classification II](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
 
    3.6 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
    
