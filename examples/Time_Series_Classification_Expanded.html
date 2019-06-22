@@ -2822,7 +2822,7 @@ div.tocify {
 <div id="intro" class="section level1">
 <h1>Intro</h1>
 <p>We are going to define a function for comparing a time-series for its most representative counterpart in a reference time-series(s). This expands the analysis already presented in <a href="https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html">“Time-Series Classificataion”</a>.</p>
-<p>In this example we will ascertain the most similar period for the <code>S&amp;P 500</code> index since its inception in 1959.</p>
+<p>In this example we will ascertain the most similar period for the <code>S&amp;P 500</code> index since its inception in 1950.</p>
 </div>
 <div id="load-required-packages-in-r-nns-4.2" class="section level1">
 <h1>Load Required Packages in R <code>NNS (&gt;= 4.2)</code></h1>
@@ -2841,7 +2841,7 @@ require(zoo)</code></pre>
 <li>A window length: <code>w</code></li>
 </ol>
 <pre class="r"><code># Download data
-getSymbols(&#39;^GSPC&#39;, src=&#39;yahoo&#39;, from=as.Date(&quot;1959-01-01&quot;))</code></pre>
+getSymbols(&#39;^GSPC&#39;, src=&#39;yahoo&#39;, from=as.Date(&quot;1950-01-01&quot;))</code></pre>
 <pre><code>## [1] &quot;^GSPC&quot;</code></pre>
 <pre class="r"><code># Create reference distribution
 reference_returns &lt;- dailyReturn(GSPC) 
@@ -2859,13 +2859,13 @@ w &lt;- length(current_returns)</code></pre>
 <p>Let’s identify the calendar year which is most similar. We will create a series of <code>reference</code> distributions from the beginning of each calendar year of equal length to the <code>current</code> distribution.</p>
 <pre class="r"><code>returns_list = list()
 
-for(i in seq(1959,2018,1)){
-    index &lt;- which(i == seq(1959,2019,1))
+for(i in seq(1950,2018,1)){
+    index &lt;- which(i == seq(1950,2019,1))
     returns_list[[index]] &lt;- reference_returns[as.character(i)][1:w]
 }
 
 IV &lt;- matrix(unlist(returns_list), ncol = w, byrow = TRUE)
-DV &lt;- seq(1959,2018,1)
+DV &lt;- seq(1950,2018,1)
 
 nns.estimate &lt;- NNS.reg(IV, DV, point.est = as.numeric(current_returns), order = &#39;max&#39;, n.best = 1, dist = &quot;L2&quot;, residual.plot = FALSE)$Point.est
 nns.estimate</code></pre>
