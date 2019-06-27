@@ -41,7 +41,7 @@ NNS.dep.base <- function(x,
           max.obs <- NULL
       }
       if(is.null(degree)){
-        degree <- ifelse(length(x[,1]) <= 100, 0, 1)
+          degree <- ifelse(length(x[,1]) <= 100, 0, 1)
       } else {
           degree <- degree
       }
@@ -67,9 +67,8 @@ NNS.dep.base <- function(x,
                      sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
                      sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
                      counts = .N
-    ), by = prior.quadrant]
+                      ), by = prior.quadrant]
 
-      ### Re-run with order=1 if categorical data...
 
       part.df[ ,c("x", "y", "quadrant", "mean.x", "mean.y") := NULL]
 
