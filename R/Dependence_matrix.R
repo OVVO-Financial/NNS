@@ -8,11 +8,14 @@ NNS.dep.matrix = function(x, order = NULL, degree= NULL){
 
 raw.rhos <- list()
 raw.deps <- list()
+raw.both <- list()
 
 for(i in 1 : (n - 1)){
-        raw.rhos[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree)$Correlation)
-        raw.deps[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree)$Dependence)
-        }
+        raw.both[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree))
+
+        raw.rhos[[i]] <- unlist(raw.both[[i]][row.names(raw.both[[i]])=="Correlation"])
+        raw.deps[[i]] <- unlist(raw.both[[i]][row.names(raw.both[[i]])=="Dependence"])
+}
 
 
 rhos <- matrix(, n, n)
