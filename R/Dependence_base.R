@@ -89,7 +89,8 @@ NNS.dep.base <- function(x,
 
 
     for (j in seq_len(ncol(part.df))){
-        set(part.df, which(is.na(part.df[[j]])), j, 0)}
+        set(part.df, which(is.na(part.df[[j]])), j, 0)
+    }
 
         nns.cor <- part.df[ , sum(nns.cor = weight * nns.cor)]
         nns.dep <- part.df[ , sum(nns.dep = weight * nns.dep)]

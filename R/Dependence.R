@@ -49,12 +49,14 @@ NNS.dep = function(x,
 
         l <- length(x)
 
-        if(l <= 500){return(NNS.dep.base(x,y,order=order, degree = degree,print.map = print.map))}
+        if(l <= 500){
+            return(NNS.dep.base(x,y,order=order, degree = degree,print.map = print.map))
+        }
 
         seg <- as.integer(.2*l)
         segs <- list(5L)
 
-        for (i in 1:5){
+        for(i in 1:5){
             if(i == 1){
                 segs[[i]] <- 1:min(l,100)
             }
@@ -72,17 +74,15 @@ cl <- makeCluster(num_cores)
 registerDoParallel(cl)
 
   nns.dep <- foreach(i = 1:5,.packages = "NNS")%dopar%{
-        NNS.dep.base(x[segs[[i]]],y[segs[[i]]],print.map = FALSE)$Dependence
+        NNS.dep.base(x[segs[[i]]],y[segs[[i]]],print.map = FALSE)
   }
 
 stopCluster(cl)
 registerDoSEQ()
 
 
-        nns.cor <- NNS.dep.base(x,y,order=order, degree = degree, print.map = print.map)$Correlation
-
-        return(list("Correlation" = nns.cor,
-                "Dependence" = mean(unlist(nns.dep))))
+        return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),
+                "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))
 
     } else {
         return(NNS.dep.matrix(x, order=order, degree = degree))
