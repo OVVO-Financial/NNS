@@ -381,6 +381,7 @@ NNS.reg = function (x, y,
                     x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
                 }
 
+                signs <- sign(x.star.coef)
                 x.star.coef[abs(x.star.coef) < threshold] <- 0
 
                 norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
@@ -391,7 +392,7 @@ NNS.reg = function (x, y,
                 #In case all IVs have 0 correlation to DV
                 if(all(x.star.matrix == 0)){
                     x.star.matrix <- x
-                    x.star.coef[x.star.coef == 0] <- 1
+                    x.star.coef[x.star.coef == 0] <- signs
                 }
 
                 DENOMINATOR <- sum( abs( x.star.coef) > 0)
