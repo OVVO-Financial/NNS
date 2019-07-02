@@ -2823,7 +2823,7 @@ div.tocify {
 <div id="intro" class="section level1">
 <h1>Intro</h1>
 <p>We are going to define a function for comparing a time-series for its most representative counterpart in a reference time-series(s). This expands the analysis already presented in <a href="https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html">“Time-Series Classificataion”</a> by using vectors of different lengths for partial time-series matching.</p>
-<p>In this example we will ascertain the most similar period for the <code>S&amp;P 500</code> index since 1950 to the current year 2019 returns through 06-21.</p>
+<p>In this example we will ascertain the most similar period for the <code>S&amp;P 500</code> index since 1950 to the current year 2019 returns through 07-02.</p>
 </div>
 <div id="load-required-packages-in-r-nns-4.2" class="section level1">
 <h1>Load Required Packages in R <code>NNS (&gt;= 4.2)</code></h1>
@@ -2891,7 +2891,6 @@ plot(future_GSPC)</code></pre>
 <h2>Remove current period, also a verification of similarity!</h2>
 <p>If we do not remove the last <code>w</code> observations from the <code>reference</code> data, we will match exactly to the <code>current</code> starting period, 01-02-2019.</p>
 <pre class="r"><code>custom_cor &lt;- function(x,y){
-  #a &lt;- sum(as.numeric(x)&gt;0 &amp; as.numeric(y)&gt;0 | as.numeric(x)&lt;0 &amp; as.numeric(y)&lt;0)/length(x)
   a &lt;- cor(as.numeric(x), as.numeric(y))
   return(a)
 }
