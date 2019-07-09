@@ -163,6 +163,7 @@ NNS.reg = function (x, y,
 
     if(class(y) == "factor"){
         type <- "CLASS"
+        noise.reduction <- "mode"
     }
 
     if(factor.2.dummy && !multivariate.call){
