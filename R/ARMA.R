@@ -42,14 +42,12 @@
 #'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12 period lag
 #' \dontrun{
-#' NNS.ARMA(AirPassengers, h = 45, training.set = 100, seasonal.factor = 12, method = "nonlin")}
+#' NNS.ARMA(AirPassengers, h = 45, training.set = 100, seasonal.factor = 12, method = "nonlin")
 #'
 #' ## Linear NNS.ARMA using AirPassengers monthly data and 12, 24, and 36 period lags
-#' \dontrun{
-#' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = c(12, 24, 36), method = "lin")}
+#' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = c(12, 24, 36), method = "lin")
 #'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
-#' \dontrun{
 #' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = FALSE, best.periods = 2)}
 #'
 #' @export

@@ -24,10 +24,9 @@
 #' @examples
 #' \dontrun{
 #' x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
-#' dy.dx(x, y, eval.point = 1.75)}
+#' dy.dx(x, y, eval.point = 1.75)
 #'
 #' # Vector of derivatives
-#' \dontrun{
 #' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")}
 #' @export
 

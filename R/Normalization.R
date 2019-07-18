@@ -18,7 +18,7 @@
 
 NNS.norm <- function(A, chart.type = NULL, linear = FALSE) {
   m  <- colMeans(A)
-  m <- pmax(1e-10, m)
+  m[m==0] <- 1e-10
   RG <- m %o% (1 / m)
 
   if(!linear){
@@ -72,6 +72,6 @@ if(!is.null(chart.type)){
 
 
 
-  return(A_Normalized)
+  return(data.table(A_Normalized))
 
 }
