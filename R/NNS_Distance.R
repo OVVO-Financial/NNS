@@ -21,6 +21,11 @@ NNS.distance <- function(rpm,dist.estimate,type,k){
   }
 
   row.sums[row.sums == 0] <- 1e-10
+                                                      
+  if(k==1){
+      return(rpm$y.hat[which.min(row.sums)])
+  }
+        
   total.row.sums <- sum(1 / row.sums)
   weights <- (1 / row.sums) / total.row.sums
 
