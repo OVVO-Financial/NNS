@@ -4,8 +4,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = 0.95,
 
   ### For Multiple regressions
   ###  Turn each column into numeric values
-  original.IVs <- (X_n)
-  original.DV <- (Y)
+  original.IVs <- X_n
+  original.DV <- Y
   n <- ncol(original.IVs)
 
   if(is.null(ncol(X_n))){

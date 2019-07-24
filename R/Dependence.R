@@ -33,12 +33,16 @@ NNS.dep = function(x,
     if(!is.null(y)){
         # No dependence if only a single value
         if(length(unique(x))==1 | length(unique(y))==1){
-            if(print.map==TRUE){
+            if(print.map){
                 NNS.part(x, y, order=1, Voronoi = TRUE)
             }
 
             return(list("Correlation" = 0,
                        "Dependence" = 0))
+        }
+
+        if(print.map){
+            NNS.part(x, y, Voronoi = TRUE)
         }
 
  if (is.null(ncores)) {
