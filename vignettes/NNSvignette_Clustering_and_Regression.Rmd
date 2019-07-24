@@ -24,19 +24,27 @@ require(data.table)
 Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
 
 ## NNS Partitioning <span style="color:red">`NNS.part`</span>
-`NNS.part` is both a partitional and hierarchical clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification at each partition.
+`NNS.part` is both a partitional and hierarchical clustering method.  NNS iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification (1:4) at each partition.
 
 `NNS.part` returns a data.table of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in `NNS.reg`.
-```{r linear,results='hide'}
+```{r linear}
 x = seq(-5, 5, .05); y = x ^ 3
 
 for(i in 1 : 4){NNS.part(x, y, order = i, noise.reduction = "off", Voronoi = TRUE)}
+```
+```{r res, echo=FALSE}
+NNS.part(x,y,order = 4, noise.reduction = "off")
 ```
 
 ### X-only Partitioning
 `NNS.part` offers a partitioning based on $x$ values only, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
 ```{r x part,results='hide'}
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
+```
+
+Note the partition identifications are limited to 1's and 2's (left and right of the partition respectively), not the 4 values per the $x$ and $y$ partitioning.
+```{r res2, echo=FALSE}
+NNS.part(x,y,order = 4, type = "XONLY")
 ```
 
 ## Clusters Used in Regression
@@ -55,8 +63,8 @@ NNS.reg(x, y, order = 4, noise.reduction = "off", ncores = 1)
 ```
 
 ### Multivariate:
-Multivariate regressions return a plot of $y$ and $\hat{y}$.
-```{r nonlinear multi,results='hide',fig.width=5,fig.height=3,fig.align = "center"}
+Multivariate regressions return a plot of $y$ and $\hat{y}$, as well as the regression points (`$RPM`) and partitions (`$rhs.partitions`) for each regressor.
+```{r nonlinear multi,fig.width=5,fig.height=3,fig.align = "center"}
 f= function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
 y = x ; z = expand.grid(x, y)
 g = f(z[ , 1], z[ , 2])
@@ -69,7 +77,7 @@ NNS.reg(z, g, order = "max", ncores = 1)
 ### Classification
 For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.  
 ```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[141:150, 1 : 4], location = "topleft", ncores = 1)$Point.est
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1:10, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
 
 ### NNS Dimension Reduction Regression
