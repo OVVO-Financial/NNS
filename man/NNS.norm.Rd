@@ -4,15 +4,17 @@
 \alias{NNS.norm}
 \title{NNS Normalization}
 \usage{
-NNS.norm(A, chart.type = NULL, linear = FALSE)
+NNS.norm(A, linear = FALSE, chart.type = NULL, location = "topleft")
 }
 \arguments{
 \item{A}{a numeric matrix or data frame.}
 
+\item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
+
 \item{chart.type}{options: ("l", "b"); \code{NULL} (default).  Set \code{(chart.type = "l")} for line,
 \code{(chart.type = "b")} for boxplot.}
 
-\item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
+\item{location}{Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.}
 }
 \value{
 Returns a \link{data.frame} of normalized values.
