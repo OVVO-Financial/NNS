@@ -170,9 +170,14 @@ NNS.stack <- function(IVs.train,
       best.nns.cv[[b]] <- nns.cv.1
 
       if(b==folds){
-          best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
-          best.k <- as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
-
+          if(objective=='min'){
+              best.nns.cv <- which.min(na.omit(unlist(best.nns.cv)))
+              best.k <- which.min(na.omit(unlist(best.k)))
+          } else {
+              best.nns.cv <- which.max(na.omit(unlist(best.nns.cv)))
+              best.k <- which.max(na.omit(unlist(best.k)))  
+          }
+        
           nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
       }
 
@@ -229,8 +234,14 @@ NNS.stack <- function(IVs.train,
         test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
         if(b==folds){
-            nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
-            best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
+            if(objective=='min'){
+                nns.ord.threshold <- which.min(na.omit(unlist(nns.ord.threshold)))
+                best.nns.ord <- which.min(na.omit(unlist(best.nns.ord)))
+            } else {
+                nns.ord.threshold <- which.max(na.omit(unlist(nns.ord.threshold)))
+                best.nns.ord <- which.max(na.omit(unlist(best.nns.ord)))
+            }
+          
             nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order,
                                threshold = nns.ord.threshold, ncores = ncores)$Point.est
         }
