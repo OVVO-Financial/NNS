@@ -173,13 +173,13 @@ NNS.stack <- function(IVs.train,
         if(objective=='min'){
           best.nns.cv <- na.omit(unlist(best.nns.cv))
           best.nns.cv[best.nns.cv == 0] <- 1e-10
-          best.nns.cv <- ((best.nns.cv/sum(best.nns.cv))^-1)/sum((best.nns.cv/sum(best.nns.cv))^-1)
+          best.nns.cv <- (((best.nns.cv/sum(best.nns.cv))^-1)/sum((best.nns.cv/sum(best.nns.cv))^-1))*best.nns.cv
           best.k <- na.omit(unlist(best.k))
           best.k <- sum(best.nns.cv*best.k)
         } else {
           best.nns.cv <- na.omit(unlist(best.nns.cv))
           best.nns.cv[best.nns.cv == 0] <- 1e-10
-          best.nns.cv <- (best.nns.cv/sum(best.nns.cv))/sum(best.nns.cv/sum(best.nns.cv))
+          best.nns.cv <- ((best.nns.cv/sum(best.nns.cv))/sum(best.nns.cv/sum(best.nns.cv)))*best.nns.cv
           best.k <- na.omit(unlist(best.k))
           best.k <- sum(best.nns.cv*best.k)
         }
