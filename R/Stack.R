@@ -242,10 +242,10 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         if(objective=='min'){
-          nns.ord.threshold <- which.min(na.omit(unlist(nns.ord.threshold)))
+          nns.ord.threshold <- which.min(na.omit(unlist(THRESHOLDS)))
           best.nns.ord <- which.min(na.omit(unlist(best.nns.ord)))
         } else {
-          nns.ord.threshold <- which.max(na.omit(unlist(nns.ord.threshold)))
+          nns.ord.threshold <- which.max(na.omit(unlist(THRESHOLDS)))
           best.nns.ord <- which.max(na.omit(unlist(best.nns.ord)))
         }
 
