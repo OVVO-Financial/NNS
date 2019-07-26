@@ -170,18 +170,19 @@ NNS.stack <- function(IVs.train,
       best.nns.cv[[b]] <- nns.cv.1
 
       if(b==folds){
-        if(objective=='min'){
           best.nns.cv <- na.omit(unlist(best.nns.cv))
           best.nns.cv[best.nns.cv == 0] <- 1e-10
-          best.nns.cv <- (((best.nns.cv/sum(best.nns.cv))^-1)/sum((best.nns.cv/sum(best.nns.cv))^-1))*best.nns.cv
-          best.k <- na.omit(unlist(best.k))
-          best.k <- sum(best.nns.cv*best.k)
+          best.nns.cv_raw <- best.nns.cv
+          if(objective=='min'){
+              best.nns.cv <- ((best.nns.cv/sum(best.nns.cv))^-1)/sum((best.nns.cv/sum(best.nns.cv))^-1)
+              best.k <- na.omit(unlist(best.k))
+              best.k <- sum(best.nns.cv*best.k)
+              best.nns.cv <- sum(best.nns.cv*best.nns.cv_raw)
         } else {
-          best.nns.cv <- na.omit(unlist(best.nns.cv))
-          best.nns.cv[best.nns.cv == 0] <- 1e-10
-          best.nns.cv <- ((best.nns.cv/sum(best.nns.cv))/sum(best.nns.cv/sum(best.nns.cv)))*best.nns.cv
-          best.k <- na.omit(unlist(best.k))
-          best.k <- sum(best.nns.cv*best.k)
+              best.nns.cv <- (best.nns.cv/sum(best.nns.cv))/sum(best.nns.cv/sum(best.nns.cv))
+              best.k <- na.omit(unlist(best.k))
+              best.k <- sum(best.nns.cv*best.k)
+              best.nns.cv <- sum(best.nns.cv*best.nns.cv_raw)
         }
 
         nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
