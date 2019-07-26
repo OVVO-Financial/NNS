@@ -141,7 +141,7 @@ NNS.stack <- function(IVs.train,
             nns.cv.1[1] <- -Inf
         }
 
-        for(i in 1:(2*n)){
+        for(i in 1:l){#(2*n)){
             if(status){
                 message("Current NNS.reg(... , n.best = ", i ," ) Iterations Remaining = " ,(2*n)-i," ","\r",appendLF=TRUE)
             }
