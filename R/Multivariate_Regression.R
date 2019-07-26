@@ -326,7 +326,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = 0.95,
 
   rhs.partitions <- data.table(reg.points.matrix)
 
-  REGRESSION.POINT.MATRIX$Sum <- NULL
+
 
   ### Return Values
   if(return.values){

@@ -37,5 +37,7 @@ NNS.distance <- function(rpm,dist.estimate,type,k){
   weights <- weights / weights.sum
   single.estimate <- sum(weights * rpm$y.hat)
 
+  rpm[,"Sum":=NULL]
+
   return(single.estimate)
 }
