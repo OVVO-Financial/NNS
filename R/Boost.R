@@ -401,7 +401,7 @@ NNS.boost <- function(IVs.train,
       par(mai=c(1.0,linch,0.8,0.5))
 
       if(length(plot.table)!=1){
-          barplot(rev(sort(plot.table,decreasing = TRUE))[1:min(n,10)],
+          barplot(sort(plot.table,decreasing = TRUE)[1:min(n,10)],
                 horiz = TRUE,
                 col='steelblue',
                 main="Feature Importance in Final Estimate",
