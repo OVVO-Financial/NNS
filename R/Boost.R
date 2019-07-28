@@ -21,7 +21,7 @@
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature weights \code{$feature.weights}.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
@@ -34,7 +34,7 @@
 #'  epochs = 100, learner.trials = 100)
 #'
 #'  ## Test accuracy
-#'  mean(round(a)==as.numeric(iris[141:150,5]))
+#'  mean(round(a$results)==as.numeric(iris[141:150,5]))
 #'  }
 #'
 #' @export
@@ -370,7 +370,7 @@ NNS.boost <- function(IVs.train,
               if(status){
                   message("% of Final Estimate = ", format(i/length(keeper.features),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
                   if(i == length(keeper.features)){
-                      message("% of Final Estimate = 1.000             ","\r",appendLF=FALSE)
+                      message("% of Final Estimate = 1.000             ","\r",appendLF=TRUE)
                       flush.console()
                   }
               }
@@ -417,5 +417,6 @@ NNS.boost <- function(IVs.train,
      par(original.par)
   }
   gc()
-  return(apply(do.call(cbind,estimates),1,mode))
+  return(list("results"=apply(do.call(cbind,estimates),1,mode),
+              "feature.weights"=plot.table/sum(plot.table)))
 }
