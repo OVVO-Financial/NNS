@@ -48,7 +48,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 \item{subcores}{integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set.
+Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature weights \code{$feature.weights}.
 }
 \description{
 Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
@@ -61,7 +61,7 @@ Ensemble method for classification using the predictions of the NNS multivariate
  epochs = 100, learner.trials = 100)
 
  ## Test accuracy
- mean(round(a)==as.numeric(iris[141:150,5]))
+ mean(round(a$results)==as.numeric(iris[141:150,5]))
  }
 
 }
