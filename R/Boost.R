@@ -392,26 +392,26 @@ NNS.boost <- function(IVs.train,
       estimates <- lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
 
 
-  if(feature.importance==TRUE){
       plot.table <- table(unlist(keeper.features))
-
       names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
 
-      linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
-      par(mai=c(1.0,linch,0.8,0.5))
+      if(feature.importance){
 
-      if(length(plot.table)!=1){
-          barplot(sort(plot.table,decreasing = TRUE)[1:min(n,10)],
-                horiz = TRUE,
-                col='steelblue',
-                main="Feature Importance in Final Estimate",
-                xlab = "Frequency",las=1)
-      } else {
-          barplot(sort(plot.table,decreasing = TRUE)[1:min(n,10)],
-                horiz = TRUE,
-                col='steelblue',
-                main="Feature Importance in Final Estimate",
-                xlab = "Frequency",las=1)
+          linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
+          par(mai=c(1.0,linch,0.8,0.5))
+
+          if(length(plot.table)!=1){
+              barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+                    horiz = TRUE,
+                    col='steelblue',
+                    main="Feature Importance in Final Estimate",
+                    xlab = "Frequency",las=1)
+          } else {
+              barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+                    horiz = TRUE,
+                    col='steelblue',
+                    main="Feature Importance in Final Estimate",
+                    xlab = "Frequency",las=1)
       }
      par(mar=c(5.1, 4.1, 4.1, 2.1))
      par(original.par)
