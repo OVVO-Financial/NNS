@@ -407,7 +407,7 @@ NNS.boost <- function(IVs.train,
                 main="Feature Importance in Final Estimate",
                 xlab = "Frequency",las=1)
       } else {
-          barplot(plot.table[1:min(n,10)],
+          barplot(sort(plot.table,decreasing = TRUE)[1:min(n,10)],
                 horiz = TRUE,
                 col='steelblue',
                 main="Feature Importance in Final Estimate",
