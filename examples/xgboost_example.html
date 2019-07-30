@@ -2828,8 +2828,8 @@ div.tocify {
 <p>Abstract:</p>
 <p><code>xgboost</code> is a highly effective and widely used machine learning method. In this paper, we describe a scalable end-to-end tree boosting system called XGBoost, which is used widely by data scientists to achieve state-of-the-art results on many machine learning challenges. We propose a novel sparsity-aware algorithm for sparse data and weighted quantile sketch for approximate tree learning. More importantly, we provide insights on cache access patterns, data compression and sharding to build a scalable tree boosting system. By combining these insights, XGBoost scales beyond billions of examples using far fewer resources than existing systems.</p>
 <p>Full paper available here: <a href="https://arxiv.org/abs/1603.02754" class="uri">https://arxiv.org/abs/1603.02754</a></p>
-<div id="install-the-latest-version-of-nns-0.4.1-and-xgboost" class="section level3">
-<h3>Install the Latest Version of <code>NNS (&gt;= 0.4.1)</code> and <code>xgboost</code></h3>
+<div id="install-the-latest-version-of-nns-0.4.4-and-xgboost" class="section level3">
+<h3>Install the Latest Version of <code>NNS (&gt;= 0.4.4)</code> and <code>xgboost</code></h3>
 <pre class="r"><code>library(devtools); install_github(&#39;OVVO-Financial/NNS&#39;, ref = &quot;NNS-Beta-Version&quot;)
 require(NNS)
 require(plyr)
@@ -2855,7 +2855,8 @@ head(dataset)</code></pre>
 </div>
 <div id="step-2-run-nns.boost-and-xgboost-over-1000-iterations" class="section level2">
 <h2>Step 2: Run <span style="color:red"><code>NNS.boost</code></span> and <code>xgboost</code> over 1,000 iterations</h2>
-<pre class="r"><code>accuracy = list()
+<pre class="r"><code>start.time=Sys.time()
+accuracy = list()
 
 ## convert factor into dummy variable matrix
 into_factor = function(x){
@@ -2899,7 +2900,7 @@ nns.predictions = NNS.boost(IVs.train = train[,1:15],
                           IVs.test= test[,1:15], feature.importance = FALSE,
                           representative.sample = FALSE, 
                           epochs = 100, learner.trials = 100,
-                          depth = &quot;max&quot;)
+                          depth = &quot;max&quot;,ncores=1,subcores = 1)$results
 
 accuracy$nns = auc(roc(as.numeric(test[,16]),round(nns.predictions)))
 
@@ -2928,7 +2929,10 @@ accuracy$xgb = auc(roc(as.numeric(label2), pre1))
 return(accuracy)
 }
 
-stopCluster(cl)</code></pre>
+stopCluster(cl)
+registerDoSEQ()
+print(Sys.time()-start.time)</code></pre>
+<pre><code>## Time difference of 7.931285 hours</code></pre>
 </div>
 <div id="step-3-compare-accuracy" class="section level2">
 <h2>Step 3: Compare Accuracy</h2>
@@ -2942,22 +2946,22 @@ rbind(
   &quot;LPM NNS&quot; = LPM(2, mean(nns.accuracy), nns.accuracy),
   &quot;LPM XGB&quot; = LPM(2, mean(xgb.accuracy), xgb.accuracy))</code></pre>
 <pre><code>##                  [,1]
-## Mean NNS 0.8597219726
+## Mean NNS 0.8608110673
 ## Mean XGB 0.8558886609
-## LPM NNS  0.0002643629
+## LPM NNS  0.0002272005
 ## LPM XGB  0.0002693473</code></pre>
 <pre class="r"><code>t.test(nns.accuracy,xgb.accuracy)</code></pre>
 <pre><code>## 
 ##  Welch Two Sample t-test
 ## 
 ## data:  nns.accuracy and xgb.accuracy
-## t = 3.7843, df = 1997.5, p-value = 0.0001587
+## t = 4.9593, df = 1991.5, p-value = 7.674e-07
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  0.001846738 0.005819886
+##  0.002975846 0.006868967
 ## sample estimates:
 ## mean of x mean of y 
-## 0.8597220 0.8558887</code></pre>
+## 0.8608111 0.8558887</code></pre>
 </div>
 </div>
 <div id="example-2-agaricus-dataset" class="section level1">
@@ -2992,7 +2996,7 @@ agaricus.dv.test = agaricus.test$label
 a = NNS.boost(IVs.train = agaricus.iv.train, DV.train = agaricus.dv.train, 
             IVs.test = agaricus.iv.test, feature.importance = FALSE, 
             representative.sample = TRUE, epochs = 100, learner.trials = 100,
-            depth = &quot;max&quot;)
+            depth = &quot;max&quot;, ncores = 1, subcores = 1)$results
 
 
 ### Evaluate accuracy  
