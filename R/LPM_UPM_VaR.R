@@ -18,9 +18,9 @@
 
 LPM.VaR <- function(percentile, degree, x){
 
-  f<- function(tgt) LPM.ratio(degree, tgt, x) - (1 - percentile)
-
-  return(uniroot(f, lower=min(x), upper = max(x), extendInt = 'yes')$root)
+    sort_x <- sort(x)
+    index <- findInterval(1-percentile,LPM.ratio(0,sort_x,x))
+    return(mean(sort_x[index:(index+1)]))
 
 }
 
@@ -41,8 +41,8 @@ LPM.VaR <- function(percentile, degree, x){
 
 UPM.VaR <- function(percentile, degree, x){
 
-    f <- function(tgt) UPM.ratio(degree, tgt, x) - (1 - percentile)
-
-    return(uniroot(f, lower = min(x), upper = max(x), extendInt = 'yes')$root)
+    sort_x <- sort(x,decreasing = TRUE)
+    index <- findInterval(1-percentile,UPM.ratio(0,sort_x,x))
+    return(mean(sort_x[(index-1):index]))
 
 }

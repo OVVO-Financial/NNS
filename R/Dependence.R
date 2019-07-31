@@ -9,6 +9,7 @@
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
+#' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or dependence between \code{x,y}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -21,6 +22,56 @@
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #' B <- cbind(x, y, z)
 #' NNS.dep(B)
+#'
+#' \dontrun{
+#' ## p-values for \code{NNS.dep}
+#' x=seq(-5,5,.1);y=x^2+rnorm(length(x))
+#'
+#'
+#' nns_cor_dep = NNS.dep(x,y,print.map = TRUE)
+#' nns_cor_dep
+#'
+#' ## Create permutations of y
+#' y_p = replicate(1000,sample.int(length(y)))
+#'
+#' ## Generate new correlation and dependence measures on each new permutation of y
+#' nns.mc = apply(y_p,2,function(g) NNS.dep(x,y[g]))
+#'
+#' ## Store results
+#' cors = unlist(lapply(nns.mc, "[[",1))
+#' deps = unlist(lapply(nns.mc, "[[",2))
+#'
+#' ## View results
+#' hist(cors)
+#' hist(deps)
+#'
+#' ## Left tailed correlation p-value
+#' cor_p_value = LPM(0,nns_cor_dep$Correlation,cors)
+#' cor_p_value
+#'
+#' ## Right tailed correlation p-value
+#' cor_p_value = UPM(0,nns_cor_dep$Correlation,cors)
+#' cor_p_value
+#'
+#' ## Two sided correlation p-value
+#' cor_p_value = UPM(0,abs(nns_cor_dep$Correlation),abs(cors))
+#' cor_p_value
+#'
+#' ## Left tailed dependence p-value
+#' dep_p_value = LPM(0,nns_cor_dep$Dependence,deps)
+#' dep_p_value
+#'
+#' ## Right tailed dependence p-value
+#' dep_p_value = UPM(0,nns_cor_dep$Dependence,deps)
+#' dep_p_value
+#'
+#' ## Confidence Intervals
+#' ## For 95th percentile VaR (both-tails) see \link{LPM.VaR} and \link{UPM.VaR}
+#' ## Lower CI
+#' LPM.VaR(.975,0,cors)
+#' ## Upper CI
+#' UPM.VaR(.975,0,cors)
+#' }
 #' @export
 
 NNS.dep = function(x,

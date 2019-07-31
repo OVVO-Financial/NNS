@@ -21,7 +21,7 @@
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature weights \code{$feature.weights}.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
@@ -404,13 +404,13 @@ NNS.boost <- function(IVs.train,
               barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
                     horiz = TRUE,
                     col='steelblue',
-                    main="Feature Importance in Final Estimate",
+                    main="Feature Frequency in Final Estimate",
                     xlab = "Frequency",las=1)
           } else {
               barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
                     horiz = TRUE,
                     col='steelblue',
-                    main="Feature Importance in Final Estimate",
+                    main="Feature Frequency in Final Estimate",
                     xlab = "Frequency",las=1)
       }
      par(mar=c(5.1, 4.1, 4.1, 2.1))
