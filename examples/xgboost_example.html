@@ -2855,8 +2855,7 @@ head(dataset)</code></pre>
 </div>
 <div id="step-2-run-nns.boost-and-xgboost-over-1000-iterations" class="section level2">
 <h2>Step 2: Run <span style="color:red"><code>NNS.boost</code></span> and <code>xgboost</code> over 1,000 iterations</h2>
-<pre class="r"><code>start.time=Sys.time()
-accuracy = list()
+<pre class="r"><code>accuracy = list()
 
 ## convert factor into dummy variable matrix
 into_factor = function(x){
@@ -2900,7 +2899,7 @@ nns.predictions = NNS.boost(IVs.train = train[,1:15],
                           IVs.test= test[,1:15], feature.importance = FALSE,
                           representative.sample = FALSE, 
                           epochs = 100, learner.trials = 100,
-                          depth = &quot;max&quot;,ncores=1,subcores = 1)$results
+                          depth = &quot;max&quot;, ncores = 1, subcores = 1)$results
 
 accuracy$nns = auc(roc(as.numeric(test[,16]),round(nns.predictions)))
 
@@ -2930,9 +2929,7 @@ return(accuracy)
 }
 
 stopCluster(cl)
-registerDoSEQ()
-print(Sys.time()-start.time)</code></pre>
-<pre><code>## Time difference of 7.931285 hours</code></pre>
+registerDoSEQ()</code></pre>
 </div>
 <div id="step-3-compare-accuracy" class="section level2">
 <h2>Step 3: Compare Accuracy</h2>
