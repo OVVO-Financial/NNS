@@ -23,6 +23,8 @@ Returns the nonlinear correlation between two variables based on higher order pa
 }
 \note{
 p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or dependence between \code{x,y}.
+
+See \link{NNS.dep} for examples.
 }
 \examples{
 set.seed(123)
