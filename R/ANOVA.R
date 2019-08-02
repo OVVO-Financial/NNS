@@ -93,7 +93,7 @@ NNS.ANOVA <- function(control,
             mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
         }
 
-        return(c("Certainty"=NNS.ANOVA.rho))
+        return(c("Certainty" = NNS.ANOVA.rho))
 
     } else {
 

@@ -8,6 +8,8 @@
 #' @param degree integer; \code{(degree = 0)} is frequency based correlations, while \code{(degree = 1)} is for area based correlations.  Defaults to \code{(degree = 0)} for smaller number of observations.
 #' @return Returns nonlinear correlation coefficient between two variables, or nonlinear correlation matrix for matrix input.
 #' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or dependence between \code{x,y}.
+#'
+#' See \link{NNS.dep} for examples.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}

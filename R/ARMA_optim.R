@@ -154,6 +154,8 @@ NNS.ARMA.optim <- function(variable, training.set,
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = subcores)
 
           eval(obj.fn)
+
+
         }
 
         if(!is.null(cl)){
@@ -163,7 +165,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       }
 
-
+      gc()
       nns.estimates.indiv <- unlist(nns.estimates.indiv)
 
       if(objective=='min'){

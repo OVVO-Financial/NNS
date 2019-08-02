@@ -24,7 +24,7 @@
 #' NNS.dep(B)
 #'
 #' \dontrun{
-#' ## p-values for \code{NNS.dep}
+#' ## p-values for [NNS.dep]
 #' x=seq(-5,5,.1);y=x^2+rnorm(length(x))
 #'
 #'
@@ -66,7 +66,7 @@
 #' dep_p_value
 #'
 #' ## Confidence Intervals
-#' ## For 95th percentile VaR (both-tails) see \link{LPM.VaR} and \link{UPM.VaR}
+#' ## For 95th percentile VaR (both-tails) see [LPM.VaR] and [UPM.VaR]
 #' ## Lower CI
 #' LPM.VaR(.975,0,cors)
 #' ## Upper CI
