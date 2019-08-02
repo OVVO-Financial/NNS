@@ -155,7 +155,6 @@ NNS.ARMA.optim <- function(variable, training.set,
 
           eval(obj.fn)
 
-
         }
 
         if(!is.null(cl)){
@@ -188,7 +187,7 @@ NNS.ARMA.optim <- function(variable, training.set,
       } else {
           current.seasonals[[i]] <- seasonal.combs[[i]][,which.max(nns.estimates[[i]])]
           current.estimate[i] <- max(nns.estimates[[i]])
-        if(i > 1 && current.estimate[i] <= current.estimate[i-1]){
+        if(i > 1 && current.estimate[i] < current.estimate[i-1]){
           current.seasonals <- current.seasonals[-length(current.estimate)]
           current.estimate <- current.estimate[-length(current.estimate)]
           break
