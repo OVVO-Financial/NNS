@@ -157,7 +157,7 @@ NNS.reg = function (x, y,
 
   if(factor.2.dummy && !multivariate.call){
       if(!is.null(dim(x))){
-          x <- apply(x,2,factor_2_dummy)
+          x <- t(apply(x,2,factor_2_dummy))
           if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
           colnames(x) <- make.unique(colnames(x),sep = "_")
 
@@ -171,9 +171,7 @@ NNS.reg = function (x, y,
 
       } else {
           x <- factor_2_dummy(x)
-          if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
-          colnames(x) <- make.unique(colnames(x),sep = "_")
-
+          if(is.null(names(x))) {names(x) = names(x)}
       }
 
 
