@@ -84,6 +84,7 @@ NNS.boost <- function(IVs.train,
   y <- DV.train
   z <- IVs.test
 
+
   if(!is.null(dim(x))){
       if(!is.numeric(x)){
           x <- sapply(x,factor_2_dummy)
@@ -103,6 +104,8 @@ NNS.boost <- function(IVs.train,
           x <- apply(x,2,as.double)
       }
   }
+
+
 
   if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
   colnames(x) <- make.unique(colnames(x),sep = "_")

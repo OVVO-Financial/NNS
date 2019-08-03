@@ -161,7 +161,6 @@ NNS.reg = function (x, y,
           if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
           colnames(x) <- make.unique(colnames(x),sep = "_")
 
-
           if(is.list(x)){
               x <- do.call(cbind,x)
               x <- apply(x,2,factor_2_dummy)
@@ -171,7 +170,6 @@ NNS.reg = function (x, y,
 
       } else {
           x <- factor_2_dummy(x)
-          if(is.null(names(x))) {names(x) = names(x)}
       }
 
 
@@ -199,7 +197,6 @@ NNS.reg = function (x, y,
 
       } else { # !is.null(dim(x))...implying univariate regression
           point.est <- factor_2_dummy(point.est)
-          point.est <- as.double(point.est)
           l <- dim(t(t(point.est)))[2]
           if(is.null(names(point.est))) {names(point.est) <- names(x)}
 
