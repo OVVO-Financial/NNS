@@ -142,93 +142,80 @@ NNS.reg = function (x, y,
   options(warn = -1)
 
   if(plot.regions && !is.null(order) && order == 'max'){
-    stop('Please reduce the "order" or set "plot.regions = FALSE".')
+      stop('Please reduce the "order" or set "plot.regions = FALSE".')
   }
 
   if(!is.null(confidence.interval) && std.errors == FALSE){
-    std.errors <- TRUE
+      std.errors <- TRUE
   }
 
 
   if(class(y) == "factor"){
-    type <- "CLASS"
-    noise.reduction <- "mode"
+      type <- "CLASS"
+      noise.reduction <- "mode"
   }
 
   if(factor.2.dummy && !multivariate.call){
-    if(!is.null(dim(x))){
-      if(!is.numeric(x)){
-        x <- sapply(x,factor_2_dummy)
-      } else {
-        x <- apply(x,2,as.double)
-        if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-        colnames(x) <- make.unique(colnames(x),sep = "_")
-      }
+      if(!is.null(dim(x))){
+          x <- apply(x,2,factor_2_dummy)
+          if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
+          colnames(x) <- make.unique(colnames(x),sep = "_")
 
-      if(is.list(x)){
-        x <- do.call(cbind,x)
-        x <- apply(x,2,as.double)
-        if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-        colnames(x) <- make.unique(colnames(x),sep = "_")
-      }
 
-    } else {
-      x <- factor_2_dummy(x)
-      if(is.null(dim(x))){
-        x <- as.double(x)
+          if(is.list(x)){
+              x <- do.call(cbind,x)
+              x <- apply(x,2,factor_2_dummy)
+              if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
+              colnames(x) <- make.unique(colnames(x),sep = "_")
+          }
+
       } else {
-        x <- apply(x,2,as.double)
-        if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
-        colnames(x) <- make.unique(colnames(x),sep = "_")
+          x <- factor_2_dummy(x)
+          if(is.null(colnames(x))) {colnames(x) = colnames(x, do.NULL = FALSE)}
+          colnames(x) <- make.unique(colnames(x),sep = "_")
+
       }
-    }
 
 
     if(!is.null(point.est)){
-      point.est.y <- numeric()
+        point.est.y <- numeric()
+        if(!is.null(dim(x))){
+            if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
+                point.est <- apply(point.est,2,factor_2_dummy)
+            } else {
+                point.est <- t(point.est)
+                point.est <- t(apply(point.est,2,factor_2_dummy))
+            }
 
-      if(!is.null(dim(point.est))){
-        if(!is.numeric(point.est)){
-          point.est <- sapply(point.est,factor_2_dummy)
-        } else {
-          point.est <- apply(point.est,2,as.double)
-          if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(point.est, do.NULL = FALSE)}
-          colnames(point.est) <- make.unique(colnames(point.est),sep = "_")
-        }
+            if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
+
 
         if(is.list(point.est)){
-          point.est <- do.call(cbind,point.est)
-          point.est <- apply(point.est,2,as.double)
-          if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(point.est, do.NULL = FALSE)}
-          colnames(point.est) <- make.unique(colnames(point.est),sep = "_")
+            point.est <- do.call(cbind,point.est)
+            point.est <- apply(point.est,2,factor_2_dummy)
+            if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
         }
 
         point.est <- as.matrix(point.est)
         l <- dim(point.est)[2]
 
-      } else { # !is.null(dim(point.est))
-        point.est <- factor_2_dummy(point.est)
-        if(is.null(dim(point.est))){
+      } else { # !is.null(dim(x))...implying univariate regression
+          point.est <- factor_2_dummy(point.est)
           point.est <- as.double(point.est)
           l <- dim(t(t(point.est)))[2]
-        } else {
-          point.est <- apply(point.est,2,as.double)
-          if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(point.est, do.NULL = FALSE)}
-          colnames(point.est) <- make.unique(colnames(point.est),sep = "_")
-          point.est <- as.matrix(point.est)
-          l <- dim(point.est)[2]
-        }
+          if(is.null(names(point.est))) {names(point.est) <- names(x)}
+
       }
 
       ### Add 0's to data for missing regressors
       if(dim(t(t(x)))[2]!=l){
-        Missing <- setdiff(colnames(x),colnames(point.est))
-        point.est[Missing] <- 0
-        point.est <- point.est[colnames(x)]
+          Missing <- setdiff(colnames(x),colnames(point.est))
+          point.est[Missing] <- 0
+          point.est <- point.est[colnames(x)]
       }
 
     } else { # is.null(point.est)
-      point.est.y <- NULL
+        point.est.y <- NULL
     }
 
   } #if(factor.2.dummy && !multivariate.call)
