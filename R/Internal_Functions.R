@@ -11,7 +11,7 @@ mode <- function(x){
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
   if(class(x) == "factor"){
-      output <- as.double(model.matrix(~x -1, x)[,-1])
+      output <- model.matrix(~x -1, x)[,-1]
   } else {
       output <- x
   }
@@ -21,7 +21,7 @@ factor_2_dummy <- function(x){
 ### Factor to dummy variable FULL RANK
 factor_2_dummy_FR <- function(x){
   if(class(x) == "factor"){
-    output <- as.double(model.matrix(~x -1, x))
+    output <- model.matrix(~x -1, x)
   } else {
     output <- x
   }
