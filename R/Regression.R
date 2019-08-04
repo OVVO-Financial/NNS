@@ -445,7 +445,7 @@ NNS.reg = function (x, y,
   min.range <- min(regression.points$x)
   max.range <- max(regression.points$x)
 
-  if(length(na.omit(y[x <= min.range]))==0){
+  if(length(na.omit(y[x <= min.range]))<=1){
     a <- y[1]
     b <- a
   } else {
@@ -453,7 +453,7 @@ NNS.reg = function (x, y,
     b <- mode(na.omit(y[x <= min.range]))
   }
 
-  if(length(na.omit(y[x <= min.range]))==0){
+  if(length(na.omit(y[x >= max.range]))<=1){
     d <- tail(y,1)
     e <- d
   } else {
@@ -466,7 +466,7 @@ NNS.reg = function (x, y,
   Dynamic.average.max <- mean(c(d, e))
 
   ###Endpoints
-  if(length(x[x < min.range]) > 0){
+  if(length(x[x < min.range]) > 1){
     if(dependence < stn){
       x0 <- Dynamic.average.min
     } else {
@@ -476,7 +476,7 @@ NNS.reg = function (x, y,
     x0 <- unique(y[x == min(x)])
   }
 
-  if(length(x[x > max.range]) > 0){
+  if(length(x[x > max.range]) > 1){
     if(dependence < stn){
       x.max <- Dynamic.average.max
     } else {
