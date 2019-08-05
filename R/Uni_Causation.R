@@ -1,10 +1,13 @@
 Uni.caus <- function(x, y, tau, plot = TRUE, scale = FALSE, time.series = FALSE){
 
   xy <- NNS.norm(cbind(x, y), linear = TRUE)
+
   NNS.x <- xy[ , 1]
   NNS.y <- xy[ , 2]
 
-  if(mean(NNS.x) != mean(NNS.y)){
+
+
+  if(mean((NNS.x)) != mean(NNS.y)){
     xy <- apply(cbind(x, y), 2, function(b) (b - min(b)) / (max(b) - min(b)))
     x <- xy[ , 1]
     y <- xy[ , 2]

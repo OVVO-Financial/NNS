@@ -76,6 +76,6 @@ if(!is.null(chart.type)){
 
 
 
-  return(data.table(A_Normalized))
+  return(A_Normalized)
 
 }
