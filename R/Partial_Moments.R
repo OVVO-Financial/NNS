@@ -224,12 +224,28 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
 
     clpms <- list()
+    cupms <- list()
+    dlpms <- list()
+    dupms <- list()
 
     for(i in 1 : n){
         if(is.numeric(target)){
             clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+
+            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
+
+            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
+
+            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
+
         } else {
             clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
         }
     }
 
@@ -237,47 +253,14 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
     colnames(clpm.matrix) <- colnames(variable)
     rownames(clpm.matrix) <- colnames(variable)
 
-
-    cupms <- list()
-
-    for(i in 1 : n){
-        if(is.numeric(target)){
-            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
-        } else {
-            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-        }
-    }
-
     cupm.matrix <- matrix(unlist(cupms), n, n)
     colnames(cupm.matrix) <- colnames(variable)
     rownames(cupm.matrix) <- colnames(variable)
-
-
-    dlpms <- list()
-
-    for(i in 1 : n){
-        if(is.numeric(target)){
-            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target, target.y = target))
-        } else {
-            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-        }
-    }
 
     dlpm.matrix <- matrix(unlist(dlpms), n, n)
     diag(dlpm.matrix) <- 0
     colnames(dlpm.matrix) <- colnames(variable)
     rownames(dlpm.matrix) <- colnames(variable)
-
-
-    dupms <- list()
-
-    for(i in 1 : n){
-        if(is.numeric(target)){
-            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target, target.y = target))
-        } else {
-            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-        }
-    }
 
     dupm.matrix <- matrix(unlist(dupms), n, n)
     diag(dupm.matrix) <- 0
