@@ -87,6 +87,8 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   seasonal.factor <- seasonal.factor[seasonal.factor<=(l/denominator)]
 
+  if(length(seasonal.factor)==0){stop(paste0('Please ensure "seasonal.factor" contains elements less than ', l/denominator, ", otherwise use cross-validation of seasonal factors as demonstrated in the vignette >>> Getting Started with NNS: Forecasting"))}
+
   nns.estimates <- list()
   seasonal.combs <- list()
 

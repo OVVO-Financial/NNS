@@ -70,15 +70,15 @@ NNS.ARMA <- function(variable,
                      ncores = NULL){
 
   if(intervals && is.numeric(seasonal.factor)){
-      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals = FALSE" or "seasonal.factor = FALSE"')
   }
 
   if(intervals && seasonal.factor){
-      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals = FALSE" or "seasonal.factor = FALSE"')
   }
 
   if(is.numeric(seasonal.factor) && dynamic){
-      stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic==TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic=F" or "seasonal.factor=F"')
+      stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
   }
 
 

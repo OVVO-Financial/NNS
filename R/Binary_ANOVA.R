@@ -17,8 +17,10 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
 
 
   #Graphs
-        original.par=par(no.readonly = TRUE)
+
         if(plot){
+            original.par <- par(no.readonly = TRUE)
+
             boxplot(list(control, treatment), las = 2, names = c("Control", "Treatment"), xlab = "Means", horizontal = TRUE, main = "NNS ANOVA and Effect Size", col = c("grey", "white"), cex.axis = 0.75)
 
             #For ANOVA Visualization
@@ -64,6 +66,8 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
                     abline(v = min(c, d), col = "blue", lwd = 4, lty = 3)
                     text(min(c, d), pos = 4, 0.75, "mu-", col = "blue")
                     text(min(c, d), pos=2, 0.75, paste0( "<--- ", (1 - CI) * 100, "%"), col = 'blue')}
+
+                par(original.par)
             }
 
             #Effect Size Lower Bound
@@ -89,7 +93,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
                 Upper.Bound.Effect <- max(mean(treatment) - min(a, b), 0)
             }
 
-            par(original.par)
+
 
         #Certainty Statistic and Effect Size Given Confidence Interval
         return(list("Control Mean" = mean(control),
