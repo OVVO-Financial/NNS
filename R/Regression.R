@@ -408,7 +408,6 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-#    dep.reduced.order <- round(NNS.part(x,y,order='max')$order * dependence)
     dep.reduced.order <- round(ceiling(log(length(y))) * dependence)
   } else {
     dep.reduced.order <- order
