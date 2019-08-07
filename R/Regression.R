@@ -408,11 +408,11 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- round(NNS.part(x, y, order = 'max')$order * dependence)
+#    dep.reduced.order <- round(NNS.part(x,y,order='max')$order * dependence)
+    dep.reduced.order <- round(ceiling(log(length(y))) * dependence)
   } else {
     dep.reduced.order <- order
   }
-
 
   if(dependence > stn ){
     if(is.null(type)){
@@ -436,7 +436,6 @@ NNS.reg = function (x, y,
   } # Dependence < stn
 
 
-
   Regression.Coefficients <- data.frame(matrix(ncol = 3))
   colnames(Regression.Coefficients) <- c('Coefficient', 'X Lower Range', 'X Upper Range')
 
@@ -445,20 +444,26 @@ NNS.reg = function (x, y,
   min.range <- min(regression.points$x)
   max.range <- max(regression.points$x)
 
-  if(length(na.omit(y[x <= min.range]))<=1){
+  y.min <- na.omit(y[x <= min.range])
+  l_y.min <- length(y.min)
+
+  if(l_y.min<=1){
     a <- y[1]
     b <- a
   } else {
-    a <- median(na.omit(y[x <= min.range]))
-    b <- mode(na.omit(y[x <= min.range]))
+    a <- median(y.min)
+    b <- mode(y.min)
   }
 
-  if(length(na.omit(y[x >= max.range]))<=1){
+  y.max <- na.omit(y[x >= max.range])
+  l_y.max <- length(y.max)
+
+  if(l_y.max<=1){
     d <- tail(y,1)
     e <- d
   } else {
-    d <- median(na.omit(y[x >= max.range]))
-    e <- mode(na.omit(y[x >= max.range]))
+    d <- median(y.max)
+    e <- mode(y.max)
   }
 
 
@@ -494,7 +499,6 @@ NNS.reg = function (x, y,
   ### Consolidate possible duplicated points
   regression.points <- unique(regression.points)
 
-
   ### Regression Equation
 
   if(multivariate.call){
@@ -506,8 +510,8 @@ NNS.reg = function (x, y,
 
 
   Regression.Coefficients <- regression.points[ , .(rise,run)]
-
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients)]
+###
+  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
 
   upper.x <- regression.points[(2 : .N), x]
 
