@@ -107,7 +107,8 @@ NNS.ARMA.optim <- function(variable, training.set,
           if(i == 1){
               seasonal.combs[[i]] <- t(seasonal.factor)
           } else {
-              seasonal.combs[[i]] <- rbind(replicate(length(seasonal.factor[!(seasonal.factor%in%current.seasonals[[i-1]])]), current.seasonals[[i-1]]), as.integer(seasonal.factor[!(seasonal.factor%in%current.seasonals[[i-1]])]))
+              remaining.index <- !(seasonal.factor%in%current.seasonals[[i-1]])
+              seasonal.combs[[i]] <- rbind(replicate(length(seasonal.factor[remaining.index]), current.seasonals[[i-1]]), as.integer(seasonal.factor[remaining.index]))
           }
 
       if(i == 1){
