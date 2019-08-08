@@ -7,7 +7,7 @@
 NNS.ARMA.optim(variable, training.set, seasonal.factor,
   negative.values = FALSE, obj.fn = expression(sum((predicted -
   actual)^2)), objective = "min", linear.approximation = TRUE,
-  depth = 1, print.trace = TRUE, ncores = NULL, subcores = NULL)
+  print.trace = TRUE, ncores = NULL, subcores = NULL)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -24,8 +24,6 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor,
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
-
-\item{depth}{integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.}
 
 \item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
@@ -58,7 +56,7 @@ nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
 seasonal.factor = seq(12, 24, 6))
 
 ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
-NNS.ARMA(AirPassengers, h=12, training.set=132,
+NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
 }
 
