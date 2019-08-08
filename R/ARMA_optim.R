@@ -10,7 +10,6 @@
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
-#' @param depth integer; \code{depth = 1} (default) Sets the level from which further combinations are generated containing only members from prior level's best \code{seasonal.factors}.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
@@ -37,7 +36,7 @@
 #' seasonal.factor = seq(12, 24, 6))
 #'
 #' ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
-#' NNS.ARMA(AirPassengers, h=12, training.set=132,
+#' NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 #' seasonal.factor = nns.optims$periods, method = nns.optims$method)
 #' }
 #'
@@ -49,7 +48,6 @@ NNS.ARMA.optim <- function(variable, training.set,
                         obj.fn = expression(sum((predicted - actual)^2)),
                         objective = "min",
                         linear.approximation = TRUE,
-                        depth = 1,
                         print.trace = TRUE,
                         ncores = NULL, subcores = NULL){
 

@@ -169,9 +169,9 @@ NNS.ARMA <- function(variable,
               M <- t(1)
           } else {
               if(is.null(best.periods)){
-                  M<- seas.matrix$all.periods
+                  M <- seas.matrix$all.periods
               } else {
-              M<- seas.matrix$all.periods[1 : best.periods, ]
+              M <- seas.matrix$all.periods[1 : best.periods, ]
               }
           }
 
