@@ -106,7 +106,11 @@ NNS.ARMA.optim <- function(variable, training.set,
       for(i in 1 : length(seasonal.factor)){
           nns.estimates.indiv <- list()
 
-          seasonal.combs[[i]] <- combn(seasonal.factor, i)
+          if(i == 1){
+              seasonal.combs[[i]] <- t(seasonal.factor)
+          } else {
+              seasonal.combs[[i]] <- rbind(replicate(length(seasonal.factor), current.seasonals), seasonal.factor)
+          }
 
       if(i == 1){
           if(linear.approximation  && j!="lin"){
@@ -121,10 +125,6 @@ NNS.ARMA.optim <- function(variable, training.set,
           } else {
               current.seasonals[[i]] <- as.numeric(unlist(current.seasonals[[i-1]]))
           }
-      }
-
-      if(i > depth){
-          seasonal.combs[[i]] <- seasonal.combs[[i]][,apply(seasonal.combs[[i]],2, function(z) sum(current.seasonals[[i]]%in%z))==length(current.seasonals[[i]])]
       }
 
 
