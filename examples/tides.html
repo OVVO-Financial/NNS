@@ -2925,9 +2925,9 @@ arma_parameters &lt;- NNS.ARMA.optim(variable = dtrain$tide_feet,
 </div>
 <div id="step-4-evaluate-the-results" class="section level2">
 <h2>Step 4: Evaluate the Results</h2>
-<p>Let’s see how we did. The R-squared between predicted and actual is the presented metric.</p>
-<pre class="r"><code>cor(nns_estimates, dtest$tide_feet)^2</code></pre>
-<pre><code>## [1] 0.9679341</code></pre>
+<p>Let’s see how we did. The R-squared<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> between predicted and actual is the presented metric.</p>
+<pre class="r"><code>(sum((nns_estimates - mean(dtest$tide_feet)) * (dtest$tide_feet - mean(dtest$tide_feet))) ^ 2) / (sum((dtest$tide_feet - mean(dtest$tide_feet)) ^ 2) * sum((nns_estimates - mean(dtest$tide_feet)) ^ 2))</code></pre>
+<pre><code>## [1] 0.9556675</code></pre>
 <pre class="r"><code>library(ggplot2)
 ggplot(aes(x=dt), data=dtest) +
   geom_line(aes(y=tide_feet), color=&#39;blue&#39;, alpha=0.5) + 
@@ -2955,7 +2955,13 @@ ggplot(aes(x=nns_estimates,y=tide_feet), data = ggplot_data) +
 </ul>
 <p>I look forward to further discussions and collaboration with those equally as passionate about these issues, and open to embracing alternative solutions. If you found this presentation interesting or useful, please feel free to reach out via e-mail: <a href="mailto:ovvo.financial.systems@gmail.com" class="email">ovvo.financial.systems@gmail.com</a></p>
 <p>Thanks for your interest!</p>
-<p>Time to run notebook: 3.6046888</p>
+<p>Time to run notebook: 3.5783079</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>See Hayfield and Racine <a href="https://cran.r-project.org/web/packages/np/vignettes/np.pdf" class="uri">https://cran.r-project.org/web/packages/np/vignettes/np.pdf</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
 </div>
 
 
