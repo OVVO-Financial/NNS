@@ -22,7 +22,7 @@
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$ensemble}} a logical indicator representing whether the ensemble method using a naive \link{NNS.ARMA} with \code{seasonal.factor = FALSE} and \code{best.periods = NULL} generated a better \code{obj.fn} result.
 #'}
-#' @note The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method = "comb")}.
+#' @note The number of combinations will grow prohibitively large, they should be kept as small as possible.
 #'
 #' \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 #'
@@ -40,7 +40,9 @@
 #' NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 #' seasonal.factor = nns.optims$periods, method = nns.optims$method)
 #'
-#' ## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL} in the {NNS.ARMA} function.
+#' ## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL}
+#' in the {NNS.ARMA} function.
+#'
 #' nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 #' seasonal.factor = nns.optims$periods, method = nns.optims$method)
 #'
