@@ -45,7 +45,7 @@ Returns a list containing:
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 }
 \note{
-The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method = "comb")}.
+The number of combinations will grow prohibitively large, they should be kept as small as possible.
 
 \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 }
@@ -60,7 +60,9 @@ seasonal.factor = seq(12, 24, 6))
 NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
 
-## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL} in the {NNS.ARMA} function.
+## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL}
+in the {NNS.ARMA} function.
+
 nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
 
