@@ -20,6 +20,7 @@
 #' \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
 #' \item{\code{$obj.fn}} the minimum objective function value
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+#' \item{\code{$ensemble}} a logical indicator representing whether the ensemble method using a naive \link{NNS.ARMA} with \code{seasonal.factor = FALSE} and \code{best.periods = NULL} generated a better \code{obj.fn} result.
 #'}
 #' @note The number of combinations will grow prohibitively large, they should be kept to a minimum when \code{(method = "comb")}.
 #'
@@ -38,6 +39,15 @@
 #' ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
 #' NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 #' seasonal.factor = nns.optims$periods, method = nns.optims$method)
+#'
+#' ## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL} in the {NNS.ARMA} function.
+#' nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+#' seasonal.factor = nns.optims$periods, method = nns.optims$method)
+#'
+#' nns.estimates.2 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+#' seasonal.factor = FALSE, best.periods = NULL, method = nns.optims$method)
+#'
+#' nns.combined.estimate <- rowMeans(cbind(nns.estimates.1, nns.estimates.2))
 #' }
 #'
 #' @export
@@ -108,6 +118,7 @@ NNS.ARMA.optim <- function(variable, training.set,
               seasonal.combs[[i]] <- t(seasonal.factor)
           } else {
               remaining.index <- !(seasonal.factor%in%current.seasonals[[i-1]])
+              if(sum(remaining.index)==0){ break }
               seasonal.combs[[i]] <- rbind(replicate(length(seasonal.factor[remaining.index]), current.seasonals[[i-1]]), as.integer(seasonal.factor[remaining.index]))
           }
 
@@ -258,8 +269,24 @@ NNS.ARMA.optim <- function(variable, training.set,
 
         if(weight.SSE<nns.SSE){
             nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
-        } else { nns.weights <- NULL }
-    } else { nns.weights <- NULL }
+
+            predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+
+            ensemble.SSE <- eval(obj.fn)<nns.SSE
+        } else {
+            nns.weights <- NULL
+
+            predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = NULL, method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+
+            ensemble.SSE <- eval(obj.fn)<nns.SSE
+        }
+    } else {
+        nns.weights <- NULL
+
+        predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = NULL, method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+
+        ensemble.SSE <- eval(obj.fn)<nns.SSE
+    }
 
   } else {
       nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
@@ -273,8 +300,25 @@ NNS.ARMA.optim <- function(variable, training.set,
 
           if(weight.SSE>nns.SSE){
               nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
-          } else { nns.weights <- NULL }
-    } else { nns.weights <- NULL }
+
+              predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+
+              ensemble.SSE <- eval(obj.fn)>weight.SSE
+
+          } else {
+              nns.weights <- NULL
+
+              predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = NULL, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+
+              ensemble.SSE <- eval(obj.fn)>nns.SSE
+          }
+      } else {
+          nns.weights <- NULL
+
+          predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = NULL, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+
+          ensemble.SSE <- eval(obj.fn)>nns.SSE
+      }
 
   }
 
@@ -283,5 +327,6 @@ NNS.ARMA.optim <- function(variable, training.set,
   return(list(periods = nns.periods,
               weights = nns.weights,
               obj.fn = nns.SSE,
-              method = nns.method))
+              method = nns.method,
+              ensemble = ensemble.SSE))
 }

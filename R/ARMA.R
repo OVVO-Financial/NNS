@@ -270,9 +270,9 @@ if(!is.null(cl)){
       if(seasonal.plot){
           par(mfrow = c(2, 1))
           if(ncol(M) > 1){
-              plot(M[ , Period], M[ , Coefficient.of.Variance],
+              plot(M[1, Period], M[1, Coefficient.of.Variance],
                     xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * M[1, Variable.Coefficient.of.Variance]))
-              points(M[1, Period], M[1, Coefficient.of.Variance], pch = 19, col = 'red')
+              points(M[ , Period], M[ , Coefficient.of.Variance], pch = 19, col = 'red')
               abline(h = M[1, Variable.Coefficient.of.Variance], col = "red", lty = 5)
               text((M[ , min(Period)] + M[ , max(Period)]) / 2, M[1, Variable.Coefficient.of.Variance], pos = 3, "Variable Coefficient of Variance", col = 'red')
           } else {
