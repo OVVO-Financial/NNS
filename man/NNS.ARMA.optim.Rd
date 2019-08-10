@@ -38,6 +38,7 @@ Returns a list containing:
 \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
 \item{\code{$obj.fn}} the minimum objective function value
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+\item{\code{$ensemble}} a logical indicator representing whether the ensemble method using a naive \link{NNS.ARMA} with \code{seasonal.factor = FALSE} and \code{best.periods = NULL} generated a better \code{obj.fn} result.
 }
 }
 \description{
@@ -58,6 +59,15 @@ seasonal.factor = seq(12, 24, 6))
 ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
 NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
+
+## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL} in the {NNS.ARMA} function.
+nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+seasonal.factor = nns.optims$periods, method = nns.optims$method)
+
+nns.estimates.2 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+seasonal.factor = FALSE, best.periods = NULL, method = nns.optims$method)
+
+nns.combined.estimate <- rowMeans(cbind(nns.estimates.1, nns.estimates.2))
 }
 
 }
