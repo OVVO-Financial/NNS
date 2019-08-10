@@ -60,15 +60,18 @@ seasonal.factor = seq(12, 24, 6))
 NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
 
-## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = NULL}
+## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = length(seasonal.factor)}
 in the {NNS.ARMA} function.
 
+## Using optimized paramaters from {NNS.ARMA.optim}
 nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method)
 
+## Using all {seasonal.factor} considered in {NNS.ARMA.optim}
 nns.estimates.2 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = nns.optims$periods, best.periods = length(nns.optims$periods), method = nns.optims$method)
+seasonal.factor = FALSE, best.periods = length(seq(12,24,6)), method = nns.optims$method)
 
+## Combined estimates
 nns.combined.estimate <- rowMeans(cbind(nns.estimates.1, nns.estimates.2))
 }
 
