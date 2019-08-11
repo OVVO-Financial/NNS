@@ -107,34 +107,18 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
 
+## `$bias.shift`
+`NNS.ARMA.optim` will return a `$bias.shift`, which is to be added to the ultimate `NNS.ARMA` forecast when using the optimum parameters from the `NNS.ARMA.optim` call.  Note the difference in results...
+```{r best optim3,fig.width=5,fig.height=3,fig.align = "center"}
+sqrt(mean((nns+nns.optimal$bias.shift - tail(AirPassengers, 44)) ^ 2))
+```
+
 ## Extension of Estimates
 Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h = 50`), by dropping the `training.set` parameter.
 
 ```{r extension,results='hide',fig.width=5,fig.height=3,fig.align = "center"}
-NNS.ARMA(AirPassengers, h = 50, seasonal.factor = nns.optimal$periods, method  = nns.optimal$method, weights = nns.optimal$weights, plot = TRUE, seasonal.plot = FALSE, ncores = 1)
+NNS.ARMA(AirPassengers, h = 50, seasonal.factor = nns.optimal$periods, method  = nns.optimal$method, weights = nns.optimal$weights, plot = TRUE, seasonal.plot = FALSE, ncores = 1) + nns.optimal$bias.shift
 ```
-
-## `$ensemble == TRUE`
-If the results of `NNS.ARMA.optim` indicate `$ensemble == TRUE`, then it has determined that an ensemble forecast has outperformed in the objective function used.  In order to create the ensemble forecast, we need to generate the alternative predictions.
-
-```{r ensemble}
-nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
-seasonal.factor = seq(12, 24, 6))
-
-## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = length(seasonal.factor)}in the {NNS.ARMA} function.
-
-## Using optimized paramaters from {NNS.ARMA.optim}
-nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = nns.optims$periods, method = nns.optims$method, plot = FALSE)
-
-## Using all {seasonal.factor} considered in {NNS.ARMA.optim}
-nns.estimates.2 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = FALSE, best.periods = length(seq(12,24,6)), method = nns.optims$method, plot = FALSE)
-
-## Combined estimates
-nns.combined.estimate <- rowMeans(cbind(nns.estimates.1, nns.estimates.2))
-```
-
 
 
 ## Brief Notes on Other Parameters
