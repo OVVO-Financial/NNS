@@ -277,20 +277,20 @@ NNS.ARMA.optim <- function(variable, training.set,
         if(weight.SSE<nns.SSE){
             nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-            predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
+            predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
             ensemble.SSE <- eval(obj.fn)<nns.SSE
         } else {
             nns.weights <- NULL
 
-            predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
+            predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
             ensemble.SSE <- eval(obj.fn)<nns.SSE
         }
     } else {
         nns.weights <- NULL
 
-        predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
+        predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
         ensemble.SSE <- eval(obj.fn)<nns.SSE
     }
@@ -308,21 +308,21 @@ NNS.ARMA.optim <- function(variable, training.set,
           if(weight.SSE>nns.SSE){
               nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-              predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+              predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
               ensemble.SSE <- eval(obj.fn)>weight.SSE
 
           } else {
               nns.weights <- NULL
 
-              predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+              predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
               ensemble.SSE <- eval(obj.fn)>nns.SSE
           }
       } else {
           nns.weights <- NULL
 
-          predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores))
+          predicted <- rowMeans(cbind(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, plot = FALSE, negative.values = negative.values, ncores = subcores)))
 
           ensemble.SSE <- eval(obj.fn)>nns.SSE
       }
