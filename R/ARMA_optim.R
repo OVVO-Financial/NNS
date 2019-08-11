@@ -22,9 +22,13 @@
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 #'}
-#' @note The number of combinations will grow prohibitively large, they should be kept as small as possible.
+#' @note
+#' \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 #'
-#' \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
+#' \item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
+#'
+#'
+#'
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -37,8 +41,11 @@
 #' seasonal.factor = seq(12, 24, 6))
 #'
 #' ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample.  Note the {$bias.shift} usage in the {NNS.ARMA} function:
-#' NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+#' nns.estimates <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 #' seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$bias.shift
+#'
+#' ## If variable cannot logically assume negative values
+#' nns.estimates <- pmax(0, nns.estimates)
 #' }
 #'
 #' @export
@@ -264,15 +271,28 @@ NNS.ARMA.optim <- function(variable, training.set,
             nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
             bias <- mode(predicted - actual)
+            predicted <- predicted+bias
+            bias.SSE <- eval(obj.fn)
+
+            if(bias.SSE>weight.SSE){bias <- 0}
+
         } else {
             nns.weights <- NULL
 
             bias <- mode(predicted - actual)
+            predicted <- predicted+bias
+            bias.SSE <- eval(obj.fn)
+
+            if(bias.SSE>nns.SSE){bias <- 0}
         }
     } else {
         nns.weights <- NULL
 
         bias <- mode(predicted - actual)
+        predicted <- predicted+bias
+        bias.SSE <- eval(obj.fn)
+
+        if(bias.SSE>nns.SSE){bias <- 0}
     }
 
   } else {
@@ -289,16 +309,28 @@ NNS.ARMA.optim <- function(variable, training.set,
               nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
               bias <- mode(predicted - actual)
+              predicted <- predicted+bias
+              bias.SSE <- eval(obj.fn)
+
+              if(bias.SSE<weight.SSE){bias <- 0}
 
           } else {
               nns.weights <- NULL
 
               bias <- mode(predicted - actual)
+              predicted <- predicted+bias
+              bias.SSE <- eval(obj.fn)
+
+              if(bias.SSE<nns.SSE){bias <- 0}
           }
       } else {
           nns.weights <- NULL
 
           bias <- mode(predicted - actual)
+          predicted <- predicted+bias
+          bias.SSE <- eval(obj.fn)
+
+          if(bias.SSE<nns.SSE){bias <- 0}
       }
 
   }
