@@ -261,7 +261,6 @@ NNS.ARMA.optim <- function(variable, training.set,
   } # for j in c('lin','nonlin','both')
 
 
-
   if(objective=='min'){
       nns.periods <- unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
       nns.method <- c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
@@ -275,20 +274,20 @@ NNS.ARMA.optim <- function(variable, training.set,
         if(weight.SSE<nns.SSE){
             nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-            predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+            predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
 
             ensemble.SSE <- eval(obj.fn)<nns.SSE
         } else {
             nns.weights <- NULL
 
-            predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+            predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
 
             ensemble.SSE <- eval(obj.fn)<nns.SSE
         }
     } else {
         nns.weights <- NULL
 
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores)
+        predicted <- rowMeans(predicted, NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = FALSE, best.periods = length(seasonal.factor), method = nns.method, weights = nns.weights, plot = FALSE, negative.values = negative.values, ncores = subcores))
 
         ensemble.SSE <- eval(obj.fn)<nns.SSE
     }
