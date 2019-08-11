@@ -45,9 +45,11 @@ Returns a list containing:
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 }
 \note{
-The number of combinations will grow prohibitively large, they should be kept as small as possible.
+\itemize{
+\item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 
-\code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
+\item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
+}
 }
 \examples{
 
@@ -57,8 +59,11 @@ nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
 seasonal.factor = seq(12, 24, 6))
 
 ## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample.  Note the {$bias.shift} usage in the {NNS.ARMA} function:
-NNS.ARMA(AirPassengers, h = 12, training.set = 132,
+nns.estimates <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$bias.shift
+
+## If variable cannot logically assume negative values
+nns.estimates <- pmax(0, nns.estimates)
 }
 
 }
