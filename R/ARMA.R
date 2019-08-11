@@ -114,7 +114,7 @@ NNS.ARMA <- function(variable,
 
 
   if(is.numeric(seasonal.factor)){
-      M <- matrix(seasonal.factor,ncol=1)
+      M <- matrix(seasonal.factor, ncol=1)
       colnames(M) <- "Period"
       lag <- seasonal.factor
       output <- numeric(length(seasonal.factor))
@@ -149,7 +149,7 @@ NNS.ARMA <- function(variable,
     }
 
 
-    ASW <- ARMA.seas.weighting(seasonal.factor,M)
+    ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
     if(is.null(weights)){
         Weights <- ASW$Weights
@@ -164,7 +164,7 @@ NNS.ARMA <- function(variable,
   for (j in 1 : h){
       ## Regenerate seasonal.factor if dynamic
       if(dynamic){
-          seas.matrix = NNS.seas(variable, plot=FALSE)
+          seas.matrix = NNS.seas(variable, plot = FALSE)
           if(!is.list(seas.matrix)){
               M <- t(1)
           } else {
@@ -175,7 +175,7 @@ NNS.ARMA <- function(variable,
               }
           }
 
-      ASW <- ARMA.seas.weighting(seasonal.factor,M)
+      ASW <- ARMA.seas.weighting(seasonal.factor, M)
       lag <- ASW$lag
       Weights <- ASW$Weights
     }
