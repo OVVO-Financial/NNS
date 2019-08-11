@@ -149,7 +149,7 @@ NNS.ARMA <- function(variable,
     }
 
 print(best.periods)
-print(M)
+print(dim(M))
 
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
