@@ -38,7 +38,7 @@ Returns a list containing:
 \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
 \item{\code{$obj.fn}} the minimum objective function value
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
-\item{\code{$ensemble}} a logical indicator representing whether the ensemble method using a naive \link{NNS.ARMA} with \code{best.periods = length(seasonal.factor)} generated a better \code{obj.fn} result.
+\item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 }
 }
 \description{
@@ -56,23 +56,9 @@ The number of combinations will grow prohibitively large, they should be kept as
 nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
 seasonal.factor = seq(12, 24, 6))
 
-## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample
+## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample.  Note the {$bias.shift} usage in the {NNS.ARMA} function:
 NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = nns.optims$periods, method = nns.optims$method)
-
-## If {$ensemble == TRUE} then take the mean of both forecasts, using {best.periods = length(seasonal.factor)}
-in the {NNS.ARMA} function.
-
-## Using optimized paramaters from {NNS.ARMA.optim}
-nns.estimates.1 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = nns.optims$periods, method = nns.optims$method)
-
-## Using all {seasonal.factor} considered in {NNS.ARMA.optim}
-nns.estimates.2 <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = FALSE, best.periods = length(seq(12,24,6)), method = nns.optims$method)
-
-## Combined estimates
-nns.combined.estimate <- rowMeans(cbind(nns.estimates.1, nns.estimates.2))
+seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$bias.shift
 }
 
 }
