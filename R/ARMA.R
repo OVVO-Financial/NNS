@@ -81,6 +81,9 @@ NNS.ARMA <- function(variable,
       stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
   }
 
+  oldw <- getOption("warn")
+  options(warn = -1)
+
 
   if (is.null(ncores)) {
       num_cores <- as.integer(detectCores() / 2) - 1
@@ -148,11 +151,11 @@ NNS.ARMA <- function(variable,
       }
     }
 
-print(best.periods)
-print(dim(M))
 
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
+
+
     if(is.null(weights)){
         Weights <- ASW$Weights
     } else {
@@ -321,6 +324,7 @@ if(!is.null(cl)){
     par(original.par)
   }
 
+  options(warn = oldw)
   return(Estimates)
 
 }
