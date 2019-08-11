@@ -39,7 +39,7 @@ Note the fact that all observations occupy the co-partial moment quadrants.
 x=seq(0, 3, .01) ; y = x ^ 10
 
 cor(x, y)
-NNS.dep(x, y, print.map = TRUE, order = 3)
+NNS.dep(x, y, print.map = TRUE)
 ```
 
 ## Dependence
