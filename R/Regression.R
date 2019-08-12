@@ -123,7 +123,7 @@
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .95,
+                    stn = .99,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
@@ -380,8 +380,9 @@ NNS.reg = function (x, y,
 
           points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
 
-          if(is.null(np)){
+          if(is.null(np)|np==1){
             new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
+
           } else {
             point.est2 <- points.norm[1:np,]
             new.point.est <- sapply(1 : np, function(i) sum(point.est2[i, ] * x.star.coef) / sum( abs( x.star.coef) > 0))
