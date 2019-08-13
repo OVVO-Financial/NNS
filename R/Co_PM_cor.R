@@ -29,12 +29,12 @@ NNS.cor.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
         colnames(A) <- c(colnames.list)
     }
 
-    A_upm <- t(apply(A, 1, function(x) x > colMeans(A)))
-    A_lpm <- t(apply(A, 1, function(x) x <= colMeans(A)))
+    A_upm <- apply(A, 2, function(x) x > mean(x))
+    A_lpm <- apply(A, 2, function(x) x <= mean(x))
 
 
-    CO_upm <- sum(apply(A_upm, 1, prod)) / l
-    CO_lpm <- sum(apply(A_lpm, 1, prod)) / l
+    CO_upm <- sum(rowProds(A_upm)) / l
+    CO_lpm <- sum(rowProds(A_lpm)) / l
 
 
     observed <- CO_upm + CO_lpm
