@@ -68,6 +68,14 @@ NNS.dep.base <- function(x,
                 noise.reduction <- 'mean'
               }
           }
+        if(order == 1){
+              test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+          if(test.map==1){
+              noise.reduction <- 'median'
+          } else{
+              noise.reduction <- 'median'
+          }
+        }
       }
       if(print.map == TRUE){
           part.map <- NNS.part(x, y, order = order, obs.req = max.obs, Voronoi = TRUE, min.obs.stop = TRUE, noise.reduction = noise.reduction)
