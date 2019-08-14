@@ -51,16 +51,38 @@ NNS.dep.base <- function(x,
   if(length(unique(x))<=2){order <- 1}
 
   if(!missing(y)){
+      if(is.null(order)){
+          test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+          if(test.map==1){
+              noise.reduction <- 'median'
+          } else{
+              noise.reduction <- 'mean'
+          }
 
-      if(print.map == TRUE){
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, Voronoi = TRUE, min.obs.stop = TRUE)
       } else {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE)
+          if(order > 1){
+              test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+              if(test.map==1){
+                noise.reduction <- 'median'
+              } else{
+                noise.reduction <- 'mean'
+              }
+          }
+      }
+      if(print.map == TRUE){
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, Voronoi = TRUE, min.obs.stop = TRUE, noise.reduction = noise.reduction)
+      } else {
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE, noise.reduction = noise.reduction)
       }
 
       part.df <- part.map$dt
 
       part.df[ , `:=` (mean.x = mean(x), mean.y = mean(y)), by = prior.quadrant]
+
+      if(degree==0){
+          part.df <- part.df[x!=mean.x & y!=mean.y,]
+      }
+
 
       part.df[ , `:=` (sub.clpm = Co.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
                      sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
@@ -81,6 +103,7 @@ NNS.dep.base <- function(x,
 
       part.df <- part.df[counts == 1, counts := 0]
       part.df <- part.df[(sub.clpm == 0 & sub.cupm == 0 & sub.dlpm == 0 & sub.dupm == 0), counts := 0]
+
       zeros <- length(x) - part.df[ , sum(counts)]
 
       part.df <- part.df[ , `:=` (weight = counts / (length(x) - zeros)), by = prior.quadrant]
