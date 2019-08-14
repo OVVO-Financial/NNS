@@ -68,7 +68,9 @@ See the following for NNS detailed examples and specific applications:
    
    4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)
    
-   4.5 [Beer Sales](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Beer_Sales.pdf)
+   4.5 [Nile](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Nile.html)
+   
+   4.6 [Beer Sales](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Beer_Sales.pdf)
 
 
 # 5. Econometrics
