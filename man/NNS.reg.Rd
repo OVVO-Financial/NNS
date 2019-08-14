@@ -4,7 +4,7 @@
 \alias{NNS.reg}
 \title{NNS Regression}
 \usage{
-NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.95,
+NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.99,
   dim.red.method = NULL, tau = NULL, type = NULL, point.est = NULL,
   location = "top", return.values = TRUE, plot = TRUE,
   plot.regions = FALSE, residual.plot = TRUE, std.errors = FALSE,
