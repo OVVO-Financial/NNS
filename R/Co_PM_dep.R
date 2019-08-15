@@ -38,8 +38,6 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
     CO_upm <- sum(upm_prods) / l
     CO_lpm <- sum(lpm_prods) / l
 
-    divergent <- (l - sum(upm_prods,lpm_prods)) / l
-
     observed <- CO_upm + CO_lpm
     independence <- 2 * (.5 ^ n)
 
