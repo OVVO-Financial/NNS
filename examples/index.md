@@ -24,9 +24,11 @@ See the following for NNS detailed examples and specific applications:
 
    1.4 [Correlation and Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Correlation%20and%20Dependence.pdf)
    
-   1.5 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+   1.5 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
+   
+   1.6 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
 
-   1.6 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+   1.7 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
 
 # 2. Regression
