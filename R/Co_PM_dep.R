@@ -32,10 +32,13 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
     A_upm <- apply(A, 2, function(x) x > mean(x))
     A_lpm <- apply(A, 2, function(x) x <= mean(x))
 
+    upm_prods <- rowProds(A_upm)
+    lpm_prods <- rowProds(A_lpm)
 
-    CO_upm <- sum(rowProds(A_upm)) / l
-    CO_lpm <- sum(rowProds(A_lpm)) / l
+    CO_upm <- sum(upm_prods) / l
+    CO_lpm <- sum(lpm_prods) / l
 
+    divergent <- (l - sum(upm_prods,lpm_prods)) / l
 
     observed <- CO_upm + CO_lpm
     independence <- 2 * (.5 ^ n)
@@ -75,5 +78,12 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
     }
 
-    return((observed - independence) / (1 - independence))
+
+    if(observed > independence){
+            return((observed - independence) /(1 - independence))
+    } else {
+            return((independence - observed) / independence)
+    }
+
+
 }
