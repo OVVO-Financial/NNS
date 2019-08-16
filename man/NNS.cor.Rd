@@ -22,7 +22,7 @@ Returns nonlinear correlation coefficient between two variables, or nonlinear co
 Returns the nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.
 }
 \note{
-p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or dependence between \code{x,y}.
+p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
 
 See \link{NNS.dep} for examples.
 }

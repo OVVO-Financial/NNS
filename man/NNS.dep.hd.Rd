@@ -14,7 +14,11 @@ NNS.dep.hd(x, plot = FALSE, independence.overlay = FALSE)
 \item{independence.overlay}{logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.}
 }
 \value{
-Returns multivariate nonlinear dependence coefficient [0,1]
+\itemize{
+\item{$actual.observations} Number of \link{Co.LPM} and \link{Co.UPM} observations.
+\item{$independent.null} Expected number of \link{Co.LPM} and \link{Co.UPM} observations under the null hypothesis of independence.
+\item{$Dependence} Multivariate nonlinear dependence coefficient [0,1]
+}
 }
 \description{
 Determines higher dimension dependence coefficients based on degree 0 co-partial moments.
