@@ -5,7 +5,12 @@
 #' @param x a numeric matrix or data frame.
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
-#' @return Returns multivariate nonlinear dependence coefficient [0,1]
+#' @return
+#' \itemize{
+#' \item{$actual.observations} Number of \link{Co.LPM} and \link{Co.UPM} observations.
+#' \item{$independent.null} Expected number of \link{Co.LPM} and \link{Co.UPM} observations under the null hypothesis of independence.
+#' \item{$Dependence} Multivariate nonlinear dependence coefficient [0,1]
+#' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{http://ssrn.com/abstract=2745308}.
 #' @examples
@@ -78,9 +83,13 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
 
     if(observed > independence){
-            return((observed - independence) /(1 - independence))
+            return(list(actual.observations = observed * l,
+                        independent.null = independence * l,
+                        Dependence = (observed - independence) /(1 - independence)))
     } else {
-            return((independence - observed) / independence)
+            return(list(actual.observations = observed * l,
+                        independent.null = independence * l,
+                        Dependence = (independence - observed) / independence))
     }
 
 
