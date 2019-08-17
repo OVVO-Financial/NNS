@@ -4,7 +4,7 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
+NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = FALSE,
   depth = NULL, n.best = 3, learner.trials = NULL, epochs = NULL,
   CV.size = 0.25, threshold = NULL,
   obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
@@ -18,7 +18,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = TRUE,
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
 
-\item{representative.sample}{logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
+\item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
 \item{depth}{integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.}
 
