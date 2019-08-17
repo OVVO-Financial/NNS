@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
-#' @param representative.sample logical; \code{TRUE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
+#' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
 #' @param n.best integer; \code{3} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
@@ -43,7 +43,7 @@
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
-                      representative.sample = TRUE,
+                      representative.sample = FALSE,
                       depth = NULL,
                       n.best = 3,
                       learner.trials = NULL,
@@ -181,13 +181,14 @@ NNS.boost <- function(IVs.train,
           new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
           if(i > 1){
-            new.index_half <- new.index.1[1:(length(y)/2)]
-            new.index <- na.omit(unique(c(new.index_half,new.index))[1:length(y)])
+            new.index_half <- new.index.1[1:(length(new.index.1)/2)]
+            new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
           }
 
 
           new.iv.train <- data.table(x[-new.index,])
           new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
+
 
           fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
           mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
@@ -272,11 +273,11 @@ NNS.boost <- function(IVs.train,
 
       for(j in 1:epochs){
           set.seed(123 * j)
-          new.index <- sample(1:length(y),as.integer(CV.size*length(y)),replace = FALSE)
+          new.index <- sample(length(y),as.integer(CV.size*length(y)),replace = FALSE)
 
       if(i > 1){
-          new.index_half <- new.index.1[1:(length(y)/2)]
-          new.index <- na.omit(unique(c(new.index_half,new.index))[1:length(y)])
+          new.index_half <- new.index.1[1:(length(new.index.1)/2)]
+          new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
       }
 
 
