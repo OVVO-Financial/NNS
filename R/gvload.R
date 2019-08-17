@@ -24,7 +24,7 @@
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
       "detectCores","makeCluster","registerDoSEQ","clusterExport",
       "%dopar%","foreach","stopCluster",
-      "%do%", "k", "product"
+      "%do%", "k"
     ))
 
   requireNamespace("data.table")

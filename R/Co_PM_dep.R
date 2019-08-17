@@ -37,8 +37,8 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
     A_upm <- apply(A, 2, function(x) x > mean(x))
     A_lpm <- apply(A, 2, function(x) x <= mean(x))
 
-    upm_prods <- rowProds(A_upm)
-    lpm_prods <- rowProds(A_lpm)
+    upm_prods <- RP(A_upm)
+    lpm_prods <- RP(A_lpm)
 
     CO_upm <- sum(upm_prods) / l
     CO_lpm <- sum(lpm_prods) / l
