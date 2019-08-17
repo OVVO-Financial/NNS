@@ -11,6 +11,6 @@ BugReports: https://github.com/OVVO-Financial/NNS/issues
 LazyData: TRUE
 RoxygenNote: 6.1.1
 Depends: R (>= 3.3.0), doParallel
-Imports: data.table, rgl, stringr
+Imports: data.table, rgl, stringr, matrixStats
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
