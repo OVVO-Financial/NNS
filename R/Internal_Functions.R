@@ -73,3 +73,44 @@ ARMA.seas.weighting <- function(sf,mat){
         }
       }
     }
+
+
+
+
+
+rowProds <- function(x, rows = NULL, cols = NULL, na.rm = FALSE,
+                     method = c("direct", "expSumLog"), ...) {
+  # Argument 'x':
+  if (!is.matrix(x)) {
+    .Defunct(msg = sprintf("Argument 'x' is of class %s, but should be a matrix. The use of a %s is not supported, the correctness of the result is not guaranteed. Please update your code accordingly.", sQuote(class(x)[1]), sQuote(class(x)[1])))  #nolint
+  }
+
+  # Apply subset
+  if (!is.null(rows) && !is.null(cols)) x <- x[rows, cols, drop = FALSE]
+  else if (!is.null(rows)) x <- x[rows, , drop = FALSE]
+  else if (!is.null(cols)) x <- x[, cols, drop = FALSE]
+
+  # Preallocate result (zero:ed by default)
+  n <- nrow(x)
+  y <- double(length = n)
+
+  # Nothing todo?
+  if (n == 0L) return(y)
+
+  # Argument 'method':
+  method <- method[1L]
+
+  # How to calculate product?
+  if (method == "expSumLog") {
+    prod <- product
+  } else if (method == "direct") {
+  } else {
+    stop("Unknown value of argument 'method': ", method)
+  }
+
+  for (ii in seq_len(n)) {
+    y[ii] <- prod(x[ii, , drop = TRUE], na.rm = na.rm)
+  }
+
+  y
+}

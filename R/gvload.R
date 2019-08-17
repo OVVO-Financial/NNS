@@ -9,7 +9,6 @@
 #' @import doParallel
 #' @import rgl
 #' @import stringr
-#' @import matrixStats
 
 
 .onLoad <- function(libname = find.package("NNS"), pkgname = "NNS"){
