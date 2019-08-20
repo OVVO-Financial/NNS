@@ -99,7 +99,8 @@ NNS.seas <- function(variable, plot = TRUE){
     return(list("all.periods" = M,
                 "best.period" = M[1, Period]))
     } else {
-        return(M)
+       return(list("all.periods" = M,
+                "best.period" = M[1, Period]))
     }
 
 }
