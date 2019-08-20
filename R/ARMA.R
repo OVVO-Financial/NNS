@@ -147,6 +147,9 @@ NNS.ARMA <- function(variable,
             if(!seasonal.factor && is.numeric(best.periods) && (length(M$all.periods$Period) < best.periods)){
                 best.periods <- length(M$all.periods$Period)
             }
+            if(!seasonal.factor && is.null(best.periods)){
+                best.periods <- length(M$all.periods$Period)
+            }
         M <- M$all.periods[1 : best.periods, ]
       }
     }
