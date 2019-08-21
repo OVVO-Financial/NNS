@@ -70,7 +70,7 @@ ARMA.seas.weighting <- function(sf,mat){
       if(is.na(M$Coefficient.of.Variance)  && length(M$Coefficient.of.Variance)==1){
         Lag.weighting <- 1
       } else {
-          Lag.weighting <- (M$Variable.Coefficient.of.Variance - M$Coefficient.of.Variance)
+        Lag.weighting <- (M$Variable.Coefficient.of.Variance - M$Coefficient.of.Variance)
       }
       Weights <- (Lag.weighting * Observation.weighting) / sum(Lag.weighting * Observation.weighting)
       return(list(lag = lag, Weights = Weights))
