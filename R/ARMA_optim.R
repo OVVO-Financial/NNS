@@ -129,6 +129,7 @@ NNS.ARMA.optim <- function(variable, training.set,
           if(linear.approximation  && j!="lin"){
               seasonal.combs[[1]] <- matrix(unlist(overall.seasonals[[1]]),ncol=1)
               current.seasonals[[1]] <- unlist(overall.seasonals[[1]])
+
           } else {
               current.seasonals[[i]] <- as.integer(unlist(seasonal.combs[[1]]))
           }
@@ -137,6 +138,7 @@ NNS.ARMA.optim <- function(variable, training.set,
               next
           } else {
               current.seasonals[[i]] <- as.integer(unlist(current.seasonals[[i-1]]))
+
           }
       }
 
@@ -144,7 +146,6 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       if(is.null(ncol(seasonal.combs[[i]]))){ break }
       if(dim(seasonal.combs[[i]])[2]==0){ break }
-
 
 
       if(j!="lin" && linear.approximation){
@@ -194,6 +195,7 @@ NNS.ARMA.optim <- function(variable, training.set,
       if(objective=='min'){
           current.seasonals[[i]] <- seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
           current.estimate[i] <- min(nns.estimates[[i]])
+
         if(i > 1 && current.estimate[i] > current.estimate[i-1]){
           current.seasonals <- current.seasonals[-length(current.estimate)]
           current.estimate <- current.estimate[-length(current.estimate)]
@@ -257,6 +259,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
 
   } # for j in c('lin','nonlin','both')
+
 
 
   if(objective=='min'){

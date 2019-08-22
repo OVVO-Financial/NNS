@@ -65,11 +65,11 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  z <- cbind(x,y); z <- z[complete.cases(z),]
+  z <- cbind(x,y); z <- z[complete.cases(z),]; z <- t(t(z))
   x <- z[,1]
   y <- z[,2]
+  if(degree.x == 0){x[x == target.x] <- target.x - 1}
+  if(degree.y == 0){y[y == target.y] <- target.y - 1}
   x <- x - target.x
   y <- y - target.y
   x[x <= 0] <- 0
@@ -101,11 +101,11 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  z <- cbind(x,y); z <- z[complete.cases(z),]
+  z <- cbind(x,y); z <- z[complete.cases(z),]; z <- t(t(z))
   x <- z[,1]
   y <- z[,2]
+  if(degree.x == 0){x[x == target.x] <- target.x - 1}
+  if(degree.y == 0){y[y == target.y] <- target.y - 1}
   x <- target.x - x
   y <- target.y - y
   x[x <= 0] <- 0
@@ -137,11 +137,11 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  z <- cbind(x,y); z <- z[complete.cases(z),]
+  z <- cbind(x,y); z <- z[complete.cases(z),]; z <- t(t(z))
   x <- z[,1]
   y <- z[,2]
+  if(degree.x == 0){x[x == target.x] <- target.x - 1}
+  if(degree.y == 0){y[y == target.y] <- target.y - 1}
   x <- x - target.x
   y <- target.y - y
   x[x <= 0] <- 0
@@ -173,11 +173,11 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  z <- cbind(x,y); z <- z[complete.cases(z),]
+  z <- cbind(x,y); z <- z[complete.cases(z),]; z <- t(t(z))
   x <- z[,1]
   y <- z[,2]
+  if(degree.x == 0){x[x == target.x] <- target.x - 1}
+  if(degree.y == 0){y[y == target.y] <- target.y - 1}
   x <- target.x - x
   y <- y - target.y
   x[x <= 0] <- 0

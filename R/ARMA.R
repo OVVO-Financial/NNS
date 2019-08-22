@@ -201,6 +201,7 @@ NNS.ARMA <- function(variable,
       Regression.Estimates <- list()
 
       Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
+
         x <- Component.index[[i]] ; y = Component.series[[i]]
         last.x <- tail(x, 1)
         last.y <- tail(y, 1)
