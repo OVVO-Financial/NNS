@@ -200,8 +200,8 @@ NNS.ARMA <- function(variable,
     if(method == 'nonlin' | method == 'both'){
       Regression.Estimates <- list()
 
-      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
-
+     # Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
+for(i in 1:length(lag)){
         x <- Component.index[[i]] ; y = Component.series[[i]]
         last.x <- tail(x, 1)
         last.y <- tail(y, 1)
@@ -212,7 +212,7 @@ NNS.ARMA <- function(variable,
         run <- diff(reg.points$x)
         rise <- diff(reg.points$y)
 
-        last.y + (rise / run)
+        Regression.Estimates[[i]] <- last.y + (rise / run)
       }
 
       Regression.Estimates <- unlist(Regression.Estimates)
