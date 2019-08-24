@@ -270,29 +270,33 @@ NNS.stack <- function(IVs.train,
 
         var.cutoffs <- rev(sort(unique(var.cutoffs)))
 
+        var.cutoffs[is.na(var.cutoffs)] <- 0
+
+        if(is.null(var.cutoffs)) var.cutoffs <- 0
+
         nns.ord <- numeric()
 
         if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
 
-        for(i in 2:length(var.cutoffs)){
+        for(i in 1:length(var.cutoffs)){
             if(status){
                 message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) Max Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
             }
 
             predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
 
-            nns.ord[i] <- eval(obj.fn)
+            nns.ord[i+1] <- eval(obj.fn)
 
             if(objective=='min'){
                 best.threshold <- var.cutoffs[which.min(na.omit(nns.ord))]
                 THRESHOLDS[[b]] <- best.threshold
                 best.nns.ord[[b]] <- min(na.omit(nns.ord))
-                if(nns.ord[i] > nns.ord[i-1]) break
+                if(i > 1 && (nns.ord[i] > nns.ord[i-1])) break
                 } else {
                     best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
                     THRESHOLDS[[b]] <- best.threshold
                     best.nns.ord[[b]] <- max(na.omit(nns.ord))
-                    if(nns.ord[i] < nns.ord[i-1]) break
+                    if(i > 1 && (nns.ord[i] < nns.ord[i-1])) break
                 }
         }
 
