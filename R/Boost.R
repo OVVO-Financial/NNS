@@ -236,15 +236,9 @@ NNS.boost <- function(IVs.train,
       results[i] <- eval(obj.fn)
 
     } # i in learner.trials
-  } # NULL thresholde
+  } # NULL threshold
 
-    if(feature.importance){
-          original.par <- par(no.readonly = TRUE)
-          par(mfrow=c(2,1))
-          par(mai=c(1.0,.5,0.8,0.5))
-          hist(results,main = "Distribution of Learner Trials Accuracy",
-               xlab = "Accuracy",col = "steelblue")
-    }
+
 
     if(extreme){
         if(objective=="max"){
@@ -259,6 +253,31 @@ NNS.boost <- function(IVs.train,
             threshold <- fivenum(results)[2]
         }
     }
+
+    if(feature.importance){
+        original.par <- par(no.readonly = TRUE)
+        par(mfrow = c(2,1))
+        par(mai = c(1.0,.5,0.8,0.5))
+        hist(results, main = "Distribution of Learner Trials Accuracy",
+            xlab = "Accuracy", col = "steelblue")
+        abline(v = threshold, col = 'red', lty = 2, lwd = 2)
+        mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
+        if(extreme){
+            if(objective=='max'){
+                mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1)
+            } else {
+                mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
+            }
+        } else {
+            if(objective=='max'){
+                mtext("Threshold >", side = 3, col = "red", at = threshold)
+            } else {
+                mtext("< Threshold", side = 3, col = "red", at = threshold)
+            }
+        }
+    }
+
+
 
     if(status){
         message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
