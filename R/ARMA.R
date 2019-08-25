@@ -13,7 +13,7 @@
 #'
 #' \code{(seasonal.factor = FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
-#' \code{(negative.values = TRUE)}.
+#' \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.
 #' @param method options: ("lin", "nonlin", "both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to
 #' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
@@ -103,6 +103,8 @@ NNS.ARMA <- function(variable,
 
   variable <- as.numeric(variable)
   OV <- variable
+
+  if(min(variable)<0){negative.values=TRUE}
 
   if(!is.null(training.set)){
       variable <- variable[1 : training.set]
