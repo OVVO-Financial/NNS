@@ -28,7 +28,7 @@ NNS.ARMA(variable, h = 1, training.set = NULL,
 \code{(seasonal.factor = FALSE)}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
-\code{(negative.values = TRUE)}.}
+\code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.}
 
 \item{method}{options: ("lin", "nonlin", "both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to
 \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.}
