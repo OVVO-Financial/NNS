@@ -274,7 +274,7 @@ NNS.reg = function (x, y,
       if(is.null(dim.red.method)){
         if(!is.null(original.columns)){
           if(is.null(n.best)){
-            n.best <- ceiling(sqrt(original.columns))
+            n.best <- floor(sqrt(original.columns))
           }
         } else {
           if(is.null(n.best)){
