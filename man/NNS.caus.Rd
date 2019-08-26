@@ -16,8 +16,6 @@ NNS.caus(x, y, factor.2.dummy = TRUE, tau, time.series = FALSE,
 
 \item{tau}{options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.}
 
-\item{time.series}{logical; \code{FALSE} (default) If analyzing time series data with \code{tau = [integer]}, select \code{(time.series = TRUE)}.  Not required when \code{(tau = "ts")}.}
-
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
 }
 \value{
@@ -27,17 +25,18 @@ Returns the directional causation (x ---> y) or (y ---> x) and net quantity of a
 Returns the causality from observational data between two variables.
 }
 \examples{
-## x clearly causes y...
+
 \dontrun{
+## x causes y...
 set.seed(123)
-x <- rnorm(100) ; y <- x ^ 2
+x <- rnorm(1000) ; y <- x ^ 2
 NNS.caus(x, y, tau = "cs")
 
-x <- 1:100 ; y <- x^2
-NNS.caus(x, y, tau = "ts", time.series = TRUE)
+## AirPassengers
+NNS.caus(1:length(AirPassengers), AirPassengers, tau = "ts")
 
-## Causal matrix
-NNS.caus(data.matrix(iris), tau = 0)
+## Causal matrix with per factor causation
+NNS.caus(iris, tau = 0)
 }
 }
 \references{
