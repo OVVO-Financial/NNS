@@ -107,30 +107,51 @@ NNS.dep = function(x,
 
         seg <- as.integer(.2*l)
         segs <- list(5L)
+        uniques <- list(5L)
 
         for(i in 1:5){
             if(i == 1){
                 segs[[i]] <- 1 : min(l,100)
+                uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
             if(i > 1 & i < 5){
                 segs[[i]] <- max(1, (i*seg - 50)) : min(l,(i*seg+50))
+                uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
             if(i == 5){
                 segs[[i]] <- max(1, (l-100)) : max(l,100)
+                uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
         }
 
         nns.dep <- list(5L)
 
-cl <- makeCluster(num_cores)
-registerDoParallel(cl)
+        if(any(unlist(uniques)==1)){
+            DT <- data.table(x,y,key = "x")
+            for(i in 1:3){
+                if(i==1){
+                    nns.dep[[i]] <- NNS.dep.base(DT[,.SD[1],by="x"]$x,DT[,.SD[1],by="x"]$y,print.map = FALSE)
+                }
+                if(i==2) {
+                nns.dep[[i]] <- NNS.dep.base(DT[,.SD[min(1,round(.N/2))],by="x"]$x,DT[,.SD[min(1,round(.N/2))],by="x"]$y,print.map = FALSE)
+                }
+                if(i==3) {
+                    nns.dep[[i]] <- NNS.dep.base(DT[,.SD[.N],by="x"]$x,DT[,.SD[.N],by="x"]$y,print.map = FALSE)
+                }
+            }
 
-  nns.dep <- foreach(i = 1:5,.packages = "NNS")%dopar%{
-        NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE)
-  }
+        } else {
 
-stopCluster(cl)
-registerDoSEQ()
+            cl <- makeCluster(num_cores)
+            registerDoParallel(cl)
+
+            nns.dep <- foreach(i = 1:5,.packages = "NNS")%dopar%{
+                NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE)
+            }
+            stopCluster(cl)
+            registerDoSEQ()
+        }
+
 
         if(l > 500 & print.map){
             NNS.part(x, y, order = order, Voronoi = TRUE)
