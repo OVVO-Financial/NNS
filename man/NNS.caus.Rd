@@ -4,8 +4,7 @@
 \alias{NNS.caus}
 \title{NNS Causation}
 \usage{
-NNS.caus(x, y, factor.2.dummy = TRUE, tau, time.series = FALSE,
-  plot = FALSE)
+NNS.caus(x, y, factor.2.dummy = TRUE, tau = 3, plot = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
