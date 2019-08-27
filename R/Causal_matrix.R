@@ -1,4 +1,4 @@
-NNS.caus.matrix<- function(x, tau = tau, time.series = time.series, plot = plot){
+NNS.caus.matrix<- function(x, tau = tau, plot = plot){
 
 n <- ncol(x)
     if(is.null(n)){
@@ -8,7 +8,7 @@ n <- ncol(x)
     indiv.causes <- list()
 
     for(i in 1 : (n - 1)){
-        indiv.causes[[i]] <- sapply((i + 1) : n, function(b) NNS.caus(x[ , i], x[ , b], plot = plot, tau = tau, time.series = time.series))
+        indiv.causes[[i]] <- sapply((i + 1) : n, function(b) NNS.caus(x[ , i], x[ , b], plot = plot, tau = tau))
     }
 
     for(i in 1 : length(indiv.causes)){

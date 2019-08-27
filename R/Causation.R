@@ -29,12 +29,10 @@
 
 NNS.caus <- function(x, y,
                      factor.2.dummy = TRUE,
-                     tau,
-                     time.series=FALSE,
+                     tau = 3,
                      plot=FALSE){
 
   orig.tau <- tau
-  orig.time.series <- time.series
   orig.plot <- plot
 
   if(factor.2.dummy){
@@ -61,13 +59,13 @@ NNS.caus <- function(x, y,
 
   if(!missing(y)){
       if(is.numeric(tau)){
-          Causation.x.given.y <- Uni.caus(x,y,tau=tau,plot = FALSE,time.series=time.series)
-          Causation.y.given.x <- Uni.caus(y,x,tau=tau,plot = FALSE,time.series=time.series)
+          Causation.x.given.y <- Uni.caus(x,y,tau=tau,plot = FALSE)
+          Causation.y.given.x <- Uni.caus(y,x,tau=tau,plot = FALSE)
 
       if(Causation.x.given.y == Causation.y.given.x |
          Causation.x.given.y == 0 | Causation.y.given.x == 0){
-            Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
-            Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE, scale = TRUE, time.series = time.series)
+            Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
+            Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
       }
     }
 
@@ -77,14 +75,14 @@ NNS.caus <- function(x, y,
 
         if(Causation.x.given.y == Causation.y.given.x |
             Causation.x.given.y == 0 | Causation.y.given.x == 0){
-                Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE, scale = TRUE)
-                Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE, scale = TRUE)
+                Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
+                Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
         }
     }
 
     if(tau == "ts"){
-        Causation.y.given.x <- Uni.caus(y, x, tau = 3, plot = FALSE, time.series = TRUE)
-        Causation.x.given.y <- Uni.caus(x, y, tau = 3, plot = FALSE, time.series = TRUE)
+        Causation.y.given.x <- Uni.caus(y, x, tau = 3, plot = FALSE)
+        Causation.x.given.y <- Uni.caus(x, y, tau = 3, plot = FALSE)
 
     }
 
@@ -120,7 +118,7 @@ NNS.caus <- function(x, y,
     }
   } else {
 
-    NNS.caus.matrix(x, tau = orig.tau, time.series = orig.time.series, plot = orig.plot)
+    NNS.caus.matrix(x, tau = orig.tau, plot = orig.plot)
   }
 
 

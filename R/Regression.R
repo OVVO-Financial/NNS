@@ -282,6 +282,7 @@ NNS.reg = function (x, y,
           }
         }
 
+
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
       } else { # Multivariate dim.red == FALSE
 
@@ -400,8 +401,10 @@ NNS.reg = function (x, y,
     } # Univariate
   } # Multivariate
 
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
-  dependence[is.na(dependence)] <- 0
+      dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
+      dependence[is.na(dependence)] <- 0
+
+
 
   if(is.null(original.columns)){
     synthetic.x.equation <- NULL

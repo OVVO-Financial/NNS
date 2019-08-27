@@ -1,4 +1,4 @@
-Uni.caus <- function(x, y, tau, plot = TRUE, scale = FALSE, time.series = FALSE){
+Uni.caus <- function(x, y, tau, plot = TRUE){
 
   xy <- NNS.norm(cbind(x, y), linear = FALSE)
 
@@ -49,7 +49,7 @@ Uni.caus <- function(x, y, tau, plot = TRUE, scale = FALSE, time.series = FALSE)
 
 
   ## Correlation of Normalized Variables
-  rho.x.y <- NNS.dep(x.norm.to.y, y.norm.to.x)$Correlation
+  rho.x.y <- NNS.dep(x.norm.to.y, y.norm.to.x)$Dependence
 
   Causation.x.given.y <- P.x.given.y * rho.x.y
 
