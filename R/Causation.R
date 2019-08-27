@@ -5,7 +5,7 @@
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
-#' @param tau options: ("cs", "ts", integer); Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
+#' @param tau options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
 #' @author Fred Viole, OVVO Financial Systems
@@ -29,7 +29,7 @@
 
 NNS.caus <- function(x, y,
                      factor.2.dummy = TRUE,
-                     tau = 3,
+                     tau = 0,
                      plot=FALSE){
 
   orig.tau <- tau
@@ -100,7 +100,7 @@ NNS.caus <- function(x, y,
         }
         return(c(Causation.x.given.y = Causation.x.given.y,
                Causation.y.given.x = Causation.y.given.x,
-               "C(y--->x)" =  Causation.y.given.x - Causation.x.given.y))
+               "C(x--->y)" =  abs(Causation.y.given.x - Causation.x.given.y)))
     } else {
         if(plot){
             # For plotting only
@@ -114,7 +114,7 @@ NNS.caus <- function(x, y,
         }
     return(c(Causation.x.given.y = Causation.x.given.y,
                Causation.y.given.x = Causation.y.given.x,
-               "C(x--->y)" = Causation.x.given.y - Causation.y.given.x))
+               "C(y--->x)" = abs(Causation.x.given.y - Causation.y.given.x)))
     }
   } else {
 

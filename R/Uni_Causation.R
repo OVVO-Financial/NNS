@@ -45,7 +45,7 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
 
   ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
-  P.x.given.y <- UPM.ratio(1, min(x.norm.to.y), y.norm.to.x) - UPM.ratio(1, max(x.norm.to.y), y.norm.to.x)
+  P.x.given.y <- UPM.ratio(1, min(y.norm.to.x), x.norm.to.y) - UPM.ratio(1, max(y.norm.to.x), x.norm.to.y)
 
 
   ## Correlation of Normalized Variables
