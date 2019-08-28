@@ -181,8 +181,12 @@ NNS.ARMA <- function(variable,
           } else {
               if(is.null(best.periods)){
                   M <- seas.matrix$all.periods
+                  best.periods <- length(M$all.periods$Period)
               } else {
-              M <- seas.matrix$all.periods[1 : best.periods, ]
+                  if(length(M$all.periods$Period) < best.periods){
+                      best.periods <- length(M$all.periods$Period)
+                  }
+                  M <- seas.matrix$all.periods[1 : best.periods, ]
               }
           }
 
