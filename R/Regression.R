@@ -447,7 +447,13 @@ NNS.reg = function (x, y,
   min.range <- min(regression.points$x)
   max.range <- max(regression.points$x)
 
-  y.min <- na.omit(y[x <= min.range])
+  mid.min.range <- mean(c(min(x),min(regression.points$x)))
+  mid.max.range <- mean(c(max(x),max(regression.points$x)))
+
+  y.mid.min <-  na.omit(y[x > mid.min.range & x <= min.range])
+  l_y.mid.min <- length(y.mid.min)
+
+  y.min <- na.omit(y[x <= mid.min.range])
   l_y.min <- length(y.min)
 
   if(l_y.min<=1){
@@ -458,7 +464,18 @@ NNS.reg = function (x, y,
     b <- mode(y.min)
   }
 
-  y.max <- na.omit(y[x >= max.range])
+  if(l_y.mid.min<=1){
+    a1 <- y.mid.min
+    b1 <- y.mid.min
+  } else {
+    a1 <- median(y.mid.min)
+    b1 <- mode(y.mid.min)
+  }
+
+  y.mid.max <- na.omit(y[x > max.range & x <= mid.max.range])
+  l_y.mid.max <- length(y.mid.max)
+
+  y.max <- na.omit(y[x > mid.max.range])
   l_y.max <- length(y.max)
 
   if(l_y.max<=1){
@@ -469,12 +486,23 @@ NNS.reg = function (x, y,
     e <- mode(y.max)
   }
 
+  if(l_y.mid.max<=1){
+    d1 <- y.mid.max
+    e1 <- y.mid.max
+  } else {
+    d1 <- median(y.mid.max)
+    e1 <- mode(y.mid.max)
+  }
 
   Dynamic.average.min <- mean(c(a, b))
   Dynamic.average.max <- mean(c(d, e))
 
-  ###Endpoints
-  if(length(x[x < min.range]) > 1){
+  Dynamic.average.mid.min <- mean(c(a1, b1))
+  Dynamic.average.mid.max <- mean(c(d1, e1))
+
+
+  ### Endpoints
+  if(length(x[x < mid.min.range]) > 1){
     if(dependence < stn){
       x0 <- Dynamic.average.min
     } else {
@@ -484,7 +512,7 @@ NNS.reg = function (x, y,
     x0 <- unique(y[x == min(x)])
   }
 
-  if(length(x[x > max.range]) > 1){
+  if(length(x[x > mid.max.range]) > 1){
     if(dependence < stn){
       x.max <- Dynamic.average.max
     } else {
@@ -494,8 +522,20 @@ NNS.reg = function (x, y,
     x.max <- unique(y[x == max(x)])
   }
 
-  regression.points <- rbindlist(list(regression.points, list(max(x), mean(x.max))))
-  regression.points <- rbindlist(list(regression.points, list(min(x), mean(x0))))
+  ### Mid Endpoints
+  x.mid.min <- Dynamic.average.mid.min
+
+  x.mid.max <- Dynamic.average.mid.max
+
+  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, mean(x.mid.max)),
+                                       c(max(x),mean(x.max)))))
+
+  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
+                                               c(mid.min.range, mean(x.mid.min)))))
+
+  regression.points <- rbindlist(list(regression.points, mid.max.rps ))
+
+  regression.points <- rbindlist(list(regression.points, mid.min.rps ))
 
   setkey(regression.points, x, y)
 
