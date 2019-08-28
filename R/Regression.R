@@ -465,8 +465,8 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.min<=1){
-    a1 <- y.mid.min
-    b1 <- y.mid.min
+    a1 <- y[1]
+    b1 <- a1
   } else {
     a1 <- median(y.mid.min)
     b1 <- mode(y.mid.min)
@@ -487,8 +487,8 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.max<=1){
-    d1 <- y.mid.max
-    e1 <- y.mid.max
+    d1 <- tail(y,1)
+    e1 <- d1
   } else {
     d1 <- median(y.mid.max)
     e1 <- mode(y.mid.max)

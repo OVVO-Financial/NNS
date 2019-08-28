@@ -100,8 +100,6 @@ NNS.ARMA <- function(variable,
       seasonal.factor <- FALSE
   }
 
-  print(rownames(variable))
-
   variable <- as.numeric(variable)
   OV <- variable
 
@@ -213,10 +211,10 @@ NNS.ARMA <- function(variable,
         last.y <- tail(y, 1)
 
         ## Skeleton NNS regression for NNS.ARMA
-        reg.points <- tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 2)
+        reg.points <- tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 3)
 
-        run <- diff(reg.points$x)
-        rise <- diff(reg.points$y)
+        run <- mean(diff(reg.points$x))
+        rise <- mean(diff(reg.points$y))
 
         last.y + (rise / run)
       }
