@@ -230,10 +230,10 @@ NNS.stack <- function(IVs.train,
 
         if(objective=='min'){
             k <- cv.range[which.min(na.omit(nns.cv.1))-0]
-            nns.cv.1 <- which.min(na.omit(nns.cv.1))
+            nns.cv.1 <- min(na.omit(nns.cv.1))
         } else {
             k <- cv.range[which.max(na.omit(nns.cv.1))-0]
-            nns.cv.1 <- which.max(na.omit(nns.cv.1))
+            nns.cv.1 <- max(na.omit(nns.cv.1))
         }
 
 
