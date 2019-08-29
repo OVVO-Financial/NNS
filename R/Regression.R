@@ -457,7 +457,7 @@ NNS.reg = function (x, y,
   l_y.min <- length(y.min)
 
   if(l_y.min<=1){
-    a <- y[1]
+    a <- median(y.min)
     b <- a
   } else {
     a <- median(y.min)
@@ -465,7 +465,7 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.min<=1){
-    a1 <- y[1]
+    a1 <- median(y.mid.min)
     b1 <- a1
   } else {
     a1 <- median(y.mid.min)
@@ -479,7 +479,7 @@ NNS.reg = function (x, y,
   l_y.max <- length(y.max)
 
   if(l_y.max<=1){
-    d <- tail(y,1)
+    d <- median(y.max)
     e <- d
   } else {
     d <- median(y.max)
@@ -487,7 +487,7 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.max<=1){
-    d1 <- tail(y,1)
+    d1 <- median(y.mid.max)
     e1 <- d1
   } else {
     d1 <- median(y.mid.max)
