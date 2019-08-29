@@ -22,7 +22,7 @@ See the following for NNS detailed examples and specific applications:
 
    1.3 [CDFs and ANOVA](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/CDFs%20and%20ANOVA.pdf)
 
-   1.4 [Correlation and Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Correlation%20and%20Dependence.pdf)
+   1.4 [Correlation and Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Correlation_and_Dependence.pdf)
    
    1.5 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
    
