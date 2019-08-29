@@ -497,8 +497,8 @@ NNS.reg = function (x, y,
   Dynamic.average.min <- mean(c(a, b))
   Dynamic.average.max <- mean(c(d, e))
 
-  Dynamic.average.mid.min <- mean(c(a1, b1))
-  Dynamic.average.mid.max <- mean(c(d1, e1))
+  Dynamic.average.mid.min <- mean(c(a1, b1, Dynamic.average.min))
+  Dynamic.average.mid.max <- mean(c(d1, e1, Dynamic.average.max))
 
 
   ### Endpoints
