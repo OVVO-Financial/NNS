@@ -155,7 +155,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode"
   }
 
-  if(factor.2.dummy && !multivariate.call){
+  if(factor.2.dummy){       # && !multivariate.call){
     if(is.list(x)){
         x <- do.call(cbind,x)
     }
