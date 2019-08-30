@@ -142,75 +142,75 @@ NNS.reg = function (x, y,
   options(warn = -1)
 
   if(plot.regions && !is.null(order) && order == 'max'){
-      stop('Please reduce the "order" or set "plot.regions = FALSE".')
+    stop('Please reduce the "order" or set "plot.regions = FALSE".')
   }
 
   if(!is.null(confidence.interval) && std.errors == FALSE){
-      std.errors <- TRUE
+    std.errors <- TRUE
   }
 
 
   if(class(y) == "factor"){
-      type <- "CLASS"
-      noise.reduction <- "mode"
+    type <- "CLASS"
+    noise.reduction <- "mode"
   }
 
   if(factor.2.dummy && !multivariate.call){
-      if(!is.null(dim(x))){
-          x <- apply(x,2,factor_2_dummy)
-          if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-          colnames(x) <- make.unique(colnames(x),sep = "_")
+    if(!is.null(dim(x))){
+      x <- apply(x,2,factor_2_dummy)
+      if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
+      colnames(x) <- make.unique(colnames(x),sep = "_")
 
-          if(is.list(x)){
-              x <- do.call(cbind,x)
-              x <- apply(x,2,factor_2_dummy)
-              if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-              colnames(x) <- make.unique(colnames(x),sep = "_")
-          }
-
-      } else {
-          x <- factor_2_dummy(x)
+      if(is.list(x)){
+        x <- do.call(cbind,x)
+        x <- apply(x,2,factor_2_dummy)
+        if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
+        colnames(x) <- make.unique(colnames(x),sep = "_")
       }
+
+    } else {
+      x <- factor_2_dummy(x)
+    }
 
 
     if(!is.null(point.est)){
-        point.est.y <- numeric()
-        if(!is.null(dim(x))){
-            if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
-                point.est <- apply(point.est,2,factor_2_dummy)
-            } else {
-                point.est <- t(point.est)
-                point.est <- t(apply(point.est,2,factor_2_dummy))
-            }
+      point.est.y <- numeric()
+      if(!is.null(dim(x))){
+        if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
+          point.est <- apply(point.est,2,factor_2_dummy)
+        } else {
+          point.est <- t(point.est)
+          point.est <- t(apply(point.est,2,factor_2_dummy))
+        }
 
-            if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
+        if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
 
 
         if(is.list(point.est)){
-            point.est <- do.call(cbind,point.est)
-            point.est <- apply(point.est,2,factor_2_dummy)
-            if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
+          point.est <- do.call(cbind,point.est)
+          point.est <- apply(point.est,2,factor_2_dummy)
+          if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
         }
 
         point.est <- as.matrix(point.est)
         l <- dim(point.est)[2]
 
       } else { # !is.null(dim(x))...implying univariate regression
-          point.est <- factor_2_dummy(point.est)
-          l <- dim(t(t(point.est)))[2]
-          if(is.null(names(point.est))) {names(point.est) <- names(x)}
+        point.est <- factor_2_dummy(point.est)
+        l <- dim(t(t(point.est)))[2]
+        if(is.null(names(point.est))) {names(point.est) <- names(x)}
 
       }
 
       ### Add 0's to data for missing regressors
       if(dim(t(t(x)))[2]!=l){
-          Missing <- setdiff(colnames(x),colnames(point.est))
-          point.est[Missing] <- 0
-          point.est <- point.est[colnames(x)]
+        Missing <- setdiff(colnames(x),colnames(point.est))
+        point.est[Missing] <- 0
+        point.est <- point.est[colnames(x)]
       }
 
     } else { # is.null(point.est)
-        point.est.y <- NULL
+      point.est.y <- NULL
     }
 
   } #if(factor.2.dummy && !multivariate.call)
@@ -401,8 +401,8 @@ NNS.reg = function (x, y,
     } # Univariate
   } # Multivariate
 
-      dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
-      dependence[is.na(dependence)] <- 0
+  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
+  dependence[is.na(dependence)] <- 0
 
 
 
@@ -457,7 +457,7 @@ NNS.reg = function (x, y,
   l_y.min <- length(y.min)
 
   if(l_y.min<=1){
-    a <- median(y.min)
+    a <- y.min
     b <- a
   } else {
     a <- median(y.min)
@@ -465,7 +465,7 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.min<=1){
-    a1 <- median(y.mid.min)
+    a1 <- y.mid.min
     b1 <- a1
   } else {
     a1 <- median(y.mid.min)
@@ -528,7 +528,7 @@ NNS.reg = function (x, y,
   x.mid.max <- Dynamic.average.mid.max
 
   mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, mean(x.mid.max)),
-                                       c(max(x),mean(x.max)))))
+                                               c(max(x),mean(x.max)))))
 
   mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
                                                c(mid.min.range, mean(x.mid.min)))))
@@ -553,7 +553,7 @@ NNS.reg = function (x, y,
 
 
   Regression.Coefficients <- regression.points[ , .(rise,run)]
-###
+  ###
   Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
 
   upper.x <- regression.points[(2 : .N), x]

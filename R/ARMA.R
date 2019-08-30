@@ -212,6 +212,7 @@ NNS.ARMA <- function(variable,
 
         ## Skeleton NNS regression for NNS.ARMA
         reg.points <- tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, noise.reduction = 'off', multivariate.call = TRUE), 3)
+        reg.points <- reg.points[complete.cases(reg.points),]
 
         run <- mean(diff(reg.points$x))
         rise <- mean(diff(reg.points$y))
