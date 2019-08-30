@@ -155,23 +155,23 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode"
   }
 
-  if(factor.2.dummy){       # && !multivariate.call){
+  if(factor.2.dummy){
     if(is.list(x)){
         x <- do.call(cbind,x)
     }
 
     if(!is.null(dim(x))){
         x <- apply(x,2,factor_2_dummy)
+        x <- apply(x,2,as.double)
         if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
         colnames(x) <- make.unique(colnames(x),sep = "_")
-        x <- apply(x,2,as.double)
     } else {
         x <- factor_2_dummy(x)
         if(!is.null(dim(x))){
             x <- apply(x,2,as.double)
         }
-    }
 
+    }
 
     if(!is.null(point.est)){
       point.est.y <- numeric()

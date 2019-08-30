@@ -86,7 +86,6 @@ NNS.boost <- function(IVs.train,
 
   if(is.list(x)){
     x <- do.call(cbind,x)
-    x <- apply(x,2,as.double)
   }
 
   if(!is.null(dim(x))){
