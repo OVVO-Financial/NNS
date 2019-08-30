@@ -84,6 +84,10 @@ NNS.boost <- function(IVs.train,
   y <- DV.train
   z <- IVs.test
 
+  if(is.list(x)){
+    x <- do.call(cbind,x)
+    x <- apply(x,2,as.double)
+  }
 
   if(!is.null(dim(x))){
       if(!is.numeric(x)){
@@ -91,10 +95,7 @@ NNS.boost <- function(IVs.train,
     } else {
           x <- apply(x,2,as.double)
     }
-    if(is.list(x)){
-        x <- do.call(cbind,x)
-        x <- apply(x,2,as.double)
-    }
+
 
   } else {
       x <- factor_2_dummy(x)
