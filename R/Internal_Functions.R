@@ -12,7 +12,6 @@ mode <- function(x){
 factor_2_dummy <- function(x){
   if(class(x) == "factor"){
     output <- model.matrix(~x -1, x)[,-1]
-    output <- as.numeric(output)
   } else {
     output <- x
   }
@@ -23,7 +22,6 @@ factor_2_dummy <- function(x){
 factor_2_dummy_FR <- function(x){
   if(class(x) == "factor"){
     output <- model.matrix(~x -1, x)
-    output <- as.numeric(output)
   } else {
     output <- x
   }
