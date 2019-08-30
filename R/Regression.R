@@ -164,9 +164,10 @@ NNS.reg = function (x, y,
         x <- apply(x,2,factor_2_dummy)
         if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
         colnames(x) <- make.unique(colnames(x),sep = "_")
-        x <- as.matrix(x)
+        x <- apply(x,2,as.double)
     } else {
         x <- factor_2_dummy(x)
+        x <- apply(x,2,as.double)
     }
 
 
