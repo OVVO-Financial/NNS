@@ -167,7 +167,9 @@ NNS.reg = function (x, y,
         x <- apply(x,2,as.double)
     } else {
         x <- factor_2_dummy(x)
-        x <- apply(x,2,as.double)
+        if(!is.null(dim(x))){
+            x <- apply(x,2,as.double)
+        }
     }
 
 
