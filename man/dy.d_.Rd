@@ -4,9 +4,9 @@
 \alias{dy.d_}
 \title{Partial Derivative dy/d_[wrt]}
 \usage{
-dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.99,
-  h = 0.05, n.best = NULL, mixed = FALSE, plot = FALSE,
-  noise.reduction = "mean")
+dy.d_(x, y, wrt, eval.points = "median", order = "max", stn = 0.99,
+  h = 0.05, n.best = 1, mixed = FALSE, plot = FALSE,
+  messages = TRUE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
@@ -23,14 +23,12 @@ dy.d_(x, y, wrt, eval.points = "median", order = NULL, stn = 0.99,
 
 \item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.}
 
-\item{n.best}{integer; Sets the number of closest regression points to use in estimating finite difference points in \link{NNS.reg}.  \code{NULL} (default) Uses \code{ceiling(sqrt(ncol(x)))}.}
-
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.  Only for single valued \code{eval.points}.}
 
-\item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.}
-
-\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal to noise situations, \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit in \link{NNS.reg}.
+\item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
 Default setting is \code{(noise.reduction = "mean")}.}
+
+\item{messages}{logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.}
 }
 \value{
 Returns:
