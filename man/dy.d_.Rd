@@ -4,9 +4,8 @@
 \alias{dy.d_}
 \title{Partial Derivative dy/d_[wrt]}
 \usage{
-dy.d_(x, y, wrt, eval.points = "median", order = "max", stn = 0.99,
-  h = 0.05, n.best = 1, mixed = FALSE, plot = FALSE,
-  messages = TRUE)
+dy.d_(x, y, wrt, eval.points = "median", h = 0.05, mixed = FALSE,
+  plot = FALSE, messages = TRUE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
@@ -16,10 +15,6 @@ dy.d_(x, y, wrt, eval.points = "median", order = "max", stn = 0.99,
 \item{wrt}{integer; Selects the regressor to differentiate with respect to.}
 
 \item{eval.points}{numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.}
-
-\item{order}{integer; \link{NNS.reg} \code{"order"}, defaults to NULL.}
-
-\item{stn}{numeric [0, 1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.}
 
 \item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.}
 
@@ -55,7 +50,7 @@ dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
 ## Known function analysis: [y = a ^ 2 * b ^ 2]
 x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
 B <- expand.grid(x_1, x_2) ; y <- B[ , 1] ^ 2 * B[ , 2] ^ 2
-dy.d_(B, y, wrt = 1, eval.points = c(.5, .5), order = "max")}
+dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
