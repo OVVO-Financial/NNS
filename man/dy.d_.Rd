@@ -18,7 +18,7 @@ dy.d_(x, y, wrt, eval.points = "median", h = 0.05, mixed = FALSE,
 
 \item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.}
 
-\item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.  Only for single valued \code{eval.points}.}
+\item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
 \item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
 Default setting is \code{(noise.reduction = "mean")}.}
@@ -32,13 +32,9 @@ Returns:
 \item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
 \item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
 }
-Retuns a vector of partial derivatives when \code{(eval.points = "all")}.
 }
 \description{
 Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
-}
-\note{
-For known function testing and analysis, regressors should be transformed via \link{expand.grid} to fill the dimensions with \code{(order = "max")}.  Example provided below.
 }
 \examples{
 \dontrun{
