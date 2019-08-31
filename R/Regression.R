@@ -183,13 +183,13 @@ NNS.reg = function (x, y,
           point.est <- t(apply(point.est,2,factor_2_dummy))
         }
 
-        if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
+        if(is.null(colnames(point.est)) && !is.null(dim(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
 
 
         if(is.list(point.est)){
           point.est <- do.call(cbind,point.est)
           point.est <- apply(point.est,2,factor_2_dummy)
-          if(is.null(colnames(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
+          if(is.null(colnames(point.est)) && !is.null(dim(point.est))) {colnames(point.est) <- colnames(x, do.NULL = FALSE)}
         }
 
         point.est <- as.matrix(point.est)
