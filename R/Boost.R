@@ -91,6 +91,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(dim(x))){
       if(!is.numeric(x)){
           x <- sapply(x,factor_2_dummy)
+          X <- data.marix(x)
     } else {
           x <- data.matrix(x)
     }
@@ -111,15 +112,17 @@ NNS.boost <- function(IVs.train,
   colnames(x) <- make.unique(colnames(x),sep = "_")
 
   if(!is.null(dim(z))){
+      if(is.list(z)){
+          z <- do.call(cbind,z)
+      }
+
       if(!is.numeric(z)){
           z <- sapply(z,factor_2_dummy)
+          z <- data.matrix(z)
       } else {
           z <- data.matrix(z)
       }
-      if(is.list(z)){
-          z <- do.call(cbind,z)
-          z <- data.matrix(z)
-      }
+
   } else {
       z <- factor_2_dummy(z)
       if(is.null(dim(z))){
