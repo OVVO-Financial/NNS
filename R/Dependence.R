@@ -101,7 +101,7 @@ NNS.dep = function(x,
 
         l <- length(x)
 
-        if(l <= 30){
+        if(l < 250){
             return(NNS.dep.base(x, y, order = order, degree = degree, print.map = print.map))
         }
 
@@ -153,7 +153,7 @@ NNS.dep = function(x,
         }
 
 
-        if(l > 500 & print.map){
+        if(l >= 250 & print.map){
             NNS.part(x, y, order = order, Voronoi = TRUE)
         }
 
