@@ -101,7 +101,7 @@ NNS.dep = function(x,
 
         l <- length(x)
 
-        if(l < 250){
+        if(l < 500){
             return(NNS.dep.base(x, y, order = order, degree = degree, print.map = print.map))
         }
 
@@ -111,15 +111,15 @@ NNS.dep = function(x,
 
         for(i in 1:5){
             if(i == 1){
-                segs[[i]] <- 1 : min(l, l/5)
+                segs[[i]] <- 1 : min(l, 100)
                 uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
             if(i > 1 & i < 5){
-                segs[[i]] <- max(1, (i*seg - l/5)) : min(l,(i*seg + l/5))
+                segs[[i]] <- max(1, (i*seg - 50)) : min(l,(i*seg + 50))
                 uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
             if(i == 5){
-                segs[[i]] <- max(1, (l- l/5)) : max(l, l/5)
+                segs[[i]] <- max(1, (l- 100)) : max(l, 100)
                 uniques[[i]] <- length(unique(x[segs[[i]]]))
             }
         }
@@ -153,7 +153,7 @@ NNS.dep = function(x,
         }
 
 
-        if(l >= 250 & print.map){
+        if(l >= 500 & print.map){
             NNS.part(x, y, order = order, Voronoi = TRUE)
         }
 
