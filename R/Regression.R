@@ -537,6 +537,8 @@ NNS.reg = function (x, y,
 
   regression.points <- rbindlist(list(regression.points, mid.min.rps ))
 
+  regression.points <- regression.points[complete.cases(regression.points),]
+
   setkey(regression.points, x, y)
 
   ### Consolidate possible duplicated points
