@@ -64,7 +64,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = 0.95,
   ###  Regression Point Matrix
   if(is.numeric(order) | is.null(order)){
 
-    reg.points <- apply(original.IVs, 2, function(b) NNS.reg(b, original.DV, factor.2.dummy = factor.2.dummy ,order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE)$x)
+    reg.points <- apply(original.IVs, 2, function(b) NNS.reg(b, original.DV, factor.2.dummy = FALSE ,order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE)$x)
 
     if(all(sapply(reg.points, length) == length(reg.points[[1]])) == FALSE){
       reg.points.matrix <- do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))
