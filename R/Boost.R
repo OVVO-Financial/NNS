@@ -6,8 +6,8 @@
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
-#' @param depth integer; \code{NULL} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
-#' @param n.best integer; \code{3} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.
+#' @param depth integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
+#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
@@ -44,8 +44,8 @@ NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
                       representative.sample = FALSE,
-                      depth = NULL,
-                      n.best = 3,
+                      depth = "max",
+                      n.best = NULL,
                       learner.trials = NULL,
                       epochs = NULL,
                       CV.size=.25,
@@ -131,6 +131,7 @@ NNS.boost <- function(IVs.train,
           z <- data.matrix(z)
       }
   }
+
   if(is.null(colnames(z))) {colnames(z) <- colnames(z, do.NULL = FALSE)}
   colnames(z) <- make.unique(colnames(z),sep = "_")
 
@@ -170,6 +171,17 @@ NNS.boost <- function(IVs.train,
 
   old.threshold <- 0
 
+  if(is.null(n.best)){
+      if(status){
+          message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
+      }
+
+      n.best <- NNS.stack(x, y, folds = 1, status = status, method = 1)$NNS.reg.n.best
+
+      if(status){
+          message("Now learning threshold...","\r",appendLF=TRUE)
+      }
+  }
 
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
