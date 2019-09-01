@@ -176,7 +176,8 @@ NNS.boost <- function(IVs.train,
           message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
       }
 
-      n.best <- NNS.stack(x, y, folds = 1, status = status, method = 1)$NNS.reg.n.best
+      n.best <- NNS.stack(x, y, folds = 1, status = status, method = 1,
+                          obj.fn = obj.fn, objective = objective)$NNS.reg.n.best
 
       if(status){
           message("Now learning threshold...","\r",appendLF=TRUE)
