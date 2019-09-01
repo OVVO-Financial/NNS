@@ -11,6 +11,7 @@
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
+#' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.
 #' @param obj.fn expression;
 #' \code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
@@ -48,7 +49,8 @@ NNS.boost <- function(IVs.train,
                       n.best = NULL,
                       learner.trials = NULL,
                       epochs = NULL,
-                      CV.size=.25,
+                      CV.size = .25,
+                      folds = 5,
                       threshold = NULL,
                       obj.fn = expression(mean(round(predicted)==as.numeric(actual))),
                       objective = "max",
@@ -176,7 +178,7 @@ NNS.boost <- function(IVs.train,
           message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
       }
 
-      n.best <- NNS.stack(x, y, folds = 1, status = status, method = 1,
+      n.best <- NNS.stack(x, y, folds = folds, status = status, method = 1,
                           obj.fn = obj.fn, objective = objective)$NNS.reg.n.best
 
       if(status){

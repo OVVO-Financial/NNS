@@ -34,7 +34,13 @@
 #' @export
 
 
-dy.d_<- function(x, y, wrt, eval.points = "median", h = .05, mixed = FALSE, plot = FALSE, messages = TRUE){
+dy.d_<- function(x, y, wrt,
+                 eval.points = "median",
+                 h = .05,
+                 folds = 5,
+                 mixed = FALSE,
+                 plot = FALSE,
+                 messages = TRUE){
 
   order = "max"
 
@@ -42,7 +48,7 @@ dy.d_<- function(x, y, wrt, eval.points = "median", h = .05, mixed = FALSE, plot
       message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
   }
 
-  n.best <- NNS.stack(x, y, folds = 1, status = messages, method = 1)$NNS.reg.n.best
+  n.best <- NNS.stack(x, y, folds = folds, status = messages, method = 1)$NNS.reg.n.best
 
   if(is.character(eval.points)){
       eval.points <- numeric()
