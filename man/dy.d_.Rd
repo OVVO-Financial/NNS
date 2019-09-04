@@ -18,6 +18,8 @@ dy.d_(x, y, wrt, eval.points = "median", h = 0.05, folds = 5,
 
 \item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.}
 
+\item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
+
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
 \item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.

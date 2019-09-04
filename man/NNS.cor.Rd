@@ -27,6 +27,7 @@ p-values and confidence intervals can be obtained from sampling random permutati
 See \link{NNS.dep} for examples.
 }
 \examples{
+\dontrun{
 set.seed(123)
 ## Pairwise Correlation
 x <- rnorm(100) ; y <- rnorm(100)
@@ -35,7 +36,7 @@ NNS.cor(x, y)
 ## Correlation Matrix
 x <- rnorm(100) ; y <- rnorm(100) ; z<-rnorm(100)
 B <- cbind(x, y, z)
-NNS.cor(B)
+NNS.cor(B)}
 
 }
 \references{
