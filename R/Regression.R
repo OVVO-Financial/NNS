@@ -6,7 +6,7 @@
 #' @param y a numeric or factor vector with compatible dimsensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
-#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.95 to ensure high dependence for higher \code{("order")} and endpoint determination.
+#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.96 to ensure high dependence for higher \code{("order")} and endpoint determination.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjuction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.
@@ -42,8 +42,6 @@
 #'
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 #'
-#'  \item{\code{"Fitted"}} returns a vector containing only the fitted values, \code{y.hat};
-#'
 #'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
 #' }
 #'
@@ -61,8 +59,6 @@
 #'  \item{\code{"RPM"}} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 #'
 #'  \item{\code{"Point.est"}} returns the predicted value generated;
-#'
-#'  \item{\code{"Fitted"}} returns a vector containing only the fitted values, \code{y.hat};
 #'
 #'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 #' }
@@ -123,7 +119,7 @@
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .99,
+                    stn = .96,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
@@ -732,7 +728,6 @@ NNS.reg = function (x, y,
                 "Point" = point.est,
                 "Point.est" = point.est.y,
                 "regression.points" = regression.points[],
-                "Fitted" = fitted[ , .(y.hat)],
                 "Fitted.xy" = fitted))
   } else {
     invisible(list("R2" = R2,
@@ -744,7 +739,6 @@ NNS.reg = function (x, y,
                    "Point" = point.est,
                    "Point.est" = point.est.y,
                    "regression.points" = regression.points[],
-                   "Fitted" = fitted[ , .(y.hat)],
                    "Fitted.xy" = fitted))
   }
 

@@ -334,14 +334,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = 0.95,
                 rhs.partitions = rhs.partitions,
                 RPM = REGRESSION.POINT.MATRIX[] ,
                 Point.est = predict.fit,
-                Fitted = fitted.matrix[ , .(y.hat)],
                 Fitted.xy = fitted.matrix[]))
   } else {
     invisible(list(R2 = R2,
                    rhs.partitions = rhs.partitions,
                    RPM = REGRESSION.POINT.MATRIX[],
                    Point.est = predict.fit,
-                   Fitted = fitted.matrix[ , .(y.hat)],
                    Fitted.xy = fitted.matrix[]))
   }
 

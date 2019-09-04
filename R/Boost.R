@@ -93,7 +93,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(dim(x))){
       if(!is.numeric(x)){
           x <- sapply(x,factor_2_dummy)
-          X <- data.marix(x)
+          X <- data.matrix(x)
     } else {
           x <- data.matrix(x)
     }

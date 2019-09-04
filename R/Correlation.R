@@ -14,6 +14,7 @@
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' ## Pairwise Correlation
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -22,7 +23,7 @@
 #' ## Correlation Matrix
 #' x <- rnorm(100) ; y <- rnorm(100) ; z<-rnorm(100)
 #' B <- cbind(x, y, z)
-#' NNS.cor(B)
+#' NNS.cor(B)}
 #'
 #' @export
 
