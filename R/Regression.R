@@ -445,7 +445,7 @@ NNS.reg = function (x, y,
   y.mid.min <-  na.omit(y[x > mid.min.range & x <= min.range])
   l_y.mid.min <- length(y.mid.min)
 
-  y.min <- na.omit(y[x <= mid.min.range])
+  y.min <- na.omit(y[x <= min.range])
   l_y.min <- length(y.min)
 
   if(l_y.min<=1){
@@ -469,7 +469,7 @@ NNS.reg = function (x, y,
   y.mid.max <- na.omit(y[x > max.range & x <= mid.max.range])
   l_y.mid.max <- length(y.mid.max)
 
-  y.max <- na.omit(y[x > mid.max.range])
+  y.max <- na.omit(y[x > max.range])
   l_y.max <- length(y.max)
 
   if(l_y.max<=1){
