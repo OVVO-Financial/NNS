@@ -143,82 +143,14 @@ NNS.stack <- function(IVs.train,
 
 
 
-
-      if(objective=='min'){
-
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order=order, ncores = ncores)$Point.est
-
-        first.cv <- eval(obj.fn)
-
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = l, order=order, ncores = ncores)$Point.est
-
-        last.cv <- eval(obj.fn)
-
-        i <- 1
-        j <- 1
-        while(last.cv<first.cv){
-
-          predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = max(1,round(l/(2*i))), order=order, ncores = ncores)$Point.est
-
-          last.cv <- eval(obj.fn)
-
-          predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = (2^j), order=order, ncores = ncores)$Point.est
-
-          first.cv <- eval(obj.fn)
-          begin.range <- (2^j)
-
-          end.range <- max(1,round(l/(2*i)))
-          if(begin.range>end.range) break
-          i <- i + 1
-          j <- j + 1
-
-
-        }
-
-        cv.range <- sort(round(max(1,2^(j-1))):round(l/max(1,(2*(i-1)))))
-
-      } else {
-
-
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order=order, ncores = ncores)$Point.est
-
-        first.cv <- eval(obj.fn)
-
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = l, order=order, ncores = ncores)$Point.est
-
-        last.cv <- eval(obj.fn)
-
-        i <- 1
-        j <- 1
-        while(last.cv<first.cv){
-          predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = max(1,round(l/(2*i))), order=order, ncores = ncores)$Point.est
-
-          last.cv <- eval(obj.fn)
-
-          predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = (2^j), order=order, ncores = ncores)$Point.est
-
-          first.cv <- eval(obj.fn)
-          begin.range <- (2^j)
-
-          end.range <- max(1,round(l/(2*i)))
-          if(begin.range>end.range) break
-          i <- i + 1
-          j <- j + 1
-        }
-
-        cv.range <- sort(round(max(1,2^(j-1))):round(l/max(1,(2*(i-1)))))
-      }
-
-
-      for(item in cv.range){
-        i <- which(item==cv.range)
+      for(i in 1:l){
         if(status){
-          message("Current NNS.reg(... , n.best = ", item ," ) Max Iterations Remaining = " ,tail(cv.range,1)-item," ","\r",appendLF=TRUE)
+          message("Current NNS.reg(... , n.best = ", i ," ) Max Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
         }
 
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = item, order=order, ncores = ncores)$Point.est
+        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, 
+                             n.best = i, order = order, ncores = ncores)$Point.est
 
-        ####NOT 0 [i+0]
         nns.cv.1[i+0] <- eval(obj.fn)
         if(i > 1){
           if(objective=='min' && nns.cv.1[i]>=nns.cv.1[i-1]){ break }
