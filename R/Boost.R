@@ -182,7 +182,7 @@ NNS.boost <- function(IVs.train,
                           obj.fn = obj.fn, objective = objective)$NNS.reg.n.best
 
       if(status){
-          message("Now learning threshold...","\r",appendLF=TRUE)
+          message("Currently determining learning threshold...","\r",appendLF=TRUE)
       }
   }
 
@@ -399,7 +399,7 @@ NNS.boost <- function(IVs.train,
           }
 
 
-          estimates <- foreach(i = 1:length(keeper.features))%dopar%{
+          estimates <- foreach(i = 1:length(keeper.features), .packages = c("NNS","data.table"))%dopar%{
 
               NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
                 plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,

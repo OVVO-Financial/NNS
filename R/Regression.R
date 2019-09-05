@@ -451,9 +451,11 @@ NNS.reg = function (x, y,
   if(l_y.min<=1){
       a <- y.min
       b <- a
+      f <- a
   } else {
       a <- median(y.min)
       b <- mode(y.min)
+      f <- mean(max(y.min),min(y.min))
   }
 
   if(l_y.mid.min<=1){
@@ -473,9 +475,11 @@ NNS.reg = function (x, y,
   if(l_y.max<=1){
       d <- median(y.max)
       e <- d
+      g <- e
   } else {
       d <- median(y.max)
       e <- mode(y.max)
+      g <- mean(c(max(y.max),min(y.max)))
   }
 
   if(l_y.mid.max<=1){
@@ -486,8 +490,8 @@ NNS.reg = function (x, y,
       e1 <- mode(y.mid.max)
   }
 
-  Dynamic.average.min <- mean(c(a, b))
-  Dynamic.average.max <- mean(c(d, e))
+  Dynamic.average.min <- mean(c(a, b, f))
+  Dynamic.average.max <- mean(c(d, e, g))
 
   Dynamic.average.mid.min <- mean(c(a1, b1, Dynamic.average.min))
   Dynamic.average.mid.max <- mean(c(d1, e1, Dynamic.average.max))
