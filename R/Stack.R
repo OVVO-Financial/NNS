@@ -161,10 +161,10 @@ NNS.stack <- function(IVs.train,
       test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
 
       if(objective=='min'){
-        k <- cv.range[which.min(na.omit(nns.cv.1))-0]
+        k <- seq_len(l)[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
-        k <- cv.range[which.max(na.omit(nns.cv.1))-0]
+        k <- seq_len(l)[which.max(na.omit(nns.cv.1))]
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }
 
