@@ -145,7 +145,7 @@ NNS.stack <- function(IVs.train,
 
       for(i in 1:l){
         if(status){
-          message("Current NNS.reg(... , n.best = ", i ," ) Max Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
+          message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
         }
 
         predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE,
@@ -175,9 +175,9 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
-        best.k <- as.numeric(names(sort(table(unlist(best.k)),decreasing = TRUE)[1]))
+        best.k <- fivenum(as.numeric(rep(names(table(best.k)), table(best.k))))
 
-        nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order=order, ncores = ncores)$Point.est
+        nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order = order, ncores = ncores)$Point.est
       }
 
     } else {
@@ -213,7 +213,7 @@ NNS.stack <- function(IVs.train,
 
       for(i in 1:length(var.cutoffs)){
         if(status){
-          message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) Max Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
+          message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
         }
 
         predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
