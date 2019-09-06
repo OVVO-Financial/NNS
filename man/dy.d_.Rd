@@ -4,8 +4,8 @@
 \alias{dy.d_}
 \title{Partial Derivative dy/d_[wrt]}
 \usage{
-dy.d_(x, y, wrt, eval.points = "median", h = 0.05, folds = 5,
-  mixed = FALSE, plot = FALSE, messages = TRUE)
+dy.d_(x, y, wrt, eval.points = "median", folds = 5, mixed = FALSE,
+  plot = FALSE, messages = TRUE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
@@ -15,8 +15,6 @@ dy.d_(x, y, wrt, eval.points = "median", h = 0.05, folds = 5,
 \item{wrt}{integer; Selects the regressor to differentiate with respect to.}
 
 \item{eval.points}{numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.}
-
-\item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.}
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
