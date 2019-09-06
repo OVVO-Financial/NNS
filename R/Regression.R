@@ -160,6 +160,7 @@ NNS.reg = function (x, y,
       x <- apply(x,2,factor_2_dummy)
       if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
       colnames(x) <- make.unique(colnames(x),sep = "_")
+
     } else {
       x <- factor_2_dummy(x)
     }
@@ -274,6 +275,8 @@ NNS.reg = function (x, y,
           }
         }
 
+
+        stn <- 1 - NNS.dep.hd(cbind(x,y))$Dependence^(1/exp(1))
 
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
       } else { # Multivariate dim.red == FALSE
