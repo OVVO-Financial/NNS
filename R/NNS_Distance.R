@@ -15,12 +15,12 @@ NNS.distance <- function(rpm,dist.estimate,type,k){
   n <- length(dist.estimate)
 
   if(type=="L2"){
-      row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
+    row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
   } else {
-      row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
+    row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
   }
- 
-   
+
+
   row.sums[row.sums == 0] <- 1e-10
 
   if(k==1){
@@ -33,13 +33,13 @@ NNS.distance <- function(rpm,dist.estimate,type,k){
   highest <- rev(order(weights))[1 : min(k, length(weights))]
 
   weights[-highest] <- 0
-  
-  weights[highest] <- 1                                                    
-                                                      
+
+  weights[highest] <- 1
+
   weights.sum <- sum(weights)
 
-                                                      
-  weights <- weights / weights.sum                                             
+
+  weights <- weights / weights.sum
   single.estimate <- sum(weights * rpm$y.hat)
 
   rpm[,"Sum":=NULL]

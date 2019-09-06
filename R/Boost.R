@@ -61,25 +61,25 @@ NNS.boost <- function(IVs.train,
 
 
 
-# Parallel process...
+  # Parallel process...
   if (is.null(ncores)) {
-      cores <- detectCores()
-      num_cores <- as.integer(cores / 2)
+    cores <- detectCores()
+    num_cores <- as.integer(cores / 2)
   } else {
-      cores <- detectCores()
-      num_cores <- ncores
+    cores <- detectCores()
+    num_cores <- ncores
   }
 
   if (is.null(subcores)) {
-      subcores <- as.integer(cores / 2) - 1
+    subcores <- as.integer(cores / 2) - 1
   }
 
   if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
 
 
   if(num_cores>1){
-      cl <- makeCluster(num_cores)
-      registerDoParallel(cl)
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
   } else { cl <- NULL }
 
   x <- IVs.train
@@ -91,21 +91,21 @@ NNS.boost <- function(IVs.train,
   }
 
   if(!is.null(dim(x))){
-      if(!is.numeric(x)){
-          x <- sapply(x,factor_2_dummy)
-          X <- data.matrix(x)
+    if(!is.numeric(x)){
+      x <- sapply(x,factor_2_dummy)
+      X <- data.matrix(x)
     } else {
-          x <- data.matrix(x)
+      x <- data.matrix(x)
     }
 
 
   } else {
-      x <- factor_2_dummy(x)
-      if(is.null(dim(x))){
-          x <- as.double(x)
-      } else {
-          x <- data.matrix(x)
-      }
+    x <- factor_2_dummy(x)
+    if(is.null(dim(x))){
+      x <- as.double(x)
+    } else {
+      x <- data.matrix(x)
+    }
   }
 
 
@@ -114,58 +114,58 @@ NNS.boost <- function(IVs.train,
   colnames(x) <- make.unique(colnames(x),sep = "_")
 
   if(!is.null(dim(z))){
-      if(is.list(z)){
-          z <- do.call(cbind,z)
-      }
+    if(is.list(z)){
+      z <- do.call(cbind,z)
+    }
 
-      if(!is.numeric(z)){
-          z <- sapply(z,factor_2_dummy)
-          z <- data.matrix(z)
-      } else {
-          z <- data.matrix(z)
-      }
+    if(!is.numeric(z)){
+      z <- sapply(z,factor_2_dummy)
+      z <- data.matrix(z)
+    } else {
+      z <- data.matrix(z)
+    }
 
   } else {
-      z <- factor_2_dummy(z)
-      if(is.null(dim(z))){
-          z <- as.double(z)
-      } else {
-          z <- data.matrix(z)
-      }
+    z <- factor_2_dummy(z)
+    if(is.null(dim(z))){
+      z <- as.double(z)
+    } else {
+      z <- data.matrix(z)
+    }
   }
 
   if(is.null(colnames(z))) {colnames(z) <- colnames(z, do.NULL = FALSE)}
   colnames(z) <- make.unique(colnames(z),sep = "_")
 
-      y <- as.double(as.numeric(unlist(y)))
+  y <- as.double(as.numeric(unlist(y)))
 
 
-    ### Representative samples
-      rep.x <- data.table(x)
+  ### Representative samples
+  rep.x <- data.table(x)
 
-      fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
-      mode.x <- rep.x[,lapply(.SD,mode), by = .(y)]
-      mean.x <- rep.x[,lapply(.SD,mean), by = .(y)]
+  fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
+  mode.x <- rep.x[,lapply(.SD,mode), by = .(y)]
+  mean.x <- rep.x[,lapply(.SD,mean), by = .(y)]
 
-      rep.x <- rbind(fivenum.x,mode.x,mean.x)
-      rep.y <- unlist(rep.x[,1])
-      rep.x <- rep.x[,-1]
+  rep.x <- rbind(fivenum.x,mode.x,mean.x)
+  rep.y <- unlist(rep.x[,1])
+  rep.x <- rep.x[,-1]
 
-      if(dim(t(t(x)))[2]!=dim(rep.x)[2]){
-        Missing <- setdiff(colnames(x),colnames(rep.x))
-        if(length(Missing)>0){
-            rep.x[Missing] <- 0
-            rep.x <- rep.x[colnames(x)]
-        }
-      }
+  if(dim(t(t(x)))[2]!=dim(rep.x)[2]){
+    Missing <- setdiff(colnames(x),colnames(rep.x))
+    if(length(Missing)>0){
+      rep.x[Missing] <- 0
+      rep.x <- rep.x[colnames(x)]
+    }
+  }
 
-      rep.x <- as.data.frame(rep.x)
+  rep.x <- as.data.frame(rep.x)
 
 
   n <- ncol(x)
 
   if(is.null(epochs)){
-      epochs <- 2*length(y)
+    epochs <- 2*length(y)
   }
 
   estimates <- list()
@@ -174,82 +174,84 @@ NNS.boost <- function(IVs.train,
   old.threshold <- 0
 
   if(is.null(n.best)){
-      if(status){
-          message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
-      }
+    if(status){
+      message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
+    }
 
-      n.best <- NNS.stack(x, y, folds = folds, status = status, method = 1,
-                          obj.fn = obj.fn, objective = objective)$NNS.reg.n.best
+    n.best <- NNS.stack(x, y, folds = folds, status = status,
+                        method = 1,
+                        obj.fn = obj.fn,
+                        objective = objective)$NNS.reg.n.best
 
-      if(status){
-          message("Currently determining learning threshold...","\r",appendLF=TRUE)
-      }
+    if(status){
+      message("Currently determining learning threshold...","\r",appendLF=TRUE)
+    }
   }
 
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
-      old.threshold <- 1
-      test.features <- list()
-      results <- numeric()
+    old.threshold <- 1
+    test.features <- list()
+    results <- numeric()
 
-      if(is.null(learner.trials)){learner.trials <- length(y)}
+    if(is.null(learner.trials)){learner.trials <- length(y)}
 
-      for(i in 1:learner.trials){
-          set.seed(123 + i)
-          new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
+    for(i in 1:learner.trials){
+      set.seed(123 + i)
+      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-          if(i > 1){
-            new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-            new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
-          }
-
-
-          new.iv.train <- data.table(x[-new.index,])
-          new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
+      if(i > 1){
+        new.index_half <- new.index.1[1:(length(new.index.1)/2)]
+        new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
+      }
 
 
-          fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-          mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
-          mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
-
-          new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
-
-          new.iv.train <- as.data.frame(new.iv.train[,-1])
-          new.dv.train <- unlist(new.iv.train[,1])
-
-          if(!representative.sample){
-              new.iv.train <- rbind(new.iv.train,x[-new.index,])
-              new.dv.train <- c(new.dv.train,y[-new.index])
-          }
-
-          actual <- y[new.index]
-          new.iv.test <- x[new.index,]
-
-          if(dim(new.iv.train)[2]!=dim(new.iv.test)[2]){
-              Missing <- setdiff(colnames(new.iv.train),colnames(new.iv.test))
-              if(length(Missing)>0){
-                  new.iv.test[Missing] <- 0
-                  new.iv.test <- new.iv.test[colnames(new.iv.train)]
-              }
-          }
-
-          if(status){
-              message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
-          }
-
-          test.features[[i]] <- sort(sample(n,sample(2:n,1),replace = FALSE))
-
-          #If estimate is > threshold, store 'features'
-          predicted <- NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],
-                        plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                        norm="std", factor.2.dummy = FALSE,ncores=subcores)$Point.est
-
-          # Do not predict a new unseen class
-          predicted <- pmin(predicted,max(as.numeric(y)))
-          predicted <- pmax(predicted,min(as.numeric(y)))
+      new.iv.train <- data.table(x[-new.index,])
+      new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
 
 
-          new.index.1 <- rev(order(abs(predicted - actual)))
+      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
+      mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
+      mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
+
+      new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+
+      new.iv.train <- as.data.frame(new.iv.train[,-1])
+      new.dv.train <- unlist(new.iv.train[,1])
+
+      if(!representative.sample){
+        new.iv.train <- rbind(new.iv.train,x[-new.index,])
+        new.dv.train <- c(new.dv.train,y[-new.index])
+      }
+
+      actual <- y[new.index]
+      new.iv.test <- x[new.index,]
+
+      if(dim(new.iv.train)[2]!=dim(new.iv.test)[2]){
+        Missing <- setdiff(colnames(new.iv.train),colnames(new.iv.test))
+        if(length(Missing)>0){
+          new.iv.test[Missing] <- 0
+          new.iv.test <- new.iv.test[colnames(new.iv.train)]
+        }
+      }
+
+      if(status){
+        message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
+      }
+
+      test.features[[i]] <- sort(sample(n,sample(2:n,1),replace = FALSE))
+
+      #If estimate is > threshold, store 'features'
+      predicted <- NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],
+                           plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                           norm="std", factor.2.dummy = FALSE,ncores=subcores)$Point.est
+
+      # Do not predict a new unseen class
+      predicted <- pmin(predicted,max(as.numeric(y)))
+      predicted <- pmax(predicted,min(as.numeric(y)))
+
+
+      new.index.1 <- rev(order(abs(predicted - actual)))
 
       results[i] <- eval(obj.fn)
 
@@ -258,204 +260,204 @@ NNS.boost <- function(IVs.train,
 
 
 
-    if(extreme){
-        if(objective=="max"){
-            threshold <- max(results)
-        } else {
-            threshold <- min(results)
-        }
+  if(extreme){
+    if(objective=="max"){
+      threshold <- max(results)
     } else {
-        if(objective=="max"){
-            threshold <- fivenum(results)[4]
-        } else {
-            threshold <- fivenum(results)[2]
-        }
+      threshold <- min(results)
+    }
+  } else {
+    if(objective=="max"){
+      threshold <- fivenum(results)[4]
+    } else {
+      threshold <- fivenum(results)[2]
+    }
+  }
+
+  if(feature.importance){
+    original.par <- par(no.readonly = TRUE)
+    par(mfrow = c(2,1))
+    par(mai = c(1.0,.5,0.8,0.5))
+    hist(results, main = "Distribution of Learner Trials Accuracy",
+         xlab = "Accuracy", col = "steelblue")
+    abline(v = threshold, col = 'red', lty = 2, lwd = 2)
+    mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
+    if(extreme){
+      if(objective=='max'){
+        mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1)
+      } else {
+        mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
+      }
+    } else {
+      if(objective=='max'){
+        mtext("Threshold >", side = 3, col = "red", at = threshold)
+      } else {
+        mtext("< Threshold", side = 3, col = "red", at = threshold)
+      }
+    }
+  }
+
+
+
+  if(status){
+    message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
+
+    # Clear message line
+    message("                                       ","\r",appendLF=FALSE)
+  }
+
+
+  keeper.features <- list()
+
+
+  for(j in 1:epochs){
+    set.seed(123 * j)
+    new.index <- sample(length(y),as.integer(CV.size*length(y)),replace = FALSE)
+
+    if(i > 1){
+      new.index_half <- new.index.1[1:(length(new.index.1)/2)]
+      new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
     }
 
-    if(feature.importance){
-        original.par <- par(no.readonly = TRUE)
-        par(mfrow = c(2,1))
-        par(mai = c(1.0,.5,0.8,0.5))
-        hist(results, main = "Distribution of Learner Trials Accuracy",
-            xlab = "Accuracy", col = "steelblue")
-        abline(v = threshold, col = 'red', lty = 2, lwd = 2)
-        mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
-        if(extreme){
-            if(objective=='max'){
-                mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1)
-            } else {
-                mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
-            }
-        } else {
-            if(objective=='max'){
-                mtext("Threshold >", side = 3, col = "red", at = threshold)
-            } else {
-                mtext("< Threshold", side = 3, col = "red", at = threshold)
-            }
-        }
+
+    new.iv.train <- data.table(x[-new.index,])
+    new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
+
+    fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
+    mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
+    mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
+
+    new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+
+
+    new.iv.train <- as.data.frame(new.iv.train[,-1])
+    new.dv.train <- unlist(new.iv.train[,1])
+
+    if(!representative.sample){
+      new.iv.train <- rbind(new.iv.train,x[-new.index,])
+      new.dv.train <- c(new.dv.train,y[-new.index])
     }
 
 
+
+    actual <- as.numeric(y[new.index])
+    new.iv.test <- x[new.index,]
 
     if(status){
-        message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
+      message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
-        # Clear message line
-        message("                                       ","\r",appendLF=FALSE)
+      if(j == epochs){
+        message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
+        flush.console()
+      }
+    }
+
+    features <- sort(sample(n,sample(2:n,1),replace = FALSE))
+
+    #If estimate is > threshold, store 'features'
+    predicted <- NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],
+                         plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                         norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+
+    # Do not predict a new unseen class
+    predicted <- pmin(predicted,max(as.numeric(y)))
+    predicted <- pmax(predicted,min(as.numeric(y)))
+
+    new.index.1 <- rev(order(abs(predicted - actual)))
+
+    new.results <- eval(obj.fn)
+
+    if(objective=="max"){
+      if(new.results>=threshold){
+        keeper.features[[j]] <- features
+      } else {
+        keeper.features[[j]] <- NULL
+      }
+    } else {
+      if(new.results<=threshold){
+        keeper.features[[j]] <- features
+      } else {
+        keeper.features[[j]] <- NULL
+      }
+    }
+  }
+
+  keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
+  if(length(keeper.features)==0){
+    if(old.threshold==0){
+      stop("Please reduce [threshold].")
+    } else {
+      keeper.features <- test.features[which.max(results)]
+    }
+  }
+
+  x <- rbind(rep.x,x)
+  y <- c(rep.y,y)
+
+  if(!is.null(cl)){
+    clusterExport(cl,c("x","y"))
+    if(status){
+      message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
     }
 
 
-      keeper.features <- list()
+    estimates <- foreach(i = 1:length(keeper.features), .packages = c("NNS","data.table"))%dopar%{
 
+      NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
+              plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+              norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+    }
+  } else {
+    for(i in 1:length(keeper.features)){
 
-      for(j in 1:epochs){
-          set.seed(123 * j)
-          new.index <- sample(length(y),as.integer(CV.size*length(y)),replace = FALSE)
-
-      if(i > 1){
-          new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-          new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
-      }
-
-
-      new.iv.train <- data.table(x[-new.index,])
-      new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
-
-      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-      mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
-      mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
-
-      new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
-
-
-        new.iv.train <- as.data.frame(new.iv.train[,-1])
-        new.dv.train <- unlist(new.iv.train[,1])
-
-        if(!representative.sample){
-            new.iv.train <- rbind(new.iv.train,x[-new.index,])
-            new.dv.train <- c(new.dv.train,y[-new.index])
+      if(status){
+        message("% of Final Estimate = ", format(i/length(keeper.features),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
+        if(i == length(keeper.features)){
+          message("% of Final Estimate = 1.000             ","\r",appendLF=TRUE)
+          flush.console()
         }
-
-
-
-      actual <- as.numeric(y[new.index])
-      new.iv.test <- x[new.index,]
-
-          if(status){
-              message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
-
-              if(j == epochs){
-                  message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
-                  flush.console()
-              }
-          }
-
-          features <- sort(sample(n,sample(2:n,1),replace = FALSE))
-
-          #If estimate is > threshold, store 'features'
-          predicted <- NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],
-                            plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                            norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
-
-          # Do not predict a new unseen class
-          predicted <- pmin(predicted,max(as.numeric(y)))
-          predicted <- pmax(predicted,min(as.numeric(y)))
-
-          new.index.1 <- rev(order(abs(predicted - actual)))
-
-          new.results <- eval(obj.fn)
-
-          if(objective=="max"){
-              if(new.results>=threshold){
-                  keeper.features[[j]] <- features
-              } else {
-                  keeper.features[[j]] <- NULL
-              }
-          } else {
-              if(new.results<=threshold){
-                  keeper.features[[j]] <- features
-            } else {
-                  keeper.features[[j]] <- NULL
-            }
-          }
       }
 
-      keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
-      if(length(keeper.features)==0){
-          if(old.threshold==0){
-                stop("Please reduce [threshold].")
-          } else {
-                keeper.features <- test.features[which.max(results)]
-          }
-      }
+      estimates[[i]] <- NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
+                                plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
+                                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+    }
 
-      x <- rbind(rep.x,x)
-      y <- c(rep.y,y)
+  }
 
-      if(!is.null(cl)){
-          clusterExport(cl,c("x","y"))
-          if(status){
-              message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
-          }
+  if(!is.null(cl)){
+    stopCluster(cl)
+    registerDoSEQ()
+  }
 
 
-          estimates <- foreach(i = 1:length(keeper.features), .packages = c("NNS","data.table"))%dopar%{
-
-              NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
-                plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
-          }
-      } else {
-          for(i in 1:length(keeper.features)){
-
-              if(status){
-                  message("% of Final Estimate = ", format(i/length(keeper.features),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
-                  if(i == length(keeper.features)){
-                      message("% of Final Estimate = 1.000             ","\r",appendLF=TRUE)
-                      flush.console()
-                  }
-              }
-
-              estimates[[i]] <- NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
-                          plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                          norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
-          }
-
-      }
-
-      if(!is.null(cl)){
-          stopCluster(cl)
-          registerDoSEQ()
-      }
+  estimates <- lapply(estimates, function(i) pmin(i,max(as.numeric(y))))
+  estimates <- lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
 
 
-      estimates <- lapply(estimates, function(i) pmin(i,max(as.numeric(y))))
-      estimates <- lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
+  plot.table <- table(unlist(keeper.features))
+  names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
 
+  if(feature.importance){
 
-      plot.table <- table(unlist(keeper.features))
-      names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
+    linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
+    par(mai=c(1.0,linch,0.8,0.5))
 
-      if(feature.importance){
-
-          linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
-          par(mai=c(1.0,linch,0.8,0.5))
-
-          if(length(plot.table)!=1){
-              barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
-                    horiz = TRUE,
-                    col='steelblue',
-                    main="Feature Frequency in Final Estimate",
-                    xlab = "Frequency",las=1)
-          } else {
-              barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
-                    horiz = TRUE,
-                    col='steelblue',
-                    main="Feature Frequency in Final Estimate",
-                    xlab = "Frequency",las=1)
-      }
-     par(mar=c(5.1, 4.1, 4.1, 2.1))
-     par(original.par)
+    if(length(plot.table)!=1){
+      barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+              horiz = TRUE,
+              col='steelblue',
+              main="Feature Frequency in Final Estimate",
+              xlab = "Frequency",las=1)
+    } else {
+      barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+              horiz = TRUE,
+              col='steelblue',
+              main="Feature Frequency in Final Estimate",
+              xlab = "Frequency",las=1)
+    }
+    par(mar=c(5.1, 4.1, 4.1, 2.1))
+    par(original.par)
   }
   gc()
   return(list("results"=apply(do.call(cbind,estimates),1,mode),

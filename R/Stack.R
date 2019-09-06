@@ -148,10 +148,11 @@ NNS.stack <- function(IVs.train,
           message("Current NNS.reg(... , n.best = ", i ," ) Max Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
         }
 
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, 
+        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE,
                              n.best = i, order = order, ncores = ncores)$Point.est
 
-        nns.cv.1[i+0] <- eval(obj.fn)
+        nns.cv.1[i] <- eval(obj.fn)
+
         if(i > 1){
           if(objective=='min' && nns.cv.1[i]>=nns.cv.1[i-1]){ break }
           if(objective=='max' && nns.cv.1[i]<=nns.cv.1[i-1]){ break }
