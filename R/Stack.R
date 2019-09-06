@@ -175,7 +175,7 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
-        best.k <- fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4]
+        best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
 
         nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order = order, ncores = ncores)$Point.est
       }

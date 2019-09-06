@@ -6,7 +6,6 @@
 #' @param y a numeric vector with compatible dimsensions to \code{x}.
 #' @param wrt integer; Selects the regressor to differentiate with respect to.
 #' @param eval.points numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.
-#' @param h numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the regressor.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
@@ -37,13 +36,14 @@
 
 dy.d_<- function(x, y, wrt,
                  eval.points = "median",
-                 h = .05,
                  folds = 5,
                  mixed = FALSE,
                  plot = FALSE,
                  messages = TRUE){
 
-  order = "max"
+  order = NULL
+
+  h = max(0.01, 1 - NNS.dep.hd(cbind(x,y))$Dependence)
 
   if(messages){
     message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
@@ -86,7 +86,9 @@ dy.d_<- function(x, y, wrt,
 
     deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
 
-    estimates <- NNS.reg(x, y, order = order, point.est = deriv.points, n.best = n.best,  residual.plot = plot ,plot = plot)$Point.est
+    estimates <- NNS.reg(x, y, order = order, point.est = deriv.points,
+                         n.best = n.best,
+                         residual.plot = plot, plot = plot)$Point.est
 
     lower <- estimates[1]
     two.f.x <- 2 * estimates[2]
@@ -105,7 +107,9 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points,
                                   original.eval.points.max)
 
-    estimates <- NNS.reg(x, y, order = order, point.est = original.eval.points, n.best = n.best, residual.plot = plot, plot = plot)$Point.est
+    estimates <- NNS.reg(x, y, order = order, point.est = original.eval.points,
+                         n.best = n.best,
+                         residual.plot = plot, plot = plot)$Point.est
 
 
     lower <- head(estimates,n)
@@ -146,7 +150,9 @@ dy.d_<- function(x, y, wrt,
       mixed.distances <- (2 * (h * abs(eval.points[1]))) * (2 * (h * abs(eval.points[2])))
     }
 
-    mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points, n.best = n.best, residual.plot = plot, plot = plot)$Point.est
+    mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points,
+                               n.best = n.best,
+                               residual.plot = plot, plot = plot)$Point.est
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)
