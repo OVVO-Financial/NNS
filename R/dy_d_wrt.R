@@ -43,7 +43,7 @@ dy.d_<- function(x, y, wrt,
 
   order = NULL
 
-  h = max(0.01, 1 - NNS.dep.hd(cbind(x,y))$Dependence)
+  h = max(0.01, 1 - NNS.dep.hd(cbind(x,y))$Dependence^(1/exp(1)))
 
   if(messages){
     message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)

@@ -135,13 +135,6 @@ NNS.stack <- function(IVs.train,
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
 
-      if(objective=='min'){
-        nns.cv.1[1] <- Inf
-      } else {
-        nns.cv.1[1] <- -Inf
-      }
-
-
 
       for(i in 1:l){
         if(status){
