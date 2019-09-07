@@ -255,7 +255,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           last.distance <- sqrt(sum((outside.points - boundary.points) ^ 2))
 
           DISTANCES[i] <- last.distance * last.known.gradient + boundary.estimates
-
         }
       }
 
