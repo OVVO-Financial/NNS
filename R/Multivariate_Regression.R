@@ -185,7 +185,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(!is.null(point.est)){
 
     ### Point estimates
-    central.points <- apply(original.IVs,2,function(x) mean(c(median(x),mode(x))))
+    central.points <- apply(original.IVs,2,function(x) mean(c(median(x), mode(x), mean(c(max(x),min(x))))))
 
     predict.fit <- numeric()
     predict.fit.iter <- list()
@@ -194,13 +194,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       l <- length(point.est)
 
       if(sum(point.est >= minimums & point.est <= maximums) == l){
-        predict.fit <- NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = point.est,type=dist,k=n.best)
+        predict.fit <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est, type = dist, k = n.best)
       } else {
-        last.known.distance <- sqrt(sum((pmin(pmax(point.est, minimums), maximums) - central.points) ^ 2))
-        last.known.gradient <- (NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = pmin(pmax(point.est, minimums), maximums),type=dist,k=n.best) - NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = central.points,type=dist,k=n.best)) / last.known.distance
+        boundary.points <- pmin(pmax(point.est, minimums), maximums)
+        last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
 
-        last.distance <- sqrt(sum((point.est - pmin(pmax(point.est, minimums), maximums)) ^ 2))
-        predict.fit <- last.distance * last.known.gradient + NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = pmin(pmax(point.est, minimums), maximums),type=dist,k=n.best)
+        boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = boundary.points, type = dist, k = n.best)
+
+
+        last.known.gradient <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance
+
+        last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
+
+        predict.fit <- last.distance * last.known.gradient + boundary.estimates
       }
     }
 
@@ -212,13 +218,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
-        NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate=point.est[i,],type=dist,k=n.best)
+        NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,], type=dist, k=n.best)
       }
 
       DISTANCES <- unlist(DISTANCES)
 
-      lows <- do.call(pmin,as.data.frame(t(point.est)))<minimums
-      highs <- do.call(pmax,as.data.frame(t(point.est)))>maximums
+      lows <- do.call(pmin,as.data.frame(t(point.est))) < minimums
+      highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
 
       outsiders <- lows + highs
 
@@ -229,22 +235,26 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         # Find rows from those columns
         outside.index <- list()
         outside.index <- foreach(i = 1:length(outside.columns))%dopar%{
-          which(point.est[,outside.columns[i]]>maximums[outside.columns[i]]| point.est[,outside.columns[i]]<minimums[outside.columns[i]])
+          which(point.est[ , outside.columns[i]] > maximums[outside.columns[i]] |
+                              point.est[,outside.columns[i]] < minimums[outside.columns[i]])
         }
 
         outside.index <- unique(unlist(outside.index))
 
         for(i in outside.index){
-          p <- point.est[i,]
+          outside.points <- point.est[i,]
+          boundary.points <- pmin(pmax(outside.points, minimums), maximums)
+          last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
 
-          last.known.distance <- sqrt(sum((pmin(pmax(p, minimums), maximums) - central.points) ^ 2))
+          boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX,
+                            dist.estimate = boundary.points,
+                            type = dist, k = n.best)
 
-          q <- NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = pmin(pmax(p, minimums), maximums),type=dist,k=n.best)
-          last.known.gradient = (q - NNS.distance(rpm=REGRESSION.POINT.MATRIX,dist.estimate = central.points,type=dist,k=n.best)) / last.known.distance
+          last.known.gradient <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance
 
-          last.distance <- sqrt(sum((p - pmin(pmax(p, minimums), maximums)) ^ 2))
+          last.distance <- sqrt(sum((outside.points - boundary.points) ^ 2))
 
-          DISTANCES[i] <- last.distance * last.known.gradient + q
+          DISTANCES[i] <- last.distance * last.known.gradient + boundary.estimates
 
         }
       }
