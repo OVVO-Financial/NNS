@@ -54,7 +54,6 @@ dy.d_<- function(x, y, wrt,
                       order = order)$NNS.reg.n.best
 
   if(is.character(eval.points)){
-    eval.points <- numeric()
     if(eval.points == "median"){
       eval.points = apply(x, 2, median)
     } else {

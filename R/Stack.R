@@ -89,6 +89,15 @@ NNS.stack <- function(IVs.train,
   best.nns.cv <- list()
   best.nns.ord <- list()
 
+  if (is.null(ncores)) {
+    num_cores <- detectCores() - 1
+  } else {
+    num_cores <- ncores
+  }
+
+  cl <- makeCluster(num_cores)
+  registerDoParallel(cl)
+
   for(b in 1 : folds){
     if(status){
       message("Folds Remaining = " ,folds-b," ","\r",appendLF=TRUE)
@@ -141,14 +150,24 @@ NNS.stack <- function(IVs.train,
           message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
         }
 
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE,
-                             n.best = i, order = order, ncores = ncores)$Point.est
+        if(i==1){
+        setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE,
+                             n.best = i, order = order, ncores = ncores)
+
+        predicted <- setup$Point.est
+        } else {
+            predicted <- list()
+            predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table"))%dopar%{
+                NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = "L2", k = i)
+            }
+            predicted <- unlist(predicted)
+        }
 
         nns.cv.1[i] <- eval(obj.fn)
 
         if(i > 2){
-          if(objective=='min' && nns.cv.1[i]>=nns.cv.1[i-1] && nns.cv.1[i]>=nns.cv.1[i/2]){ break }
-          if(objective=='max' && nns.cv.1[i]<=nns.cv.1[i-1] && nns.cv.1[i]<=nns.cv.1[i/2]){ break }
+          if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
+          if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
         }
       }
 
@@ -171,6 +190,9 @@ NNS.stack <- function(IVs.train,
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
 
         nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order = order, ncores = ncores)$Point.est
+
+        stopCluster(cl)
+        registerDoSEQ()
       }
 
     } else {
@@ -179,7 +201,6 @@ NNS.stack <- function(IVs.train,
       nns.method.1 <- NA
       if(objective=='min'){best.nns.cv <- Inf} else {best.nns.cv <- -Inf}
     }# 1 %in% method
-
 
 
     # Dimension Reduction Regression Output
