@@ -185,7 +185,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(!is.null(point.est)){
 
     ### Point estimates
-    central.points <- apply(original.IVs,2,function(x) mean(c(median(x), mode(x), mean(c(max(x),min(x))))))
+    central.points <- apply(original.IVs,2,function(x) mean(c(mean(x),median(x), mode(x), mean(c(max(x),min(x))))))
 
     predict.fit <- numeric()
     predict.fit.iter <- list()
