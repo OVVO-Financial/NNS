@@ -314,7 +314,7 @@ NNS.boost <- function(IVs.train,
 
   for(j in 1:epochs){
     set.seed(123 * j)
-    new.index <- sample(length(y),as.integer(CV.size*length(y)),replace = FALSE)
+    new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
     if(i > 1){
       new.index_half <- new.index.1[1:(length(new.index.1)/2)]
@@ -323,7 +323,7 @@ NNS.boost <- function(IVs.train,
 
 
     new.iv.train <- data.table(x[-new.index,])
-    new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
+    new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
     fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
     mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
@@ -397,33 +397,38 @@ NNS.boost <- function(IVs.train,
   x <- rbind(rep.x,x)
   y <- c(rep.y,y)
 
+  kf <- data.table(table(as.character(keeper.features)))
+  kf$N <- kf$N/sum(kf$N)
+
+
   if(!is.null(cl)){
     clusterExport(cl,c("x","y"))
     if(status){
       message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
     }
 
+    estimates <- foreach(i = 1:dim(kf)[1], .packages = c("NNS","data.table"))%dopar%{
 
-    estimates <- foreach(i = 1:length(keeper.features), .packages = c("NNS","data.table"))%dopar%{
-
-      NNS.reg(x[,keeper.features[[i]]], y, point.est = z[,keeper.features[[i]]],
+      NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
               plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-              factor.2.dummy = FALSE, ncores = subcores)$Point.est
+              factor.2.dummy = FALSE, ncores = subcores)$Point.est * kf$N[i]
     }
   } else {
-    for(i in 1:length(keeper.features)){
+    for(i in 1:dim(kf)[1]){
 
       if(status){
-        message("% of Final Estimate = ", format(i/length(keeper.features),digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
+        message("% of Final Estimate = ", format(i/dim(kf)[1],digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
         if(i == length(keeper.features)){
-          message("% of Final Estimate = 1.000             ","\r",appendLF=TRUE)
+          message("% of Final Estimate = 1.000             ","\r",appendLF=FALSE)
           flush.console()
         }
       }
 
-      estimates[[i]] <- NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
+
+      estimates[[i]] <- NNS.reg(x[,eval(parse(text=kf$V1[i]))],y,point.est = z[,eval(parse(text=kf$V1[i]))],
                                 plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+                                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est * kf$N[i]
+
     }
 
   }
@@ -433,9 +438,10 @@ NNS.boost <- function(IVs.train,
     registerDoSEQ()
   }
 
+  estimates <- Reduce("+", estimates)
 
-  estimates <- lapply(estimates, function(i) pmin(i,max(as.numeric(y))))
-  estimates <- lapply(estimates, function(i) pmax(i,min(as.numeric(y))))
+  estimates <- pmin(estimates, max(as.numeric(y)))
+  estimates <- pmax(estimates, min(as.numeric(y)))
 
 
   plot.table <- table(unlist(keeper.features))
@@ -463,6 +469,6 @@ NNS.boost <- function(IVs.train,
     par(original.par)
   }
   gc()
-  return(list("results"=apply(do.call(cbind,estimates),1,mode),
-              "feature.weights"=plot.table/sum(plot.table)))
+  return(list("results" = estimates,
+              "feature.weights" = plot.table/sum(plot.table)))
 }

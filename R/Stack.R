@@ -167,8 +167,8 @@ NNS.stack <- function(IVs.train,
         nns.cv.1[i] <- eval(obj.fn)
 
         if(i > 2){
-          if(objective=='min' && nns.cv.1[i]>=nns.cv.1[i-1] && nns.cv.1[i]>=nns.cv.1[i-2]){ break }
-          if(objective=='max' && nns.cv.1[i]<=nns.cv.1[i-1] && nns.cv.1[i]<=nns.cv.1[i-2]){ break }
+          if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
+          if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
         }
       }
 
