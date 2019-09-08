@@ -160,6 +160,7 @@ NNS.stack <- function(IVs.train,
             predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table"))%dopar%{
                 NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = "L2", k = i)
             }
+
             predicted <- unlist(predicted)
         }
 
