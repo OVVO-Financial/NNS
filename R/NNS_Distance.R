@@ -11,8 +11,23 @@
 #'
 #' @export
 
-NNS.distance <- function(rpm,dist.estimate,type,k){
+NNS.distance <- function(rpm, dist.estimate, type, k){
   n <- length(dist.estimate)
+
+  y.hat <- rpm$y.hat
+
+  cols <- names(rpm)[names(rpm)!="y.hat"]
+
+  rpm <- rbind(as.list(t(dist.estimate)),rpm[,.SD,.SDcols=cols])
+
+  rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
+
+  dist.estimate <- as.numeric(rpm[1,])
+
+  rpm <- rpm[-1,]
+
+  rpm$y.hat <- y.hat
+
 
   if(type=="L2"){
     row.sums <- rpm[,  `:=`(Sum= Reduce(`+`, lapply(1 : n,function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]

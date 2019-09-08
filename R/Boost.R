@@ -242,9 +242,11 @@ NNS.boost <- function(IVs.train,
       test.features[[i]] <- sort(sample(n,sample(2:n,1),replace = FALSE))
 
       #If estimate is > threshold, store 'features'
-      predicted <- NNS.reg(new.iv.train[,test.features[[i]]],new.dv.train,point.est = new.iv.test[,test.features[[i]]],
-                           plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                           norm="std", factor.2.dummy = FALSE,ncores=subcores)$Point.est
+      predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
+                           new.dv.train,point.est = new.iv.test[,test.features[[i]]],
+                           plot=FALSE, residual.plot = FALSE, order = depth,
+                           n.best = n.best, factor.2.dummy = FALSE,
+                           ncores = subcores)$Point.est
 
       # Do not predict a new unseen class
       predicted <- pmin(predicted,max(as.numeric(y)))
@@ -355,9 +357,10 @@ NNS.boost <- function(IVs.train,
     features <- sort(sample(n,sample(2:n,1),replace = FALSE))
 
     #If estimate is > threshold, store 'features'
-    predicted <- NNS.reg(new.iv.train[,features],new.dv.train,point.est = new.iv.test[,features],
+    predicted <- NNS.reg(new.iv.train[,features],
+                         new.dv.train, point.est = new.iv.test[,features],
                          plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                         norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+                         factor.2.dummy = FALSE, ncores = subcores)$Point.est
 
     # Do not predict a new unseen class
     predicted <- pmin(predicted,max(as.numeric(y)))
@@ -403,9 +406,9 @@ NNS.boost <- function(IVs.train,
 
     estimates <- foreach(i = 1:length(keeper.features), .packages = c("NNS","data.table"))%dopar%{
 
-      NNS.reg(x[,keeper.features[[i]]],y,point.est = z[,keeper.features[[i]]],
-              plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-              norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est
+      NNS.reg(x[,keeper.features[[i]]], y, point.est = z[,keeper.features[[i]]],
+              plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
+              factor.2.dummy = FALSE, ncores = subcores)$Point.est
     }
   } else {
     for(i in 1:length(keeper.features)){
