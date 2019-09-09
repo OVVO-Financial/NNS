@@ -166,7 +166,7 @@ NNS.stack <- function(IVs.train,
 
         nns.cv.1[i] <- eval(obj.fn)
 
-        if(i > 2){
+        if(length(na.omit(nns.cv.1)) > 2){
           if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
           if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
         }
@@ -175,10 +175,12 @@ NNS.stack <- function(IVs.train,
       test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
 
       if(objective=='min'){
-        k <- seq_len(l)[which.min(na.omit(nns.cv.1))]
+        ks <- (1:l)[!is.na(nns.cv.1)]
+        k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
-        k <- seq_len(l)[which.max(na.omit(nns.cv.1))]
+        ks <- (1:l)[!is.na(nns.cv.1)]
+        k <- ks[which.max(na.omit(nns.cv.1))]
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }
 
