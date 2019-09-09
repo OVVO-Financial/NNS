@@ -112,15 +112,15 @@ NNS.dep = function(x,
 
     for(i in 1:5){
       if(i == 1){
-        segs[[i]] <- 1 : min(l, l/5)
+        segs[[i]] <- 1 : min(l, min(100, l/5))
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
       if(i > 1 & i < 5){
-        segs[[i]] <- max(1, (i*seg - l/5)) : min(l,(i*seg + l/5))
+        segs[[i]] <- max(1, (i*seg - min(50, l/5))) : min(l,(i*seg + min(50, l/5)))
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
       if(i == 5){
-        segs[[i]] <- max(1, (l - l/5)) : max(l, l/5)
+        segs[[i]] <- max(1, (l - l/5)) : max(l, min(100, l/5))
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
     }
