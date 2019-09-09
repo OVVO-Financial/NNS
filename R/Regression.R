@@ -352,7 +352,10 @@ NNS.reg = function (x, y,
           signs <- sign(x.star.coef)
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
-          x.star.matrix <- t( t(x) * x.star.coef)
+          norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+
+          x.star.matrix <- t( t(norm.x) * x.star.coef)
+          x.star.matrix[is.na(x.star.matrix)] <- 0
 
           #In case all IVs have 0 correlation to DV
           if(all(x.star.matrix == 0)){

@@ -120,7 +120,7 @@ NNS.dep = function(x,
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
       if(i == 5){
-        segs[[i]] <- max(1, (l - l/5)) : max(l, min(100, l/5))
+        segs[[i]] <- max(1, (l - min(100, l/5))) : l
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
     }
