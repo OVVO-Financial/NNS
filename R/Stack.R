@@ -172,7 +172,10 @@ NNS.stack <- function(IVs.train,
         }
       }
 
-      test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
+      if(length(predicted > 0)){
+
+          test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
+      } else {test.set.1 <- test.set}
 
       if(objective=='min'){
         ks <- (1:l)[!is.na(nns.cv.1)]
@@ -190,6 +193,7 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
+
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
 
         nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order = order, ncores = ncores)$Point.est

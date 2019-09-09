@@ -352,10 +352,7 @@ NNS.reg = function (x, y,
           signs <- sign(x.star.coef)
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
-          norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-
-          x.star.matrix <- t( t(norm.x) * x.star.coef)
-
+          x.star.matrix <- t( t(x) * x.star.coef)
 
           #In case all IVs have 0 correlation to DV
           if(all(x.star.matrix == 0)){
@@ -499,7 +496,6 @@ NNS.reg = function (x, y,
 
   Dynamic.average.mid.min <- mean(c(a1, b1, Dynamic.average.min))
   Dynamic.average.mid.max <- mean(c(d1, e1, Dynamic.average.max))
-
 
   ### Endpoints
   if(length(x[x < mid.min.range]) > 1){
