@@ -3,7 +3,7 @@
 #' @importFrom grDevices adjustcolor rainbow rgb
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum
-#' @importFrom utils globalVariables tail combn flush.console
+#' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom data.table data.table
 #' @import data.table
 #' @import doParallel

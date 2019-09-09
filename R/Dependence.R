@@ -142,15 +142,10 @@ NNS.dep = function(x,
       }
 
     } else {
+        for(i in 1:5){
+            nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE)
+        }
 
-      cl <- makeCluster(num_cores)
-      registerDoParallel(cl)
-
-      nns.dep <- foreach(i = 1:5,.packages = "NNS")%dopar%{
-        NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE)
-      }
-      stopCluster(cl)
-      registerDoSEQ()
     }
 
 
