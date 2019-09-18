@@ -206,8 +206,7 @@ NNS.ARMA <- function(variable,
       Regression.Estimates <- list()
 
       Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
-        x <- Component.index[[i]] ; y = Component.series[[i]]
-        last.x <- tail(x, 1)
+        x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
 
         ## Skeleton NNS regression for NNS.ARMA
@@ -216,7 +215,7 @@ NNS.ARMA <- function(variable,
 
         run <- mean(diff(reg.points$x))
         rise <- mean(diff(reg.points$y))
-
+print(j%%lag)
         last.y + (rise / run)
       }
 

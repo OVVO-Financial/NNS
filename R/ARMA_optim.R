@@ -61,7 +61,8 @@ NNS.ARMA.optim <- function(variable, training.set,
                         print.trace = TRUE,
                         ncores = NULL, subcores = NULL){
 
-
+  if(is.null(obj.fn)){ stop("Please provide an objective function")}
+  objective <- tolower(objective)
 
   if (is.null(ncores)) {
       cores <- detectCores()

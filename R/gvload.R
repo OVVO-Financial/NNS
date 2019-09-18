@@ -4,7 +4,7 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum
 #' @importFrom utils globalVariables head tail combn flush.console
-#' @importFrom data.table data.table
+#' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorderv as.IDate as.ITime
 #' @import data.table
 #' @import doParallel
 #' @import rgl

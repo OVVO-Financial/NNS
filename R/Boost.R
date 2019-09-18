@@ -59,7 +59,9 @@ NNS.boost <- function(IVs.train,
                       status = TRUE,
                       ncores = NULL, subcores = NULL){
 
+  if(is.null(obj.fn)){ stop("Please provide an objective function")}
 
+  objective <- tolower(objective)
 
   # Parallel process...
   if (is.null(ncores)) {
@@ -181,7 +183,8 @@ NNS.boost <- function(IVs.train,
     n.best <- NNS.stack(x, y, folds = folds, status = status,
                         method = 1,
                         obj.fn = obj.fn,
-                        objective = objective)$NNS.reg.n.best
+                        objective = objective,
+                        ncores = ncores)$NNS.reg.n.best
 
     if(status){
       message("Currently determining learning threshold...","\r",appendLF=TRUE)
@@ -427,7 +430,7 @@ NNS.boost <- function(IVs.train,
 
       estimates[[i]] <- NNS.reg(x[,eval(parse(text=kf$V1[i]))],y,point.est = z[,eval(parse(text=kf$V1[i]))],
                                 plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                                norm="std", factor.2.dummy = FALSE, ncores=subcores)$Point.est * kf$N[i]
+                                factor.2.dummy = FALSE, ncores=subcores)$Point.est * kf$N[i]
 
     }
 

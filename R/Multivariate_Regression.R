@@ -1,4 +1,4 @@
-NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', norm = NULL, dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
+NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
 
 
 
@@ -33,25 +33,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     }
   }
 
-  if(!is.null(norm)){
-    if(!is.null(point.est)){
-      point.B <- rbind(point.est, original.IVs)
-      colnames(point.B) <- colnames(point.est)
-      if(norm == 'std'){
-        point.est <- apply(point.B, 2, function(c) (c - min(c)) / (max(c) - min(c)))[1 : np, ]
-        original.IVs <- apply(original.IVs, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-      } else {
-        point.est <- NNS.norm(point.B)[1 : np, ]
-        original.IVs <- NNS.norm(original.IVs)
-      }
-    } else {
-      if(norm == 'std'){
-        original.IVs <- apply(original.IVs, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-      } else {
-        original.IVs <- NNS.norm(original.IVs)
-      }
-    }
-  } # Normalization
 
   original.matrix <- cbind.data.frame(original.IVs, original.DV)
 

@@ -40,10 +40,10 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
 
     if(!is.null(confidence.interval)){
         #Upper end of CDF confidence interval for control mean
-        if(tails == "Both"){
+        if(tails == "both"){
             CI <- confidence.interval+(1-confidence.interval)/2
         }
-        if(tails == "Left" | tails == "Right") {
+        if(tails == "left" | tails == "right") {
             CI <- confidence.interval
         }
 
@@ -51,7 +51,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
             a <- UPM.VaR(CI, 1, control)
             b <- mean(control)
             if(plot){
-                if(tails == "Both" | tails == "Right"){
+                if(tails == "both" | tails == "right"){
                     abline(v = max(a, b), col = "green", lwd = 4, lty = 3)
                     text(max(a, b), pos = 2, 0.75, "mu+", col = "green")
                     text(max(a, b), pos = 4, 0.75, paste0((1 - CI) * 100, "% --->"), col = "green")}
@@ -62,7 +62,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
             d <- mean(control)
 
             if(plot){
-                if(tails == "Both" | tails == "Left"){
+                if(tails == "both" | tails == "left"){
                     abline(v = min(c, d), col = "blue", lwd = 4, lty = 3)
                     text(min(c, d), pos = 4, 0.75, "mu-", col = "blue")
                     text(min(c, d), pos=2, 0.75, paste0( "<--- ", (1 - CI) * 100, "%"), col = 'blue')}
@@ -71,25 +71,25 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
             }
 
             #Effect Size Lower Bound
-            if(tails == "Both"){
+            if(tails == "both"){
                 Lower.Bound.Effect <- min(mean(treatment) - max(a, b), 0)
             }
-            if(tails == "Left"){
+            if(tails == "left"){
                 Lower.Bound.Effect <- min(mean(treatment) - max(c, d), 0)
             }
-            if(tails == "Right"){
+            if(tails == "right"){
                 Lower.Bound.Effect <- min(mean(treatment) - max(a, b), 0)
             }
 
 
   #Effect Size Upper Bound
-            if(tails == "Both"){
+            if(tails == "both"){
                 Upper.Bound.Effect <- max(mean(treatment) - min(c, d), 0)
             }
-            if(tails == "Left"){
+            if(tails == "left"){
                 Upper.Bound.Effect <- max(mean(treatment) - min(c, d), 0)
             }
-            if(tails == "Right"){
+            if(tails == "right"){
                 Upper.Bound.Effect <- max(mean(treatment) - min(a, b), 0)
             }
 

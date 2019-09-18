@@ -22,7 +22,6 @@
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
 #' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit with a specific \code{order}.
-#' @param norm \code{NULL} (default) the method of normalization options: ("NNS", "std"); Normalizes \code{x} between 0 and 1 for multivariate regression when set to \code{(norm = "std")}, or normalizes \code{x} according to \link{NNS.norm} when set to \code{(norm = "NNS")}.
 #' @param dist options:("L1", "L2") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param multivariate.call Internal parameter for multivariate regressions.
@@ -130,7 +129,6 @@ NNS.reg = function (x, y,
                     threshold = 0,
                     n.best = NULL,
                     noise.reduction = "mean",
-                    norm = NULL,
                     dist = "L2", ncores = NULL,
                     multivariate.call = FALSE){
 
@@ -278,7 +276,7 @@ NNS.reg = function (x, y,
 
         stn <- 1 - NNS.dep.hd(cbind(x,y))$Dependence^(1/exp(1))
 
-        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, norm = norm, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
+        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
       } else { # Multivariate dim.red == FALSE
 
         if(is.null(original.names)){

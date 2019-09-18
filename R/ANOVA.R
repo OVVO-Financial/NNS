@@ -50,6 +50,11 @@ NNS.ANOVA <- function(control,
                      plot = TRUE,
                      binary = TRUE){
 
+    tails <- tolower(tails)
+    if(!any(tails%in%c("left","right","both"))){
+        stop("Please select tails from 'left', 'right', or 'both'")
+    }
+
     if(missing(treatment)){
         n <- ncol(control)
         if(is.null(n)){

@@ -47,6 +47,11 @@ NNS.part = function(x, y,
                     min.obs.stop = FALSE,
                     noise.reduction = "mean"){
 
+    noise.reduction <- tolower(noise.reduction)
+    if(!any(noise.reduction%in%c("mean","median","mode","off"))){
+        stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'")
+    }
+
     if(is.null(obs.req)) obs.req <- 8
 
     if(!is.null(order)){
@@ -113,7 +118,7 @@ NNS.part = function(x, y,
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
             # Stop if diminishing returns
-            if(obs.req > 0 && length(obs.req.rows) < length(old.obs.req.rows)) break
+###            if(obs.req > 0 && length(obs.req.rows) < length(old.obs.req.rows)) break
 
             #Segments for Voronoi...
             if(Voronoi){
