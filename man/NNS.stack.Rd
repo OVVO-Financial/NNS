@@ -25,7 +25,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL,
 
 \item{folds}{integer; \code{folds = 5} (default) Select the number of cross-validation folds.}
 
-\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = 'max')} is the k-nearest neighbors equivalent.}
+\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent.}
 
 \item{norm}{options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
 
