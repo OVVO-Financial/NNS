@@ -35,8 +35,6 @@
 #'
 #'  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 #'
-#'  \item{\code{"Point"}} returns the \code{x} point(s) being evaluated;
-#'
 #'  \item{\code{"Point.est"}} for the predicted value generated;
 #'
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
@@ -591,7 +589,7 @@ NNS.reg = function (x, y,
     reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE)
     coef.point.interval[coef.point.interval == 0] <- 1
     reg.point.interval[reg.point.interval == 0] <- 1
-    point.est.y <- ((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y]
+    point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
   }
 
   colnames(estimate) <- NULL
@@ -733,7 +731,6 @@ NNS.reg = function (x, y,
                 "equation" = synthetic.x.equation,
                 "x.star" = x.star,
                 "derivative" = Regression.Coefficients[],
-                "Point" = point.est,
                 "Point.est" = point.est.y,
                 "regression.points" = regression.points[],
                 "Fitted.xy" = fitted))
@@ -744,7 +741,6 @@ NNS.reg = function (x, y,
                    "equation" = synthetic.x.equation,
                    "x.star" = x.star,
                    "derivative" = Regression.Coefficients[],
-                   "Point" = point.est,
                    "Point.est" = point.est.y,
                    "regression.points" = regression.points[],
                    "Fitted.xy" = fitted))
