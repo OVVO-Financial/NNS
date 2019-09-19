@@ -166,43 +166,46 @@ NNS.reg = function (x, y,
     x <- data.matrix(x)
 
     if(!is.null(point.est)){
-      point.est.y <- numeric()
-      if(is.list(point.est)){
-        point.est <- do.call(cbind,point.est)
-      }
-
-      if(!is.null(dim(x))){
-        if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
-          point.est <- apply(point.est,2,factor_2_dummy)
-        } else {
-          point.est <- t(point.est)
-          point.est <- t(apply(point.est,2,factor_2_dummy))
+        point.est.y <- numeric()
+        if(is.list(point.est)){
+            point.est <- do.call(cbind,point.est)
         }
 
-        if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
-          colnames(point.est) <- colnames(x, do.NULL = FALSE)
+        if(!is.null(dim(x))){
+            if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
+                point.est <- apply(point.est,2,factor_2_dummy)
+            } else {
+                point.est <- t(point.est)
+                point.est <- t(apply(point.est,2,factor_2_dummy))
+            }
+
+            if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
+                #colnames(point.est) <- colnames(x, do.NULL = FALSE)
+                names(point.est) <- names(x)
+            }
+
+            point.est <- as.matrix(point.est)
+            l <- dim(point.est)[2]
+
+        } else { # !is.null(dim(x))...implying univariate regression
+
+            point.est <- factor_2_dummy(point.est)
+            l <- dim(t(t(point.est)))[2]
+
+            if(is.null(names(point.est))) {names(point.est) <- names(x)}
         }
-
-        point.est <- as.matrix(point.est)
-        l <- dim(point.est)[2]
-
-      } else { # !is.null(dim(x))...implying univariate regression
-        point.est <- factor_2_dummy(point.est)
-        l <- dim(t(t(point.est)))[2]
-        if(is.null(names(point.est))) {names(point.est) <- names(x)}
-      }
 
       ### Add 0's to data for missing regressors
-      if(dim(t(t(x)))[2]!=l){
-        Missing <- setdiff(colnames(x),colnames(point.est))
-        point.est[Missing] <- 0
-        point.est <- point.est[colnames(x)]
-      }
+        if(dim(t(t(x)))[2]!=l && dim(t(t(x)))[2]>1){
+            Missing <- setdiff(names(x),names(point.est))
+            point.est[Missing] <- 0
+            point.est <- point.est[names(x)]
+        }
 
-      point.est <- data.matrix(point.est)
+        point.est <- data.matrix(point.est)
 
     } else { # is.null(point.est)
-      point.est.y <- NULL
+        point.est.y <- NULL
     }
 
   } #if(factor.2.dummy && !multivariate.call)
