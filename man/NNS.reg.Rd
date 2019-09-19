@@ -69,8 +69,6 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 
- \item{\code{"Point"}} returns the \code{x} point(s) being evaluated;
-
  \item{\code{"Point.est"}} for the predicted value generated;
 
  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
