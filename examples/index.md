@@ -22,7 +22,7 @@ See the following for NNS detailed examples and specific applications:
 
    1.3 [CDFs and ANOVA](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/CDFs%20and%20ANOVA.pdf)
 
-   1.4 [Correlation and Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Correlation_and_Dependence.pdf)
+   1.4 [Correlation and Dependence](https://ssrn.com/abstract=3010414)
    
    1.5 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
    
@@ -40,15 +40,16 @@ See the following for NNS detailed examples and specific applications:
    2.3 [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
    
    2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
-
+   
    2.5 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
+
    
 
 # 3. Machine Learning
 
    3.1 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
-   3.2 [Classification Using NNS Clustering Analysis](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Classification%20Using%20NNS%20Clustering%20Analysis.pdf)
+   3.2 [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
    
    3.3 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
    
@@ -72,8 +73,6 @@ See the following for NNS detailed examples and specific applications:
    4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)
    
    4.5 [Nile](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Nile.html)
-   
-   4.6 [Beer Sales](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Beer_Sales.pdf)
 
 
 # 5. Econometrics
