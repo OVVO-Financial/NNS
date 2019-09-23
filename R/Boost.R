@@ -231,10 +231,10 @@ NNS.boost <- function(IVs.train,
       new.iv.test <- x[new.index,]
 
       if(dim(new.iv.train)[2]!=dim(new.iv.test)[2]){
-        Missing <- setdiff(colnames(new.iv.train),colnames(new.iv.test))
+        Missing <- setdiff(names(new.iv.train),names(new.iv.test))
         if(length(Missing)>0){
           new.iv.test[Missing] <- 0
-          new.iv.test <- new.iv.test[colnames(new.iv.train)]
+          new.iv.test <- new.iv.test[names(new.iv.train)]
         }
       }
 

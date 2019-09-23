@@ -141,9 +141,12 @@ NNS.reg = function (x, y,
     std.errors <- TRUE
   }
 
+  if(!is.null(type)){
+    type <- tolower(type)
+  }
 
   if(class(y) == "factor"){
-    type <- "CLASS"
+    type <- "class"
     noise.reduction <- "mode"
   }
 
@@ -178,7 +181,6 @@ NNS.reg = function (x, y,
             }
 
             if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
-                #colnames(point.est) <- colnames(x, do.NULL = FALSE)
                 names(point.est) <- names(x)
             }
 
@@ -255,7 +257,7 @@ NNS.reg = function (x, y,
     stn <- 0
   }
 
-  if(!is.null(type) && type == "CLASS" && is.null(n.best)){
+  if(!is.null(type) && type == "class" && is.null(n.best)){
     n.best <- 1
   }
 
@@ -293,6 +295,7 @@ NNS.reg = function (x, y,
         y <- as.numeric(y)
 
         if(!is.null(dim.red.method)){
+          dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
 
           if(dim.red.method!="cor"){
@@ -305,7 +308,7 @@ NNS.reg = function (x, y,
             x.star.cor[is.na(x.star.cor)] <- 0
           }
 
-          if(dim.red.method == "NNS.dep"){
+          if(dim.red.method == "nns.dep"){
             x.star.coef <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef[is.na(x.star.coef)] <- 0
           }
@@ -315,7 +318,7 @@ NNS.reg = function (x, y,
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
-          if(dim.red.method == "NNS.caus"){
+          if(dim.red.method == "nns.caus"){
             if(is.null(tau)){
               tau <- "cs"
             }
