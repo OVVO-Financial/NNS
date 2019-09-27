@@ -118,6 +118,7 @@ NNS.ARMA <- function(variable,
 
 
   if(is.numeric(seasonal.factor)){
+      seasonal.plot = FALSE
       M <- matrix(seasonal.factor, ncol=1)
       colnames(M) <- "Period"
       lag <- seasonal.factor
