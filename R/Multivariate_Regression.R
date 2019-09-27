@@ -256,6 +256,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   R2 <- (sum((y.hat - mean(original.DV)) * (original.DV - mean(original.DV))) ^ 2) / (sum((original.DV - mean(original.DV)) ^ 2) * sum((y.hat - mean(original.DV)) ^ 2))
 
+  fitted.matrix$residuals <- fitted.matrix$y.hat - fitted.matrix$y
 
   ### 3d plot
   if(plot && n == 2){

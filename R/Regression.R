@@ -39,7 +39,7 @@
 #'
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
+#'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
 #' }
 #'
 #'
@@ -625,6 +625,7 @@ NNS.reg = function (x, y,
 
   R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
 
+  fitted$residuals <- fitted$y.hat - fitted$y
 
   ###Standard errors estimatation
   if(std.errors){
