@@ -120,7 +120,7 @@ x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
 NNS.reg(x, y, point.est = c(.25, .5, .75))
 
 ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
-x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y<-rnorm(100)
+x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
 NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
 
 ## IRIS dataset examples:

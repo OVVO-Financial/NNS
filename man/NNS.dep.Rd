@@ -42,52 +42,48 @@ NNS.dep(B)
 
 
 ## p-values for [NNS.dep]
-x=seq(-5,5,.1);y=x^2+rnorm(length(x))
+x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 
 
-nns_cor_dep = NNS.dep(x,y,print.map = TRUE)
+nns_cor_dep <- NNS.dep(x, y, print.map = TRUE)
 nns_cor_dep
 
 ## Create permutations of y
-y_p = replicate(1000,sample.int(length(y)))
+y_p <- replicate(1000, sample.int(length(y)))
 
 ## Generate new correlation and dependence measures on each new permutation of y
-nns.mc = apply(y_p,2,function(g) NNS.dep(x,y[g]))
+nns.mc <- apply(y_p, 2, function(g) NNS.dep(x, y[g]))
 
 ## Store results
-cors = unlist(lapply(nns.mc, "[[",1))
-deps = unlist(lapply(nns.mc, "[[",2))
+cors <- unlist(lapply(nns.mc, "[[", 1))
+deps <- unlist(lapply(nns.mc, "[[", 2))
 
 ## View results
 hist(cors)
 hist(deps)
 
 ## Left tailed correlation p-value
-cor_p_value = LPM(0,nns_cor_dep$Correlation,cors)
+cor_p_value <- LPM(0, nns_cor_dep$Correlation, cors)
 cor_p_value
 
 ## Right tailed correlation p-value
-cor_p_value = UPM(0,nns_cor_dep$Correlation,cors)
+cor_p_value <- UPM(0, nns_cor_dep$Correlation, cors)
 cor_p_value
-
-## Two sided correlation p-value
-cor_p_value = UPM(0,abs(nns_cor_dep$Correlation),abs(cors))
-cor_p_value
-
-## Left tailed dependence p-value
-dep_p_value = LPM(0,nns_cor_dep$Dependence,deps)
-dep_p_value
-
-## Right tailed dependence p-value
-dep_p_value = UPM(0,nns_cor_dep$Dependence,deps)
-dep_p_value
 
 ## Confidence Intervals
 ## For 95th percentile VaR (both-tails) see [LPM.VaR] and [UPM.VaR]
 ## Lower CI
-LPM.VaR(.975,0,cors)
+LPM.VaR(.975, 0, cors)
 ## Upper CI
-UPM.VaR(.975,0,cors)
+UPM.VaR(.975, 0, cors)
+
+## Left tailed dependence p-value
+dep_p_value <- LPM(0, nns_cor_dep$Dependence, deps)
+dep_p_value
+
+## Right tailed dependence p-value
+dep_p_value <- UPM(0, nns_cor_dep$Dependence, deps)
+dep_p_value
 }
 }
 \references{
