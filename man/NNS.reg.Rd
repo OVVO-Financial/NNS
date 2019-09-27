@@ -73,7 +73,7 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 
- \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, and \code{NNS.ID};
+ \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
 }
 
 
