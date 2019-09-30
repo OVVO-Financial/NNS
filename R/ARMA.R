@@ -216,7 +216,7 @@ NNS.ARMA <- function(variable,
 
         run <- mean(diff(reg.points$x))
         rise <- mean(diff(reg.points$y))
-print(j%%lag)
+
         last.y + (rise / run)
       }
 
