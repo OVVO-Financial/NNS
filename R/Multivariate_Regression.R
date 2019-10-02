@@ -79,7 +79,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     colnames(reg.points.matrix) <- as.character(colnames.list)
   }
 
-  reg.points.matrix <- unique(reg.points.matrix)
+  if(is.numeric(order) | is.null(order)){
+      reg.points.matrix <- unique(reg.points.matrix)
+  }
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   ### PARALLEL
@@ -117,15 +119,18 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   mean.by.id.matrix <- data.table(original.IVs, original.DV, NNS.ID, obs)
 
   setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
-
-  if(noise.reduction == 'mean' | noise.reduction == 'off'){
-    mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
-  }
-  if(noise.reduction == 'median'){
-    mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
-  }
-  if(noise.reduction == 'mode'){
-    mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
+  if(is.numeric(order) | is.null(order)){
+      if(noise.reduction == 'mean' | noise.reduction == 'off'){
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
+      }
+      if(noise.reduction == 'median'){
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
+      }
+      if(noise.reduction == 'mode'){
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
+      }
+  } else {
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
   }
 
   y.identifier <- mean.by.id.matrix[ , NNS.ID]
@@ -141,15 +146,16 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX = mean.by.id.matrix[ , obs := NULL]
 
-
-  if(noise.reduction == 'mean' | noise.reduction == 'off'){
-    REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, mean), by = NNS.ID]
-  }
-  if(noise.reduction == 'median'){
-    REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, median), by = NNS.ID]
-  }
-  if(noise.reduction == 'mode'){
-    REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, mode), by = NNS.ID]
+  if(is.numeric(order) | is.null(order)){
+      if(noise.reduction == 'mean' | noise.reduction == 'off'){
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, mean), by = NNS.ID]
+      }
+      if(noise.reduction == 'median'){
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, median), by = NNS.ID]
+      }
+      if(noise.reduction == 'mode'){
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, mode), by = NNS.ID]
+      }
   }
 
   REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , NNS.ID := NULL]
