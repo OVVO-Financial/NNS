@@ -205,7 +205,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
-        NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,], type=dist, k=n.best)
+        NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
+                     type = dist, k = n.best)
       }
 
       DISTANCES <- unlist(DISTANCES)
@@ -214,6 +215,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
 
       outsiders <- lows + highs
+
+      outsiders[is.na(outsiders)] <- 0
 
       if(sum(outsiders)>0){
         outside.columns <- numeric()
