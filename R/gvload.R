@@ -27,7 +27,7 @@
       "%do%", "k"
     ))
 
-  requireNamespace("data.table")
+  suppressMessages(requireNamespace("data.table"))
 
   .datatable.aware = TRUE
 
