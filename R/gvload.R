@@ -33,5 +33,5 @@
 
   invisible()
 
-
+  options(warn = -1)
 }
