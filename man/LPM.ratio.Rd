@@ -24,12 +24,16 @@ set.seed(123)
 x <- rnorm(100)
 LPM.ratio(0, mean(x), x)
 
-## Continuous CDF
-LPM.ratio(1, sort(x), x)
+\dontrun{
+## Empirical CDF (degree = 0)
+lpm_cdf <- LPM.ratio(0, sort(x), x)
+plot(sort(x), lpm_cdf)
 
+## Continuous CDF (degree = 1)
+lpm_cdf_1 <- LPM.ratio(1, sort(x), x)
+plot(sort(x), lpm_cdf_1)
 
 ## Joint CDF
-\dontrun{
 x <- rnorm(5000) ; y <- rnorm(5000)
 plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 zlab = "Probability", box = FALSE)
@@ -38,6 +42,9 @@ zlab = "Probability", box = FALSE)
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
+
+Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
+\url{https://ssrn.com/abstract=3007373}
 }
 \author{
 Fred Viole, OVVO Financial Systems
