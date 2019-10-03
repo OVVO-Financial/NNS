@@ -41,7 +41,9 @@ See the following for NNS detailed examples and specific applications:
    
    2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
    
-   2.5 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
+   2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression-Residuals.html)
+   
+   2.6 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
 
    
 
