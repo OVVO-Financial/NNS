@@ -529,10 +529,10 @@ NNS.reg = function (x, y,
   x.mid.max <- Dynamic.average.mid.max
 
   mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, mean(x.mid.max)),
-                                               c(max(x),mean(x.max)))), check.names = FALSE)
+                                               c(max(x),mean(x.max))),use.names = FALSE))
 
   mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, mean(x.mid.min)))), check.names = FALSE)
+                                               c(mid.min.range, mean(x.mid.min))),use.names = FALSE))
 
   regression.points <- rbindlist(list(regression.points, mid.max.rps ))
 
