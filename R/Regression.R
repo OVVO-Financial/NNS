@@ -529,10 +529,10 @@ NNS.reg = function (x, y,
   x.mid.max <- Dynamic.average.mid.max
 
   mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, mean(x.mid.max)),
-                                               c(max(x),mean(x.max)))))
+                                               c(max(x),mean(x.max)))), check.names = FALSE)
 
   mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, mean(x.mid.min)))))
+                                               c(mid.min.range, mean(x.mid.min)))), check.names = FALSE)
 
   regression.points <- rbindlist(list(regression.points, mid.max.rps ))
 
@@ -600,7 +600,7 @@ NNS.reg = function (x, y,
   fitted <- data.table(x = part.map$dt$x,
                        y = part.map$dt$y,
                        y.hat = estimate,
-                       NNS.ID = part.map$dt$quadrant)
+                       NNS.ID = part.map$dt$quadrant, check.names = FALSE)
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
