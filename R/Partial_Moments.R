@@ -211,6 +211,8 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
+#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
+#' \url{https://ssrn.com/abstract=3457377}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
@@ -305,17 +307,23 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
+#' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
+#' \url{https://ssrn.com/abstract=3007373}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
 #' LPM.ratio(0, mean(x), x)
 #'
-#' ## Continuous CDF
-#' LPM.ratio(1, sort(x), x)
+#' \dontrun{
+#' ## Empirical CDF (degree = 0)
+#' lpm_cdf <- LPM.ratio(0, sort(x), x)
+#' plot(sort(x), lpm_cdf)
 #'
+#' ## Continuous CDF (degree = 1)
+#' lpm_cdf_1 <- LPM.ratio(1, sort(x), x)
+#' plot(sort(x), lpm_cdf_1)
 #'
 #' ## Joint CDF
-#' \dontrun{
 #' x <- rnorm(5000) ; y <- rnorm(5000)
 #' plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 #' zlab = "Probability", box = FALSE)
@@ -324,9 +332,13 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
 LPM.ratio <- function(degree, target, variable){
   lpm <- LPM(degree, target, variable)
-  upm <- UPM(degree, target, variable)
 
-  lpm / (lpm + upm)
+  if(degree > 0){
+      upm <- UPM(degree, target, variable)
+      return(lpm / (lpm + upm))
+  } else {
+      return(lpm)
+  }
 }
 
 
@@ -356,11 +368,16 @@ LPM.ratio <- function(degree, target, variable){
 
 
 UPM.ratio <- function(degree, target, variable){
-  lpm <- LPM(degree, target, variable)
   upm <- UPM(degree, target, variable)
 
-  upm / (lpm + upm)
+  if(degree > 0){
+    lpm <- LPM(degree, target, variable)
+    return(upm / (lpm + upm))
+  } else {
+    return(upm)
+  }
 }
+
 
 
 #' NNS PDF
