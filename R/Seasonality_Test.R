@@ -33,7 +33,7 @@ NNS.seas <- function(variable, plot = TRUE){
   if(mean(variable) != 0){
     var.cov <- abs(sd(variable) / mean(variable))
   } else {
-    var.cov <- Inf
+    var.cov <- sd(variable)
   }
 
   for(i in 1 : (length(variable) / 2)){
