@@ -100,6 +100,7 @@ NNS.ARMA <- function(variable,
       seasonal.factor <- FALSE
   }
 
+  label <- deparse(substitute(variable))
   variable <- as.numeric(variable)
   OV <- variable
 
@@ -296,7 +297,7 @@ if(!is.null(cl)){
           }
       }
 
-    label <- names(variable)
+
     if(is.null(label)){
         label <- "Variable"
     }

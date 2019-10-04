@@ -64,6 +64,11 @@ NNS.part = function(x, y,
         order=Inf
     }
 
+    if(Voronoi){
+            x.label <- deparse(substitute(x))
+            y.label <- deparse(substitute(y))
+    }
+
     x <- as.numeric(x)
     y <- as.numeric(y)
 
@@ -76,7 +81,7 @@ NNS.part = function(x, y,
 
 
     if(Voronoi){
-        plot(x, y, col = 'steelblue', cex.lab = 2, xlab = "X", ylab = "Y")
+        plot(x, y, col = 'steelblue', cex.lab = 1.5, xlab = x.label, ylab = y.label)
     }
 
 

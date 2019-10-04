@@ -150,6 +150,16 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode"
   }
 
+  # Variable names
+  original.names <- colnames(x)
+  original.columns <- ncol(x)
+
+  y.label <- deparse(substitute(y))
+
+  if(is.null(original.columns)){
+      x.label <- deparse(substitute(x))
+  }
+
   if(factor.2.dummy && !multivariate.call){
     if(is.list(x)){
       x <- do.call(cbind,x)
@@ -214,14 +224,13 @@ NNS.reg = function (x, y,
   original.names <- colnames(x)
   original.columns <- ncol(x)
 
+  y.label <- deparse(substitute(y))
+
   y <- as.numeric(y)
   original.y <- y
 
-  if(is.null(names(original.y))){
-    y.label <- "Y"
-  } else {
-    y.label <- names(y)
-  }
+
+
 
   if(!factor.2.dummy){
     if(is.null(ncol(x))){
@@ -677,13 +686,13 @@ NNS.reg = function (x, y,
            col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
              if(original.columns > 1){
-               paste0("Synthetic X* ","(Segments = ",(p-1),')')
-             }
+               "Synthetic X*"
+             } else { x.label }
            } else {
-             paste0("X  ","(Segments = ",(p-1),")",sep='')
+             x.label
            },
-           ylab = "Y", mgp = c(2.5, 0.5, 0),
-           cex.lab = 2, cex.main = 2)
+           ylab = y.label, mgp = c(2.5, 0.5, 0),
+           cex.lab = 1.5, cex.main = 2)
 
       points(na.omit(fitted[ , .(x,y.hat + qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
       points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
@@ -693,13 +702,13 @@ NNS.reg = function (x, y,
       plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
              if(original.columns > 1){
-               paste0("Synthetic X* ", "(Segments = ", (p - 1), ')')
-             }
+               "Synthetic X*"
+             } else { x.label }
            } else {
-             paste0("X  ", "(Segments = ", (p - 1), ")", sep = '')
+             x.label
            },
-           ylab = "Y",mgp = c(2.5, 0.5, 0),
-           cex.lab = 2, cex.main = 2)
+           ylab = y.label, mgp = c(2.5, 0.5, 0),
+           cex.lab = 1.5, cex.main = 2)
     } # !confidence.intervals
 
     ### Plot Regression points and fitted values and legend

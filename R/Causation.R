@@ -58,6 +58,9 @@ NNS.caus <- function(x, y,
   }
 
   if(!missing(y)){
+      if(is.factor(y)){
+          y <- as.numeric(y)
+      }
       if(is.numeric(tau)){
           Causation.x.given.y <- Uni.caus(x,y,tau=tau,plot = FALSE)
           Causation.y.given.x <- Uni.caus(y,x,tau=tau,plot = FALSE)
