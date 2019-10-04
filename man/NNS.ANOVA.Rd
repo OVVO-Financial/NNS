@@ -51,7 +51,7 @@ NNS.ANOVA(A)
 
 ### Multiple variable analysis with no control variable
 set.seed(123)
-x <- rnorm(100) ; y<- rnorm(100) ; z<- rnorm(100)
+x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 A <- cbind(x, y, z)
 NNS.ANOVA(A)
 }
