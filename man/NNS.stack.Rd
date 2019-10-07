@@ -53,8 +53,6 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 }
 \note{
-If character variables are used, transform them first to factors using \link{as.factor}, or \link{data.matrix} to ensure overall dataset is numeric.  A multifunction \link{sapply} can also be applied to the overall dataset: \code{data <- sapply(data,function(x){as.factor(x) ; as.numeric(x)})}.  Then run \code{NNS.stack} with transormed variables.
-
 Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 
 If error received:
