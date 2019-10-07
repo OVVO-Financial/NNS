@@ -74,7 +74,7 @@ nns_cor_dep <- NNS.dep(x, y, print.map = TRUE)
 nns_cor_dep
 
 ## Create permutations of y
-y_p <- replicate(1000, sample.int(length(y)))
+y_p <- replicate(100, sample.int(length(y)))
 
 ## Generate new correlation and dependence measures on each new permutation of y
 nns.mc <- apply(y_p, 2, function(g) NNS.dep(x, y[g]))
