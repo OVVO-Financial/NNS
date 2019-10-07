@@ -28,6 +28,9 @@
     ))
 
   requireNamespace("data.table")
+  requireNamespace("rgl")
+  requireNamespace("doParallel")
+  requireNamespace("stringr")
 
   .datatable.aware = TRUE
 
