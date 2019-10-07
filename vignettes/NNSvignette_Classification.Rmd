@@ -23,6 +23,8 @@ require(data.table)
 
 We have extended the `NNS.reg` applications per the use of an ensemble method of classification in `NNS.boost`.
 
+***One major advantage `NNS.boost` has over tree based methods is the ability to seamlessly extrapolate beyond the current range of observations.***
+
 ## Splits vs. Partitions
 Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs.  `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable.  We can directly control the number of "splits" with the `NNS.reg(..., order = , ...)` parameter.
 
@@ -36,7 +38,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 ```
 
 # `NNS.boost`
-Through resampling of the training set and letting each iterated set of data speak for themselves, we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value.  From there we simply aggregate the predictions.
+Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value.  From there we simply aggregate the predictions.
 
 `NNS.boost` will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console.  A plot of the frequency of the learning accuracy on the training set is also provided.
 

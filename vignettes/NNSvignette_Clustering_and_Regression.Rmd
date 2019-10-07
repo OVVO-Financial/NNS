@@ -50,7 +50,7 @@ NNS.part(x,y,order = 4, type = "XONLY")
 ## Clusters Used in Regression
 The right column of plots shows the corresponding regression for the order of `NNS` partitioning.
 ```{r depreg,results='hide'}
-for(i in 1 : 3){NNS.part(x, y, order = i, Voronoi = TRUE) ; NNS.reg(x, y, order = i, ncores = 1)}
+for(i in 1 : 3){NNS.part(x, y, order = i, noise.reduction = "off", Voronoi = TRUE) ; NNS.reg(x, y, order = i, ncores = 1)}
 ```
 
 
