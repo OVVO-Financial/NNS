@@ -143,6 +143,7 @@ NNS.reg = function (x, y,
 
   if(!is.null(type)){
     type <- tolower(type)
+    noise.reduction <- "mode"
   }
 
   if(class(y) == "factor"){
