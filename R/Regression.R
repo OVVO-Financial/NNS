@@ -142,7 +142,7 @@ NNS.reg = function (x, y,
   }
   
   if(!plot){
-    resid.plot <- FALSE
+    residual.plot <- FALSE
   }
     
   if(!is.null(type)){
