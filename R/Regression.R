@@ -140,7 +140,11 @@ NNS.reg = function (x, y,
   if(!is.null(confidence.interval) && std.errors == FALSE){
     std.errors <- TRUE
   }
-
+  
+  if(!plot){
+    resid.plot <- FALSE
+  }
+    
   if(!is.null(type)){
     type <- tolower(type)
     noise.reduction <- "mode"
