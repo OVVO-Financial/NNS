@@ -301,21 +301,25 @@ if(!is.null(cl)){
     if(is.null(label)){
         label <- "Variable"
     }
-
+    
+    if(intervals){
     plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
          xlim = c(1, max((training.set + h), length(OV))),
-         ylab = label, ylim = c(min(Estimates, OV), max(OV, Estimates)))
-
-    if(intervals){
+         ylab = label, ylim = c(min(Estimates, OV,  unlist(Estimate.band) ), max(OV, Estimates, unlist(Estimate.band) )) )
+        
         for(i in 1 : h){
             ys <- unlist(Estimate.band[[i]])
-            points(rep(training.set + i, length(ys)), ys, pch = 15, col = rgb(1, 0, 0, 0.25))
+            points(rep(training.set + i, length(ys)), ys, pch = 15, col = rgb(1, 0, 0, 0.125))
         }
 
         lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
         segments(training.set, FV[training.set], training.set + 1, Estimates[1],lwd = 2,lty = 1,col = 'red')
         legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h, " period(s)")), lty = c(1, 1), col = c('steelblue', 'red'), lwd = 2)
     } else {
+        plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
+         xlim = c(1, max((training.set + h), length(OV))),
+         ylab = label, ylim = c(min(Estimates, OV), max(OV, Estimates)))
+      
         if(training.set[1] < length(OV)){
             lines((training.set + 1) : (training.set + h), Estimates, type = 'l',lwd = 2, lty = 3, col = 'red')
             segments(training.set, FV[training.set], training.set + 1, Estimates[1], lwd = 2, lty = 3, col = 'red')
