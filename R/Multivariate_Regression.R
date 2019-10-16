@@ -148,7 +148,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   fitted.matrix <- data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
   setkey(mean.by.id.matrix, 'NNS.ID')
-  REGRESSION.POINT.MATRIX = mean.by.id.matrix[ , obs := NULL]
+  REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , obs := NULL]
+  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, as.numeric)]
 
   if(is.numeric(order) | is.null(order)){
       if(noise.reduction == 'mean' | noise.reduction == 'off'){
@@ -209,7 +210,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
-        NNS.distance(rpm=REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
+        NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
                      type = dist, k = n.best)
       }
 
