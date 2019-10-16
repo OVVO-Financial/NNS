@@ -309,7 +309,7 @@ if(!is.null(cl)){
     if(intervals){
         for(i in 1 : h){
             ys <- unlist(Estimate.band[[i]])
-            points(rep(training.set + i, length(ys)), ys, pch = 15, col = 'black')#rgb(1, 0, 0, 0.0125))
+            points(rep(training.set + i, length(ys)), ys, pch = 15, col = rgb(1, 0, 0, 0.25))
         }
 
         lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
