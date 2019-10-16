@@ -140,6 +140,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   resid.plot <- mean.by.id.matrix[]
   setkey(resid.plot, 'obs')
   y.hat <- mean.by.id.matrix[ , .(y.hat)]
+  if(!is.null(type)){
+      y.hat <- round(y.hat)
+  }
+
 
   fitted.matrix <- data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
@@ -326,6 +330,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   rhs.partitions <- data.table(reg.points.matrix)
 
+  if(!is.null(type)){
+      fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
+      if(!is.null(predict.fit)){
+          predict.fit <- round(predict.fit)
+      }
+  }
 
   ### Return Values
   if(return.values){

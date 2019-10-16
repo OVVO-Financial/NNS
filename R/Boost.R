@@ -5,6 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
+#' @param type \code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
@@ -44,6 +45,7 @@
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
+                      type = "CLASS",
                       representative.sample = FALSE,
                       depth = "max",
                       n.best = NULL,
@@ -184,7 +186,7 @@ NNS.boost <- function(IVs.train,
                         method = 1,
                         obj.fn = obj.fn,
                         objective = objective,
-                        ncores = ncores)$NNS.reg.n.best
+                        ncores = ncores, type = type)$NNS.reg.n.best
 
     if(status){
       message("Currently determining learning threshold...","\r",appendLF=TRUE)
@@ -249,7 +251,7 @@ NNS.boost <- function(IVs.train,
                            new.dv.train,point.est = new.iv.test[,test.features[[i]]],
                            plot=FALSE, residual.plot = FALSE, order = depth,
                            n.best = n.best, factor.2.dummy = FALSE,
-                           ncores = subcores)$Point.est
+                           ncores = subcores, type = type)$Point.est
 
       # Do not predict a new unseen class
       predicted <- pmin(predicted,max(as.numeric(y)))
@@ -363,7 +365,7 @@ NNS.boost <- function(IVs.train,
     predicted <- NNS.reg(new.iv.train[,features],
                          new.dv.train, point.est = new.iv.test[,features],
                          plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                         factor.2.dummy = FALSE, ncores = subcores)$Point.est
+                         factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est
 
     # Do not predict a new unseen class
     predicted <- pmin(predicted,max(as.numeric(y)))
@@ -414,7 +416,7 @@ NNS.boost <- function(IVs.train,
 
       NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
               plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-              factor.2.dummy = FALSE, ncores = subcores)$Point.est * kf$N[i]
+              factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est * kf$N[i]
     }
   } else {
     for(i in 1:dim(kf)[1]){
@@ -430,7 +432,7 @@ NNS.boost <- function(IVs.train,
 
       estimates[[i]] <- NNS.reg(x[,eval(parse(text=kf$V1[i]))],y,point.est = z[,eval(parse(text=kf$V1[i]))],
                                 plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                                factor.2.dummy = FALSE, ncores=subcores)$Point.est * kf$N[i]
+                                factor.2.dummy = FALSE, ncores=subcores, type = type)$Point.est * kf$N[i]
 
     }
 
@@ -472,6 +474,11 @@ NNS.boost <- function(IVs.train,
     par(original.par)
   }
   gc()
-  return(list("results" = estimates,
-              "feature.weights" = plot.table/sum(plot.table)))
+  if(is.null(type)){
+      return(list("results" = estimates,
+                  "feature.weights" = plot.table/sum(plot.table)))
+  } else {
+      return(list("results" = round(estimates),
+                  "feature.weights" = plot.table/sum(plot.table)))
+  }
 }

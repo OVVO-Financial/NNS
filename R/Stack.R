@@ -5,6 +5,7 @@
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
+#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
@@ -55,6 +56,7 @@
 NNS.stack <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
+                      type = NULL,
                       obj.fn = expression( sum((predicted - actual)^2) ),
                       objective = "min",
                       CV.size = NULL,
@@ -134,7 +136,7 @@ NNS.stack <- function(IVs.train,
               }
 
           if(i==1){
-              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores)
+              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores, type = type)
 
               predicted <- setup$Point.est
           } else {
@@ -176,14 +178,15 @@ NNS.stack <- function(IVs.train,
 
           if(b==folds){
               best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
-
               best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
-
-              nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, residual.plot = FALSE, n.best = best.k, order = order, ncores = ncores)$Point.est
-
+              nns.method.1 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, plot = FALSE, n.best = best.k, order = order, ncores = ncores, type = type)$Point.est
+              if(!is.null(type) & !is.null(nns.method.1)){
+                  nns.method.1 <- round(nns.method.1)
+              }
               stopCluster(cl)
               registerDoSEQ()
           }
+
 
       } else {
           test.set.1 <- NULL
@@ -198,7 +201,7 @@ NNS.stack <- function(IVs.train,
 
           actual <- CV.DV.test
 
-          var.cutoffs <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores)$equation$Coefficient, digits = 2))
+          var.cutoffs <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores, type = type)$equation$Coefficient, digits = 2))
 
           var.cutoffs <- var.cutoffs - .005
 
@@ -219,7 +222,7 @@ NNS.stack <- function(IVs.train,
                   message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
               }
 
-              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores)$Point.est
+              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores, type = type)$Point.est
 
               nns.ord[i+1] <- eval(obj.fn)
 
@@ -243,7 +246,10 @@ NNS.stack <- function(IVs.train,
           if(b==folds){
               nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
               best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
-              nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order, threshold = nns.ord.threshold, ncores = ncores)$Point.est
+              nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order, threshold = nns.ord.threshold, ncores = ncores, type = type)$Point.est
+              if(!is.null(type) & !is.null(nns.method.2)){
+                  nns.method.2 <- round(nns.method.2)
+              }
           }
 
       } else {
@@ -274,18 +280,20 @@ NNS.stack <- function(IVs.train,
 
   if(identical(sort(method),c(1,2))){
       estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
+      if(!is.null(type)){
+          estimates <- round(estimates)
+      }
   } else {
-    if(method==1){
-        estimates <- (nns.method.1)
+        if(method==1){
+            estimates <- (nns.method.1)
     } else {
         if(method==2) {
-          estimates <- (nns.method.2)
+            estimates <- (nns.method.2)
         }
     }
   }
 
   gc()
-
 
   return(list(OBJfn.reg = best.nns.cv,
               NNS.reg.n.best = best.k,

@@ -140,11 +140,7 @@ NNS.reg = function (x, y,
   if(!is.null(confidence.interval) && std.errors == FALSE){
     std.errors <- TRUE
   }
-  
-  if(!plot){
-    residual.plot <- FALSE
-  }
-    
+
   if(!is.null(type)){
     type <- tolower(type)
     noise.reduction <- "mode"
@@ -153,6 +149,10 @@ NNS.reg = function (x, y,
   if(class(y) == "factor"){
     type <- "class"
     noise.reduction <- "mode"
+  }
+
+  if(!plot){
+    residual.plot <- FALSE
   }
 
   # Variable names
@@ -436,7 +436,7 @@ NNS.reg = function (x, y,
         part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0)
       }
     } else {
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction='off', order = dep.reduced.order, obs.req = 0)
+      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 0)
       if(length(part.map$regression.points$x) == 0){
         part.map <- NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
       }
@@ -607,9 +607,15 @@ NNS.reg = function (x, y,
     coef.point.interval[coef.point.interval == 0] <- 1
     reg.point.interval[reg.point.interval == 0] <- 1
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+    if(!is.null(type)){
+        point.est.y <- round(point.est.y)
+    }
   }
 
   colnames(estimate) <- NULL
+  if(!is.null(type)){
+    estimate <- round(estimate)
+  }
 
   fitted <- data.table(x = part.map$dt$x,
                        y = part.map$dt$y,
@@ -617,7 +623,6 @@ NNS.reg = function (x, y,
                        NNS.ID = part.map$dt$quadrant)
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
-
 
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
 
