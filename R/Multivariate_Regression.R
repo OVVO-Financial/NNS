@@ -153,13 +153,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   if(is.numeric(order) | is.null(order)){
       if(noise.reduction == 'mean' | noise.reduction == 'off'){
-          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(na.omit(.SD), mean), by = NNS.ID]
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, mean), by = NNS.ID]
       }
       if(noise.reduction == 'median'){
-          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(na.omit(.SD), median), by = NNS.ID]
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(median(z)))), by = NNS.ID]
       }
       if(noise.reduction == 'mode'){
-          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(na.omit(.SD), mode), by = NNS.ID]
+          REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode(z))), by = NNS.ID]
       }
   }
 
