@@ -149,7 +149,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , obs := NULL]
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, as.numeric)]
+  REGRESSION.POINT.MATRIX <- suppressWarnings(REGRESSION.POINT.MATRIX[ , lapply(.SD, as.numeric)])
 
   if(is.numeric(order) | is.null(order)){
       if(noise.reduction == 'mean' | noise.reduction == 'off'){
