@@ -4,12 +4,13 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = FALSE,
-  depth = "max", n.best = NULL, learner.trials = NULL,
-  epochs = NULL, CV.size = 0.25, folds = 5, threshold = NULL,
-  obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
-  objective = "max", extreme = FALSE, feature.importance = TRUE,
-  status = TRUE, ncores = NULL, subcores = NULL)
+NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
+  representative.sample = FALSE, depth = "max", n.best = NULL,
+  learner.trials = NULL, epochs = NULL, CV.size = 0.25, folds = 5,
+  threshold = NULL, obj.fn = expression(mean(round(predicted) ==
+  as.numeric(actual))), objective = "max", extreme = FALSE,
+  feature.importance = TRUE, status = TRUE, ncores = NULL,
+  subcores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -17,6 +18,8 @@ NNS.boost(IVs.train, DV.train, IVs.test, representative.sample = FALSE,
 \item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
+
+\item{type}{\code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.}
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 

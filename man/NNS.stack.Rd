@@ -4,7 +4,7 @@
 \alias{NNS.stack}
 \title{NNS Stack}
 \usage{
-NNS.stack(IVs.train, DV.train, IVs.test = NULL,
+NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
   obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
   CV.size = NULL, folds = 5, order = NULL, norm = NULL,
   method = c(1, 2), dim.red.method = "cor", status = TRUE,
@@ -16,6 +16,8 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL,
 \item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
 
 \item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
+
+\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.}
 
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
