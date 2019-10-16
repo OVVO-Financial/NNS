@@ -125,4 +125,4 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 
 * [f(Newton)](https://ssrn.com/abstract=2186471)
 
-* [Bayes' Theorem From Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf)
+* [Bayes' Theorem From Partial Moments](https://ssrn.com/abstract=3457377)
