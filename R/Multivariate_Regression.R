@@ -126,8 +126,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       if(noise.reduction == 'median'){
           mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
       }
-      if(noise.reduction == 'mode'){
+      if(noise.reduction == 'mode' & is.null(type)){
           mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
+      }
+      if(noise.reduction == 'mode' & !is.null(type)){
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := as.numeric(names(sort(table(original.DV),decreasing = TRUE))[1]), by = 'NNS.ID']
       }
   } else {
       mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
@@ -158,8 +161,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     if(noise.reduction == 'median'){
       REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(median(z))), by = NNS.ID]
     }
-    if(noise.reduction == 'mode'){
+    if(noise.reduction == 'mode' & is.null(type)){
       REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode(z))), by = NNS.ID]
+    }
+    if(noise.reduction == 'mode' & !is.null(type)){
+      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(names(sort(table(z),decreasing = TRUE))[1])), by = NNS.ID]
     }
   }
 
