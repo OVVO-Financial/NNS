@@ -30,18 +30,20 @@ NNS.seas <- function(variable, plot = TRUE){
   output <- numeric() ; output_1 = numeric() ; output_2 = numeric()
   instances <- numeric() ; instances_1 = numeric() ; instances_2 = numeric()
 
+  if(mean(variable) != 0){
+    var.cov <- abs(sd(variable) / mean(variable))
+  } else {
+    var.cov <- sd(variable)
+  }
 
-  var.cov <- sd(diff(variable))
-
-  for(i in 1 : (length(variable) / 3)){
+  for(i in 1 : (length(variable) / 2)){
     reverse.var <- variable[seq(length(variable), 1, -i)]
     reverse.var_1 <- variable_1[seq(length(variable_1), 1, -i)]
     reverse.var_2 <- variable_2[seq(length(variable_2), 1, -i)]
 
-    test <- sd(diff(reverse.var))
-    test_1 <- sd(diff(reverse.var_1))
-    test_2 <- sd(diff(reverse.var_2))
-
+    test <- abs(sd(reverse.var) / mean(reverse.var))
+    test_1 <- abs(sd(reverse.var_1) / mean(reverse.var_1))
+    test_2 <- abs(sd(reverse.var_2) / mean(reverse.var_2))
     if (test <= var.cov){
       instances[i] <- i
       output[i] <- test
@@ -87,12 +89,12 @@ NNS.seas <- function(variable, plot = TRUE){
 
 
     if(plot){
-      plot(instances[index], output[index], xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * sd(diff(variable)) ))
+      plot(instances[index], output[index], xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
 
       points(M[1, Period], M[1, Coefficient.of.Variance], pch = 19, col = 'red')
 
-      abline(h = sd(diff(variable)), col = "red", lty = 5)
-      text(mean(instances[index]), sd(diff(variable)), pos = 3, "Variable Coefficient of Variance", col = 'red')
+      abline(h = abs(sd(variable) / mean(variable)), col = "red", lty = 5)
+      text(mean(instances[index]), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variance", col = 'red')
     }
 
     return(list("all.periods" = M,
