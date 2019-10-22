@@ -83,7 +83,7 @@ See the following for NNS detailed examples and specific applications:
 
    5.1 [Econometrics Critiques and Solutions](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/7_Econometic_Reasons.html)
    
-   5.2 [VAR Alternative](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Multivariate_time_series_example.html)
+   5.2 [VAR Alternative](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html)
    
    
 
