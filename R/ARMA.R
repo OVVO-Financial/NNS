@@ -161,7 +161,6 @@ NNS.ARMA <- function(variable,
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
 
-
     if(is.null(weights)){
         Weights <- ASW$Weights
     } else {
@@ -279,13 +278,15 @@ if(!is.null(cl)){
     stopCluster(cl)
     registerDoSEQ()
 }
+
+
   #### PLOTTING
   if(plot){
     original.par = par(no.readonly = TRUE)
     if(seasonal.plot){
       par(mfrow = c(2, 1))
       if(ncol(M) > 1){
-        plot(M[1, Period], M[1, Coefficient.of.Variance],
+        plot(M[, Period], M[, Coefficient.of.Variance],
              xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * M[1, Variable.Coefficient.of.Variance]))
         points(M[ , Period], M[ , Coefficient.of.Variance], pch = 19, col = 'red')
         abline(h = M[1, Variable.Coefficient.of.Variance], col = "red", lty = 5)

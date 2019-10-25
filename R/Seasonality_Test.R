@@ -3,6 +3,7 @@
 #' Seasonality test based on the coefficient of variance for the variable and lagged component series.  A result of 1 signifies no seasonality present.
 #'
 #' @param variable a numeric vector.
+#' @param modulo integer; NULL (default) Used to find the nearest multiple in the reported seasonal period.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
 #' @return Returns a matrix of all periods exhibiting less coefficient of variance than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variance versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
@@ -17,7 +18,9 @@
 #' @export
 
 
-NNS.seas <- function(variable, plot = TRUE){
+NNS.seas <- function(variable,
+                     modulo = NULL,
+                     plot = TRUE){
 
   if(length(variable)<5){
     return(data.table("Period" = 0, "Coefficient.of.Variance" = 0, "Variable.Coefficient.of.Variance" = 0, key = "Coefficient.of.Variance"))
@@ -33,7 +36,7 @@ NNS.seas <- function(variable, plot = TRUE){
   if(mean(variable) != 0){
     var.cov <- abs(sd(variable) / mean(variable))
   } else {
-    var.cov <- abs(acf(variable, lag = 1)$acf[2])^-1
+    var.cov <- abs(acf(variable, lag.max = 1)$acf[2])^-1
   }
 
   for(i in 1 : (length(variable) / 2)){
@@ -46,9 +49,9 @@ NNS.seas <- function(variable, plot = TRUE){
         test_1 <- abs(sd(reverse.var_1) / mean(reverse.var_1))
         test_2 <- abs(sd(reverse.var_2) / mean(reverse.var_2))
     } else {
-        test <- abs(acf(reverse.var, lag = 1)$acf[2])^-1
-        test_1 <- abs(acf(reverse.var_1, lag = 1)$acf[2])^-1
-        test_2 <- abs(acf(reverse.var_2, lag = 1)$acf[2])^-1
+        test <- abs(acf(reverse.var, lag.max = 1)$acf[2])^-1
+        test_1 <- abs(acf(reverse.var_1, lag.max = 1)$acf[2])^-1
+        test_2 <- abs(acf(reverse.var_2, lag.max = 1)$acf[2])^-1
     }
 
     if (test <= var.cov){
@@ -104,8 +107,21 @@ NNS.seas <- function(variable, plot = TRUE){
       text(mean(instances[index]), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variance", col = 'red')
     }
 
-    return(list("all.periods" = M,
-                "best.period" = M[1, Period]))
+    if(!is.null(modulo)){
+        a <- M$Period
+        plus <- a+(modulo-a%%modulo)
+        minus <- a-a%%modulo
+
+        periods <- unique(c(rbind(minus,plus)))
+        periods <- periods[!is.na(periods) & periods>0]
+
+        return(list("all.periods" = M,
+                    "best.period" = M[1, Period],
+                    "modulo" = periods))
+    } else {
+        return(list("all.periods" = M,
+                    "best.period" = M[1, Period]))
+    }
 
 
 }
