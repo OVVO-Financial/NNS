@@ -4,10 +4,12 @@
 \alias{NNS.seas}
 \title{NNS Seasonality Test}
 \usage{
-NNS.seas(variable, plot = TRUE)
+NNS.seas(variable, modulo = NULL, plot = TRUE)
 }
 \arguments{
 \item{variable}{a numeric vector.}
+
+\item{modulo}{integer; NULL (default) Used to find the nearest multiple in the reported seasonal period.}
 
 \item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.}
 }
