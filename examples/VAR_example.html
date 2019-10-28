@@ -2978,11 +2978,9 @@ registerDoParallel(cl)
 
 nns_IVs &lt;- foreach(i = 1:ncol(y_train_VAR), .packages = &#39;NNS&#39;)%dopar%{
     variable = y_train_VAR[, i]
-    a = NNS.seas(variable, plot = FALSE)$all.periods$Period
-    plus = a+(4-a%%4)
-    minus = a-a%%4
-    periods = unique(c(rbind(minus,plus)))
-    periods = periods[!is.na(periods) &amp; periods&gt;0]
+    
+    periods = NNS.seas(variable, modulo = 4, plot = FALSE)$modulo
+  
     b = NNS.ARMA.optim(variable, seasonal.factor = periods, 
                        training.set = length(variable) - 2*h, ncores = 1, 
                        obj.fn = expression( cor(predicted,actual, method = &quot;spearman&quot;) /sum((predicted - actual)^2)   ),
