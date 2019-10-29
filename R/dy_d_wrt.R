@@ -81,9 +81,9 @@ dy.d_<- function(x, y, wrt,
 
   if(is.null(dim(eval.points))){
       if(is.null(dim(x))){
-          h_step <- h * mean(x)
+          h_step <- abs(h * mean(x))
       } else {
-          h_step <- h * mean(x[,wrt])
+          h_step <- abs(h * mean(x[,wrt]))
       }
       original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
       original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
@@ -104,7 +104,7 @@ dy.d_<- function(x, y, wrt,
   } else {
       n <- dim(eval.points)[1]
       original.eval.points <- eval.points
-      h_step <- h * mean(eval.points[, wrt])
+      h_step <- abs(h * mean(eval.points[, wrt]))
       original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
       original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
@@ -139,8 +139,8 @@ dy.d_<- function(x, y, wrt,
       }
 
       if(!is.null(dim(eval.points))){
-          h_step_1 <- h * mean(eval.points[,1])
-          h_step_2 <- h * mean(eval.points[,2])
+          h_step_1 <- abs(h * mean(eval.points[,1]))
+          h_step_2 <- abs(h * mean(eval.points[,2]))
           mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
