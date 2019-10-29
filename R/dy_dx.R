@@ -55,7 +55,7 @@ dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.
       original.eval.point.min <- eval.point
       original.eval.point.max <- eval.point
 
-      h_step <- h * mean(x)
+      h_step <- abs(h * mean(x))
     
       eval.point.min <- original.eval.point.min - h_step
       eval.point.max <- h_step + original.eval.point.max
@@ -65,8 +65,8 @@ dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.
 
     if(any(run == 0)) {
         z <- which(run == 0)
-        eval.point.max[z] <- ((max(x) - min(x)) * h) + eval.point[z]
-        eval.point.max[z] <- eval.point[z] - ((max(x) - min(x)) * h)
+        eval.point.max[z] <- (abs((max(x) - min(x)) * h)) + eval.point[z]
+        eval.point.max[z] <- eval.point[z] - (abs((max(x) - min(x)) * h))
         run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
@@ -97,7 +97,7 @@ dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.
     ## Second derivative form:
     # f(x+h) - 2(f(x)) +f(x-h) / h^2
 
-        h_step <- h * mean(x)
+        h_step <- abs(h * mean(x))
         deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
 
         second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1], stn = stn, noise.reduction = noise.reduction)$Point.est
