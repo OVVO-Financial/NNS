@@ -80,8 +80,9 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(is.null(dim(eval.points))){
-      original.eval.points.min[wrt] <- (1 - h) * original.eval.points.min[wrt]
-      original.eval.points.max[wrt] <- (1 + h) * original.eval.points.max[wrt]
+      h_step <- mean(eval.points)
+      original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
+      original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
 
       deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
 
@@ -99,8 +100,9 @@ dy.d_<- function(x, y, wrt,
   } else {
       n <- dim(eval.points)[1]
       original.eval.points <- eval.points
-      original.eval.points.min[ , wrt] <- (1 - h) * original.eval.points.min[ , wrt]
-      original.eval.points.max[ , wrt] <- (1 + h) * original.eval.points.max[ , wrt]
+      h_step <- mean(eval.points[, wrt])
+      original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
+      original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
       original.eval.points <- rbind(original.eval.points.min,
                                     original.eval.points,
