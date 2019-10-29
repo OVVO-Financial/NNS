@@ -80,7 +80,11 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(is.null(dim(eval.points))){
-      h_step <- mean(eval.points)
+      if(is.null(dim(x)){
+          h_step <- mean(x)
+      } else {
+          h_step <- mean(x[,wrt])
+      }
       original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
       original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
 
@@ -135,21 +139,27 @@ dy.d_<- function(x, y, wrt,
       }
 
       if(!is.null(dim(eval.points))){
+          h_step_1 <- mean(eval.points[,1])
+          h_step_2 <- mean(eval.points[,2])
+          mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
+                                     eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
+                                     h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
+                                     eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
 
-          mixed.deriv.points <- matrix(c((1 + h) * eval.points[,1],(1 + h) * eval.points[,2],
-                                     (1 - h) * eval.points[,1], (1 + h) * eval.points[,2],
-                                     (1 + h) * eval.points[,1], (1 - h) * eval.points[,2],
-                                     (1 - h) * eval.points[,1], (1 - h) * eval.points[,2]), ncol = 2, byrow = TRUE)
-
-          mixed.distances <- 2 * (h * abs(eval.points[,1])) * 2 * (h * abs(eval.points[,2]))
+          mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
 
       } else {
-          mixed.deriv.points <- matrix(c((1 + h) * eval.points,
-                                       (1 - h) * eval.points[1], (1 + h) * eval.points[2],
-                                       (1 + h) * eval.points[1], (1 - h) * eval.points[2],
-                                       (1 - h) * eval.points), ncol = 2, byrow = TRUE)
+          if(is.null(dim(x)){
+              h_step <- mean(x)
+          } else {
+              h_step <- mean(x[,wrt])
+          }
+          mixed.deriv.points <- matrix(c(h_step + eval.points,
+                                       eval.points[1] - h_step, h_step + eval.points[2],
+                                       h_step + eval.points[1], eval.points[2] - h_step,
+                                       eval.points - h_step), ncol = 2, byrow = TRUE)
 
-          mixed.distances <- (2 * (h * abs(eval.points[1]))) * (2 * (h * abs(eval.points[2])))
+          mixed.distances <- (2 * h_step) * (2 * h_step)
       }
 
       mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points,
