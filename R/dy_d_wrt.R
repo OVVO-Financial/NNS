@@ -80,7 +80,7 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(is.null(dim(eval.points))){
-      if(is.null(dim(x)){
+      if(is.null(dim(x))){
           h_step <- mean(x)
       } else {
           h_step <- mean(x[,wrt])
@@ -149,7 +149,7 @@ dy.d_<- function(x, y, wrt,
           mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
 
       } else {
-          if(is.null(dim(x)){
+          if(is.null(dim(x))){
               h_step <- mean(x)
           } else {
               h_step <- mean(x[,wrt])
