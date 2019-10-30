@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
+#' @param factor.2.dummy logical; \code{FALSE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
 #' @param tau options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
 #' @return Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
@@ -22,15 +22,18 @@
 #' ## AirPassengers
 #' NNS.caus(1:length(AirPassengers), AirPassengers, tau = "ts")
 #'
-#' ## Causal matrix with per factor causation
+#' ## Causal matrix without per factor causation
 #' NNS.caus(iris, tau = 0)
+#'
+#' ## Causal matrix with per factor causation
+#' NNS.caus(iris, factor.2.dummy = TRUE, tau = 0)
 #' }
 #' @export
 
 NNS.caus <- function(x, y,
-                     factor.2.dummy = TRUE,
+                     factor.2.dummy = FALSE,
                      tau = 0,
-                     plot=FALSE){
+                     plot = FALSE){
 
   orig.tau <- tau
   orig.plot <- plot
@@ -121,7 +124,7 @@ NNS.caus <- function(x, y,
     }
   } else {
 
-    NNS.caus.matrix(x, tau = orig.tau, plot = orig.plot)
+    NNS.caus.matrix(x, tau = orig.tau)
   }
 
 
