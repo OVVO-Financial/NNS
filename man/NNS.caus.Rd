@@ -4,14 +4,14 @@
 \alias{NNS.caus}
 \title{NNS Causation}
 \usage{
-NNS.caus(x, y, factor.2.dummy = TRUE, tau = 0, plot = FALSE)
+NNS.caus(x, y, factor.2.dummy = FALSE, tau = 0, plot = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
 
-\item{factor.2.dummy}{logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.}
+\item{factor.2.dummy}{logical; \code{FALSE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.}
 
 \item{tau}{options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.}
 
@@ -34,8 +34,11 @@ NNS.caus(x, y, tau = "cs")
 ## AirPassengers
 NNS.caus(1:length(AirPassengers), AirPassengers, tau = "ts")
 
-## Causal matrix with per factor causation
+## Causal matrix without per factor causation
 NNS.caus(iris, tau = 0)
+
+## Causal matrix with per factor causation
+NNS.caus(iris, factor.2.dummy = TRUE, tau = 0)
 }
 }
 \references{
