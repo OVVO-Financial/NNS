@@ -33,86 +33,86 @@
 dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.order = 1, h = .05, noise.reduction = "mean", deriv.method = "FS"){
 
   if(length(eval.point) > 1 & deriv.method == "NNS"){
-      deriv.method <- "FS"
+    deriv.method <- "FS"
   }
 
   if(class(eval.point) == "character"){
-      ranges <- NNS.reg(x, y, order = order, noise.reduction = noise.reduction, plot = FALSE)$derivative
-      ranges[ , interval := seq(1 : length(ranges$Coefficient))]
+    ranges <- NNS.reg(x, y, order = order, noise.reduction = noise.reduction, plot = FALSE)$derivative
+    ranges[ , interval := seq(1 : length(ranges$Coefficient))]
 
-      range.weights <- numeric()
-      range.weights <- data.table(x, 'interval' = findInterval(x, ranges[ , X.Lower.Range]))
-      ranges <- ranges[interval %in% range.weights$interval, ]
+    range.weights <- numeric()
+    range.weights <- data.table(x, 'interval' = findInterval(x, ranges[ , X.Lower.Range]))
+    ranges <- ranges[interval %in% range.weights$interval, ]
 
-      range.weights <- range.weights[ , .N, by = 'interval']
+    range.weights <- range.weights[ , .N, by = 'interval']
 
-      range.weights <- range.weights$N / sum(range.weights$N)
+    range.weights <- range.weights$N / sum(range.weights$N)
 
-      return(sum(ranges[,Coefficient]*range.weights))
+    return(sum(ranges[,Coefficient]*range.weights))
 
   } else {
 
-      original.eval.point.min <- eval.point
-      original.eval.point.max <- eval.point
+    original.eval.point.min <- eval.point
+    original.eval.point.max <- eval.point
 
-      h_step <- abs(h * mean(x))
-    
-      eval.point.min <- original.eval.point.min - h_step
-      eval.point.max <- h_step + original.eval.point.max
+    h_step <- abs(h * diff(range(x)))
 
-      run <- eval.point.max - eval.point.min
+    eval.point.min <- original.eval.point.min - h_step
+    eval.point.max <- h_step + original.eval.point.max
+
+    run <- eval.point.max - eval.point.min
 
 
     if(any(run == 0)) {
-        z <- which(run == 0)
-        eval.point.max[z] <- (abs((max(x) - min(x)) * h)) + eval.point[z]
-        eval.point.max[z] <- eval.point[z] - (abs((max(x) - min(x)) * h))
-        run[z] <- eval.point.max[z] - eval.point.min[z]
+      z <- which(run == 0)
+      eval.point.max[z] <- (abs((max(x) - min(x)) * h)) + eval.point[z]
+      eval.point.max[z] <- eval.point[z] - (abs((max(x) - min(x)) * h))
+      run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
     if(deriv.order == 1){
-        if(deriv.method == "FS"){
-            estimates.min <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.min)$Point.est
-            estimates.max <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.max)$Point.est
+      if(deriv.method == "FS"){
+        estimates.min <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.min)$Point.est
+        estimates.max <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.max)$Point.est
 
-            rise <- estimates.max - estimates.min
+        rise <- estimates.max - estimates.min
 
-            return(rise / run)
+        return(rise / run)
       } else {
 
-          reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, stn = stn, noise.reduction = noise.reduction)
+        reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, stn = stn, noise.reduction = noise.reduction)
 
-          output <- reg.output$derivative
-          if(length(output[ , Coefficient]) == 1){
-              return(output[ , Coefficient])
-          }
+        output <- reg.output$derivative
+        if(length(output[ , Coefficient]) == 1){
+          return(output[ , Coefficient])
+        }
 
-          if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]) < eval.point){
-              return(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1])
-          } else {
-              return(mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1])))
-          }
+        if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]) < eval.point){
+          return(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1])
+        } else {
+          return(mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1])))
+        }
       }
     } else {
-    ## Second derivative form:
-    # f(x+h) - 2(f(x)) +f(x-h) / h^2
+      ## Second derivative form:
+      # f(x+h) - 2(f(x)) +f(x-h) / h^2
 
-        h_step <- abs(h * mean(x))
-        deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
+      h_step <- abs(h * diff(range(x)))
+      deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
 
-        second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1], stn = stn, noise.reduction = noise.reduction)$Point.est
-        second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 2], stn = stn, noise.reduction = noise.reduction)$Point.est
-        second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 3], stn = stn, noise.reduction = noise.reduction)$Point.est
+      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1], stn = stn, noise.reduction = noise.reduction)$Point.est
+      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 2], stn = stn, noise.reduction = noise.reduction)$Point.est
+      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 3], stn = stn, noise.reduction = noise.reduction)$Point.est
 
 
-        f.x_h <- second.deriv.estimates.1
+      f.x_h <- second.deriv.estimates.1
 
-        two_f.x <- 2 * second.deriv.estimates.2
+      two_f.x <- 2 * second.deriv.estimates.2
 
-        f.x__h <- second.deriv.estimates.3
+      f.x__h <- second.deriv.estimates.3
 
-        run <- ((1 + h) * eval.point) - eval.point
-        return((f.x_h - two_f.x + f.x__h) / (run ^ 2))
+      run <- ((1 + h) * eval.point) - eval.point
+      return((f.x_h - two_f.x + f.x__h) / (run ^ 2))
 
     }
 

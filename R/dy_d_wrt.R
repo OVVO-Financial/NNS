@@ -43,10 +43,10 @@ dy.d_<- function(x, y, wrt,
 
   order <- NULL
 
-  h <- max(0.01, 1 - NNS.dep.hd(cbind(x,y))$Dependence^(1/exp(1)))
+  h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
 
   if(messages){
-      message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
+    message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
   }
 
   n.best <- NNS.stack(x, y, folds = folds,
@@ -54,21 +54,21 @@ dy.d_<- function(x, y, wrt,
                       order = order)$NNS.reg.n.best
 
   if(is.character(eval.points)){
-      if(eval.points == "median"){
-          eval.points = apply(x, 2, median)
+    if(eval.points == "median"){
+      eval.points = apply(x, 2, median)
+    } else {
+      if(eval.points == "last"){
+        eval.points = as.numeric(x[length(x[ , 1]), ])
       } else {
-          if(eval.points == "last"){
-              eval.points = as.numeric(x[length(x[ , 1]), ])
-          } else {
-              if(eval.points == "mean"){
-                  eval.points = apply(x, 2, mean)
-              } else {
-                  if(eval.points == "all"){
-                      eval.points=x
-                  }
-              }
+        if(eval.points == "mean"){
+          eval.points = apply(x, 2, mean)
+        } else {
+          if(eval.points == "all"){
+            eval.points=x
           }
+        }
       }
+    }
   }
 
 
@@ -76,111 +76,111 @@ dy.d_<- function(x, y, wrt,
   original.eval.points.max <- eval.points
 
   if(messages){
-      message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
+    message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
   if(is.null(dim(eval.points))){
-      if(is.null(dim(x))){
-          h_step <- abs(h * mean(x))
-      } else {
-          h_step <- abs(h * mean(x[,wrt]))
-      }
-      original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
-      original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
+    if(is.null(dim(x))){
+      h_step <- abs(diff(range(x))/h) + (.05 * diff(range(x)))
+    } else {
+      h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
+    }
+    original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
+    original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
 
-      deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
+    deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
 
-      estimates <- NNS.reg(x, y, order = order, point.est = deriv.points,
-                          n.best = n.best,
-                          residual.plot = plot, plot = plot)$Point.est
+    estimates <- NNS.reg(x, y, order = order, point.est = deriv.points,
+                         n.best = n.best,
+                         residual.plot = plot, plot = plot)$Point.est
 
-      lower <- estimates[1]
-      two.f.x <- 2 * estimates[2]
-      upper <- estimates[3]
+    lower <- estimates[1]
+    two.f.x <- 2 * estimates[2]
+    upper <- estimates[3]
 
-      rise <- upper - lower
+    rise <- upper - lower
 
-      distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
+    distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
   } else {
-      n <- dim(eval.points)[1]
-      original.eval.points <- eval.points
-      h_step <- abs(h * mean(eval.points[, wrt]))
-      original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
-      original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
+    n <- dim(eval.points)[1]
+    original.eval.points <- eval.points
+    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
+    original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
+    original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
-      original.eval.points <- rbind(original.eval.points.min,
-                                    original.eval.points,
-                                    original.eval.points.max)
+    original.eval.points <- rbind(original.eval.points.min,
+                                  original.eval.points,
+                                  original.eval.points.max)
 
-      estimates <- NNS.reg(x, y, order = order, point.est = original.eval.points,
+    estimates <- NNS.reg(x, y, order = order, point.est = original.eval.points,
                          n.best = n.best,
                          residual.plot = plot, plot = plot)$Point.est
 
 
-      lower <- head(estimates,n)
-      two.f.x <- 2 * estimates[(n+1):(2*n)]
-      upper <- tail(estimates,n)
+    lower <- head(estimates,n)
+    two.f.x <- 2 * estimates[(n+1):(2*n)]
+    upper <- tail(estimates,n)
 
-      rise <- upper - lower
+    rise <- upper - lower
 
-      distance_wrt <- original.eval.points.max[ , wrt] - original.eval.points.min[ , wrt]
+    distance_wrt <- original.eval.points.max[ , wrt] - original.eval.points.min[ , wrt]
   }
 
 
   if(mixed){
-      if(is.null(dim(eval.points))){
-          if(length(eval.points)!=2){
-              return("Mixed Derivatives are only for 2 IV")
-          }
-      } else {
-          if(ncol(eval.points) != 2){
-              return("Mixed Derivatives are only for 2 IV")
-          }
+    if(is.null(dim(eval.points))){
+      if(length(eval.points)!=2){
+        return("Mixed Derivatives are only for 2 IV")
       }
+    } else {
+      if(ncol(eval.points) != 2){
+        return("Mixed Derivatives are only for 2 IV")
+      }
+    }
 
-      if(!is.null(dim(eval.points))){
-          h_step_1 <- abs(h * mean(eval.points[,1]))
-          h_step_2 <- abs(h * mean(eval.points[,2]))
-          mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
+    if(!is.null(dim(eval.points))){
+      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.05 * diff(range(x[, 1])))
+      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.05 * diff(range(x[, 2])))
+      mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
                                      eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
 
-          mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
+      mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
 
+    } else {
+      if(is.null(dim(x))){
+        h_step <- h * mean(x)
       } else {
-          if(is.null(dim(x))){
-              h_step <- h * mean(x)
-          } else {
-              h_step <- h * mean(x[,wrt])
-          }
-          mixed.deriv.points <- matrix(c(h_step + eval.points,
-                                       eval.points[1] - h_step, h_step + eval.points[2],
-                                       h_step + eval.points[1], eval.points[2] - h_step,
-                                       eval.points - h_step), ncol = 2, byrow = TRUE)
-
-          mixed.distances <- (2 * h_step) * (2 * h_step)
+        h_step <- h * mean(x[,wrt])
       }
+      mixed.deriv.points <- matrix(c(h_step + eval.points,
+                                     eval.points[1] - h_step, h_step + eval.points[2],
+                                     h_step + eval.points[1], eval.points[2] - h_step,
+                                     eval.points - h_step), ncol = 2, byrow = TRUE)
 
-      mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points,
-                                 n.best = n.best,
-                                 residual.plot = plot, plot = plot)$Point.est
+      mixed.distances <- (2 * h_step) * (2 * h_step)
+    }
 
-      if(messages){
-          message("Done :-)","\r",appendLF=TRUE)
-      }
+    mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points,
+                               n.best = n.best,
+                               residual.plot = plot, plot = plot)$Point.est
 
-      z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
-      z <- z[,1]+z[,4]-z[,2]-z[,3]
-      mixed <- (z/mixed.distances)
+    if(messages){
+      message("Done :-)","\r",appendLF=TRUE)
+    }
+
+    z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
+    z <- z[,1]+z[,4]-z[,2]-z[,3]
+    mixed <- (z/mixed.distances)
 
 
-      return(list("First Derivative" = rise / distance_wrt,
-                  "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2),
-                  "Mixed Derivative" = mixed))
+    return(list("First Derivative" = rise / distance_wrt,
+                "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2),
+                "Mixed Derivative" = mixed))
   } else {
-      return(list("First Derivative" = rise / distance_wrt,
-                  "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2)))
+    return(list("First Derivative" = rise / distance_wrt,
+                "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2)))
   }
 
 
