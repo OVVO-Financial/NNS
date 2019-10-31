@@ -121,7 +121,7 @@ NNS.caus <- function(x, y,
           }
             return(c(Causation.x.given.y = Causation.x.given.y,
                       Causation.y.given.x = Causation.y.given.x,
-                      "C(y--->x)" = Causation.x.given.y - Causation.y.given.x))
+                      "C(y--->x)" = abs(Causation.x.given.y) - abs(Causation.y.given.x)))
           }
     } else {
       if(Causation.x.given.y <= Causation.y.given.x){
