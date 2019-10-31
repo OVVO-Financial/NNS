@@ -93,35 +93,70 @@ NNS.caus <- function(x, y,
     }
 
 
-    if(abs(Causation.x.given.y) <= abs(Causation.y.given.x)){
+    if(sign(Causation.x.given.y) == sign(Causation.y.given.x)){
+        if(abs(Causation.x.given.y) <= abs(Causation.y.given.x)){
+            if(plot){
+                # For plotting only
+                if(tau == "cs"){
+                    tau <- 0
+                }
+                if(tau == "ts"){
+                    tau <- 3
+                }
+                Uni.caus(x, y, tau = tau, plot = plot)
+            }
+            return(c(Causation.x.given.y = Causation.x.given.y,
+                  Causation.y.given.x = Causation.y.given.x,
+                  "C(x--->y)" =  abs(Causation.y.given.x) - abs(Causation.x.given.y)))
+        } else {
+          if(plot){
+              # For plotting only
+              if(tau == "cs"){
+                  tau <- 0
+              }
+              if(tau == "ts"){
+                  tau <- 3
+              }
+              Uni.caus(x, y, tau = tau, plot = plot)
+          }
+            return(c(Causation.x.given.y = Causation.x.given.y,
+                      Causation.y.given.x = Causation.y.given.x,
+                      "C(y--->x)" = Causation.x.given.y - Causation.y.given.x))
+          }
+    } else {
+      if(Causation.x.given.y <= Causation.y.given.x){
         if(plot){
-            # For plotting only
-            if(tau == "cs"){
-                tau <- 0
-            }
-            if(tau == "ts"){
-                tau <- 3
-            }
-            Uni.caus(x, y, tau = tau, plot = plot)
+          # For plotting only
+          if(tau == "cs"){
+            tau <- 0
+          }
+          if(tau == "ts"){
+            tau <- 3
+          }
+          Uni.caus(x, y, tau = tau, plot = plot)
         }
         return(c(Causation.x.given.y = Causation.x.given.y,
-               Causation.y.given.x = Causation.y.given.x,
-               "C(x--->y)" =  abs(Causation.y.given.x - Causation.x.given.y)))
-    } else {
+                 Causation.y.given.x = Causation.y.given.x,
+                 "C(x--->y)" =  Causation.y.given.x - Causation.x.given.y))
+      } else {
         if(plot){
-            # For plotting only
-            if(tau == "cs"){
-                tau <- 0
-            }
-            if(tau == "ts"){
-                tau <- 3
-            }
-            Uni.caus(x, y, tau = tau, plot = plot)
+          # For plotting only
+          if(tau == "cs"){
+            tau <- 0
+          }
+          if(tau == "ts"){
+            tau <- 3
+          }
+          Uni.caus(x, y, tau = tau, plot = plot)
         }
-    return(c(Causation.x.given.y = Causation.x.given.y,
-               Causation.y.given.x = Causation.y.given.x,
-               "C(y--->x)" = abs(Causation.x.given.y - Causation.y.given.x)))
+        return(c(Causation.x.given.y = Causation.x.given.y,
+                 Causation.y.given.x = Causation.y.given.x,
+                 "C(y--->x)" = Causation.x.given.y - Causation.y.given.x))
+      }
+
+
     }
+
   } else {
 
     NNS.caus.matrix(x, tau = orig.tau)
