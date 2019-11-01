@@ -195,7 +195,9 @@ NNS.boost <- function(IVs.train,
 
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
-    epochs <- NULL
+    if(!extreme){
+        epochs <- NULL
+    }
     old.threshold <- 1
     test.features <- list()
     results <- numeric()
@@ -318,86 +320,84 @@ NNS.boost <- function(IVs.train,
   keeper.features <- list()
 
   if(!is.null(epochs)){
-  for(j in 1:epochs){
-    set.seed(123 * j)
-    new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
+    for(j in 1:epochs){
+        set.seed(123 * j)
+        new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-    if(i > 1){
-      new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-      new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
-    }
-
-
-    new.iv.train <- data.table(x[-new.index,])
-    new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
-
-    fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-    mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
-    mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
-
-    new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+        if(i > 1){
+            new.index_half <- new.index.1[1:(length(new.index.1)/2)]
+            new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
+        }
 
 
-    new.iv.train <- as.data.frame(new.iv.train[,-1])
-    new.dv.train <- unlist(new.iv.train[,1])
+        new.iv.train <- data.table(x[-new.index,])
+        new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
-    if(!representative.sample){
-      new.iv.train <- rbind(new.iv.train,x[-new.index,])
-      new.dv.train <- c(new.dv.train,y[-new.index])
-    }
+        fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
+        mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
+        mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
+
+        new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+
+        new.iv.train <- as.data.frame(new.iv.train[,-1])
+        new.dv.train <- unlist(new.iv.train[,1])
+
+        if(!representative.sample){
+            new.iv.train <- rbind(new.iv.train,x[-new.index,])
+            new.dv.train <- c(new.dv.train,y[-new.index])
+        }
 
 
+        actual <- as.numeric(y[new.index])
+        new.iv.test <- x[new.index,]
 
-    actual <- as.numeric(y[new.index])
-    new.iv.test <- x[new.index,]
+        if(status){
+            message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
-    if(status){
-      message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
-
-      if(j == epochs){
-        message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
-        flush.console()
-      }
-    }
+            if(j == epochs){
+                message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
+                flush.console()
+            }
+        }
     
-    features <- sort(sample(n,sample(2:n,1),replace = FALSE))
+        features <- sort(sample(n,sample(2:n,1),replace = FALSE))
 
     #If estimate is > threshold, store 'features'
-    predicted <- NNS.reg(new.iv.train[,features],
-                         new.dv.train, point.est = new.iv.test[,features],
-                         plot=FALSE, residual.plot = FALSE, order=depth, n.best=n.best,
-                         factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est
+        predicted <- NNS.reg(new.iv.train[,features],
+                             new.dv.train, point.est = new.iv.test[,features],
+                             plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
+                             factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est
 
     # Do not predict a new unseen class
-    predicted <- pmin(predicted,max(as.numeric(y)))
-    predicted <- pmax(predicted,min(as.numeric(y)))
+        predicted <- pmin(predicted,max(as.numeric(y)))
+        predicted <- pmax(predicted,min(as.numeric(y)))
 
-    new.index.1 <- rev(order(abs(predicted - actual)))
+        new.index.1 <- rev(order(abs(predicted - actual)))
 
-    new.results <- eval(obj.fn)
+        new.results <- eval(obj.fn)
 
-    if(objective=="max"){
-      if(new.results>=threshold){
-        keeper.features[[j]] <- features
-      } else {
-        keeper.features[[j]] <- NULL
-      }
-    } else {
-      if(new.results<=threshold){
-        keeper.features[[j]] <- features
-      } else {
-        keeper.features[[j]] <- NULL
+        if(objective=="max"){
+            if(new.results>=threshold){
+                keeper.features[[j]] <- features
+            } else {
+                keeper.features[[j]] <- NULL
+            }
+        } else {
+            if(new.results<=threshold){
+                keeper.features[[j]] <- features
+        } else {
+                keeper.features[[j]] <- NULL
+        }
       }
     }
-  }
-} # !is.null(epochs)
-  else {
+  } else { # !is.null(epochs)
         if(objective=="max"){
-                  keeper.features <- test.features[which(results>=threshold)]
+            keeper.features <- test.features[which(results>=threshold)]
          } else {
-                  keeper.features <- test.features[which(results<=threshold)]
+            keeper.features <- test.features[which(results<=threshold)]
          }
-  }
+ }
+  
   keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
   if(length(keeper.features)==0){
     if(old.threshold==0){
