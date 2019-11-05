@@ -95,6 +95,8 @@ NNS.ARMA.optim <- function(variable, training.set,
   denominator <- min(5,max(2, as.integer(l/100)))
 
   seasonal.factor <- seasonal.factor[seasonal.factor<=(l/denominator)]
+  seasonal.factor <- c(1, seasonal.factor)
+  seasonal.factor <- unique(seasonal.factor)
 
   if(length(seasonal.factor)==0){stop(paste0('Please ensure "seasonal.factor" contains elements less than ', l/denominator, ", otherwise use cross-validation of seasonal factors as demonstrated in the vignette >>> Getting Started with NNS: Forecasting"))}
 
