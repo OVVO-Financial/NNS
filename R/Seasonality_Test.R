@@ -113,7 +113,7 @@ NNS.seas <- function(variable,
         minus <- a-a%%modulo
 
         periods <- unique(c(rbind(minus,plus)))
-        periods <- periods[!is.na(periods) & periods>0]
+        periods <- c(periods[!is.na(periods) & periods>0], 1)
 
         return(list("all.periods" = M,
                     "best.period" = M[1, Period],
