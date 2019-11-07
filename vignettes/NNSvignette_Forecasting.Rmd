@@ -62,8 +62,6 @@ seas
 
 Now we know `seasonal.factor = 12` is our best fit, we can see if there's any benefit from using a nonlinear regression.  Alternatively, we can define our best fit as the corresponding `seas$Period` entry of the minimum value in our `seas$RMSE` column.
 
-**Note:** You may experience instances with monthly data that report `seasonal.factor` close to multiples of 3, 4, 6 or 12.  For instance, if the reported `seasonal.factor = {37, 47, 71, 73}`  use  `(seasonal.factor = c(36, 48, 72))` by setting the `modulo` parameter in `NNS.seas(..., modulo = 12)`.  The same suggestion holds for daily data and multiples of 7, or any other time series with logically inferred cyclical patterns.
-
 ```{r best fit}
 a = seas[which.min(seas[ , 2]), 1]
 ```
@@ -74,6 +72,18 @@ nns = NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "nonlin", sea
 
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
+
+
+**Note:** You may experience instances with monthly data that report `seasonal.factor` close to multiples of 3, 4, 6 or 12.  For instance, if the reported `seasonal.factor = {37, 47, 71, 73}`  use  `(seasonal.factor = c(36, 48, 72))` by setting the `modulo` parameter in `NNS.seas(..., modulo = 12)`.  The same suggestion holds for daily data and multiples of 7, or any other time series with logically inferred cyclical patterns.  The nearest periods to that `modulo` will be in the expanded output.
+
+```{r modulo}
+NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
+```
+
+
+
+
+
 
 
 
