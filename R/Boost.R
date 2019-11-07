@@ -266,6 +266,8 @@ NNS.boost <- function(IVs.train,
       results[i] <- eval(obj.fn)
 
     } # i in learner.trials
+  } else {
+      results <- threshold
   } # NULL threshold
 
 
@@ -310,10 +312,10 @@ NNS.boost <- function(IVs.train,
 
 
   if(status){
-    message(paste0("Learner Accuracy Threshold = ", format(threshold,digits = 3,nsmall = 2),"           "),appendLF = TRUE)
+    message(paste0("Learner Accuracy Threshold = ", format(threshold, digits = 3, nsmall = 2),"           "), appendLF = TRUE)
 
     # Clear message line
-    message("                                       ","\r",appendLF=FALSE)
+    message("                                       ", "\r", appendLF=FALSE)
   }
 
 
@@ -324,7 +326,7 @@ NNS.boost <- function(IVs.train,
       set.seed(123 * j)
       new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-      if(i > 1){
+      if(j > 1){
         new.index_half <- new.index.1[1:(length(new.index.1)/2)]
         new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
       }
@@ -337,10 +339,10 @@ NNS.boost <- function(IVs.train,
       mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
       mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
 
-      new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
+      new.iv.train <- rbind(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train)
 
-      new.iv.train <- as.data.frame(new.iv.train[,-1])
-      new.dv.train <- unlist(new.iv.train[,1])
+      new.iv.train <- as.data.frame(new.iv.train[, -1])
+      new.dv.train <- unlist(new.iv.train[, 1])
 
       if(!representative.sample){
         new.iv.train <- rbind(new.iv.train,x[-new.index,])
@@ -360,11 +362,11 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(n,sample(2:n,1),replace = FALSE))
+      features <- sort(sample(n, sample(2:n, 1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
-      predicted <- NNS.reg(new.iv.train[,features],
-                           new.dv.train, point.est = new.iv.test[,features],
+      predicted <- NNS.reg(new.iv.train[, features],
+                           new.dv.train, point.est = new.iv.test[, features],
                            plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
                            factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est
 
@@ -430,9 +432,10 @@ NNS.boost <- function(IVs.train,
     for(i in 1:dim(kf)[1]){
 
       if(status){
-        message("% of Final Estimate = ", format(i/dim(kf)[1],digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
+        message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
         if(i == length(keeper.features)){
-          message("% of Final Estimate = 1.000             ","\r",appendLF=FALSE)
+          message("% of Final Estimate = 1.000             ","\r", appendLF = FALSE)
+          message("                                        ","\r", appendLF = TRUE)
           flush.console()
         }
       }
@@ -462,11 +465,11 @@ NNS.boost <- function(IVs.train,
 
   if(feature.importance){
 
-    linch <-  max(strwidth(names(plot.table), "inch")+0.4, na.rm = TRUE)
-    par(mai=c(1.0,linch,0.8,0.5))
+    linch <-  max(strwidth(names(plot.table), "inch") + 0.4, na.rm = TRUE)
+    par(mai=c(1.0, linch, 0.8, 0.5))
 
     if(length(plot.table)!=1){
-      barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+      barplot(sort(plot.table, decreasing = FALSE)[1:min(n, 10)],
               horiz = TRUE,
               col='steelblue',
               main="Feature Frequency in Final Estimate",
@@ -476,7 +479,7 @@ NNS.boost <- function(IVs.train,
               horiz = TRUE,
               col='steelblue',
               main="Feature Frequency in Final Estimate",
-              xlab = "Frequency",las=1)
+              xlab = "Frequency", las = 1)
     }
     par(mar=c(5.1, 4.1, 4.1, 2.1))
     par(original.par)
