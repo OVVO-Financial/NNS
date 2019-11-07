@@ -57,9 +57,9 @@ a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
 
 a$results
 
-mean(round(a$results)==as.numeric(iris[test.set,5]))
-
 a$feature.weights
+
+mean(round(a$results)==as.numeric(iris[test.set,5]))
 ```
 
 A perfect classification.
