@@ -286,13 +286,13 @@ if(!is.null(cl)){
     if(seasonal.plot){
       par(mfrow = c(2, 1))
       if(ncol(M) > 1){
-        plot(M[, Period], M[, Coefficient.of.Variance],
-             xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * M[1, Variable.Coefficient.of.Variance]))
-        points(M[ , Period], M[ , Coefficient.of.Variance], pch = 19, col = 'red')
-        abline(h = M[1, Variable.Coefficient.of.Variance], col = "red", lty = 5)
-        text((M[ , min(Period)] + M[ , max(Period)]) / 2, M[1, Variable.Coefficient.of.Variance], pos = 3, "Variable Coefficient of Variance", col = 'red')
+        plot(M[, Period], M[, Coefficient.of.Variation],
+             xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * M[1, Variable.Coefficient.of.Variation]))
+        points(M[ , Period], M[ , Coefficient.of.Variation], pch = 19, col = 'red')
+        abline(h = M[1, Variable.Coefficient.of.Variation], col = "red", lty = 5)
+        text((M[ , min(Period)] + M[ , max(Period)]) / 2, M[1, Variable.Coefficient.of.Variation], pos = 3, "Variable Coefficient of Variation", col = 'red')
       } else {
-        plot(1,1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test",
+        plot(1,1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test",
              ylim = c(0, 2 * abs(sd(FV) / mean(FV))))
         text(1, abs(sd(FV) / mean(FV)), pos = 3, "NO SEASONALITY DETECTED", col = 'red')
       }

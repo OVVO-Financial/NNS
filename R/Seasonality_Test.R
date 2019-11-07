@@ -1,11 +1,11 @@
 #' NNS Seasonality Test
 #'
-#' Seasonality test based on the coefficient of variance for the variable and lagged component series.  A result of 1 signifies no seasonality present.
+#' Seasonality test based on the coefficient of variation for the variable and lagged component series.  A result of 1 signifies no seasonality present.
 #'
 #' @param variable a numeric vector.
 #' @param modulo integer; NULL (default) Used to find the nearest multiple in the reported seasonal period.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
-#' @return Returns a matrix of all periods exhibiting less coefficient of variance than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variance versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
+#' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -13,7 +13,7 @@
 #' set.seed(123)
 #' x <- rnorm(100)
 #'
-#' ## To call strongest period based on coefficient of variance:
+#' ## To call strongest period based on coefficient of variation:
 #' NNS.seas(x)$best.period
 #' @export
 
@@ -23,7 +23,7 @@ NNS.seas <- function(variable,
                      plot = TRUE){
 
   if(length(variable)<5){
-    return(data.table("Period" = 0, "Coefficient.of.Variance" = 0, "Variable.Coefficient.of.Variance" = 0, key = "Coefficient.of.Variance"))
+    return(data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
   }
 
   variable_1 <- variable[1 : (length(variable) - 1)]
@@ -91,20 +91,20 @@ NNS.seas <- function(variable,
   if(insts){
     n <- rep(var.cov, length(instances[index]))
 
-    M <- data.table("Period" = instances[index], "Coefficient.of.Variance" = output[index], "Variable.Coefficient.of.Variance" = n, key = "Coefficient.of.Variance")
+    M <- data.table("Period" = instances[index], "Coefficient.of.Variation" = output[index], "Variable.Coefficient.of.Variation" = n, key = "Coefficient.of.Variation")
   } else {
-    M <- data.table("Period" = 1, "Coefficient.of.Variance" = NA, "Variable.Coefficient.of.Variance" = var.cov, key = "Coefficient.of.Variance")
+    M <- data.table("Period" = 1, "Coefficient.of.Variation" = NA, "Variable.Coefficient.of.Variation" = var.cov, key = "Coefficient.of.Variation")
   }
 
 
 
     if(plot){
-      plot(instances[index], output[index], xlab = "Period", ylab = "Coefficient of Variance", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
+      plot(instances[index], output[index], xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
 
-      points(M[1, Period], M[1, Coefficient.of.Variance], pch = 19, col = 'red')
+      points(M[1, Period], M[1, Coefficient.of.Variation], pch = 19, col = 'red')
 
       abline(h = abs(sd(variable) / mean(variable)), col = "red", lty = 5)
-      text(mean(instances[index]), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variance", col = 'red')
+      text(mean(instances[index]), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variation", col = 'red')
     }
 
     if(!is.null(modulo)){
@@ -113,15 +113,28 @@ NNS.seas <- function(variable,
         minus <- a-a%%modulo
 
         periods <- unique(c(rbind(minus,plus)))
-        periods <- c(periods[!is.na(periods) & periods>0], 1)
 
-        return(list("all.periods" = M,
-                    "best.period" = M[1, Period],
-                    "modulo" = periods))
-    } else {
-        return(list("all.periods" = M,
-                    "best.period" = M[1, Period]))
+        if(!1%in%unlist(M[,1])){
+            periods <- c(periods[!is.na(periods) & periods>0], 1)
+
+        } else {
+            periods <- periods[!is.na(periods) & periods>0]
+        }
+
+        periods <- periods[!periods%in%unlist(M[, 1])]
+
+        mod_cv <- data.table(cbind(periods,
+                                   rep(M[1, 3], length(periods)),
+                                   rep(M[1, 3], length(periods))))
+
+        M <- rbindlist(list(M, mod_cv))
+
     }
 
+    return(list("all.periods" = M,
+                "best.period" = unlist(M[1, Period])))
 
 }
+
+
+
