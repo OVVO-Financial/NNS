@@ -9,7 +9,7 @@ NNS.seas(variable, modulo = NULL, mod.only = TRUE, plot = TRUE)
 \arguments{
 \item{variable}{a numeric vector.}
 
-\item{modulo}{integer; NULL (default) Used to find the nearest multiple in the reported seasonal period.}
+\item{modulo}{integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.}
 
 \item{mod.only}{logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.}
 
@@ -26,7 +26,10 @@ set.seed(123)
 x <- rnorm(100)
 
 ## To call strongest period based on coefficient of variation:
-NNS.seas(x)$best.period
+NNS.seas(x, plot = FALSE)$best.period
+
+## Using modulos for logical seasonal inference:
+NNS.seas(x, modulo = c(2,3,5,7), plot = FALSE)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
