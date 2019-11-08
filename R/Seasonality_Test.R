@@ -4,6 +4,7 @@
 #'
 #' @param variable a numeric vector.
 #' @param modulo integer; NULL (default) Used to find the nearest multiple in the reported seasonal period.
+#' @param mod.only logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
 #' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
@@ -20,10 +21,15 @@
 
 NNS.seas <- function(variable,
                      modulo = NULL,
+                     mod.only = TRUE,
                      plot = TRUE){
 
   if(length(variable)<5){
     return(data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
+  }
+
+  if(is.null(modulo)){
+      mod.only <- FALSE
   }
 
   variable_1 <- variable[1 : (length(variable) - 1)]
@@ -121,13 +127,19 @@ NNS.seas <- function(variable,
             periods <- periods[!is.na(periods) & periods>0]
         }
 
+        if(mod.only){
+            mod_index <- which(unlist(M[, 1])%in%periods)
+        } else {
+            mod_index <- seq_along(unlist(M[,1]))
+        }
+
         periods <- periods[!periods%in%unlist(M[, 1])]
 
         mod_cv <- data.table(cbind(periods,
                                    rep(M[1, 3], length(periods)),
                                    rep(M[1, 3], length(periods))))
 
-        M <- rbindlist(list(M, mod_cv))
+        M <- rbindlist(list(M[mod_index, ], mod_cv))
 
     }
 
