@@ -23,7 +23,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{integer; \code{"max"} (default) Specifies the \code{order} parameter in the \code{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.}
+\item{depth}{options: (integer, NULL, "max"); \code{"max"} (default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.}
 
@@ -35,7 +35,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
-\item{threshold}{numeric [0, 1]; \code{NULL} (default) Sets the \code{obj.fn} accuracy threshold to keep feature combinations.}
+\item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
 
 \item{obj.fn}{expression;
 \code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
