@@ -6,7 +6,7 @@
 #' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
 #' @param mod.only logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
-#' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
+#' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
@@ -147,7 +147,8 @@ NNS.seas <- function(variable,
     }
 
     return(list("all.periods" = M,
-                "best.period" = unlist(M[1, Period])))
+                "best.period" = unlist(M[1, Period]),
+                "periods" = as.vector(unlist(M[, 1]))))
 
 }
 
