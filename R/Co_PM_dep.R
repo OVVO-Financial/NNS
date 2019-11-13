@@ -44,7 +44,10 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
     CO_lpm <- sum(lpm_prods) / l
 
     observed <- CO_upm + CO_lpm
+    if(is.na(observed)) observed <- 0
+
     independence <- 2 * (.5 ^ n)
+    if(is.na(independence)) independence <- 0
 
     if(plot && n == 3){
 

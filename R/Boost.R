@@ -122,7 +122,7 @@ NNS.boost <- function(IVs.train,
     }
 
     n.best <- NNS.stack(x, y, folds = folds, status = status,
-                        method = 1,
+                        method = 1, order = depth,
                         obj.fn = obj.fn,
                         objective = objective,
                         ncores = ncores, type = type)$NNS.reg.n.best
@@ -173,14 +173,6 @@ NNS.boost <- function(IVs.train,
 
       actual <- y[new.index]
       new.iv.test <- x[new.index,]
-
-      ### Add 0's to data for missing regressors
-#      if(length(colnames(new.iv.train)[!(colnames(new.iv.train)%in%colnames(new.iv.test))]) > 0 ){
-#        Missing <- colnames(new.iv.train)[!(colnames(new.iv.train)%in%colnames(new.iv.test))]
-#        new.iv.test <- data.frame(new.iv.test)
-#        new.iv.test[, Missing] <- 0
-#        new.iv.test <- new.iv.test[, colnames(new.iv.train)]
-#      }
 
 
       if(status){
