@@ -17,7 +17,7 @@ UPM.VaR(percentile, degree, x)
 Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 }
 \description{
-Generates an upside VaR based on the Upper Partial Moment ratio
+Generates an upside value at risk (VaR) based on the Upper Partial Moment ratio
 }
 \examples{
 set.seed(123)

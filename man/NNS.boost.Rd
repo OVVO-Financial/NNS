@@ -66,7 +66,7 @@ Ensemble method for classification using the predictions of the NNS multivariate
  epochs = 100, learner.trials = 100)
 
  ## Test accuracy
- mean(round(a$results)==as.numeric(iris[141:150,5]))
+ mean(round(a$results) == as.numeric(iris[141:150, 5]))
  }
 
 }

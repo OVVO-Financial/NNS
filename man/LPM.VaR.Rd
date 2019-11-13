@@ -17,7 +17,7 @@ LPM.VaR(percentile, degree, x)
 Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 }
 \description{
-Generates a VaR based on the Lower Partial Moment ratio.
+Generates a value at risk (VaR) based on the Lower Partial Moment ratio.
 }
 \examples{
 set.seed(123)
