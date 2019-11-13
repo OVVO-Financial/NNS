@@ -96,7 +96,7 @@ NNS.boost <- function(IVs.train,
 
   fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
   mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(z))), by = .(y)]
-  mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z)))), by = .(y)]
+  mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z))), by = .(y)]
 
   rep.x <- rbind(fivenum.x,mode.x,mean.x)
   rep.y <- unlist(rep.x[,1])
@@ -158,8 +158,8 @@ NNS.boost <- function(IVs.train,
 
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-      mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
-      mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
+      mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
+      mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
 
       new.iv.train <- rbind(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train)
 
@@ -276,8 +276,8 @@ NNS.boost <- function(IVs.train,
       new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-      mode.new.iv.train <- new.iv.train[,lapply(.SD,mode), by = .(y[-new.index])]
-      mean.new.iv.train <- new.iv.train[,lapply(.SD,mean), by = .(y[-new.index])]
+      mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
+      mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
 
       new.iv.train <- rbind(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train)
 
