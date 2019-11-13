@@ -142,7 +142,7 @@ NNS.seas <- function(variable,
                                    rep(M[1, 3], length(periods)),
                                    rep(M[1, 3], length(periods))))
 
-        M <- rbindlist(list(M[mod_index, ], mod_cv), use.names = FALSE)
+        M <- rbindlist(list(M, mod_cv), use.names = FALSE)
 
     }
 
