@@ -94,7 +94,7 @@ NNS.boost <- function(IVs.train,
   ### Representative samples
   rep.x <- data.table(x)
 
-  fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
+  fivenum.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
   mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(z))), by = .(y)]
   mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z))), by = .(y)]
 
@@ -157,7 +157,7 @@ NNS.boost <- function(IVs.train,
       new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
 
 
-      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
+      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
       mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
       mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
 
