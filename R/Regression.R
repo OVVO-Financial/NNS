@@ -198,7 +198,7 @@ NNS.reg = function (x, y,
                 point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
             } else {
                 point.est <- t(point.est)
-                point.est <- t(do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR)))
+                point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
             }
 
             if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
@@ -210,10 +210,10 @@ NNS.reg = function (x, y,
 
         } else { # !is.null(dim(x))...implying univariate regression
 
-            point.est <- factor_2_dummy_FR(point.est)
-            l <- dim(t(t(point.est)))[2]
+            point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
+            l <- dim(t(point.est))[2]
 
-            if(is.null(names(point.est))) {names(point.est) <- names(x)}
+            if(is.null(colnames(point.est))) {colnames(point.est) <- names(x)}
         }
 
       ### Add 0's to data for missing regressors
