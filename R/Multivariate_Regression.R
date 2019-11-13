@@ -1,7 +1,6 @@
 NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
 
 
-
   ### For Multiple regressions
   ###  Turn each column into numeric values
   original.IVs <- X_n

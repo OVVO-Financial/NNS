@@ -202,18 +202,19 @@ NNS.reg = function (x, y,
             }
 
             if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
-                names(point.est) <- names(x)
+                colnames(point.est) <- colnames(x)
             }
 
             point.est <- as.matrix(point.est)
             l <- dim(point.est)[2]
-
+            colnames(point.est) <- colnames(x)
         } else { # !is.null(dim(x))...implying univariate regression
 
             point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
             l <- dim(t(point.est))[2]
 
-            if(is.null(colnames(point.est))) {colnames(point.est) <- names(x)}
+            if(is.null(colnames(point.est))) {
+              colnames(point.est) <- colnames(x)}
         }
 
       ### Add 0's to data for missing regressors
