@@ -96,7 +96,7 @@ NNS.boost <- function(IVs.train,
 
   fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
   mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(z))), by = .(y)]
-  mean.x <- rep.x[,lapply(.SD,mean), by = .(y)]
+  mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z)))), by = .(y)]
 
   rep.x <- rbind(fivenum.x,mode.x,mean.x)
   rep.y <- unlist(rep.x[,1])
