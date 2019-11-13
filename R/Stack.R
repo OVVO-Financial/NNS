@@ -111,11 +111,13 @@ NNS.stack <- function(IVs.train,
 
       if(b > 1){
           test.set_half <- unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
+
           test.set <- unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+          test.set <- na.omit(test.set)
     }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
-      CV.IVs.test <- IVs.train[c(test.set), ]
+      CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(-test.set), ]), factor_2_dummy_FR))
 
       CV.DV.train <- DV.train[c(-test.set)]
       CV.DV.test <- DV.train[c(test.set)]
