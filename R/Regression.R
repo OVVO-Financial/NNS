@@ -160,39 +160,45 @@ NNS.reg = function (x, y,
   original.columns <- ncol(x)
 
   y.label <- deparse(substitute(y))
+  if(is.null(y.label)){
+    y.label <- "y"
+  }
 
   if(is.null(original.columns)){
       x.label <- deparse(substitute(x))
+      if(is.null(x.label)){
+          x.label <- "x"
+      }
   }
 
-  if(factor.2.dummy && !multivariate.call){
-    if(is.list(x)){
-      x <- do.call(cbind,x)
+  if(factor.2.dummy){ #&& !multivariate.call){
+    if(is.list(x) & !is.data.frame(x)){
+      x <- do.call(cbind, x)
     }
 
     if(!is.null(dim(x))){
-      x <- apply(x,2,factor_2_dummy)
+      x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
       if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
       colnames(x) <- make.unique(colnames(x),sep = "_")
 
     } else {
-      x <- factor_2_dummy(x)
+      x <- factor_2_dummy_FR(x)
     }
 
     x <- data.matrix(x)
 
     if(!is.null(point.est)){
         point.est.y <- numeric()
-        if(is.list(point.est)){
-            point.est <- do.call(cbind,point.est)
+        if(is.list(point.est) & !is.data.frame(point.est)){
+            point.est <- do.call(cbind, point.est)
         }
 
         if(!is.null(dim(x))){
             if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
-                point.est <- apply(point.est,2,factor_2_dummy)
+                point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
             } else {
                 point.est <- t(point.est)
-                point.est <- t(apply(point.est,2,factor_2_dummy))
+                point.est <- t(do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR)))
             }
 
             if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
@@ -204,17 +210,18 @@ NNS.reg = function (x, y,
 
         } else { # !is.null(dim(x))...implying univariate regression
 
-            point.est <- factor_2_dummy(point.est)
+            point.est <- factor_2_dummy_FR(point.est)
             l <- dim(t(t(point.est)))[2]
 
             if(is.null(names(point.est))) {names(point.est) <- names(x)}
         }
 
       ### Add 0's to data for missing regressors
-        if(dim(t(t(x)))[2]!=l && dim(t(t(x)))[2]>1){
-            Missing <- setdiff(names(x),names(point.est))
-            point.est[Missing] <- 0
-            point.est <- point.est[names(x)]
+        if(length(colnames(x)[!(colnames(x)%in%colnames(point.est))]) > 0 ){
+            Missing <- colnames(x)[!(colnames(x)%in%colnames(point.est))]
+            point.est <- data.frame(point.est)
+            point.est[, Missing] <- 0
+            point.est <- point.est[, colnames(x)]
         }
 
         point.est <- data.matrix(point.est)
@@ -230,6 +237,9 @@ NNS.reg = function (x, y,
   original.columns <- ncol(x)
 
   y.label <- deparse(substitute(y))
+  if(is.null(y.label)){
+    y.label <- "y"
+  }
 
   y <- as.numeric(y)
   original.y <- y
@@ -468,7 +478,7 @@ NNS.reg = function (x, y,
   y.min <- na.omit(y[x <= mid.min.range])
   l_y.min <- length(y.min)
 
-  if(l_y.min<=1){
+  if(l_y.min <= 1){
     a <- y.min
     b <- a
     f <- a
@@ -478,7 +488,7 @@ NNS.reg = function (x, y,
     f <- mean(c(max(y.min),min(y.min)))
   }
 
-  if(l_y.mid.min<=1){
+  if(l_y.mid.min <= 1){
     a1 <- y.mid.min
     b1 <- a1
   } else {
@@ -492,7 +502,7 @@ NNS.reg = function (x, y,
   y.max <- na.omit(y[x > mid.max.range])
   l_y.max <- length(y.max)
 
-  if(l_y.max<=1){
+  if(l_y.max <= 1){
     d <- median(y.max)
     e <- d
     g <- e
@@ -502,7 +512,7 @@ NNS.reg = function (x, y,
     g <- mean(c(max(y.max),min(y.max)))
   }
 
-  if(l_y.mid.max<=1){
+  if(l_y.mid.max <= 1){
     d1 <- median(y.mid.max)
     e1 <- d1
   } else {
@@ -553,11 +563,20 @@ NNS.reg = function (x, y,
   regression.points <- rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
 
   regression.points <- regression.points[complete.cases(regression.points),]
-
   setkey(regression.points, x, y)
 
   ### Consolidate possible duplicated points
-  regression.points <- unique(regression.points)
+  if(noise.reduction == "mean" | noise.reduction == "off"){
+      regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
+  }
+
+  if(noise.reduction == "median"){
+    regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
+  }
+
+  if(noise.reduction == "mode"){
+    regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
+  }
 
   ### Regression Equation
 

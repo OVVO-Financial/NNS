@@ -36,7 +36,7 @@
 #'  epochs = 100, learner.trials = 100)
 #'
 #'  ## Test accuracy
-#'  mean(round(a$results)==as.numeric(iris[141:150,5]))
+#'  mean(round(a$results) == as.numeric(iris[141:150, 5]))
 #'  }
 #'
 #' @export
@@ -90,78 +90,17 @@ NNS.boost <- function(IVs.train,
   y <- DV.train
   z <- IVs.test
 
-  if(is.list(x)){
-    x <- do.call(cbind,x)
-  }
-
-  if(!is.null(dim(x))){
-    if(!is.numeric(x)){
-      x <- sapply(x,factor_2_dummy)
-      X <- data.matrix(x)
-    } else {
-      x <- data.matrix(x)
-    }
-
-
-  } else {
-    x <- factor_2_dummy(x)
-    if(is.null(dim(x))){
-      x <- as.double(x)
-    } else {
-      x <- data.matrix(x)
-    }
-  }
-
-
-
-  if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-  colnames(x) <- make.unique(colnames(x),sep = "_")
-
-  if(!is.null(dim(z))){
-    if(is.list(z)){
-      z <- do.call(cbind,z)
-    }
-
-    if(!is.numeric(z)){
-      z <- sapply(z,factor_2_dummy)
-      z <- data.matrix(z)
-    } else {
-      z <- data.matrix(z)
-    }
-
-  } else {
-    z <- factor_2_dummy(z)
-    if(is.null(dim(z))){
-      z <- as.double(z)
-    } else {
-      z <- data.matrix(z)
-    }
-  }
-
-  if(is.null(colnames(z))) {colnames(z) <- colnames(z, do.NULL = FALSE)}
-  colnames(z) <- make.unique(colnames(z),sep = "_")
-
-  y <- as.double(as.numeric(unlist(y)))
-
 
   ### Representative samples
   rep.x <- data.table(x)
 
   fivenum.x <- rep.x[,lapply(.SD,fivenum), by = .(y)]
-  mode.x <- rep.x[,lapply(.SD,mode), by = .(y)]
+  mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(z))), by = .(y)]
   mean.x <- rep.x[,lapply(.SD,mean), by = .(y)]
 
   rep.x <- rbind(fivenum.x,mode.x,mean.x)
   rep.y <- unlist(rep.x[,1])
   rep.x <- rep.x[,-1]
-
-  if(dim(t(t(x)))[2]!=dim(rep.x)[2]){
-    Missing <- setdiff(colnames(x),colnames(rep.x))
-    if(length(Missing)>0){
-      rep.x[Missing] <- 0
-      rep.x <- rep.x[colnames(x)]
-    }
-  }
 
   rep.x <- as.data.frame(rep.x)
 
@@ -235,13 +174,14 @@ NNS.boost <- function(IVs.train,
       actual <- y[new.index]
       new.iv.test <- x[new.index,]
 
-      if(dim(new.iv.train)[2]!=dim(new.iv.test)[2]){
-        Missing <- setdiff(names(new.iv.train),names(new.iv.test))
-        if(length(Missing)>0){
-          new.iv.test[Missing] <- 0
-          new.iv.test <- new.iv.test[names(new.iv.train)]
-        }
-      }
+      ### Add 0's to data for missing regressors
+#      if(length(colnames(new.iv.train)[!(colnames(new.iv.train)%in%colnames(new.iv.test))]) > 0 ){
+#        Missing <- colnames(new.iv.train)[!(colnames(new.iv.train)%in%colnames(new.iv.test))]
+#        new.iv.test <- data.frame(new.iv.test)
+#        new.iv.test[, Missing] <- 0
+#        new.iv.test <- new.iv.test[, colnames(new.iv.train)]
+#      }
+
 
       if(status){
         message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)

@@ -1,6 +1,6 @@
 #' LPM VaR
 #'
-#' Generates a VaR based on the Lower Partial Moment ratio.
+#' Generates a value at risk (VaR) based on the Lower Partial Moment ratio.
 #' @param percentile numeric [0, 1]; The percentile for left-tail VaR.
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.
@@ -26,7 +26,7 @@ LPM.VaR <- function(percentile, degree, x){
 
 #' UPM VaR
 #'
-#' Generates an upside VaR based on the Upper Partial Moment ratio
+#' Generates an upside value at risk (VaR) based on the Upper Partial Moment ratio
 #' @param percentile numeric [0, 1]; The percentile for right-tail VaR.
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.

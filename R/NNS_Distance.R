@@ -23,7 +23,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
 
-  dist.estimate <- as.numeric(rpm[1,])
+  dist.estimate <- as.numeric(rpm[1, ])
 
   rpm <- rpm[-1,]
 

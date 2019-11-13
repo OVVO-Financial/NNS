@@ -41,13 +41,13 @@ NNS.caus <- function(x, y,
   if(factor.2.dummy){
       if(!is.null(dim(x))){
           if(!is.numeric(x)){
-              x <- sapply(x,factor_2_dummy_FR)
+              x <- do.call(cbind,lapply(data.frame(x), factor_2_dummy_FR))
           } else {
-              x <- apply(x,2,as.double)
+              x <- apply(x, 2, as.double)
           }
           if(is.list(x)){
-              x <- do.call(cbind,x)
-              x <- apply(x,2,as.double)
+              x <- do.call(cbind, x)
+              x <- apply(x, 2, as.double)
           }
 
       } else {
@@ -55,7 +55,7 @@ NNS.caus <- function(x, y,
           if(is.null(dim(x))){
               x <- as.double(x)
           } else {
-              x <- apply(x,2,as.double)
+              x <- apply(x, 2, as.double)
           }
       }
   }
@@ -65,8 +65,8 @@ NNS.caus <- function(x, y,
           y <- as.numeric(y)
       }
       if(is.numeric(tau)){
-          Causation.x.given.y <- Uni.caus(x,y,tau=tau,plot = FALSE)
-          Causation.y.given.x <- Uni.caus(y,x,tau=tau,plot = FALSE)
+          Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
+          Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
 
       if(Causation.x.given.y == Causation.y.given.x |
          Causation.x.given.y == 0 | Causation.y.given.x == 0){

@@ -103,7 +103,7 @@ NNS.stack <- function(IVs.train,
 
   for(b in 1 : folds){
       if(status){
-          message("Folds Remaining = " ,folds-b," ","\r",appendLF=TRUE)
+          message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
       }
 
       set.seed(123 * b)
@@ -116,6 +116,7 @@ NNS.stack <- function(IVs.train,
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
       CV.IVs.test <- IVs.train[c(test.set), ]
+
       CV.DV.train <- DV.train[c(-test.set)]
       CV.DV.test <- DV.train[c(test.set)]
 
@@ -136,11 +137,12 @@ NNS.stack <- function(IVs.train,
               }
 
           if(i==1){
-              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores, type = type)
-
+              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores, type = type, factor.2.dummy = TRUE)
               predicted <- setup$Point.est
+
           } else {
               predicted <- list()
+
               predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table"))%dopar%{
                   NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = "L2", k = i)
               }
