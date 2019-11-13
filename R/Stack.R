@@ -43,7 +43,7 @@
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4])
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS")
 #'
 #'  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
 #'  NNS.stack(iris[ , 1:4], iris[ , 5])
@@ -117,7 +117,7 @@ NNS.stack <- function(IVs.train,
     }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
-      CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(-test.set), ]), factor_2_dummy_FR))
+      CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(test.set), ]), factor_2_dummy_FR))
 
       CV.DV.train <- DV.train[c(-test.set)]
       CV.DV.test <- DV.train[c(test.set)]
@@ -141,7 +141,6 @@ NNS.stack <- function(IVs.train,
           if(i==1){
               setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores, type = type, factor.2.dummy = TRUE)
               predicted <- setup$Point.est
-
           } else {
               predicted <- list()
 
@@ -163,7 +162,7 @@ NNS.stack <- function(IVs.train,
           if(length(predicted > 0)){
               test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
           } else {
-          test.set.1 <- test.set
+              test.set.1 <- test.set
           }
 
           if(objective=='min'){
