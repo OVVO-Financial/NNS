@@ -30,10 +30,10 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 Returns a matrix of forecasted variables.
 }
 \description{
-Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables for a multi-variate time-series forecast.
+Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 }
 \examples{
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+
  \dontrun{
  set.seed(123)
  x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
@@ -43,8 +43,17 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 
 }
 \references{
-Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-\url{https://ssrn.com/abstract=2864711}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+\url{http://amzn.com/1490523995}
+
+Viole, F. (2019) "Forecasting Using NNS"
+\url{https://ssrn.com/abstract=3382300}
+
+Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
+\url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
+
+Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
+\url{https://www.preprints.org/manuscript/201801.0090/v1}
 }
 \author{
 Fred Viole, OVVO Financial Systems

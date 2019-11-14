@@ -150,6 +150,9 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 
 Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
+
+Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
+\url{https://www.preprints.org/manuscript/201801.0090/v1}
 }
 \author{
 Fred Viole, OVVO Financial Systems
