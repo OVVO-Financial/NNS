@@ -4,7 +4,7 @@
 \alias{NNS.VAR}
 \title{NNS VAR}
 \usage{
-NNS.VAR(variables, h, tau, obj.fn = expression(sum((predicted -
+NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
   actual)^2)), objective = "min", status = TRUE, ncores = NULL,
   subcores = NULL)
 }
@@ -12,6 +12,8 @@ NNS.VAR(variables, h, tau, obj.fn = expression(sum((predicted -
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
 
 \item{h}{integer; 1 (default) Number of periods to forecast.}
+
+\item{tau}{integer; 0 (default) Number of lagged observations to consider for the time-series data.}
 
 \item{obj.fn}{expression;
 \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
