@@ -38,6 +38,10 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
+#'
+#' Viole, F. (2019) "Forecasting Using NNS"
+#' \url{https://ssrn.com/abstract=3382300}
+#'
 #' @examples
 #'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12 period lag

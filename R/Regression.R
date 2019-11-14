@@ -68,6 +68,9 @@
 #'
 #' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 #' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
+#'
+#' Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
+#' \url{https://www.preprints.org/manuscript/201801.0090/v1}
 #' @examples
 #' \dontrun{
 #' set.seed(123)
