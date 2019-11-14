@@ -79,6 +79,42 @@ ARMA.seas.weighting <- function(sf,mat){
 }
 
 
+### Lag matrix generator for NNS.VAR
+lag.mtx <- function(x, tau){
+  colheads <- NULL
+
+  if(is.null(dim(x)[2])) {
+    colheads <- noquote(as.character(deparse(substitute(x))))
+    x <- t(t(x))
+  }
+
+  j.vectors <- list()
+
+  for(j in 1:ncol(x)){
+    if(is.null(colheads)){
+      colheads <- colnames(x)[j]
+
+      colheads <- noquote(as.character(deparse(substitute(colheads))))
+    }
+
+    x.vectors <- list()
+    heads <- paste0(colheads, ".tau.")
+    heads <- gsub('"', '' ,heads)
+
+    for (i in 0:tau){
+      x.vectors[[paste(heads, i, sep = "")]] <- numeric(0L)
+      start <- tau - i + 1
+      end <- length(x[,j]) - i
+      x.vectors[[i + 1]] <- x[start : end, j]
+    }
+
+    j.vectors[[j]] <- do.call(cbind, x.vectors)
+    colheads <- NULL
+  }
+
+  return(as.data.frame(do.call(cbind, j.vectors)))
+}
+
 
 
 
@@ -99,3 +135,6 @@ RP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
 
   y
 }
+
+
+

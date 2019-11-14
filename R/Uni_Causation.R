@@ -21,14 +21,14 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
         y.vectors[[i + 1]] <- y[start : end]
     }
 
-      x.vectors.tau <- do.call(cbind,x.vectors)
-      y.vectors.tau <- do.call(cbind,y.vectors)
+      x.vectors.tau <- do.call(cbind, x.vectors)
+      y.vectors.tau <- do.call(cbind, y.vectors)
 
       ## Normalize x to x.tau
-      x.norm.tau <- rowMeans(NNS.norm(x.vectors.tau))
+      x.norm.tau <- NNS.norm(x.vectors.tau)[, 1]
 
       ## Normalize y to y.tau
-      y.norm.tau <- rowMeans(NNS.norm(y.vectors.tau))
+      y.norm.tau <- NNS.norm(y.vectors.tau)[, 1]
 
 
   } else {

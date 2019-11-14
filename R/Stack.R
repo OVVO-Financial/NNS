@@ -69,7 +69,6 @@ NNS.stack <- function(IVs.train,
                       ncores = NULL){
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
-  objective <- tolower(objective)
 
   objective <- tolower(objective)
 
