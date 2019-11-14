@@ -1,6 +1,6 @@
 #' NNS VAR
 #'
-#' Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables for a multi-variate time-series forecast.
+#' Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 #'
 #' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
 #' @param h integer; 1 (default) Number of periods to forecast.
