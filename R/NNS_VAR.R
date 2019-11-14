@@ -4,6 +4,7 @@
 #'
 #' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
 #' @param h integer; 1 (default) Number of periods to forecast.
+#' @param tau integer; 0 (default) Number of lagged observations to consider for the time-series data.
 #' @param obj.fn expression;
 #' \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -31,7 +32,7 @@
 
 NNS.VAR <- function(variables,
                     h,
-                    tau,
+                    tau = 0,
                     obj.fn = expression( sum((predicted - actual)^2) ),
                     objective = "min",
                     status = TRUE,
