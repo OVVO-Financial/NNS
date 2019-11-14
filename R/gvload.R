@@ -20,7 +20,7 @@
       "mean_y_seg","mean_x_seg","sub.clpm",'sub.cupm','sub.dlpm','sub.dupm','weight','mean.x','mean.y',
       "Coefficient","X.Lower.Range","X.Upper.Range","y.hat","interval",
       "NNS.ID","max.x1","max.x2","min.x1","min.x2","counts",'old.counts',
-      "Period","Coefficient.of.Variation","Variable.Coefficient.of.Variation", "Sum", "j","lpm","upm",
+      "Period","Coefficient.of.Variation","Variable.Coefficient.of.Variation", "Sum", "j","lpm","upm", "tau",
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
       "detectCores","makeCluster","registerDoSEQ","clusterExport",
       "%dopar%","foreach","stopCluster",
