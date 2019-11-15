@@ -5,8 +5,8 @@
 \title{NNS VAR}
 \usage{
 NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
-  actual)^2)), objective = "min", status = TRUE, ncores = NULL,
-  subcores = NULL)
+  actual)^2)), objective = "min", epochs = 100, status = TRUE,
+  ncores = NULL, subcores = NULL)
 }
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
@@ -19,6 +19,8 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+
+\item{epochs}{integer; \code{100} (default) Total number of feature combinations to run.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
