@@ -84,7 +84,7 @@ NNS.VAR <- function(variables,
                         mod.only = FALSE, plot = FALSE)$periods
 
     b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
-                       training.set = length(variable) - 2*h,
+                       training.set = length(variable) - h,
                        obj.fn = obj.fn,
                        objective = objective,
                        print.trace = status,
@@ -106,7 +106,7 @@ NNS.VAR <- function(variables,
   lagged_new_values <- lag.mtx(new_values, tau = tau)
 
 # Keep original variables as training set
-  lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1]-h)
+  lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
 
 # Select tau = 0 as test set DVs
   DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
