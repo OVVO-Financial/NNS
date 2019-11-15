@@ -112,13 +112,13 @@ NNS.VAR <- function(variables,
   nns_DVs <- list()
 
   if(status){
-    message("Currently generating multi-variate estimates...","\r",appendLF=TRUE)
+    message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   }
 
   for(i in DVs){
     index <- which(DVs%in%i)
     if(status){
-      message("Variable ", index, " of ", length(DVs), appendLF=TRUE)
+      message("Variable ", index, " of ", length(DVs), appendLF = TRUE)
     }
 # NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
     nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
