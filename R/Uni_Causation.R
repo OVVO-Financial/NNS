@@ -25,10 +25,10 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
       y.vectors.tau <- do.call(cbind, y.vectors)
 
       ## Normalize x to x.tau
-      x.norm.tau <- NNS.norm(x.vectors.tau)[, 1]
+      x.norm.tau <- rowMeans(NNS.norm(x.vectors.tau))
 
       ## Normalize y to y.tau
-      y.norm.tau <- NNS.norm(y.vectors.tau)[, 1]
+      y.norm.tau <- rowMeans(NNS.norm(y.vectors.tau))
 
 
   } else {
