@@ -103,6 +103,9 @@ NNS.VAR <- function(variables,
 # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
 
+# Keep original variables as training set
+  lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)-h)
+
 # Select tau = 0 as test set DVs
   DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
 
@@ -118,8 +121,8 @@ NNS.VAR <- function(variables,
       message("Variable ", index, " of ", length(DVs), appendLF=TRUE)
     }
 # NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
-    nns_boost_est <- NNS.boost(lagged_new_values[, -i], lagged_new_values[, i],
-                               IVs.test = tail(lagged_new_values[, -i], h),
+    nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
+                               IVs.test = tail(lagged_new_values_train[, -i], 2*h),
                                obj.fn = obj.fn,
                                objective = objective,
                                learner.trials = 100, epochs = 100,
@@ -127,12 +130,12 @@ NNS.VAR <- function(variables,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-    nns_DVs[[index]] <- NNS.stack(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
-                             lagged_new_values[, i],
+    nns_DVs[[index]] <- NNS.stack(lagged_new_values_train[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
+                             lagged_new_values_train[, i],
                              IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
                              obj.fn = obj.fn,
                              objective = objective,
-                             status = status)$stack
+                             status = status, ncores = ncores)$stack
 
 
   }
