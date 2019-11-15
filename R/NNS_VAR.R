@@ -147,6 +147,6 @@ NNS.VAR <- function(variables,
   forecasts <- (nns_IVs + nns_DVs)/2
   colnames(forecasts) <- colnames(variables)
 
-  return( list(c(nns_IVs, nns_DVs, forecasts) )
+  return( list(c(nns_IVs, nns_DVs, forecasts)) )
 
 }
