@@ -29,7 +29,14 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 \item{subcores}{integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
-Returns a matrix of forecasted variables.
+Returns the following matrices of forecasted variables:
+\itemize{
+ \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
+
+ \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts.
+
+ \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
+ }
 }
 \description{
 Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
