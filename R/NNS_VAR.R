@@ -13,7 +13,15 @@
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
-#' @return Returns a matrix of forecasted variables.
+#' @return Returns the following matrices of forecasted variables:
+#' \itemize{
+#'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
+#'
+#'  \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts.
+#'
+#'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
+#'  }
+#'
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -51,7 +59,7 @@ NNS.VAR <- function(variables,
                     subcores = NULL){
 
 
-# Create train / test sets for NNS.ARMA extensions
+  # Create train / test sets for NNS.ARMA extensions
   train_VAR = dim(variables)[1] - h
   test_DVs = tail(variables, h)
 
@@ -84,11 +92,11 @@ NNS.VAR <- function(variables,
                         mod.only = FALSE, plot = FALSE)$periods
 
     b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
-                       training.set = length(variable) - h,
-                       obj.fn = obj.fn,
-                       objective = objective,
-                       print.trace = status,
-                       ncores = subcores)
+                        training.set = length(variable) - h,
+                        obj.fn = obj.fn,
+                        objective = objective,
+                        print.trace = status,
+                        ncores = subcores)
 
     NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = ncores, plot = FALSE) + b$bias.shift
@@ -98,17 +106,18 @@ NNS.VAR <- function(variables,
   registerDoSEQ()
 
   nns_IVs <- do.call(cbind, nns_IVs)
+  colnames(nns_IVs) <- colnames(variables)
 
-# Combine forecasted IVs onto training data.frame
+  # Combine forecasted IVs onto training data.frame
   new_values <- rbind(variables, nns_IVs)
 
-# Now lag new forecasted data.frame
+  # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
 
-# Keep original variables as training set
+  # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
 
-# Select tau = 0 as test set DVs
+  # Select tau = 0 as test set DVs
   DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
 
   nns_DVs <- list()
@@ -122,6 +131,7 @@ NNS.VAR <- function(variables,
     if(status){
       message("Variable ", index, " of ", length(DVs), appendLF = TRUE)
     }
+
 # NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
     nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
                                IVs.test = tail(lagged_new_values_train[, -i], h),
@@ -133,20 +143,21 @@ NNS.VAR <- function(variables,
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
     nns_DVs[[index]] <- NNS.stack(lagged_new_values_train[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
-                             lagged_new_values_train[, i],
-                             IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
-                             obj.fn = obj.fn,
-                             objective = objective,
-                             status = status, ncores = ncores)$stack
+                                  lagged_new_values_train[, i],
+                                  IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
+                                  obj.fn = obj.fn,
+                                  objective = objective,
+                                  status = status, ncores = ncores)$stack
 
 
   }
 
   nns_DVs <- do.call(cbind, nns_DVs)
+  colnames(nns_DVs) <- colnames(variables)
 
   forecasts <- (nns_IVs + nns_DVs)/2
   colnames(forecasts) <- colnames(variables)
 
-  return( list(NNS_IV = nns_IVs, NNS_DV = nns_DVs, fcast = forecasts) )
+  return( list(univariate = nns_IVs, multivariate = nns_DVs, ensemble = forecasts) )
 
 }
