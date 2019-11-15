@@ -124,10 +124,9 @@ NNS.seas <- function(variable,
         periods <- unique(c(rbind(minus,plus)))
 
         if(!1%in%unlist(M[,1])){
-            periods <- c(periods[!is.na(periods) & periods>0], 1)
-
+            periods <- c(periods[!is.na(periods) & periods>0], modulo, 1)
         } else {
-            periods <- periods[!is.na(periods) & periods>0]
+            periods <- c(periods[!is.na(periods) & periods>0], modulo)
         }
 
         if(mod.only){
@@ -136,7 +135,7 @@ NNS.seas <- function(variable,
             mod_index <- seq_along(unlist(M[,1]))
         }
 
-        periods <- periods[!periods%in%unlist(M[, 1])]
+        periods <- unique(periods[!periods%in%unlist(M[, 1])])
 
         mod_cv <- data.table(cbind(periods,
                                    rep(M[1, 3], length(periods)),
