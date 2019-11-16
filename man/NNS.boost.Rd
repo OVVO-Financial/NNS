@@ -6,11 +6,11 @@
 \usage{
 NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
   representative.sample = FALSE, depth = "max", n.best = NULL,
-  learner.trials = NULL, epochs = NULL, CV.size = 0.25, folds = 5,
-  threshold = NULL, obj.fn = expression(mean(round(predicted) ==
-  as.numeric(actual))), objective = "max", extreme = FALSE,
-  feature.importance = TRUE, status = TRUE, ncores = NULL,
-  subcores = NULL)
+  learner.trials = NULL, epochs = NULL, CV.size = 0.25,
+  ts.test = NULL, folds = 5, threshold = NULL,
+  obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
+  objective = "max", extreme = FALSE, feature.importance = TRUE,
+  status = TRUE, ncores = NULL, subcores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -32,6 +32,8 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 \item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
 \item{CV.size}{numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.}
+
+\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{h} parameter value from \link{NNS.ARMA} or known periods to forecast.}
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
