@@ -25,7 +25,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
-\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{h} parameter value from \link{NNS.ARMA} or known periods to forecast.}
+\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
 \item{folds}{integer; \code{folds = 5} (default) Select the number of cross-validation folds.}
 

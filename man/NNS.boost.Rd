@@ -33,7 +33,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{CV.size}{numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.}
 
-\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{h} parameter value from \link{NNS.ARMA} or known periods to forecast.}
+\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
