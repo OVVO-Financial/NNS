@@ -92,7 +92,7 @@ NNS.VAR <- function(variables,
                         mod.only = FALSE, plot = FALSE)$periods
 
     b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
-                        training.set = length(variable) - h,
+                        training.set = length(variable) - 2*h,
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
