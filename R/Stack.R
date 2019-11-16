@@ -9,7 +9,7 @@
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
-#' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{h} parameter value from \link{NNS.ARMA} or known periods to forecast.
+#' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
 #' @param order integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent.
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
@@ -118,7 +118,7 @@ NNS.stack <- function(IVs.train,
       }
 
       if(!is.null(ts.test)){
-        test.set <- length(DV.train) - (2*ts.test):0
+        test.set <- length(DV.train) - ts.test:0
       }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]

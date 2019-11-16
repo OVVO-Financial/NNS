@@ -137,6 +137,7 @@ NNS.VAR <- function(variables,
                                IVs.test = tail(lagged_new_values_train[, -i], h),
                                obj.fn = obj.fn,
                                objective = objective,
+                               ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
                                ncores = ncores, type = NULL,
                                feature.importance = FALSE)
@@ -147,6 +148,7 @@ NNS.VAR <- function(variables,
                                   IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
                                   obj.fn = obj.fn,
                                   objective = objective,
+                                  ts.test = 2*h, folds = 1,
                                   status = status, ncores = ncores)$stack
 
 

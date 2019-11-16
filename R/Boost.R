@@ -12,7 +12,7 @@
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  Number of observations in the training set is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
-#' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{h} parameter value from \link{NNS.ARMA} or known periods to forecast.
+#' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
 #' @param obj.fn expression;
@@ -125,7 +125,7 @@ NNS.boost <- function(IVs.train,
 
     n.best <- NNS.stack(x, y, folds = folds, status = status,
                         method = 1, order = depth,
-                        obj.fn = obj.fn,
+                        obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
                         ncores = ncores, type = type)$NNS.reg.n.best
 
@@ -155,7 +155,7 @@ NNS.boost <- function(IVs.train,
       }
 
       if(!is.null(ts.test)){
-        new.index <- length(y) - (2*ts.test):0
+        new.index <- length(y) - ts.test:0
       }
 
 
