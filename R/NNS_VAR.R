@@ -10,7 +10,8 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param epochs integer; \code{100} (default) Total number of feature combinations to run.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param par logical; \code{TRUE} (default) Invokes parallel processing to the default number of cores in \link{NNS.ARMA} and \link{NNS.stack} routines.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
@@ -54,7 +55,8 @@ NNS.VAR <- function(variables,
                     objective = "min",
                     epochs = 100,
                     status = TRUE,
-                    ncores = NULL){
+                    ncores = NULL,
+                    subcores = NULL){
 
 
   # Create train / test sets for NNS.ARMA extensions
@@ -94,10 +96,10 @@ NNS.VAR <- function(variables,
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
-                        ncores = cores)
+                        ncores = subcores)
 
     NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
-             method = b$method, ncores = cores, plot = FALSE) + b$bias.shift
+             method = b$method, ncores = subcores, plot = FALSE) + b$bias.shift
   }
 
   stopCluster(cl)
@@ -137,7 +139,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = cores, type = NULL,
+                               ncores = ncores, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
@@ -148,7 +150,7 @@ NNS.VAR <- function(variables,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = cores)$stack
+                                  status = status, ncores = ncores)$stack
 
 
   }
