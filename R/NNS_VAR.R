@@ -96,10 +96,10 @@ NNS.VAR <- function(variables,
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
-                        ncores = num_cores)
+                        ncores = cores)
 
     NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
-             method = b$method, ncores = num_cores, plot = FALSE) + b$bias.shift
+             method = b$method, ncores = cores, plot = FALSE) + b$bias.shift
   }
 
   stopCluster(cl)
@@ -139,7 +139,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = num_cores, type = NULL,
+                               ncores = cores, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
@@ -150,7 +150,7 @@ NNS.VAR <- function(variables,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = num_cores)$stack
+                                  status = status, ncores = cores)$stack
 
 
   }
