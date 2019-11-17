@@ -230,7 +230,7 @@ NNS.stack <- function(IVs.train,
                   message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
               }
 
-              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order=order, ncores = ncores, type = type)$Point.est
+              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = ncores, type = type)$Point.est
 
               nns.ord[i+1] <- eval(obj.fn)
 
@@ -254,7 +254,7 @@ NNS.stack <- function(IVs.train,
           if(b==folds){
               nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
               best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
-              nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order=order, threshold = nns.ord.threshold, ncores = ncores, type = type)$Point.est
+              nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores, type = type)$Point.est
               if(!is.null(type) & !is.null(nns.method.2)){
                   nns.method.2 <- round(nns.method.2)
               }
