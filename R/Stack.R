@@ -211,7 +211,7 @@ NNS.stack <- function(IVs.train,
 
           var.cutoffs <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores, type = type)$equation$Coefficient, digits = 2))
 
-          var.cutoffs <- var.cutoffs - .005
+          var.cutoffs <- var.cutoffs - .0005
 
           var.cutoffs <- var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
 
@@ -239,13 +239,13 @@ NNS.stack <- function(IVs.train,
                   THRESHOLDS[[b]] <- best.threshold
                   best.nns.ord[[b]] <- min(na.omit(nns.ord))
                   if(i > 1 && is.na(nns.ord[i])) break
-                  if(i > 1 && (nns.ord[i] > nns.ord[i-1])) break
+                  if(i > 1 && (nns.ord[i] >= nns.ord[i-1])) break
               } else {
                   best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
                   THRESHOLDS[[b]] <- best.threshold
                   best.nns.ord[[b]] <- max(na.omit(nns.ord))
                   if(i > 1 && is.na(nns.ord[i])) break
-                  if(i > 1 && (nns.ord[i] < nns.ord[i-1])) break
+                  if(i > 1 && (nns.ord[i] <= nns.ord[i-1])) break
               }
           }
 
