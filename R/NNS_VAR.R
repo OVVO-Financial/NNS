@@ -10,8 +10,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param epochs integer; \code{100} (default) Total number of feature combinations to run.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
-#' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param par logical; \code{TRUE} (default) Invokes parallel processing to the default number of cores in \link{NNS.ARMA} and \link{NNS.stack} routines.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
@@ -55,8 +54,7 @@ NNS.VAR <- function(variables,
                     objective = "min",
                     epochs = 100,
                     status = TRUE,
-                    ncores = NULL,
-                    subcores = NULL){
+                    ncores = NULL){
 
 
   # Create train / test sets for NNS.ARMA extensions
