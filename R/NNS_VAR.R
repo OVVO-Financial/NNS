@@ -148,7 +148,7 @@ NNS.VAR <- function(variables,
                                   IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
                                   obj.fn = obj.fn,
                                   objective = objective,
-                                  order = 'max',
+                                  order = 'max', method = 1,
                                   ts.test = 2*h, folds = 1,
                                   status = status, ncores = ncores)$stack
 
