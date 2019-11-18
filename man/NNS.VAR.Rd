@@ -63,6 +63,9 @@ Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 
 Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
 \url{https://www.preprints.org/manuscript/201801.0090/v1}
+
+Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression"
+\url{https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html}
 }
 \author{
 Fred Viole, OVVO Financial Systems
