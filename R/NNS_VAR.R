@@ -187,8 +187,6 @@ NNS.VAR <- function(variables,
       DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
   }
 
-print(IV_weights)
-print(DV_weights)
 
   forecasts <- (IV_weights * nns_IVs_results + DV_weights * nns_DVs)
   colnames(forecasts) <- colnames(variables)
