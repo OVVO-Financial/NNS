@@ -96,7 +96,7 @@ NNS.VAR <- function(variables,
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
-                        ncores = subcores)
+                        ncores = 1)
 
     NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = subcores, plot = FALSE) + b$bias.shift
@@ -139,7 +139,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = ncores, type = NULL,
+                               ncores = 1, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
@@ -150,7 +150,7 @@ NNS.VAR <- function(variables,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = ncores)$stack
+                                  status = status, ncores = 1)$stack
 
 
   }
