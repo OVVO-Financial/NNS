@@ -98,18 +98,23 @@ NNS.VAR <- function(variables,
                         print.trace = status,
                         ncores = 1)
 
-    NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
+    nns_IVs$results <- NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = subcores, plot = FALSE) + b$bias.shift
+
+    nns_IVs$obj_fn <- b$obj.fn
+
+    return(nns_IVs)
+
   }
 
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs <- do.call(cbind, nns_IVs)
-  colnames(nns_IVs) <- colnames(variables)
+  nns_IVs_results <- do.call(cbind, lapply(nns_IVs, `[[`, 1))
+  colnames(nns_IVs_results) <- colnames(variables)
 
   # Combine forecasted IVs onto training data.frame
-  new_values <- rbind(variables, nns_IVs)
+  new_values <- rbind(variables, nns_IVs_results)
 
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
@@ -121,6 +126,7 @@ NNS.VAR <- function(variables,
   DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
 
   nns_DVs <- list()
+  DV_obj_fn <- list()
 
   if(status){
     message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
@@ -143,24 +149,46 @@ NNS.VAR <- function(variables,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-    nns_DVs[[index]] <- NNS.stack(lagged_new_values_train[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
+    DV_values <- NNS.stack(lagged_new_values_train[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
                                   lagged_new_values_train[, i],
                                   IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
                                   obj.fn = obj.fn,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = 1)$stack
+                                  status = status, ncores = 1)
 
+    nns_DVs[[index]] <- DV_values$stack
+
+    DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
 
   }
 
   nns_DVs <- do.call(cbind, nns_DVs)
   colnames(nns_DVs) <- colnames(variables)
 
-  forecasts <- (nns_IVs + nns_DVs)/2
+  if(objective=="min"){
+      IV_weights <- 1/unlist(lapply(nns_IVs, `[[`, 2))
+      DV_weights <- 1/unlist(DV_obj_fn)
+      IV_weights <- IV_weights / (IV_weights + DV_weights)
+      DV_weights <- DV_weights / (IV_weights + DV_weights)
+
+      IV_weights <- rep(IV_weights, each = dim(nns_IVs_results)[1])
+      DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
+  } else {
+      IV_weights <- unlist(lapply(nns_IVs, `[[`, 2))
+      DV_weights <- unlist(DV_obj_fn)
+      IV_weights <- IV_weights / (IV_weights + DV_weights)
+      DV_weights <- DV_weights / (IV_weights + DV_weights)
+
+      IV_weights <- rep(IV_weights, each = dim(nns_IVs_results)[1])
+      DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
+  }
+
+
+  forecasts <- (IV_weights * nns_IVs_results + DV_weights * nns_DVs)
   colnames(forecasts) <- colnames(variables)
 
-  return( list(univariate = nns_IVs, multivariate = nns_DVs, ensemble = forecasts) )
+  return( list(univariate = nns_IVs_results, multivariate = nns_DVs, ensemble = forecasts) )
 
 }
