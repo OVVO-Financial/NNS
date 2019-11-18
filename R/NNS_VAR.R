@@ -170,22 +170,23 @@ NNS.VAR <- function(variables,
   if(objective=="min"){
       IV_weights <- 1/unlist(lapply(nns_IVs, `[[`, 2))
       DV_weights <- 1/unlist(DV_obj_fn)
-      IV_weights <- IV_weights / (IV_weights + DV_weights)
-      DV_weights <- DV_weights / (IV_weights + DV_weights)
+      IV_weights <- IV_weights / sum(IV_weights, DV_weights)
+      DV_weights <- DV_weights / sum(IV_weights, DV_weights)
 
       IV_weights <- rep(IV_weights, each = dim(nns_IVs_results)[1])
       DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
   } else {
       IV_weights <- unlist(lapply(nns_IVs, `[[`, 2))
       DV_weights <- unlist(DV_obj_fn)
-      IV_weights <- IV_weights / (IV_weights + DV_weights)
-      DV_weights <- DV_weights / (IV_weights + DV_weights)
+      IV_weights <- IV_weights / sum(IV_weights, DV_weights)
+      DV_weights <- DV_weights / sum(IV_weights, DV_weights)
 
       IV_weights <- rep(IV_weights, each = dim(nns_IVs_results)[1])
       DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
   }
 
-
+print(IV_weights)
+print(DV_weights)
   forecasts <- (IV_weights * nns_IVs_results + DV_weights * nns_DVs)
   colnames(forecasts) <- colnames(variables)
 
