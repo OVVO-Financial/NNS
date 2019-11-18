@@ -3222,9 +3222,7 @@ knitr::kable(ALL_RESULTS, digits = 4)</code></pre>
 <div id="nns.var" class="section level1">
 <h1><span class="header-section-number">3</span> <code>NNS.VAR()</code></h1>
 <p>The <code>NNS.VAR()</code> function now accomplishes all of the prior steps in a single line of code. <code>NNS.VAR</code> does take the additional step of weighting each estimate by its objective function result.</p>
-<pre class="r"><code>nns_var_estimates = NNS.VAR(y_train_VAR, h = 12, tau = 4, 
-                            obj.fn = expression (sum((predicted - actual)^2)),
-                            objective = &#39;min&#39;)
+<pre class="r"><code>nns_var_estimates = NNS.VAR(y_train_VAR, h = 12, tau = 4, ncores = 1)
 
 nns_var_estimates</code></pre>
 <pre><code>## $univariate
