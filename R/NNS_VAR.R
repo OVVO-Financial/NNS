@@ -35,6 +35,9 @@
 #'
 #' Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
 #' \url{https://www.preprints.org/manuscript/201801.0090/v1}
+#'
+#' Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression"
+#' \url{https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html}
 #' @examples
 #'
 #'  \dontrun{
@@ -145,7 +148,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = 1, type = NULL,
+                               ncores = num_cores, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
@@ -156,7 +159,7 @@ NNS.VAR <- function(variables,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = 1)
+                                  status = status, ncores = num_cores)
 
     nns_DVs[[index]] <- DV_values$stack
 
