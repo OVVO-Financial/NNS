@@ -6,7 +6,7 @@
 \usage{
 NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
   actual)^2)), objective = "min", epochs = 100, status = TRUE,
-  ncores = NULL, subcores = NULL)
+  ncores = NULL)
 }
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
@@ -25,8 +25,6 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
-
-\item{subcores}{integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns the following matrices of forecasted variables:
@@ -55,6 +53,9 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 \url{http://amzn.com/1490523995}
 
+Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression Using NNS"
+\url{https://ssrn.com/abstract=3489550}
+
 Viole, F. (2019) "Forecasting Using NNS"
 \url{https://ssrn.com/abstract=3382300}
 
@@ -63,9 +64,6 @@ Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 
 Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
 \url{https://www.preprints.org/manuscript/201801.0090/v1}
-
-Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression"
-\url{https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html}
 }
 \author{
 Fred Viole, OVVO Financial Systems
