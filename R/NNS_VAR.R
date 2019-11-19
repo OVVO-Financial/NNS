@@ -11,7 +11,6 @@
 #' @param epochs integer; \code{100} (default) Total number of feature combinations to run.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
-#' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA.optim}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
@@ -27,6 +26,9 @@
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{http://amzn.com/1490523995}
 #'
+#' Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression Using NNS"
+#' \url{https://ssrn.com/abstract=3489550}
+#'
 #' Viole, F. (2019) "Forecasting Using NNS"
 #' \url{https://ssrn.com/abstract=3382300}
 #'
@@ -36,8 +38,6 @@
 #' Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
 #' \url{https://www.preprints.org/manuscript/201801.0090/v1}
 #'
-#' Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression"
-#' \url{https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html}
 #' @examples
 #'
 #'  \dontrun{
@@ -58,13 +58,7 @@ NNS.VAR <- function(variables,
                     objective = "min",
                     epochs = 100,
                     status = TRUE,
-                    ncores = NULL,
-                    subcores = NULL){
-
-
-  # Create train / test sets for NNS.ARMA extensions
-  train_VAR = dim(variables)[1] - h
-  test_DVs = tail(variables, h)
+                    ncores = NULL){
 
   nns_IVs <- list()
 
