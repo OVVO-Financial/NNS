@@ -71,10 +71,6 @@ NNS.VAR <- function(variables,
     num_cores <- ncores
   }
 
-  if (is.null(subcores)) {
-    subcores <- as.integer(cores / 2) - 1
-  }
-
   cl <- makeCluster(detectCores()-1)
   registerDoParallel(cl)
 
@@ -96,7 +92,7 @@ NNS.VAR <- function(variables,
                         ncores = 1)
 
     nns_IVs$results <- NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
-             method = b$method, ncores = subcores, plot = FALSE) + b$bias.shift
+             method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
     nns_IVs$obj_fn <- b$obj.fn
 
