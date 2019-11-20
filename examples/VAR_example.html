@@ -2794,42 +2794,9 @@ div.tocify {
 <p>This quick note is intended to introduce the intuition behind the <code>NNS.VAR</code> function, which serves as a nonparametric vector autoregression.</p>
 <p>Install latest version of <code>NNS (&gt;=0.4.7)</code> and other required packages…</p>
 <pre class="r"><code>require(devtools)
-install_github(&quot;OVVO-Financial/NNS&quot;, ref = &quot;NNS-Beta-Version&quot;)</code></pre>
-<pre><code>## 
-##   
-  
-  
-   checking for file &#39;C:\Users\fredv\AppData\Local\Temp\RtmpstX6Pa\remotes46b055ae5f8c\OVVO-Financial-NNS-9fb3959/DESCRIPTION&#39; ...
-  
-v  checking for file &#39;C:\Users\fredv\AppData\Local\Temp\RtmpstX6Pa\remotes46b055ae5f8c\OVVO-Financial-NNS-9fb3959/DESCRIPTION&#39;
-## 
-  
-  
-  
--  preparing &#39;NNS&#39;: (3.9s)
-##    checking DESCRIPTION meta-information ...
-  
-v  checking DESCRIPTION meta-information
-## 
-  
-  
-  
--  checking for LF line-endings in source and make files and shell scripts
-## 
-  
-  
-  
--  checking for empty or unneeded directories
-## 
-  
-  
-  
--  building &#39;NNS_0.4.7.tar.gz&#39;
-## 
-  
-   
-## </code></pre>
-<pre class="r"><code>library(NNS)
+install_github(&quot;OVVO-Financial/NNS&quot;, ref = &quot;NNS-Beta-Version&quot;)
+
+library(NNS)
 library(vars)
 library(forecast)
 library(randomForest)
@@ -3496,9 +3463,10 @@ for (i in 1:3) {
     NNS_VAR_corr[i] = cor(nns_var_estimates$ensemble[, i], test_DVs[, 
         i], method = &quot;spearman&quot;)
 }
-library(kableExtra)
+
 NNS_VAR_results = cbind(NNS_VAR_RMSEs, NNS_VAR_corr)
-knitr::kable(VAR_results, digits = 4) %&gt;% kable_styling(full_width = T) %&gt;% 
+rownames(NNS_VAR_results) = colnames(y_train_VAR)
+knitr::kable(NNS_VAR_results, digits = 4) %&gt;% kable_styling(full_width = T) %&gt;% 
     column_spec(1, width = &quot;8cm&quot;)</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
@@ -3506,34 +3474,34 @@ knitr::kable(VAR_results, digits = 4) %&gt;% kable_styling(full_width = T) %&gt;
 <th style="text-align:left;">
 </th>
 <th style="text-align:right;">
-VAR Estimates RMSE to Actual Values
+NNS_VAR_RMSEs
 </th>
 <th style="text-align:right;">
-VAR Estimates Correlation to Actual Values
+NNS_VAR_corr
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;width: 8cm; ">
-Diff.Real.GDP
+Diff Real GDP
 </td>
 <td style="text-align:right;">
-0.5062
+0.4194
 </td>
 <td style="text-align:right;">
--0.3916
+0.2657
 </td>
 </tr>
 <tr>
 <td style="text-align:left;width: 8cm; ">
-Interest.Rate
+Interest Rate
 </td>
 <td style="text-align:right;">
-1.3451
+0.8412
 </td>
 <td style="text-align:right;">
-0.7741
+0.1156
 </td>
 </tr>
 <tr>
@@ -3541,23 +3509,14 @@ Interest.Rate
 Inflation
 </td>
 <td style="text-align:right;">
-0.3481
+0.3300
 </td>
 <td style="text-align:right;">
--0.6294
+0.5035
 </td>
 </tr>
 </tbody>
 </table>
-</div>
-<div id="comments" class="section level1">
-<h1><span class="header-section-number">9</span> Comments</h1>
-<p>Unlike random forests, <code>NNS</code> has interpretability, albeit less straightforward than the VAR. Furthermore, <code>NNS</code> can extrapolate well beyond observed ranges, whereby random forests cannot. Finally, multivariate partial derivatives can be extracted using the finite step method, which <code>NNS</code> has a routine for, <code>dy.d_</code> to aid in policy decisions.</p>
-<p>With time-series like these (differenced log data), there are two objectives: sign and magnitude. <strong>All forecasts fail at least one sign objective, except for the the multivariate <code>NNS.reg</code> and by extension <code>NNS.VAR</code>!</strong></p>
-<p>Given the smaller number of observations due to the quarterly data, interpolation to the higher monthly frequency may further benefit the VAR alternative methods.</p>
-<p>This is still a very active area of development, any and all questions / comments are welcomed!</p>
-<p>email: <a href="mailto:fviole@fordham.edu" class="email">fviole@fordham.edu</a></p>
-<p>Thank you for your interest!</p>
 </div>
 <div class="footnotes">
 <hr />
