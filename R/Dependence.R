@@ -12,7 +12,7 @@
 #' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{http://amzn.com/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' \dontrun{
 #' set.seed(123)

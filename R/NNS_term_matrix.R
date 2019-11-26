@@ -7,7 +7,7 @@
 #' @param names Column names for \code{"IV"} and \code{"oos"}.  Defaults to FALSE.
 #' @return Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{http://amzn.com/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))
 #' NNS.term.matrix(x)

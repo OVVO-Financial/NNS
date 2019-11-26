@@ -7,7 +7,7 @@
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{http://amzn.com/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
