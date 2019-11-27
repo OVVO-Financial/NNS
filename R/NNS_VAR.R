@@ -142,9 +142,11 @@ NNS.VAR <- function(variables,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-    DV_values <- NNS.stack(lagged_new_values_train[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)],
+    relevant_vars <- colnames(lagged_new_values)%in%names(nns_boost_est$feature.weights)
+
+    DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
                                   lagged_new_values_train[, i],
-                                  IVs.test =  tail(lagged_new_values[, names(nns_boost_est$feature.weights)%in%colnames(lagged_new_values)], h),
+                                  IVs.test =  tail(lagged_new_values[, relevant_vars], h),
                                   obj.fn = obj.fn,
                                   objective = objective,
                                   order = 'max',
