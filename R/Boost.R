@@ -274,16 +274,17 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      new.iv.train <- data.table(x[-new.index,])
+      new.iv.train <- data.table(x[-new.index, ])
       new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
       mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
       mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
 
-      names(fivenum.new.iv.train) <- colnames(new.iv.train)
-      names(mean.new.iv.train) <- colnames(new.iv.train)
-      names(mode.new.iv.train) <- colnames(new.iv.train)
+
+      names(fivenum.new.iv.train) <- c("y", colnames(new.iv.train))
+      names(mean.new.iv.train) <- c("y", colnames(new.iv.train))
+      names(mode.new.iv.train) <- c("y", colnames(new.iv.train))
 
 
       new.iv.train <- rbindlist(list(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train), use.names = FALSE)
@@ -356,8 +357,8 @@ NNS.boost <- function(IVs.train,
     }
   }
 
-  x <- rbind(rep.x,x)
-  y <- c(rep.y,y)
+  x <- rbind(rep.x, x)
+  y <- c(rep.y, y)
 
   kf <- data.table(table(as.character(keeper.features)))
   kf$N <- kf$N/sum(kf$N)
