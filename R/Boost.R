@@ -150,8 +150,10 @@ NNS.boost <- function(IVs.train,
       new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       if(i > 1){
+        maxes <- as.vector(apply(x, 2, which.max))
+        mins <- as.vector(apply(x, 2, which.min))
         new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-        new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
+        new.index <- na.omit(unique(c(mins, maxes, new.index_half,new.index))[1:as.integer(CV.size*length(y))])
       }
 
       if(!is.null(ts.test)){
@@ -160,7 +162,7 @@ NNS.boost <- function(IVs.train,
 
 
       new.iv.train <- data.table(x[-new.index,])
-      new.iv.train <- new.iv.train[,lapply(.SD,as.double)]
+      new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
@@ -265,8 +267,10 @@ NNS.boost <- function(IVs.train,
       new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       if(j > 1){
+        maxes <- as.vector(apply(x, 2, which.max))
+        mins <- as.vector(apply(x, 2, which.min))
         new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-        new.index <- na.omit(unique(c(new.index_half,new.index))[1:as.integer(CV.size*length(y))])
+        new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
       }
 
       if(!is.null(ts.test)){
@@ -389,9 +393,12 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      estimates[[i]] <- NNS.reg(x[,eval(parse(text=kf$V1[i]))],y,point.est = z[,eval(parse(text=kf$V1[i]))],
-                                plot=FALSE, residual.plot = FALSE, order = depth, n.best=n.best,
-                                factor.2.dummy = FALSE, ncores=subcores, type = type)$Point.est * kf$N[i]
+      estimates[[i]] <- NNS.reg(x[, eval(parse(text=kf$V1[i]))], y,
+                                point.est = z[, eval(parse(text=kf$V1[i]))],
+                                plot = FALSE, residual.plot = FALSE, order = depth,
+                                n.best  =n.best,
+                                factor.2.dummy = FALSE, ncores = subcores,
+                                type = type)$Point.est * kf$N[i]
 
     }
 

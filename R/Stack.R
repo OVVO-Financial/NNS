@@ -111,9 +111,11 @@ NNS.stack <- function(IVs.train,
       test.set <- sample(1 : l, as.integer(CV.size * l), replace = FALSE)
 
       if(b > 1){
-          test.set_half <- unique(c(rbind(test.set.1,test.set.2)))[1:(length(test.set)/2)]
+          maxes <- as.vector(apply(IVs.train, 2, which.max))
+          mins <- as.vector(apply(IVs.train, 2, which.min))
+          test.set_half <- unique(c(rbind(test.set.1, test.set.2)))[1:(length(test.set)/2)]
 
-          test.set <- unique(c(test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+          test.set <- unique(c(mins, maxes, test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
           test.set <- na.omit(test.set)
       }
 
@@ -279,7 +281,7 @@ NNS.stack <- function(IVs.train,
   if(objective=="min"){
       weights <- c(max(1e-10, 1 / best.nns.cv), max(1e-10, 1 / best.nns.ord))
   } else {
-      weights <- c(max(1e-10,best.nns.cv), max(1e-10, best.nns.ord))
+      weights <- c(max(1e-10, best.nns.cv), max(1e-10, best.nns.ord))
   }
 
   weights <- pmax(weights, c(0, 0))
