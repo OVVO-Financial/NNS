@@ -153,7 +153,7 @@ NNS.boost <- function(IVs.train,
         maxes <- as.vector(apply(x, 2, which.max))
         mins <- as.vector(apply(x, 2, which.min))
         new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-        new.index <- na.omit(unique(c(mins, maxes, new.index_half,new.index))[1:as.integer(CV.size*length(y))])
+        new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
       }
 
       if(!is.null(ts.test)){

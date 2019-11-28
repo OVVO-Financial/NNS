@@ -115,7 +115,7 @@ NNS.stack <- function(IVs.train,
           mins <- as.vector(apply(IVs.train, 2, which.min))
           test.set_half <- unique(c(rbind(test.set.1, test.set.2)))[1:(length(test.set)/2)]
 
-          test.set <- unique(c(mins, maxes, test.set_half,sample(1 : l, replace = FALSE)))[1:length(test.set)]
+          test.set <- unique(c(mins, maxes, test.set_half, sample(1 : l, replace = FALSE)))[1:length(test.set)]
           test.set <- na.omit(test.set)
       }
 

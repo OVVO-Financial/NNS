@@ -117,7 +117,7 @@ lag.mtx <- function(x, tau){
 
 
 
-
+### Row products for NNS.dep.hd
 RP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
 
   if (!is.null(rows) && !is.null(cols)) x <- x[rows, cols, drop = FALSE]
