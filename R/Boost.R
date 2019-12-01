@@ -157,7 +157,7 @@ NNS.boost <- function(IVs.train,
       }
 
       if(!is.null(ts.test)){
-        new.index <- length(y) - ts.test:0
+        new.index <- 1:(length(y) - ts.test)
       }
 
 

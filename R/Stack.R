@@ -120,7 +120,7 @@ NNS.stack <- function(IVs.train,
       }
 
       if(!is.null(ts.test)){
-        test.set <- length(DV.train) - ts.test:0
+        test.set <- 1:(length(DV.train) - ts.test)
       }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
@@ -129,11 +129,11 @@ NNS.stack <- function(IVs.train,
       CV.DV.train <- DV.train[c(-test.set)]
       CV.DV.test <- DV.train[c(test.set)]
 
-      training <- cbind(IVs.train[c(-test.set),],DV.train[c(-test.set)])
+      training <- cbind(IVs.train[c(-test.set),], DV.train[c(-test.set)])
       training <- training[complete.cases(training),]
 
-      CV.IVs.train <- training[,-(ncol(training))]
-      CV.DV.train <- training[,ncol(training)]
+      CV.IVs.train <- training[, -(ncol(training))]
+      CV.DV.train <- training[, ncol(training)]
 
 
       if(1 %in% method){
