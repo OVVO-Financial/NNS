@@ -41,7 +41,7 @@ NNS.cor(B)}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{http://amzn.com/1490523995}
+\url{https://www.amazon.com/dp/1490523995}
 }
 \author{
 Fred Viole, OVVO Financial Systems
