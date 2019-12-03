@@ -214,12 +214,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       DISTANCES <- list()
 
 
-      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table"))%dopar%{
+      DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table", "dtw"))%dopar%{
         NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
                      type = dist, k = n.best)
       }
 
       DISTANCES <- unlist(DISTANCES)
+
+
 
       lows <- do.call(pmin,as.data.frame(t(point.est))) < minimums
       highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
@@ -245,6 +247,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           outside.points <- point.est[i,]
           boundary.points <- pmin(pmax(outside.points, minimums), maximums)
           last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
+
+          if(dist=="DTW"){dist <- "L2"}
 
           boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX,
                             dist.estimate = boundary.points,

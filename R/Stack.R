@@ -121,6 +121,9 @@ NNS.stack <- function(IVs.train,
 
       if(!is.null(ts.test)){
         test.set <- 1:(length(DV.train) - ts.test)
+        dist <- "DTW"
+      } else {
+        dist <- "L2"
       }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
@@ -151,8 +154,8 @@ NNS.stack <- function(IVs.train,
           } else {
               predicted <- list()
 
-              predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table"))%dopar%{
-                  NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = "L2", k = i)
+              predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table","dtw"))%dopar%{
+                  NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
               }
 
               predicted <- unlist(predicted)
@@ -232,7 +235,7 @@ NNS.stack <- function(IVs.train,
                   message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
               }
 
-              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = ncores, type = type)$Point.est
+              predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = ncores, type = type, dist = dist)$Point.est
 
               nns.ord[i+1] <- eval(obj.fn)
 

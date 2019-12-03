@@ -113,6 +113,12 @@ NNS.boost <- function(IVs.train,
     epochs <- 2*length(y)
   }
 
+  if(!is.null(ts.test)){
+    dist <- "DTW"
+  } else {
+    dist <- "L2"
+  }
+
   estimates <- list()
   fold <- list()
 
@@ -230,8 +236,8 @@ NNS.boost <- function(IVs.train,
     original.par <- par(no.readonly = TRUE)
     par(mfrow = c(2,1))
     par(mai = c(1.0,.5,0.8,0.5))
-    hist(results, main = "Distribution of Learner Trials Accuracy",
-         xlab = "Accuracy", col = "steelblue")
+    hist(results, main = "Distribution of Learner Trials Objective Function",
+         xlab = "Objective Function", col = "steelblue")
     abline(v = threshold, col = 'red', lty = 2, lwd = 2)
     mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
     if(extreme){
