@@ -200,7 +200,7 @@ NNS.boost <- function(IVs.train,
                            new.dv.train,point.est = new.iv.test[,test.features[[i]]],
                            plot=FALSE, residual.plot = FALSE, order = depth,
                            n.best = n.best, factor.2.dummy = FALSE,
-                           ncores = subcores, type = type)$Point.est
+                           ncores = subcores, type = type, dist = dist)$Point.est
 
       # Do not predict a new unseen class
       predicted <- pmin(predicted,max(as.numeric(y)))
@@ -384,7 +384,7 @@ NNS.boost <- function(IVs.train,
 
       NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
               plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-              factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est * kf$N[i]
+              factor.2.dummy = FALSE, ncores = subcores, type = type, dist = dist)$Point.est * kf$N[i]
     }
   } else {
     for(i in 1:dim(kf)[1]){
