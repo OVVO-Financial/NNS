@@ -6,7 +6,7 @@
 \usage{
 NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
   actual)^2)), objective = "min", epochs = 100, status = TRUE,
-  ncores = 1)
+  ncores = NULL)
 }
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
@@ -24,7 +24,7 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
-\item{ncores}{integer; 1 (default) value specifying the number of cores to be used in the parallelized subroutine \link{NNS.stack}. If NULL, the number of cores to be used is equal to half the number of cores of the machine - 1.}
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns the following matrices of forecasted variables:

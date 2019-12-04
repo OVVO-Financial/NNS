@@ -10,7 +10,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
   ts.test = NULL, folds = 5, threshold = NULL,
   obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
   objective = "max", extreme = FALSE, feature.importance = TRUE,
-  status = TRUE, ncores = 1, subcores = 1)
+  status = TRUE, ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -50,9 +50,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
-\item{ncores}{integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure. If NULL, the number of cores to be used is equal to half the number of cores of the machine.}
-
-\item{subcores}{integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL, the number of cores to be used is equal to half the number of cores of the machine - 1.}
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
