@@ -21,8 +21,7 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
-#' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
@@ -61,7 +60,7 @@ NNS.boost <- function(IVs.train,
                       extreme = FALSE,
                       feature.importance = TRUE,
                       status = TRUE,
-                      ncores = NULL, subcores = NULL){
+                      ncores = NULL){
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
 
@@ -70,27 +69,14 @@ NNS.boost <- function(IVs.train,
   # Parallel process...
   if (is.null(ncores)) {
     cores <- detectCores()
-    num_cores <- as.integer(cores / 2)
+    num_cores <- cores - 1
   } else {
     cores <- detectCores()
     num_cores <- ncores
   }
 
-  if(is.null(subcores)) {
-    if(num_cores==1){
-      subcores <- 1
-    } else {
-      subcores <- as.integer(cores / 2) - 1
-    }
-  }
 
-  if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
-
-
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
+  if((num_cores)>cores){ stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))}
 
   x <- IVs.train
   y <- DV.train
@@ -137,7 +123,7 @@ NNS.boost <- function(IVs.train,
                         method = 1, order = depth,
                         obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
-                        ncores = ncores, type = type)$NNS.reg.n.best
+                        ncores = NULL, type = type)$NNS.reg.n.best
 
     if(status){
       message("Currently determining learning threshold...","\r",appendLF=TRUE)
@@ -204,7 +190,7 @@ NNS.boost <- function(IVs.train,
                            new.dv.train,point.est = new.iv.test[,test.features[[i]]],
                            plot=FALSE, residual.plot = FALSE, order = depth,
                            n.best = n.best, factor.2.dummy = FALSE,
-                           ncores = subcores, type = type)$Point.est
+                           ncores = 1, type = type)$Point.est
 
       # Do not predict a new unseen class
       predicted <- pmin(predicted,max(as.numeric(y)))
@@ -330,7 +316,7 @@ NNS.boost <- function(IVs.train,
       predicted <- NNS.reg(new.iv.train[, features],
                            new.dv.train, point.est = new.iv.test[, features],
                            plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-                           factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est
+                           factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
 
       # Do not predict a new unseen class
       predicted <- pmin(predicted,max(as.numeric(y)))
@@ -377,6 +363,10 @@ NNS.boost <- function(IVs.train,
   kf <- data.table(table(as.character(keeper.features)))
   kf$N <- kf$N/sum(kf$N)
 
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else { cl <- NULL }
 
   if(!is.null(cl)){
     clusterExport(cl,c("x","y"))
@@ -407,7 +397,7 @@ NNS.boost <- function(IVs.train,
                                 point.est = z[, eval(parse(text=kf$V1[i]))],
                                 plot = FALSE, residual.plot = FALSE, order = depth,
                                 n.best = n.best,
-                                factor.2.dummy = FALSE, ncores = subcores,
+                                factor.2.dummy = FALSE, ncores = 1,
                                 type = type, dist = dist)$Point.est * kf$N[i]
 
     }
