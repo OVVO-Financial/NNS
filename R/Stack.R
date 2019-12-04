@@ -99,9 +99,6 @@ NNS.stack <- function(IVs.train,
       num_cores <- ncores
   }
 
-  cl <- makeCluster(num_cores)
-  registerDoParallel(cl)
-
   for(b in 1 : folds){
       if(status){
           message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
@@ -154,9 +151,15 @@ NNS.stack <- function(IVs.train,
           } else {
               predicted <- list()
 
-              predicted <- foreach(j = 1:nrow(CV.IVs.test),.packages=c("NNS","data.table","dtw"))%dopar%{
+              cl <- makeCluster(num_cores)
+              registerDoParallel(cl)
+
+              predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
                   NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
               }
+
+              stopCluster(cl)
+              registerDoSEQ()
 
               predicted <- unlist(predicted)
           }
@@ -196,8 +199,7 @@ NNS.stack <- function(IVs.train,
               if(!is.null(type) & !is.null(nns.method.1)){
                   nns.method.1 <- round(nns.method.1)
               }
-              stopCluster(cl)
-              registerDoSEQ()
+
           }
 
 
