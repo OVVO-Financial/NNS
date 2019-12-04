@@ -77,7 +77,11 @@ NNS.boost <- function(IVs.train,
   }
 
   if (is.null(subcores)) {
-    subcores <- as.integer(cores / 2) - 1
+    if(num_cores==1){
+      subcores <- 1
+    } else {
+      subcores <- as.integer(cores / 2) - 1
+    }
   }
 
   if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
@@ -402,9 +406,9 @@ NNS.boost <- function(IVs.train,
       estimates[[i]] <- NNS.reg(x[, eval(parse(text=kf$V1[i]))], y,
                                 point.est = z[, eval(parse(text=kf$V1[i]))],
                                 plot = FALSE, residual.plot = FALSE, order = depth,
-                                n.best  =n.best,
+                                n.best = n.best,
                                 factor.2.dummy = FALSE, ncores = subcores,
-                                type = type)$Point.est * kf$N[i]
+                                type = type, dist = dist)$Point.est * kf$N[i]
 
     }
 
