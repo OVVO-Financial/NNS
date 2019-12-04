@@ -53,7 +53,7 @@ test.set = sample(150,10)
 a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
               epochs = 100, learner.trials = 100, status = FALSE,
-              ncores = 1, subcores = 1)
+              ncores = 1)
 
 a$results
 
