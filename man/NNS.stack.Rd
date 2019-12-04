@@ -8,7 +8,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
   obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
   CV.size = NULL, ts.test = NULL, folds = 5, order = NULL,
   norm = NULL, method = c(1, 2), dim.red.method = "cor",
-  status = TRUE, ncores = NULL)
+  status = TRUE, ncores = 1)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -39,7 +39,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
+\item{ncores}{integer; 1 (default) value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL, the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.
