@@ -10,7 +10,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param epochs integer; \code{100} (default) Total number of feature combinations to run.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param ncores integer; 1 (default) value specifying the number of cores to be used in the parallelized subroutine \link{NNS.stack}. If NULL, the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
@@ -58,7 +58,7 @@ NNS.VAR <- function(variables,
                     objective = "min",
                     epochs = 100,
                     status = TRUE,
-                    ncores = NULL){
+                    ncores = 1){
 
   nns_IVs <- list()
 
@@ -138,7 +138,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = num_cores, type = NULL,
+                               ncores = 1, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()

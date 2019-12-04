@@ -21,8 +21,8 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
-#' @param subcores integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
+#' @param ncores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure. If NULL, the number of cores to be used is equal to half the number of cores of the machine.
+#' @param subcores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.reg}.  If NULL, the number of cores to be used is equal to half the number of cores of the machine - 1.
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
@@ -61,7 +61,7 @@ NNS.boost <- function(IVs.train,
                       extreme = FALSE,
                       feature.importance = TRUE,
                       status = TRUE,
-                      ncores = NULL, subcores = NULL){
+                      ncores = 1, subcores = 1){
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
 
