@@ -113,6 +113,11 @@ NNS.boost <- function(IVs.train,
     epochs <- 2*length(y)
   }
 
+  if(!is.null(ts.test)){
+    dist <- "DTW"
+  } else {
+    dist <- "L2"
+  }
 
   estimates <- list()
   fold <- list()
@@ -379,7 +384,7 @@ NNS.boost <- function(IVs.train,
 
       NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
               plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-              factor.2.dummy = FALSE, ncores = subcores, type = type)$Point.est * kf$N[i]
+              factor.2.dummy = FALSE, ncores = subcores, type = type, dist = dist)$Point.est * kf$N[i]
     }
   } else {
     for(i in 1:dim(kf)[1]){
