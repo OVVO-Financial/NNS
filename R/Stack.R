@@ -8,6 +8,7 @@
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
@@ -60,6 +61,7 @@ NNS.stack <- function(IVs.train,
                       type = NULL,
                       obj.fn = expression( sum((predicted - actual)^2) ),
                       objective = "min",
+                      dist = "L2",
                       CV.size = NULL,
                       ts.test = NULL,
                       folds = 5,
@@ -119,8 +121,6 @@ NNS.stack <- function(IVs.train,
       if(!is.null(ts.test)){
         test.set <- 1:(length(DV.train) - ts.test)
         dist <- "DTW"
-      } else {
-        dist <- "L2"
       }
 
       CV.IVs.train <- IVs.train[c(-test.set), ]
@@ -146,7 +146,7 @@ NNS.stack <- function(IVs.train,
               }
 
           if(i==1){
-              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1, type = type, factor.2.dummy = TRUE)
+              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1, type = type, factor.2.dummy = TRUE, dist = dist)
               predicted <- setup$Point.est
           } else {
               predicted <- list()

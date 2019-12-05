@@ -40,7 +40,11 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
   }
 
   if(type=="DTW"){
-      row.sums <- rpm[,  `:=` (Sum = unlist(lapply(1 : nrow(rpm), function(i) dtw(as.numeric(rpm[i, ]),as.numeric(dist.estimate))$distance)))][,Sum]
+      row.sums <- rpm[,  `:=` (Sum = unlist(lapply(1 : nrow(rpm), function(i) dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))][,Sum]
+  }
+
+  if(type=="FACTOR"){
+    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]!=as.numeric(dist.estimate)[i]))))][,Sum]
   }
 
   row.sums[row.sums == 0] <- 1e-10
