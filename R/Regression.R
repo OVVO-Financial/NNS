@@ -405,8 +405,9 @@ NNS.reg = function (x, y,
             new.point.est <- numeric()
             points.norm <- rbind(point.est, original.variable)
 
-            points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-
+            if(dist!="FACTOR"){
+                points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+            }
             if(is.null(np)|np==1){
               new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
 
@@ -594,7 +595,7 @@ NNS.reg = function (x, y,
 
 
   Regression.Coefficients <- regression.points[ , .(rise,run)]
-  ###
+
   Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
 
   upper.x <- regression.points[(2 : .N), x]

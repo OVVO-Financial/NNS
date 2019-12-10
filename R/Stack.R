@@ -227,7 +227,9 @@ NNS.stack <- function(IVs.train,
           var.cutoffs[is.na(var.cutoffs)] <- 0
 
           if(is.null(var.cutoffs)) var.cutoffs <- 0
-
+          if(dist=="FACTOR"){
+            var.cutoffs <- var.cutoffs[-1]
+          }
           nns.ord <- numeric()
 
           if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
