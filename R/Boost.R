@@ -156,7 +156,7 @@ NNS.boost <- function(IVs.train,
         new.index <- 1:(length(y) - ts.test)
       }
 
-
+      new.index <- unlist(new.index)
       new.iv.train <- data.table(x[-new.index,])
       new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
@@ -273,7 +273,7 @@ NNS.boost <- function(IVs.train,
         new.index <- length(y) - (2*ts.test):0
       }
 
-
+      new.index <- unlist(new.index)
       new.iv.train <- data.table(x[-new.index, ])
       new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 

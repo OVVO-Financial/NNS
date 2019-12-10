@@ -123,6 +123,8 @@ NNS.stack <- function(IVs.train,
         dist <- "DTW"
       }
 
+      test.set <- unlist(test.set)
+
       CV.IVs.train <- IVs.train[c(-test.set), ]
       CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(test.set), ]), factor_2_dummy_FR))
 

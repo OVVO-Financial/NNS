@@ -167,6 +167,7 @@ NNS.reg = function (x, y,
     y.label <- "y"
   }
 
+
   if(is.null(original.columns)){
       x.label <- deparse(substitute(x))
       if(is.null(x.label)){
@@ -245,10 +246,9 @@ NNS.reg = function (x, y,
     y.label <- "y"
   }
 
+
   y <- as.numeric(y)
   original.y <- y
-
-
 
 
   if(!factor.2.dummy){
@@ -305,7 +305,7 @@ NNS.reg = function (x, y,
         }
 
 
-        mult_stn <- 1 - NNS.dep.hd(cbind(x,y))$Dependence^(1/exp(1))
+        mult_stn <- 1 - NNS.dep.hd(cbind(x, y))$Dependence^(1/exp(1))
         if(is.na(mult_stn)) mult_stn <- stn
 
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot, residual.plot = residual.plot, order = order, n.best = n.best, type = type, location = location, noise.reduction = noise.reduction, dist = dist, stn = mult_stn, return.values = return.values, plot.regions = plot.regions, ncores = ncores))
@@ -454,7 +454,7 @@ NNS.reg = function (x, y,
     } else {
       part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 0)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x,y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
+        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
       }
     } # type
   } else {
