@@ -18,7 +18,7 @@ PM.matrix(LPM.degree, UPM.degree, target, variable, pop.adj = FALSE)
 \item{pop.adj}{logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.}
 }
 \value{
-Matrix of partial moment quadrant values.  Uncalled quadrants will return a matrix of zeros.
+Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 }
 \description{
 This function generates a co-partial moment matrix for the specified co-partial moment.
