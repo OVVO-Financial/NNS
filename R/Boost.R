@@ -293,8 +293,8 @@ NNS.boost <- function(IVs.train,
       new.dv.train <- unlist(new.iv.train[, 1])
 
       if(!representative.sample){
-        new.iv.train <- rbind(new.iv.train,x[-new.index,])
-        new.dv.train <- c(new.dv.train,y[-new.index])
+        new.iv.train <- rbind(new.iv.train, x[-new.index,])
+        new.dv.train <- c(new.dv.train, y[-new.index])
       }
 
 

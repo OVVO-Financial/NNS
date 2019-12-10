@@ -19,11 +19,10 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   cols <- names(rpm)[names(rpm)!="y.hat"]
 
-
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = cols])
     rpm[, names(rpm) := lapply(.SD, as.numeric)]
-    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
+    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b))))]
     dist.estimate <- as.numeric(rpm[1, ])
     rpm <- rpm[-1,]
   }
