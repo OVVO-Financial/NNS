@@ -26,12 +26,12 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   if(type!="FACTOR"){
     rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
-  }
-print(rpm)
+
+
   dist.estimate <- as.numeric(rpm[1, ])
 
   rpm <- rpm[-1,]
-
+  }
   rpm$y.hat <- y.hat
 
 
