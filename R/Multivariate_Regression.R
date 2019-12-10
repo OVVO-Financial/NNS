@@ -191,13 +191,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       l <- length(point.est)
 
       if(sum(point.est >= minimums & point.est <= maximums) == l){
+
         predict.fit <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est, type = dist, k = n.best)
       } else {
         boundary.points <- pmin(pmax(point.est, minimums), maximums)
+
         last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
 
         boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = boundary.points, type = dist, k = n.best)
-
 
         last.known.gradient <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance
 
@@ -212,7 +213,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       highs <- logical()
       outsiders <- numeric()
       DISTANCES <- list()
-
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table", "dtw"))%dopar%{
         NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],

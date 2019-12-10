@@ -19,11 +19,15 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   cols <- names(rpm)[names(rpm)!="y.hat"]
 
-  rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = cols])
-  rpm[, names(rpm) := lapply(.SD, as.numeric)]
 
-  rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
 
+    rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = cols])
+    rpm[, names(rpm) := lapply(.SD, as.numeric)]
+
+  if(type!="FACTOR"){
+    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / (max(b) - min(b)))]
+  }
+print(rpm)
   dist.estimate <- as.numeric(rpm[1, ])
 
   rpm <- rpm[-1,]
@@ -44,13 +48,13 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
   }
 
   if(type=="FACTOR"){
-    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]!=as.numeric(dist.estimate)[i]))))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = 1/Reduce(`+`, Map("*", rpm, as.numeric(dist.estimate))))][,Sum]
   }
 
   row.sums[row.sums == 0] <- 1e-10
 
   if(k==1){
-      if(length(which(row.sums == min(row.sums)))){
+      if(length(which(row.sums == min(row.sums)))>1){
           return(mode(rpm$y.hat[which(row.sums == min(row.sums))]))
       }  else {
           return(rpm$y.hat[which.min(row.sums)])

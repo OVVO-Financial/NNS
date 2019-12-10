@@ -123,7 +123,7 @@ NNS.boost <- function(IVs.train,
                         method = 1, order = depth,
                         obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
-                        ncores = NULL, type = type)$NNS.reg.n.best
+                        ncores = ncores, type = type)$NNS.reg.n.best
 
     if(status){
       message("Currently determining learning threshold...","\r",appendLF=TRUE)
