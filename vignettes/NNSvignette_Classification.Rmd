@@ -50,8 +50,8 @@ Let's have a look and see how it works.  We use 140 `iris` observations as our t
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
 a = NNS.boost(iris[-c(1:10), 1:4], iris[-c(1:10), 5],
               IVs.test = iris[1:10, 1:4],
-              epochs = 100, learner.trials = 100, status = FALSE,
-              ncores = 1)
+              epochs = 100, learner.trials = 100, 
+              status = FALSE, ncores = 1)
 
 a$results
 

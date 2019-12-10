@@ -89,9 +89,6 @@ hist(cors)
 abline(v = LPM.VaR(.975,0, cors), col = 'red')
 abline(v = UPM.VaR(.975,0, cors), col = 'red')
 
-hist(deps)
-abline(v = LPM.VaR(.975,0, deps), col = 'red')
-abline(v = UPM.VaR(.975,0, deps), col = 'red')
 
 ## Left tailed correlation p-value
 cor_p_value <- LPM(0, nns_cor_dep$Correlation, cors)
@@ -107,6 +104,12 @@ cor_p_value
 LPM.VaR(.975, 0, cors)
 ## Upper CI
 UPM.VaR(.975, 0, cors)
+
+
+hist(deps)
+abline(v = LPM.VaR(.975,0, deps), col = 'red')
+abline(v = UPM.VaR(.975,0, deps), col = 'red')
+
 
 ## Left tailed dependence p-value
 dep_p_value <- LPM(0, nns_cor_dep$Dependence, deps)
