@@ -16,6 +16,7 @@ require(NNS)
 require(knitr)
 require(rgl)
 require(data.table)
+require(dtw)
 ```
 
 # Classification
@@ -44,14 +45,11 @@ Through resampling of the training set and letting each iterated set of data spe
 
 Once a `threshold` is obtained, `NNS.boost` will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
 
-Let's have a look and see how it works.  We use 140 random `iris` observations as our training set and 10 observations as our test set.
+Let's have a look and see how it works.  We use 140 `iris` observations as our training set with the first 10 observations as our test set.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
-set.seed(123)
-test.set = sample(150,10)
-
-a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
-              IVs.test = iris[test.set, 1:4],
+a = NNS.boost(iris[-c(1:10), 1:4], iris[-c(1:10), 5],
+              IVs.test = iris[1:10, 1:4],
               epochs = 100, learner.trials = 100, status = FALSE,
               ncores = 1)
 
@@ -59,7 +57,7 @@ a$results
 
 a$feature.weights
 
-mean(round(a$results)==as.numeric(iris[test.set,5]))
+mean(round(a$results)==as.numeric(iris[1:10, 5]))
 ```
 
 A perfect classification.
