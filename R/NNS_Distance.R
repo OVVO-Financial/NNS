@@ -43,7 +43,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
   }
 
   if(type=="FACTOR"){
-    row.sums <- rpm[,  `:=` (Sum = 1/Reduce(`+`, Map("*", rpm[, 1:n], as.numeric(dist.estimate))))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = 1/Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))][,Sum]
   }
 
   row.sums[row.sums == 0] <- 1e-10
