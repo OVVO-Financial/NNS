@@ -206,7 +206,7 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = "mean")} will set the target as the mean of every variable.
 #' @param variable a numeric matrix or data.frame.
 #' @param pop.adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
-#' @return Matrix of partial moment quadrant values.  Uncalled quadrants will return a matrix of zeros.
+#' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -288,11 +288,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target, variable, pop.adj=FALSE){
 
   cov.matrix <- cupm.matrix + clpm.matrix - dupm.matrix - dlpm.matrix
 
-  return(list(cov.matrix = cov.matrix,
-              cupm = cupm.matrix,
+  return(list(cupm = cupm.matrix,
               dupm = dupm.matrix,
               dlpm = dlpm.matrix,
-              clpm = clpm.matrix
+              clpm = clpm.matrix,
+              cov.matrix = cov.matrix
               ))
 }
 
