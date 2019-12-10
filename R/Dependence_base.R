@@ -27,7 +27,7 @@ NNS.dep.base <- function(x,
           max.obs <- NULL
       }
       if(is.null(degree)){
-          degree <- ifelse(length(x) <= 100, 0, 1)
+          degree <- ifelse(length(x) < 100, 0, 1)
       } else {
           degree <- degree
       }
@@ -41,7 +41,7 @@ NNS.dep.base <- function(x,
           max.obs <- NULL
       }
       if(is.null(degree)){
-          degree <- ifelse(length(x[,1]) <= 100, 0, 1)
+          degree <- ifelse(length(x[,1]) < 100, 0, 1)
       } else {
           degree <- degree
       }
@@ -52,16 +52,16 @@ NNS.dep.base <- function(x,
 
   if(!missing(y)){
       if(is.null(order)){
-          test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+          test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE, )$order
           if(test.map==1){
               noise.reduction <- 'median'
           } else{
               noise.reduction <- 'mean'
           }
-
+      order <- test.map
       } else {
           if(order > 1){
-              test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE, )$order
               if(test.map==1){
                 noise.reduction <- 'median'
               } else{
@@ -69,7 +69,7 @@ NNS.dep.base <- function(x,
               }
           }
         if(order == 1){
-              test.map <- NNS.part(x,y,order = order, obs.req = max.obs, Voronoi = FALSE, min.obs.stop = TRUE)$order
+              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE,)$order
           if(test.map==1){
               noise.reduction <- 'median'
           } else{
@@ -78,9 +78,9 @@ NNS.dep.base <- function(x,
         }
       }
       if(print.map == TRUE){
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, Voronoi = TRUE, min.obs.stop = TRUE, noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = NULL, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = TRUE, noise.reduction = noise.reduction)
       } else {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE, noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = NULL, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE, noise.reduction = noise.reduction)
       }
 
       part.df <- part.map$dt
@@ -91,13 +91,13 @@ NNS.dep.base <- function(x,
           part.df <- part.df[x!=mean.x & y!=mean.y,]
       }
 
-
       part.df[ , `:=` (sub.clpm = Co.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     counts = .N
-                      ), by = prior.quadrant]
+                       sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       counts = .N
+                      ),
+               by = prior.quadrant]
 
 
       part.df[ ,c("x", "y", "quadrant", "mean.x", "mean.y") := NULL]
@@ -106,7 +106,7 @@ NNS.dep.base <- function(x,
       part.df <- unique(part.df[])
 
       part.df[ , `:=` (nns.cor = (sub.clpm + sub.cupm - sub.dlpm - sub.dupm) / (sub.clpm + sub.cupm + sub.dlpm + sub.dupm),
-                     nns.dep = abs(sub.clpm + sub.cupm - sub.dlpm - sub.dupm) / (sub.clpm + sub.cupm + sub.dlpm + sub.dupm))]
+                       nns.dep = abs(sub.clpm + sub.cupm - sub.dlpm - sub.dupm) / (sub.clpm + sub.cupm + sub.dlpm + sub.dupm))]
 
 
       part.df <- part.df[counts == 1, counts := 0]
@@ -115,7 +115,6 @@ NNS.dep.base <- function(x,
       zeros <- length(x) - part.df[ , sum(counts)]
 
       part.df <- part.df[ , `:=` (weight = counts / (length(x) - zeros)), by = prior.quadrant]
-
 
 
 

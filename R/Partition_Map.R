@@ -123,7 +123,7 @@ NNS.part = function(x, y,
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
             # Stop if diminishing returns
-            if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
+            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
 
             #Segments for Voronoi...
             if(Voronoi){
@@ -256,7 +256,7 @@ NNS.part = function(x, y,
             old.obs.req.rows <- PART[old.counts >= 2 * obs.req, which = TRUE]
 
             # Stop if diminishing returns
-            if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
+            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
 
             if(noise.reduction == 'mean' | noise.reduction == 'off'){
                 RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x : y]
