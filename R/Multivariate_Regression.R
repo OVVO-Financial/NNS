@@ -203,8 +203,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         last.known.gradient <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance
 
         last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
-print(last.distance)
-print(last.known.gradient)
+
         predict.fit <- last.distance * last.known.gradient + boundary.estimates
       }
     }

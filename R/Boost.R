@@ -91,11 +91,11 @@ NNS.boost <- function(IVs.train,
   mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z))), by = .(y)]
 
   rep.x <- rbindlist(list(fivenum.x, mode.x, mean.x), use.names = FALSE)
+
   rep.y <- unlist(rep.x[,1])
   rep.x <- rep.x[,-1]
 
   rep.x <- as.data.frame(rep.x)
-
 
   n <- ncol(x)
 
@@ -119,7 +119,7 @@ NNS.boost <- function(IVs.train,
       message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
     }
 
-    n.best <- NNS.stack(x, y, folds = folds, status = status,
+    n.best <- NNS.stack(x, y, folds = 1, status = status,
                         method = 1, order = depth,
                         obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
@@ -160,7 +160,6 @@ NNS.boost <- function(IVs.train,
       new.iv.train <- data.table(x[-new.index,])
       new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
-
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
       mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
       mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
@@ -171,8 +170,8 @@ NNS.boost <- function(IVs.train,
       new.dv.train <- unlist(new.iv.train[,1])
 
       if(!representative.sample){
-        new.iv.train <- rbind(new.iv.train,x[-new.index,])
-        new.dv.train <- c(new.dv.train,y[-new.index])
+        new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
+        new.dv.train <- c(new.dv.train, y[-new.index])
       }
 
       actual <- y[new.index]
@@ -187,8 +186,9 @@ NNS.boost <- function(IVs.train,
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
-                           new.dv.train,point.est = new.iv.test[,test.features[[i]]],
-                           plot=FALSE, residual.plot = FALSE, order = depth,
+                           new.dv.train,
+                           point.est = new.iv.test[,test.features[[i]]],
+                           plot = FALSE, residual.plot = FALSE, order = depth,
                            n.best = n.best, factor.2.dummy = FALSE,
                            ncores = 1, type = type)$Point.est
 
@@ -293,7 +293,7 @@ NNS.boost <- function(IVs.train,
       new.dv.train <- unlist(new.iv.train[, 1])
 
       if(!representative.sample){
-        new.iv.train <- rbind(new.iv.train, x[-new.index,])
+        new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
         new.dv.train <- c(new.dv.train, y[-new.index])
       }
 
@@ -357,7 +357,7 @@ NNS.boost <- function(IVs.train,
     }
   }
 
-  x <- rbind(rep.x, x)
+  x <- rbind(rep.x, data.matrix(x))
   y <- c(rep.y, y)
 
   kf <- data.table(table(as.character(keeper.features)))
@@ -393,8 +393,8 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      estimates[[i]] <- NNS.reg(x[, eval(parse(text=kf$V1[i]))], y,
-                                point.est = z[, eval(parse(text=kf$V1[i]))],
+      estimates[[i]] <- NNS.reg(data.matrix(x[, eval(parse(text=kf$V1[i]))]), y,
+                                point.est = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
                                 plot = FALSE, residual.plot = FALSE, order = depth,
                                 n.best = n.best,
                                 factor.2.dummy = FALSE, ncores = 1,
