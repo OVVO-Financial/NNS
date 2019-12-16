@@ -157,6 +157,11 @@ This setting generates a new seasonal period(s) using the estimated values as co
 
 These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot = TRUE` will not plot without `plot = TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  `intervals` will plot the surrounding estimated values iff `intervals = TRUE & seasonal.factor = FALSE`.
 
+# Multivariate Time Series Forecasting
+The extension to a generalized multivariate instance is provided in the following documentation of the `NNS.VAR()` function:
+
+* [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://ssrn.com/abstract=3489550)
+
 
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
