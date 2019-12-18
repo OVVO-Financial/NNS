@@ -26,8 +26,12 @@ NNS.norm <- function(A,
   RG <- m %o% (1 / m)
 
   if(!linear){
-      scale.factor <- abs(NNS.dep(A)$Dependence)
-      scales <- colMeans(RG * scale.factor)
+      if(length(m) < 10){
+        scale.factor <- abs(cor(A))
+      } else {
+        scale.factor <- abs(NNS.dep(A)$Dependence)
+      }
+    scales <- colMeans(RG * scale.factor)
   } else {
       scales <- colMeans(RG)
   }
