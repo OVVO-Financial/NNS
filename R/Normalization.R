@@ -19,7 +19,8 @@
 
 NNS.norm <- function(A,
                      linear = FALSE,
-                     chart.type = NULL, location = "topleft"){
+                     chart.type = NULL,
+                     location = "topleft"){
 
   m  <- colMeans(A)
   m[m==0] <- 1e-10
@@ -62,7 +63,7 @@ if(!is.null(chart.type)){
         }
 
         if(chart.type == 'l' ){
-            par(mar = c(3, nchar(max(A))*.5, 2, 1))
+            par(mar = c(3, nchar(max(A_Normalized))*1/exp(1), 2, 1))
             par(mfrow = c(2, 1))
 
             matplot(A, type = 'l', col = c('steelblue', rainbow(n)), ylab = '', xaxt = 'n', lwd = 2, las = 1)
