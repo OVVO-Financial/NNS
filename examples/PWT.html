@@ -2776,14 +2776,13 @@ div.tocify {
 
 <h1 class="title toc-ignore">Penn World Table 9.1 in R</h1>
 <h4 class="author">Fred Viole</h4>
-<h4 class="date">10/8/2019</h4>
 
 </div>
 
 
 <div id="intro" class="section level1">
 <h1><span class="header-section-number">1</span> Intro</h1>
-<p>The objective of this analysis is to try to capture any causative effects in the Penn World Table data on Real GDP <code>rdgpe</code>. We will use several techniques available on a theoretical ground truth, and then apply the most accurate technique on the remaining variables.</p>
+<p>The objective of this analysis is to try to capture any causative effects in the Penn World Table data on Real GDP <code>rdgpe</code>. We will use several techniques available on a theoretical ground truth, and then apply these techniques on other variables of interest.</p>
 <div id="ground-truth" class="section level2">
 <h2><span class="header-section-number">1.1</span> Ground Truth</h2>
 <p>The ground truth we have identified is that Real GDP causes Total Factor Productivity <code>ctfp</code>. Why is this? The contention is that <code>ctfp</code> is essentially measuring economies of scale, and in order to invoke those economies of scale, a country must first achieve scale! Thus, we assume <code>rdgpe</code> causes <code>ctfp</code>.</p>
@@ -3166,7 +3165,7 @@ granger[granger_causality &gt; 0.05, unique(country)]</code></pre>
 <p>Reviewing the literature may offer some ability to narrow down this search based on economic theory, or find other contributing factors besides population size.</p>
 <div id="hall-and-jones-1999" class="section level2">
 <h2><span class="header-section-number">3.1</span> Hall and Jones (1999)</h2>
-<p>Output per worker varies enormously across countries. Why? On an accounting basis our analysis shows that differences in physical capital and educational attainment can only partially explain the variation in output per worker. They find a large amount of variation in the level of the Solow residual across countries. At a deeper level, they document that the differences in capital accumulation, productivity, and therefore output per worker are driven by differences in institutions and government policies, which we call social infrastructure. They treat social infrastructure as endogenous, determined historically by location and other factors captured in part by language.</p>
+<p>Output per worker varies enormously across countries. Why? On an accounting basis our analysis shows that differences in physical capital and educational attainment can only partially explain the variation in output per worker. They find a large amount of variation in the level of the Solow residual across countries. At a deeper level, they document that the differences in capital accumulation, productivity, and therefore output per worker are driven by differences in institutions and government policies, which they call ``social infrastructure’’. They treat social infrastructure as endogenous, determined historically by location and other factors captured in part by language.</p>
 <p>We can cluster the <code>rdgpe</code> by location, or latitude, and test to see if there are statistically significant differences in the distributions of the average member nation. We will cluster the countries by latitude and then transform <code>rdgpe</code> to a growth rate for normalization across countries.</p>
 <div id="step-6-incorporate-longitudinal-data" class="section level3">
 <h3><span class="header-section-number">3.1.1</span> Step 6: Incorporate Longitudinal Data</h3>
