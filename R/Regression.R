@@ -119,7 +119,7 @@
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .96,
+                    stn = .95,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
@@ -447,14 +447,14 @@ NNS.reg = function (x, y,
 
   if(dependence > stn ){
     if(is.null(type)){
-      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
       }
     } else {
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
       }
     } # type
   } else {
@@ -478,7 +478,7 @@ NNS.reg = function (x, y,
   mid.min.range <- mean(c(min(x),min(regression.points$x)))
   mid.max.range <- mean(c(max(x),max(regression.points$x)))
 
-  y.mid.min <-  na.omit(y[x > mid.min.range & x <= min.range])
+  y.mid.min <-  na.omit(y[x <= min.range])
   l_y.mid.min <- length(y.mid.min)
 
   y.min <- na.omit(y[x <= mid.min.range])
@@ -502,7 +502,8 @@ NNS.reg = function (x, y,
     b1 <- mode(y.mid.min)
   }
 
-  y.mid.max <- na.omit(y[x > max.range & x <= mid.max.range])
+
+  y.mid.max <- na.omit(y[x >= max.range])
   l_y.mid.max <- length(y.mid.max)
 
   y.max <- na.omit(y[x > mid.max.range])

@@ -92,12 +92,13 @@ NNS.part = function(x, y,
     } else {
         obs.req <- obs.req
         type <- type
-        hard.stop <- max(floor(log(length(x))),1)
+        hard.stop <- order #max(floor(log(length(x))),1)
     }
 
 
     if(noise.reduction == 'off'){
         obs.req <- 1
+        min.obs.stop <- FALSE
     } else {
         obs.req <- obs.req
     }
@@ -243,17 +244,17 @@ NNS.part = function(x, y,
         while(i >= 0){
             if(i == order | i == hard.stop) break
 
-            PART[counts >= 2 * obs.req, counts := .N, by = quadrant]
+            PART[counts >= 1 * obs.req, counts := .N, by = quadrant]
 
-            PART[old.counts >= 2 * obs.req, old.counts := .N, by = prior.quadrant]
+            PART[old.counts >= 1 * obs.req, old.counts := .N, by = prior.quadrant]
 
-            if(max(PART$counts) <= 2 * obs.req && i >= 1) break
+            if(max(PART$counts) <= 1 * obs.req && i >= 1) break
 
-            if(min.obs.stop && (min(PART$counts) <= 2 * obs.req) && i >= 1) break
+            if(min.obs.stop && (min(PART$counts) <= 1 * obs.req) && i >= 1) break
 
-            obs.req.rows <- PART[counts >= 2 * obs.req, which = TRUE]
+            obs.req.rows <- PART[counts >= 1 * obs.req, which = TRUE]
 
-            old.obs.req.rows <- PART[old.counts >= 2 * obs.req, which = TRUE]
+            old.obs.req.rows <- PART[old.counts >= 1 * obs.req, which = TRUE]
 
             # Stop if diminishing returns
             if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
