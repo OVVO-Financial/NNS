@@ -92,7 +92,7 @@ NNS.part = function(x, y,
     } else {
         obs.req <- obs.req
         type <- type
-        hard.stop <- order #max(floor(log(length(x))),1)
+        hard.stop <- max(floor(log(length(x),2)),1)
     }
 
 
