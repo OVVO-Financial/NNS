@@ -31,7 +31,7 @@ Below are some examples demonstrating unsupervised learning with NNS clustering 
 ```{r linear}
 x = seq(-5, 5, .05); y = x ^ 3
 
-for(i in 1 : 4){NNS.part(x, y, order = i, noise.reduction = "off", Voronoi = TRUE)}
+for(i in 1 : 4){NNS.part(x, y, order = i, min.obs.stop = FALSE, Voronoi = TRUE)}
 ```
 ```{r res, echo=FALSE}
 NNS.part(x,y,order = 4, noise.reduction = "off")
@@ -75,15 +75,10 @@ NNS.reg(z, g, order = "max", ncores = 1)
 ### Inter/Extrapolation
 `NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x, y, point.est = ...)` parameter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
 
-### Classification
-For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.  
-```{r iris point.est,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1:10, 1 : 4], location = "topleft", ncores = 1)$Point.est
-```
 
 ### NNS Dimension Reduction Regression
 `NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x, y, dim.red.method = "cor", ...)`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
-```{r nonlinear class,fig.width=5,fig.height=3,fig.align = "center"}
+```{r nonlinear_class,fig.width=5,fig.height=3,fig.align = "center", message = FALSE}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
 ```
 Thus, our model for this regression would be:
@@ -102,6 +97,19 @@ and the `point.est = (...)` operates in the same manner as the full regression a
 ```{r final,fig.width=5,fig.height=3,fig.align = "center"}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
+
+
+# Classification
+For a classification problem, we simply set `NNS.reg(x, y, type = "CLASS", ...)`.
+
+```{r class,fig.width=5,fig.height=3,fig.align = "center", message=FALSE}
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1:10, 1 : 4], location = "topleft", ncores = 1)$Point.est
+```
+
+
+# Cross-Validation
+The `NNS.stack()` routine cross-validates for a given objective function the `n.best` parameter in the multivariate `NNS.reg` function as well as the `threshold` parameter in the dimension reduction `NNS.reg` version.  `NNS.stack` can be used for classification or continuous dependent variables.
+
 
 
 # References
