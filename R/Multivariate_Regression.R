@@ -182,7 +182,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(!is.null(point.est)){
 
     ### Point estimates
-    central.points <- apply(original.IVs,2,function(x) mean(c(mean(x),median(x), mode(x), mean(c(max(x),min(x))))))
+    central.points <- apply(original.IVs, 2, function(x) mean(c(mean(x), median(x), mode(x), mean(c(max(x), min(x))))))
 
     predict.fit <- numeric()
     predict.fit.iter <- list()
@@ -195,7 +195,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         predict.fit <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est, type = dist, k = n.best)
       } else {
         boundary.points <- pmin(pmax(point.est, minimums), maximums)
-
+        central.points <- (boundary.points + central.points) / 2
         last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
 
         boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = boundary.points, type = dist, k = n.best)
@@ -246,6 +246,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         for(i in outside.index){
           outside.points <- point.est[i,]
           boundary.points <- pmin(pmax(outside.points, minimums), maximums)
+          central.points <- (boundary.points + central.points) / 2
           last.known.distance <- sqrt(sum((boundary.points - central.points) ^ 2))
 
           if(dist=="DTW"){

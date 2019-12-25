@@ -447,14 +447,14 @@ NNS.reg = function (x, y,
 
   if(dependence > stn ){
     if(is.null(type)){
-      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } else {
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } # type
   } else {
