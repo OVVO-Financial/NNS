@@ -52,25 +52,28 @@ NNS.dep.base <- function(x,
 
   if(!missing(y)){
       if(is.null(order)){
-          test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE, )$order
-          if(test.map==1){
+          test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE)
+          test.order <- test.map$order
+          if(test.order==1){
               noise.reduction <- 'median'
           } else{
               noise.reduction <- 'mean'
           }
-      order <- test.map
+          order <- test.order
       } else {
           if(order > 1){
-              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE, )$order
-              if(test.map==1){
+              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE)
+              test.order <- test.map$order
+              if(test.order==1){
                 noise.reduction <- 'median'
               } else{
                 noise.reduction <- 'mean'
               }
           }
         if(order == 1){
-              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE,)$order
-          if(test.map==1){
+              test.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = TRUE, Voronoi = FALSE)
+              test.order <- test.map$order
+          if(test.order==1){
               noise.reduction <- 'median'
           } else{
               noise.reduction <- 'median'
@@ -78,9 +81,9 @@ NNS.dep.base <- function(x,
         }
       }
       if(print.map == TRUE){
-          part.map <- NNS.part(x, y, order = NULL, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = TRUE, noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = TRUE, noise.reduction = noise.reduction)
       } else {
-          part.map <- NNS.part(x, y, order = NULL, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE, noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, min.obs.stop = FALSE, Voronoi = FALSE, noise.reduction = noise.reduction)
       }
 
       part.df <- part.map$dt
