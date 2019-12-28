@@ -7,7 +7,7 @@
 NNS.ARMA.optim(variable, training.set, seasonal.factor,
   negative.values = FALSE, obj.fn = expression(sum((predicted -
   actual)^2)), objective = "min", linear.approximation = TRUE,
-  print.trace = TRUE, ncores = NULL, subcores = NULL)
+  print.trace = TRUE, ncores = NULL)
 }
 \arguments{
 \item{variable}{a numeric vector.}
@@ -28,8 +28,6 @@ NNS.ARMA.optim(variable, training.set, seasonal.factor,
 \item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.}
-
-\item{subcores}{integer; value specifying the number of cores to be used in the parallelized procedure in the subroutine \link{NNS.ARMA}.  If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns a list containing:
