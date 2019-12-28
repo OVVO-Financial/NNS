@@ -65,7 +65,7 @@ NNS.dep.hd(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 ```
 
 # p-values for `NNS.dep()`
-p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running NNS.dep(x,$y_p$) to compare against a null hypothesis of 0 correlation, or independence between (x, y).
+p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running NNS.dep(x,$y_p$) to compare against a null hypothesis of 0 correlation, or independence between $(x, y)$.
 
 ```{r permutations}
 ## p-values for [NNS.dep]

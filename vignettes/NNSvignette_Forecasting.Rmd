@@ -97,7 +97,7 @@ Given our monthly dataset, we will try multiple years by setting `seasonal.facto
 nns.optimal = NNS.ARMA.optim(AirPassengers[1:100], 
                              training.set = 88, 
                              seasonal.factor = seq(12, 24, 6),
-                             obj.fn = expression( sqrt(mean((predicted - actual)^2)) ), ncores = 1, subcores = 1)
+                             obj.fn = expression( sqrt(mean((predicted - actual)^2)) ), ncores = 1)
 
 nns.optimal
 ```
