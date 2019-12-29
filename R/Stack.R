@@ -48,10 +48,10 @@
 #'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS")
 #'
 #'  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
-#'  NNS.stack(iris[ , 1:4], iris[ , 5])
+#'  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
 #'
 #'  ## Selecting NNS.reg and dimension reduction techniques.
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2))}
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")}
 #'
 #' @export
 
@@ -73,6 +73,13 @@ NNS.stack <- function(IVs.train,
                       ncores = NULL){
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
+
+  type <- tolower(type)
+
+  if(type=="class"){
+    obj.fn <- expression(mean(round(predicted)==as.numeric(actual)))
+    objective <- "max"
+  }
 
   objective <- tolower(objective)
 
