@@ -74,11 +74,13 @@ NNS.stack <- function(IVs.train,
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
 
-  type <- tolower(type)
 
-  if(!is.null(type) & type=="class"){
-    obj.fn <- expression(mean(round(predicted)==as.numeric(actual)))
-    objective <- "max"
+  if(!is.null(type)){
+      type <- tolower(type)
+      if(type=="class"){
+          obj.fn <- expression(mean(round(predicted)==as.numeric(actual)))
+          objective <- "max"
+      }
   }
 
   objective <- tolower(objective)
