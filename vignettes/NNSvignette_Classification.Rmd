@@ -65,6 +65,23 @@ mean(round(a$results)==as.numeric(iris[test.set, 5]))
 
 A perfect classification.
 
+# Cross-Validation Classification Using `NNS.stack`
+The `NNS.stack()` routine cross-validates for a given objective function the `n.best` parameter in the multivariate `NNS.reg` function as well as the `threshold` parameter in the dimension reduction `NNS.reg` version. `NNS.stack` can be used for classification via `NNS.stack(..., type = "CLASS", ...)`.
+
+Using the reduced features (if any and calling them from `names(a$feature.weights)`) from our `NNS.boost` output, we can further cross-validate the classification using `NNS.stack`.
+
+```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE}
+b = NNS.stack(IVs.train = iris[-test.set, names(a$feature.weights)], 
+              DV.train = iris[-test.set, 5],
+              IVs.test = iris[test.set, names(a$feature.weights)],
+              type = "CLASS",
+              ncores = 1)
+
+b
+
+mean(round(b$stack)==as.numeric(iris[test.set, 5]))
+```
+
 ## Brief Notes on Other Parameters
 * `representative.sample` uses a representation of each of the regressors via Tukey's five number summary as well as `mean` and `mode`.  This encoding of the regressors greatly reduces large datasets runtimes.
 
