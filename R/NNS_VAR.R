@@ -138,7 +138,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                learner.trials = epochs,
-                               ncores = NULL, type = NULL,
+                               ncores = num_cores, type = NULL,
                                feature.importance = FALSE)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
@@ -151,7 +151,7 @@ NNS.VAR <- function(variables,
                                   objective = objective,
                                   order = 'max',
                                   ts.test = 2*h, folds = 1,
-                                  status = status, ncores = NULL)
+                                  status = status, ncores = num_cores)
 
     nns_DVs[[index]] <- DV_values$stack
 
