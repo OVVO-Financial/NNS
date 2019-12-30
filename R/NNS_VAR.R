@@ -137,6 +137,7 @@ NNS.VAR <- function(variables,
                                obj.fn = obj.fn,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
+                               depth = "max",
                                learner.trials = epochs,
                                ncores = num_cores, type = NULL,
                                feature.importance = FALSE)
@@ -149,7 +150,7 @@ NNS.VAR <- function(variables,
                                   IVs.test =  tail(lagged_new_values[, relevant_vars], h),
                                   obj.fn = obj.fn,
                                   objective = objective,
-                                  order = 'max',
+                                  order = "max",
                                   ts.test = 2*h, folds = 1,
                                   status = status, ncores = num_cores)
 
