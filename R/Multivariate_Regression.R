@@ -83,26 +83,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   }
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
-  ### PARALLEL
-
-  if (is.null(ncores)) {
-    num_cores <- as.integer(detectCores() / 2) - 1
-  } else {
-    num_cores <- ncores
-  }
-
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
-
   NNS.ID <- list()
 
-  NNS.ID <- foreach(j = 1:n)%dopar%{
+  for(j in 1:n){
     sorted.reg.points <- sort(reg.points.matrix[ , j])
     sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
 
-    findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+    NNS.ID[[j]] <- findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
   }
 
 
@@ -213,6 +200,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     }
 
     if(!is.null(np)){
+      ### PARALLEL
+
+      if (is.null(ncores)) {
+        num_cores <- as.integer(detectCores() / 2) - 1
+      } else {
+        num_cores <- ncores
+      }
+
+      if(num_cores>1){
+        cl <- makeCluster(num_cores)
+        registerDoParallel(cl)
+      } else { cl <- NULL }
+
       lows <- logical()
       highs <- logical()
       outsiders <- numeric()
@@ -276,18 +276,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
       predict.fit <- DISTANCES
 
-    }
+      if(!is.null(cl)){
+          stopCluster(cl)
+          registerDoSEQ()
+      }
 
+    }
 
   } else {
     predict.fit <- NULL
   } # is.null point.est
 
 
-  if(!is.null(cl)){
-    stopCluster(cl)
-    registerDoSEQ()
-  }
+
 
   R2 <- (sum((y.hat - mean(original.DV)) * (original.DV - mean(original.DV))) ^ 2) / (sum((original.DV - mean(original.DV)) ^ 2) * sum((y.hat - mean(original.DV)) ^ 2))
 
