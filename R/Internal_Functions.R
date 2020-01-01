@@ -1,12 +1,10 @@
 ### Mode of a distribution
 mode <- function(x){
-  if(length(na.omit(x)) > 1){
-    d <- density(na.omit(x))
-    d$x[which.max(d$y)]
-  } else {
-    x
+  x <- na.omit(x)
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
   }
-}
+
 
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
