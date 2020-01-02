@@ -183,15 +183,18 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       } else {
         boundary.points <- pmin(pmax(point.est, minimums), maximums)
         mid.points <- (boundary.points + central.points) / 2
+        mid.points_2 <- (boundary.points + mid.points) / 2
         last.known.distance_1 <- sqrt(sum((boundary.points - central.points) ^ 2))
         last.known.distance_2 <- sqrt(sum((boundary.points - mid.points) ^ 2))
+        last.known.distance_3 <- sqrt(sum((boundary.points - mid.points_2) ^ 2))
 
         boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = boundary.points, type = dist, k = n.best)
 
         last.known.gradient_1 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance_1
         last.known.gradient_2 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points, type = dist, k = n.best)) / last.known.distance_2
+        last.known.gradient_3 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points_2, type = dist, k = n.best)) / last.known.distance_3
 
-        last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2) / 2
+        last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2 + last.known.gradient_3) / 3
 
         last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
 
@@ -251,8 +254,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           outside.points <- point.est[i,]
           boundary.points <- pmin(pmax(outside.points, minimums), maximums)
           mid.points <- (boundary.points + central.points) / 2
+          mid.points_2 <- (boundary.points + mid.points) / 2
           last.known.distance_1 <- sqrt(sum((boundary.points - central.points) ^ 2))
           last.known.distance_2 <- sqrt(sum((boundary.points - mid.points) ^ 2))
+          last.known.distance_3 <- sqrt(sum((boundary.points - mid.points_2) ^ 2))
 
           if(dist=="DTW"){
             dist <- "L2"
@@ -264,8 +269,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
           last.known.gradient_1 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance_1
           last.known.gradient_2 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points, type = dist, k = n.best)) / last.known.distance_2
+          last.known.gradient_3 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points_2, type = dist, k = n.best)) / last.known.distance_3
 
-          last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2) / 2
+          last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2 + last.known.gradient_3) / 3
 
           last.distance <- sqrt(sum((outside.points - boundary.points) ^ 2))
 
