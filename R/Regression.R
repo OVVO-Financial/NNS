@@ -468,7 +468,7 @@ NNS.reg = function (x, y,
     part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
                          order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
     if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
     }
   } # Dependence < stn
 
