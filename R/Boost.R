@@ -361,7 +361,7 @@ NNS.boost <- function(IVs.train,
   y <- c(rep.y, y)
 
   kf <- data.table(table(as.character(keeper.features)))
-  kf$N <- kf$N/sum(kf$N)
+  kf$N <- kf$N / sum(kf$N)
 
   if(num_cores>1){
     cl <- makeCluster(num_cores)

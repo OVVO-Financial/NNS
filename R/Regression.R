@@ -646,7 +646,7 @@ NNS.reg = function (x, y,
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    estimate <- round(estimate)
+    estimate <- trunc(estimate+sign(estimate)*0.5) #round(estimate)
   }
 
   fitted <- data.table(x = part.map$dt$x,
