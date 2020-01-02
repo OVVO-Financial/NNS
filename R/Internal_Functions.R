@@ -6,6 +6,7 @@ mode <- function(x){
   }
 
 
+
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
   if(class(x) == "factor"){
