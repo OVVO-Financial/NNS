@@ -83,7 +83,7 @@ NNS.stack <- function(IVs.train,
       }
       noise.reduction <- "mode"
   } else {
-      noise.reduction <- NULL
+      noise.reduction <- "mean"
   }
 
   objective <- tolower(objective)
