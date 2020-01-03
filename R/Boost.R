@@ -48,7 +48,7 @@
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test,
-                      type = "CLASS",
+                      type = NULL,
                       representative.sample = FALSE,
                       depth = "max",
                       n.best = NULL,
