@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
-#' @param type \code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.
+#' @param type \code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.   Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth options: (integer, NULL, "max"); \code{"max"} (default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
@@ -74,7 +74,6 @@ NNS.boost <- function(IVs.train,
     cores <- detectCores()
     num_cores <- ncores
   }
-
 
   if((num_cores)>cores){ stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))}
 
@@ -362,6 +361,9 @@ NNS.boost <- function(IVs.train,
 
   kf <- data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
+
+
+
 
   if(num_cores>1){
     cl <- makeCluster(num_cores)
