@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
-#' @param type \code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.   Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
+#' @param type \code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth options: (integer, NULL, "max"); \code{"max"} (default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
@@ -16,7 +16,7 @@
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
 #' @param obj.fn expression;
-#' \code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
@@ -55,14 +55,22 @@ NNS.boost <- function(IVs.train,
                       ts.test = NULL,
                       folds = 5,
                       threshold = NULL,
-                      obj.fn = expression(mean(round(predicted)==as.numeric(actual))),
-                      objective = "max",
+                      obj.fn = expression( sum((predicted - actual)^2) ),
+                      objective = "min",
                       extreme = FALSE,
                       feature.importance = TRUE,
                       status = TRUE,
                       ncores = NULL){
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
+
+  if(!is.null(type)){
+    type <- tolower(type)
+    if(type=="class"){
+      obj.fn <- expression(mean(trunc(predicted + sign(predicted)*0.5)==as.numeric(actual)))
+      objective <- "max"
+    }
+  }
 
   objective <- tolower(objective)
 
@@ -446,7 +454,7 @@ NNS.boost <- function(IVs.train,
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    return(list("results" = trunc(estimates+sign(estimates)*0.5),
+    return(list("results" = trunc(estimates + sign(estimates)*0.5),
                 "feature.weights" = plot.table/sum(plot.table)))
   }
 }
