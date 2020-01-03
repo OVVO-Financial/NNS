@@ -8,9 +8,9 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
   representative.sample = FALSE, depth = "max", n.best = NULL,
   learner.trials = NULL, epochs = NULL, CV.size = 0.25,
   ts.test = NULL, folds = 5, threshold = NULL,
-  obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
-  objective = "max", extreme = FALSE, feature.importance = TRUE,
-  status = TRUE, ncores = NULL)
+  obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
+  extreme = FALSE, feature.importance = TRUE, status = TRUE,
+  ncores = NULL)
 }
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
@@ -19,7 +19,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
 
-\item{type}{\code{"CLASS"} (default).  To perform a classification, set to \code{(type = "CLASS")}, else for continuous DV set to \code{(type = NULL)}.}
+\item{type}{\code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].}
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
@@ -40,7 +40,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 \item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
 
 \item{obj.fn}{expression;
-\code{expression(mean(round(predicted)==as.numeric(actual)))} (default) Mean accuracy is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+\code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.}
 
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
