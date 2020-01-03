@@ -4,7 +4,7 @@
 \alias{NNS.boost}
 \title{NNS Boost}
 \usage{
-NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
+NNS.boost(IVs.train, DV.train, IVs.test, type = NULL,
   representative.sample = FALSE, depth = "max", n.best = NULL,
   learner.trials = NULL, epochs = NULL, CV.size = 0.25,
   ts.test = NULL, folds = 5, threshold = NULL,
