@@ -48,7 +48,7 @@ Once a `threshold` is obtained, `NNS.boost` will test various feature combinatio
 Let's have a look and see how it works.  We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
-set.seed(123)
+set.seed(1234)
 test.set = sample(150,10)
  
 a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],

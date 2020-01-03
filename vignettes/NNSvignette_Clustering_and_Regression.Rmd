@@ -33,12 +33,10 @@ x = seq(-5, 5, .05); y = x ^ 3
 
 for(i in 1 : 4){NNS.part(x, y, order = i, min.obs.stop = FALSE, Voronoi = TRUE)}
 ```
-```{r res, echo=FALSE}
-NNS.part(x,y,order = 4, noise.reduction = "off")
-```
+
 
 ### X-only Partitioning
-`NNS.part` offers a partitioning based on $x$ values only, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
+`NNS.part` offers a partitioning based on $x$ values only `NNS.part(x, y, type = "XONLY", ...)`, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
 ```{r x part,results='hide'}
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
 ```
@@ -50,20 +48,20 @@ NNS.part(x,y,order = 4, type = "XONLY")
 
 ## Clusters Used in Regression
 The right column of plots shows the corresponding regression for the order of `NNS` partitioning.
-```{r depreg,results='hide'}
+```{r depreg},results='hide'}
 for(i in 1 : 3){NNS.part(x, y, order = i, noise.reduction = "off", Voronoi = TRUE) ; NNS.reg(x, y, order = i, ncores = 1)}
 ```
 
 
-## NNS Regression `NNS.reg`
+# NNS Regression `NNS.reg`
 `NNS.reg` can fit any $f(x)$, for both uni- and multivariate cases.  `NNS.reg` returns a self-evident list of values provided below.
 
-### Univariate:
+## Univariate:
 ```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
 NNS.reg(x, y, order = 4, noise.reduction = "off", ncores = 1)
 ```
 
-### Multivariate:
+## Multivariate:
 Multivariate regressions return a plot of $y$ and $\hat{y}$, as well as the regression points (`$RPM`) and partitions (`$rhs.partitions`) for each regressor.
 ```{r nonlinear multi,fig.width=5,fig.height=3,fig.align = "center"}
 f= function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
@@ -72,11 +70,11 @@ g = f(z[ , 1], z[ , 2])
 NNS.reg(z, g, order = "max", ncores = 1)
 ```
 
-### Inter/Extrapolation
+## Inter/Extrapolation
 `NNS.reg` can inter- or extrapolate any point of interest.  The `NNS.reg(x, y, point.est = ...)` parameter permits any sized data of similar dimensions to $x$ and called specifically with `$Point.est`.
 
 
-### NNS Dimension Reduction Regression
+## NNS Dimension Reduction Regression
 `NNS.reg` also provides a dimension reduction regression by including a parameter `NNS.reg(x, y, dim.red.method = "cor", ...)`.  Reducing all regressors to a single dimension using the returned equation `$equation`.
 ```{r nonlinear_class,fig.width=5,fig.height=3,fig.align = "center", message = FALSE}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
@@ -85,7 +83,7 @@ Thus, our model for this regression would be:
 $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
 
 
-#### Threshold
+### Threshold
 `NNS.reg(x, y, dim.red.method = "cor", threshold = ...)` offers a method of reducing regressors further by controlling the absolute value of required correlation.
 ```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
@@ -107,7 +105,7 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1:10, 1 : 4
 ```
 
 
-# Cross-Validation
+# Cross-Validation `NNS.stack`
 The `NNS.stack()` routine cross-validates for a given objective function the `n.best` parameter in the multivariate `NNS.reg` function as well as the `threshold` parameter in the dimension reduction `NNS.reg` version.  `NNS.stack` can be used for classification `NNS.stack(..., type = "CLASS", ...)` or continuous dependent variables `NNS.stack(..., type = NULL, ...)`.
 
 Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`.
