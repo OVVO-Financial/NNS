@@ -322,7 +322,6 @@ NNS.stack <- function(IVs.train,
   weights <- weights / sum(weights)
 
   if(identical(sort(method),c(1,2))){
-print(cbind(nns.method.1, nns.method.2))
       estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
       if(!is.null(type)){
           estimates <- trunc(estimates+sign(estimates)*0.5)
