@@ -184,7 +184,7 @@ NNS.boost <- function(IVs.train,
         new.dv.train <- c(new.dv.train, y[-new.index])
       }
 
-      actual <- y[new.index]
+      actual <- as.numeric(y[new.index])
       new.iv.test <- x[new.index,]
 
 
@@ -215,7 +215,6 @@ NNS.boost <- function(IVs.train,
   } else {
       results <- threshold
   } # NULL threshold
-
 
 
   if(extreme){
