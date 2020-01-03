@@ -27,7 +27,7 @@ NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.95,
 
 \item{tau}{options("ts", NULL); \code{NULL}(default) To be used in conjuction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.}
 
-\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.}
+\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].}
 
 \item{point.est}{a numeric or factor vector with compatible dimsensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.}
 
