@@ -33,7 +33,13 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 #' \url{https://ssrn.com/abstract=2864711}
-#' @note Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
+#'
+#' @note
+#' \itemize{
+#' \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
+#'
+#' \item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
+#' }
 #'
 #' If error received:
 #'
@@ -78,12 +84,9 @@ NNS.stack <- function(IVs.train,
   if(!is.null(type)){
       type <- tolower(type)
       if(type=="class"){
-          obj.fn <- expression(mean(trunc(predicted + sign(predicted)*0.5)==as.numeric(actual)))
+          obj.fn <- expression(mean( predicted == as.numeric(actual)))
           objective <- "max"
       }
-      noise.reduction <- "mode"
-  } else {
-      noise.reduction <- "mean"
   }
 
   objective <- tolower(objective)
@@ -324,7 +327,7 @@ NNS.stack <- function(IVs.train,
   if(identical(sort(method),c(1,2))){
       estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
       if(!is.null(type)){
-          estimates <- trunc(estimates+sign(estimates)*0.5)
+          estimates <- round(estimates)
       }
   } else {
         if(method==1){

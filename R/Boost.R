@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.
-#' @param type \code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
+#' @param type \code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth options: (integer, NULL, "max"); \code{"max"} (default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")} will be signifcantly faster, but increase the variance of results.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
@@ -25,6 +25,8 @@
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
+#' @note Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
+#'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
 #' \url{https://ssrn.com/abstract=2864711}
@@ -33,10 +35,11 @@
 #'  \dontrun{
 #'  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
 #'  IVs.test = iris[141:150, 1:4],
-#'  epochs = 100, learner.trials = 100)
+#'  epochs = 100, learner.trials = 100,
+#'  type = "CLASS")
 #'
 #'  ## Test accuracy
-#'  mean(round(a$results) == as.numeric(iris[141:150, 5]))
+#'  mean( a$results == as.numeric(iris[141:150, 5]))
 #'  }
 #'
 #' @export
@@ -67,7 +70,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(type)){
     type <- tolower(type)
     if(type=="class"){
-      obj.fn <- expression(mean(trunc(predicted + sign(predicted)*0.5)==as.numeric(actual)))
+      obj.fn <- expression( mean(predicted == as.numeric(actual)) )
       objective <- "max"
     }
   }
@@ -454,7 +457,7 @@ NNS.boost <- function(IVs.train,
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    return(list("results" = trunc(estimates + sign(estimates)*0.5),
+    return(list("results" = round(estimates),
                 "feature.weights" = plot.table/sum(plot.table)))
   }
 }

@@ -360,9 +360,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   rhs.partitions <- data.table(reg.points.matrix)
 
   if(!is.null(type)){
-      fitted.matrix$y.hat <- trunc(fitted.matrix$y.hat+sign(fitted.matrix$y.hat)*0.5) #round(fitted.matrix$y.hat)
+      fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
       if(!is.null(predict.fit)){
-          predict.fit <- trunc(predict.fit+sign(predict.fit)*0.5) #round(predict.fit)
+          predict.fit <- round(predict.fit)
       }
   }
 
