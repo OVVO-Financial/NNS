@@ -59,7 +59,11 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 }
 \note{
-Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
+\itemize{
+\item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
+
+\item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
+}
 
 If error received:
 

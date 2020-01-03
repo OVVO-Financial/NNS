@@ -19,7 +19,7 @@ NNS.boost(IVs.train, DV.train, IVs.test, type = "CLASS",
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.}
 
-\item{type}{\code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].}
+\item{type}{\code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
@@ -58,15 +58,19 @@ Returns a vector of fitted values for the dependent variable test set \code{$res
 \description{
 Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
 }
+\note{
+Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
+}
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
  \dontrun{
  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
  IVs.test = iris[141:150, 1:4],
- epochs = 100, learner.trials = 100)
+ epochs = 100, learner.trials = 100,
+ type = "CLASS")
 
  ## Test accuracy
- mean(round(a$results) == as.numeric(iris[141:150, 5]))
+ mean( a$results == as.numeric(iris[141:150, 5]))
  }
 
 }
