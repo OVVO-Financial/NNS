@@ -96,7 +96,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   NNS.ID <- do.call(cbind,NNS.ID)
 
   ### Create unique identifier of each observation's interval
-  NNS.ID <- apply(NNS.ID, 1 , paste , collapse = "." )
+  NNS.ID <- gsub(do.call(paste, as.data.frame(NNS.ID)), pattern = " ", replacement = ".")
 
 
   ### Match y to unique identifier
@@ -226,9 +226,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
                      type = dist, k = n.best)
       }
 
+
+      if(!is.null(cl)){
+        stopCluster(cl)
+        registerDoSEQ()
+      }
+
       DISTANCES <- unlist(DISTANCES)
-
-
 
       lows <- do.call(pmin,as.data.frame(t(point.est))) < minimums
       highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
@@ -282,10 +286,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
       predict.fit <- DISTANCES
 
-      if(!is.null(cl)){
-          stopCluster(cl)
-          registerDoSEQ()
-      }
+
 
     }
 

@@ -68,8 +68,7 @@ NNS.dep.base <- function(x,
                              Voronoi = FALSE, min.obs.stop = TRUE)$order
         if (test.map == 1) {
           noise.reduction <- "median"
-        }
-        else {
+        } else {
           noise.reduction <- "mean"
         }
       }
@@ -77,9 +76,6 @@ NNS.dep.base <- function(x,
         test.map <- NNS.part(x, y, order = order, obs.req = max.obs,
                              Voronoi = FALSE, min.obs.stop = TRUE)$order
         if (test.map == 1) {
-          noise.reduction <- "median"
-        }
-        else {
           noise.reduction <- "median"
         }
       }
