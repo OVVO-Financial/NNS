@@ -198,7 +198,7 @@ NNS.reg = function (x, y,
         }
 
         if(!is.null(dim(x))){
-            if(!is.null(dim(point.est)) && dim(point.est)[1]>1) {
+            if(!is.null(dim(point.est)) && dim(point.est)[1]>=1) {
                 point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
             } else {
                 point.est <- t(point.est)
