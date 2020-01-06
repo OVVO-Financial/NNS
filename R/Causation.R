@@ -94,7 +94,7 @@ NNS.caus <- function(x, y,
 
 
     if(sign(Causation.x.given.y) == sign(Causation.y.given.x)){
-        if(abs(Causation.x.given.y) <= abs(Causation.y.given.x)){
+        if(Causation.x.given.y <= Causation.y.given.x){
             if(plot){
                 # For plotting only
                 if(tau == "cs"){
@@ -107,7 +107,7 @@ NNS.caus <- function(x, y,
             }
             return(c(Causation.x.given.y = Causation.x.given.y,
                   Causation.y.given.x = Causation.y.given.x,
-                  "C(x--->y)" =  abs(Causation.y.given.x) - abs(Causation.x.given.y)))
+                  "C(x--->y)" =  Causation.y.given.x - Causation.x.given.y))
         } else {
           if(plot){
               # For plotting only
