@@ -430,7 +430,7 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1 / exp(1))
+  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- 0
 
   if(is.null(original.columns) | is.null(dim.red.method)){
@@ -443,7 +443,6 @@ NNS.reg = function (x, y,
   } else {
     dep.reduced.order <- order
   }
-
 
   if(dependence > stn ){
     if(is.null(type)){
@@ -491,7 +490,7 @@ NNS.reg = function (x, y,
   l_y.min <- length(y.min)
 
   if(l_y.min <= 1){
-    a <- y.min
+    a <- median(y.min)
     b <- a
     f <- a
   } else {
@@ -501,7 +500,7 @@ NNS.reg = function (x, y,
   }
 
   if(l_y.mid.min <= 1){
-    a1 <- y.mid.min
+    a1 <- median(y.mid.min)
     b1 <- a1
   } else {
     a1 <- median(y.mid.min)
@@ -512,7 +511,7 @@ NNS.reg = function (x, y,
   y.mid.max <- na.omit(y[x >= max.range])
   l_y.mid.max <- length(y.mid.max)
 
-  y.max <- na.omit(y[x > mid.max.range])
+  y.max <- na.omit(y[x >= mid.max.range])
   l_y.max <- length(y.max)
 
   if(l_y.max <= 1){
@@ -578,17 +577,19 @@ NNS.reg = function (x, y,
   regression.points <- regression.points[complete.cases(regression.points),]
   setkey(regression.points, x, y)
 
-  ### Consolidate possible duplicated points
-  if(noise.reduction == "mean" | noise.reduction == "off"){
-      regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
-  }
+### Consolidate possible duplicated points
+  if(any(duplicated(regression.points$x))){
+      if(noise.reduction == "mean" | noise.reduction == "off"){
+          regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
+      }
 
-  if(noise.reduction == "median"){
-    regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
-  }
+      if(noise.reduction == "median"){
+          regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
+      }
 
-  if(noise.reduction == "mode"){
-    regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
+      if(noise.reduction == "mode"){
+          regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
+      }
   }
 
   ### Regression Equation
