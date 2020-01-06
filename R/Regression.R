@@ -446,15 +446,15 @@ NNS.reg = function (x, y,
 
   if(dependence > stn ){
     if(is.null(type)){
-      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, noise.reduction = 'median', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y, noise.reduction ='median', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } else {
       part.map <- NNS.part(x, y, type = "XONLY",
-                           noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+                           noise.reduction = 'median', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y,noise.reduction = 'median',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } # type
   } else {
@@ -495,8 +495,12 @@ NNS.reg = function (x, y,
     f <- a
   } else {
     a <- median(y.min)
-    b <- mode(y.min)
-    f <- mean(c(max(y.min),min(y.min)))
+    if(!is.null(type)){
+      b <- mode(y.min)
+    } else{
+      b <- density(y.min)$x[which.max(density(y.min)$y)]
+    }
+    f <- mean(c(max(y.min), min(y.min)))
   }
 
   if(l_y.mid.min <= 1){
@@ -504,7 +508,11 @@ NNS.reg = function (x, y,
     b1 <- a1
   } else {
     a1 <- median(y.mid.min)
-    b1 <- mode(y.mid.min)
+    if(!is.null(type)){
+      b1 <- mode(y.mid.min)
+    } else{
+      b1 <- density(y.mid.min)$x[which.max(density(y.mid.min)$y)]
+    }
   }
 
 
@@ -520,8 +528,12 @@ NNS.reg = function (x, y,
     g <- e
   } else {
     d <- median(y.max)
-    e <- mode(y.max)
-    g <- mean(c(max(y.max),min(y.max)))
+    if(!is.null(type)){
+        e <- mode(y.max)
+    } else{
+        e <- density(y.max)$x[which.max(density(y.max)$y)]
+    }
+    g <- mean(c(max(y.max), min(y.max)))
   }
 
   if(l_y.mid.max <= 1){
@@ -529,7 +541,11 @@ NNS.reg = function (x, y,
     e1 <- d1
   } else {
     d1 <- median(y.mid.max)
-    e1 <- mode(y.mid.max)
+    if(!is.null(type)){
+      e1 <- mode(y.mid.max)
+    } else{
+      e1 <- density(y.mid.max)$x[which.max(density(y.mid.max)$y)]
+    }
   }
 
   Dynamic.average.min <- mean(c(a, b, f))

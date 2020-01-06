@@ -1,9 +1,15 @@
-### Mode of a distribution
+### Classification Mode of a distribution
 mode <- function(x){
   x <- na.omit(x)
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
-  }
+}
+
+### Continuous Mode of a distribution
+mode_2 <- function(x) {
+  d <- density(x)
+  d$x[which.max(d$y)]
+}
 
 
 
