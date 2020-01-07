@@ -4,7 +4,6 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param order integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order = NULL)} which generates a more accurate derivative for well specified cases.
 #' @param eval.point numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.
 #' @param deriv.order numeric options: (1, 2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order = 2)}.
 #' @param h numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the independent variable.
@@ -27,7 +26,7 @@
 #' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")}
 #' @export
 
-dy.dx <- function(x, y, order = NULL, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
+dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
 
   if(length(eval.point) > 1 & deriv.method == "NNS"){
     deriv.method <- "FS"
@@ -97,9 +96,9 @@ dy.dx <- function(x, y, order = NULL, eval.point = median(x), deriv.order = 1, h
       h_step <- abs(h * diff(range(x)))
       deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
 
-      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1])$Point.est
-      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 2])$Point.est
-      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 3])$Point.est
+      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 1])$Point.est
+      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 2])$Point.est
+      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 3])$Point.est
 
 
       f.x_h <- second.deriv.estimates.1
