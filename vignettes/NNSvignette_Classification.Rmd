@@ -51,16 +51,19 @@ Let's have a look and see how it works.  We use 140 random `iris` observations a
 set.seed(1234)
 test.set = sample(150,10)
  
-a = NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
-               IVs.test = iris[test.set, 1:4],
-               epochs = 100, learner.trials = 100, status = FALSE,
-               ncores = 1)
+a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
+              DV.train = iris[-test.set, 5],
+              IVs.test = iris[test.set, 1:4],
+              epochs = 100, learner.trials = 100, 
+              status = FALSE,
+              type = "CLASS",
+              ncores = 1)
 
 a$results
 
 a$feature.weights
 
-mean(round(a$results)==as.numeric(iris[test.set, 5]))
+mean( a$results == as.numeric(iris[test.set, 5]) )
 ```
 
 A perfect classification.
@@ -79,7 +82,7 @@ b = NNS.stack(IVs.train = iris[-test.set, names(a$feature.weights)],
 
 b
 
-mean(round(b$stack)==as.numeric(iris[test.set, 5]))
+mean( b$stack == as.numeric(iris[test.set, 5]) )
 ```
 
 ## Brief Notes on Other Parameters
