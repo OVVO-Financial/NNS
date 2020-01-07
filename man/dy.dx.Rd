@@ -4,15 +4,13 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(x, y, order = NULL, eval.point = median(x), deriv.order = 1,
-  h = 0.05, deriv.method = "FS")
+dy.dx(x, y, eval.point = median(x), deriv.order = 1, h = 0.05,
+  deriv.method = "FS")
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
-
-\item{order}{integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order = NULL)} which generates a more accurate derivative for well specified cases.}
 
 \item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.}
 
