@@ -430,7 +430,7 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
+  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1/exp(1))
   dependence[is.na(dependence)] <- 0
 
   if(is.null(original.columns) | is.null(dim.red.method)){
@@ -458,10 +458,19 @@ NNS.reg = function (x, y,
       }
     } # type
   } else {
-    if(!is.null(type)){
+    if(is.null(type)){
         noise.reduction <- "median"
         type2 <- "XONLY"
-    } else {type2 = NULL}
+    } else {
+        if(type == "class"){
+          type2 = NULL
+          noise.reduction <- "mode"
+        } else {
+            noise.reduction <- "median"
+            type2 <- "XONLY"
+        }
+    }
+
     noise.reduction2 <- ifelse(noise.reduction=="mean", "median", noise.reduction)
 
     part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
@@ -496,9 +505,13 @@ NNS.reg = function (x, y,
   } else {
     a <- median(y.min)
     if(!is.null(type)){
-      b <- mode(y.min)
+      if(type == "class"){
+          b <- mode_class(y.min)
+      } else {
+          b <- mode(y.min)
+      }
     } else{
-      b <- density(y.min)$x[which.max(density(y.min)$y)]
+      b <- mode(y.min)
     }
     f <- mean(c(max(y.min), min(y.min)))
   }
@@ -509,9 +522,13 @@ NNS.reg = function (x, y,
   } else {
     a1 <- median(y.mid.min)
     if(!is.null(type)){
-      b1 <- mode(y.mid.min)
+      if(type == "class"){
+        b1 <- mode_class(y.mid.min)
+      } else {
+        b1 <- mode(y.mid.min)
+      }
     } else{
-      b1 <- density(y.mid.min)$x[which.max(density(y.mid.min)$y)]
+      b1 <- mode(y.mid.min)
     }
   }
 
@@ -529,9 +546,13 @@ NNS.reg = function (x, y,
   } else {
     d <- median(y.max)
     if(!is.null(type)){
+      if(type == "class"){
+        e <- mode_class(y.max)
+      } else {
         e <- mode(y.max)
+      }
     } else{
-        e <- density(y.max)$x[which.max(density(y.max)$y)]
+      e <- mode(y.max)
     }
     g <- mean(c(max(y.max), min(y.max)))
   }
@@ -542,9 +563,13 @@ NNS.reg = function (x, y,
   } else {
     d1 <- median(y.mid.max)
     if(!is.null(type)){
-      e1 <- mode(y.mid.max)
+      if(type == "class"){
+        e1 <- mode_class(y.mid.max)
+      } else {
+        e1 <- mode(y.mid.max)
+      }
     } else{
-      e1 <- density(y.mid.max)$x[which.max(density(y.mid.max)$y)]
+      e1 <- mode(y.mid.max)
     }
   }
 

@@ -5,12 +5,9 @@
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param order integer; Controls the number of partial moment quadrant means.  Defaults to \code{(order = NULL)} which generates a more accurate derivative for well specified cases.
-#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \link{NNS.dep} which reduces \code{"order"} when \code{(order = NULL)}.  Defaults to 0.99 to ensure high dependence for higher \code{"order"} and endpoint determination.
 #' @param eval.point numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.
 #' @param deriv.order numeric options: (1, 2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order = 2)}.
 #' @param h numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the independent variable.
-#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal to noise situations, \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit in \link{NNS.reg}.
-#' Default setting is \code{(noise.reduction = "mean")}.
 #' @param deriv.method method of derivative estimation, options: ("NNS", "FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite step method \code{(deriv.method = "FS")} (Defualt).
 #' @return Returns the value of the partial derivative estimate for the given order.
 #' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
@@ -30,7 +27,7 @@
 #' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")}
 #' @export
 
-dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.order = 1, h = .05, noise.reduction = "mean", deriv.method = "FS"){
+dy.dx <- function(x, y, order = NULL, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
 
   if(length(eval.point) > 1 & deriv.method == "NNS"){
     deriv.method <- "FS"
@@ -72,15 +69,15 @@ dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.
 
     if(deriv.order == 1){
       if(deriv.method == "FS"){
-        estimates.min <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.min)$Point.est
-        estimates.max <- NNS.reg(x, y, plot = FALSE, order = order, stn = stn, noise.reduction = noise.reduction, point.est = eval.point.max)$Point.est
+        estimates.min <- NNS.reg(x, y, plot = FALSE, order = order, point.est = eval.point.min)$Point.est
+        estimates.max <- NNS.reg(x, y, plot = FALSE, order = order, point.est = eval.point.max)$Point.est
 
         rise <- estimates.max - estimates.min
 
         return(rise / run)
       } else {
 
-        reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, stn = stn, noise.reduction = noise.reduction)
+        reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order)
 
         output <- reg.output$derivative
         if(length(output[ , Coefficient]) == 1){
@@ -100,9 +97,9 @@ dy.dx <- function(x, y, order = NULL, stn = 0.99, eval.point = median(x), deriv.
       h_step <- abs(h * diff(range(x)))
       deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
 
-      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1], stn = stn, noise.reduction = noise.reduction)$Point.est
-      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 2], stn = stn, noise.reduction = noise.reduction)$Point.est
-      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 3], stn = stn, noise.reduction = noise.reduction)$Point.est
+      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 1])$Point.est
+      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 2])$Point.est
+      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order=order, point.est = deriv.points[ , 3])$Point.est
 
 
       f.x_h <- second.deriv.estimates.1

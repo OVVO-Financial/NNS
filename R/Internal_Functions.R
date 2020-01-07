@@ -1,17 +1,19 @@
+### Continuous Mode of a distribution
+mode <- function(x) {
+  if(length(x) > 1){
+      d <- density(x)
+      d$x[which.max(d$y)]
+  } else {
+    x
+  }
+}
+
 ### Classification Mode of a distribution
-mode <- function(x){
+mode_class <- function(x){
   x <- na.omit(x)
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
-
-### Continuous Mode of a distribution
-mode_2 <- function(x) {
-  d <- density(x)
-  d$x[which.max(d$y)]
-}
-
-
 
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
