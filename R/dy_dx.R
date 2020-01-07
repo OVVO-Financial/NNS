@@ -34,7 +34,7 @@ dy.dx <- function(x, y, order = NULL, eval.point = median(x), deriv.order = 1, h
   }
 
   if(class(eval.point) == "character"){
-    ranges <- NNS.reg(x, y, order = order, noise.reduction = noise.reduction, plot = FALSE)$derivative
+    ranges <- NNS.reg(x, y, order = order, plot = FALSE)$derivative
     ranges[ , interval := seq(1 : length(ranges$Coefficient))]
 
     range.weights <- numeric()
