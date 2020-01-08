@@ -254,6 +254,9 @@ NNS.stack <- function(IVs.train,
           var.cutoffs[is.na(var.cutoffs)] <- 0
 
           if(is.null(var.cutoffs)) var.cutoffs <- 0
+
+          if(n == 2) var.cutoffs <- c(var.cutoffs, 0)
+
           if(dist=="FACTOR"){
             var.cutoffs <- var.cutoffs[-1]
           }
@@ -289,7 +292,7 @@ NNS.stack <- function(IVs.train,
           test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
           if(b==folds){
-              nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)),decreasing = TRUE)[1]))
+              nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
               best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
               nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
                                       type = type)$Point.est
