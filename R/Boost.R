@@ -203,9 +203,10 @@ NNS.boost <- function(IVs.train,
                            ncores = 1, type = type)$Point.est
 
       # Do not predict a new unseen class
-      predicted <- pmin(predicted,max(as.numeric(y)))
-      predicted <- pmax(predicted,min(as.numeric(y)))
-
+      if(!is.null(type)){
+          predicted <- pmin(predicted, max(as.numeric(y)))
+          predicted <- pmax(predicted, min(as.numeric(y)))
+      }
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -328,8 +329,10 @@ NNS.boost <- function(IVs.train,
                            factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
 
       # Do not predict a new unseen class
-      predicted <- pmin(predicted,max(as.numeric(y)))
-      predicted <- pmax(predicted,min(as.numeric(y)))
+      if(!is.null(type)){
+          predicted <- pmin(predicted,max(as.numeric(y)))
+          predicted <- pmax(predicted,min(as.numeric(y)))
+      }
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -423,9 +426,10 @@ NNS.boost <- function(IVs.train,
 
   estimates <- Reduce("+", estimates)
 
-  estimates <- pmin(estimates, max(as.numeric(y)))
-  estimates <- pmax(estimates, min(as.numeric(y)))
-
+  if(!is.null(type)){
+      estimates <- pmin(estimates, max(as.numeric(y)))
+      estimates <- pmax(estimates, min(as.numeric(y)))
+  }
 
   plot.table <- table(unlist(keeper.features))
   names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
