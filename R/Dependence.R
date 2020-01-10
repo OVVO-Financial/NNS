@@ -124,7 +124,9 @@ NNS.dep = function(x,
     nns.dep <- list(5L)
 
     if(any(unlist(uniques)==1)){
-      DT <- data.table(x, y, key = "x")
+      DT <- data.table(x, y)
+      setkey(DT[, x := x], x)
+
       for(i in 1:3){
         if(i==1){
           nns.dep[[i]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE)
