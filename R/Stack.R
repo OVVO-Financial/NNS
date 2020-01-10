@@ -182,7 +182,7 @@ NNS.stack <- function(IVs.train,
               predicted <- unlist(predicted)
 
               if(!is.null(type)){
-                  predicted <- trunc(predicted+sign(predicted)*0.5)
+                  predicted <- round(predicted)
               }
           }
 
@@ -334,10 +334,10 @@ NNS.stack <- function(IVs.train,
       }
   } else {
         if(method==1){
-            estimates <- (nns.method.1)
+            estimates <- nns.method.1
     } else {
         if(method==2) {
-            estimates <- (nns.method.2)
+            estimates <- nns.method.2
         }
     }
   }
