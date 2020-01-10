@@ -52,29 +52,31 @@ NNS.part = function(x, y,
                                     "off"))) {
         stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'")
     }
-    if (is.null(obs.req))
-        obs.req <- 8
+    if (is.null(obs.req)) obs.req <- 8
+
     if (!is.null(order)) {
         if (order == 0) {
             order <- 1
-        }
-        else {
+        } else {
             order <- order
         }
-    }
-    else {
+    } else {
         order = Inf
     }
+
     if (Voronoi) {
         x.label <- deparse(substitute(x))
         y.label <- deparse(substitute(y))
     }
+
     x <- as.numeric(x)
     y <- as.numeric(y)
+
     if (length(x) < 8) {
         order <- 1
         obs.req <- 0
     }
+
     PART <- data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
 
     if(Voronoi) {

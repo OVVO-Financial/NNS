@@ -616,7 +616,9 @@ NNS.reg = function (x, y,
   regression.points <- rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
 
   regression.points <- regression.points[complete.cases(regression.points),]
+  regression.points <- regression.points[ , .(x,y)]
   setkey(regression.points, x, y)
+  regression.points <- unique(regression.points)
 
 ### Consolidate possible duplicated points
   if(any(duplicated(regression.points$x))){
@@ -656,9 +658,7 @@ NNS.reg = function (x, y,
 
   Regression.Coefficients <- unique(Regression.Coefficients)
   Regression.Coefficients[Regression.Coefficients == Inf] <- 1
-  regression.points <- regression.points[ , .(x,y)]
-  setkey(regression.points)
-  regression.points <- unique(regression.points)
+
 
   ### Fitted Values
   p <- length(regression.points[ , x])
