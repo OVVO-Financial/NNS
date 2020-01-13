@@ -1,6 +1,6 @@
 ### Continuous Mode of a distribution
 mode <- function(x) {
-  if(length(x) > 1){
+  if(length(unique(x)) > 1){
       d <- density(na.omit(as.numeric(x)))
       d$x[which.max(d$y)]
   } else {
