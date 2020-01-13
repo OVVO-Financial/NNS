@@ -573,11 +573,11 @@ NNS.reg = function (x, y,
     }
   }
 
-  Dynamic.average.min <- mean(c(a, b, f))
-  Dynamic.average.max <- mean(c(d, e, g))
+  Dynamic.average.min <- mode(c(a, b, f))
+  Dynamic.average.max <- mode(c(d, e, g))
 
-  Dynamic.average.mid.min <- mean(c(a1, b1, Dynamic.average.min))
-  Dynamic.average.mid.max <- mean(c(d1, e1, Dynamic.average.max))
+  Dynamic.average.mid.min <- mode(c(a1, b1, Dynamic.average.min))
+  Dynamic.average.mid.max <- mode(c(d1, e1, Dynamic.average.max))
 
   ### Endpoints
   if(length(x[x < mid.min.range]) > 1){
