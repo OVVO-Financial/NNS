@@ -21,7 +21,7 @@
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
-#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")}  uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit with a specific \code{order}.
+#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")}  (default) uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit with a specific \code{order}.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param multivariate.call Internal parameter for multivariate regressions.
@@ -129,7 +129,7 @@ NNS.reg = function (x, y,
                     std.errors = FALSE, confidence.interval = NULL,
                     threshold = 0,
                     n.best = NULL,
-                    noise.reduction = "mean",
+                    noise.reduction = "median",
                     dist = "L2", ncores = NULL,
                     multivariate.call = FALSE){
 
@@ -169,10 +169,10 @@ NNS.reg = function (x, y,
 
 
   if(is.null(original.columns)){
-      x.label <- deparse(substitute(x))
-      if(is.null(x.label)){
-          x.label <- "x"
-      }
+    x.label <- deparse(substitute(x))
+    if(is.null(x.label)){
+      x.label <- "x"
+    }
   }
 
   if(factor.2.dummy && !multivariate.call){
@@ -192,47 +192,47 @@ NNS.reg = function (x, y,
     x <- data.matrix(x)
 
     if(!is.null(point.est)){
-        point.est.y <- numeric()
-        if(is.list(point.est) & !is.data.frame(point.est)){
-            point.est <- do.call(cbind, point.est)
+      point.est.y <- numeric()
+      if(is.list(point.est) & !is.data.frame(point.est)){
+        point.est <- do.call(cbind, point.est)
+      }
+
+      if(!is.null(dim(x))){
+        if(!is.null(dim(point.est)) && dim(point.est)[1]>=1) {
+          point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
+        } else {
+          point.est <- t(point.est)
+          point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
         }
 
-        if(!is.null(dim(x))){
-            if(!is.null(dim(point.est)) && dim(point.est)[1]>=1) {
-                point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
-            } else {
-                point.est <- t(point.est)
-                point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
-            }
-
-            if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
-                colnames(point.est) <- colnames(x)
-            }
-
-            point.est <- as.matrix(point.est)
-            l <- dim(point.est)[2]
-            colnames(point.est) <- colnames(x)
-        } else { # !is.null(dim(x))...implying univariate regression
-
-            point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
-            l <- dim(t(point.est))[2]
-
-            if(is.null(colnames(point.est))) {
-              colnames(point.est) <- colnames(x)}
+        if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
+          colnames(point.est) <- colnames(x)
         }
+
+        point.est <- as.matrix(point.est)
+        l <- dim(point.est)[2]
+        colnames(point.est) <- colnames(x)
+      } else { # !is.null(dim(x))...implying univariate regression
+
+        point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
+        l <- dim(t(point.est))[2]
+
+        if(is.null(colnames(point.est))) {
+          colnames(point.est) <- colnames(x)}
+      }
 
       ### Add 0's to data for missing regressors
-        if(length(colnames(x)[!(colnames(x)%in%colnames(point.est))]) > 0 ){
-            Missing <- colnames(x)[!(colnames(x)%in%colnames(point.est))]
-            point.est <- data.frame(point.est)
-            point.est[, Missing] <- 0
-            point.est <- point.est[, colnames(x)]
-        }
+      if(length(colnames(x)[!(colnames(x)%in%colnames(point.est))]) > 0 ){
+        Missing <- colnames(x)[!(colnames(x)%in%colnames(point.est))]
+        point.est <- data.frame(point.est)
+        point.est[, Missing] <- 0
+        point.est <- point.est[, colnames(x)]
+      }
 
-        point.est <- data.matrix(point.est)
+      point.est <- data.matrix(point.est)
 
     } else { # is.null(point.est)
-        point.est.y <- NULL
+      point.est.y <- NULL
     }
 
   } #if(factor.2.dummy && !multivariate.call)
@@ -406,7 +406,7 @@ NNS.reg = function (x, y,
             points.norm <- rbind(point.est, original.variable)
 
             if(dist!="FACTOR"){
-                points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
             }
             if(is.null(np)|np==1){
               new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
@@ -459,16 +459,16 @@ NNS.reg = function (x, y,
     } # type
   } else {
     if(is.null(type)){
+      noise.reduction <- "median"
+      type2 <- "XONLY"
+    } else {
+      if(type == "class"){
+        type2 = NULL
+        noise.reduction <- "mode"
+      } else {
         noise.reduction <- "median"
         type2 <- "XONLY"
-    } else {
-        if(type == "class"){
-          type2 = NULL
-          noise.reduction <- "mode"
-        } else {
-            noise.reduction <- "median"
-            type2 <- "XONLY"
-        }
+      }
     }
 
     noise.reduction2 <- ifelse(noise.reduction=="mean", "median", noise.reduction)
@@ -506,9 +506,9 @@ NNS.reg = function (x, y,
     a <- median(y.min)
     if(!is.null(type)){
       if(type == "class"){
-          b <- mode_class(y.min)
+        b <- mode_class(y.min)
       } else {
-          b <- mode(y.min)
+        b <- mode(y.min)
       }
     } else{
       b <- mode(y.min)
@@ -620,19 +620,19 @@ NNS.reg = function (x, y,
   setkey(regression.points, x, y)
   regression.points <- unique(regression.points)
 
-### Consolidate possible duplicated points
+  ### Consolidate possible duplicated points
   if(any(duplicated(regression.points$x))){
-      if(noise.reduction == "mean" | noise.reduction == "off"){
-          regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
-      }
+    if(noise.reduction == "mean" | noise.reduction == "off"){
+      regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
+    }
 
-      if(noise.reduction == "median"){
-          regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
-      }
+    if(noise.reduction == "median"){
+      regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
+    }
 
-      if(noise.reduction == "mode"){
-          regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
-      }
+    if(noise.reduction == "mode"){
+      regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
+    }
   }
 
   ### Regression Equation
@@ -682,7 +682,7 @@ NNS.reg = function (x, y,
     reg.point.interval[reg.point.interval == 0] <- 1
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
     if(!is.null(type)){
-        point.est.y <- round(point.est.y)
+      point.est.y <- round(point.est.y)
     }
   }
 
