@@ -326,8 +326,11 @@ NNS.ARMA.optim <- function(variable, training.set,
               bias <- mode(predicted - actual)
               predicted <- predicted+bias
               bias.SSE <- eval(obj.fn)
-
-              if(bias.SSE<nns.SSE){bias <- 0}
+              if(objective=="min"){
+                if(bias.SSE<=nns.SSE){bias <- 0}
+              } else {
+                if(bias.SSE>=nns.SSE){bias <- 0}
+              }
           }
       } else {
           nns.weights <- NULL
@@ -335,8 +338,13 @@ NNS.ARMA.optim <- function(variable, training.set,
           bias <- mode(predicted - actual)
           predicted <- predicted+bias
           bias.SSE <- eval(obj.fn)
+          if(objective=="min"){
+              if(bias.SSE<=nns.SSE){bias <- 0}
+          } else {
+              if(bias.SSE>=nns.SSE){bias <- 0}
+          }
 
-          if(bias.SSE<nns.SSE){bias <- 0}
+
       }
 
   }
