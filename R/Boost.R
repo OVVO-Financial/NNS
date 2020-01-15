@@ -363,7 +363,11 @@ NNS.boost <- function(IVs.train,
   keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
   if(length(keeper.features)==0){
     if(old.threshold==0){
-      stop("Please reduce [threshold].")
+      if(objective=="min"){
+          stop("Please increase [threshold].")
+      } else {
+          stop("Please reduce [threshold].")
+      }
     } else {
       keeper.features <- test.features[which.max(results)]
     }
