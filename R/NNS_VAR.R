@@ -132,32 +132,57 @@ NNS.VAR <- function(variables,
     }
 
 # NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
-    nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
-                               IVs.test = tail(lagged_new_values_train[, -i], h),
+#    nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
+#                               IVs.test = tail(lagged_new_values_train[, -i], h),
+#                               obj.fn = obj.fn,
+#                               objective = objective,
+#                               ts.test = 2*h, folds = 1,
+#                               depth = "max",
+#                               learner.trials = epochs,
+#                               ncores = num_cores, type = NULL,
+#                               feature.importance = FALSE)
+
+    cor_threshold <- NNS.stack(IVs.train = lagged_new_values_train[, -i],
+                               DV.train = lagged_new_values_train[, i],
+                               ts.test = 2*h, folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
-                               ts.test = 2*h, folds = 1,
-                               depth = "max",
-                               learner.trials = epochs,
-                               ncores = num_cores, type = NULL,
-                               feature.importance = FALSE)
+                               order = "max", method = 2)$NNS.dim.red.threshold
+
+    relevant_vars <- head(which(abs(NNS.reg(lagged_new_values_train[, -i],
+                                            lagged_new_values_train[, i],
+                                            dim.red.method = "cor", threshold = cor_threshold,
+                                            plot = FALSE, factor.2.dummy = FALSE,
+                                            order = "max")$equation$Coefficient)>0),-1)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-    relevant_vars <- colnames(lagged_new_values)%in%names(nns_boost_est$feature.weights)
+#    relevant_vars <- colnames(lagged_new_values)%in%names(nns_boost_est$feature.weights)
+    if(length(relevant_vars)>1){
+        DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
+                               lagged_new_values_train[, i],
+                               IVs.test =  tail(lagged_new_values[, relevant_vars], h),
+                               obj.fn = obj.fn,
+                               objective = objective,
+                               order = "max",
+                               ts.test = 2*h, folds = 1,
+                               status = status, ncores = num_cores)
 
-    DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
-                                  lagged_new_values_train[, i],
-                                  IVs.test =  tail(lagged_new_values[, relevant_vars], h),
-                                  obj.fn = obj.fn,
-                                  objective = objective,
-                                  order = "max",
-                                  ts.test = 2*h, folds = 1,
-                                  status = status, ncores = num_cores)
+        nns_DVs[[index]] <- DV_values$stack
 
-    nns_DVs[[index]] <- DV_values$stack
+        DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
 
-    DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
+        } else {
+            DV_values <- NNS.reg(lagged_new_values_train[, relevant_vars],
+                                 lagged_new_values_train[, i],
+                                 point.est =  tail(lagged_new_values[, relevant_vars], h))
 
+            nns_DVs[[index]] <- DV_values$Point.est
+
+            predicted <- tail(DV_values$Fitted.xy$y.hat, 2*h)
+            actual <- tail(DV_values$Fitted.xy$y, 2*h)
+
+            DV_obj_fn[[index]] <- eval(obj.fn)
+        }
   }
 
   nns_DVs <- do.call(cbind, nns_DVs)

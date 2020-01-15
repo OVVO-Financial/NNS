@@ -829,7 +829,7 @@ NNS.reg = function (x, y,
                 "x.star" = x.star,
                 "derivative" = Regression.Coefficients[],
                 "Point.est" = point.est.y,
-                "regression.points" = regression.points[],
+                "regression.points" = regression.points[, .(x,y)],
                 "Fitted.xy" = fitted))
   } else {
     invisible(list("R2" = R2,
@@ -839,7 +839,7 @@ NNS.reg = function (x, y,
                    "x.star" = x.star,
                    "derivative" = Regression.Coefficients[],
                    "Point.est" = point.est.y,
-                   "regression.points" = regression.points[],
+                   "regression.points" = regression.points[ ,.(x,y)],
                    "Fitted.xy" = fitted))
   }
 
