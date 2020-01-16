@@ -1,4 +1,4 @@
-NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'mean', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
+NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
 
 
   ### For Multiple regressions
@@ -106,7 +106,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
   if(is.numeric(order) | is.null(order)){
-      if(noise.reduction == 'mean' | noise.reduction == 'off'){
+      if(noise.reduction == 'off'){
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
+      }
+      if(noise.reduction == 'mean'){
           mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
       }
       if(noise.reduction == 'median'){
@@ -116,7 +119,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
       }
       if(noise.reduction == 'mode' & !is.null(type)){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := as.numeric(names(sort(table(original.DV),decreasing = TRUE))[1]), by = 'NNS.ID']
+          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode_class(original.DV), by = 'NNS.ID']
       }
   } else {
       mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
@@ -141,7 +144,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
   if(is.numeric(order) | is.null(order)){
-    if(noise.reduction == 'mean' | noise.reduction == 'off'){
+    if(noise.reduction == 'off'){
+      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, function(z) as.numeric(gravity(z))), by = NNS.ID]
+    }
+    if(noise.reduction == 'mean'){
       REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, function(z) as.numeric(mean(z))), by = NNS.ID]
     }
     if(noise.reduction == 'median'){
@@ -151,7 +157,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode(z))), by = NNS.ID]
     }
     if(noise.reduction == 'mode' & !is.null(type)){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(names(sort(table(z),decreasing = TRUE))[1])), by = NNS.ID]
+      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode_class(z))), by = NNS.ID]
     }
   }
 
@@ -315,7 +321,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       region.matrix <- data.table(original.IVs, original.DV, NNS.ID)
       region.matrix[ , `:=` (min.x1 = min(.SD), max.x1 = max(.SD)), by = NNS.ID, .SDcols = 1]
       region.matrix[ , `:=` (min.x2 = min(.SD), max.x2 = max(.SD)), by = NNS.ID, .SDcols = 2]
-      if(noise.reduction == 'off' | noise.reduction == 'mean'){
+      if(noise.reduction == 'off'){
+        region.matrix[ , `:=` (y.hat = gravity(original.DV)), by = NNS.ID]
+      }
+      if(noise.reduction == 'mean'){
         region.matrix[ , `:=` (y.hat = mean(original.DV)), by = NNS.ID]
       }
       if(noise.reduction == 'median'){
@@ -324,6 +333,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       if(noise.reduction=='mode'){
         region.matrix[ , `:=` (y.hat = mode(original.DV)), by = NNS.ID]
       }
+
       setkey(region.matrix, NNS.ID, min.x1, max.x1, min.x2, max.x2)
       region.matrix[ ,{
         quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),

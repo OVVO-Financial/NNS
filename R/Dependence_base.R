@@ -18,7 +18,7 @@ NNS.dep.base <- function(x,
                    degree = NULL,
                    print.map = FALSE){
 
-  noise.reduction = "median"
+  noise.reduction = "off"
 
   if(!missing(y)) {
       if(length(x) < 20 | class(x) == "factor" | class(y) == "factor") {

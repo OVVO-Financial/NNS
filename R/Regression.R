@@ -21,7 +21,7 @@
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
-#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")}  (default) uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")}  allows for maximum possible fit with a specific \code{order}.
+#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param multivariate.call Internal parameter for multivariate regressions.
@@ -129,7 +129,7 @@ NNS.reg = function (x, y,
                     std.errors = FALSE, confidence.interval = NULL,
                     threshold = 0,
                     n.best = NULL,
-                    noise.reduction = "median",
+                    noise.reduction = "off",
                     dist = "L2", ncores = NULL,
                     multivariate.call = FALSE){
 
@@ -281,9 +281,9 @@ NNS.reg = function (x, y,
 
   np <- nrow(point.est)
 
-  if(noise.reduction == 'off'){
-    stn <- 0
-  }
+ # if(noise.reduction == 'off'){
+ #   stn <- 0
+ # }
 
   if(!is.null(type) && type == "class" && is.null(n.best)){
     n.best <- 1
@@ -446,32 +446,32 @@ NNS.reg = function (x, y,
 
   if(dependence > stn ){
     if(is.null(type)){
-      part.map <- NNS.part(x, y, noise.reduction = 'median', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y, noise.reduction ='median', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y, noise.reduction ='off', order = min( nchar( part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } else {
       part.map <- NNS.part(x, y, type = "XONLY",
-                           noise.reduction = 'median', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+                           noise.reduction = 'off', order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y,noise.reduction = 'median',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+        part.map <- NNS.part(x, y,noise.reduction = 'off',type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } # type
   } else {
     if(is.null(type)){
-      noise.reduction <- "median"
+      noise.reduction <- "off"
       type2 <- "XONLY"
     } else {
       if(type == "class"){
         type2 = NULL
         noise.reduction <- "mode"
       } else {
-        noise.reduction <- "median"
+        noise.reduction <- "off"
         type2 <- "XONLY"
       }
     }
 
-    noise.reduction2 <- ifelse(noise.reduction=="mean", "median", noise.reduction)
+    noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
 
     part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
                          order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
@@ -622,7 +622,11 @@ NNS.reg = function (x, y,
 
   ### Consolidate possible duplicated points
   if(any(duplicated(regression.points$x))){
-    if(noise.reduction == "mean" | noise.reduction == "off"){
+    if(noise.reduction == "off"){
+      regression.points <- regression.points[, lapply(.SD, gravity), .SDcols = 2, by = .(x)]
+    }
+
+    if(noise.reduction == "mean"){
       regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
     }
 

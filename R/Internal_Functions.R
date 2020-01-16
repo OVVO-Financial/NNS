@@ -15,6 +15,11 @@ mode_class <- function(x){
   ux[which.max(tabulate(match(x, ux)))]
 }
 
+### Central Tendency
+gravity <- function(x){
+  mean(c(mean(x), mode(x), median(x)))
+}
+
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
   if(class(x) == "factor"){

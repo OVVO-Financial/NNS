@@ -8,7 +8,7 @@
 #' @param order integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.
 #' @param obs.req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
 #' @param min.obs.stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
-#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "mean")}, while \code{(noise.reduction = "off")} will partition quadrant to a single observation for a given \code{(order = ...)}.
+#' @param noise.reduction the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used.
 #' @return Returns:
 #'  \itemize{
 #'   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
@@ -45,7 +45,7 @@ NNS.part = function(x, y,
                     order = NULL,
                     obs.req = 8,
                     min.obs.stop = TRUE,
-                    noise.reduction = "mean"){
+                    noise.reduction = "off"){
 
     noise.reduction <- tolower(noise.reduction)
     if (!any(noise.reduction %in% c("mean", "median", "mode",
@@ -117,9 +117,40 @@ NNS.part = function(x, y,
 
             if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
 
-            if(Voronoi) {
-                if(l.PART > obs.req) {
-                    if(noise.reduction == "mean" | noise.reduction == "off") {
+            if(noise.reduction == "off") {
+                if(Voronoi) {
+                    if(l.PART > obs.req) {
+                        PART[obs.req.rows, {
+                            segments(min(x), gravity(y), max(x), gravity(y),
+                                     lty = 3)
+                            segments(gravity(x), min(y), gravity(x), max(y),
+                                     lty = 3)
+                        }, by = quadrant]
+                    }
+                }
+
+                RP <- PART[obs.req.rows, lapply(.SD, gravity), by = quadrant, .SDcols = x:y]
+
+                RP[, `:=`(prior.quadrant, (quadrant))]
+
+                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
+
+                old.parts <- length(unique(PART$quadrant))
+
+                PART[RP, on = .(quadrant), `:=`(q_new, {
+                    lox = x.x <= i.x
+                    loy = x.y <= i.y
+                    1L + lox + loy * 2L
+                })]
+
+                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
+
+                new.parts <- length(unique(PART$quadrant))
+            }
+
+            if(noise.reduction == "mean") {
+                if(Voronoi) {
+                    if(l.PART > obs.req) {
                         PART[obs.req.rows, {
                             segments(min(x), mean(y), max(x), mean(y),
                                      lty = 3)
@@ -127,26 +158,8 @@ NNS.part = function(x, y,
                                      lty = 3)
                         }, by = quadrant]
                     }
-                    if(noise.reduction == "median") {
-                        PART[obs.req.rows, {
-                            segments(min(x), median(y), max(x), median(y),
-                                     lty = 3)
-                            segments(median(x), min(y), median(x),
-                                     max(y), lty = 3)
-                        }, by = quadrant]
-                    }
-                    if(noise.reduction == "mode") {
-                        PART[obs.req.rows, {
-                            segments(min(x), mode(y), max(x), mode(y),
-                                     lty = 3)
-                            segments(mode(x), min(y), mode(x), max(y),
-                                     lty = 3)
-                        }, by = quadrant]
-                    }
                 }
-            }
 
-            if(noise.reduction == "mean" | noise.reduction == "off") {
                 RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x:y]
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
@@ -166,7 +179,19 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
             }
 
+
             if(noise.reduction == "median") {
+                if(Voronoi) {
+                    if(l.PART > obs.req) {
+                        PART[obs.req.rows, {
+                            segments(min(x), median(y), max(x), median(y),
+                                     lty = 3)
+                            segments(median(x), min(y), median(x), max(y),
+                                     lty = 3)
+                        }, by = quadrant]
+                    }
+                }
+
                 RP <- PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x:y]
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
@@ -187,6 +212,17 @@ NNS.part = function(x, y,
             }
 
             if (noise.reduction == "mode") {
+                if(Voronoi) {
+                    if(l.PART > obs.req) {
+                        PART[obs.req.rows, {
+                            segments(min(x), mode(y), max(x), mode(y),
+                                     lty = 3)
+                            segments(mode(x), min(y), mode(x), max(y),
+                                     lty = 3)
+                        }, by = quadrant]
+                    }
+                }
+
                 RP <- PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x:y]
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
@@ -241,7 +277,26 @@ NNS.part = function(x, y,
             old.obs.req.rows <- PART[old.counts >= 1 * obs.req, which = TRUE]
 
             if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
-            if(noise.reduction == "mean" | noise.reduction == "off") {
+            if(noise.reduction == "off") {
+                RP <- PART[obs.req.rows, lapply(.SD, gravity), by = quadrant, .SDcols = x:y]
+
+                RP[, `:=`(prior.quadrant, (quadrant))]
+
+                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
+
+                old.parts <- length(unique(PART$quadrant))
+
+                PART[RP, on = .(quadrant), `:=`(q_new, {
+                    lox = x.x > i.x
+                    1L + lox
+                })]
+
+                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
+
+                new.parts <- length(unique(PART$quadrant))
+            }
+
+            if(noise.reduction == "mean") {
                 RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x:y]
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
