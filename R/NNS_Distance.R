@@ -50,9 +50,9 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   if(k==1){
       if(length(which(row.sums == min(row.sums)))>1){
-          return(mode(rpm$y.hat[which(row.sums == min(row.sums))]))
+          return(mode(rpm$y.hat[which(row.sums == min(row.sums))][1]))
       }  else {
-          return(rpm$y.hat[which.min(row.sums)])
+          return(rpm$y.hat[which.min(row.sums)][1])
       }
   }
 
@@ -73,5 +73,5 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   rpm[,"Sum":=NULL]
 
-  return(single.estimate)
+  return(mean(single.estimate))
 }

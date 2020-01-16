@@ -225,7 +225,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table", "dtw"))%dopar%{
         NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
-                     type = dist, k = n.best)
+                     type = dist, k = n.best)[1]
       }
 
 
