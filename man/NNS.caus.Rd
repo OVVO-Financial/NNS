@@ -31,9 +31,6 @@ set.seed(123)
 x <- rnorm(1000) ; y <- x ^ 2
 NNS.caus(x, y, tau = "cs")
 
-## AirPassengers
-NNS.caus(1:length(AirPassengers), AirPassengers, tau = "ts")
-
 ## Causal matrix without per factor causation
 NNS.caus(iris, tau = 0)
 

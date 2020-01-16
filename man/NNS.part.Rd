@@ -5,7 +5,7 @@
 \title{NNS Partition Map}
 \usage{
 NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
-  obs.req = 8, min.obs.stop = TRUE, noise.reduction = "mean")
+  obs.req = 8, min.obs.stop = TRUE, noise.reduction = "off")
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -22,7 +22,7 @@ NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
 
 \item{min.obs.stop}{logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "mean")}, while \code{(noise.reduction = "off")} will partition quadrant to a single observation for a given \code{(order = ...)}.}
+\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used.}
 }
 \value{
 Returns:
