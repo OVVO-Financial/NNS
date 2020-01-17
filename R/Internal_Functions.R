@@ -17,7 +17,7 @@ mode_class <- function(x){
 
 ### Central Tendency
 gravity <- function(x){
-  mean(c(mean(x), mode(x), median(x)))
+  (mean(x) + median(x) + mode(x) ) / 3
 }
 
 ### Factor to dummy variable

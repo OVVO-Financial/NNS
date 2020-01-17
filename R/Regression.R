@@ -495,86 +495,28 @@ NNS.reg = function (x, y,
   y.min <- na.omit(y[x <= mid.min.range])
   l_y.min <- length(y.min)
 
-  if(l_y.min <= 1){
-    a <- median(y.min)
-    b <- a
-    f <- a
-  } else {
-    a <- median(y.min)
-    if(!is.null(type)){
-      if(type == "class"){
-        b <- mode_class(y.min)
-      } else {
-        b <- mode(y.min)
-      }
-    } else{
-      b <- mode(y.min)
-    }
-    f <- mean(c(max(y.min), min(y.min)))
-  }
-
-  if(l_y.mid.min <= 1){
-    a1 <- median(y.mid.min)
-    b1 <- a1
-  } else {
-    a1 <- median(y.mid.min)
-    if(!is.null(type)){
-      if(type == "class"){
-        b1 <- mode_class(y.mid.min)
-      } else {
-        b1 <- mode(y.mid.min)
-      }
-    } else{
-      b1 <- mode(y.mid.min)
-    }
-  }
-
-
   y.mid.max <- na.omit(y[x >= max.range])
   l_y.mid.max <- length(y.mid.max)
 
   y.max <- na.omit(y[x >= mid.max.range])
   l_y.max <- length(y.max)
 
-  if(l_y.max <= 1){
-    d <- median(y.max)
-    e <- d
-    g <- e
-  } else {
-    d <- median(y.max)
-    if(!is.null(type)){
+
+  if(!is.null(type)){
       if(type == "class"){
-        e <- mode_class(y.max)
-      } else {
-        e <- mode(y.max)
-      }
-    } else{
-      e <- mode(y.max)
-    }
-    g <- mean(c(max(y.max), min(y.max)))
-  }
+          Dynamic.average.min <- mode_class(y.min)
+          Dynamic.average.max <- mode_class(y.max)
 
-  if(l_y.mid.max <= 1){
-    d1 <- median(y.mid.max)
-    e1 <- d1
+          Dynamic.average.mid.min <- mode_class(y.mid.min)
+          Dynamic.average.mid.max <- mode_class(y.mid.max)
+      }
   } else {
-    d1 <- median(y.mid.max)
-    if(!is.null(type)){
-      if(type == "class"){
-        e1 <- mode_class(y.mid.max)
-      } else {
-        e1 <- mode(y.mid.max)
-      }
-    } else{
-      e1 <- mode(y.mid.max)
-    }
+      Dynamic.average.min <- gravity(y.min)
+      Dynamic.average.max <- gravity(y.max)
+
+      Dynamic.average.mid.min <- gravity(y.mid.min)
+      Dynamic.average.mid.max <- gravity(y.mid.max)
   }
-
-  Dynamic.average.min <- mode(c(a, b, f))
-  Dynamic.average.max <- mode(c(d, e, g))
-
-  Dynamic.average.mid.min <- mode(c(a1, b1, Dynamic.average.min))
-  Dynamic.average.mid.max <- mode(c(d1, e1, Dynamic.average.max))
 
   ### Endpoints
   if(length(x[x < mid.min.range]) > 1){
@@ -598,15 +540,11 @@ NNS.reg = function (x, y,
   }
 
   ### Mid Endpoints
-  x.mid.min <- Dynamic.average.mid.min
-
-  x.mid.max <- Dynamic.average.mid.max
-
-  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, mean(x.mid.max)),
-                                               c(max(x),mean(x.max)))))
+  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
+                                               c(max(x), mean(x.max)))))
 
   mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, mean(x.mid.min)))))
+                                               c(mid.min.range, Dynamic.average.mid.min))))
 
   regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
 
