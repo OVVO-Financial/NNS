@@ -281,9 +281,6 @@ NNS.reg = function (x, y,
 
   np <- nrow(point.est)
 
- # if(noise.reduction == 'off'){
- #   stn <- 0
- # }
 
   if(!is.null(type) && type == "class" && is.null(n.best)){
     n.best <- 1
@@ -333,7 +330,7 @@ NNS.reg = function (x, y,
             x.star.cor <- cor(cbind(x, y))
             x.star.cor[is.na(x.star.cor)] <- 0
           } else {
-            x.star.cor <- cor(cbind(x, y))
+            x.star.cor <- cor(cbind(x, y), method = "spearman")
             x.star.cor[is.na(x.star.cor)] <- 0
           }
 

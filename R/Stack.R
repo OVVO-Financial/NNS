@@ -89,6 +89,10 @@ NNS.stack <- function(IVs.train,
       }
   }
 
+  if(dist == "FACTOR"){
+      method <- 1
+  }
+
   objective <- tolower(objective)
 
   DV.train <- as.numeric(DV.train)
