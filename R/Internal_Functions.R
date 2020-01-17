@@ -1,12 +1,8 @@
 ### Continuous Mode of a distribution
 mode <- function(x) {
-  if(length(unique(x)) > 1){
-      d <- density(na.omit(as.numeric(x)))
-      d$x[which.max(d$y)]
-  } else {
-    x
+      d <-tryCatch(density(na.omit(as.numeric(x))), error = function(e) { median(x)})
+      tryCatch(d$x[which.max(d$y)], error = function(e) {d})
   }
-}
 
 ### Classification Mode of a distribution
 mode_class <- function(x){

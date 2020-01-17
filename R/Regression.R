@@ -184,7 +184,6 @@ NNS.reg = function (x, y,
       x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
       if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
       colnames(x) <- make.unique(colnames(x),sep = "_")
-
     } else {
       x <- factor_2_dummy_FR(x)
     }

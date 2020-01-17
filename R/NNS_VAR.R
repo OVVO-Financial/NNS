@@ -131,17 +131,7 @@ NNS.VAR <- function(variables,
       message("Variable ", index, " of ", length(DVs), appendLF = TRUE)
     }
 
-# NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
-#    nns_boost_est <- NNS.boost(lagged_new_values_train[, -i], lagged_new_values_train[, i],
-#                               IVs.test = tail(lagged_new_values_train[, -i], h),
-#                               obj.fn = obj.fn,
-#                               objective = objective,
-#                               ts.test = 2*h, folds = 1,
-#                               depth = "max",
-#                               learner.trials = epochs,
-#                               ncores = num_cores, type = NULL,
-#                               feature.importance = FALSE)
-
+# Dimension reduction NNS.reg to reduce variables
     cor_threshold <- NNS.stack(IVs.train = lagged_new_values_train[, -i],
                                DV.train = lagged_new_values_train[, i],
                                ts.test = 2*h, folds = 1,
@@ -149,14 +139,18 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                order = "max", method = 2)$NNS.dim.red.threshold
 
-    relevant_vars <- head(which(abs(NNS.reg(lagged_new_values_train[, -i],
+    relevant_vars <- NNS.reg(lagged_new_values_train[, -i],
                                             lagged_new_values_train[, i],
                                             dim.red.method = "cor", threshold = cor_threshold,
                                             plot = FALSE, factor.2.dummy = FALSE,
-                                            order = "max")$equation$Coefficient)>0),-1)
+                                            order = "max")$equation
+
+    relevant_vars <- relevant_vars[abs(relevant_vars$Coefficient)>0,]
+
+    relevant_vars <- names(lagged_new_values)%in%(relevant_vars$Variable)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-#    relevant_vars <- colnames(lagged_new_values)%in%names(nns_boost_est$feature.weights)
+
     if(length(relevant_vars)>1){
         DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
                                lagged_new_values_train[, i],
@@ -197,6 +191,9 @@ NNS.VAR <- function(variables,
       DV_weights <- unlist(DV_obj_fn)
   }
 
+print(IV_weights)
+print(DV_weights)
+
   denom <- (IV_weights + DV_weights)
   IV_weights <- IV_weights / denom
   DV_weights <- DV_weights / denom
@@ -205,6 +202,9 @@ NNS.VAR <- function(variables,
   DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
 
   forecasts <- (IV_weights * nns_IVs_results + DV_weights * nns_DVs)
+
+  forecasts <- (nns_IVs_results + nns_DVs) / 2
+
   colnames(forecasts) <- colnames(variables)
 
   return( list(univariate = nns_IVs_results, multivariate = nns_DVs, ensemble = forecasts) )
