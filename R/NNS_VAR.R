@@ -4,7 +4,7 @@
 #'
 #' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
 #' @param h integer; 1 (default) Number of periods to forecast.
-#' @param tau integer; 0 (default) Number of lagged observations to consider for the time-series data.
+#' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.
 #' @param obj.fn expression;
 #' \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -137,20 +137,20 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
-                               order = "max", method = 2)$NNS.dim.red.threshold
+                               order = "max", method = 2)
 
     relevant_vars <- NNS.reg(lagged_new_values_train[, -i],
-                                            lagged_new_values_train[, i],
-                                            dim.red.method = "cor", threshold = cor_threshold,
-                                            plot = FALSE, factor.2.dummy = FALSE,
-                                            order = "max")$equation
+                             lagged_new_values_train[, i],
+                             dim.red.method = "cor",
+                             threshold = cor_threshold$NNS.dim.red.threshold,
+                             plot = FALSE, factor.2.dummy = FALSE,
+                             order = "max")$equation
 
     relevant_vars <- relevant_vars[abs(relevant_vars$Coefficient)>0,]
 
     relevant_vars <- names(lagged_new_values)%in%(relevant_vars$Variable)
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-
     if(length(relevant_vars)>1){
         DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
                                lagged_new_values_train[, i],
@@ -172,41 +172,16 @@ NNS.VAR <- function(variables,
 
             nns_DVs[[index]] <- DV_values$Point.est
 
-            predicted <- tail(DV_values$Fitted.xy$y.hat, 2*h)
-            actual <- tail(DV_values$Fitted.xy$y, 2*h)
-
-            DV_obj_fn[[index]] <- eval(obj.fn)
+            DV_obj_fn[[index]] <- cor_threshold$OBJfn.dim.red
         }
   }
 
   nns_DVs <- do.call(cbind, nns_DVs)
   colnames(nns_DVs) <- colnames(variables)
 
-  if(objective=="min"){
-      IV_weights <- 1/unlist(lapply(nns_IVs, `[[`, 2))
-      DV_weights <- 1/unlist(DV_obj_fn)
-
-  } else {
-      IV_weights <- unlist(lapply(nns_IVs, `[[`, 2))
-      DV_weights <- unlist(DV_obj_fn)
-  }
-
-print(IV_weights)
-print(DV_weights)
-
-  denom <- (IV_weights + DV_weights)
-  IV_weights <- IV_weights / denom
-  DV_weights <- DV_weights / denom
-
-  IV_weights <- rep(IV_weights, each = dim(nns_IVs_results)[1])
-  DV_weights <- rep(DV_weights, each = dim(nns_DVs)[1])
-
-  forecasts <- (IV_weights * nns_IVs_results + DV_weights * nns_DVs)
-
   forecasts <- (nns_IVs_results + nns_DVs) / 2
 
   colnames(forecasts) <- colnames(variables)
 
   return( list(univariate = nns_IVs_results, multivariate = nns_DVs, ensemble = forecasts) )
-
 }
