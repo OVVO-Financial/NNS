@@ -13,7 +13,7 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 
 \item{h}{integer; 1 (default) Number of periods to forecast.}
 
-\item{tau}{integer; 0 (default) Number of lagged observations to consider for the time-series data.}
+\item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.}
 
 \item{obj.fn}{expression;
 \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
