@@ -79,8 +79,12 @@ NNS.reg(z, g, order = "max", ncores = 1)
 ```{r nonlinear_class,fig.width=5,fig.height=3,fig.align = "center", message = FALSE}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
 ```
+
+```{r nonlinear_class2,fig.width=5,fig.height=3,fig.align = "center", message = FALSE, echo=FALSE}
+a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
+```
 Thus, our model for this regression would be:
-$$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{4} $$
+$$Species = \frac{`r round(a$Coefficient[1],3)`*Sepal.Length `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{4} $$
 
 
 ### Threshold
@@ -88,8 +92,13 @@ $$Species = \frac{0.7825612*Sepal.Length -0.4266576*Sepal.Width +	0.9490347*Peta
 ```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
 ```
+
+```{r nonlinear class threshold 2,fig.width=5,fig.height=3,fig.align = "center"}
+a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
+```
+
 Thus, our model for this further reduced dimension regression would be:
-$$Species = \frac{0.7825612*Sepal.Length -0*Sepal.Width +	0.9490347*Petal.Length + 0.9565473*Petal.Width}{3} $$
+$$Species = \frac{\: `r round(a$Coefficient[1],3)`*Sepal.Length - `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{3} $$
 
 and the `point.est = (...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r final,fig.width=5,fig.height=3,fig.align = "center"}
@@ -114,7 +123,7 @@ Any objective function `obj.fn` can be called using `expression()` with the term
 NNS.stack(IVs.train = iris[ , 1 : 4], 
           DV.train = iris[ , 5], 
           IVs.test = iris[1:10, 1 : 4],
-          obj.fn = expression( mean(predicted == actual) ),
+          obj.fn = expression( mean(round(predicted) == actual) ),
           objective = "max",
           type = "CLASS", folds = 1, ncores = 1)
 ```
