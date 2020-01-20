@@ -123,15 +123,15 @@ NNS.seas <- function(variable,
 
         periods <- unique(c(rbind(minus,plus)))
 
-        if(!1%in%unlist(M[,1])){
-            periods <- c(periods[!is.na(periods) & periods>0], modulo, 1)
-        } else {
-            periods <- c(periods[!is.na(periods) & periods>0], modulo)
-        }
-
         if(mod.only){
+            periods <- c(periods[!is.na(periods) & periods>0])                    # , modulo)
             mod_index <- which(unlist(M[, 1])%in%periods)
         } else {
+            if(!1%in%unlist(M[,1])){
+                periods <- c(periods[!is.na(periods) & periods>0],1)              #, modulo, 1)
+            } else {
+                periods <- c(periods[!is.na(periods) & periods>0])  #   , modulo)
+            }
             mod_index <- seq_along(unlist(M[,1]))
         }
 

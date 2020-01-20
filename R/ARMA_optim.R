@@ -93,7 +93,6 @@ NNS.ARMA.optim <- function(variable, training.set,
   denominator <- min(5,max(2, as.integer(l/100)))
 
   seasonal.factor <- seasonal.factor[seasonal.factor<=(l/denominator)]
-  seasonal.factor <- c(1, seasonal.factor)
   seasonal.factor <- unique(seasonal.factor)
 
   if(length(seasonal.factor)==0){stop(paste0('Please ensure "seasonal.factor" contains elements less than ', l/denominator, ", otherwise use cross-validation of seasonal factors as demonstrated in the vignette >>> Getting Started with NNS: Forecasting"))}
@@ -247,10 +246,10 @@ NNS.ARMA.optim <- function(variable, training.set,
 
     if(print.trace){
         if(i > 1){
-            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[length(current.estimate)]), collapse = ", ")),")"))
+            print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[length(current.estimate)]), collapse = ", "))," )"))
             print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[length(current.estimate)]))
         } else {
-            print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals), collapse = ", ")),")"))
+            print(paste0("BEST method = ", paste0("'",j,"'"), " PATH MEMBER = ", paste("c(", paste(unlist(current.seasonals), collapse = ", "))," )"))
             print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[1]))
         }
     }
