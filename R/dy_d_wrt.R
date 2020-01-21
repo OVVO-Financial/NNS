@@ -41,7 +41,7 @@ dy.d_<- function(x, y, wrt,
                  plot = FALSE,
                  messages = TRUE){
 
-  order <- "max"
+  order <- NULL
 
   h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
 
@@ -49,9 +49,6 @@ dy.d_<- function(x, y, wrt,
     message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
   }
 
-  n.best <- NNS.stack(x, y, folds = folds,
-                      status = messages, method = 1,
-                      order = order)$NNS.reg.n.best
 
   if(is.character(eval.points)){
     if(eval.points == "median"){
@@ -90,9 +87,7 @@ dy.d_<- function(x, y, wrt,
 
     deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
 
-    estimates <- NNS.reg(x, y, order = order, point.est = deriv.points,
-                         n.best = n.best,
-                         residual.plot = plot, plot = plot)$Point.est
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order)$stack
 
     lower <- estimates[1]
     two.f.x <- 2 * estimates[2]
@@ -112,10 +107,8 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points,
                                   original.eval.points.max)
 
-    estimates <- NNS.reg(x, y, order = order, point.est = original.eval.points,
-                         n.best = n.best,
-                         residual.plot = plot, plot = plot)$Point.est
 
+    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order)$stack
 
     lower <- head(estimates,n)
     two.f.x <- 2 * estimates[(n+1):(2*n)]
@@ -162,9 +155,8 @@ dy.d_<- function(x, y, wrt,
       mixed.distances <- (2 * h_step) * (2 * h_step)
     }
 
-    mixed.estimates <- NNS.reg(x, y, order = order, point.est = mixed.deriv.points,
-                               n.best = n.best,
-                               residual.plot = plot, plot = plot)$Point.est
+
+    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order)$stack
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)

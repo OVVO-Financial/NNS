@@ -162,40 +162,40 @@ NNS.stack <- function(IVs.train,
           nns.cv.1 <- numeric()
 
           for(i in 1:l){
-              if(status){
-                  message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
-              }
+                  if(status){
+                      message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
+                  }
 
-          if(i==1){
-              setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                               type = type, factor.2.dummy = TRUE, dist = dist)
-              predicted <- setup$Point.est
-          } else {
-              predicted <- list()
+                  if(i==1){
+                      setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+                                       type = type, factor.2.dummy = TRUE, dist = dist)
+                      predicted <- setup$Point.est
+                  } else {
+                      predicted <- list()
 
-              cl <- makeCluster(num_cores)
-              registerDoParallel(cl)
+                      cl <- makeCluster(num_cores)
+                      registerDoParallel(cl)
 
-              predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
-                  NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
-              }
+                      predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
+                          NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
+                      }
 
-              stopCluster(cl)
-              registerDoSEQ()
+                  stopCluster(cl)
+                  registerDoSEQ()
 
-              predicted <- unlist(predicted)
+                  predicted <- unlist(predicted)
 
-              if(!is.null(type)){
-                  predicted <- round(predicted)
-              }
-          }
+                      if(!is.null(type)){
+                          predicted <- round(predicted)
+                      }
+                  }
 
-          nns.cv.1[i] <- eval(obj.fn)
+                  nns.cv.1[i] <- eval(obj.fn)
 
-          if(length(na.omit(nns.cv.1)) > 2){
-              if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
-              if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
-          }
+                  if(length(na.omit(nns.cv.1)) > 2){
+                      if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
+                      if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
+                  }
           }
 
           if(length(predicted > 0)){
