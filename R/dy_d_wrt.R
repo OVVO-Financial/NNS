@@ -45,10 +45,6 @@ dy.d_<- function(x, y, wrt,
 
   h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
 
-  if(messages){
-    message("Currently determining [n.best] clusters...","\r",appendLF=TRUE)
-  }
-
 
   if(is.character(eval.points)){
     if(eval.points == "median"){
