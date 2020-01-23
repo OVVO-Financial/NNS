@@ -106,6 +106,10 @@ NNS.stack <- function(IVs.train,
 
   l <- length(IVs.train[ , 1])
 
+  if(is.null(IVs.test)){
+    IVs.test <- IVs.train
+  }
+
   if(is.null(CV.size)){
     if(is.null(IVs.test)){
       CV.size <- 0.25

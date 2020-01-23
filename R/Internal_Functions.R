@@ -16,6 +16,22 @@ gravity <- function(x){
   (mean(x) + median(x) + mode(x) ) / 3
 }
 
+
+### cbind different length vectors
+alt_cbind <- function(x,y,first = FALSE) {
+  if(length(x)<length(y)) {
+    if(first) x = c(rep(NA, length(y)-length(x)),x);y=y
+    if(!first) x = c(x,rep(NA, length(y)-length(x)));y=y
+  }
+  if(length(y)<length(x)) {
+    if(first) y = c(rep(NA, length(x)-length(y)),y);x=x
+    if(!first) y = c(y,rep(NA, length(x)-length(y)));x=x
+  }
+
+  return(cbind(x,y))
+
+}
+
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
   if(class(x) == "factor"){
