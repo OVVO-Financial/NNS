@@ -25,11 +25,10 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
       y.vectors.tau <- do.call(cbind, y.vectors)
 
       ## Normalize x to x.tau
-      x.norm.tau <- rowMeans(NNS.norm(x.vectors.tau))
+      x.norm.tau <- NNS.norm(x.vectors.tau)[ , 1]
 
       ## Normalize y to y.tau
-      y.norm.tau <- rowMeans(NNS.norm(y.vectors.tau))
-
+      y.norm.tau <- NNS.norm(y.vectors.tau)[ , 1]
 
   } else {
       x.norm.tau <- x
@@ -66,8 +65,6 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
       lines(x, col = 'steelblue',lwd = 3)
       legend('top', c("X", "Y"), lty = 1,lwd = c(3, 3),
            col = c('steelblue', 'red'), ncol = 2)
-
-
 
       ## Time Normalized Variables Plot
       ymin <- min(c(min(x.norm.tau), min(y.norm.tau)))

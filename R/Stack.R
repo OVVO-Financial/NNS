@@ -86,6 +86,7 @@ NNS.stack <- function(IVs.train,
   }
 
 
+
   if(!is.null(type)){
     type <- tolower(type)
     if(type=="class"){
@@ -108,7 +109,12 @@ NNS.stack <- function(IVs.train,
 
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
+  } else {
+    if(is.null(dim(IVs.test)) || dim(IVs.test)[2]==1){
+      IVs.test <- data.frame(IVs.test)
+    }
   }
+
 
   if(is.null(CV.size)){
     if(is.null(IVs.test)){

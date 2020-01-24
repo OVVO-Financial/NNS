@@ -100,7 +100,7 @@ NNS.caus <- function(x, y,
           if(tau == "ts"){
             tau <- 3
           }
-          Uni.caus(x, y, tau = tau, plot = plot)
+          Uni.caus(y, x, tau = tau, plot = plot)
         }
         return(c(Causation.x.given.y = Causation.x.given.y,
                  Causation.y.given.x = Causation.y.given.x,
@@ -130,7 +130,7 @@ NNS.caus <- function(x, y,
           if(tau == "ts"){
             tau <- 3
           }
-          Uni.caus(x, y, tau = tau, plot = plot)
+          Uni.caus(y, x, tau = tau, plot = plot)
         }
         return(c(Causation.x.given.y = Causation.x.given.y,
                  Causation.y.given.x = Causation.y.given.x,

@@ -120,6 +120,7 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- list()
   DV_obj_fn <- list()
+  relevant_vars <- list()
 
   if(status){
     message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
@@ -139,22 +140,29 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                order = "max", method = 2)
 
-    relevant_vars <- NNS.reg(lagged_new_values_train[, -i],
+    rel_vars <- NNS.reg(lagged_new_values_train[, -i],
                              lagged_new_values_train[, i],
                              dim.red.method = "cor",
                              threshold = cor_threshold$NNS.dim.red.threshold,
                              plot = FALSE, factor.2.dummy = FALSE,
                              order = "max")$equation
 
-    relevant_vars <- relevant_vars[abs(relevant_vars$Coefficient)>0,]
+    rel_vars <- rel_vars[abs(rel_vars$Coefficient)>0,]
 
-    relevant_vars <- names(lagged_new_values)%in%(relevant_vars$Variable)
+
+    rel_vars <- names(lagged_new_values)[names(lagged_new_values)%in%(rel_vars$Variable)]
+
+    relevant_vars[[index]] <- rel_vars
+
+    if(length(rel_vars)==0){
+        rel_vars <- names(lagged_new_values_train)
+    }
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
-    if(length(relevant_vars)>1){
-        DV_values <- NNS.stack(lagged_new_values_train[, relevant_vars],
+    if(length(rel_vars)>1){
+        DV_values <- NNS.stack(lagged_new_values_train[, rel_vars],
                                lagged_new_values_train[, i],
-                               IVs.test =  tail(lagged_new_values[, relevant_vars], h),
+                               IVs.test =  tail(lagged_new_values[, rel_vars], h),
                                obj.fn = obj.fn,
                                objective = objective,
                                order = "max",
@@ -166,14 +174,17 @@ NNS.VAR <- function(variables,
         DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
 
         } else {
-            DV_values <- NNS.reg(lagged_new_values_train[, relevant_vars],
+            DV_values <- NNS.reg(lagged_new_values_train[, rel_vars],
                                  lagged_new_values_train[, i],
-                                 point.est =  tail(lagged_new_values[, relevant_vars], h))
+                                 point.est =  tail(lagged_new_values[, rel_vars], h), plot = FALSE)
 
             nns_DVs[[index]] <- DV_values$Point.est
 
             DV_obj_fn[[index]] <- cor_threshold$OBJfn.dim.red
         }
+
+
+
   }
 
   nns_DVs <- do.call(cbind, nns_DVs)
@@ -183,5 +194,13 @@ NNS.VAR <- function(variables,
 
   colnames(forecasts) <- colnames(variables)
 
-  return( list(univariate = nns_IVs_results, multivariate = nns_DVs, ensemble = forecasts) )
+  RV <- lapply(relevant_vars,function(x) if(is.null(x)){NA} else {x})
+
+  RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
+  colnames(RV) <- colnames(variables)
+
+  return( list("Relevant_Variables" = RV,
+               univariate = nns_IVs_results,
+               multivariate = nns_DVs,
+               ensemble = forecasts) )
 }
