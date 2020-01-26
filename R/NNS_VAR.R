@@ -14,6 +14,8 @@
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
+#'  \item{\code{"eelevant_variables"}} Returns the relevant variables from the dimension reduction step.
+#'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
 #'  \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts.
@@ -138,19 +140,21 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
-                               order = "max", method = 2)
+                               order = "max", method = 2,
+                               dim.red.method = "NNS.dep")
 
     rel_vars <- NNS.reg(lagged_new_values_train[, -i],
-                             lagged_new_values_train[, i],
-                             dim.red.method = "cor",
-                             threshold = cor_threshold$NNS.dim.red.threshold,
-                             plot = FALSE, factor.2.dummy = FALSE,
-                             order = "max")$equation
+                        lagged_new_values_train[, i],
+                        dim.red.method = "NNS.dep",
+                        threshold = cor_threshold$NNS.dim.red.threshold,
+                        plot = FALSE, factor.2.dummy = FALSE,
+                        order = "max")$equation
 
     rel_vars <- rel_vars[abs(rel_vars$Coefficient)>0,]
 
-
     rel_vars <- names(lagged_new_values)[names(lagged_new_values)%in%(rel_vars$Variable)]
+
+
 
     relevant_vars[[index]] <- rel_vars
 
@@ -167,7 +171,8 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                order = "max",
                                ts.test = 2*h, folds = 1,
-                               status = status, ncores = num_cores)
+                               status = status, ncores = num_cores,
+                               dim.red.method = "NNS.dep")
 
         nns_DVs[[index]] <- DV_values$stack
 
@@ -190,16 +195,23 @@ NNS.VAR <- function(variables,
   nns_DVs <- do.call(cbind, nns_DVs)
   colnames(nns_DVs) <- colnames(variables)
 
-  forecasts <- (nns_IVs_results + nns_DVs) / 2
-
-  colnames(forecasts) <- colnames(variables)
-
   RV <- lapply(relevant_vars,function(x) if(is.null(x)){NA} else {x})
 
   RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
   colnames(RV) <- colnames(variables)
 
-  return( list("Relevant_Variables" = RV,
+  uni <- numeric()
+  multi <- numeric()
+
+  for(i in 1:length(colnames(RV))){
+      uni[i] <-  sum(colnames(RV)[i]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_")))[,1])  / length(na.omit(RV[,i]))
+      multi[i] <- 1 - uni[i]
+  }
+
+  forecasts <- Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi)))
+
+
+  return( list("relevant_variables" = RV,
                univariate = nns_IVs_results,
                multivariate = nns_DVs,
                ensemble = forecasts) )

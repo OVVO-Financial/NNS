@@ -122,7 +122,7 @@ lag.mtx <- function(x, tau){
     }
 
     x.vectors <- list()
-    heads <- paste0(colheads, ".tau.")
+    heads <- paste0(colheads, "_tau_")
     heads <- gsub('"', '' ,heads)
 
     for (i in 0:tau){
