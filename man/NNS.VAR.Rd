@@ -29,6 +29,8 @@ NNS.VAR(variables, h, tau = 0, obj.fn = expression(sum((predicted -
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
+ \item{\code{"eelevant_variables"}} Returns the relevant variables from the dimension reduction step.
+
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 
  \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts.
