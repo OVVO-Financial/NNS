@@ -140,7 +140,7 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
-                               order = "max", method = 2,
+                               order = NULL, method = 2,
                                dim.red.method = "NNS.dep")
 
     rel_vars <- NNS.reg(lagged_new_values_train[, -i],
@@ -148,7 +148,7 @@ NNS.VAR <- function(variables,
                         dim.red.method = "NNS.dep",
                         threshold = cor_threshold$NNS.dim.red.threshold,
                         plot = FALSE, factor.2.dummy = FALSE,
-                        order = "max")$equation
+                        order = NULL)$equation
 
     rel_vars <- rel_vars[abs(rel_vars$Coefficient)>0,]
 
