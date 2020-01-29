@@ -83,10 +83,16 @@ dy.d_<- function(x, y, wrt,
   if(is.null(dim(eval.points)) || dim(eval.points)[2]==1){
     h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
 
-    original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
-    original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
+    if(length(eval.points)==dim(x)[2]){
+        original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
+        original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
+    } else {
+        original.eval.points.min <- original.eval.points.min - h_step
+        original.eval.points.max <- h_step + original.eval.points.max
+    }
 
-    if(length(eval.points)==1 || dim(eval.points)[2]==1){
+
+    if(length(eval.points) == 1){
         index <- sample.int(n = dim(x)[1], size = 30, replace = TRUE)
         deriv.points <- x[index, ]
         deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify=FALSE))
@@ -101,7 +107,7 @@ dy.d_<- function(x, y, wrt,
     estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order)$stack
 
 
-    if(length(eval.points)==1 || dim(eval.points)[2]==1){
+    if(length(eval.points) == 1){
         lower <- mean(estimates[1:30])
         two.f.x <- 2 * mean(estimates[31:60])
         upper <- mean(estimates[61:90])
