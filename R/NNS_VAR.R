@@ -202,9 +202,10 @@ NNS.VAR <- function(variables,
   multi <- numeric()
 
   for(i in 1:length(colnames(RV))){
-      uni[i] <-  sum(colnames(RV)[i]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_")))[,1])  / length(na.omit(RV[,i]))
+      uni[i] <-  sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / length(na.omit(RV[,i]))
       multi[i] <- 1 - uni[i]
   }
+
 
   forecasts <- Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi)))
 
