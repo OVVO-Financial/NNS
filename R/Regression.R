@@ -439,45 +439,52 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-        dep.reduced.order <- floor(floor(log(length(y))) * dependence)
+      dep.reduced.order <- floor(floor(log(length(y))) * dependence)
   } else {
-    dep.reduced.order <- order
+      dep.reduced.order <- order
   }
 
-  if(dependence > stn ){
-    if(is.null(type)){
-      part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = dep.reduced.order, min.obs.stop = FALSE)
-      if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = min( nchar( part.map$dt$quadrant)), min.obs.stop = FALSE)
-      }
-    } else {
-      part.map <- NNS.part(x, y, type = "XONLY",
-                           noise.reduction = noise.reduction, order = dep.reduced.order, min.obs.stop = FALSE)
-      if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), min.obs.stop = FALSE)
-      }
-    } # type
-  } else {
-    if(is.null(type)){
-      noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
-      type2 <- "XONLY"
-    } else {
-      if(type == "class"){
-        type2 = NULL
-        noise.reduction2 <- "mode"
+
+      if(dependence > stn){
+          if(is.null(type)){
+              part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
+              if(length(part.map$regression.points$x) == 0){
+                  part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = min( nchar( part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+              }
+          } else {
+              part.map <- NNS.part(x, y, type = "XONLY",
+                                  noise.reduction = noise.reduction, order = dep.reduced.order, min.obs.stop = FALSE)
+              if(length(part.map$regression.points$x) == 0){
+                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+              }
+          } # type
+        if(dependence == 1){
+          if(is.null(order)) {
+              dep.reduced.order <- "max"
+          }
+          part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
+        }
       } else {
-        noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
-        type2 <- "XONLY"
+          if(is.null(type)){
+              noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
+              type2 <- "XONLY"
+          } else {
+              if(type == "class"){
+                  type2 = NULL
+                  noise.reduction2 <- "mode"
+              } else {
+                  noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
+                  type2 <- "XONLY"
+              }
+          }
+
+
+      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
+                           order = dep.reduced.order, type = type2, min.obs.stop = TRUE)
+      if(length(part.map$regression.points$x) == 0){
+          part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
       }
-    }
-
-
-    part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
-                         order = dep.reduced.order, type = type2, min.obs.stop = TRUE)
-    if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = TRUE)
-    }
-  } # Dependence < stn
+    } # Dependence < stn
 
 
   Regression.Coefficients <- data.frame(matrix(ncol = 3))

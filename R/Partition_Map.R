@@ -61,7 +61,7 @@ NNS.part = function(x, y,
             order <- order
         }
     } else {
-        order = Inf
+        order <- Inf
     }
 
     if (Voronoi) {
@@ -86,7 +86,7 @@ NNS.part = function(x, y,
     if(!is.numeric(order)) {
         obs.req <- 0
         type <- type
-        hard.stop <- Inf
+        hard.stop <- max(floor(log(length(x), 1.5)), 1)
     } else {
         obs.req <- obs.req
         type <- type
@@ -102,7 +102,7 @@ NNS.part = function(x, y,
     if(is.null(type)) {
         i <- 0L
         while (i >= 0) {
-            if(i == order | i == hard.stop) break
+            if(i == order || i == hard.stop) break
 
             PART[counts >= obs.req, `:=`(counts, .N), by = quadrant]
             PART[old.counts >= obs.req, `:=`(old.counts, .N), by = prior.quadrant]
