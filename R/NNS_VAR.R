@@ -8,7 +8,6 @@
 #' @param obj.fn expression;
 #' \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
-#' @param epochs integer; \code{100} (default) Total number of feature combinations to run.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
@@ -55,10 +54,9 @@
 
 NNS.VAR <- function(variables,
                     h,
-                    tau = 0,
+                    tau = 1,
                     obj.fn = expression( sum((predicted - actual)^2) ),
                     objective = "min",
-                    epochs = 100,
                     status = TRUE,
                     ncores = NULL){
 
@@ -141,11 +139,11 @@ NNS.VAR <- function(variables,
                                obj.fn = obj.fn,
                                objective = objective,
                                order = NULL, method = 2,
-                               dim.red.method = "NNS.dep")
+                               dim.red.method = "cor")
 
     rel_vars <- NNS.reg(lagged_new_values_train[, -i],
                         lagged_new_values_train[, i],
-                        dim.red.method = "NNS.dep",
+                        dim.red.method = "cor",
                         threshold = cor_threshold$NNS.dim.red.threshold,
                         plot = FALSE, factor.2.dummy = FALSE,
                         order = NULL)$equation
@@ -172,7 +170,7 @@ NNS.VAR <- function(variables,
                                order = "max",
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
-                               dim.red.method = "NNS.dep")
+                               dim.red.method = "cor")
 
         nns_DVs[[index]] <- DV_values$stack
 
