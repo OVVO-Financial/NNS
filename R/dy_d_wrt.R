@@ -5,7 +5,7 @@
 #' @param x a numeric matrix or data frame.
 #' @param y a numeric vector with compatible dimsensions to \code{x}.
 #' @param wrt integer; Selects the regressor to differentiate with respect to.
-#' @param eval.points numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.
+#' @param eval.points numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the overall partial derivative at every observation of the variable with respect to.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
@@ -24,8 +24,15 @@
 #' \dontrun{
 #' set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 #' B <- cbind(x_1, x_2)
-#' ## To find derivatives of y wrt 1st regressor
+#'
+#' ## To find average partial derivative of y wrt 1st regressor, only supply 1 value in [eval.points]
+#' dy.d_(B, y, wrt = 1, eval.points = c(.5))
+#'
+#' dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
+#'
+#' ## To find derivatives of y wrt 1st regressor and specified 2nd regressor
 #' dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
+#'
 #'
 #' ## Known function analysis: [y = a ^ 2 * b ^ 2]
 #' x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
@@ -48,16 +55,16 @@ dy.d_<- function(x, y, wrt,
 
   if(is.character(eval.points)){
     if(eval.points == "median"){
-      eval.points = apply(x, 2, median)
+      eval.points <- median(x[ , wrt])
     } else {
       if(eval.points == "last"){
-        eval.points = as.numeric(x[length(x[ , 1]), ])
+        eval.points <- as.numeric(tail(x[ , wrt], 1))
       } else {
         if(eval.points == "mean"){
-          eval.points = apply(x, 2, mean)
+          eval.points <- mean(x[ , wrt])
         } else {
           if(eval.points == "all"){
-            eval.points=x
+            eval.points <- x
           }
         }
       }
@@ -67,27 +74,41 @@ dy.d_<- function(x, y, wrt,
 
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
+  original.eval.points <- eval.points
 
   if(messages){
     message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
   if(is.null(dim(eval.points))){
-    if(is.null(dim(x))){
-      h_step <- abs(diff(range(x))/h) + (.05 * diff(range(x)))
-    } else {
-      h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
-    }
+    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
+
     original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
     original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
 
-    deriv.points <- matrix(c(original.eval.points.min, eval.points, original.eval.points.max), ncol = length(eval.points), byrow = TRUE)
+    if(length(eval.points)==1){
+        index <- sample.int(n = dim(x)[1], size = 30, replace = TRUE)
+        deriv.points <- x[index, ]
+        deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify=FALSE))
+        deriv.points[, wrt] <- c(rep(original.eval.points.min, 30),
+                                 rep(eval.points, 30),
+                                 rep(original.eval.points.max, 30))
+    } else {
+        deriv.points <- matrix(c(original.eval.points.min, original.eval.points, original.eval.points.max), ncol = dim(x)[2], byrow = TRUE)
+    }
 
     estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order)$stack
 
-    lower <- estimates[1]
-    two.f.x <- 2 * estimates[2]
-    upper <- estimates[3]
+
+    if(length(eval.points)==1){
+        lower <- mean(estimates[1:30])
+        two.f.x <- 2 * mean(estimates[31:60])
+        upper <- mean(estimates[61:90])
+    } else {
+        lower <- estimates[1]
+        two.f.x <- 2 * estimates[2]
+        upper <- estimates[3]
+    }
 
     rise <- upper - lower
 
@@ -138,11 +159,9 @@ dy.d_<- function(x, y, wrt,
       mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
 
     } else {
-      if(is.null(dim(x))){
-        h_step <- h * mean(x)
-      } else {
-        h_step <- h * mean(x[,wrt])
-      }
+
+      h_step <- h * mean(x[,wrt])
+
       mixed.deriv.points <- matrix(c(h_step + eval.points,
                                      eval.points[1] - h_step, h_step + eval.points[2],
                                      h_step + eval.points[1], eval.points[2] - h_step,
