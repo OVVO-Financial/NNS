@@ -14,7 +14,7 @@ dy.d_(x, y, wrt, eval.points = "median", folds = 5, mixed = FALSE,
 
 \item{wrt}{integer; Selects the regressor to differentiate with respect to.}
 
-\item{eval.points}{numeric or options: ("mean", median", "last"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find partial derivatives at the median of every variable.  Set to \code{(eval.points = "last")} to find partial derivatives at the last value of every variable.  Set to \code{(eval.points="mean")} to find partial derivatives at the mean value of every variable. Set to \code{(eval.points = "all")} to find partial derivatives at every observation.}
+\item{eval.points}{numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the overall partial derivative at every observation of the variable with respect to.}
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
@@ -40,8 +40,15 @@ Returns the numerical partial derivate of \code{y} with respect to [wrt] any reg
 \dontrun{
 set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 B <- cbind(x_1, x_2)
-## To find derivatives of y wrt 1st regressor
+
+## To find average partial derivative of y wrt 1st regressor, only supply 1 value in [eval.points]
+dy.d_(B, y, wrt = 1, eval.points = c(.5))
+
+dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
+
+## To find derivatives of y wrt 1st regressor and specified 2nd regressor
 dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
+
 
 ## Known function analysis: [y = a ^ 2 * b ^ 2]
 x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
