@@ -408,7 +408,7 @@ NNS.reg = function (x, y,
             if(dist!="FACTOR"){
               points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
             }
-            if(is.null(np)|np==1){
+            if(is.null(np) || np==1){
               new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
 
             } else {
@@ -439,7 +439,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- floor(round(log(length(y))) * dependence)
+      dep.reduced.order <- floor(floor(log(length(y))) * dependence)
   } else {
       dep.reduced.order <- order
   }
