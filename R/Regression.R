@@ -439,7 +439,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- floor(floor(log(length(y))) * dependence)
+      dep.reduced.order <- round(floor(log(length(y))) * dependence)
   } else {
       dep.reduced.order <- order
   }
@@ -453,7 +453,7 @@ NNS.reg = function (x, y,
               }
           } else {
               part.map <- NNS.part(x, y, type = "XONLY",
-                                  noise.reduction = noise.reduction, order = dep.reduced.order, min.obs.stop = FALSE)
+                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
               if(length(part.map$regression.points$x) == 0){
                   part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
               }
@@ -480,7 +480,7 @@ NNS.reg = function (x, y,
 
 
       part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
-                           order = dep.reduced.order, type = type2, min.obs.stop = TRUE)
+                           order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
           part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
       }

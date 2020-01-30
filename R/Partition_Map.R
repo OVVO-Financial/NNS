@@ -84,9 +84,9 @@ NNS.part = function(x, y,
     }
 
     if(!is.numeric(order)) {
-        obs.req <- 0
+        obs.req <- 1
         type <- type
-        hard.stop <- max(floor(log(length(x), 1.5)), 1)
+        hard.stop <- max(ceiling(log(length(x), 2)), 1)
     } else {
         obs.req <- obs.req
         type <- type
