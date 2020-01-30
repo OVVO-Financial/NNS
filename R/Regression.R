@@ -433,13 +433,13 @@ NNS.reg = function (x, y,
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1/exp(1))
   dependence[is.na(dependence)] <- 0
 
-  if(is.null(original.columns) | is.null(dim.red.method)){
+  if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
     x.star <- NULL
   }
 
   if(is.null(order)){
-      dep.reduced.order <- round(floor(log(length(y))) * dependence)
+      dep.reduced.order <- floor(round(log(length(y))) * dependence)
   } else {
       dep.reduced.order <- order
   }
@@ -479,7 +479,7 @@ NNS.reg = function (x, y,
           }
 
 
-      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
+      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, obs.req = 4,
                            order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
           part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
