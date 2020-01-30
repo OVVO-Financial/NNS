@@ -139,11 +139,11 @@ NNS.VAR <- function(variables,
                                obj.fn = obj.fn,
                                objective = objective,
                                order = NULL, method = 2,
-                               dim.red.method = "cor")
+                               dim.red.method = "NNS.dep")
 
     rel_vars <- NNS.reg(lagged_new_values_train[, -i],
                         lagged_new_values_train[, i],
-                        dim.red.method = "cor",
+                        dim.red.method = "NNS.dep",
                         threshold = cor_threshold$NNS.dim.red.threshold,
                         plot = FALSE, factor.2.dummy = FALSE,
                         order = NULL)$equation
@@ -167,10 +167,9 @@ NNS.VAR <- function(variables,
                                IVs.test =  tail(lagged_new_values[, rel_vars], h),
                                obj.fn = obj.fn,
                                objective = objective,
-                               order = "max",
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
-                               dim.red.method = "cor")
+                               dim.red.method = "NNS.dep")
 
         nns_DVs[[index]] <- DV_values$stack
 

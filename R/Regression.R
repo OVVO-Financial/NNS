@@ -439,7 +439,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- floor(floor(log(length(y))) * dependence)
+      dep.reduced.order <- round(round(log(length(y))) * dependence)
   } else {
       dep.reduced.order <- order
   }
