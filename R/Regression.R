@@ -380,7 +380,7 @@ NNS.reg = function (x, y,
             x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
           }
 
-          signs <- sign(x.star.coef)
+          preserved.coef <- x.star.coef
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
           norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
@@ -391,7 +391,7 @@ NNS.reg = function (x, y,
           #In case all IVs have 0 correlation to DV
           if(all(x.star.matrix == 0)){
             x.star.matrix <- x
-            x.star.coef[x.star.coef == 0] <- signs
+            x.star.coef[x.star.coef == 0] <- preserved.coef
           }
 
           DENOMINATOR <- sum( abs( x.star.coef) > 0)
@@ -439,7 +439,9 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- round(round(log(length(y))) * dependence)
+      dep.reduced.order <- ifelse( (round(log(length(y))) * dependence)%%1<.5 ,
+                                   floor(floor(log(length(y))) * dependence),
+                                   floor(ceiling(log(length(y))) * dependence))
   } else {
       dep.reduced.order <- order
   }
@@ -479,7 +481,7 @@ NNS.reg = function (x, y,
           }
 
 
-      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, obs.req = 4,
+      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
                            order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
           part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)

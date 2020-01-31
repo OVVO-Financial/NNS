@@ -269,13 +269,11 @@ NNS.stack <- function(IVs.train,
       var.cutoffs_2 <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
                                          type = type)$equation$Coefficient, digits = 2))
 
-      var.cutoffs <- (var.cutoffs_1 + pmin(var.cutoffs_1, var.cutoffs_2))/2
-
-      var.cutoffs <- var.cutoffs[var.cutoffs <= 1 & var.cutoffs >= 0]
-
-      var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
+      var.cutoffs <- (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2
 
       var.cutoffs[is.na(var.cutoffs)] <- 0
+
+      var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
 
       if(is.null(var.cutoffs)) var.cutoffs <- 0
 
