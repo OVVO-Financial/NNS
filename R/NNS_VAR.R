@@ -5,6 +5,7 @@
 #' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
 #' @param h integer; 1 (default) Number of periods to forecast.
 #' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param obj.fn expression;
 #' \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -21,6 +22,8 @@
 #'
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
+#'
+#' @note \code{dim.red.method = "cor"} is significantly faster than the other methods, but comes at the expense of ignoring possible nonlinear relationships between lagged variables.
 #'
 #'
 #' @author Fred Viole, OVVO Financial Systems
@@ -55,11 +58,15 @@
 NNS.VAR <- function(variables,
                     h,
                     tau = 1,
+                    dim.red.method = "cor",
                     obj.fn = expression( sum((predicted - actual)^2) ),
                     objective = "min",
                     status = TRUE,
                     ncores = NULL){
 
+  dim.red.method <- tolower(dim.red.method)
+  if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method
+                                                                          is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
   nns_IVs <- list()
 
   # Parallel process...
@@ -139,23 +146,37 @@ NNS.VAR <- function(variables,
                                obj.fn = obj.fn,
                                objective = objective,
                                order = NULL, method = 2,
-                               dim.red.method = "all")
-
-    #rel_vars <- NNS.reg(lagged_new_values_train[, -i],
-    #                    lagged_new_values_train[, i],
-    #                    dim.red.method = "all",
-    #                    threshold = cor_threshold$NNS.dim.red.threshold,
-    #                    plot = FALSE, factor.2.dummy = FALSE,
-    #                    order = "max")$equation
+                               dim.red.method = dim.red.method)
 
 
-    rel.1 <- cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman")
-    rel.2 <- NNS.dep(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))$Dependence
-    rel.3 <- NNS.caus(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))
+    if(dim.red.method == "cor" || dim.red.method == "all"){
+        rel.1 <- cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman")
+    }
 
-    rel_vars <- ((rel.1+rel.2+rel.3)/3)[-1,1]
+    if(dim.red.method == "nns.dep" || dim.red.method == "all"){
+        rel.2 <- NNS.dep(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))$Dependence
+    }
 
-    #rel_vars <- rel.1[-1,1]
+    if(dim.red.method == "nns.caus" || dim.red.method == "all"){
+        rel.3 <- NNS.caus(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))
+    }
+
+    if(dim.red.method == "cor"){
+        rel_vars <- rel.1[-1,1]
+    }
+
+    if(dim.red.method == "nns.dep"){
+        rel_vars <- rel.2[-1,1]
+    }
+
+    if(dim.red.method == "cor"){
+        rel_vars <- rel.3[1,-1]
+    }
+
+    if(dim.red.method == "all"){
+        rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
+    }
+
 
     rel_vars <- rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold]
 
@@ -178,7 +199,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
-                               dim.red.method = "all")
+                               dim.red.method = dim.red.method)
 
         nns_DVs[[index]] <- DV_values$stack
 
