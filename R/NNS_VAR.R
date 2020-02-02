@@ -169,7 +169,7 @@ NNS.VAR <- function(variables,
         rel_vars <- rel.2[-1,1]
     }
 
-    if(dim.red.method == "cor"){
+    if(dim.red.method == "nns.caus"){
         rel_vars <- rel.3[1,-1]
     }
 
