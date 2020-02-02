@@ -4,8 +4,9 @@
 \alias{NNS.VAR}
 \title{NNS VAR}
 \usage{
-NNS.VAR(variables, h, tau = 1, obj.fn = expression(sum((predicted -
-  actual)^2)), objective = "min", status = TRUE, ncores = NULL)
+NNS.VAR(variables, h, tau = 1, dim.red.method = "cor",
+  obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
+  status = TRUE, ncores = NULL)
 }
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
@@ -13,6 +14,8 @@ NNS.VAR(variables, h, tau = 1, obj.fn = expression(sum((predicted -
 \item{h}{integer; 1 (default) Number of periods to forecast.}
 
 \item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.}
+
+\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{obj.fn}{expression;
 \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
@@ -37,6 +40,9 @@ Returns the following matrices of forecasted variables:
 }
 \description{
 Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
+}
+\note{
+\code{dim.red.method = "cor"} is significantly faster than the other methods, but comes at the expense of ignoring possible nonlinear relationships between lagged variables.
 }
 \examples{
 
