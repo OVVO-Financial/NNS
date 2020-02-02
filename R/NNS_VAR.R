@@ -139,18 +139,27 @@ NNS.VAR <- function(variables,
                                obj.fn = obj.fn,
                                objective = objective,
                                order = NULL, method = 2,
-                               dim.red.method = "NNS.dep")
+                               dim.red.method = "all")
 
-    rel_vars <- NNS.reg(lagged_new_values_train[, -i],
-                        lagged_new_values_train[, i],
-                        dim.red.method = "NNS.dep",
-                        threshold = cor_threshold$NNS.dim.red.threshold,
-                        plot = FALSE, factor.2.dummy = FALSE,
-                        order = NULL)$equation
+    #rel_vars <- NNS.reg(lagged_new_values_train[, -i],
+    #                    lagged_new_values_train[, i],
+    #                    dim.red.method = "all",
+    #                    threshold = cor_threshold$NNS.dim.red.threshold,
+    #                    plot = FALSE, factor.2.dummy = FALSE,
+    #                    order = "max")$equation
 
-    rel_vars <- rel_vars[abs(rel_vars$Coefficient)>0,]
 
-    rel_vars <- names(lagged_new_values)[names(lagged_new_values)%in%(rel_vars$Variable)]
+    rel.1 <- cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman")
+    rel.2 <- NNS.dep(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))$Dependence
+    rel.3 <- NNS.caus(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))
+
+    rel_vars <- ((rel.1+rel.2+rel.3)/3)[-1,1]
+
+    #rel_vars <- rel.1[-1,1]
+
+    rel_vars <- rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold]
+
+    rel_vars <- names(lagged_new_values)[names(lagged_new_values)%in%names(rel_vars)]
 
 
 
@@ -169,7 +178,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
-                               dim.red.method = "NNS.dep")
+                               dim.red.method = "all")
 
         nns_DVs[[index]] <- DV_values$stack
 

@@ -330,7 +330,7 @@ NNS.reg = function (x, y,
           if(dim.red.method!="cor"){
             x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE)
             x.star.dep[is.na(x.star.dep)] <- 0
-            x.star.cor <- cor(cbind(x, y))
+            x.star.cor <- cor(cbind(x, y), method = "spearman")
             x.star.cor[is.na(x.star.cor)] <- 0
           } else {
             x.star.cor <- cor(cbind(x, y), method = "spearman")
@@ -352,11 +352,11 @@ NNS.reg = function (x, y,
               tau <- "cs"
             }
             x.star.coef <- numeric()
-            for(i in 1:ncol(x)){
-              cause <- NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+
+              cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
               cause[is.na(cause)] <- 0
-              x.star.coef[i] <- cause[1] - cause[2]
-            }
+              x.star.coef <- (cause[(ncol(x) + 1), ] - cause[ ,(ncol(x) + 1)])[-(ncol(x) + 1)]
+
           }
 
           if(dim.red.method == "all"){
@@ -366,18 +366,18 @@ NNS.reg = function (x, y,
 
             x.star.coef.1 <- numeric()
 
-            for(i in 1 : ncol(x)){
-              cause <- NNS.caus(x[ , i], y, tau = tau, plot = FALSE)
+
+              cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
               cause[is.na(cause)] <- 0
-              x.star.coef.1[i] <- cause[1] - cause[2]
-            }
+              x.star.coef.1 <- (cause[(ncol(x) + 1), ] - cause[ , (ncol(x) + 1)])[-(ncol(x) + 1)]
+
 
             x.star.coef.3 <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
-            x.star.coef.2 <- x.star.dep$Correlation[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.2 <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.2[is.na(x.star.coef.2)] <- 0
-            x.star.coef[is.na(x.star.coef)] <- 0
             x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+            x.star.coef[is.na(x.star.coef)] <- 0
           }
 
           preserved.coef <- x.star.coef
