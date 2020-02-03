@@ -632,12 +632,12 @@ NNS.reg = function (x, y,
     reg.point.interval[reg.point.interval == 0] <- 1
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
 
-    if(point.est>max(x) || point.est < min(x)){
-        point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval - 1)
-                                                                                                                                   , mean(Coefficient)]) + regression.points[reg.point.interval, y])
+    if(any(point.est > max(x) | point.est < min(x))){
+        point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, max(1, coef.point.interval - 1), max(1, coef.point.interval - 2))
+                                                                                                                                   , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
 
-      point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval + 1)
-                                                                                                                                 , mean(Coefficient)]) + regression.points[reg.point.interval, y])
+        point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval + 1, coef.point.interval + 2)
+                                                                                                                                 , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
     }
 
     if(!is.null(type)){

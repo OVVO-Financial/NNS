@@ -46,11 +46,13 @@ NNS.dep.base <- function(x,
       }
   }
 
-  if(length(unique(x)) <= 2) {
+  if(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y))) {
       order <- 1
   }
 
   if(!missing(y)) {
+      n = length(x)
+
       if (print.map == TRUE) {
           part.map <- NNS.part(x, y, order = order, obs.req = max.obs,
                                Voronoi = TRUE, min.obs.stop = TRUE , noise.reduction = noise.reduction)
@@ -60,16 +62,17 @@ NNS.dep.base <- function(x,
       }
 
       part.df <- part.map$dt
-      part.df[, `:=`(mean.x = median(x), mean.y = median(y)), by = prior.quadrant]
 
-      if (degree == 0) {
-          part.df <- part.df[x != mean.x & y != mean.y, ]
-      }
+      if(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y))){
+            part.df[, `:=`(mean.x = median(x), mean.y = median(y)), by = prior.quadrant]
+        if (degree == 0) {
+            part.df <- part.df[x != mean.x & y != mean.y, ]
+        }
 
-      part.df[, `:=`(sub.clpm = Co.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
-                     sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]), counts = .N),
+        part.df[, `:=`(sub.clpm = Co.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       sub.cupm = Co.UPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       sub.dlpm = D.LPM(degree, degree, x, y, mean.x[1], mean.y[1]),
+                       sub.dupm = D.UPM(degree, degree, x, y, mean.x[1], mean.y[1]), counts = .N),
                 by = prior.quadrant]
 
         part.df[, `:=`(c("x", "y", "quadrant", "mean.x", "mean.y"), NULL)]
@@ -90,7 +93,7 @@ NNS.dep.base <- function(x,
         part.df <- part.df[, `:=`(weight = counts/(length(x) - zeros)), by = prior.quadrant]
 
         for (j in seq_len(ncol(part.df))) {
-            set(part.df, which(is.na(part.df[[j]])), j, 0)
+          set(part.df, which(is.na(part.df[[j]])), j, 0)
         }
 
         nns.cor <- part.df[, sum(nns.cor = weight * nns.cor)]
@@ -98,7 +101,19 @@ NNS.dep.base <- function(x,
 
         return(list(Correlation = nns.cor, Dependence = nns.dep))
 
-        } else {
-            NNS.dep.matrix(x, order = order, degree = degree)
-    }
+      } else {
+          if(sd(x)>0 & sd(y)>0){
+          part.df[, `:=` (weight = .N/n), by = prior.quadrant]
+
+          disp <- part.df[,.(cor(x, y, method = "spearman")), by = prior.quadrant]$V1
+          disp[is.na(disp)] <- 0
+
+          nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
+          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)
+
+          return(list(Correlation = nns.cor, Dependence = nns.dep))}
+      }
+  } else {
+        NNS.dep.matrix(x, order = order, degree = degree)
+  }
 }
