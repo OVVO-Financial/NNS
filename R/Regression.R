@@ -626,11 +626,20 @@ NNS.reg = function (x, y,
   estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
 
   if(!is.null(point.est)){
-    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE)
+    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
+    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
     coef.point.interval[coef.point.interval == 0] <- 1
     reg.point.interval[reg.point.interval == 0] <- 1
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+
+    if(point.est>max(x) || point.est < min(x)){
+        point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval - 1)
+                                                                                                                                   , mean(Coefficient)]) + regression.points[reg.point.interval, y])
+
+      point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval + 1)
+                                                                                                                                 , mean(Coefficient)]) + regression.points[reg.point.interval, y])
+    }
+
     if(!is.null(type)){
       point.est.y <- round(point.est.y)
     }
