@@ -430,7 +430,7 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
+  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1/2)
   dependence[is.na(dependence)] <- 0
 
   if(is.null(original.columns) || is.null(dim.red.method)){
