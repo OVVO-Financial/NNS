@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r setup2, message=FALSE}
+```{r setup2, message=FALSE, warning = FALSE}
 require(NNS)
 require(knitr)
 require(rgl)

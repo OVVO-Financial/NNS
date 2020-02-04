@@ -12,7 +12,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r setup2, message=FALSE}
+```{r setup2, message=FALSE, warning=FALSE}
 require(NNS)
 require(knitr)
 require(rgl)
@@ -81,7 +81,7 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft"
 ```
 
 ```{r nonlinear_class2,fig.width=5,fig.height=3,fig.align = "center", message = FALSE, echo=FALSE}
-a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
+a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1, plot = FALSE)$equation
 ```
 Thus, our model for this regression would be:
 $$Species = \frac{`r round(a$Coefficient[1],3)`*Sepal.Length `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{4} $$
@@ -93,8 +93,8 @@ $$Species = \frac{`r round(a$Coefficient[1],3)`*Sepal.Length `r round(a$Coeffici
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
 ```
 
-```{r nonlinear class threshold 2,fig.width=5,fig.height=3,fig.align = "center"}
-a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
+```{r nonlinear class threshold 2,fig.width=5,fig.height=3,fig.align = "center", echo=FALSE}
+a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1, plot = FALSE)$equation
 ```
 
 Thus, our model for this further reduced dimension regression would be:
