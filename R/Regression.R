@@ -430,7 +430,7 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence ^ (1/exp(1))
+  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- 0
 
   if(is.null(original.columns) || is.null(dim.red.method)){
@@ -439,7 +439,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- ifelse( (round(log(length(y))) * dependence)%%1<.5 ,
+      dep.reduced.order <- ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
                                    floor(floor(log(length(y))) * dependence),
                                    floor(ceiling(log(length(y))) * dependence))
   } else {
@@ -641,7 +641,7 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      point.est.y <- round(point.est.y)
+      point.est.y <- ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))
     }
   }
 

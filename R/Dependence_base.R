@@ -105,7 +105,7 @@ NNS.dep.base <- function(x,
           if(sd(x)>0 & sd(y)>0){
           part.df[, `:=` (weight = .N/n), by = prior.quadrant]
 
-          disp <- part.df[,.(cor(x, y, method = "spearman")), by = prior.quadrant]$V1
+          disp <- part.df[,.(cor(x, y)), by = prior.quadrant]$V1
           disp[is.na(disp)] <- 0
 
           nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
