@@ -636,7 +636,7 @@ NNS.reg = function (x, y,
         point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, max(1, coef.point.interval - 1), max(1, coef.point.interval - 2))
                                                                                                                                    , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
 
-        point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, coef.point.interval + 1, coef.point.interval + 2)
+        point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, min(dim(Regression.Coefficients)[1],coef.point.interval + 1), min(dim(Regression.Coefficients)[1], coef.point.interval + 2))
                                                                                                                                  , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
     }
 

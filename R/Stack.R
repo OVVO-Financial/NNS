@@ -271,6 +271,8 @@ NNS.stack <- function(IVs.train,
 
       var.cutoffs <- (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2
 
+      var.cutoffs <- var.cutoffs[var.cutoffs < 1]
+
       var.cutoffs[is.na(var.cutoffs)] <- 0
 
       var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
@@ -284,7 +286,7 @@ NNS.stack <- function(IVs.train,
       }
       nns.ord <- numeric()
 
-      if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
+#      if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
 
       for(i in 1:length(var.cutoffs)){
         if(status){
@@ -294,20 +296,20 @@ NNS.stack <- function(IVs.train,
         predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
                              type = type, dist = dist)$Point.est
 
-        nns.ord[i+1] <- eval(obj.fn)
+        nns.ord[i] <- eval(obj.fn)
 
         if(objective=="min"){
-          best.threshold <- var.cutoffs[which.min(na.omit(nns.ord[-1]))]
+          best.threshold <- var.cutoffs[which.min(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- min(na.omit(nns.ord))
-          if(i > 1 && is.na(nns.ord[i])) break
-          if(i > 1 && (nns.ord[i] >= nns.ord[i-1])) break
+          if(i > 2 && is.na(nns.ord[i])) break
+          if(i > 2 && (nns.ord[i] >= nns.ord[i-1])) break
         } else {
-          best.threshold <- var.cutoffs[which.max(na.omit(nns.ord[-1]))]
+          best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- max(na.omit(nns.ord))
-          if(i > 1 && is.na(nns.ord[i])) break
-          if(i > 1 && (nns.ord[i] <= nns.ord[i-1])) break
+          if(i > 2 && is.na(nns.ord[i])) break
+          if(i > 2  && (nns.ord[i] <= nns.ord[i-1])) break
         }
       }
 

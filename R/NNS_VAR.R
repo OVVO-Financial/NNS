@@ -149,15 +149,15 @@ NNS.VAR <- function(variables,
                                dim.red.method = dim.red.method)
 
 
-    if(dim.red.method == "cor" || dim.red.method == "all"){
+    if(any(dim.red.method == "cor" | dim.red.method == "all")){
         rel.1 <- cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman")
     }
 
-    if(dim.red.method == "nns.dep" || dim.red.method == "all"){
+    if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
         rel.2 <- NNS.dep(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))$Dependence
     }
 
-    if(dim.red.method == "nns.caus" || dim.red.method == "all"){
+    if(any(dim.red.method == "nns.caus" | dim.red.method == "all")){
         rel.3 <- NNS.caus(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]))
     }
 
@@ -176,7 +176,6 @@ NNS.VAR <- function(variables,
     if(dim.red.method == "all"){
         rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
     }
-
 
     rel_vars <- rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold]
 
