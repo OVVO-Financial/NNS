@@ -373,9 +373,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   rhs.partitions <- data.table(reg.points.matrix)
 
   if(!is.null(type)){
-      fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat%%1 < .5 , floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
+      fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
       if(!is.null(predict.fit)){
-          predict.fit <- ifelse(predict.fit%%1 < .5, floor(predict.fit), ceiling(predict.fit))
+          predict.fit <- round(predict.fit)
       }
   }
 

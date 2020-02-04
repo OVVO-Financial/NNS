@@ -641,7 +641,7 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      point.est.y <- ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))
+      point.est.y <- round(point.est.y)
     }
   }
 
