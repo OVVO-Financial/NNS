@@ -144,6 +144,12 @@ NNS.reg = function (x, y,
     std.errors <- TRUE
   }
 
+  if(!is.null(dim.red.method)){
+      if(is.null(dim(x)) || dim(x)[1]==1){
+          dim.red.method <- NULL
+      }
+  }
+
   if(!is.null(type)){
     type <- tolower(type)
     noise.reduction <- "mode"
@@ -323,7 +329,7 @@ NNS.reg = function (x, y,
         x <- apply(data.matrix(x), 2, as.numeric)
         y <- as.numeric(y)
 
-        if(!is.null(dim.red.method)){
+        if(!is.null(dim.red.method) & !is.null(dim(x))){
           dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
 
