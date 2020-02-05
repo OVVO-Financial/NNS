@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param order integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = NULL)}.  Errors can generally be rectified by setting \code{(order = 1)}.  Will not partition further if less than 4 observations exist in a quadrant.
+#' @param order integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = 3)}.  Errors can generally be rectified by setting \code{(order = 1)}.
 #' @param degree integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
@@ -73,7 +73,7 @@
 
 NNS.dep = function(x,
                    y = NULL,
-                   order = NULL,
+                   order = 3,
                    degree = NULL,
                    print.map = FALSE,
                    ncores = NULL){
@@ -129,33 +129,33 @@ NNS.dep = function(x,
 
       for(i in 1:3){
         if(i==1){
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE)
+          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, order = order)
         }
         if(i==2) {
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE)
+          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, order = order)
         }
         if(i==3) {
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE)
+          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, order = order)
         }
       }
 
     } else {
         for(i in 1:5){
-            nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE)
+            nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE, order = order)
         }
 
     }
 
 
     if(l >= 150 & print.map){
-      NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, noise.reduction = "median")
+      NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE)
     }
 
     return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),
                 "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))
 
   } else {
-    return(NNS.dep.matrix(x, order=order, degree = degree))
+    return(NNS.dep.matrix(x, order = order, degree = degree))
   }
 
 }

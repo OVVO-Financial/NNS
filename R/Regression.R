@@ -431,8 +431,8 @@ NNS.reg = function (x, y,
   } # Multivariate
 
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
-  dependence[is.na(dependence)] <- 0
-  ifelse(dependence < 0.5, dependence^.5, max(0.5^.5, dependence^2))
+  dependence[is.na(dependence)] <- .01
+  ifelse(dependence < 0.5, dependence <- dependence^(1/2), dependence <- max(0.707, dependence^1))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
