@@ -115,7 +115,9 @@ NNS.part = function(x, y,
             obs.req.rows <- PART[counts >= obs.req, which = TRUE]
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
-            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
+            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) {print("here")
+                break
+            }
 
             if(noise.reduction == "off") {
                 if(Voronoi) {
