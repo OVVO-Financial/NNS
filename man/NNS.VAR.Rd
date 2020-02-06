@@ -13,7 +13,7 @@ NNS.VAR(variables, h, tau = 1, dim.red.method = "cor",
 
 \item{h}{integer; 1 (default) Number of periods to forecast.}
 
-\item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.}
+\item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.}
 
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
@@ -50,7 +50,15 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  set.seed(123)
  x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
  A <- cbind(x = x, y = y, z = z)
+
+ ### Using lags 1:4 for each variable
  NNS.VAR(A, h = 12, tau = 4, status = TRUE)
+
+ ### Using lag 1 for variable 1, lag 3 for variable 2 and lag 3 for variable 3
+ NNS.VAR(A, h = 12, tau = c(1,3,3), status = TRUE)
+
+ ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
+ NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6)), c(1,2,3), status = TRUE)
  }
 
 }
