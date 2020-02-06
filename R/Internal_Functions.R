@@ -104,8 +104,12 @@ ARMA.seas.weighting <- function(sf,mat){
 
 
 ### Lag matrix generator for NNS.VAR
+### Vector of tau for single different tau per variables tau = c(1, 4)
+### List of tau vectors for multiple different tau per variables tau = list(c(1,2,3), c(4,5,6))
 lag.mtx <- function(x, tau){
   colheads <- NULL
+
+  max_tau <- max(unlist(tau))
 
   if(is.null(dim(x)[2])) {
     colheads <- noquote(as.character(deparse(substitute(x))))
@@ -125,9 +129,9 @@ lag.mtx <- function(x, tau){
     heads <- paste0(colheads, "_tau_")
     heads <- gsub('"', '' ,heads)
 
-    for (i in 0:tau){
+    for (i in 0:max_tau){
       x.vectors[[paste(heads, i, sep = "")]] <- numeric(0L)
-      start <- tau - i + 1
+      start <- max_tau - i + 1
       end <- length(x[,j]) - i
       x.vectors[[i + 1]] <- x[start : end, j]
     }
@@ -135,8 +139,19 @@ lag.mtx <- function(x, tau){
     j.vectors[[j]] <- do.call(cbind, x.vectors)
     colheads <- NULL
   }
+  mtx <- as.data.frame(do.call(cbind, j.vectors))
 
-  return(as.data.frame(do.call(cbind, j.vectors)))
+  relevant_lags <- list()
+  if(length(unlist(tau)) > 1){
+    for(i in 1:(length(tau))){
+        relevant_lags[[i]] <- c((i-1)*max_tau + i, (i-1)*max_tau + unlist(tau[[i]]) + i)
+    }
+
+    relevant_lags <- sort(unlist(relevant_lags))
+    mtx <- mtx[ , relevant_lags]
+  }
+
+  return(mtx)
 }
 
 
