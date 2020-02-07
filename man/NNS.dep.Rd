@@ -4,8 +4,8 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(x, y = NULL, order = 3, degree = NULL, print.map = FALSE,
-  ncores = NULL)
+NNS.dep(x, y = NULL, order = 3, degree = NULL, asym = FALSE,
+  print.map = FALSE, ncores = NULL)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -15,6 +15,8 @@ NNS.dep(x, y = NULL, order = 3, degree = NULL, print.map = FALSE,
 \item{order}{integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = 3)}.  Errors can generally be rectified by setting \code{(order = 1)}.}
 
 \item{degree}{integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.}
+
+\item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means.}
 
