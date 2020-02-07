@@ -6,6 +6,7 @@
 #' @param order from \link{NNS.part}
 #' @param degree from \link{NNS.part}
 #' @param print.map from \link{NNS.part}
+#' @param asym for asymmetrical dependecies
 #'
 #' @return Returns NNS dependence.
 #'
@@ -16,7 +17,8 @@ NNS.dep.base <- function(x,
                    y = NULL,
                    order = NULL,
                    degree = NULL,
-                   print.map = FALSE){
+                   print.map = FALSE,
+                   asym = FALSE){
 
   noise.reduction = "off"
 
@@ -24,6 +26,7 @@ NNS.dep.base <- function(x,
       if(length(x) < 20 | class(x) == "factor" | class(y) == "factor") {
           order <- 1
           max.obs <- 1
+          y <- as.numeric(y)
       } else {
           order <- order
           max.obs <- 30
@@ -32,11 +35,12 @@ NNS.dep.base <- function(x,
       if(is.null(degree)) {
           degree <- ifelse(length(x) <= 100, 0, 1)
       }
-
+      if(asym) y <- abs(y)
   } else {
       if(length(x[, 1]) < 20 | any(unlist(lapply(x, is.factor)))) {
           order <- 1
           max.obs <- 1
+          x <- data.matrix(x)
       } else {
           max.obs <- 30
       }
@@ -52,12 +56,12 @@ NNS.dep.base <- function(x,
 
   if(!missing(y)) {
       n = length(x)
-
+      if(asym){type <- "XONLY"} else {type <- NULL}
       if (print.map == TRUE) {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs,
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, type = type,
                                Voronoi = TRUE, min.obs.stop = TRUE , noise.reduction = noise.reduction)
       } else {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs,
+          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, type = type,
                                Voronoi = FALSE, min.obs.stop = TRUE , noise.reduction = noise.reduction)
       }
 
@@ -105,7 +109,7 @@ NNS.dep.base <- function(x,
           if(sd(x)>0 & sd(y)>0){
           part.df[, `:=` (weight = .N/n), by = prior.quadrant]
 
-          disp <- part.df[,.(cor(x, y, method = "spearman")), by = prior.quadrant]$V1
+          disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
           disp[is.na(disp)] <- 0
 
           nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
@@ -114,6 +118,6 @@ NNS.dep.base <- function(x,
           return(list(Correlation = nns.cor, Dependence = nns.dep))}
       }
   } else {
-        NNS.dep.matrix(x, order = order, degree = degree)
+        NNS.dep.matrix(x, order = order, degree = degree, asym = asym)
   }
 }
