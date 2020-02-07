@@ -31,7 +31,7 @@ Note the fact that all observations occupy the co-partial moment quadrants.
 x = seq(0, 3, .01) ; y = 2 * x
 
 cor(x, y)
-NNS.dep(x, y, print.map = TRUE, order = 3)
+NNS.dep(x, y, print.map = TRUE)
 ```
 
 ## Nonlinear Relationship
@@ -71,7 +71,7 @@ p-values and confidence intervals can be obtained from sampling random permutati
 ## p-values for [NNS.dep]
 x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 
-nns_cor_dep <- NNS.dep(x, y, print.map = TRUE)
+nns_cor_dep <- NNS.dep(x,abs (y), print.map = TRUE)
 nns_cor_dep
 
 ## Create permutations of y
