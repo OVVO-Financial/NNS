@@ -67,8 +67,8 @@ NNS.dep.base <- function(x,
 
       part.df <- part.map$dt
 
-      if(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y))){
-            part.df[, `:=`(mean.x = median(x), mean.y = median(y)), by = prior.quadrant]
+      if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0)){
+            part.df[, `:=`(mean.x = gravity(x), mean.y = gravity(y)), by = prior.quadrant]
         if (degree == 0) {
             part.df <- part.df[x != mean.x & y != mean.y, ]
         }
@@ -106,7 +106,6 @@ NNS.dep.base <- function(x,
         return(list(Correlation = nns.cor, Dependence = nns.dep))
 
       } else {
-          if(sd(x)>0 & sd(y)>0){
           part.df[, `:=` (weight = .N/n), by = prior.quadrant]
 
           disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
@@ -115,7 +114,7 @@ NNS.dep.base <- function(x,
           nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
           nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)
 
-          return(list(Correlation = nns.cor, Dependence = nns.dep))}
+          return(list(Correlation = nns.cor, Dependence = nns.dep))
       }
   } else {
         NNS.dep.matrix(x, order = order, degree = degree, asym = asym)
