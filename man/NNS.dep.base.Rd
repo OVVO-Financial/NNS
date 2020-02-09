@@ -4,7 +4,7 @@
 \alias{NNS.dep.base}
 \title{NNS Dependence Base}
 \usage{
-NNS.dep.base(x, y = NULL, order = NULL, degree = NULL,
+NNS.dep.base(x, y = NULL, order = NULL, degree = NULL, type = NULL,
   print.map = FALSE, asym = FALSE)
 }
 \arguments{
@@ -15,6 +15,8 @@ NNS.dep.base(x, y = NULL, order = NULL, degree = NULL,
 \item{order}{from \link{NNS.part}}
 
 \item{degree}{from \link{NNS.part}}
+
+\item{type}{from \link{NNS.part}}
 
 \item{print.map}{from \link{NNS.part}}
 
