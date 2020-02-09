@@ -93,11 +93,6 @@ NNS.part = function(x, y,
         hard.stop <- max(floor(log(length(x), 2)), 1)
     }
 
-    if(noise.reduction == "off") {
-        obs.req <- 1
-    } else {
-        obs.req <- obs.req
-    }
 
     if(is.null(type)) {
         i <- 0L

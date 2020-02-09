@@ -5,6 +5,7 @@
 #' @param y from \link{NNS.part}
 #' @param order from \link{NNS.part}
 #' @param degree from \link{NNS.part}
+#' @param type from \link{NNS.part}
 #' @param print.map from \link{NNS.part}
 #' @param asym for asymmetrical dependecies
 #'
@@ -17,32 +18,29 @@ NNS.dep.base <- function(x,
                    y = NULL,
                    order = NULL,
                    degree = NULL,
+                   type = NULL,
                    print.map = FALSE,
                    asym = FALSE){
 
-  noise.reduction = "off"
 
   if(!missing(y)) {
       if(length(x) < 20 | class(x) == "factor" | class(y) == "factor") {
-          order <- 1
-          max.obs <- 1
+          order <- 2
           y <- as.numeric(y)
+          asym <- TRUE
       } else {
           order <- order
-          max.obs <- 30
       }
 
       if(is.null(degree)) {
           degree <- ifelse(length(x) <= 100, 0, 1)
       }
-      if(asym) y <- abs(y)
   } else {
       if(length(x[, 1]) < 20 | any(unlist(lapply(x, is.factor)))) {
-          order <- 1
-          max.obs <- 1
+          order <- 2
           x <- data.matrix(x)
+          asym <- TRUE
       } else {
-          max.obs <- 30
       }
 
       if(is.null(degree)) {
@@ -58,11 +56,11 @@ NNS.dep.base <- function(x,
       n = length(x)
       if(asym){type <- "XONLY"} else {type <- NULL}
       if (print.map == TRUE) {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, type = type,
-                               Voronoi = TRUE, min.obs.stop = TRUE , noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = order, obs.req = 1, type = type,
+                               Voronoi = TRUE, min.obs.stop = TRUE)
       } else {
-          part.map <- NNS.part(x, y, order = order, obs.req = max.obs, type = type,
-                               Voronoi = FALSE, min.obs.stop = TRUE , noise.reduction = noise.reduction)
+          part.map <- NNS.part(x, y, order = order, obs.req = 1, type = type,
+                               Voronoi = FALSE, min.obs.stop = TRUE)
       }
 
       part.df <- part.map$dt
@@ -108,8 +106,14 @@ NNS.dep.base <- function(x,
       } else {
           part.df[, `:=` (weight = .N/n), by = prior.quadrant]
 
-          disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
+          if(asym){
+              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = prior.quadrant]$V1
+          } else {
+              disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
+          }
+
           disp[is.na(disp)] <- 0
+
 
           nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
           nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)

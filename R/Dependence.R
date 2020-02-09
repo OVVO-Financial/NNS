@@ -86,7 +86,7 @@ NNS.dep = function(x,
     # No dependence if only a single value
     if(length(unique(x))==1 | length(unique(y))==1){
       if(print.map){
-        NNS.part(x, y, order = 1, Voronoi = TRUE, noise.reduction = "off", type = type)
+        NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
       }
 
       return(list("Correlation" = 0,
@@ -103,7 +103,7 @@ NNS.dep = function(x,
     l <- length(x)
 
     if(l < 150){
-      return(NNS.dep.base(x, y, order = order, degree = degree, print.map = print.map, asym = asym))
+        return(NNS.dep.base(x, y, order = order, degree = degree, print.map = print.map, asym = asym, type = "XONLY"))
     }
 
     seg <- as.integer(.2*l)
