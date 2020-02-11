@@ -39,7 +39,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
 
 
-
+  orig.dig <- getOption("digits")
   options(digits = 20)
   Bs <- numeric()
   Bl <- numeric()
@@ -105,7 +105,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
           inferred.h <- uniroot(new.f, c(-2 * h, 2 * h), extendInt = 'yes')$root
 
-          if(print.trace == TRUE) {print(c("Iteration" = i, "h" = inferred.h, "Lower B" = lower.B, "Upper B" = upper.B))}
+          if(print.trace) {print(c("Iteration" = as.integer(i), "h" = inferred.h, "Lower B" = lower.B, "Upper B" = upper.B))}
 
           Bs[i] <- new.B
 
@@ -189,7 +189,7 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
     i = i + 1
   }
-  options(digits = 8)
+  options(digits = orig.dig)
 }
 
 

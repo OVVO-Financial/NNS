@@ -161,6 +161,7 @@ NNS.stack <- function(IVs.train,
 
     CV.IVs.train <- IVs.train[c(-test.set), ]
     CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(test.set), ]), factor_2_dummy_FR))
+    CV.IVs.test <- CV.IVs.test[complete.cases(CV.IVs.test),]
 
     CV.DV.train <- DV.train[c(-test.set)]
     CV.DV.test <- DV.train[c(test.set)]
@@ -285,8 +286,6 @@ NNS.stack <- function(IVs.train,
         var.cutoffs <- var.cutoffs[-1]
       }
       nns.ord <- numeric()
-
-#      if(objective=='min'){nns.ord[1] <- Inf} else {nns.ord[1] <- -Inf}
 
       for(i in 1:length(var.cutoffs)){
         if(status){

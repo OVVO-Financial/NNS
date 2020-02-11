@@ -409,7 +409,7 @@ NNS.reg = function (x, y,
 
           if(!is.null(point.est)){
             new.point.est <- numeric()
-            points.norm <- rbind(point.est, original.variable)
+            points.norm <- rbind(point.est, x)
 
             if(dist!="FACTOR"){
               points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
@@ -419,15 +419,18 @@ NNS.reg = function (x, y,
 
             } else {
               point.est2 <- points.norm[1:np,]
-              new.point.est <- sapply(1 : np, function(i) sum(point.est2[i, ] * x.star.coef) / sum( abs( x.star.coef) > 0))
+              new.point.est <- apply(point.est2, 1, function(i) as.numeric(as.vector(i)[!is.na(i)|!is.nan(i)] %*% x.star.coef[!is.na(i)|!is.nan(i)])
+                                     / sum( abs( x.star.coef) > 0))
             }
 
             point.est <- new.point.est
+
           }
 
           x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
 
           x.star <- data.table(x.star = x)
+
         }
 
       } # Multivariate Not NULL type
@@ -639,7 +642,7 @@ NNS.reg = function (x, y,
     reg.point.interval[reg.point.interval == 0] <- 1
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
 
-    if(any(point.est > max(x) | point.est < min(x))){
+    if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
         point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, max(1, coef.point.interval - 1))
                                                                                                                                    , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
 

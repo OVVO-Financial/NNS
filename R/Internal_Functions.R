@@ -32,25 +32,27 @@ alt_cbind <- function(x,y,first = FALSE) {
 
 }
 
+
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
-  if(class(x) == "factor"){
+  if(class(x) == "factor" & length(unique(x)) > 1){
     output <- model.matrix(~(x) -1, x)[,-1]
   } else {
-    output <- x
+    output <- as.numeric(x)
   }
   output
 }
 
 ### Factor to dummy variable FULL RANK
 factor_2_dummy_FR <- function(x){
-  if(class(x) == "factor"){
+  if(class(x) == "factor" & length(unique(x)) > 1){
     output <- model.matrix(~(x) -1, x)
   } else {
-    output <- x
+    output <- as.numeric(x)
   }
   output
 }
+
 
 
 ### Generator for 1:length(lag) vectors in NNS.ARMA
