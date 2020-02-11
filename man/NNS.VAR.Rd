@@ -29,7 +29,7 @@ NNS.VAR(variables, h, tau = 1, dim.red.method = "cor",
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
- \item{\code{"eelevant_variables"}} Returns the relevant variables from the dimension reduction step.
+ \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 
@@ -58,7 +58,7 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  NNS.VAR(A, h = 12, tau = c(1,3,3), status = TRUE)
 
  ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
- NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6)), c(1,2,3), status = TRUE)
+ NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6), c(1,2,3)), status = TRUE)
  }
 
 }
