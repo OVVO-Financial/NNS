@@ -14,7 +14,7 @@
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
-#'  \item{\code{"eelevant_variables"}} Returns the relevant variables from the dimension reduction step.
+#'  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
@@ -56,7 +56,7 @@
 #'  NNS.VAR(A, h = 12, tau = c(1,3,3), status = TRUE)
 #'
 #'  ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
-#'  NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6)), c(1,2,3), status = TRUE)
+#'  NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6), c(1,2,3)), status = TRUE)
 #'  }
 #'
 #' @export
@@ -73,8 +73,7 @@ NNS.VAR <- function(variables,
                     ncores = NULL){
 
   dim.red.method <- tolower(dim.red.method)
-  if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method
-                                                                          is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
+  if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
   nns_IVs <- list()
 
   # Parallel process...
@@ -96,7 +95,7 @@ NNS.VAR <- function(variables,
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
     variable <- variables[, i]
 
-    periods <- NNS.seas(variable, modulo = tau,
+    periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
     b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
@@ -238,7 +237,7 @@ NNS.VAR <- function(variables,
   multi <- numeric()
 
   for(i in 1:length(colnames(RV))){
-      uni[i] <-  .5 + .5*(sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / max(tau, length(na.omit(RV[,i]))))
+      uni[i] <-  .5 + .5*(sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / max(length(tau[[min(i, length(tau))]]), length(na.omit(RV[,i]))))
       multi[i] <- 1 - uni[i]
   }
 

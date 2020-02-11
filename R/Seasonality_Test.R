@@ -102,7 +102,7 @@ NNS.seas <- function(variable,
 
     M <- data.table("Period" = instances[index], "Coefficient.of.Variation" = output[index], "Variable.Coefficient.of.Variation" = n, key = "Coefficient.of.Variation")
   } else {
-    M <- data.table("Period" = 1, "Coefficient.of.Variation" = NA, "Variable.Coefficient.of.Variation" = var.cov, key = "Coefficient.of.Variation")
+    M <- data.table("Period" = 1, "Coefficient.of.Variation" = var.cov, "Variable.Coefficient.of.Variation" = var.cov, key = "Coefficient.of.Variation")
   }
 
 
