@@ -81,13 +81,22 @@ NNS.ANOVA <- function(control,
   #Continuous CDF for each variable from Mean of Means
         LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
 
-  #Continuous CDF Deviation from 0.5
-        MAD.CDF <- abs(LPM_ratio - .5)
+        lower.target = mean(sapply(1:n, function(i) LPM.VaR(.75,1,A[,i])))
+        upper.target = mean(sapply(1:n, function(i) UPM.VaR(.75,1,A[,i])))
 
-        Mean.MAD.CDF <- mean(MAD.CDF)
+
+        raw.certainties <- list()
+        n <- ncol(A)
+        for(i in 1:(n - 1)){
+          raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA.bin(A[ , i],A[ , b],
+                                                                                mean.of.means = mean.of.means,
+                                                                                upper.target = upper.target,
+                                                                                lower.target = lower.target, plot = FALSE)$Certainty)
+        }
+
 
   #Certainty associated with samples
-        NNS.ANOVA.rho <- ((0.5 - Mean.MAD.CDF) ^ 2 )/0.25
+        NNS.ANOVA.rho <- mean(unlist(raw.certainties))
 
   #Graphs
         if(plot){
@@ -105,7 +114,7 @@ NNS.ANOVA <- function(control,
           raw.certainties <- list()
           n <- ncol(A)
           for(i in 1:(n - 1)){
-              raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA(cbind(A[ , i],A[ , b])))
+              raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA.bin(A[ , i],A[ , b], plot = FALSE)$Certainty)
           }
 
           certainties <- matrix(, n, n)

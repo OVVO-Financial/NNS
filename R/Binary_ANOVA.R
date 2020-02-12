@@ -1,20 +1,41 @@
-NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails = NULL, plot = TRUE){
+NNS.ANOVA.bin<- function(control, treatment,
+                         mean.of.means = NULL,
+                         upper.target = NULL,
+                         lower.target = NULL,
+                         confidence.interval = NULL, tails = NULL, plot = TRUE){
 
+  if(is.null(upper.target) && is.null(lower.target)){
         mean.of.means <- mean(c(mean(control), mean(treatment)))
+        upper.target <- mean(c(UPM.VaR(.75, 1, control), UPM.VaR(.75, 1, treatment)))
+        lower.target <- mean(c(LPM.VaR(.75, 1, control), LPM.VaR(.75, 1, treatment)))
+  }
+
 
   #Continuous CDF for each variable from Mean of Means
         LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
-
         LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)
+
+        Upper_ratio.1 <- UPM.ratio(1, upper.target, control)
+        Upper_ratio.2 <- UPM.ratio(1, upper.target, treatment)
+        Upper_ratio <- sqrt((Upper_ratio.1* Upper_ratio.2))
+
+        Lower_ratio.1 <- LPM.ratio(1, lower.target, control)
+        Lower_ratio.2 <- LPM.ratio(1, lower.target, treatment)
+        Lower_ratio <- sqrt((Lower_ratio.1* Lower_ratio.2))
 
 
   #Continuous CDF Deviation from 0.5
         MAD.CDF <- mean(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5)))
+        upper.CDF <- mean(c(Upper_ratio.1, Upper_ratio.2))
+        lower.CDF <- mean(c(Lower_ratio.1, Lower_ratio.2))
 
 
   #Certainty associated with samples
-        NNS.ANOVA.rho <- (0.5 - MAD.CDF) ^ 2 / 0.25
+        NNS.ANOVA.rho <- sum(c( ((.5- MAD.CDF)^2) / .25 ,
+                                ifelse(Upper_ratio==0,0,.5 * ( abs(Upper_ratio)/ upper.CDF)),
+                                ifelse(Lower_ratio==0,0,.5 * ( abs(Lower_ratio)/ lower.CDF))))/2
 
+        pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
   #Graphs
 
@@ -35,7 +56,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
                 "Grand Mean" = mean.of.means,
                 "Control CDF" = LPM_ratio.1,
                 "Treatment CDF" = LPM_ratio.2,
-                "Certainty" = NNS.ANOVA.rho))}
+                "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment)))}
 
 
     if(!is.null(confidence.interval)){
@@ -101,7 +122,7 @@ NNS.ANOVA.bin<- function(control, treatment, confidence.interval = NULL, tails =
                     "Grand Mean" = mean.of.means,
                     "Control CDF" = LPM_ratio.1,
                     "Treatment CDF" = LPM_ratio.2,
-                    "Certainty" = NNS.ANOVA.rho,
+                    "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment),
                     "Lower Bound Effect" = Lower.Bound.Effect,
                     "Upper Bound Effect" = Upper.Bound.Effect))
   }
