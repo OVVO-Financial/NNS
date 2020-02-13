@@ -6,6 +6,13 @@ NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
   }
 
 
+  x <- data.matrix(x)
+
+  if(dim(x)[1] < 20 ) {
+    order <- 2
+    asym <- TRUE
+  }
+
   raw.rhos_lower <- list()
   raw.deps_lower <- list()
   raw.both_lower <- list()

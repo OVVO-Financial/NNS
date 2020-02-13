@@ -80,6 +80,9 @@ NNS.dep = function(x,
                    print.map = FALSE,
                    ncores = NULL){
 
+  oldw <- getOption("warn")
+  options(warn = -1)
+
   if(asym){type <- "XONLY"} else {type <- NULL}
 
   if(!is.null(y)){
@@ -89,6 +92,7 @@ NNS.dep = function(x,
         NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
       }
 
+      options(warn = oldw)
       return(list("Correlation" = 0,
                   "Dependence" = 0))
     }
@@ -154,7 +158,7 @@ NNS.dep = function(x,
     if(l >= 150 & print.map){
       NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, type = type)
     }
-
+    options(warn = oldw)
     return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),
                 "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))
 

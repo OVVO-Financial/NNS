@@ -22,6 +22,8 @@ NNS.dep.base <- function(x,
                    print.map = FALSE,
                    asym = FALSE){
 
+  oldw <- getOption("warn")
+  options(warn = -1)
 
   if(!missing(y)) {
       if(length(x) < 20 | class(x) == "factor" | class(y) == "factor") {
@@ -40,7 +42,6 @@ NNS.dep.base <- function(x,
           order <- 2
           x <- data.matrix(x)
           asym <- TRUE
-      } else {
       }
 
       if(is.null(degree)) {
@@ -118,6 +119,7 @@ NNS.dep.base <- function(x,
           nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
           nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)
 
+          options(warn = oldw)
           return(list(Correlation = nns.cor, Dependence = nns.dep))
       }
   } else {
