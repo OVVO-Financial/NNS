@@ -28,6 +28,8 @@
 
 dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
 
+  order = NULL
+
   if(length(eval.point) > 1 & deriv.method == "NNS"){
     deriv.method <- "FS"
   }
