@@ -100,8 +100,12 @@ dy.d_<- function(x, y, wrt,
                                  rep(eval.points, 30),
                                  rep(original.eval.points.max, 30))
 
+        distance_wrt <-  original.eval.points.max - original.eval.points.min
+
     } else {
         deriv.points <- matrix(c(original.eval.points.min, original.eval.points, original.eval.points.max), ncol = dim(x)[2], byrow = TRUE)
+
+        distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
     estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order)$stack
@@ -119,7 +123,6 @@ dy.d_<- function(x, y, wrt,
 
     rise <- upper - lower
 
-    distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
   } else {
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points

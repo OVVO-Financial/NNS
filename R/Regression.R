@@ -490,7 +490,6 @@ NNS.reg = function (x, y,
               }
           }
 
-
       part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
                            order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
