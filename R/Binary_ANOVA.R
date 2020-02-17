@@ -1,13 +1,17 @@
 NNS.ANOVA.bin<- function(control, treatment,
                          mean.of.means = NULL,
-                         upper.target = NULL,
-                         lower.target = NULL,
+                         upper.25.target = NULL,
+                         lower.25.target = NULL,
+                         upper.125.target = NULL,
+                         lower.125.target = NULL,
                          confidence.interval = NULL, tails = NULL, plot = TRUE){
 
-  if(is.null(upper.target) && is.null(lower.target)){
+  if(is.null(upper.25.target) && is.null(lower.25.target)){
         mean.of.means <- mean(c(mean(control), mean(treatment)))
-        upper.target <- mean(c(UPM.VaR(.75, 1, control), UPM.VaR(.75, 1, treatment)))
-        lower.target <- mean(c(LPM.VaR(.75, 1, control), LPM.VaR(.75, 1, treatment)))
+        upper.25.target <- mean(c(UPM.VaR(.75, 1, control), UPM.VaR(.75, 1, treatment)))
+        lower.25.target <- mean(c(LPM.VaR(.75, 1, control), LPM.VaR(.75, 1, treatment)))
+        upper.125.target <- mean(c(UPM.VaR(.875, 1, control), UPM.VaR(.875, 1, treatment)))
+        lower.125.target <- mean(c(LPM.VaR(.875, 1, control), LPM.VaR(.875, 1, treatment)))
   }
 
 
@@ -15,25 +19,38 @@ NNS.ANOVA.bin<- function(control, treatment,
         LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
         LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)
 
-        Upper_ratio.1 <- UPM.ratio(1, upper.target, control)
-        Upper_ratio.2 <- UPM.ratio(1, upper.target, treatment)
-        Upper_ratio <- sqrt((Upper_ratio.1* Upper_ratio.2))
+        Upper_25_ratio.1 <- UPM.ratio(1, upper.25.target, control)
+        Upper_25_ratio.2 <- UPM.ratio(1, upper.25.target, treatment)
+        Upper_25_ratio <- sqrt((Upper_25_ratio.1* Upper_25_ratio.2))
 
-        Lower_ratio.1 <- LPM.ratio(1, lower.target, control)
-        Lower_ratio.2 <- LPM.ratio(1, lower.target, treatment)
-        Lower_ratio <- sqrt((Lower_ratio.1* Lower_ratio.2))
+        Lower_25_ratio.1 <- LPM.ratio(1, lower.25.target, control)
+        Lower_25_ratio.2 <- LPM.ratio(1, lower.25.target, treatment)
+        Lower_25_ratio <- sqrt((Lower_25_ratio.1* Lower_25_ratio.2))
+
+        Upper_125_ratio.1 <- UPM.ratio(1, upper.125.target, control)
+        Upper_125_ratio.2 <- UPM.ratio(1, upper.125.target, treatment)
+        Upper_125_ratio <- sqrt((Upper_125_ratio.1* Upper_125_ratio.2))
+
+        Lower_125_ratio.1 <- LPM.ratio(1, lower.125.target, control)
+        Lower_125_ratio.2 <- LPM.ratio(1, lower.125.target, treatment)
+        Lower_125_ratio <- sqrt((Lower_125_ratio.1* Lower_125_ratio.2))
 
 
   #Continuous CDF Deviation from 0.5
         MAD.CDF <- mean(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5)))
-        upper.CDF <- mean(c(Upper_ratio.1, Upper_ratio.2))
-        lower.CDF <- mean(c(Lower_ratio.1, Lower_ratio.2))
+        upper.25.CDF <- mean(c(Upper_25_ratio.1, Upper_25_ratio.2))
+        lower.25.CDF <- mean(c(Lower_25_ratio.1, Lower_25_ratio.2))
+        upper.125.CDF <- mean(c(Upper_125_ratio.1, Upper_125_ratio.2))
+        lower.125.CDF <- mean(c(Lower_125_ratio.1, Lower_125_ratio.2))
 
 
   #Certainty associated with samples
         NNS.ANOVA.rho <- sum(c( ((.5- MAD.CDF)^2) / .25 ,
-                                ifelse(Upper_ratio==0,0,.5 * ( abs(Upper_ratio)/ upper.CDF)),
-                                ifelse(Lower_ratio==0,0,.5 * ( abs(Lower_ratio)/ lower.CDF))))/2
+                                ifelse(Upper_25_ratio==0, 0, .5 * ( abs(Upper_25_ratio)/ upper.25.CDF)),
+                                ifelse(Lower_25_ratio==0, 0, .5 * ( abs(Lower_25_ratio)/ lower.25.CDF)),
+                                ifelse(Upper_125_ratio==0, 0, .25 * ( abs(Upper_125_ratio)/ upper.125.CDF)),
+                                ifelse(Lower_125_ratio==0, 0, .25 * ( abs(Lower_125_ratio)/ lower.125.CDF)))
+                             ) / 2.25
 
         pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
