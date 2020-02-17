@@ -67,7 +67,7 @@ NNS.ANOVA <- function(control,
             A <- control
         }
     } else {
-        return(NNS.ANOVA.bin(control, treatment, confidence.interval, plot = plot, tails = tails))
+        return(NNS.ANOVA.bin(control, treatment, confidence.interval = confidence.interval, plot = plot, tails = tails))
     }
 
 
