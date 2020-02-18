@@ -237,7 +237,7 @@ NNS.VAR <- function(variables,
   multi <- numeric()
 
   for(i in 1:length(colnames(RV))){
-      uni[i] <-  .5 + .5*(sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / max(length(tau[[min(i, length(tau))]]), length(na.omit(RV[,i]))))
+      uni[i] <-  .5 + .5*(sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / max(ifelse(length(tau)>1, length(tau[[min(i, length(tau))]]), tau), length(na.omit(RV[,i]))))
       multi[i] <- 1 - uni[i]
   }
 
