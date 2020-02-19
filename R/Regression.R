@@ -699,7 +699,7 @@ NNS.reg = function (x, y,
 
         if(se.denominator > 0){
           fitted[obs, `:=`
-                 ( 'standard.errors' = sqrt( sum(((y.hat - y) ^ 2)) / se.denominator ) )]
+                 ( 'standard.errors' = sqrt( sum(((y.hat - y) ^ 2)) / (se.denominator * sum(((x - mean(x)) ^ 2))) ) )]
         } else {
           fitted[obs, `:=` ( 'standard.errors' = 0 )]
         }
