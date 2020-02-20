@@ -21,19 +21,19 @@ NNS.ANOVA.bin<- function(control, treatment,
 
         Upper_25_ratio.1 <- UPM.ratio(1, upper.25.target, control)
         Upper_25_ratio.2 <- UPM.ratio(1, upper.25.target, treatment)
-        Upper_25_ratio <- sqrt((Upper_25_ratio.1* Upper_25_ratio.2))
+        Upper_25_ratio <- mean(c(Upper_25_ratio.1, Upper_25_ratio.2))
 
         Lower_25_ratio.1 <- LPM.ratio(1, lower.25.target, control)
         Lower_25_ratio.2 <- LPM.ratio(1, lower.25.target, treatment)
-        Lower_25_ratio <- sqrt((Lower_25_ratio.1* Lower_25_ratio.2))
+        Lower_25_ratio <- mean(c(Lower_25_ratio.1, Lower_25_ratio.2))
 
         Upper_125_ratio.1 <- UPM.ratio(1, upper.125.target, control)
         Upper_125_ratio.2 <- UPM.ratio(1, upper.125.target, treatment)
-        Upper_125_ratio <- sqrt((Upper_125_ratio.1* Upper_125_ratio.2))
+        Upper_125_ratio <- mean(c(Upper_125_ratio.1, Upper_125_ratio.2))
 
         Lower_125_ratio.1 <- LPM.ratio(1, lower.125.target, control)
         Lower_125_ratio.2 <- LPM.ratio(1, lower.125.target, treatment)
-        Lower_125_ratio <- sqrt((Lower_125_ratio.1* Lower_125_ratio.2))
+        Lower_125_ratio <- mean(c(Lower_125_ratio.1, Lower_125_ratio.2))
 
 
   #Continuous CDF Deviation from 0.5

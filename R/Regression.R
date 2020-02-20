@@ -439,6 +439,7 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
+
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
   ifelse(dependence < 0.5, dependence <- dependence^(1/2), dependence <- max(0.707, dependence^2))
@@ -522,26 +523,15 @@ NNS.reg = function (x, y,
   l_y.max <- length(y.max)
 
 
-  if(!is.null(type)){
-      if(type == "class"){
-          Dynamic.average.min <- mode_class(y.min)
-          Dynamic.average.max <- mode_class(y.max)
-
-          Dynamic.average.mid.min <- mode_class(y.mid.min)
-          Dynamic.average.mid.max <- mode_class(y.mid.max)
-      }
-  } else {
-      Dynamic.average.min <- gravity(y.min)
-      Dynamic.average.max <- gravity(y.max)
-
-      Dynamic.average.mid.min <- gravity(y.mid.min)
-      Dynamic.average.mid.max <- gravity(y.mid.max)
-  }
 
   ### Endpoints
   if(length(x[x < mid.min.range]) > 1){
     if(dependence < stn){
-      x0 <- Dynamic.average.min
+      if(!is.null(type)){
+          x0 <- mode_class(y.min)
+      } else {
+          x0 <- lm((y[x < min.range]) ~  (x[x < min.range]))$fitted.values[which.min(x[x < min.range])]
+      }
     } else {
       x0 <- unique(y[x == min(x)])
     }
@@ -551,7 +541,11 @@ NNS.reg = function (x, y,
 
   if(length(x[x > mid.max.range]) > 1){
     if(dependence < stn){
-      x.max <- Dynamic.average.max
+      if(!is.null(type)){
+          x.max <- mode_class(y.max)
+      } else {
+          x.max <- lm(y[x > max.range]~ x[x > max.range])$fitted.values[which.max(x[x > max.range])]
+      }
     } else {
       x.max <- unique(y[x == max(x)])
     }
@@ -560,11 +554,9 @@ NNS.reg = function (x, y,
   }
 
   ### Mid Endpoints
-  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
-                                               c(max(x), mean(x.max)))))
+  mid.max.rps <- data.table(do.call(rbind,list(c(max(x), mean(x.max)))))
 
-  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, Dynamic.average.mid.min))))
+  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)))))
 
   regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
 
@@ -690,28 +682,9 @@ NNS.reg = function (x, y,
 
   ###Standard errors estimatation
   if(std.errors){
-    l <- length(regression.points[ , x])
-    for(i in 1 : l){
-      if(i < l){
-        obs <- fitted[ x >= regression.points[ , x][i] & x < regression.points[ , x][i + 1], which = TRUE]
+          fitted[, `:=`
+                 ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1, (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) )), by = gradient]
 
-        se.denominator <- length(obs - 2)
-
-        if(se.denominator > 0){
-          fitted[obs, `:=`
-                 ( 'standard.errors' = sqrt( sum(((y.hat - y) ^ 2)) / (se.denominator * sum(((x - mean(x)) ^ 2))) ) )]
-        } else {
-          fitted[obs, `:=` ( 'standard.errors' = 0 )]
-        }
-      }
-
-      if(i == l){
-        obs <- fitted[x >= regression.points[ , x][i - 1], which = TRUE]
-        se.denominator <- length(obs - 2)
-        fitted[obs, `:=`
-               ( 'standard.errors' = sqrt(sum( ((y.hat - y) ^ 2))/ se.denominator ) )]
-      }
-    }
   } # std.errors
 
   ###Plotting and regression equation
@@ -730,8 +703,8 @@ NNS.reg = function (x, y,
 
     if(is.numeric(confidence.interval)){
       pval <- 1 - confidence.interval
-      se.max <- max(fitted[ , y.hat + qnorm(1 - (pval / 2)) * standard.errors])
-      se.min <- min(fitted[, y.hat - qnorm(1 - (pval / 2)) * standard.errors])
+      se.max <- max(na.omit(fitted[ , y.hat + (qnorm(1 - (pval / 2)) * standard.errors)]))
+      se.min <- min(na.omit(fitted[, y.hat - (qnorm(1 - (pval / 2)) * standard.errors)]))
 
       plot(x, y, xlim = c(xmin, xmax),
            ylim = c(min(c(se.min, ymin)), max(c(se.max,ymax))),
