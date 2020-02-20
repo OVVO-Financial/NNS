@@ -4,9 +4,16 @@
 \alias{NNS.VAR}
 \title{NNS VAR}
 \usage{
-NNS.VAR(variables, h, tau = 1, dim.red.method = "cor",
-  obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
-  status = TRUE, ncores = NULL)
+NNS.VAR(
+  variables,
+  h,
+  tau = 1,
+  dim.red.method = "cor",
+  obj.fn = expression(sum((predicted - actual)^2)),
+  objective = "min",
+  status = TRUE,
+  ncores = NULL
+)
 }
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}

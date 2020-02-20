@@ -4,8 +4,16 @@
 \alias{NNS.part}
 \title{NNS Partition Map}
 \usage{
-NNS.part(x, y, Voronoi = FALSE, type = NULL, order = NULL,
-  obs.req = 8, min.obs.stop = TRUE, noise.reduction = "off")
+NNS.part(
+  x,
+  y,
+  Voronoi = FALSE,
+  type = NULL,
+  order = NULL,
+  obs.req = 8,
+  min.obs.stop = TRUE,
+  noise.reduction = "off"
+)
 }
 \arguments{
 \item{x}{a numeric vector.}

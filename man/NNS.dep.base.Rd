@@ -4,8 +4,15 @@
 \alias{NNS.dep.base}
 \title{NNS Dependence Base}
 \usage{
-NNS.dep.base(x, y = NULL, order = NULL, degree = NULL, type = NULL,
-  print.map = FALSE, asym = FALSE)
+NNS.dep.base(
+  x,
+  y = NULL,
+  order = NULL,
+  degree = NULL,
+  type = NULL,
+  print.map = FALSE,
+  asym = FALSE
+)
 }
 \arguments{
 \item{x}{from \link{NNS.part}}

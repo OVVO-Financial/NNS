@@ -4,8 +4,16 @@
 \alias{dy.d_}
 \title{Partial Derivative dy/d_[wrt]}
 \usage{
-dy.d_(x, y, wrt, eval.points = "median", folds = 5, mixed = FALSE,
-  plot = FALSE, messages = TRUE)
+dy.d_(
+  x,
+  y,
+  wrt,
+  eval.points = "median",
+  folds = 5,
+  mixed = FALSE,
+  plot = FALSE,
+  messages = TRUE
+)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}

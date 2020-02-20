@@ -4,13 +4,30 @@
 \alias{NNS.reg}
 \title{NNS Regression}
 \usage{
-NNS.reg(x, y, factor.2.dummy = TRUE, order = NULL, stn = 0.95,
-  dim.red.method = NULL, tau = NULL, type = NULL, point.est = NULL,
-  location = "top", return.values = TRUE, plot = TRUE,
-  plot.regions = FALSE, residual.plot = TRUE, std.errors = FALSE,
-  confidence.interval = NULL, threshold = 0, n.best = NULL,
-  noise.reduction = "off", dist = "L2", ncores = NULL,
-  multivariate.call = FALSE)
+NNS.reg(
+  x,
+  y,
+  factor.2.dummy = TRUE,
+  order = NULL,
+  stn = 0.95,
+  dim.red.method = NULL,
+  tau = NULL,
+  type = NULL,
+  point.est = NULL,
+  location = "top",
+  return.values = TRUE,
+  plot = TRUE,
+  plot.regions = FALSE,
+  residual.plot = TRUE,
+  std.errors = FALSE,
+  confidence.interval = NULL,
+  threshold = 0,
+  n.best = NULL,
+  noise.reduction = "off",
+  dist = "L2",
+  ncores = NULL,
+  multivariate.call = FALSE
+)
 }
 \arguments{
 \item{x}{a vector, matrix or data frame of variables of numeric or factor data types.}

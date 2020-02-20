@@ -4,10 +4,17 @@
 \alias{NNS.ARMA.optim}
 \title{NNS ARMA Optimizer}
 \usage{
-NNS.ARMA.optim(variable, training.set, seasonal.factor,
-  negative.values = FALSE, obj.fn = expression(sum((predicted -
-  actual)^2)), objective = "min", linear.approximation = TRUE,
-  print.trace = TRUE, ncores = NULL)
+NNS.ARMA.optim(
+  variable,
+  training.set,
+  seasonal.factor,
+  negative.values = FALSE,
+  obj.fn = expression(sum((predicted - actual)^2)),
+  objective = "min",
+  linear.approximation = TRUE,
+  print.trace = TRUE,
+  ncores = NULL
+)
 }
 \arguments{
 \item{variable}{a numeric vector.}

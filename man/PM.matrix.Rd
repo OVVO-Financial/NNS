@@ -4,8 +4,7 @@
 \alias{PM.matrix}
 \title{Partial Moment Matrix}
 \usage{
-PM.matrix(LPM.degree, UPM.degree, target = "mean", variable,
-  pop.adj = FALSE)
+PM.matrix(LPM.degree, UPM.degree, target = "mean", variable, pop.adj = FALSE)
 }
 \arguments{
 \item{LPM.degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}

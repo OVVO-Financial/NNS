@@ -4,11 +4,24 @@
 \alias{NNS.stack}
 \title{NNS Stack}
 \usage{
-NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
-  obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
-  dist = "L2", CV.size = NULL, ts.test = NULL, folds = 5,
-  order = NULL, norm = NULL, method = c(1, 2),
-  dim.red.method = "cor", status = TRUE, ncores = NULL)
+NNS.stack(
+  IVs.train,
+  DV.train,
+  IVs.test = NULL,
+  type = NULL,
+  obj.fn = expression(sum((predicted - actual)^2)),
+  objective = "min",
+  dist = "L2",
+  CV.size = NULL,
+  ts.test = NULL,
+  folds = 5,
+  order = "max",
+  norm = NULL,
+  method = c(1, 2),
+  dim.red.method = "cor",
+  status = TRUE,
+  ncores = NULL
+)
 }
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
@@ -31,7 +44,7 @@ NNS.stack(IVs.train, DV.train, IVs.test = NULL, type = NULL,
 
 \item{folds}{integer; \code{folds = 5} (default) Select the number of cross-validation folds.}
 
-\item{order}{integer; \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent.}
+\item{order}{options: (integer, "max", NULL); Sets the order for \link{NNS.reg}, where \code{(order = "max")}(default) is the k-nearest neighbors equivalent.}
 
 \item{norm}{options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
 

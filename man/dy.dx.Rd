@@ -4,8 +4,14 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(x, y, eval.point = median(x), deriv.order = 1, h = 0.05,
-  deriv.method = "FS")
+dy.dx(
+  x,
+  y,
+  eval.point = median(x),
+  deriv.order = 1,
+  h = 0.05,
+  deriv.method = "FS"
+)
 }
 \arguments{
 \item{x}{a numeric vector.}

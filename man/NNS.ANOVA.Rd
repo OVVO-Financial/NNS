@@ -4,8 +4,15 @@
 \alias{NNS.ANOVA}
 \title{NNS ANOVA}
 \usage{
-NNS.ANOVA(control, treatment, confidence.interval = 0.95,
-  tails = "Both", pairwise = FALSE, plot = TRUE, binary = TRUE)
+NNS.ANOVA(
+  control,
+  treatment,
+  confidence.interval = 0.95,
+  tails = "Both",
+  pairwise = FALSE,
+  plot = TRUE,
+  binary = TRUE
+)
 }
 \arguments{
 \item{control}{a numeric vector, matrix or data frame.}
