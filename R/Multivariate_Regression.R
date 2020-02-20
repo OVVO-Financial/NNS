@@ -32,7 +32,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     }
   }
 
-
   original.matrix <- cbind.data.frame(original.IVs, original.DV)
 
   minimums <- apply(original.IVs, 2, min)

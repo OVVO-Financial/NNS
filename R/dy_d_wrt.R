@@ -48,7 +48,7 @@ dy.d_<- function(x, y, wrt,
                  plot = FALSE,
                  messages = TRUE){
 
-  order <- NULL
+  order <- "max"
 
   h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
 
