@@ -197,7 +197,7 @@ dy.d_<- function(x, y, wrt,
                 "Mixed Derivative" = mixed))
   } else {
     return(list("First Derivative" = rise / distance_wrt,
-                "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2)))
+                "Second Derivative" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2) ) )
   }
 
 
