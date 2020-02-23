@@ -442,7 +442,7 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
-  ifelse(dependence < 0.5, dependence <- dependence^(1/2), dependence <- max(0.707, dependence^2))
+  ifelse(dependence < 0.5, dependence <- dependence^(1/2), dependence <- max(0.707, dependence^1))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
