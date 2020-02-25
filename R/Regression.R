@@ -692,19 +692,19 @@ NNS.reg = function (x, y,
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     xmin <- min(c(point.est, x))
     xmax <- max(c(point.est, x))
-    ymin <- min(c(point.est.y, y))
-    ymax <- max(c(point.est.y, y))
+    ymin <- min(c(point.est.y, y, fitted$y.hat))
+    ymax <- max(c(point.est.y, y, fitted$y.hat))
 
     if(is.null(order)){
-      plot.order <- dep.reduced.order
+      plot.order <- max(1, dep.reduced.order)
     } else {
-      plot.order <- order
+      plot.order <- max(1, order)
     }
 
     if(is.numeric(confidence.interval)){
       pval <- 1 - confidence.interval
-      se.max <- max(na.omit(fitted[ , y.hat + (qnorm(1 - (pval / 2)) * standard.errors)]))
-      se.min <- min(na.omit(fitted[, y.hat - (qnorm(1 - (pval / 2)) * standard.errors)]))
+      se.max <- max(na.omit(fitted[ , y.hat + (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
+      se.min <- min(na.omit(fitted[, y.hat - (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
 
       plot(x, y, xlim = c(xmin, xmax),
            ylim = c(min(c(se.min, ymin)), max(c(se.max,ymax))),
