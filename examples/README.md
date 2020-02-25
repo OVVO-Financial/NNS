@@ -88,14 +88,9 @@ See the following for NNS detailed examples and specific applications:
 
 # References
 
-The previous examples are just that...examples.  They are not meant to serve as proofs or intended to be exhaustive demonstrations.
+The previous examples are just that...examples.  They are not meant to serve as proofs or intended to be exhaustive demonstrations, rather the hands-on application of a robust nonparametetric regression in many different types of common machine learning problems.
 
-Aside from the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356), if you'd like to learn *why* & *how* NNS does what it does, then please check out the book:
-
-## Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" <http://amzn.com/1490523995>
-
-
-<a href="http://amzn.com/1490523995" rel="NNS Book"> ![NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20Cover.jpg)
+See the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356), if you'd like to learn *why* & *how* NNS does what it does.
 
 
 # Thank you for your interest in NNS!
