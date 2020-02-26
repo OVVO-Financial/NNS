@@ -143,7 +143,7 @@ NNS.stack <- function(IVs.train,
     }
 
     set.seed(123 * b)
-    test.set <- sample(1 : l, as.integer(CV.size * l), replace = FALSE)
+    test.set <- sample(1 : l, as.integer(CV.size * l), replace = TRUE)
 
     if(b > 1){
       maxes <- as.vector(apply(IVs.train, 2, which.max))

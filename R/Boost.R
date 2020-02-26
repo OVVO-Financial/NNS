@@ -155,7 +155,7 @@ NNS.boost <- function(IVs.train,
 
     for(i in 1:learner.trials){
       set.seed(123 + i)
-      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
+      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = TRUE)
 
       if(i > 1){
         maxes <- as.vector(apply(x, 2, which.max))
@@ -194,7 +194,7 @@ NNS.boost <- function(IVs.train,
         message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
       }
 
-      test.features[[i]] <- sort(sample(n,sample(2:n,1),replace = FALSE))
+      test.features[[i]] <- sort(sample(n, sample(2:n,1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
@@ -263,7 +263,7 @@ NNS.boost <- function(IVs.train,
     message(paste0("Learner Accuracy Threshold = ", format(threshold, digits = 3, nsmall = 2),"           "), appendLF = TRUE)
 
     # Clear message line
-    message("                                       ", "\r", appendLF=FALSE)
+    message("                                       ", "\r", appendLF = FALSE)
   }
 
 
@@ -272,7 +272,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(epochs)){
     for(j in 1:epochs){
       set.seed(123 * j)
-      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
+      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = TRUE)
 
       if(j > 1){
         maxes <- as.vector(apply(x, 2, which.max))
@@ -317,7 +317,7 @@ NNS.boost <- function(IVs.train,
         message("% of epochs = ", format(j/epochs,digits =  3,nsmall = 2),"     ","\r",appendLF=FALSE)
 
         if(j == epochs){
-          message("% of epochs ",j," = 1.000     ","\r",appendLF=FALSE)
+          message("% of epochs ",j," = 1.000     ","\r",appendLF = FALSE)
           flush.console()
         }
       }
