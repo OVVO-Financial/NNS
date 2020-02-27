@@ -530,8 +530,9 @@ NNS.reg = function (x, y,
       if(!is.null(type)){
           x0 <- mode_class(y.min)
       } else {
-          x0 <- mean(c(lm((y[x < min.range]) ~  (x[x < min.range]))$fitted.values[which.min(x[x < min.range])],
-                       lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]))
+          x0 <- sum(lm((y[x < min.range]) ~  (x[x < min.range]))$fitted.values[which.min(x[x < min.range])]*l_y.min,
+                       lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]*l_y.mid.min) /
+                sum(l_y.min, l_y.mid.min)
       }
     } else {
       x0 <- unique(y[x == min(x)])
@@ -545,8 +546,9 @@ NNS.reg = function (x, y,
       if(!is.null(type)){
           x.max <- mode_class(y.max)
       } else {
-          x.max <- mean(c(lm(y[x > max.range] ~ x[x > max.range])$fitted.values[which.max(x[x > max.range])],
-                          lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]))
+          x.max <- sum(lm(y[x > max.range] ~ x[x > max.range])$fitted.values[which.max(x[x > max.range])]*l_y.max,
+                          lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]*l_y.mid.max) /
+                   sum(l_y.max, l_y.mid.max)
       }
     } else {
       x.max <- unique(y[x == max(x)])
