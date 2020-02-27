@@ -530,7 +530,8 @@ NNS.reg = function (x, y,
       if(!is.null(type)){
           x0 <- mode_class(y.min)
       } else {
-          x0 <- lm((y[x < min.range]) ~  (x[x < min.range]))$fitted.values[which.min(x[x < min.range])]
+          x0 <- mean(c(lm((y[x < min.range]) ~  (x[x < min.range]))$fitted.values[which.min(x[x < min.range])],
+                       lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]))
       }
     } else {
       x0 <- unique(y[x == min(x)])
@@ -544,7 +545,8 @@ NNS.reg = function (x, y,
       if(!is.null(type)){
           x.max <- mode_class(y.max)
       } else {
-          x.max <- lm(y[x > max.range]~ x[x > max.range])$fitted.values[which.max(x[x > max.range])]
+          x.max <- mean(c(lm(y[x > max.range] ~ x[x > max.range])$fitted.values[which.max(x[x > max.range])],
+                          lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]))
       }
     } else {
       x.max <- unique(y[x == max(x)])
