@@ -94,18 +94,19 @@ NNS.VAR <- function(variables,
 
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
     variable <- variables[, i]
+    na_s <- sum(is.na(variable))
 
     periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
     b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
-                        training.set = length(variable) - 2*h,
+                        training.set = length(variable) - 2*(h + na_s),
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
                         ncores = 1)
 
-    nns_IVs$results <- NNS.ARMA(variable, h = h, seasonal.factor = b$periods, weights = b$weights,
+    nns_IVs$results <- NNS.ARMA(variable, h = (h + na_s), seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
     nns_IVs$obj_fn <- b$obj.fn
