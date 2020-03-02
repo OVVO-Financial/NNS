@@ -74,6 +74,7 @@ NNS.VAR <- function(variables,
 
   dim.red.method <- tolower(dim.red.method)
   if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
+
   nns_IVs <- list()
 
   # Parallel process...
@@ -92,9 +93,12 @@ NNS.VAR <- function(variables,
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
 
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
+#  nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
+    for(i in 1:ncol(variables)){
+
     variable <- variables[, i]
     na_s <- sum(is.na(variable))
+    variable <- na.omit(variable)
 
     periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
