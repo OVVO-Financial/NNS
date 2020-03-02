@@ -94,11 +94,9 @@ NNS.VAR <- function(variables,
   }
 
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
-
     variable <- variables[, i]
     na_s <- sum(is.na(variable))
     variable <- na.omit(variable)
-
     periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
@@ -121,11 +119,17 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- do.call(cbind, lapply(nns_IVs, `[[`, 1))
-  colnames(nns_IVs_results) <- colnames(variables)
+  new_values = list()
 
   # Combine forecasted IVs onto training data.frame
-  new_values <- rbind(variables, nns_IVs_results)
+  for(i in 1:ncol(variables)){
+      new_values[[i]] = c(na.omit(variables[,i]), nns_IVs[[i]]$results  )
+
+  }
+  new_values <- do.call(cbind, new_values)
+
+
+  colnames(new_values) <- colnames(variables)
 
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
