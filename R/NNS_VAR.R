@@ -93,8 +93,7 @@ NNS.VAR <- function(variables,
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
 
-#  nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
-    for(i in 1:ncol(variables)){
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
 
     variable <- variables[, i]
     na_s <- sum(is.na(variable))
