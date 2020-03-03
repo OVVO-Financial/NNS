@@ -119,8 +119,8 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- tail(data.frame(do.call(cbind, lapply(nns_IVs, `[[`, 1))), h)
-  colnames(nns_IVs_results) <- variables
+  nns_IVs_results <- data.frame(tail(do.call(cbind, lapply(nns_IVs, `[[`, 1)), h))
+  colnames(nns_IVs_results) <- colnames(variables)
   row.names(nns_IVs_results) <- seq_len(h)
 
   new_values <- list()
@@ -132,7 +132,7 @@ NNS.VAR <- function(variables,
   }
 
 
-  new_values <- do.call(cbind, new_values)
+  new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- colnames(variables)
 
   # Now lag new forecasted data.frame
@@ -256,7 +256,7 @@ NNS.VAR <- function(variables,
 
 
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
-  colnames(forecasts) <- variables
+  colnames(forecasts) <- colnames(variables)
   row.names(forecasts) <- seq_len(h)
 
   return( list("relevant_variables" = RV,

@@ -442,7 +442,6 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
-  ifelse(dependence < 0.5, dependence <- dependence^(1/2), dependence <- max(0.707, dependence^2))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
@@ -450,9 +449,9 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-      dep.reduced.order <- ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
+      dep.reduced.order <- max(1, ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
                                    floor(floor(log(length(y))) * dependence),
-                                   floor(ceiling(log(length(y))) * dependence))
+                                   floor(ceiling(log(length(y))) * dependence)))
   } else {
       dep.reduced.order <- order
   }
