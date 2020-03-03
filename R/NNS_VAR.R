@@ -119,13 +119,15 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- do.call(cbind, lapply(nns_IVs, `[[`, 1))
+  nns_IVs_results <- tail(data.frame(do.call(cbind, lapply(nns_IVs, `[[`, 1))), h)
+  colnames(nns_IVs_results) <- variables
+  row.names(nns_IVs_results) <- seq_len(h)
 
-  new_values = list()
+  new_values <- list()
 
   # Combine forecasted IVs onto training data.frame
   for(i in 1:ncol(variables)){
-      new_values[[i]] = c(na.omit(variables[,i]), nns_IVs[[i]]$results  )
+      new_values[[i]] <- c(na.omit(variables[,i]), nns_IVs[[i]]$results  )
 
   }
 
@@ -235,10 +237,11 @@ NNS.VAR <- function(variables,
 
   }
 
-  nns_DVs <- do.call(cbind, nns_DVs)
+  nns_DVs <- data.frame(do.call(cbind, nns_DVs))
   colnames(nns_DVs) <- colnames(variables)
+  row.names(nns_DVs) <- seq_len(h)
 
-  RV <- lapply(relevant_vars,function(x) if(is.null(x)){NA} else {x})
+  RV <- lapply(relevant_vars, function(x) if(is.null(x)){NA} else {x})
 
   RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
   colnames(RV) <- colnames(variables)
@@ -252,8 +255,9 @@ NNS.VAR <- function(variables,
   }
 
 
-  forecasts <- Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi)))
-
+  forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
+  colnames(forecasts) <- variables
+  row.names(forecasts) <- seq_len(h)
 
   return( list("relevant_variables" = RV,
                univariate = nns_IVs_results,
