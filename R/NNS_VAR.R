@@ -119,6 +119,8 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
+  nns_IVs_results <- do.call(cbind, lapply(nns_IVs, `[[`, 1))
+
   new_values = list()
 
   # Combine forecasted IVs onto training data.frame
@@ -126,9 +128,9 @@ NNS.VAR <- function(variables,
       new_values[[i]] = c(na.omit(variables[,i]), nns_IVs[[i]]$results  )
 
   }
+
+
   new_values <- do.call(cbind, new_values)
-
-
   colnames(new_values) <- colnames(variables)
 
   # Now lag new forecasted data.frame
