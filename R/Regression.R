@@ -151,7 +151,7 @@ NNS.reg = function (x, y,
   }
 
   if(!is.null(type)){
-    type <- tolower(type)
+    type <- "class"
     noise.reduction <- "mode"
   }
 
@@ -442,6 +442,7 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
+  ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(0.5, dependence^2))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
@@ -457,11 +458,12 @@ NNS.reg = function (x, y,
   }
 
 
+
       if(dependence > stn){
-              part.map <- NNS.part(x, y, type = "XONLY",
-                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = TRUE)
+              part.map <- NNS.part(x, y, type = NULL,
+                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
               if(length(part.map$regression.points$x) == 0){
-                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = TRUE)
+                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
               }
         if(dependence == 1){
           if(is.null(order)) {
@@ -475,7 +477,7 @@ NNS.reg = function (x, y,
               type2 <- "XONLY"
           } else {
               if(type == "class"){
-                  type2 = NULL
+                  type2 = "XONLY"
                   noise.reduction2 <- "mode"
               } else {
                   noise.reduction2 <- noise.reduction
