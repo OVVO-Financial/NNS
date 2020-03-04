@@ -525,6 +525,9 @@ NNS.reg = function (x, y,
 
   ### Endpoints
   if(length(x[x < mid.min.range]) > 1){
+    Dynamic.average.mid.min <- mean(c(lm((y[x < min.range & x >= mid.min.range]) ~  (x[x < min.range & x >= mid.min.range]))$fitted.values[which.min(x[x <= min.range & x >= mid.min.range])],
+                                      (min.range + (mid.min.range - min.range) * lm((y[x < min.range]) ~  (x[x < min.range]))$coef[2])))
+
     if(dependence < stn){
       if(!is.null(type)){
           x0 <- mode_class(y.min)
@@ -541,10 +544,15 @@ NNS.reg = function (x, y,
       x0 <- unique(y[x == min(x)])
     }
   } else {
+    Dynamic.average.mid.min <- min.range + (mid.min.range - min.range) * lm((y[x < min.range]) ~  (x[x < min.range]))$coef[2]
+
     x0 <- unique(y[x == min(x)])
   }
 
   if(length(x[x > mid.max.range]) > 1){
+    Dynamic.average.mid.max <- mean(c(lm((y[x > max.range & x <= mid.max.range]) ~  (x[x > max.range & x <= mid.max.range]))$fitted.values[which.max(x[x >= max.range & x <= mid.max.range])],
+                                      (max.range + (mid.max.range - max.range) * lm((y[x > max.range]) ~  (x[x > max.range]))$coef[2])))
+
     if(dependence < stn){
       if(!is.null(type)){
           x.max <- mode_class(y.max)
@@ -561,13 +569,17 @@ NNS.reg = function (x, y,
       x.max <- unique(y[x == max(x)])
     }
   } else {
+    Dynamic.average.mid.max <- max.range + (mid.max.range - max.range) * lm((y[x > max.range]) ~  (x[x > max.range]))$coef[2]
     x.max <- unique(y[x == max(x)])
   }
 
-  ### Mid Endpoints
-  mid.max.rps <- data.table(do.call(rbind,list(c(max(x), mean(x.max)))))
 
-  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)))))
+  ### Mid Endpoints
+  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
+                                               c(max(x), mean(x.max)))))
+
+  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
+                                               c(mid.min.range, Dynamic.average.mid.min))))
 
   regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
 
