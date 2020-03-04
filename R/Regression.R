@@ -645,11 +645,11 @@ NNS.reg = function (x, y,
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
 
     if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-        point.est.y[point.est>max(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, max(1, coef.point.interval - 1))
-                                                                                                                                   , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
+        upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
 
-        point.est.y[point.est<min(x)] <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[c(coef.point.interval, min(dim(Regression.Coefficients)[1],coef.point.interval + 1))
-                                                                                                                                 , mean(unique(Coefficient))]) + regression.points[reg.point.interval, y])
+        lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
     }
 
     if(!is.null(type)){
