@@ -110,7 +110,7 @@ NNS.part = function(x, y,
             obs.req.rows <- PART[counts >= obs.req, which = TRUE]
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
-            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) {print("here")
+            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) {
                 break
             }
 
@@ -239,7 +239,7 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
             }
 
-            if(obs.req == 0 & old.parts == new.parts) break
+            if(obs.req == 0 & old.parts >= new.parts) break
             i = i + 1L
         }
         if (!is.numeric(order)) {
@@ -350,7 +350,7 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
             }
 
-            if(obs.req == 0 & old.parts == new.parts) break
+            if(obs.req == 0 & old.parts >= new.parts) break
             i <- i + 1L
         }
 

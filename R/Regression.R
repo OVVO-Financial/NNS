@@ -458,18 +458,11 @@ NNS.reg = function (x, y,
 
 
       if(dependence > stn){
-          if(is.null(type)){
-              part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
-              if(length(part.map$regression.points$x) == 0){
-                  part.map <- NNS.part(x, y, noise.reduction = noise.reduction, order = min( nchar( part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
-              }
-          } else {
               part.map <- NNS.part(x, y, type = "XONLY",
-                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
+                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = TRUE)
               if(length(part.map$regression.points$x) == 0){
-                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = TRUE)
               }
-          } # type
         if(dependence == 1){
           if(is.null(order)) {
               dep.reduced.order <- "max"
@@ -493,15 +486,15 @@ NNS.reg = function (x, y,
       part.map <- NNS.part(x, y, noise.reduction = noise.reduction2,
                            order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
       if(length(part.map$regression.points$x) == 0){
-          part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 1, min.obs.stop = FALSE)
+          part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
       }
     } # Dependence < stn
-
 
   Regression.Coefficients <- data.frame(matrix(ncol = 3))
   colnames(Regression.Coefficients) <- c('Coefficient', 'X Lower Range', 'X Upper Range')
 
   regression.points <- part.map$regression.points[,.(x,y)]
+  setkey(regression.points,x)
 
   min.range <- min(regression.points$x)
   max.range <- max(regression.points$x)
@@ -531,7 +524,7 @@ NNS.reg = function (x, y,
           x0 <- mode_class(y.min)
       } else {
           Dynamic.average.mid.min <- mean(c(lm((y[x <= min.range & x >= mid.min.range]) ~  (x[x <= min.range & x >= mid.min.range]))$fitted.values[which.min(x[x <= min.range & x >= mid.min.range])],
-                                          (min(regression.points$y) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2])))
+                                          (head(regression.points$y, 1) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2])))
           if(l_y.min>1 && l_y.mid.min>1){
               x0 <- sum(lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted.values[which.min(x[x < min.range])]*l_y.min,
                            lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]*l_y.mid.min) /
@@ -546,7 +539,7 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.min <- mode_class(y.min)
         x0 <- mode_class(y.min)
       } else {
-        Dynamic.average.mid.min <- min(regression.points$y) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+        Dynamic.average.mid.min <- head(regression.points$y, 1) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
         x0 <- unique(y[x == min(x)])
       }
     }
@@ -555,7 +548,7 @@ NNS.reg = function (x, y,
       Dynamic.average.mid.min <- mode_class(y.min)
       x0 <- mode_class(y.min)
     } else {
-      Dynamic.average.mid.min <- min(regression.points$y) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+      Dynamic.average.mid.min <- head(regression.points$y, 1) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
       x0 <- unique(y[x == min(x)])
     }
   }
@@ -571,7 +564,7 @@ NNS.reg = function (x, y,
           x.max <- mode_class(y.max)
       } else {
           Dynamic.average.mid.max <- mean(c(lm((y[x >= max.range & x <= mid.max.range]) ~  (x[x >= max.range & x <= mid.max.range]))$fitted.values[which.max(x[x >= max.range & x <= mid.max.range])],
-                                          (max(regression.points$y) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2])))
+                                          (tail(regression.points$y, 1) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2])))
           if(l_y.max>1 && l_y.mid.max>1){
               x.max <- sum(lm(y[x >= max.range] ~ x[x >= max.range])$fitted.values[which.max(x[x >= max.range])]*l_y.max,
                               lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]*l_y.mid.max) /
@@ -586,7 +579,7 @@ NNS.reg = function (x, y,
         x.max <- mode_class(y.max)
       } else {
         x.max <- unique(y[x == max(x)])
-        Dynamic.average.mid.max <- max(regression.points$y) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
+        Dynamic.average.mid.max <- tail(regression.points$y, 1) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
       }
     }
   } else {
@@ -594,7 +587,7 @@ NNS.reg = function (x, y,
       Dynamic.average.mid.max <- mode_class(y.max)
       x.max <- mode_class(y.max)
     } else{
-      Dynamic.average.mid.max <- max(regression.points$y) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
+      Dynamic.average.mid.max <- tail(regression.points$y, 1) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
       x.max <- unique(y[x == max(x)])
     }
 

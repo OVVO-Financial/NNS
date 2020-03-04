@@ -154,6 +154,7 @@ NNS.VAR <- function(variables,
 
   for(i in DVs){
     index <- which(DVs%in%i)
+
     if(status){
       message("Variable ", index, " of ", length(DVs), appendLF = TRUE)
     }
@@ -164,8 +165,9 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
-                               order = NULL, method = 2,
-                               dim.red.method = dim.red.method)
+                               method = 2,
+                               dim.red.method = dim.red.method,
+                               order = "max")
 
 
     if(any(dim.red.method == "cor" | dim.red.method == "all")){
@@ -217,18 +219,15 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
-                               dim.red.method = dim.red.method)
+                               dim.red.method = dim.red.method,
+                               order = "max")
 
         nns_DVs[[index]] <- DV_values$stack
 
         DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
 
         } else {
-            DV_values <- NNS.reg(lagged_new_values_train[, rel_vars],
-                                 lagged_new_values_train[, i],
-                                 point.est =  tail(lagged_new_values[, rel_vars], h), plot = FALSE)
-
-            nns_DVs[[index]] <- DV_values$Point.est
+            nns_DVs[[index]] <- nns_IVs_results[,index]
 
             DV_obj_fn[[index]] <- cor_threshold$OBJfn.dim.red
         }
@@ -250,9 +249,12 @@ NNS.VAR <- function(variables,
   multi <- numeric()
 
   for(i in 1:length(colnames(RV))){
-      uni[i] <-  .5 + .5*(sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1])  / max(ifelse(length(tau)>1, length(tau[[min(i, length(tau))]]), tau), length(na.omit(RV[,i]))))
+      uni[i] <-  .5 + .5*((sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]) -
+                             sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]!=do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]))
+                          / max(ifelse(length(tau)>1, length(tau[[min(i, length(tau))]]), tau), length(na.omit(RV[,i]))))
       multi[i] <- 1 - uni[i]
   }
+
 
 
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
