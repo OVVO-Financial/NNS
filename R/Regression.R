@@ -307,13 +307,12 @@ NNS.reg = function (x, y,
         }
 
 
-        mult_stn <- 1 - NNS.dep.hd(cbind(x, y))$Dependence^(1/exp(1))
-        if(is.na(mult_stn)) mult_stn <- stn
+
 
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
-                         dist = dist, stn = mult_stn, return.values = return.values, plot.regions = plot.regions,
+                         dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
                          ncores = ncores))
       } else { # Multivariate dim.red == FALSE
 
