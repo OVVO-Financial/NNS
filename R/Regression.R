@@ -501,22 +501,26 @@ NNS.reg = function (x, y,
   mid.min.range <- mean(c(min(x),min(regression.points$x)))
   mid.max.range <- mean(c(max(x),max(regression.points$x)))
 
-  y.mid.min <-  na.omit(y[x <= min.range])
-  l_y.mid.min <- length(y.mid.min)
-
-  y.min <- na.omit(y[x <= mid.min.range])
+  y.min <-  na.omit(y[x <= min.range])
   l_y.min <- length(y.min)
+  l_y.min_unique <- length(unique(l_y.min))
 
-  y.mid.max <- na.omit(y[x >= max.range])
-  l_y.mid.max <- length(y.mid.max)
+  y.mid.min <- na.omit(y[x <= mid.min.range])
+  l_y.mid.min <- length(y.mid.min)
+  l_y.mid.min_unique <- length(unique(l_y.mid.min))
 
-  y.max <- na.omit(y[x >= mid.max.range])
+  y.max <- na.omit(y[x >= max.range])
   l_y.max <- length(y.max)
+  l_y.max_unique <- length(unique(l_y.max))
+
+  y.mid.max <- na.omit(y[x >= mid.max.range])
+  l_y.mid.max <- length(y.mid.max)
+  l_y.mid.max_unique <- length(unique(l_y.mid.max))
 
 
 
   ### Endpoints
-  if(length(x[x < mid.min.range]) > 1){
+  if(l_y.mid.min_unique > 1){
     if(dependence < stn){
       if(!is.null(type)){
           Dynamic.average.mid.min <- mode_class(y.min)
@@ -547,8 +551,13 @@ NNS.reg = function (x, y,
       Dynamic.average.mid.min <- mode_class(y.min)
       x0 <- mode_class(y.min)
     } else {
-      Dynamic.average.mid.min <- head(regression.points$y, 1) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
-      x0 <- unique(y[x == min(x)])
+      if(l_y.mid.min_unique > 1){
+          Dynamic.average.mid.min <- head(regression.points$y, 1) + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+          x0 <- unique(gravity(y[x == min(x)]))
+      } else {
+          x0 <- unique(gravity(y[x == min(x)]))
+          Dynamic.average.mid.min <- x0
+      }
     }
   }
 
@@ -556,7 +565,7 @@ NNS.reg = function (x, y,
 
 
 
-  if(length(x[x > mid.max.range]) > 1){
+  if(l_y.mid.max_unique > 1){
     if(dependence < stn){
       if(!is.null(type)){
           Dynamic.average.mid.max <- mode_class(y.max)
@@ -586,11 +595,17 @@ NNS.reg = function (x, y,
       Dynamic.average.mid.max <- mode_class(y.max)
       x.max <- mode_class(y.max)
     } else{
-      Dynamic.average.mid.max <- tail(regression.points$y, 1) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
-      x.max <- unique(y[x == max(x)])
+      if(l_y.mid.max_unique > 1){
+          Dynamic.average.mid.max <- tail(regression.points$y, 1) + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
+          x.max <- unique(gravity(y[x == max(x)]))
+      } else{
+          x.max <- unique(gravity(y[x == max(x)]))
+          Dynamic.average.mid.max <- x.max
+      }
     }
 
   }
+
 
 
   ### Mid Endpoints
