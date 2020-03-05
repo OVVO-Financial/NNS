@@ -509,6 +509,10 @@ NNS.reg = function (x, y,
   l_y.mid.min <- length(y.mid.min)
   l_y.mid.min_unique <- length(unique(l_y.mid.min))
 
+  x.mid.min <- na.omit(x[x <= mid.min.range])
+  l_x.mid.min <- length(x.mid.min)
+  l_x.mid.min_unique <- length(unique(l_x.mid.min))
+
   y.max <- na.omit(y[x >= max.range])
   l_y.max <- length(y.max)
   l_y.max_unique <- length(unique(l_y.max))
@@ -517,10 +521,13 @@ NNS.reg = function (x, y,
   l_y.mid.max <- length(y.mid.max)
   l_y.mid.max_unique <- length(unique(l_y.mid.max))
 
+  x.mid.max <- na.omit(x[x >= mid.max.range])
+  l_x.mid.max <- length(x.mid.max)
+  l_x.mid.max_unique <- length(unique(l_x.mid.max))
 
 
   ### Endpoints
-  if(l_y.mid.min_unique > 1){
+  if(l_x.mid.min_unique > 1){
     if(dependence < stn){
       if(!is.null(type)){
           Dynamic.average.mid.min <- mode_class(y.min)
@@ -561,7 +568,7 @@ NNS.reg = function (x, y,
 
 
 
-  if(l_y.mid.max_unique > 1){
+  if(l_x.mid.max_unique > 1){
     if(dependence < stn){
       if(!is.null(type)){
           Dynamic.average.mid.max <- mode_class(y.max)
