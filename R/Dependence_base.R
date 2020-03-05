@@ -58,10 +58,10 @@ NNS.dep.base <- function(x,
           if(asym){type <- "XONLY"} else {type <- NULL}
 
           if (print.map == TRUE) {
-            part.map <- NNS.part(x, y, order = order, obs.req = 1, type = type,
+            part.map <- NNS.part(x, y, order = order, obs.req = 8, type = type,
                                  Voronoi = TRUE, min.obs.stop = TRUE)
           } else {
-            part.map <- NNS.part(x, y, order = order, obs.req = 1, type = type,
+            part.map <- NNS.part(x, y, order = order, obs.req = 8, type = type,
                                  Voronoi = FALSE, min.obs.stop = TRUE)
           }
 

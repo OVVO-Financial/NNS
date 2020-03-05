@@ -306,14 +306,12 @@ NNS.reg = function (x, y,
           }
         }
 
-
-
-
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
                          ncores = ncores))
+
       } else { # Multivariate dim.red == FALSE
 
         if(is.null(original.names)){
@@ -441,7 +439,7 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
-  ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(0.5, dependence^2))
+  ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^2))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
@@ -459,10 +457,10 @@ NNS.reg = function (x, y,
 
 
       if(dependence > stn){
-              part.map <- NNS.part(x, y, type = NULL,
-                                  noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
+              part.map <- NNS.part(x, y, type = "XONLY",
+                                  noise.reduction = "mean", order = dep.reduced.order, obs.req = 4, min.obs.stop = FALSE)
               if(length(part.map$regression.points$x) == 0){
-                  part.map <- NNS.part(x, y,noise.reduction = noise.reduction,type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+                  part.map <- NNS.part(x, y, noise.reduction = "mean", type = "XONLY", order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
               }
         if(dependence == 1){
           if(is.null(order)) {
