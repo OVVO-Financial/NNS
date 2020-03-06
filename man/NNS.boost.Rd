@@ -37,7 +37,7 @@ NNS.boost(
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be signifcantly faster, but increase the variance of results.}
+\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be signifcantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.}
 
