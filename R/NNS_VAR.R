@@ -167,7 +167,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                method = 2,
                                dim.red.method = dim.red.method,
-                               order = "max")
+                               order = NULL)
 
 
     if(any(dim.red.method == "cor" | dim.red.method == "all")){
@@ -220,7 +220,7 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
                                dim.red.method = dim.red.method,
-                               order = "max")
+                               order = NULL)
 
         nns_DVs[[index]] <- DV_values$stack
 
