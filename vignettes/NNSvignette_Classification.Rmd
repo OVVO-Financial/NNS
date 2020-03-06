@@ -88,7 +88,7 @@ mean( b$stack == as.numeric(iris[test.set, 5]) )
 ## Brief Notes on Other Parameters
 * `representative.sample` uses a representation of each of the regressors via Tukey's five number summary as well as `mean` and `mode`.  This encoding of the regressors greatly reduces large datasets runtimes.
 
-* `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression.  In essence, this is the basis for a `kNN` nearest neighbor type of classification.
+* `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression.  In essence, this is the basis for a `kNN` nearest neighbor type of classification.  **For mixed data type regressors / features, it is suggested to use** `NNS.boost(..., depth = "max", ...)`.
 
 * `n.best = 1` will use the single nearest neighbor.  When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` but as the dimensions increase the results diverge demonstrating `NNS` is less sensitive to the curse of dimensionality than `kNN`.
 
