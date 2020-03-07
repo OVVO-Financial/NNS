@@ -119,7 +119,7 @@ The `NNS.stack()` routine cross-validates for a given objective function the `n.
 
 Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`.
 
-**Note:** For mixed data type regressors / features, it is suggested to use `NNS.stack(..., order = "max", ...)`. 
+**Note: For mixed data type regressors / features, it is suggested to use** `NNS.stack(..., order = "max", ...)`. 
 
 ```{r stack,fig.width=5,fig.height=3,fig.align = "center", message=FALSE}
 NNS.stack(IVs.train = iris[ , 1 : 4], 
