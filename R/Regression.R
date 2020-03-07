@@ -295,15 +295,6 @@ NNS.reg = function (x, y,
       x <- original.variable
     } else {
       if(is.null(dim.red.method)){
-        if(!is.null(original.columns)){
-          if(is.null(n.best)){
-            n.best <- floor(sqrt(original.columns))
-          }
-        } else {
-          if(is.null(n.best)){
-            n.best <- 2
-          }
-        }
 
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,

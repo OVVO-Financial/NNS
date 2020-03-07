@@ -167,7 +167,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(!is.numeric(n.best)){
     n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
-    n.best <- n.best
+    if(is.null(n.best)){
+        n.best <- 1
+    }
   }
 
   ### Point estimates
