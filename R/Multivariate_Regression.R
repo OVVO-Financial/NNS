@@ -78,7 +78,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   }
 
   if(is.numeric(order) | is.null(order)){
-      reg.points.matrix <- unique(reg.points.matrix)
+    reg.points.matrix <- unique(reg.points.matrix)
   }
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
@@ -105,23 +105,23 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
   if(is.numeric(order) | is.null(order)){
-      if(noise.reduction == 'off'){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
-      }
-      if(noise.reduction == 'mean'){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
-      }
-      if(noise.reduction == 'median'){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
-      }
-      if(noise.reduction == 'mode' & is.null(type)){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
-      }
-      if(noise.reduction == 'mode' & !is.null(type)){
-          mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode_class(original.DV), by = 'NNS.ID']
-      }
+    if(noise.reduction == 'off'){
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
+    }
+    if(noise.reduction == 'mean'){
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
+    }
+    if(noise.reduction == 'median'){
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
+    }
+    if(noise.reduction == 'mode' & is.null(type)){
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
+    }
+    if(noise.reduction == 'mode' & !is.null(type)){
+      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode_class(original.DV), by = 'NNS.ID']
+    }
   } else {
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
+    mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
   }
 
   y.identifier <- mean.by.id.matrix[ , NNS.ID]
@@ -132,7 +132,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   setkey(resid.plot, 'obs')
   y.hat <- mean.by.id.matrix[ , .(y.hat)]
   if(!is.null(type)){
-      y.hat <- round(y.hat)
+    y.hat <- round(y.hat)
   }
 
 
@@ -256,7 +256,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         outside.index <- list()
         outside.index <- foreach(i = 1:length(outside.columns))%dopar%{
           which(point.est[ , outside.columns[i]] > maximums[outside.columns[i]] |
-                              point.est[,outside.columns[i]] < minimums[outside.columns[i]])
+                  point.est[,outside.columns[i]] < minimums[outside.columns[i]])
         }
 
         outside.index <- unique(unlist(outside.index))
@@ -275,8 +275,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           }
 
           boundary.estimates <- NNS.distance(rpm = REGRESSION.POINT.MATRIX,
-                            dist.estimate = boundary.points,
-                            type = dist, k = n.best)
+                                             dist.estimate = boundary.points,
+                                             type = dist, k = n.best)
 
           last.known.gradient_1 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, type = dist, k = n.best)) / last.known.distance_1
           last.known.gradient_2 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points, type = dist, k = n.best)) / last.known.distance_2
@@ -372,10 +372,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   rhs.partitions <- data.table(reg.points.matrix)
 
   if(!is.null(type)){
-      fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
-      if(!is.null(predict.fit)){
-          predict.fit <- round(predict.fit)
-      }
+    fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
+    if(!is.null(predict.fit)){
+      predict.fit <- round(predict.fit)
+    }
   }
 
   ### Return Values

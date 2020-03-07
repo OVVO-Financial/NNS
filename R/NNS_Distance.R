@@ -31,15 +31,15 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
 
   if(type=="L2"){
-      row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
   }
 
   if(type=="L1"){
-      row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
   }
 
   if(type=="DTW"){
-      row.sums <- rpm[,  `:=` (Sum = unlist(lapply(1 : nrow(rpm), function(i) dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = unlist(lapply(1 : nrow(rpm), function(i) dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))][,Sum]
   }
 
   if(type=="FACTOR"){
@@ -49,11 +49,11 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
   row.sums[row.sums == 0] <- 1e-10
 
   if(k==1){
-      if(length(which(row.sums == min(row.sums)))>1){
-          return(mode(rpm$y.hat[which(row.sums == min(row.sums))][1]))
-      }  else {
-          return(rpm$y.hat[which.min(row.sums)][1])
-      }
+    if(length(which(row.sums == min(row.sums)))>1){
+      return(mode(rpm$y.hat[which(row.sums == min(row.sums))][1]))
+    }  else {
+      return(rpm$y.hat[which.min(row.sums)][1])
+    }
   }
 
   total.row.sums <- sum(1 / row.sums)

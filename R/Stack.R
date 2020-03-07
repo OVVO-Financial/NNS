@@ -107,7 +107,7 @@ NNS.stack <- function(IVs.train,
 
   n <- ncol(IVs.train)
 
-  l <- length(IVs.train[ , 1])
+  l <- ceiling(length(IVs.train[ , 1])^(1/3))
 
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
@@ -143,14 +143,14 @@ NNS.stack <- function(IVs.train,
     }
 
     set.seed(123 * b)
-    test.set <- sample(1 : l, as.integer(CV.size * l), replace = TRUE)
+    test.set <- sample(1 : length(IVs.train[ , 1]), as.integer(CV.size * length(IVs.train[ , 1])), replace = TRUE)
 
     if(b > 1){
       maxes <- as.vector(apply(IVs.train, 2, which.max))
       mins <- as.vector(apply(IVs.train, 2, which.min))
       test.set_half <- unique(c(rbind(test.set.1, test.set.2)))[1:(length(test.set)/2)]
 
-      test.set <- unique(c(mins, maxes, test.set_half, sample(1 : l, replace = FALSE)))[1:length(test.set)]
+      test.set <- unique(c(mins, maxes, test.set_half, sample(1 : length(IVs.train[ , 1]), replace = FALSE)))[1:length(test.set)]
       test.set <- na.omit(test.set)
     }
 
@@ -179,12 +179,13 @@ NNS.stack <- function(IVs.train,
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
 
-      for(i in 1:l){
+      for(i in c(1:l,length((IVs.train[ , 1])))){
+        index <- which(c(1:l, length(IVs.train[ , 1])) %in% i)
         if(status){
-          message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-i," ","\r",appendLF=TRUE)
+          message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-index," ","\r",appendLF=TRUE)
         }
 
-        if(i==1){
+        if(index==1){
           setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
                            type = type, factor.2.dummy = TRUE, dist = dist)
           predicted <- setup$Point.est
@@ -213,11 +214,11 @@ NNS.stack <- function(IVs.train,
           }
         }
 
-        nns.cv.1[i] <- eval(obj.fn)
+        nns.cv.1[index] <- eval(obj.fn)
 
         if(length(na.omit(nns.cv.1)) > 2){
-          if(objective=='min' & nns.cv.1[i]>=nns.cv.1[i-1] & nns.cv.1[i]>=nns.cv.1[i-2]){ break }
-          if(objective=='max' & nns.cv.1[i]<=nns.cv.1[i-1] & nns.cv.1[i]<=nns.cv.1[i-2]){ break }
+          if(objective=='min' & nns.cv.1[index]>=nns.cv.1[index-1] & nns.cv.1[index]>=nns.cv.1[index-2]){ break }
+          if(objective=='max' & nns.cv.1[index]<=nns.cv.1[index-1] & nns.cv.1[index]<=nns.cv.1[index-2]){ break }
         }
       }
 
@@ -228,11 +229,11 @@ NNS.stack <- function(IVs.train,
       }
 
       if(objective=='min'){
-        ks <- (1:l)[!is.na(nns.cv.1)]
+        ks <- c(1:l,"all")[!is.na(nns.cv.1)]
         k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
-        ks <- (1:l)[!is.na(nns.cv.1)]
+        ks <- c(1:l,"all")[!is.na(nns.cv.1)]
         k <- ks[which.max(na.omit(nns.cv.1))]
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }
