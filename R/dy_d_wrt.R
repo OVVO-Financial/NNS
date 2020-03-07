@@ -108,7 +108,7 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order)$stack
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1)$reg
 
 
     if(length(eval.points) == 1){
@@ -135,7 +135,7 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points.max)
 
 
-    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order)$stack
+    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = 1)$reg
 
     lower <- head(estimates,n)
     two.f.x <- 2 * estimates[(n+1):(2*n)]
@@ -181,7 +181,7 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order)$stack
+    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = 1)$reg
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)

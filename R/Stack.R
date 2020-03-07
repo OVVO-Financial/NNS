@@ -194,15 +194,15 @@ NNS.stack <- function(IVs.train,
           predicted <- list()
 
           if(dim(IVs.train)[2]>1){
-              cl <- makeCluster(num_cores)
-              registerDoParallel(cl)
+            cl <- makeCluster(num_cores)
+            registerDoParallel(cl)
 
-              predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
-                                    NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
-                            }
+            predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
+              NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
+            }
 
-              stopCluster(cl)
-              registerDoSEQ()
+            stopCluster(cl)
+            registerDoSEQ()
           } else {
             predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
                                   type = type, factor.2.dummy = TRUE, dist = dist)$Point.est
@@ -229,11 +229,11 @@ NNS.stack <- function(IVs.train,
       }
 
       if(objective=='min'){
-        ks <- c(1:l,"all")[!is.na(nns.cv.1)]
+        ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
         k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
-        ks <- c(1:l,"all")[!is.na(nns.cv.1)]
+        ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
         k <- ks[which.max(na.omit(nns.cv.1))]
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }

@@ -286,9 +286,8 @@ NNS.reg = function (x, y,
 
   np <- nrow(point.est)
 
-
-  if(!is.null(type) && type == "class" && is.null(n.best)){
-    n.best <- 1
+  if(all(type == "class" | is.null(n.best))){
+      n.best <- 1
   }
 
   if(!is.null(ncol(original.variable))){
@@ -643,7 +642,6 @@ NNS.reg = function (x, y,
   }
 
   ### Regression Equation
-
   if(multivariate.call){
     return(regression.points)
   }
