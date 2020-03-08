@@ -164,11 +164,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , original.DV := NULL]
 
 
-  if(!is.numeric(n.best)){
+  if(is.character(n.best)){
     n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
     if(is.null(n.best)){
-        n.best <- ceiling(sqrt(n))
+
+        n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
     }
   }
 
