@@ -168,7 +168,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
     if(is.null(n.best)){
-        n.best <- 1
+        n.best <- ceiling(sqrt(n))
     }
   }
 
