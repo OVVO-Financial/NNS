@@ -107,7 +107,7 @@ NNS.stack <- function(IVs.train,
 
   n <- ncol(IVs.train)
 
-  l <- ceiling(length(IVs.train[ , 1])^(1/3))
+  l <- floor(sqrt(length(IVs.train[ , 1])))
 
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
