@@ -225,10 +225,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         num_cores <- ncores
       }
 
-      if(num_cores>1){
+
         cl <- makeCluster(num_cores)
         registerDoParallel(cl)
-      } else { cl <- NULL }
+
 
       DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table", "dtw"))%dopar%{
         NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
@@ -236,10 +236,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       }
 
 
-      if(!is.null(cl)){
-        stopCluster(cl)
-        registerDoSEQ()
-      }
+
+      stopCluster(cl)
+      registerDoSEQ()
 
       DISTANCES <- unlist(DISTANCES)
 
