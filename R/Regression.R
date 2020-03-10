@@ -523,7 +523,7 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.min <- mode_class(y.min)
         x0 <- mode_class(y.min)
       } else {
-        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])]  + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])]  + (mid.min.range - max(x[x <= min.range])) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
         if(l_y.min>1 && l_y.mid.min>1){
           x0 <- sum(lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted.values[which.min(x[x <= min.range])]*l_y.min,
                     lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]*l_y.mid.min) /
@@ -538,7 +538,7 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.min <- mode_class(y.min)
         x0 <- mode_class(y.min)
       } else {
-        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])] + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])] + (mid.min.range - max(x[x <= min.range])) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
         x0 <- unique(y[x == min(x)])
       }
     }
@@ -562,7 +562,7 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.max <- mode_class(y.max)
         x.max <- mode_class(y.max)
       } else {
-        Dynamic.average.mid.max <-  lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])] + (mid.max.range - max.range) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
+        Dynamic.average.mid.max <-  lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])] + (mid.max.range - min(x[x >= max.range])) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
         if(l_y.max>1 && l_y.mid.max>1){
             x.max <- sum(lm(y[x >= max.range] ~ x[x >= max.range])$fitted.values[which.max(x[x >= max.range])]*l_y.max,
                        lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]*l_y.mid.max) /
@@ -577,7 +577,7 @@ NNS.reg = function (x, y,
         x.max <- mode_class(y.max)
       } else {
         x.max <- unique(y[x == max(x)])
-        Dynamic.average.mid.max <- lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])]  + (mid.max.range - max.range) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
+        Dynamic.average.mid.max <- lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])]  + (mid.max.range - min(x[x >= max.range])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
       }
     }
   } else {
