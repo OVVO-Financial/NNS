@@ -143,14 +143,14 @@ NNS.stack <- function(IVs.train,
     }
 
     set.seed(123 * b)
-    test.set <- sample(1 : length(IVs.train[ , 1]), as.integer(CV.size * length(IVs.train[ , 1])), replace = TRUE)
+    test.set <- sample(1 : length(IVs.train[ , 1]), as.integer(CV.size * length(IVs.train[ , 1])), replace = FALSE)
 
     if(b > 1){
       maxes <- as.vector(apply(IVs.train, 2, which.max))
       mins <- as.vector(apply(IVs.train, 2, which.min))
       test.set_half <- unique(c(rbind(test.set.1, test.set.2)))[1:(length(test.set)/2)]
 
-      test.set <- unique(c(mins, maxes, test.set_half, sample(1 : length(IVs.train[ , 1]), replace = TRUE)))[1:length(test.set)]
+      test.set <- unique(c(mins, maxes, test.set_half, sample(1 : length(IVs.train[ , 1]), replace = FALSE)))[1:length(test.set)]
       test.set <- na.omit(test.set)
     }
 

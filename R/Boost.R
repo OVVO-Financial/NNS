@@ -157,7 +157,7 @@ NNS.boost <- function(IVs.train,
 
     for(i in 1:learner.trials){
       set.seed(123 + i)
-      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = TRUE)
+      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       if(i > 1){
         maxes <- as.vector(apply(x, 2, which.max))
@@ -274,7 +274,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(epochs)){
     for(j in 1:epochs){
       set.seed(123 * j)
-      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = TRUE)
+      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       if(j > 1){
         maxes <- as.vector(apply(x, 2, which.max))
