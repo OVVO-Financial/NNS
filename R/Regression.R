@@ -527,7 +527,7 @@ NNS.reg = function (x, y,
       } else {
         Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])]  + (mid.min.range - min.range) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
         if(l_y.min>1 && l_y.mid.min>1){
-          x0 <- sum(lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted.values[which.min(x[x < min.range])]*l_y.min,
+          x0 <- sum(lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted.values[which.min(x[x <= min.range])]*l_y.min,
                     lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]*l_y.mid.min) /
             sum(l_y.min, l_y.mid.min)
         } else {
