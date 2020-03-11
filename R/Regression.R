@@ -629,10 +629,6 @@ NNS.reg = function (x, y,
     }
   }
 
-  ### Regression Equation
-  if(multivariate.call){
-    return(regression.points)
-  }
 
   rise <- regression.points[ , 'rise' := y - shift(y)]
   run <- regression.points[ , 'run' := x - shift(x)]
@@ -700,6 +696,8 @@ NNS.reg = function (x, y,
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
+
+
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
 
   deg.fr <- length(y) - 2
@@ -711,6 +709,108 @@ NNS.reg = function (x, y,
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
 
   fitted <- cbind(fitted, gradient)
+  fitted$residuals <- fitted$y.hat - fitted$y
+
+  bias <- fitted
+  setkey(bias, x)
+
+  bias <- bias[, mean(residuals)*-1, by = gradient]
+  fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
+
+  bias[, bias := lapply(.SD, frollmean, n = 2, fill = NA, align="right"), .SDcols = 2]
+  bias <- rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
+  bias[is.na(bias)] <- 0
+
+  regression.points[, y:= y + bias$bias]
+
+  ### Regression Equation
+  if(multivariate.call){
+    return(regression.points)
+  }
+
+
+  rise <- regression.points[ , 'rise' := y - shift(y)]
+  run <- regression.points[ , 'run' := x - shift(x)]
+
+
+  Regression.Coefficients <- regression.points[ , .(rise,run)]
+
+  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
+
+  upper.x <- regression.points[(2 : .N), x]
+
+  Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+
+  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
+
+
+  Regression.Coefficients <- unique(Regression.Coefficients)
+  Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+
+
+  ### Fitted Values
+  p <- length(regression.points[ , x])
+
+  if(is.na(Regression.Coefficients[1, Coefficient])){
+    Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
+  }
+  if(is.na(Regression.Coefficients[.N, Coefficient])){
+    Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
+  }
+
+  coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
+  reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
+
+  estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
+
+  if(!is.null(point.est)){
+    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
+    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
+    coef.point.interval[coef.point.interval == 0] <- 1
+    reg.point.interval[reg.point.interval == 0] <- 1
+    point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+
+    if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
+      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+      point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
+
+      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+      point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
+    }
+
+    if(!is.null(type)){
+      point.est.y <- round(point.est.y)
+    }
+  }
+
+  colnames(estimate) <- NULL
+  if(!is.null(type)){
+    estimate <- round(estimate)
+  }
+
+  fitted <- data.table(x = part.map$dt$x,
+                       y = part.map$dt$y,
+                       y.hat = estimate,
+                       NNS.ID = part.map$dt$quadrant)
+
+  colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
+
+
+
+  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
+
+  deg.fr <- length(y) - 2
+
+  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
+
+  y.fitted <- fitted[ , y.hat]
+
+  gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
+
+  fitted <- cbind(fitted, gradient)
+  fitted$residuals <- fitted$y.hat - fitted$y
+
+
 
   if(!is.null(type)){
     Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y)
@@ -720,7 +820,7 @@ NNS.reg = function (x, y,
 
   R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
 
-  fitted$residuals <- fitted$y.hat - fitted$y
+
 
   ###Standard errors estimatation
   if(std.errors){
@@ -737,8 +837,8 @@ NNS.reg = function (x, y,
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     xmin <- min(c(point.est, x))
     xmax <- max(c(point.est, x))
-    ymin <- min(c(point.est.y, y, fitted$y.hat))
-    ymax <- max(c(point.est.y, y, fitted$y.hat))
+    ymin <- min(c(point.est.y, y, fitted$y.hat, regression.points$y))
+    ymax <- max(c(point.est.y, y, fitted$y.hat, regression.points$y))
 
     if(is.null(order)){
       plot.order <- max(1, dep.reduced.order)
