@@ -721,7 +721,12 @@ NNS.reg = function (x, y,
   bias <- rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
   bias[is.na(bias)] <- 0
 
-  regression.points[, y:= y + bias$bias]
+  if(!is.null(type)){
+      regression.points[, y := round(y + bias$bias)]
+  } else {
+      regression.points[, y := y + bias$bias]
+  }
+
 
   ### Regression Equation
   if(multivariate.call){
