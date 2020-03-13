@@ -15,6 +15,7 @@
 #' @param order options: (integer, "max", NULL); \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent, which is suggested for mixed continuous and discrete (unordered, ordered) data.
 #' @param norm options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, which will reduce the dimension first, then find the optimal \code{n.best}.
+#' @param stack logical; \code{TRUE} (default) Uses dimension reduction output in \code{n.best} optimization, otherwise performs both analyses independently.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
@@ -74,6 +75,7 @@ NNS.stack <- function(IVs.train,
                       order = NULL,
                       norm = NULL,
                       method = c(1, 2),
+                      stack = TRUE,
                       dim.red.method = "cor",
                       status = TRUE,
                       ncores = NULL){
@@ -241,7 +243,11 @@ NNS.stack <- function(IVs.train,
         rel_vars <- nns.method.2$equation
         rel_vars <- rel_vars[rel_vars$Coefficient>0,1][-.N]
 
-        relevant_vars <- colnames(IVs.train)%in%unlist(rel_vars)
+        if(stack){
+            relevant_vars <- colnames(IVs.train)%in%unlist(rel_vars)
+        } else {
+            relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
+        }
 
         if(!is.null(type) & !is.null(nns.method.2$Point.est)){
           nns.method.2 <- round(nns.method.2$Point.est)
