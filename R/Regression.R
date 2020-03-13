@@ -217,6 +217,7 @@ NNS.reg = function (x, y,
         point.est <- as.matrix(point.est)
         l <- dim(point.est)[2]
         colnames(point.est) <- colnames(x)
+
       } else { # !is.null(dim(x))...implying univariate regression
 
         point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
