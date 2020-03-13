@@ -2793,7 +2793,7 @@ div.tocify {
 </div>
 <div id="install-nns-4.7" class="section level1">
 <h1><span class="header-section-number">2</span> Install NNS (&gt;= 4.7)</h1>
-<pre class="r"><code>require(devtools); install_github(&#39;OVVO-Financial/NNS&#39;, ref = &quot;NNS-Beta-Version&quot;)
+<pre class="r"><code>#require(devtools); install_github(&#39;OVVO-Financial/NNS&#39;, ref = &quot;NNS-Beta-Version&quot;)
 library(NNS)</code></pre>
 </div>
 <div id="download-and-read-data" class="section level1">
@@ -2808,7 +2808,7 @@ library(NNS)</code></pre>
 <p>Note that this is not a classification problem in <code>NNS</code>, since neither method invokes <code>(..., type = &quot;CLASS&quot;, ...)</code> argument for binary regression.</p>
 <pre class="r"><code>nns_model &lt;- NNS.stack(IVs.train = RetailMart_train_IV,
                        DV.train = RetailMart_train$PREGNANT,
-                       order = &quot;max&quot;)$stack
+                       order = &quot;max&quot;, type = &quot;CLASS&quot;, method = 1)$stack
 
 nns_conf &lt;- table(round(nns_model), RetailMart_train$PREGNANT)
 
@@ -2822,8 +2822,8 @@ logistic_conf &lt;- table(pred, RetailMart_train$PREGNANT)
 nns_conf</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 493 242
-##   1   7 258</code></pre>
+##   0 476 167
+##   1  24 333</code></pre>
 <pre class="r"><code>logistic_conf</code></pre>
 <pre><code>##     
 ## pred   0   1
@@ -2878,7 +2878,7 @@ logistic_conf_oos &lt;- table(oos_pred, na.omit(RetailMart_test$PREGNANT))</code
 <pre class="r"><code>nns_stack_oos &lt;- NNS.stack(IVs.train = RetailMart_train_IV[,names(nns_boost_oos$feature.weights)],
                            DV.train = RetailMart_train$PREGNANT,
                            IVs.test = RetailMart_test_IV[,names(nns_boost_oos$feature.weights)],
-                           order = &quot;max&quot;,
+                           order = &quot;max&quot;, 
                            ncores = 1)
 
 
@@ -2907,8 +2907,8 @@ nns_stack_conf_oos &lt;- table(round(nns_stack_oos$stack), na.omit(RetailMart_te
 <pre class="r"><code>nns_stack_conf_oos</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 907  33
-##   1  33  27</code></pre>
+##   0 936  44
+##   1   4  16</code></pre>
 </div>
 </div>
 <div id="interpretability-of-nns-results." class="section level2">
