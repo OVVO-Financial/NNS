@@ -164,8 +164,7 @@ NNS.stack <- function(IVs.train,
     test.set <- unlist(test.set)
 
     CV.IVs.train <- IVs.train[c(-test.set), ]
-    CV.IVs.test <- do.call(cbind, lapply(data.frame(IVs.train[c(test.set), ]), factor_2_dummy_FR))
-    CV.IVs.test <- CV.IVs.test[complete.cases(CV.IVs.test),]
+    CV.IVs.test <- IVs.train[test.set, ]
 
     CV.DV.train <- DV.train[c(-test.set)]
     CV.DV.test <- DV.train[c(test.set)]
@@ -232,7 +231,7 @@ NNS.stack <- function(IVs.train,
 
       test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
-      relevant_vars <- colnames(CV.IVs.train)
+      relevant_vars <- colnames(IVs.train)
 
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
@@ -271,33 +270,6 @@ NNS.stack <- function(IVs.train,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if(1 %in% method){
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
@@ -324,6 +296,8 @@ NNS.stack <- function(IVs.train,
             if(dim(CV.IVs.train)[2]>1){
                 cl <- makeCluster(num_cores)
                 registerDoParallel(cl)
+
+                CV.IVs.test <- do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR))
 
                 predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
                     NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)

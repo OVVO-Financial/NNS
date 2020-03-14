@@ -25,7 +25,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     point.est <- point.est
   }
 
-
   if(!is.null(point.est)){
     if(ncol(point.est) != n){
       stop("Please ensure 'point.est' is of compatible dimensions to 'x'")

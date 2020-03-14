@@ -186,6 +186,15 @@ NNS.reg = function (x, y,
       x <- do.call(cbind, x)
     }
 
+    if(!is.null(point.est)){
+        if(!is.null(dim(x))){
+            new_x <- rbindlist(list(x, data.frame(point.est)),use.names = FALSE)
+        } else {
+            new_x <- unlist(list(x, point.est))
+        }
+    }
+
+
     if(!is.null(dim(x))){
       x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
       if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
@@ -198,49 +207,30 @@ NNS.reg = function (x, y,
 
     if(!is.null(point.est)){
       point.est.y <- numeric()
-      if(is.list(point.est) & !is.data.frame(point.est)){
-        point.est <- do.call(cbind, point.est)
-      }
 
       if(!is.null(dim(x))){
-        if(!is.null(dim(point.est)) && dim(point.est)[1]>=1) {
-          point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
-        } else {
-          point.est <- t(point.est)
-          point.est <- do.call(cbind, lapply(data.frame(point.est), factor_2_dummy_FR))
-        }
-
-        if(is.null(colnames(point.est)) && !is.null(dim(point.est))){
-          colnames(point.est) <- colnames(x)
-        }
-
-        point.est <- as.matrix(point.est)
-        l <- dim(point.est)[2]
-        colnames(point.est) <- colnames(x)
-
-      } else { # !is.null(dim(x))...implying univariate regression
-
-        point.est <- factor_2_dummy_FR(data.frame(point.est, row.names = FALSE))
-        l <- dim(t(point.est))[2]
-
-        if(is.null(colnames(point.est))) {
-          colnames(point.est) <- colnames(x)}
+        new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
+        if(is.null(colnames(new_x))) {colnames(new_x) <- colnames(new_x, do.NULL = FALSE)}
+        colnames(new_x) <- make.unique(colnames(new_x),sep = "_")
+      } else {
+        new_x <- factor_2_dummy_FR(new_x)
       }
 
-      ### Add 0's to data for missing regressors
-      if(length(colnames(x)[!(colnames(x)%in%colnames(point.est))]) > 0 ){
-        Missing <- colnames(x)[!(colnames(x)%in%colnames(point.est))]
-        point.est <- data.frame(point.est)
-        point.est[, Missing] <- 0
-        point.est <- point.est[, colnames(x)]
+      if(is.null(dim(point.est))){
+          l_point.est <- length(point.est)
+      } else {
+          l_point.est <- dim(point.est)[1]
       }
 
-      point.est <- data.matrix(point.est)
+      point.est <- tail(new_x, l_point.est)
+
+      if(is.null(dim(point.est)) || dim(point.est)[2]==1){
+        point.est <- as.vector(unlist(point.est))
+      }
 
     } else { # is.null(point.est)
       point.est.y <- NULL
     }
-
   } #if(factor.2.dummy && !multivariate.call)
 
   # Variable names
@@ -281,8 +271,6 @@ NNS.reg = function (x, y,
       }
     }
   } # !factor to dummy
-
-
   original.variable <- x
 
   np <- nrow(point.est)
@@ -298,7 +286,6 @@ NNS.reg = function (x, y,
       x <- original.variable
     } else {
       if(is.null(dim.red.method)){
-
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
@@ -402,7 +389,7 @@ NNS.reg = function (x, y,
             points.norm <- rbind(point.est, x)
 
             if(dist!="FACTOR"){
-              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b))==0, 1, (max(b) - min(b))))
             }
             if(is.null(np) || np==1){
               new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
@@ -416,6 +403,7 @@ NNS.reg = function (x, y,
             point.est <- new.point.est
 
           }
+
 
           x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
 
@@ -524,10 +512,11 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.min <- mode_class(y.min)
         x0 <- mode_class(y.min)
       } else {
-        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])]  + (mid.min.range - max(x[x <= min.range])) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+
+        Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
         if(l_y.min>1 && l_y.mid.min>1){
-          x0 <- sum(lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted.values[which.min(x[x <= min.range])]*l_y.min,
-                    lm((y[x <= mid.min.range]) ~  (x[x <= mid.min.range]))$fitted.values[which.min(x[x <= mid.min.range])]*l_y.mid.min) /
+          x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
+                    lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
             sum(l_y.min, l_y.mid.min)
         } else {
 
@@ -539,7 +528,7 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.min <- mode_class(y.min)
         x0 <- mode_class(y.min)
       } else {
-        Dynamic.average.mid.min <- lm((y[x <= min.range]) ~  (x[x <= min.range]))$fitted[which.max(x[x <= min.range])] + (mid.min.range - max(x[x <= min.range])) * lm((y[x <= min.range]) ~  (x[x <= min.range]))$coef[2]
+        Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
         x0 <- unique(y[x == min(x)])
       }
     }
@@ -563,10 +552,10 @@ NNS.reg = function (x, y,
         Dynamic.average.mid.max <- mode_class(y.max)
         x.max <- mode_class(y.max)
       } else {
-        Dynamic.average.mid.max <-  lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])] + (mid.max.range - min(x[x >= max.range])) * lm((y[x >= max.range]) ~  (x[x >= max.range]))$coef[2]
+        Dynamic.average.mid.max <-  lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$coef[2]
         if(l_y.max>1 && l_y.mid.max>1){
-            x.max <- sum(lm(y[x >= max.range] ~ x[x >= max.range])$fitted.values[which.max(x[x >= max.range])]*l_y.max,
-                       lm(y[x >= mid.max.range] ~ x[x >= mid.max.range])$fitted.values[which.max(x[x >= mid.max.range])]*l_y.mid.max) /
+            x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
+                       lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
             sum(l_y.max, l_y.mid.max)
         } else{
           x.max <- y.max
@@ -578,7 +567,7 @@ NNS.reg = function (x, y,
         x.max <- mode_class(y.max)
       } else {
         x.max <- unique(y[x == max(x)])
-        Dynamic.average.mid.max <- lm((y[x >= max.range]) ~  (x[x >= max.range]))$fitted[which.min(x[x >= max.range])]  + (mid.max.range - min(x[x >= max.range])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
+        Dynamic.average.mid.max <- lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
       }
     }
   } else {
@@ -724,10 +713,13 @@ NNS.reg = function (x, y,
 
   if(!is.null(type)){
       regression.points[, y := round(y + bias$bias)]
+
   } else {
       regression.points[, y := y + bias$bias]
   }
 
+  regression.points$y <- pmin(regression.points$y, max(y))
+  regression.points$y <- pmax(regression.points$y, min(y))
 
   ### Regression Equation
   if(multivariate.call){
@@ -874,7 +866,6 @@ NNS.reg = function (x, y,
       points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
 
     } else {
-
       plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
              if(original.columns > 1){
