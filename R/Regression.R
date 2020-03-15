@@ -188,7 +188,7 @@ NNS.reg = function (x, y,
 
       if(!is.null(point.est)){
         if(!is.null(dim(x))){
-          new_x <- rbindlist(list(x, data.frame(point.est)),use.names = FALSE)
+          new_x <- rbindlist(list(data.frame(x), data.frame(point.est)),use.names = FALSE)
         } else {
           new_x <- unlist(list(x, point.est))
         }
