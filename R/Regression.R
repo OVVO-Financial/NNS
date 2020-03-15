@@ -133,797 +133,798 @@ NNS.reg = function (x, y,
                     dist = "L2", ncores = NULL,
                     multivariate.call = FALSE){
 
-  oldw <- getOption("warn")
-  options(warn = -1)
+    oldw <- getOption("warn")
+    options(warn = -1)
 
-  if(plot.regions && !is.null(order) && order == 'max'){
-    stop('Please reduce the "order" or set "plot.regions = FALSE".')
-  }
-
-  if(!is.null(confidence.interval) && std.errors == FALSE){
-    std.errors <- TRUE
-  }
-
-  if(!is.null(dim.red.method)){
-    if(is.null(dim(x)) || dim(x)[1]==1){
-      dim.red.method <- NULL
-    }
-  }
-
-  if(!is.null(type)){
-    type <- "class"
-    noise.reduction <- "mode"
-  }
-
-  if(class(y) == "factor"){
-    type <- "class"
-    noise.reduction <- "mode"
-  }
-
-  if(!plot){
-    residual.plot <- FALSE
-  }
-
-  # Variable names
-  original.names <- colnames(x)
-  original.columns <- ncol(x)
-
-  y.label <- deparse(substitute(y))
-  if(is.null(y.label)){
-    y.label <- "y"
-  }
-
-
-  if(is.null(original.columns)){
-    x.label <- deparse(substitute(x))
-    if(is.null(x.label)){
-      x.label <- "x"
-    }
-  }
-
-  if(factor.2.dummy && !multivariate.call){
-    if(is.list(x) & !is.data.frame(x)){
-      x <- do.call(cbind, x)
+    if(plot.regions && !is.null(order) && order == 'max'){
+      stop('Please reduce the "order" or set "plot.regions = FALSE".')
     }
 
-    if(!is.null(point.est)){
+    if(!is.null(confidence.interval) && std.errors == FALSE){
+      std.errors <- TRUE
+    }
+
+    if(!is.null(dim.red.method)){
+      if(is.null(dim(x)) || dim(x)[1]==1){
+        dim.red.method <- NULL
+      }
+    }
+
+    if(!is.null(type)){
+      type <- "class"
+      noise.reduction <- "mode"
+    }
+
+    if(class(y) == "factor"){
+      type <- "class"
+      noise.reduction <- "mode"
+    }
+
+    if(!plot){
+      residual.plot <- FALSE
+    }
+
+    # Variable names
+    original.names <- colnames(x)
+    original.columns <- ncol(x)
+
+    y.label <- deparse(substitute(y))
+    if(is.null(y.label)){
+      y.label <- "y"
+    }
+
+
+    if(is.null(original.columns)){
+      x.label <- deparse(substitute(x))
+      if(is.null(x.label)){
+        x.label <- "x"
+      }
+    }
+
+    if(factor.2.dummy && !multivariate.call){
+      if(is.list(x) & !is.data.frame(x)){
+        x <- do.call(cbind, x)
+      }
+
+      if(!is.null(point.est)){
         if(!is.null(dim(x))){
-            new_x <- rbindlist(list(x, data.frame(point.est)),use.names = FALSE)
+          new_x <- rbindlist(list(x, data.frame(point.est)),use.names = FALSE)
         } else {
-            new_x <- unlist(list(x, point.est))
+          new_x <- unlist(list(x, point.est))
         }
-    }
+      }
 
-
-    if(!is.null(dim(x))){
-      x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
-      if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-      colnames(x) <- make.unique(colnames(x),sep = "_")
-    } else {
-      x <- factor_2_dummy_FR(x)
-    }
-
-    x <- data.matrix(x)
-
-    if(!is.null(point.est)){
-      point.est.y <- numeric()
 
       if(!is.null(dim(x))){
-        new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
-        if(is.null(colnames(new_x))) {colnames(new_x) <- colnames(new_x, do.NULL = FALSE)}
-        colnames(new_x) <- make.unique(colnames(new_x),sep = "_")
+        x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
+        if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
+        colnames(x) <- make.unique(colnames(x),sep = "_")
       } else {
-        new_x <- factor_2_dummy_FR(new_x)
+        x <- factor_2_dummy_FR(x)
       }
 
-      if(is.null(dim(point.est))){
-          l_point.est <- length(point.est)
-      } else {
-          l_point.est <- dim(point.est)[1]
-      }
+      x <- data.matrix(x)
 
-      point.est <- tail(new_x, l_point.est)
-
-      if(is.null(dim(point.est)) || dim(point.est)[2]==1){
-        point.est <- as.vector(unlist(point.est))
-      }
-
-    } else { # is.null(point.est)
-      point.est.y <- NULL
-    }
-  } #if(factor.2.dummy && !multivariate.call)
-
-  # Variable names
-  original.names <- colnames(x)
-  original.columns <- ncol(x)
-
-  y.label <- deparse(substitute(y))
-  if(is.null(y.label)){
-    y.label <- "y"
-  }
-
-
-  y <- as.numeric(y)
-  original.y <- y
-
-
-  if(!factor.2.dummy){
-    if(is.null(ncol(x))){
-      x <- as.double(x)
       if(!is.null(point.est)){
-        point.est <- as.double(point.est)
         point.est.y <- numeric()
-      } else {
+
+        if(!is.null(dim(x))){
+          new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
+          if(is.null(colnames(new_x))) {colnames(new_x) <- colnames(new_x, do.NULL = FALSE)}
+          colnames(new_x) <- make.unique(colnames(new_x),sep = "_")
+        } else {
+          new_x <- factor_2_dummy_FR(new_x)
+        }
+
+        if(is.null(dim(point.est))){
+          l_point.est <- length(point.est)
+        } else {
+          l_point.est <- dim(point.est)[1]
+        }
+
+        point.est <- tail(new_x, l_point.est)
+
+        if(is.null(dim(point.est)) || dim(point.est)[2]==1){
+          point.est <- as.vector(unlist(point.est))
+        }
+
+      } else { # is.null(point.est)
         point.est.y <- NULL
       }
-    } else {
-      x <- data.matrix(x)
-      if(!is.null(point.est)){
-        if(is.null(ncol(point.est))){
+    } #if(factor.2.dummy && !multivariate.call)
+
+    # Variable names
+    original.names <- colnames(x)
+    original.columns <- ncol(x)
+
+    y.label <- deparse(substitute(y))
+    if(is.null(y.label)){
+      y.label <- "y"
+    }
+
+
+    y <- as.numeric(y)
+    original.y <- y
+
+
+    if(!factor.2.dummy){
+      if(is.null(ncol(x))){
+        x <- as.double(x)
+        if(!is.null(point.est)){
           point.est <- as.double(point.est)
           point.est.y <- numeric()
         } else {
-          point.est <- data.matrix(point.est)
-          point.est.y <- numeric()
+          point.est.y <- NULL
         }
       } else {
-        point.est.y <- NULL
-      }
-    }
-  } # !factor to dummy
-  original.variable <- x
-
-  np <- nrow(point.est)
-
-  if(!is.null(type) && type == "class" ){
-      if(is.null(n.best)){
-          n.best <- 1
-      }
-  }
-
-  if(!is.null(ncol(original.variable))){
-    if(ncol(original.variable) == 1){
-      x <- original.variable
-    } else {
-      if(is.null(dim.red.method)){
-        return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
-                         residual.plot = residual.plot, order = order, n.best = n.best, type = type,
-                         location = location, noise.reduction = noise.reduction,
-                         dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
-                         ncores = ncores))
-
-      } else { # Multivariate dim.red == FALSE
-
-        if(is.null(original.names)){
-          colnames.list <- list()
-          for(i in 1 : ncol(x)){
-            colnames.list[i] <- paste0("X", i)
-          }
-        } else {
-          colnames.list <- original.names
-        }
-
-        x <- apply(data.matrix(x), 2, as.numeric)
-        y <- as.numeric(y)
-
-        if(!is.null(dim.red.method) & !is.null(dim(x))){
-          dim.red.method <- tolower(dim.red.method)
-          x.star.matrix <- matrix(nrow = length(y))
-
-          if(dim.red.method!="cor"){
-            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE)
-            x.star.dep[is.na(x.star.dep)] <- 0
-            x.star.cor <- cor(cbind(x, y), method = "spearman")
-            x.star.cor[is.na(x.star.cor)] <- 0
+        x <- data.matrix(x)
+        if(!is.null(point.est)){
+          if(is.null(ncol(point.est))){
+            point.est <- as.double(point.est)
+            point.est.y <- numeric()
           } else {
-            x.star.cor <- cor(cbind(x, y), method = "spearman")
-            x.star.cor[is.na(x.star.cor)] <- 0
+            point.est <- data.matrix(point.est)
+            point.est.y <- numeric()
           }
-
-          if(dim.red.method == "nns.dep"){
-            x.star.coef <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef[is.na(x.star.coef)] <- 0
-          }
-
-          if(dim.red.method == "cor"){
-            x.star.coef <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef[is.na(x.star.coef)] <- 0
-          }
-
-          if(dim.red.method == "nns.caus"){
-            if(is.null(tau)){
-              tau <- "cs"
-            }
-            x.star.coef <- numeric()
-
-            cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
-            cause[is.na(cause)] <- 0
-            x.star.coef <- (cause[(ncol(x) + 1), ] - cause[ ,(ncol(x) + 1)])[-(ncol(x) + 1)]
-
-          }
-
-          if(dim.red.method == "all"){
-            if(is.null(tau)){
-              tau <- "cs"
-            }
-
-            x.star.coef.1 <- numeric()
-
-
-            cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
-            cause[is.na(cause)] <- 0
-            x.star.coef.1 <- (cause[(ncol(x) + 1), ] - cause[ , (ncol(x) + 1)])[-(ncol(x) + 1)]
-
-
-            x.star.coef.3 <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef.3[is.na(x.star.coef.3)] <- 0
-            x.star.coef.2 <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
-            x.star.coef.2[is.na(x.star.coef.2)] <- 0
-            x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
-            x.star.coef[is.na(x.star.coef)] <- 0
-          }
-
-          preserved.coef <- x.star.coef
-          x.star.coef[abs(x.star.coef) < threshold] <- 0
-
-          norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-
-          x.star.matrix <- t( t(norm.x) * x.star.coef)
-          x.star.matrix[is.na(x.star.matrix)] <- 0
-
-          #In case all IVs have 0 correlation to DV
-          if(all(x.star.matrix == 0)){
-            x.star.matrix <- x
-            x.star.coef[x.star.coef == 0] <- preserved.coef
-          }
-
-          DENOMINATOR <- sum( abs( x.star.coef) > 0)
-
-          synthetic.x.equation.coef <- data.table(Variable = colnames.list, Coefficient = x.star.coef)
-
-          synthetic.x.equation <- rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
-
-
-          if(!is.null(point.est)){
-            new.point.est <- numeric()
-            points.norm <- rbind(point.est, x)
-
-            if(dist!="FACTOR"){
-              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b))==0, 1, (max(b) - min(b))))
-            }
-            if(is.null(np) || np==1){
-              new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
-
-            } else {
-              point.est2 <- points.norm[1:np,]
-              new.point.est <- apply(point.est2, 1, function(i) as.numeric(as.vector(i)[!is.na(i)|!is.nan(i)] %*% x.star.coef[!is.na(i)|!is.nan(i)])
-                                     / sum( abs( x.star.coef) > 0))
-            }
-
-            point.est <- new.point.est
-
-          }
-
-
-          x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
-
-          x.star <- data.table(x.star = x)
-
-        }
-
-      } # Multivariate Not NULL type
-
-    } # Univariate
-
-  } # Multivariate
-
-
-  dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
-  dependence[is.na(dependence)] <- .01
-  ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^1))
-
-  if(is.null(original.columns) || is.null(dim.red.method)){
-    synthetic.x.equation <- NULL
-    x.star <- NULL
-  }
-
-  if(is.null(order)){
-    dep.reduced.order <- max(1, ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
-                                        floor(floor(log(length(y))) * dependence),
-                                        floor(ceiling(log(length(y))) * dependence)))
-  } else {
-    dep.reduced.order <- order
-  }
-
-
-
-  if(dependence > stn){
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 5, min.obs.stop = FALSE)
-    if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
-    }
-    if(dependence == 1){
-      if(is.null(order)) {
-        dep.reduced.order <- "max"
-      }
-      part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
-    }
-  } else {
-    if(is.null(type)){
-      noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
-      type2 <- "XONLY"
-    } else {
-      if(type == "class"){
-        type2 = "XONLY"
-        noise.reduction2 <- "mode"
-      } else {
-        noise.reduction2 <- noise.reduction
-        type2 <- "XONLY"
-      }
-    }
-
-    part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
-    if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
-    }
-  } # Dependence < stn
-
-  Regression.Coefficients <- data.frame(matrix(ncol = 3))
-  colnames(Regression.Coefficients) <- c('Coefficient', 'X Lower Range', 'X Upper Range')
-
-  regression.points <- part.map$regression.points[,.(x,y)]
-  setkey(regression.points,x)
-
-  min.range <- min(regression.points$x)
-  max.range <- max(regression.points$x)
-
-  mid.min.range <- mean(c(min(x),min(regression.points$x)))
-  mid.max.range <- mean(c(max(x),max(regression.points$x)))
-
-  y.min <-  na.omit(y[x <= min.range])
-  l_y.min <- length(y.min)
-  l_y.min_unique <- length(unique(y.min))
-
-  y.mid.min <- na.omit(y[x <= mid.min.range])
-  l_y.mid.min <- length(y.mid.min)
-  l_y.mid.min_unique <- length(unique(y.mid.min))
-
-  x.mid.min <- na.omit(x[x <= mid.min.range])
-  l_x.mid.min <- length(x.mid.min)
-  l_x.mid.min_unique <- length(unique(x.mid.min))
-
-  y.max <- na.omit(y[x >= max.range])
-  l_y.max <- length(y.max)
-  l_y.max_unique <- length(unique(y.max))
-
-  y.mid.max <- na.omit(y[x >= mid.max.range])
-  l_y.mid.max <- length(y.mid.max)
-  l_y.mid.max_unique <- length(unique(y.mid.max))
-
-  x.mid.max <- na.omit(x[x >= mid.max.range])
-  l_x.mid.max <- length(x.mid.max)
-  l_x.mid.max_unique <- length(unique(x.mid.max))
-
-
-  ### Endpoints
-  if(l_x.mid.min_unique > 1){
-    if(dependence < stn){
-      if(!is.null(type)){
-        Dynamic.average.mid.min <- mode_class(y.min)
-        x0 <- mode_class(y.min)
-      } else {
-
-        Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
-        if(l_y.min>1 && l_y.mid.min>1){
-          x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
-                    lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
-            sum(l_y.min, l_y.mid.min)
         } else {
-
-          x0 <- y.min
+          point.est.y <- NULL
         }
       }
-    } else {
-      if(!is.null(type)){
-        Dynamic.average.mid.min <- mode_class(y.min)
-        x0 <- mode_class(y.min)
-      } else {
-        Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
-        x0 <- unique(y[x == min(x)])
+    } # !factor to dummy
+    original.variable <- x
+
+    np <- nrow(point.est)
+
+    if(!is.null(type) && type == "class" ){
+      if(is.null(n.best)){
+        n.best <- 1
       }
     }
-  } else {
-    if(!is.null(type)){
-      Dynamic.average.mid.min <- mode_class(y.min)
-      x0 <- mode_class(y.min)
-    } else {
-      x0 <- unique(gravity(y[x == min(x)]))
-      Dynamic.average.mid.min <- lm((y[x <= tail(head(regression.points$x, 2),1)]) ~  (x[x <= tail(head(regression.points$x, 2),1)]))$fitted[which.max(x[x <= tail(head(regression.points$x, 2),1)])] + (mid.min.range - tail(head(regression.points$x, 2),1)) * lm((y[x <= tail(head(regression.points$x, 2),1)]) ~  (x[x <= tail(head(regression.points$x, 2),1)]))$coef[2]
-    }
-  }
 
-
-
-
-
-  if(l_x.mid.max_unique > 1){
-    if(dependence < stn){
-      if(!is.null(type)){
-        Dynamic.average.mid.max <- mode_class(y.max)
-        x.max <- mode_class(y.max)
+    if(!is.null(ncol(original.variable))){
+      if(ncol(original.variable) == 1){
+        x <- original.variable
       } else {
-        Dynamic.average.mid.max <-  lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$coef[2]
-        if(l_y.max>1 && l_y.mid.max>1){
-            x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
-                       lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
-            sum(l_y.max, l_y.mid.max)
-        } else{
-          x.max <- y.max
-        }
-      }
-    } else {
-      if(!is.null(type)){
-        Dynamic.average.mid.max <- mode_class(y.max)
-        x.max <- mode_class(y.max)
-      } else {
-        x.max <- unique(y[x == max(x)])
-        Dynamic.average.mid.max <- lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
-      }
+        if(is.null(dim.red.method)){
+          return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
+                           residual.plot = residual.plot, order = order, n.best = n.best, type = type,
+                           location = location, noise.reduction = noise.reduction,
+                           dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
+                           ncores = ncores))
+
+        } else { # Multivariate dim.red == FALSE
+
+          if(is.null(original.names)){
+            colnames.list <- list()
+            for(i in 1 : ncol(x)){
+              colnames.list[i] <- paste0("X", i)
+            }
+          } else {
+            colnames.list <- original.names
+          }
+
+          x <- apply(data.matrix(x), 2, as.numeric)
+          y <- as.numeric(y)
+
+          if(!is.null(dim.red.method) & !is.null(dim(x))){
+            dim.red.method <- tolower(dim.red.method)
+            x.star.matrix <- matrix(nrow = length(y))
+
+            if(dim.red.method!="cor"){
+              x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE)
+              x.star.dep[is.na(x.star.dep)] <- 0
+              x.star.cor <- cor(cbind(x, y), method = "spearman")
+              x.star.cor[is.na(x.star.cor)] <- 0
+            } else {
+              x.star.cor <- cor(cbind(x, y), method = "spearman")
+              x.star.cor[is.na(x.star.cor)] <- 0
+            }
+
+            if(dim.red.method == "nns.dep"){
+              x.star.coef <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+              x.star.coef[is.na(x.star.coef)] <- 0
+            }
+
+            if(dim.red.method == "cor"){
+              x.star.coef <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+              x.star.coef[is.na(x.star.coef)] <- 0
+            }
+
+            if(dim.red.method == "nns.caus"){
+              if(is.null(tau)){
+                tau <- "cs"
+              }
+              x.star.coef <- numeric()
+
+              cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
+              cause[is.na(cause)] <- 0
+              x.star.coef <- (cause[(ncol(x) + 1), ] - cause[ ,(ncol(x) + 1)])[-(ncol(x) + 1)]
+
+            }
+
+            if(dim.red.method == "all"){
+              if(is.null(tau)){
+                tau <- "cs"
+              }
+
+              x.star.coef.1 <- numeric()
+
+
+              cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
+              cause[is.na(cause)] <- 0
+              x.star.coef.1 <- (cause[(ncol(x) + 1), ] - cause[ , (ncol(x) + 1)])[-(ncol(x) + 1)]
+
+
+              x.star.coef.3 <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+              x.star.coef.3[is.na(x.star.coef.3)] <- 0
+              x.star.coef.2 <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+              x.star.coef.2[is.na(x.star.coef.2)] <- 0
+              x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+              x.star.coef[is.na(x.star.coef)] <- 0
+            }
+
+            preserved.coef <- x.star.coef
+            x.star.coef[abs(x.star.coef) < threshold] <- 0
+
+            norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
+
+            x.star.matrix <- t( t(norm.x) * x.star.coef)
+            x.star.matrix[is.na(x.star.matrix)] <- 0
+
+            #In case all IVs have 0 correlation to DV
+            if(all(x.star.matrix == 0)){
+              x.star.matrix <- x
+              x.star.coef[x.star.coef == 0] <- preserved.coef
+            }
+
+            DENOMINATOR <- sum( abs( x.star.coef) > 0)
+
+            synthetic.x.equation.coef <- data.table(Variable = colnames.list, Coefficient = x.star.coef)
+
+            synthetic.x.equation <- rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
+
+
+            if(!is.null(point.est)){
+              new.point.est <- numeric()
+              points.norm <- rbind(point.est, x)
+
+              if(dist!="FACTOR"){
+                points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b))==0, 1, (max(b) - min(b))))
+              }
+              if(is.null(np) || np==1){
+                new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
+
+              } else {
+                point.est2 <- points.norm[1:np,]
+                new.point.est <- apply(point.est2, 1, function(i) as.numeric(as.vector(i)[!is.na(i)|!is.nan(i)] %*% x.star.coef[!is.na(i)|!is.nan(i)])
+                                       / sum( abs( x.star.coef) > 0))
+              }
+
+              point.est <- new.point.est
+
+            }
+
+
+            x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
+
+            x.star <- data.table(x.star = x)
+
+          }
+
+        } # Multivariate Not NULL type
+
+      } # Univariate
+
+    } # Multivariate
+
+
+    dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
+    dependence[is.na(dependence)] <- .01
+    ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^1))
+
+    if(is.null(original.columns) || is.null(dim.red.method)){
+      synthetic.x.equation <- NULL
+      x.star <- NULL
     }
-  } else {
-    if(!is.null(type)){
-      Dynamic.average.mid.max <- mode_class(y.max)
-      x.max <- mode_class(y.max)
-    } else{
-      x.max <- unique(gravity(y[x == max(x)]))
-      Dynamic.average.mid.max <- lm((y[x >= head(tail(regression.points$x, 2),1)]) ~  (x[x >= head(tail(regression.points$x, 2),1)]))$fitted[which.min(x[x >= head(tail(regression.points$x, 2),1)])] + (mid.max.range - head(tail(regression.points$x, 2),1)) * lm((y[x >= head(tail(regression.points$x, 2),1)]) ~  (x[x >= head(tail(regression.points$x, 2),1)]))$coef[2]
-
-    }
-
-  }
-
-
-
-  ### Mid Endpoints
-  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
-                                               c(max(x), mean(x.max)))))
-
-  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, Dynamic.average.mid.min))))
-
-  regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
-
-  regression.points <- rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
-
-  regression.points <- regression.points[complete.cases(regression.points),]
-  regression.points <- regression.points[ , .(x,y)]
-  setkey(regression.points, x, y)
-  regression.points <- unique(regression.points)
-
-  ### Consolidate possible duplicated points
-  if(any(duplicated(regression.points$x))){
-    if(noise.reduction == "off"){
-      regression.points <- regression.points[, lapply(.SD, gravity), .SDcols = 2, by = .(x)]
-    }
-
-    if(noise.reduction == "mean"){
-      regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
-    }
-
-    if(noise.reduction == "median"){
-      regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
-    }
-
-    if(noise.reduction == "mode"){
-      regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
-    }
-  }
-
-
-  rise <- regression.points[ , 'rise' := y - shift(y)]
-  run <- regression.points[ , 'run' := x - shift(x)]
-
-
-  Regression.Coefficients <- regression.points[ , .(rise,run)]
-
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-
-  upper.x <- regression.points[(2 : .N), x]
-
-  Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
-
-  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
-
-
-  Regression.Coefficients <- unique(Regression.Coefficients)
-  Regression.Coefficients[Regression.Coefficients == Inf] <- 1
-
-
-  ### Fitted Values
-  p <- length(regression.points[ , x])
-
-  if(is.na(Regression.Coefficients[1, Coefficient])){
-    Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
-  }
-  if(is.na(Regression.Coefficients[.N, Coefficient])){
-    Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
-  }
-
-  coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-  reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
-
-  estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
-
-  if(!is.null(point.est)){
-    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
-    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
-    coef.point.interval[coef.point.interval == 0] <- 1
-    reg.point.interval[reg.point.interval == 0] <- 1
-    point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
-
-    if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
-
-      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
-    }
-
-    if(!is.null(type)){
-      point.est.y <- round(point.est.y)
-    }
-  }
-
-  colnames(estimate) <- NULL
-  if(!is.null(type)){
-    estimate <- round(estimate)
-  }
-
-  fitted <- data.table(x = part.map$dt$x,
-                       y = part.map$dt$y,
-                       y.hat = estimate,
-                       NNS.ID = part.map$dt$quadrant)
-
-  colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
-
-
-
-  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
-
-  deg.fr <- length(y) - 2
-
-  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
-
-  y.fitted <- fitted[ , y.hat]
-
-  gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
-
-  fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - fitted$y
-
-  bias <- fitted
-  setkey(bias, x)
-
-  bias <- bias[, mean(residuals)*-1, by = gradient]
-  fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
-
-  bias[, bias := lapply(.SD, frollmean, n = 2, fill = NA, align="right"), .SDcols = 2]
-  bias <- rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
-  bias[is.na(bias)] <- 0
-
-  if(!is.null(type)){
-      regression.points[, y := round(y + bias$bias)]
-
-  } else {
-      regression.points[, y := y + bias$bias]
-  }
-
-  regression.points$y <- pmin(regression.points$y, max(y))
-  regression.points$y <- pmax(regression.points$y, min(y))
-
-  ### Regression Equation
-  if(multivariate.call){
-    return(regression.points)
-  }
-
-
-  rise <- regression.points[ , 'rise' := y - shift(y)]
-  run <- regression.points[ , 'run' := x - shift(x)]
-
-
-  Regression.Coefficients <- regression.points[ , .(rise,run)]
-
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-
-  upper.x <- regression.points[(2 : .N), x]
-
-  Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
-
-  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
-
-
-  Regression.Coefficients <- unique(Regression.Coefficients)
-  Regression.Coefficients[Regression.Coefficients == Inf] <- 1
-
-
-  ### Fitted Values
-  p <- length(regression.points[ , x])
-
-  if(is.na(Regression.Coefficients[1, Coefficient])){
-    Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
-  }
-  if(is.na(Regression.Coefficients[.N, Coefficient])){
-    Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
-  }
-
-  coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-  reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
-
-  estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
-
-  if(!is.null(point.est)){
-    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
-    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
-    coef.point.interval[coef.point.interval == 0] <- 1
-    reg.point.interval[reg.point.interval == 0] <- 1
-    point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
-
-    if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
-
-      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
-    }
-
-    if(!is.null(type)){
-      point.est.y <- round(point.est.y)
-    }
-  }
-
-  colnames(estimate) <- NULL
-  if(!is.null(type)){
-    estimate <- round(estimate)
-  }
-
-  fitted <- data.table(x = part.map$dt$x,
-                       y = part.map$dt$y,
-                       y.hat = estimate,
-                       NNS.ID = part.map$dt$quadrant)
-
-  colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
-
-
-
-  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
-
-  deg.fr <- length(y) - 2
-
-  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
-
-  y.fitted <- fitted[ , y.hat]
-
-  gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
-
-  fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - fitted$y
-
-
-
-  if(!is.null(type)){
-    Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y)
-  } else {
-    Prediction.Accuracy <- NULL
-  }
-
-  R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
-
-
-
-  ###Standard errors estimatation
-  if(std.errors){
-
-    fitted[, `:=`
-           ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1, (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) )), by = gradient]
-
-
-
-  } # std.errors
-
-  ###Plotting and regression equation
-  if(plot){
-    r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
-    xmin <- min(c(point.est, x))
-    xmax <- max(c(point.est, x))
-    ymin <- min(c(point.est.y, y, fitted$y.hat, regression.points$y))
-    ymax <- max(c(point.est.y, y, fitted$y.hat, regression.points$y))
 
     if(is.null(order)){
-      plot.order <- max(1, dep.reduced.order)
+      dep.reduced.order <- max(1, ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
+                                          floor(floor(log(length(y))) * dependence),
+                                          floor(ceiling(log(length(y))) * dependence)))
     } else {
-      plot.order <- max(1, order)
+      dep.reduced.order <- order
     }
 
-    if(is.numeric(confidence.interval)){
-      pval <- 1 - confidence.interval
-      se.max <- max(na.omit(fitted[ , y.hat + (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
-      se.min <- min(na.omit(fitted[, y.hat - (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
 
-      plot(x, y, xlim = c(xmin, xmax),
-           ylim = c(min(c(se.min, ymin)), max(c(se.max,ymax))),
-           col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
-           xlab = if(!is.null(original.columns)){
-             if(original.columns > 1){
-               "Synthetic X*"
-             } else { x.label }
-           } else {
-             x.label
-           },
-           ylab = y.label, mgp = c(2.5, 0.5, 0),
-           cex.lab = 1.5, cex.main = 2)
 
-      points(na.omit(fitted[ , .(x,y.hat + qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
-      points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
-
+    if(dependence > stn){
+      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 5, min.obs.stop = FALSE)
+      if(length(part.map$regression.points$x) == 0){
+        part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+      }
+      if(dependence == 1){
+        if(is.null(order)) {
+          dep.reduced.order <- "max"
+        }
+        part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 1, min.obs.stop = FALSE)
+      }
     } else {
-      plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
-           xlab = if(!is.null(original.columns)){
-             if(original.columns > 1){
-               "Synthetic X*"
-             } else { x.label }
-           } else {
-             x.label
-           },
-           ylab = y.label, mgp = c(2.5, 0.5, 0),
-           cex.lab = 1.5, cex.main = 2)
-    } # !confidence.intervals
-
-    ### Plot Regression points and fitted values and legend
-    points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
-    lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
-
-
-    if(!is.null(point.est)){
-      points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)
-      legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
-    } else {
-      legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
-    }
-
-    if(!is.null(point.est)){
-      if(sum(point.est > max(x)) > 0){
-        segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[.N, y], col = "green", lty = 2)
+      if(is.null(type)){
+        noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
+        type2 <- "XONLY"
+      } else {
+        if(type == "class"){
+          type2 = "XONLY"
+          noise.reduction2 <- "mode"
+        } else {
+          noise.reduction2 <- noise.reduction
+          type2 <- "XONLY"
+        }
       }
 
-      if(sum(point.est < min(x)) > 0){
-        segments(point.est[point.est < min(x)], point.est.y[point.est < min(x)], regression.points[1, x], regression.points[1, y], col = "green", lty = 2)
+      part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = type2, min.obs.stop = FALSE)
+      if(length(part.map$regression.points$x) == 0){
+        part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+      }
+    } # Dependence < stn
+
+    Regression.Coefficients <- data.frame(matrix(ncol = 3))
+    colnames(Regression.Coefficients) <- c('Coefficient', 'X Lower Range', 'X Upper Range')
+
+    regression.points <- part.map$regression.points[,.(x,y)]
+    regression.points$x <- pmin(max(x), pmax(regression.points$x, min(x)))
+    setkey(regression.points,x)
+
+    min.range <- min(regression.points$x)
+    max.range <- max(regression.points$x)
+
+    mid.min.range <- mean(c(min(x),min(regression.points$x)))
+    mid.max.range <- mean(c(max(x),max(regression.points$x)))
+
+    y.min <-  na.omit(y[x <= min.range])
+    l_y.min <- length(y.min)
+    l_y.min_unique <- length(unique(y.min))
+
+    y.mid.min <- na.omit(y[x <= mid.min.range])
+    l_y.mid.min <- length(y.mid.min)
+    l_y.mid.min_unique <- length(unique(y.mid.min))
+
+    x.mid.min <- na.omit(x[x <= mid.min.range])
+    l_x.mid.min <- length(x.mid.min)
+    l_x.mid.min_unique <- length(unique(x.mid.min))
+
+    y.max <- na.omit(y[x >= max.range])
+    l_y.max <- length(y.max)
+    l_y.max_unique <- length(unique(y.max))
+
+    y.mid.max <- na.omit(y[x >= mid.max.range])
+    l_y.mid.max <- length(y.mid.max)
+    l_y.mid.max_unique <- length(unique(y.mid.max))
+
+    x.mid.max <- na.omit(x[x >= mid.max.range])
+    l_x.mid.max <- length(x.mid.max)
+    l_x.mid.max_unique <- length(unique(x.mid.max))
+
+
+    ### Endpoints
+    if(l_x.mid.min_unique > 1){
+      if(dependence < stn){
+        if(!is.null(type)){
+          Dynamic.average.mid.min <- mode_class(y.min)
+          x0 <- mode_class(y.min)
+        } else {
+
+          Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
+          if(l_y.min>1 && l_y.mid.min>1){
+            x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
+                      lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
+              sum(l_y.min, l_y.mid.min)
+          } else {
+
+            x0 <- y.min
+          }
+        }
+      } else {
+        if(!is.null(type)){
+          Dynamic.average.mid.min <- mode_class(y.min)
+          x0 <- mode_class(y.min)
+        } else {
+          Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
+          x0 <- unique(y[x == min(x)])
+        }
+      }
+    } else {
+      if(!is.null(type)){
+        Dynamic.average.mid.min <- mode_class(y.min)
+        x0 <- mode_class(y.min)
+      } else {
+        x0 <- unique(gravity(y[x == min(x)]))
+        Dynamic.average.mid.min <- lm((y[x <= tail(head(regression.points$x, 2),1)]) ~  (x[x <= tail(head(regression.points$x, 2),1)]))$fitted[which.max(x[x <= tail(head(regression.points$x, 2),1)])] + (mid.min.range - tail(head(regression.points$x, 2),1)) * lm((y[x <= tail(head(regression.points$x, 2),1)]) ~  (x[x <= tail(head(regression.points$x, 2),1)]))$coef[2]
       }
     }
-  }# plot TRUE bracket
 
-  options(warn = oldw)
 
-  ### Return Values
-  if(return.values){
-    return(list("R2" = R2,
-                "SE" = SE,
-                "Prediction.Accuracy" = Prediction.Accuracy,
-                "equation" = synthetic.x.equation,
-                "x.star" = x.star,
-                "derivative" = Regression.Coefficients[],
-                "Point.est" = point.est.y,
-                "regression.points" = regression.points[, .(x,y)],
-                "Fitted.xy" = fitted))
-  } else {
-    invisible(list("R2" = R2,
-                   "SE" = SE,
-                   "Prediction.Accuracy" = Prediction.Accuracy,
-                   "equation" = synthetic.x.equation,
-                   "x.star" = x.star,
-                   "derivative" = Regression.Coefficients[],
-                   "Point.est" = point.est.y,
-                   "regression.points" = regression.points[ ,.(x,y)],
-                   "Fitted.xy" = fitted))
+
+
+
+    if(l_x.mid.max_unique > 1){
+      if(dependence < stn){
+        if(!is.null(type)){
+          Dynamic.average.mid.max <- mode_class(y.max)
+          x.max <- mode_class(y.max)
+        } else {
+          Dynamic.average.mid.max <-  lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$coef[2]
+          if(l_y.max>1 && l_y.mid.max>1){
+            x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
+                         lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
+              sum(l_y.max, l_y.mid.max)
+          } else{
+            x.max <- y.max
+          }
+        }
+      } else {
+        if(!is.null(type)){
+          Dynamic.average.mid.max <- mode_class(y.max)
+          x.max <- mode_class(y.max)
+        } else {
+          x.max <- unique(y[x == max(x)])
+          Dynamic.average.mid.max <- lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
+        }
+      }
+    } else {
+      if(!is.null(type)){
+        Dynamic.average.mid.max <- mode_class(y.max)
+        x.max <- mode_class(y.max)
+      } else{
+        x.max <- unique(gravity(y[x == max(x)]))
+        Dynamic.average.mid.max <- lm((y[x >= head(tail(regression.points$x, 2),1)]) ~  (x[x >= head(tail(regression.points$x, 2),1)]))$fitted[which.min(x[x >= head(tail(regression.points$x, 2),1)])] + (mid.max.range - head(tail(regression.points$x, 2),1)) * lm((y[x >= head(tail(regression.points$x, 2),1)]) ~  (x[x >= head(tail(regression.points$x, 2),1)]))$coef[2]
+
+      }
+
+    }
+
+
+
+    ### Mid Endpoints
+    mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
+                                                 c(max(x), mean(x.max)))))
+
+    mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
+                                                 c(mid.min.range, Dynamic.average.mid.min))))
+
+    regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
+
+    regression.points <- rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
+
+    regression.points <- regression.points[complete.cases(regression.points),]
+    regression.points <- regression.points[ , .(x,y)]
+    setkey(regression.points, x, y)
+    regression.points <- unique(regression.points)
+
+    ### Consolidate possible duplicated points
+    if(any(duplicated(regression.points$x))){
+      if(noise.reduction == "off"){
+        regression.points <- regression.points[, lapply(.SD, gravity), .SDcols = 2, by = .(x)]
+      }
+
+      if(noise.reduction == "mean"){
+        regression.points <- regression.points[, lapply(.SD, mean), .SDcols = 2, by = .(x)]
+      }
+
+      if(noise.reduction == "median"){
+        regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
+      }
+
+      if(noise.reduction == "mode"){
+        regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
+      }
+    }
+
+
+    rise <- regression.points[ , 'rise' := y - shift(y)]
+    run <- regression.points[ , 'run' := x - shift(x)]
+
+
+    Regression.Coefficients <- regression.points[ , .(rise,run)]
+
+    Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
+
+    upper.x <- regression.points[(2 : .N), x]
+
+    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+
+    Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
+
+
+    Regression.Coefficients <- unique(Regression.Coefficients)
+    Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+
+
+    ### Fitted Values
+    p <- length(regression.points[ , x])
+
+    if(is.na(Regression.Coefficients[1, Coefficient])){
+      Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
+    }
+    if(is.na(Regression.Coefficients[.N, Coefficient])){
+      Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
+    }
+
+    coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
+    reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
+
+    estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
+
+    if(!is.null(point.est)){
+      coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
+      reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
+      coef.point.interval[coef.point.interval == 0] <- 1
+      reg.point.interval[reg.point.interval == 0] <- 1
+      point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+
+      if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
+        upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
+
+        lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
+      }
+
+      if(!is.null(type)){
+        point.est.y <- round(point.est.y)
+      }
+    }
+
+    colnames(estimate) <- NULL
+    if(!is.null(type)){
+      estimate <- round(estimate)
+    }
+
+    fitted <- data.table(x = part.map$dt$x,
+                         y = part.map$dt$y,
+                         y.hat = estimate,
+                         NNS.ID = part.map$dt$quadrant)
+
+    colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
+
+
+
+    Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
+
+    deg.fr <- length(y) - 2
+
+    SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
+
+    y.fitted <- fitted[ , y.hat]
+
+    gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
+
+    fitted <- cbind(fitted, gradient)
+    fitted$residuals <- fitted$y.hat - fitted$y
+
+    bias <- fitted
+    setkey(bias, x)
+
+    bias <- bias[, mean(residuals)*-1, by = gradient]
+    fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
+
+    bias[, bias := lapply(.SD, frollmean, n = 2, fill = NA, align="right"), .SDcols = 2]
+    bias <- rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
+    bias[is.na(bias)] <- 0
+
+    if(!is.null(type)){
+      regression.points[, y := round(y + bias$bias)]
+
+    } else {
+      regression.points[, y := y + bias$bias]
+    }
+
+    regression.points$y <- pmin(regression.points$y, max(y))
+    regression.points$y <- pmax(regression.points$y, min(y))
+
+    ### Regression Equation
+    if(multivariate.call){
+      return(regression.points)
+    }
+
+
+    rise <- regression.points[ , 'rise' := y - shift(y)]
+    run <- regression.points[ , 'run' := x - shift(x)]
+
+
+    Regression.Coefficients <- regression.points[ , .(rise,run)]
+
+    Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
+
+    upper.x <- regression.points[(2 : .N), x]
+
+    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+
+    Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
+
+
+    Regression.Coefficients <- unique(Regression.Coefficients)
+    Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+
+
+    ### Fitted Values
+    p <- length(regression.points[ , x])
+
+    if(is.na(Regression.Coefficients[1, Coefficient])){
+      Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
+    }
+    if(is.na(Regression.Coefficients[.N, Coefficient])){
+      Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
+    }
+
+    coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
+    reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
+
+    estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
+
+    if(!is.null(point.est)){
+      coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
+      reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
+      coef.point.interval[coef.point.interval == 0] <- 1
+      reg.point.interval[reg.point.interval == 0] <- 1
+      point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+
+      if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
+        upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
+
+        lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+        point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
+      }
+
+      if(!is.null(type)){
+        point.est.y <- round(point.est.y)
+      }
+    }
+
+    colnames(estimate) <- NULL
+    if(!is.null(type)){
+      estimate <- round(estimate)
+    }
+
+    fitted <- data.table(x = part.map$dt$x,
+                         y = part.map$dt$y,
+                         y.hat = estimate,
+                         NNS.ID = part.map$dt$quadrant)
+
+    colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
+
+
+
+    Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
+
+    deg.fr <- length(y) - 2
+
+    SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
+
+    y.fitted <- fitted[ , y.hat]
+
+    gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
+
+    fitted <- cbind(fitted, gradient)
+    fitted$residuals <- fitted$y.hat - fitted$y
+
+
+
+    if(!is.null(type)){
+      Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y)
+    } else {
+      Prediction.Accuracy <- NULL
+    }
+
+    R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
+
+
+
+    ###Standard errors estimatation
+    if(std.errors){
+
+      fitted[, `:=`
+             ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1, (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) )), by = gradient]
+
+
+
+    } # std.errors
+
+    ###Plotting and regression equation
+    if(plot){
+      r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
+      xmin <- min(c(point.est, x))
+      xmax <- max(c(point.est, x))
+      ymin <- min(c(point.est.y, y, fitted$y.hat, regression.points$y))
+      ymax <- max(c(point.est.y, y, fitted$y.hat, regression.points$y))
+
+      if(is.null(order)){
+        plot.order <- max(1, dep.reduced.order)
+      } else {
+        plot.order <- max(1, order)
+      }
+
+      if(is.numeric(confidence.interval)){
+        pval <- 1 - confidence.interval
+        se.max <- max(na.omit(fitted[ , y.hat + (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
+        se.min <- min(na.omit(fitted[, y.hat - (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
+
+        plot(x, y, xlim = c(xmin, xmax),
+             ylim = c(min(c(se.min, ymin)), max(c(se.max,ymax))),
+             col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
+             xlab = if(!is.null(original.columns)){
+               if(original.columns > 1){
+                 "Synthetic X*"
+               } else { x.label }
+             } else {
+               x.label
+             },
+             ylab = y.label, mgp = c(2.5, 0.5, 0),
+             cex.lab = 1.5, cex.main = 2)
+
+        points(na.omit(fitted[ , .(x,y.hat + qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
+        points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
+
+      } else {
+        plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
+             xlab = if(!is.null(original.columns)){
+               if(original.columns > 1){
+                 "Synthetic X*"
+               } else { x.label }
+             } else {
+               x.label
+             },
+             ylab = y.label, mgp = c(2.5, 0.5, 0),
+             cex.lab = 1.5, cex.main = 2)
+      } # !confidence.intervals
+
+      ### Plot Regression points and fitted values and legend
+      points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
+      lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
+
+
+      if(!is.null(point.est)){
+        points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)
+        legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
+      } else {
+        legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
+      }
+
+      if(!is.null(point.est)){
+        if(sum(point.est > max(x)) > 0){
+          segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[.N, y], col = "green", lty = 2)
+        }
+
+        if(sum(point.est < min(x)) > 0){
+          segments(point.est[point.est < min(x)], point.est.y[point.est < min(x)], regression.points[1, x], regression.points[1, y], col = "green", lty = 2)
+        }
+      }
+    }# plot TRUE bracket
+
+    options(warn = oldw)
+
+    ### Return Values
+    if(return.values){
+      return(list("R2" = R2,
+                  "SE" = SE,
+                  "Prediction.Accuracy" = Prediction.Accuracy,
+                  "equation" = synthetic.x.equation,
+                  "x.star" = x.star,
+                  "derivative" = Regression.Coefficients[],
+                  "Point.est" = point.est.y,
+                  "regression.points" = regression.points[, .(x,y)],
+                  "Fitted.xy" = fitted))
+    } else {
+      invisible(list("R2" = R2,
+                     "SE" = SE,
+                     "Prediction.Accuracy" = Prediction.Accuracy,
+                     "equation" = synthetic.x.equation,
+                     "x.star" = x.star,
+                     "derivative" = Regression.Coefficients[],
+                     "Point.est" = point.est.y,
+                     "regression.points" = regression.points[ ,.(x,y)],
+                     "Fitted.xy" = fitted))
+    }
+
   }
-
-}
