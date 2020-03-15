@@ -197,8 +197,6 @@ NNS.reg = function (x, y,
 
       if(!is.null(dim(x))){
         x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
-        if(is.null(colnames(x))) {colnames(x) <- colnames(x, do.NULL = FALSE)}
-        colnames(x) <- make.unique(colnames(x),sep = "_")
       } else {
         x <- factor_2_dummy_FR(x)
       }
@@ -210,8 +208,6 @@ NNS.reg = function (x, y,
 
         if(!is.null(dim(x))){
           new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
-          if(is.null(colnames(new_x))) {colnames(new_x) <- colnames(new_x, do.NULL = FALSE)}
-          colnames(new_x) <- make.unique(colnames(new_x),sep = "_")
         } else {
           new_x <- factor_2_dummy_FR(new_x)
         }

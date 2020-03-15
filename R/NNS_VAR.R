@@ -212,6 +212,7 @@ NNS.VAR <- function(variables,
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
     if(length(rel_vars)>1){
+
         DV_values <- NNS.stack(lagged_new_values_train[, rel_vars],
                                lagged_new_values_train[, i],
                                IVs.test =  tail(lagged_new_values[, rel_vars], h),
@@ -220,7 +221,7 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
                                dim.red.method = dim.red.method,
-                               order = NULL)
+                               order = NULL, stack = FALSE)
 
         nns_DVs[[index]] <- DV_values$stack
 

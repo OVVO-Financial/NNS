@@ -268,8 +268,6 @@ NNS.stack <- function(IVs.train,
 
 
 
-
-
     if(1 %in% method){
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
