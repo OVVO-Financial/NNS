@@ -156,7 +156,7 @@ NNS.dep = function(x,
 
 
     if(l >= 150 & print.map){
-      NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, type = type)
+      NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, type = type, noise.reduction = "mean")
     }
     options(warn = oldw)
     return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),

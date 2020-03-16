@@ -58,17 +58,17 @@ NNS.dep.base <- function(x,
           if(asym){type <- "XONLY"} else {type <- NULL}
 
           if (print.map == TRUE) {
-            part.map <- NNS.part(x, y, order = order, obs.req = 10, type = type,
+            part.map <- NNS.part(x, y, order = order, type = type, noise.reduction = "mean", obs.req = 10,
                                  Voronoi = TRUE, min.obs.stop = TRUE)
           } else {
-            part.map <- NNS.part(x, y, order = order, obs.req = 10, type = type,
+            part.map <- NNS.part(x, y, order = order, type = type, noise.reduction = "mean", obs.req = 10,
                                  Voronoi = FALSE, min.obs.stop = TRUE)
           }
 
           part.df <- part.map$dt
 
       if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0)){
-            part.df[, `:=`(mean.x = gravity(x), mean.y = gravity(y)), by = prior.quadrant]
+            part.df[, `:=`(mean.x = mean(x), mean.y = mean(y)), by = prior.quadrant]
         if (degree == 0) {
             part.df <- part.df[x != mean.x & y != mean.y, ]
         }
@@ -106,19 +106,18 @@ NNS.dep.base <- function(x,
         return(list(Correlation = nns.cor, Dependence = nns.dep))
 
       } else {
-          part.df[, `:=` (weight = .N/n), by = quadrant]
+          part.df[, `:=` (weight = .N/n), by = prior.quadrant]
 
           if(asym){
-              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = quadrant]$V1
+              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = prior.quadrant]$V1
           } else {
-              disp <- part.df[,.(cor(x, y, method = "pearson")), by = quadrant]$V1
+              disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
           }
 
           disp[is.na(disp)] <- 0
 
-
-          nns.cor <- sum(disp * part.df[, mean(weight), by = quadrant]$V1)
-          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = quadrant]$V1)
+          nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
+          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)
 
           options(warn = oldw)
           return(list(Correlation = nns.cor, Dependence = nns.dep))
