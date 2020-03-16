@@ -65,10 +65,15 @@ NNS.caus <- function(x, y,
       Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
       Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
 
+      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
+      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
+
       if(Causation.x.given.y == Causation.y.given.x |
          Causation.x.given.y == 0 | Causation.y.given.x == 0){
         Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
         Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
+        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
+        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
       }
     }
 
@@ -76,16 +81,25 @@ NNS.caus <- function(x, y,
       Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
       Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
 
+      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
+      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
+
       if(Causation.x.given.y == Causation.y.given.x |
          Causation.x.given.y == 0 | Causation.y.given.x == 0){
         Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
         Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
+
+        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
+        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
       }
     }
 
     if(tau == "ts"){
       Causation.y.given.x <- Uni.caus(y, x, tau = 3, plot = FALSE)
       Causation.x.given.y <- Uni.caus(x, y, tau = 3, plot = FALSE)
+
+      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
+      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
 
     }
 
