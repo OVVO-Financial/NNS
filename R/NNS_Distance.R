@@ -61,7 +61,13 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   highest <- rev(order(weights))[1 : min(k, length(weights))]
 
-  weights <- (weights + 1) / 2
+  weights[-highest] <- 0
+
+  weights.sum <- sum(weights)
+
+  weights <- weights / weights.sum
+
+  weights <- rowMeans(cbind(weights, rep(1/k, length(weights))))
 
   weights[-highest] <- 0
 
