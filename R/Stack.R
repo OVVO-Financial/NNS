@@ -242,9 +242,14 @@ NNS.stack <- function(IVs.train,
         rel_vars <- nns.method.2$equation
         rel_vars <- rel_vars[rel_vars$Coefficient>0,1][-.N]
 
+
         if(stack){
             relevant_vars <- colnames(IVs.train)%in%unlist(rel_vars)
         } else {
+            relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
+        }
+
+        if(all(relevant_vars=="FALSE")){
             relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
         }
 
