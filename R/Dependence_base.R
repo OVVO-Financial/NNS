@@ -106,18 +106,23 @@ NNS.dep.base <- function(x,
         return(list(Correlation = nns.cor, Dependence = nns.dep))
 
       } else {
-          part.df[, `:=` (weight = .N/n), by = prior.quadrant]
+          part.df[, counts := .N , by = quadrant]
+          part.df <- part.df[counts >= 5, ]
+
+          n <- dim(part.df)[1]
+
+          part.df[, `:=` (weight = .N/n), by = quadrant]
 
           if(asym){
-              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = prior.quadrant]$V1
+              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = quadrant]$V1
           } else {
-              disp <- part.df[,.(cor(x, y, method = "pearson")), by = prior.quadrant]$V1
+              disp <- part.df[,.(cor(x, y, method = "pearson")), by = quadrant]$V1
           }
 
           disp[is.na(disp)] <- 0
 
-          nns.cor <- sum(disp * part.df[, mean(weight), by = prior.quadrant]$V1)
-          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = prior.quadrant]$V1)
+          nns.cor <- sum(disp * part.df[, mean(weight), by = quadrant]$V1)
+          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = quadrant]$V1)
 
           options(warn = oldw)
           return(list(Correlation = nns.cor, Dependence = nns.dep))
