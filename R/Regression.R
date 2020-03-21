@@ -425,8 +425,8 @@ NNS.reg = function (x, y,
 
     if(is.null(order)){
       dep.reduced.order <- max(1, ifelse( (round(log(length(y))) * dependence)%%1 < .5 ,
-                                          floor(floor(log(length(y))) * dependence),
-                                          floor(ceiling(log(length(y))) * dependence)))
+                                          floor(log(length(y)) * dependence),
+                                          ceiling(log(length(y)) * dependence)))
     } else {
       dep.reduced.order <- order
     }
