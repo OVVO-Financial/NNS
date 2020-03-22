@@ -821,7 +821,7 @@ NNS.reg = function (x, y,
     if(std.errors){
 
       fitted[, `:=`
-             ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1, (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) )), by = gradient]
+             ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) ), by = gradient]
 
 
 
