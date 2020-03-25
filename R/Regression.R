@@ -414,7 +414,7 @@ NNS.reg = function (x, y,
     } # Multivariate
 
 
-    dependence <- NNS.dep(x, y, print.map = FALSE)$Dependence
+    dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
     dependence[is.na(dependence)] <- .01
     ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^1))
 
@@ -740,7 +740,7 @@ NNS.reg = function (x, y,
 
 
     Regression.Coefficients <- unique(Regression.Coefficients)
-    Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+    Regression.Coefficients$Coefficient[Regression.Coefficients$Coefficient==Inf] <- 1
 
 
     ### Fitted Values

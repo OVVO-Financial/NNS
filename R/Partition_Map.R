@@ -360,7 +360,7 @@ NNS.part = function(x, y,
         RP <- setorder(RP[], quadrant)[]
 
         if(Voronoi) {
-            abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1, max(x)), lty = 3)
+            abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1,max(x)), lty = 3)
             points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
             title(main = paste0("NNS Order = ", i), cex.main = 2)
         }
