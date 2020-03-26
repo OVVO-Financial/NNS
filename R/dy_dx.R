@@ -30,6 +30,10 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.
 
   order = NULL
 
+  if(!is.null(ncol(x)) & is.null(colnames(x))){
+    x <- data.frame(x)
+  }
+
   if(length(eval.point) > 1 & deriv.method == "NNS"){
     deriv.method <- "FS"
   }

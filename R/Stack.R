@@ -163,8 +163,8 @@ NNS.stack <- function(IVs.train,
 
     test.set <- unlist(test.set)
 
-    CV.IVs.train <- IVs.train[c(-test.set), ]
-    CV.IVs.test <- IVs.train[test.set, ]
+    CV.IVs.train <- data.frame(IVs.train[c(-test.set), ])
+    CV.IVs.test <- data.frame(IVs.train[test.set, ])
 
     CV.DV.train <- DV.train[c(-test.set)]
     CV.DV.test <- DV.train[c(test.set)]
@@ -172,7 +172,7 @@ NNS.stack <- function(IVs.train,
     training <- cbind(IVs.train[c(-test.set),], DV.train[c(-test.set)])
     training <- training[complete.cases(training),]
 
-    CV.IVs.train <- training[, -(ncol(training))]
+    CV.IVs.train <- data.frame(training[, -(ncol(training))])
     CV.DV.train <- training[, ncol(training)]
 
 
@@ -276,9 +276,11 @@ NNS.stack <- function(IVs.train,
     if(1 %in% method){
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
-
-      CV.IVs.train <- CV.IVs.train[, relevant_vars]
-      CV.IVs.test <- CV.IVs.test[, relevant_vars]
+      if(length(relevant_vars)==0){
+          relevant_vars <- seq_along(dim(IVs.train)[2])
+      }
+      CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
+      CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
 
       for(i in c(1:l,length((IVs.train[ , 1])))){
         index <- which(c(1:l, length(IVs.train[ , 1])) %in% i)

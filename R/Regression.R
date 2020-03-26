@@ -168,6 +168,10 @@ NNS.reg = function (x, y,
     original.names <- colnames(x)
     original.columns <- ncol(x)
 
+    if(!is.null(original.columns) & is.null(colnames(x))){
+      x <- data.frame(x)
+    }
+
     y.label <- deparse(substitute(y))
     if(is.null(y.label)){
       y.label <- "y"
@@ -616,10 +620,17 @@ NNS.reg = function (x, y,
       }
     }
 
-
-    rise <- regression.points[ , 'rise' := y - shift(y)]
-    run <- regression.points[ , 'run' := x - shift(x)]
-
+    if(dim(regression.points)[1]>1){
+        rise <- regression.points[ , 'rise' := y - shift(y)]
+        run <- regression.points[ , 'run' := x - shift(x)]
+    } else {
+        rise <- max(y) - min(y)
+        rise <- regression.points[ , 'rise' := rise]
+        run <- max(x) - min(x)
+        if(run==0) run <- 1
+        run <- regression.points[ , 'run' := run]
+        regression.points <- rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
+    }
 
     Regression.Coefficients <- regression.points[ , .(rise,run)]
 
@@ -627,7 +638,11 @@ NNS.reg = function (x, y,
 
     upper.x <- regression.points[(2 : .N), x]
 
-    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+    if(length(unique(upper.x))>1){
+        Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+    } else {
+        Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'= 0,'X.Lower.Range' = unique(upper.x), 'X.Upper.Range' = unique(upper.x))]
+    }
 
     Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
 
