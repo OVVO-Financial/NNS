@@ -50,7 +50,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   if(k==1){
     if(length(which(row.sums == min(row.sums)))>1){
-      return(mode(rpm$y.hat[which(row.sums == min(row.sums))][1]))
+      return(mode(rpm$y.hat[which(row.sums == min(row.sums))]))
     }  else {
       return(rpm$y.hat[which.min(row.sums)][1])
     }
@@ -67,13 +67,15 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   weights <- weights / weights.sum
 
-  weights <- rowMeans(cbind(weights, rep(1/k, length(weights))))
+  if(type!="FACTOR"){
+    weights <- rowMeans(cbind(weights, rep(1/k, length(weights))))
 
-  weights[-highest] <- 0
+    weights[-highest] <- 0
 
-  weights.sum <- sum(weights)
+    weights.sum <- sum(weights)
 
-  weights <- weights / weights.sum
+    weights <- weights / weights.sum
+  }
 
   single.estimate <- sum(weights * rpm$y.hat)
 
