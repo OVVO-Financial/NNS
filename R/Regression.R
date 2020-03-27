@@ -281,11 +281,13 @@ NNS.reg = function (x, y,
       }
     }
 
+
     if(!is.null(ncol(original.variable))){
       if(ncol(original.variable) == 1){
         x <- original.variable
       } else {
         if(is.null(dim.red.method)){
+          colnames(x) <- make.unique(colnames(x), sep = "_")
           return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                            residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                            location = location, noise.reduction = noise.reduction,
