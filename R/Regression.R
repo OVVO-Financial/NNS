@@ -853,7 +853,7 @@ NNS.reg = function (x, y,
     if(std.errors){
 
       fitted[, `:=`
-             ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( (.N - 2)) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) ), by = gradient]
+             ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 2))) * ifelse(sum(((x - mean(x)) ^ 2))==0,1,sum(((x - mean(x)) ^ 2))) ) ), by = gradient]
 
 
 
@@ -891,8 +891,8 @@ NNS.reg = function (x, y,
              ylab = y.label, mgp = c(2.5, 0.5, 0),
              cex.lab = 1.5, cex.main = 2)
 
-        points(na.omit(fitted[ , .(x,y.hat + qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
-        points(na.omit(fitted[ , .(x,y.hat - qnorm(1 - (pval / 2)) * standard.errors)]), col = 'pink', pch = 19)
+        points(na.omit(fitted[ , .(x,y.hat + qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]), col = 'pink', pch = 19)
+        points(na.omit(fitted[ , .(x,y.hat - qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]), col = 'pink', pch = 19)
 
       } else {
         plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
