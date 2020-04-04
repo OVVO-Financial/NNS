@@ -845,8 +845,11 @@ NNS.reg = function (x, y,
       Prediction.Accuracy <- NULL
     }
 
-    R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
-
+    if((sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2)==0){
+      R2 <- 1
+    } else {
+      R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
+    }
 
 
     ###Standard errors estimatation

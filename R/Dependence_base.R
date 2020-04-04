@@ -67,7 +67,7 @@ NNS.dep.base <- function(x,
 
           part.df <- part.map$dt
 
-      if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0)){
+      if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0 | length(x)<5 )){
             part.df[, `:=`(mean.x = mean(x), mean.y = mean(y)), by = prior.quadrant]
         if (degree == 0) {
             part.df <- part.df[x != mean.x & y != mean.y, ]
@@ -107,22 +107,30 @@ NNS.dep.base <- function(x,
 
       } else {
           part.df[, counts := .N , by = quadrant]
-          part.df <- part.df[counts >= 5, ]
+          min_part.df <- part.df[counts >= 5, ]
 
-          n <- dim(part.df)[1]
+          n <- dim(min_part.df)[1]
 
-          part.df[, `:=` (weight = .N/n), by = quadrant]
+          if(n==0){
+            part.df[, counts := .N , by = prior.quadrant]
+            min_part.df <- part.df[counts >= 5, ]
+            min_part.df[ , quadrant := prior.quadrant]
+
+            n <- dim(min_part.df)[1]
+          }
+
+          min_part.df[, `:=` (weight = .N/n), by = quadrant]
 
           if(asym){
-              disp <- part.df[,.(cor(x, abs(y), method = "pearson")), by = quadrant]$V1
+              disp <- min_part.df[,.(sign(cor(x,abs(y)))*summary(lm(abs(y)~x))$r.squared), by = quadrant]$V1
           } else {
-              disp <- part.df[,.(cor(x, y, method = "pearson")), by = quadrant]$V1
+              disp <- min_part.df[,.(sign(cor(x,y))*summary(lm(y~x))$r.squared), by = quadrant]$V1
           }
 
           disp[is.na(disp)] <- 0
 
-          nns.cor <- sum(disp * part.df[, mean(weight), by = quadrant]$V1)
-          nns.dep <- sum(abs(disp) * part.df[, mean(weight), by = quadrant]$V1)
+          nns.cor <- sum(disp * min_part.df[, mean(weight), by = quadrant]$V1)
+          nns.dep <- sum(abs(disp) * min_part.df[, mean(weight), by = quadrant]$V1)
 
           options(warn = oldw)
           return(list(Correlation = nns.cor, Dependence = nns.dep))
