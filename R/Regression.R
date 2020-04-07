@@ -541,13 +541,13 @@ NNS.reg = function (x, y,
         x0 <- mode_class(y.min)
         } else {
             x0 <- unique(gravity(y[x == min(x)]))
-            if(l_y.mid.min==1){
+            if(l_y.min==1){
             Dynamic.average.mid.min <- lm((y[x <= tail(head(regression.points$x, 2),1)]) ~
                                         (x[x <= tail(head(regression.points$x, 2),1)]))$fitted[which.max(x[x <= tail(head(regression.points$x, 2),1)])]
             } else {
-                Dynamic.average.mid.min <- lm((y[x <= tail(head(regression.points$x, 2),1)]) ~
-                                        (x[x <= tail(head(regression.points$x, 2),1)]))$fitted[which.max(x[x <= tail(head(regression.points$x, 2),1)])]  +
-                (mid.min.range - tail(head(regression.points$x, 2),1)) * lm((y[x <= tail(head(regression.points$x, 2),1)]) ~  (x[x <= tail(head(regression.points$x, 2),1)]))$coef[2]
+                Dynamic.average.mid.min <- lm((y[x <= head(regression.points$x, 1)]) ~
+                                        (x[x <= head(regression.points$x, 1)]))$fitted[which.max(x[x <= head(regression.points$x, 1)])]  +
+                (mid.min.range - head(regression.points$x, 1)) * lm((y[x <= head(regression.points$x, 1)]) ~  (x[x <= head(regression.points$x, 1)]))$coef[2]
             }
       }
     }
@@ -586,13 +586,13 @@ NNS.reg = function (x, y,
         x.max <- mode_class(y.max)
       } else{
         x.max <- unique(gravity(y[x == max(x)]))
-        if(l_y.mid.max==1){
+        if(l_y.max==1){
         Dynamic.average.mid.max <- lm((y[x >= head(tail(regression.points$x, 2),1)]) ~
                                         (x[x >= head(tail(regression.points$x, 2),1)]))$fitted[which.min(x[x >= head(tail(regression.points$x, 2),1)])]
         } else {
-          Dynamic.average.mid.max <- lm((y[x >= head(tail(regression.points$x, 2),1)]) ~
-                                          (x[x >= head(tail(regression.points$x, 2),1)]))$fitted[which.min(x[x >= head(tail(regression.points$x, 2),1)])] +
-              (mid.max.range - head(tail(regression.points$x, 2),1)) * lm((y[x >= head(tail(regression.points$x, 2),1)]) ~  (x[x >= head(tail(regression.points$x, 2),1)]))$coef[2]
+          Dynamic.average.mid.max <- lm((y[x >= tail(regression.points$x, 1)]) ~
+                                          (x[x >= tail(regression.points$x, 1)]))$fitted[which.min(x[x >= tail(regression.points$x, 1)])] +
+              (mid.max.range - tail(regression.points$x, 1)) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
 
         }
 
@@ -871,7 +871,7 @@ NNS.reg = function (x, y,
       ymax <- max(c(point.est.y, y, fitted$y.hat, regression.points$y))
 
       if(is.null(order)){
-        plot.order <- max(1, dep.reduced.order)
+        plot.order <- max(1, part.map$order)
       } else {
         plot.order <- max(1, order)
       }

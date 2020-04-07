@@ -32,7 +32,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
 
   if(type=="L2"){
-    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)))][,Sum]
+    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)        ))][,Sum]
                                     + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
   }
 
