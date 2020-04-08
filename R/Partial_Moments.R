@@ -441,7 +441,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
-#'  \item{\code{"function"}} a data.table containing the observations and resulting CDF of the variable.
+#'  \item{\code{"Function"}} a data.table containing the observations and resulting CDF of the variable.
 #'  \item{\code{"target.value"}} value from the \code{target} argument.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
@@ -515,7 +515,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
 
     if(type == "hazard"){
-      CDF <- unlist(NNS.PDF(x,plot = FALSE)[,2])/(1-CDF)
+      CDF <- density(x, n = length(x))$y/(1-CDF)
 
       ylabel <- "h(x)"
       P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
@@ -553,7 +553,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     colnames(values) <- c(deparse(substitute(variable)), ylabel)
 
 
-    return(list("function" = values ,
+    return(list("Function" = values ,
                 "target.value" = P))
 
   } else {
