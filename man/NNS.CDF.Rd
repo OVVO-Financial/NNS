@@ -20,7 +20,7 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 \value{
 Returns:
 \itemize{
- \item{\code{"function"}} a data.table containing the observations and resulting CDF of the variable.
+ \item{\code{"Function"}} a data.table containing the observations and resulting CDF of the variable.
  \item{\code{"target.value"}} value from the \code{target} argument.
 }
 }
