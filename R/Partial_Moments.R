@@ -427,7 +427,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 
 #' NNS CDF
 #'
-#' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}.
+#' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 #'
 #' @param variable a numeric vector or data.frame of 2 variables for joint CDF.
 #' @param degree integer; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
@@ -495,7 +495,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     colnames(values) <- c(deparse(substitute(variable)), "CDF")
 
     if(!is.null(target)){
-      P <- NNS.reg(overall_target, CDF, order = "max", point.est = target, plot = FALSE)$Point.est
+      P <- LPM.ratio(degree, target, variable)
     } else {
       P <- NULL
     }
