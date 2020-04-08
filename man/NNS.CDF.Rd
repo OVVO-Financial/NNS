@@ -25,7 +25,7 @@ Returns:
 }
 }
 \description{
-This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}.
+This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 }
 \examples{
 set.seed(123)
