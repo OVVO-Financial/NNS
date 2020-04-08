@@ -423,3 +423,197 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 
   return(data.table(cbind("Intervals" = Intervals, PDF)))
 }
+
+
+#' NNS CDF
+#'
+#' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}.
+#'
+#' @param variable a numeric vector or data.frame of 2 variables for joint CDF.
+#' @param degree integer; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; \code{NULL} (default) Must lie within support of each variable.
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return for bi-variate analysis.  Multivariate analysis is restricted to \code{"CDF"}.
+#' @param plot logical; plots CDF.
+#' @return Returns:
+#' \itemize{
+#'  \item{\code{"function"}} a data.table containing the observations and resulting CDF of the variable.
+#'  \item{\code{"target.value"}} value from the \code{target} argument.
+#' }
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995}
+#'
+#' Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
+#' \url{https://ssrn.com/abstract=3007373}
+
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' NNS.CDF(x)
+#'
+#' \dontrun{
+#' ## Empirical CDF (degree = 0)
+#' NNS.CDF(x)
+#'
+#' ## Continuous CDF (degree = 1)
+#' NNS.CDF(x, 1)
+#'
+#' ## Joint CDF
+#' x <- rnorm(5000) ; y <- rnorm(5000)
+#' A <- cbind(x,y)
+#'
+#' NNS.CDF(A, 0)
+#'
+#' ## Joint CDF with target
+#' NNS.CDF(A, 0, target = c(0,0))
+#' }
+#' @export
+
+
+NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
+
+  if(!is.null(target)){
+     if(is.null(dim(variable)) || dim(variable)[2]==1){
+        if(target<min(variable) || target>max(variable))   stop("Please make sure target 1 is within the observed values of variable 1.")
+     } else {
+      if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
+      if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
+    }
+  }
+
+  type = tolower(type)
+
+  if(!(type%in%c("cdf","survival", "hazard", "cumulative hazard"))) stop(paste("Please select a type from: ", "`CDF`, ", "`survival`, ",  "`hazard`, ", "`cumulative hazard`"))
+
+  if(is.null(dim(variable)) || dim(variable)[2]==1){
+
+    overall_target <- sort(variable)
+
+    CDF <- LPM.ratio(degree, overall_target, variable)
+
+    values <- cbind.data.frame(sort(variable), CDF)
+    colnames(values) <- c(deparse(substitute(variable)), "CDF")
+
+    if(!is.null(target)){
+      P <- NNS.reg(overall_target, CDF, order = "max", point.est = target, plot = FALSE)$Point.est
+    } else {
+      P <- NULL
+    }
+
+    ylabel <- "Probability"
+    x <- sort(variable)
+
+    if(type == "survival"){
+      CDF <- 1 - CDF
+      P <- 1 - P
+    }
+
+    if(type == "hazard"){
+      CDF <- density(x, n = length(x), from = min(x), to = max(x))$y / (1-CDF)
+
+      ylabel <- "h(x)"
+      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(target, x[length(x)]), plot = FALSE)$Point.est
+      CDF[is.infinite(CDF)] <- P[2]
+      P <- P[1]
+    }
+
+    if(type == "cumulative hazard"){
+      CDF <- -log((1 - CDF))
+
+      ylabel <- "H(x)"
+      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(target, x[length(x)]), plot = TRUE)$Point.est
+      CDF[is.infinite(CDF)] <- P[2]
+      P <- P[1]
+    }
+
+
+    if(plot){
+      plot(x, CDF, pch = 19, col = 'steelblue', xlab = deparse(substitute(variable)), ylab = ylabel, main = type, type = "s", lwd = 2)
+      points(x, CDF, pch = 19, col = 'steelblue')
+      lines(x, CDF, lty=2, col = 'steelblue')
+
+      if(!is.null(target)){
+          segments(target,0,target,P, col = "red", lwd = 2, lty = 2)
+          segments(min(variable), P, target, P, col = "red", lwd = 2, lty = 2)
+          points(target, P, col = "green", pch = 19)
+          mtext(text = round(P,4), col = "red", side = 2, at = P,  las = 2)
+          mtext(text = round(target,4), col = "red", side = 1, at = target,  las = 1)
+      }
+    }
+
+    values <- data.table(cbind.data.frame(x, CDF))
+    colnames(values) <- c(deparse(substitute(variable)), ylabel)
+
+
+    return(list("function" = values ,
+                "target.value" = P))
+
+  } else {
+    overall_target_1 <- (variable[,1])
+    overall_target_2 <- (variable[,2])
+
+    CDF <- Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) /
+                (
+                 Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+                 Co.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+                 D.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+                 D.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2)
+                )
+
+    if(type == "survival"){
+        CDF <- 1 - CDF
+    }
+
+    if(type == "hazard"){
+        CDF <- sort(variable) / (1 - CDF)
+    }
+
+    if(type == "cumulative hazard"){
+      CDF <- -log((1 - CDF))
+    }
+
+
+    if(!is.null(target)){
+      P <- Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) /
+                (
+                  Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+                  Co.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+                  D.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+                  D.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2])
+                )
+
+
+    } else {
+      P <- NULL
+    }
+
+    if(plot){
+      plot3d(variable[,1], variable[,2], CDF, col = "steelblue",
+             xlab = deparse(substitute(variable[,1])), ylab = deparse(substitute(variable[,2])),
+             zlab = "Probability", box = FALSE, pch = 19)
+
+      if(!is.null(target)){
+          points3d(target[1], target[2], P, col = "green", pch = 19)
+          points3d(target[1], target[2], 0, col = "red", pch = 15, cex = 2)
+          lines3d(x= c(target[1], max(variable[,1])),
+                  y= c(target[2], max(variable[,2])),
+                  z= c(P, P),
+                  col = "red", lwd = 2, lty=3)
+          lines3d(x= c(target[1], target[1]),
+                  y= c(target[2], target[2]),
+                  z= c(0, P),
+                  col = "red", lwd = 1, lty=3)
+          text3d(max(variable[,1]), max(variable[,2]), P, texts = paste0("P = ", round(P,4)), pos = 4, col = "red")
+      }
+
+    }
+
+  }
+
+  return(list("CDF" = data.table(cbind((variable), CDF = CDF)),
+              "P" = P))
+
+
+}
+
+
