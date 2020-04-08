@@ -19,7 +19,7 @@ NNS.ARMA.optim(
 \arguments{
 \item{variable}{a numeric vector.}
 
-\item{training.set}{numeric; \code{NULL} (defualt) Sets the number of variable observations}
+\item{training.set}{numeric; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
 
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
@@ -51,6 +51,8 @@ Wrapper function for optimizing any combination of a given \code{seasonal.factor
 }
 \note{
 \itemize{
+\item{} Typically, \code{(training.set = length(variable) - 2 * length(forecast horizon))} is used for optimization.  Smaller samples would use \code{(training.set = length(variable) - length(forecast horizon))} in order to preserve information.
+
 \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 
 \item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
