@@ -415,11 +415,16 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 
   d.dx <- (abs(max(target)) + abs(min(target))) / bins
   tgt <- seq(min(target), max(target), d.dx)
-  PDF <- abs((diff(LPM.ratio(degree, tgt, variable),2)))
+  CDF <- LPM.ratio(degree, tgt, variable)
+  diffs <- abs(shift(CDF,1) - shift(CDF,-1))
+  diffs[1] <- max(0,(diffs[2]-diffs[3]) + diffs[2])
+  diffs <- na.omit(diffs)
+  area <- (UPM(1, mean(variable), variable)+LPM(1, mean(variable), variable))*(max(variable)-min(variable))
+  PDF <- (diffs*area)/area
 
   Intervals <- (sort(tgt)+(d.dx/2))[1:length(PDF)]
 
-  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X")}
+  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Probability Density")}
 
   return(data.table(cbind("Intervals" = Intervals, PDF)))
 }
@@ -508,27 +513,30 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       P <- 1 - P
     }
 
+
     if(type == "hazard"){
-      CDF <- density(x, n = length(x), from = min(x), to = max(x))$y / (1-CDF)
+      CDF <- unlist(NNS.PDF(x,plot = FALSE)[,2])/(1-CDF)
 
       ylabel <- "h(x)"
-      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(target, x[length(x)]), plot = FALSE)$Point.est
-      CDF[is.infinite(CDF)] <- P[2]
-      P <- P[1]
+      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
+      CDF[is.infinite(CDF)] <- P[1]
+      P <- P[-1]
     }
+
 
     if(type == "cumulative hazard"){
       CDF <- -log((1 - CDF))
 
       ylabel <- "H(x)"
-      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(target, x[length(x)]), plot = TRUE)$Point.est
-      CDF[is.infinite(CDF)] <- P[2]
-      P <- P[1]
+      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = TRUE)$Point.est
+
+      CDF[is.infinite(CDF)] <- P[1]
+      P <- P[-1]
     }
 
 
     if(plot){
-      plot(x, CDF, pch = 19, col = 'steelblue', xlab = deparse(substitute(variable)), ylab = ylabel, main = type, type = "s", lwd = 2)
+      plot(x, CDF, pch = 19, col = 'steelblue', xlab = deparse(substitute(variable)), ylab = ylabel, main = toupper(type), type = "s", lwd = 2)
       points(x, CDF, pch = 19, col = 'steelblue')
       lines(x, CDF, lty=2, col = 'steelblue')
 
