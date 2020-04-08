@@ -3,7 +3,7 @@
 #' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 #'
 #' @param variable a numeric vector.
-#' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
+#' @param training.set numeric; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
@@ -23,6 +23,8 @@
 #'}
 #' @note
 #' \itemize{
+#' \item{} Typically, \code{(training.set = length(variable) - 2 * length(forecast horizon))} is used for optimization.  Smaller samples would use \code{(training.set = length(variable) - length(forecast horizon))} in order to preserve information.
+#'
 #' \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 #'
 #' \item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
@@ -76,7 +78,8 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   if((num_cores+subcores)>cores){ stop(paste0("Please ensure total number of cores [ncores + subcores] is less than ", cores))}
 
-  if(is.null(training.set)){training.set <- 0}
+  if(is.null(training.set)){stop("Please use the length of the variable less the forecast period as the training.set value.")}
+
   training.set <- floor(training.set)
 
   variable <- as.numeric(variable)
