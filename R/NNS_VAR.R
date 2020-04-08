@@ -77,6 +77,14 @@ NNS.VAR <- function(variables,
 
   nns_IVs <- list()
 
+  if(is.null(colnames(variables))){
+    var_names <- character()
+    for(i in 1:ncol(variables)){
+        var_names[i] <- paste0("x",i)
+    }
+    colnames(variables) <- var_names
+  }
+
   # Parallel process...
   if (is.null(ncores)) {
     cores <- detectCores()
