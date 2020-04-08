@@ -133,7 +133,7 @@ NNS.VAR <- function(variables,
 
 
   new_values <- data.frame(do.call(cbind, new_values))
-  colnames(new_values) <- colnames(variables)
+  colnames(new_values) <- as.character(colnames(variables))
 
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
@@ -244,7 +244,7 @@ NNS.VAR <- function(variables,
   RV <- lapply(relevant_vars, function(x) if(is.null(x)){NA} else {x})
 
   RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
-  colnames(RV) <- colnames(variables)
+  colnames(RV) <- as.character(colnames(variables))
 
   uni <- numeric()
   multi <- numeric()
