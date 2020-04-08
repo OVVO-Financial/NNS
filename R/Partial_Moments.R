@@ -474,7 +474,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
   if(!is.null(target)){
      if(is.null(dim(variable)) || dim(variable)[2]==1){
-        if(target<min(variable) || target>max(variable))   stop("Please make sure target 1 is within the observed values of variable 1.")
+        if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
      } else {
       if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
       if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
