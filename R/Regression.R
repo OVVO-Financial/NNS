@@ -799,10 +799,10 @@ NNS.reg = function (x, y,
 
     if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
       upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
+      point.est.y[point.est>max(x)] <- (point.est[point.est>max(x)] - max(x)) * upper.slope +  regression.points[.N, y]   #mode(y[which.max(x)]))
 
       lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
+      point.est.y[point.est<min(x)] <- (point.est[point.est<min(x)] - min(x)) * lower.slope +  regression.points[1, y] #  mode(y[which.min(x)]))
     }
 
     if(!is.null(type)){
