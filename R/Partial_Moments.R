@@ -385,7 +385,7 @@ UPM.ratio <- function(degree, target, variable){
 
 #' NNS PDF
 #'
-#' This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
+#' This function generates an empirical PDF using \link{dy.dx} on \link{NNS.CDF}.
 #'
 #' @param variable a numeric vector.
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.
