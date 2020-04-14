@@ -135,14 +135,13 @@ A normalized sum of upside area and downside area.
 # Vectorized targets:
 > Co.LPM(0,0,x,y,c(0,1),c(0,1))
 [1] 0.28 0.73
+
+# Alternatively via NNS.CDF()
+> NNS.CDF(x)
 ```
 ### PDFs
 ```r
-> tgt=sort(x)
-# Arbitrary d/dx approximation
-> d.dx=(max(x)+abs(min(x)))/100
-> PDF=(LPM.ratio(1,tgt+d.dx,x)-LPM.ratio(1,tgt-d.dx,x))
-> plot(sort(x),PDF,col='blue',type='l',lwd=3,xlab="x")
+> NNS.PDF(x)
 ```
 ### Numerical Integration - [UPM(1,0,f(x))-LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
 ```r
