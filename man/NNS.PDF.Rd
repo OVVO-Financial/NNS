@@ -21,7 +21,7 @@ NNS.PDF(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE)
 Returns a data.table containing the intervals used and resulting PDF of the variable.
 }
 \description{
-This function generates an empirical PDF using continuous CDFs from \link{LPM.ratio}.
+This function generates an empirical PDF using \link{dy.dx} on \link{NNS.CDF}.
 }
 \examples{
 set.seed(123)
