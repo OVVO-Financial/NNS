@@ -390,7 +390,7 @@ UPM.ratio <- function(degree, target, variable){
 #' @param variable a numeric vector.
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.
 #' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.
-#' @param bins numeric; \code{NULL} (default) Selects number of observations as default bins.
+#' @param bins numeric; \code{NULL} (default) Selects number of observations as default number of bins.
 #' @param plot logical; plots PDF.
 #' @return Returns a data.table containing the intervals used and resulting PDF of the variable.
 #' @author Fred Viole, OVVO Financial Systems
@@ -406,8 +406,7 @@ UPM.ratio <- function(degree, target, variable){
 #' @export
 
 
-NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE){
-
+NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TRUE){
   if(is.null(target)){target <- sort(variable)}
 
 # d/dx approximation
@@ -415,16 +414,13 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL, plot = TRU
 
   d.dx <- (abs(max(target)) + abs(min(target))) / bins
   tgt <- seq(min(target), max(target), d.dx)
-  CDF <- LPM.ratio(degree, tgt, variable)
-  diffs <- abs(shift(CDF,1) - shift(CDF,-1))
-  diffs[1] <- max(0,(diffs[2]-diffs[3]) + diffs[2])
-  diffs <- na.omit(diffs)
-  area <- (UPM(1, mean(variable), variable)+LPM(1, mean(variable), variable))*(max(variable)-min(variable))
-  PDF <- (diffs*area)/area
 
-  Intervals <- (sort(tgt)+(d.dx/2))[1:length(PDF)]
+  CDF <- NNS.CDF(variable, plot = FALSE)$Function
+  PDF <- dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt)
 
-  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Probability Density")}
+  Intervals <- tgt
+
+  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
 
   return(data.table(cbind("Intervals" = Intervals, PDF)))
 }
