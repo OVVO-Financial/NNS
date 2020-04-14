@@ -490,7 +490,12 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
     overall_target <- sort(variable)
 
+    if(degree > 0){
     CDF <- LPM.ratio(degree, overall_target, variable)
+    } else {
+      cdf_fun <- ecdf(x)
+      CDF <- cdf_fun(overall_target)
+    }
 
     values <- cbind.data.frame(sort(variable), CDF)
     colnames(values) <- c(deparse(substitute(variable)), "CDF")
@@ -511,7 +516,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
 
     if(type == "hazard"){
-      CDF <- density(x, n = length(x))$y/(1-CDF)
+      CDF <- exp(log(density(x, n = length(x))$y)-log(1-CDF))
 
       ylabel <- "h(x)"
       P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
