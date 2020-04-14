@@ -524,7 +524,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       CDF <- -log((1 - CDF))
 
       ylabel <- "H(x)"
-      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = TRUE)$Point.est
+      P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
 
       CDF[is.infinite(CDF)] <- P[1]
       P <- P[-1]
