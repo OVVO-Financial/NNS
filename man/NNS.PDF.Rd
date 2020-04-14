@@ -13,7 +13,7 @@ NNS.PDF(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE)
 
 \item{target}{a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.}
 
-\item{bins}{numeric; \code{NULL} (default) Selects number of observations as default bins.}
+\item{bins}{numeric; \code{NULL} (default) Selects number of observations as default number of bins.}
 
 \item{plot}{logical; plots PDF.}
 }
