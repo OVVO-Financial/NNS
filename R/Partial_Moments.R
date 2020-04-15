@@ -418,11 +418,9 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
   CDF <- NNS.CDF(variable, plot = FALSE)$Function
   PDF <- dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt)
 
-  Intervals <- tgt
+  if(plot){plot(tgt, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
 
-  if(plot){plot(Intervals, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
-
-  return(data.table(cbind("Intervals" = Intervals, PDF)))
+  return(data.table(cbind("Intervals" = tgt, PDF)))
 }
 
 
@@ -491,7 +489,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     overall_target <- sort(variable)
 
     if(degree > 0){
-    CDF <- LPM.ratio(degree, overall_target, variable)
+      CDF <- LPM.ratio(degree, overall_target, variable)
     } else {
       cdf_fun <- ecdf(x)
       CDF <- cdf_fun(overall_target)
