@@ -26,7 +26,7 @@ NNS.dep.base <- function(x,
   options(warn = -1)
 
   if(!missing(y)) {
-      if(length(x) < 20 | class(x) == "factor" | class(y) == "factor") {
+      if(any(length(x) < 20 | class(x) == "factor" | class(y) == "factor")) {
           order <- 2
           y <- as.numeric(y)
           asym <- TRUE
@@ -38,7 +38,7 @@ NNS.dep.base <- function(x,
           degree <- ifelse(length(x) <= 100, 0, 1)
       }
   } else {
-      if(length(x[, 1]) < 20 | any(unlist(lapply(x, is.factor)))) {
+      if(any(length(x[, 1]) < 20 | any(unlist(lapply(x, is.factor))))) {
           order <- 2
           x <- data.matrix(x)
           asym <- TRUE
@@ -49,7 +49,7 @@ NNS.dep.base <- function(x,
       }
   }
 
-  if(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y))) {
+  if(any(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y)))) {
       order <- 1
   }
 
