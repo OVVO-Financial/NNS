@@ -209,15 +209,11 @@ NNS.VAR <- function(variables,
         rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
     }
 
-    rel_vars <- rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold]
-
-    rel_vars <- names(lagged_new_values)[names(lagged_new_values)%in%names(rel_vars)]
-
-
+    rel_vars <- names(rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold])
 
     relevant_vars[[index]] <- rel_vars
 
-    if(length(rel_vars)==0){
+    if(any(length(rel_vars)==0 | is.null(rel_vars))){
         rel_vars <- names(lagged_new_values_train)
     }
 
