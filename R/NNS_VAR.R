@@ -130,7 +130,7 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_estimates, `[[`, 1), function(x) tail(x, h))))
+  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) tail(x, h))))
   colnames(nns_IVs_results) <- colnames(variables)
   row.names(nns_IVs_results) <- seq_len(h)
 
@@ -164,7 +164,7 @@ NNS.VAR <- function(variables,
   }
 
   for(i in DVs){
-    index <- which(DVs%in%i)
+    index <- which(DVs==i)
 
     if(status){
       message("Variable ", index, " of ", length(DVs), appendLF = TRUE)
@@ -213,7 +213,7 @@ NNS.VAR <- function(variables,
 
     relevant_vars[[index]] <- rel_vars
 
-    if(any(length(rel_vars)==0 | is.null(rel_vars))){
+    if(any(length(rel_vars)==0 | is.null(relevant_vars))){
         rel_vars <- names(lagged_new_values_train)
     }
 
@@ -245,6 +245,7 @@ NNS.VAR <- function(variables,
   }
 
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
+
   colnames(nns_DVs) <- colnames(variables)
   row.names(nns_DVs) <- seq_len(h)
 
