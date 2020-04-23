@@ -104,7 +104,7 @@ NNS.VAR <- function(variables,
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
 
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = 'NNS')%dopar%{
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
     variable <- variables[, i]
     na_s <- sum(is.na(variable))
     variable <- na.omit(variable)
@@ -130,7 +130,7 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- data.frame(tail(do.call(cbind, lapply(nns_IVs, `[[`, 1)), h))
+  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_estimates, `[[`, 1), function(x) tail(x, h))))
   colnames(nns_IVs_results) <- colnames(variables)
   row.names(nns_IVs_results) <- seq_len(h)
 
