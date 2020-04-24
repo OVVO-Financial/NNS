@@ -281,7 +281,7 @@ NNS.VAR <- function(variables,
   colnames(nns_DVs) <- colnames(variables)
   row.names(nns_DVs) <- seq_len(h)
 
-  RV <- data.frame(do.call(cbind, lapply(RV, `length<-`, max(lengths(RV)))))
+  RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
   colnames(RV) <- as.character(colnames(variables))
 
 
@@ -307,7 +307,7 @@ NNS.VAR <- function(variables,
   colnames(forecasts) <- colnames(variables)
   row.names(forecasts) <- seq_len(h)
 
-  return( list("relevant_variables" = RV,
+  return( list("relevant_variables" = data.frame(RV),
                univariate = nns_IVs_results,
                multivariate = nns_DVs,
                ensemble = forecasts) )
