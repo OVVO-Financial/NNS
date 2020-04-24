@@ -156,14 +156,32 @@ NNS.VAR <- function(variables,
   DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
 
   nns_DVs <- list()
-  DV_obj_fn <- list()
+
   relevant_vars <- list()
 
   if(status){
     message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   }
 
-  for(i in DVs){
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else { cl <- NULL }
+
+  if(!is.null(cl)){
+    if(status){
+      message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
+    }
+    status <- FALSE
+  }
+
+  comb <- function(x, ...) {
+    lapply(seq_along(x),
+           function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
+  }
+
+  lists <- foreach(i = DVs, .packages = "NNS", .combine = 'comb', .init = list(list(), list()),
+                   .multicombine = TRUE)%dopar%{
     index <- which(DVs==i)
 
     if(status){
@@ -182,7 +200,7 @@ NNS.VAR <- function(variables,
 
 
     if(any(dim.red.method == "cor" | dim.red.method == "all")){
-        rel.1 <- cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman")
+        rel.1 <- abs(cor(cbind(lagged_new_values_train[, i],lagged_new_values_train[, -i]), method = "spearman"))
     }
 
     if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
@@ -213,7 +231,7 @@ NNS.VAR <- function(variables,
 
     relevant_vars[[index]] <- rel_vars
 
-    if(any(length(rel_vars)==0 | is.null(relevant_vars))){
+    if(any(length(rel_vars)==0 | is.null(relevant_vars[[index]]))){
         rel_vars <- names(lagged_new_values_train)
     }
 
@@ -230,38 +248,58 @@ NNS.VAR <- function(variables,
                                dim.red.method = dim.red.method,
                                order = NULL, stack = FALSE)
 
+
         nns_DVs[[index]] <- DV_values$stack
+    } else {
+        nns_DVs[[index]] <- nns_IVs_results[,index]
+    }
 
-        DV_obj_fn[[index]] <- sum( (c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red) / (DV_values$OBJfn.reg + DV_values$OBJfn.dim.red)) * c(DV_values$OBJfn.reg, DV_values$OBJfn.dim.red))
-
-        } else {
-            nns_DVs[[index]] <- nns_IVs_results[,index]
-
-            DV_obj_fn[[index]] <- cor_threshold$OBJfn.dim.red
-        }
-
-
+  list(nns_DVs, relevant_vars)
 
   }
 
-  nns_DVs <- data.frame(do.call(cbind, nns_DVs))
+  if(num_cores>1){
+      stopCluster(cl)
+      registerDoSEQ()
+
+      nns_DVs <- lists[[1]]
+      relevant_vars <- lists[[2]]
+
+      nns_DVs <- data.frame(do.call(cbind, lapply(nns_DVs, unlist)))
+      RV <- lapply(relevant_vars, function(x) if(length(unlist(x))==0){NA} else {x})
+  } else {
+      nns_DVs <- lists[[1]][[ncol(variables)]]
+      relevant_vars <- lists[[2]][[ncol(variables)]]
+
+      nns_DVs <- data.frame(do.call(cbind, nns_DVs))
+      RV <- lapply(relevant_vars, function(x) if(length(x)==0){NA} else {x})
+  }
+
+
 
   colnames(nns_DVs) <- colnames(variables)
   row.names(nns_DVs) <- seq_len(h)
 
-  RV <- lapply(relevant_vars, function(x) if(is.null(x)){NA} else {x})
 
-  RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
+
+  RV <- data.frame(do.call(cbind, lapply(RV, `length<-`, max(lengths(RV)))))
   colnames(RV) <- as.character(colnames(variables))
+
+
 
   uni <- numeric()
   multi <- numeric()
 
   for(i in 1:length(colnames(RV))){
-      uni[i] <-  .5 + .5*((sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]) -
+      if(length(na.omit(RV[,i])>0)){
+          uni[i] <-  .5 + .5*((sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]==do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]) -
                              sum(unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]!=do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]))
                           / max(ifelse(length(tau)>1, length(tau[[min(i, length(tau))]]), tau), length(na.omit(RV[,i]))))
-      multi[i] <- 1 - uni[i]
+          multi[i] <- 1 - uni[i]
+      } else {
+          uni[i] <- 0.5
+          multi[i] <- 0.5
+      }
   }
 
 
