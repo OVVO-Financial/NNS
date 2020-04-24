@@ -246,7 +246,7 @@ NNS.VAR <- function(variables,
                                ts.test = 2*h, folds = 1,
                                status = status, ncores = num_cores,
                                dim.red.method = dim.red.method,
-                               order = NULL, stack = FALSE)
+                               order = "max", stack = FALSE)
 
 
         nns_DVs[[index]] <- DV_values$stack
