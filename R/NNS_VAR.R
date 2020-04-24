@@ -265,8 +265,9 @@ NNS.VAR <- function(variables,
       nns_DVs <- lists[[1]]
       relevant_vars <- lists[[2]]
 
-      nns_DVs <- data.frame(do.call(cbind, lapply(nns_DVs, unlist)))
+      nns_DVs <- data.frame(do.call(cbind, (lapply(nns_DVs, unlist))))
       RV <- lapply(relevant_vars, function(x) if(length(unlist(x))==0){NA} else {x})
+      RV <- lapply(RV, unlist)
   } else {
       nns_DVs <- lists[[1]][[ncol(variables)]]
       relevant_vars <- lists[[2]][[ncol(variables)]]
@@ -279,8 +280,6 @@ NNS.VAR <- function(variables,
 
   colnames(nns_DVs) <- colnames(variables)
   row.names(nns_DVs) <- seq_len(h)
-
-
 
   RV <- data.frame(do.call(cbind, lapply(RV, `length<-`, max(lengths(RV)))))
   colnames(RV) <- as.character(colnames(variables))
