@@ -751,7 +751,7 @@ NNS.reg = function (x, y,
   regression.points$y <- pmax(regression.points$y, min(y))
 
   if(!is.numeric(order) & !is.null(order)){
-    regression.points <- data.table(cbind.data.frame(x,y))
+    regression.points <- part.map$dt[, .(x,y)]
   }
 
   ### Regression Equation
