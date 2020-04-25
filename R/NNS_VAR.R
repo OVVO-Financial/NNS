@@ -14,6 +14,7 @@
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
+#'  \item{\code{"interpolated_and_extrapolated"}} Returns the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
 #'  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
@@ -104,10 +105,24 @@ NNS.VAR <- function(variables,
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
 
+
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
-    variable <- variables[, i]
-    na_s <- sum(is.na(variable))
-    variable <- na.omit(variable)
+# For Interpolation / Extrapolation of all missing values
+    a <- cbind.data.frame("index" = seq_len(dim(variables)[1]), variables)
+    a <- a[, c(1,(i+1))]
+    interpolation_start <- which(!is.na(a[,2]))[1]
+    interpolation_point <- tail(which(!is.na(a[,2])),1)
+    a <- a[interpolation_start:interpolation_point,]
+    a <- a[complete.cases(a),]
+    nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
+                                     point.est = a$index[a$index<=interpolation_point], plot=FALSE,
+                                     ncores = 1)$Point.est
+
+    new_variable <- nns_IVs$interpolation
+    if(interpolation_point!=tail(a$index,1)){new_variable[(interpolation_point+1):tail(a$index,1)] <- NA}
+
+    na_s <- sum(is.na(new_variable))
+    variable <- na.omit(new_variable)
     periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
@@ -130,16 +145,18 @@ NNS.VAR <- function(variables,
   stopCluster(cl)
   registerDoSEQ()
 
-  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) tail(x, h))))
+  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) head(x, dim(variables)[1]))))
+
+  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(x, h))))
   colnames(nns_IVs_results) <- colnames(variables)
 
   new_values <- list()
 
-  # Combine forecasted IVs onto training data.frame
+  # Combine interpolated / extrapolated / forecasted IVs onto training data.frame
   for(i in 1:ncol(variables)){
-      new_values[[i]] <- c(na.omit(variables[,i]), nns_IVs[[i]]$results  )
-
+      new_values[[i]] <- c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i])
   }
+
 
 
   new_values <- data.frame(do.call(cbind, new_values))
@@ -311,7 +328,8 @@ NNS.VAR <- function(variables,
   colnames(forecasts) <- colnames(variables)
 
 
-  return( list("relevant_variables" = data.frame(RV),
+  return( list("interpolated_and_extrapolated" = data.table(nns_IVs_interpolated_extrapolated),
+              "relevant_variables" = data.frame(RV),
                univariate = nns_IVs_results,
                multivariate = nns_DVs,
                ensemble = forecasts) )
