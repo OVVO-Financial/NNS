@@ -752,6 +752,7 @@ NNS.reg = function (x, y,
 
   if(!is.numeric(order) & !is.null(order)){
     regression.points <- part.map$dt[, .(x,y)]
+    setkey(regression.points, x)
   }
 
   ### Regression Equation
