@@ -121,19 +121,19 @@ NNS.VAR <- function(variables,
     new_variable <- nns_IVs$interpolation
     if(interpolation_point!=tail(a$index,1)){new_variable[(interpolation_point+1):tail(a$index,1)] <- NA}
 
-    na_s <- sum(is.na(new_variable))
-    variable <- na.omit(new_variable)
-    periods <- NNS.seas(variable, modulo = min(tau[[min(i, length(tau))]]),
+    na_s <- tail(a$index,1) - interpolation_point
+
+    periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
-    b <- NNS.ARMA.optim(variable, seasonal.factor = periods,
-                        training.set = length(variable) - 2*(h + na_s),
+    b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
+                        training.set = interpolation_point - 2*(h + na_s),
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
                         ncores = 1)
 
-    nns_IVs$results <- NNS.ARMA(variable, h = (h + na_s), seasonal.factor = b$periods, weights = b$weights,
+    nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s), seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
     nns_IVs$obj_fn <- b$obj.fn
@@ -158,9 +158,10 @@ NNS.VAR <- function(variables,
   }
 
 
-
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
+
+  nns_IVs_interpolated_extrapolated <- head(new_values, dim(variables)[1])
 
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
@@ -186,7 +187,7 @@ NNS.VAR <- function(variables,
 
   if(!is.null(cl)){
     if(status){
-      message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
+      message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     }
     status <- FALSE
   }
