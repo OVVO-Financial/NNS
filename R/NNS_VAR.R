@@ -14,7 +14,7 @@
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
-#'  \item{\code{"interpolated_and_extrapolated"}} Returns the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
+#'  \item{\code{"interpolated_and_extrapolated"}} Returns a \link{data.table} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
 #'  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
@@ -108,20 +108,20 @@ NNS.VAR <- function(variables,
 
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
 # For Interpolation / Extrapolation of all missing values
-    a <- cbind.data.frame("index" = seq_len(dim(variables)[1]), variables)
+    index <- seq_len(dim(variables)[1])
+    a <- cbind.data.frame("index" = index, variables)
     a <- a[, c(1,(i+1))]
     interpolation_start <- which(!is.na(a[,2]))[1]
     interpolation_point <- tail(which(!is.na(a[,2])),1)
     a <- a[interpolation_start:interpolation_point,]
     a <- a[complete.cases(a),]
     nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
-                                     point.est = a$index[a$index<=interpolation_point], plot=FALSE,
+                                     point.est = index[index<=interpolation_point], plot=FALSE,
                                      ncores = 1)$Point.est
 
     new_variable <- nns_IVs$interpolation
-    if(interpolation_point!=tail(a$index,1)){new_variable[(interpolation_point+1):tail(a$index,1)] <- NA}
 
-    na_s <- tail(a$index,1) - interpolation_point
+    na_s <- tail(index,1) - interpolation_point
 
     periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
@@ -135,6 +135,8 @@ NNS.VAR <- function(variables,
 
     nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s), seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
+
+    nns_IVs$interpolation <- c(nns_IVs$interpolation, head(nns_IVs$results, na_s))
 
     nns_IVs$obj_fn <- b$obj.fn
 
