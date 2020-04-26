@@ -4,9 +4,10 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time
 #' @importFrom utils globalVariables head tail combn flush.console
-#' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorderv as.IDate as.ITime
+#' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift
 #' @importFrom dtw dtw
-#' @import data.table
+#' @importFrom dplyr select everything
+#' @importFrom magrittr "%>%"
 #' @import doParallel
 #' @import rgl
 #' @import stringr
@@ -23,7 +24,7 @@
       "NNS.ID","max.x1","max.x2","min.x1","min.x2","counts",'old.counts',
       "Period","Coefficient.of.Variation","Variable.Coefficient.of.Variation", "Sum", "j","lpm","upm", "tau",
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
-      "detectCores","makeCluster","registerDoSEQ","clusterExport",
+      "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
       "%do%", "k", "V1", "residuals"
     ))

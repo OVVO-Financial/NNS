@@ -110,6 +110,8 @@ NNS.VAR <- function(variables,
     colnames(variables) <- var_names
   }
 
+  colnames(variables) <- gsub(" - ", "...", colnames(variables))
+
   # Parallel process...
   if (is.null(ncores)) {
     cores <- detectCores()
@@ -229,7 +231,7 @@ NNS.VAR <- function(variables,
            function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
   }
 
-  lists <- foreach(i = DVs, .packages = "NNS", .combine = 'comb', .init = list(list(), list()),
+  lists <- foreach(i = 1:ncol(variables), .packages = "NNS", .combine = 'comb', .init = list(list(), list()),
                    .multicombine = TRUE)%dopar%{
     index <- which(DVs==i)
 

@@ -153,6 +153,7 @@ lag.mtx <- function(x, tau){
     mtx <- mtx[ , relevant_lags]
   }
 
+  mtx <- mtx %>% select(which(grepl("tau_0", colnames(mtx))), everything())
   return(mtx)
 }
 
