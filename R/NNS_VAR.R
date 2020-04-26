@@ -125,13 +125,13 @@ NNS.VAR <- function(variables,
   if(status){
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
+
+
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
 # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
     last_point <- tail(index, 1)
     a <- cbind.data.frame("index" = index, variables)
-
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
-
     a <- a[, c(1,(i+1))]
     interpolation_start <- which(!is.na(a[,2]))[1]
     interpolation_point <- tail(which(!is.na(a[,2])), 1)
