@@ -144,7 +144,7 @@ NNS.VAR <- function(variables,
 
     if(dim(a)[1]<last_point){
         nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
-                                        point.est = index[index<=interpolation_point], plot=FALSE,
+                                        point.est = index, plot=FALSE,
                                         ncores = 1)$Point.est
 
         new_variable <- nns_IVs$interpolation
@@ -168,7 +168,11 @@ NNS.VAR <- function(variables,
     nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s), seasonal.factor = b$periods, weights = b$weights,
              method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
-    nns_IVs$interpolation <- c(nns_IVs$interpolation, head(nns_IVs$results, na_s))
+    if(na_s > 0){
+        na_s_extrapolation <- rowMeans(cbind(tail(nns_IVs$interpolation, na_s), head(nns_IVs$results, na_s)))
+        nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
+    }
+
 
     nns_IVs$obj_fn <- b$obj.fn
 
