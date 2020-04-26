@@ -36,7 +36,7 @@ NNS.VAR(
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
- \item{\code{"interpolated_and_extrapolated"}} Returns the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
+ \item{\code{"interpolated_and_extrapolated"}} Returns a \link{data.table} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
@@ -58,6 +58,10 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 \examples{
 
  \dontrun{
+ ####################################################
+ ### Standard Nonparametric Vector Autoregression ###
+ ####################################################
+
  set.seed(123)
  x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
  A <- cbind(x = x, y = y, z = z)
@@ -70,6 +74,23 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 
  ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
  NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6), c(1,2,3)), status = TRUE)
+
+
+ #########################################
+ ### NOWCASTING with Mixed Frequencies ###
+ #########################################
+
+ library(Quandl)
+ econ_variables <- Quandl(c("FRED/GDPC1", "FRED/UNRATE", "FRED/CPIAUCSL"),type = 'ts',order = "asc",
+                             collapse = "monthly", start_date="2000-01-01")
+
+ ### Note the missing values that need to be imputed
+ row.names(econ_variables) <- as.character(as.Date(time(econ_variables)))
+ head(econ_variables)
+ tail(econ_variables)
+
+
+ NNS.VAR(econ_variables, h = 12, tau = 12, status = TRUE)
  }
 
 }
