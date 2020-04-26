@@ -127,6 +127,8 @@ NNS.VAR <- function(variables,
   }
 
 
+
+
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
 # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
@@ -200,7 +202,7 @@ NNS.VAR <- function(variables,
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
 
   # Select tau = 0 as test set DVs
-  DVs <- which(grepl("tau.0", colnames(lagged_new_values)))
+  DVs <- which(grepl("tau_0", colnames(lagged_new_values)))
 
   nns_DVs <- list()
 
@@ -275,6 +277,7 @@ NNS.VAR <- function(variables,
     }
 
     rel_vars <- names(rel_vars[rel_vars>cor_threshold$NNS.dim.red.threshold])
+    rel_vars <- rel_vars[rel_vars!=i]
 
     relevant_vars[[index]] <- rel_vars
 
