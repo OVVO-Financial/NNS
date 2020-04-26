@@ -49,6 +49,10 @@
 #' @examples
 #'
 #'  \dontrun{
+#'  ####################################################
+#'  ### Standard Nonparametric Vector Autoregression ###
+#'  ####################################################
+#'
 #'  set.seed(123)
 #'  x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #'  A <- cbind(x = x, y = y, z = z)
@@ -61,6 +65,23 @@
 #'
 #'  ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
 #'  NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6), c(1,2,3)), status = TRUE)
+#'
+#'
+#'  #########################################
+#'  ### NOWCASTING with Mixed Frequencies ###
+#'  #########################################
+#'
+#'  library(Quandl)
+#'  econ_variables <- Quandl(c("FRED/GDPC1", "FRED/UNRATE", "FRED/CPIAUCSL"),type = 'ts',order = "asc",
+#'                              collapse = "monthly", start_date="2000-01-01")
+#'
+#'  ### Note the missing values that need to be imputed
+#'  row.names(econ_variables) <- as.character(as.Date(time(econ_variables)))
+#'  head(econ_variables)
+#'  tail(econ_variables)
+#'
+#'
+#'  NNS.VAR(econ_variables, h = 12, tau = 12, status = TRUE)
 #'  }
 #'
 #' @export
@@ -104,24 +125,31 @@ NNS.VAR <- function(variables,
   if(status){
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   }
-
-
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
 # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
+    last_point <- tail(index, 1)
     a <- cbind.data.frame("index" = index, variables)
+
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
+
     a <- a[, c(1,(i+1))]
     interpolation_start <- which(!is.na(a[,2]))[1]
-    interpolation_point <- tail(which(!is.na(a[,2])),1)
+    interpolation_point <- tail(which(!is.na(a[,2])), 1)
     a <- a[interpolation_start:interpolation_point,]
     a <- a[complete.cases(a),]
-    nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
-                                     point.est = index[index<=interpolation_point], plot=FALSE,
-                                     ncores = 1)$Point.est
 
-    new_variable <- nns_IVs$interpolation
+    if(dim(a)[1]<last_point){
+        nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
+                                        point.est = index[index<=interpolation_point], plot=FALSE,
+                                        ncores = 1)$Point.est
 
-    na_s <- tail(index,1) - interpolation_point
+        new_variable <- nns_IVs$interpolation
+    } else {
+        new_variable <- variables[,i]
+        nns_IVs$interpolation <- new_variable
+    }
+
+    na_s <- tail(index, 1) - interpolation_point
 
     periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
