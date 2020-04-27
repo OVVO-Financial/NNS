@@ -415,7 +415,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
   d.dx <- (abs(max(target)) + abs(min(target))) / bins
   tgt <- seq(min(target), max(target), d.dx)
 
-  CDF <- NNS.CDF(variable, plot = FALSE)$Function
+  CDF <- NNS.CDF(variable, plot = FALSE, degree = degree)$Function
   PDF <- dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt)
 
   if(plot){plot(tgt, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
@@ -473,10 +473,10 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
   if(!is.null(target)){
      if(is.null(dim(variable)) || dim(variable)[2]==1){
-        if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
+          if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
      } else {
-      if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
-      if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
+        if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
+        if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
     }
   }
 
@@ -487,6 +487,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
   if(is.null(dim(variable)) || dim(variable)[2]==1){
 
     overall_target <- sort(variable)
+    x <- overall_target
 
     if(degree > 0){
       CDF <- LPM.ratio(degree, overall_target, variable)
@@ -505,7 +506,6 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     }
 
     ylabel <- "Probability"
-    x <- sort(variable)
 
     if(type == "survival"){
       CDF <- 1 - CDF
@@ -576,7 +576,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     }
 
     if(type == "cumulative hazard"){
-      CDF <- -log((1 - CDF))
+        CDF <- -log((1 - CDF))
     }
 
 
