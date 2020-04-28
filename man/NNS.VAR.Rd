@@ -101,6 +101,9 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression Using NNS"
 \url{https://ssrn.com/abstract=3489550}
 
+Viole, F. (2020) "NOWCASTING with NNS"
+\url{https://ssrn.com/abstract=3586658}
+
 Viole, F. (2019) "Forecasting Using NNS"
 \url{https://ssrn.com/abstract=3382300}
 
