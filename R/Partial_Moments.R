@@ -496,6 +496,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       CDF <- cdf_fun(overall_target)
     }
 
+
     values <- cbind.data.frame(sort(variable), CDF)
     colnames(values) <- c(deparse(substitute(variable)), "CDF")
 
