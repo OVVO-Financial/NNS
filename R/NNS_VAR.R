@@ -204,7 +204,10 @@ NNS.VAR <- function(variables,
           last_point <- tail(index, 1) - na_s[i]
           a <- cbind.data.frame(nns_IVs_interpolated_extrapolated, "index" = index)
 
-          mutlivariate_extrapolation <- NNS.reg(a[1:last_point, -i], a[1:last_point, i], point.est = a[, -i], order = "max", n.best = 1, plot = FALSE)$Point.est
+          mutlivariate_extrapolation <- NNS.stack(a[1:last_point, -i], a[1:last_point, i],
+                                                  IVs.test = a[, -i],
+                                                  order = "max",
+                                                  folds = 1)$stack
 
           return(rowMeans(cbind(a[,i], mutlivariate_extrapolation)))
 
