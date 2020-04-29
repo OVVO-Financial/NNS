@@ -81,11 +81,10 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  #########################################
 
  library(Quandl)
- econ_variables <- Quandl(c("FRED/GDPC1", "FRED/UNRATE", "FRED/CPIAUCSL"),type = 'ts',order = "asc",
-                             collapse = "monthly", start_date="2000-01-01")
+ econ_variables <- Quandl(c("FRED/GDPC1", "FRED/UNRATE", "FRED/CPIAUCSL"),type = 'ts',
+                          order = "asc", collapse = "monthly", start_date="2000-01-01")
 
  ### Note the missing values that need to be imputed
- row.names(econ_variables) <- as.character(as.Date(time(econ_variables)))
  head(econ_variables)
  tail(econ_variables)
 
