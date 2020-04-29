@@ -152,8 +152,11 @@ lag.mtx <- function(x, tau){
     relevant_lags <- sort(unlist(relevant_lags))
     mtx <- mtx[ , relevant_lags]
   }
+  vars <- which(grepl("tau_0", colnames(mtx)))
 
-  mtx <- mtx %>% select(which(grepl("tau_0", colnames(mtx))), everything())
+  everything_else <- seq_len(dim(mtx)[2])[-vars]
+  mtx <- mtx[,c(vars, everything_else)]
+
   return(mtx)
 }
 

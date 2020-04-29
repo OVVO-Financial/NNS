@@ -6,11 +6,10 @@
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift
 #' @importFrom dtw dtw
-#' @importFrom dplyr select everything
-#' @importFrom magrittr "%>%"
 #' @import doParallel
 #' @import rgl
 #' @import stringr
+
 
 
 .onLoad <- function(libname = find.package("NNS"), pkgname = "NNS"){
