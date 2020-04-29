@@ -145,7 +145,7 @@ NNS.VAR <- function(variables,
     a <- a[complete.cases(a),]
 
     if(dim(a)[1]<last_point){
-        nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = NULL,
+        nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
                                         point.est = index, plot=FALSE,
                                         ncores = 1)$Point.est
 
