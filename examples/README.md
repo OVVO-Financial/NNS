@@ -50,20 +50,21 @@ See the following for NNS detailed examples and specific applications:
    
 
 # 3. Machine Learning
+   3.1 [Partitional Estimation Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partitional_Estimation_Using_Partial_Moments.pdf)
 
-   3.1 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
+   3.2 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
-   3.2 [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
+   3.3 [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
    
-   3.3 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
+   3.4 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
    
-   3.4 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
+   3.5 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
    
-   3.5 [Time-Series Classification II](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
+   3.6 [Time-Series Classification II](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
 
-   3.6 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   3.7 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
    
-   3.7 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
+   3.8 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
 
 
 # 4. Time-Series Forecasting
