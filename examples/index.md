@@ -50,7 +50,7 @@ See the following for NNS detailed examples and specific applications:
    
 
 # 3. Machine Learning
-   3.1 [Partitional Based Estimation Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partitional_Estimation_Using_Partial_Moments.pdf)
+   3.1 [Partitional Based Estimation Using Partial Moments](https://ssrn.com/abstract=3592491)
 
    3.2 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
