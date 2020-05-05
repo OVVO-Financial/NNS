@@ -114,7 +114,7 @@ x = seq(0, 1, .001) ; y = x ^ 2
 (UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)
 ```
 
-$$0.3333=\frac{\int_{0}^{1} x^2 dx}{1-0}$$
+$$0.3333 * [1-0] = \int_{0}^{1} x^2 dx$$
 For the total area, not just the definite integral, simply sum the partial moments and multiply by $[b - a]$:
 $$[UPM(1,0,f(x))+LPM(1,0,f(x))] *[b-a]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert$$
 

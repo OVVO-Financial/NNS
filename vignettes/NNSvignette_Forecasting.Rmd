@@ -18,6 +18,7 @@ require(knitr)
 require(rgl)
 require(data.table)
 require(dtw)
+library(meboot)
 ```
 
 
@@ -149,11 +150,12 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
 ## Extension of Estimates
-Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h = 50`), by dropping the `training.set` parameter.
+Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-range (`h = 50`), by dropping the `training.set` parameter while generating the 95% confidence intervals.
 
 ```{r extension,results='hide',fig.width=5,fig.height=3,fig.align = "center"}
 NNS.ARMA(AirPassengers, 
-         h = 50, 
+         h = 50,
+         conf.intervals = .95,
          seasonal.factor = nns.optimal$periods, 
          method  = nns.optimal$method, 
          weights = nns.optimal$weights, 
@@ -171,6 +173,10 @@ We included the ability to use any number of specified seasonal periods simultan
 Instead of weighting by the `seasonal.factor` strength of seasonality, we offer the ability to weight each per any defined compatible vector summing to 1.  
 Equal weighting would be `weights = rep((1/length(seasonal.factor)), length(seasonal.factor))`.
 
+* `conf.intervals`
+
+Provides the values for the specified confidence intervals within [0,1] for each forecasted point and plots the bootstapped replicates for the forecasted points.
+
 * `seasonal.factor = FALSE`
 
 We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
@@ -183,9 +189,9 @@ This parameter restricts the number of detected seasonal periods to use, again, 
 
 This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`.  Also computationally expensive due to the recalculation of seasonal periods for each estimated value.
 
-* `plot` , `seasonal.plot` and `intervals`
+* `plot` , `seasonal.plot` 
 
-These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot = TRUE` will not plot without `plot = TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  `intervals` will plot the surrounding estimated values iff `intervals = TRUE & seasonal.factor = FALSE`.
+These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot = TRUE` will not plot without `plot = TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  
 
 # Multivariate Time Series Forecasting
 The extension to a generalized multivariate instance is provided in the following documentation of the `NNS.VAR()` function:
