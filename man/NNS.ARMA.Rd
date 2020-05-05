@@ -49,7 +49,7 @@ NNS.ARMA(
 
 \item{seasonal.plot}{logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.}
 
-\item{conf.intervals}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.}
+\item{conf.intervals}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstap \link{meboot} on the final estimates.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
