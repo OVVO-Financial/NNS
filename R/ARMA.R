@@ -19,9 +19,9 @@
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
-#' @param intervals logical; \code{FALSE} (default) Plots the surrounding forecasts around the final estimate when \code{(intervals = TRUE)} and \code{(seasonal.factor = FALSE)}.  There are no other forecasts to plot when a single \code{seasonal.factor} is selected.
+#' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstap \link{meboot} on the final estimates.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
-#' @return Returns a vector of forecasts of length \code{(h)}.
+#' @return Returns a vector of forecasts of length \code{(h)} if no \code{conf.intervals} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper confidence intervals per forecast point.
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
 #' \code{(seasonal.factor = c(36, 48, 72))}.
@@ -70,16 +70,9 @@ NNS.ARMA <- function(variable,
                      dynamic = FALSE,
                      plot = TRUE,
                      seasonal.plot = TRUE,
-                     intervals = FALSE,
+                     conf.intervals = NULL,
                      ncores = NULL){
 
-  if(intervals && is.numeric(seasonal.factor)){
-      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals = FALSE" or "seasonal.factor = FALSE"')
-  }
-
-  if(intervals && seasonal.factor){
-      stop('Hmmm...Seems you have "intervals" and "seasonal.factor" selected.  Please set "intervals = FALSE" or "seasonal.factor = FALSE"')
-  }
 
   if(is.numeric(seasonal.factor) && dynamic){
       stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
@@ -172,7 +165,7 @@ NNS.ARMA <- function(variable,
     }
   }
 
-  Estimate.band <- list()
+
 
   # Regression for each estimate in h
   for (j in 1 : h){
@@ -254,17 +247,6 @@ NNS.ARMA <- function(variable,
     }
 
 
-    if(intervals){
-      if(method == 'both'){
-        Estimate.band[[j]] <- c(NL.Regression.Estimates, L.Regression.Estimates)
-      }
-      if(method == 'nonlin'){
-        Estimate.band[[j]] <- NL.Regression.Estimates
-      }
-      if(method == 'lin'){
-        Estimate.band[[j]] <- L.Regression.Estimates
-      }
-    }
 
     if(method == 'both'){
         Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
@@ -281,6 +263,11 @@ if(!is.null(cl)){
     stopCluster(cl)
     registerDoSEQ()
 }
+
+  #return(Estimates)
+  if(!is.null(conf.intervals)){
+      CIs <- meboot(Estimates, reps=399)$ensemble
+  }
 
 
   #### PLOTTING
@@ -306,14 +293,14 @@ if(!is.null(cl)){
       label <- "Variable"
     }
 
-    if(intervals){
+
+    if(!is.null(conf.intervals)){
       plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
            xlim = c(1, max((training.set + h), length(OV))),
-           ylab = label, ylim = c(min(Estimates, OV,  unlist(Estimate.band) ), max(OV, Estimates, unlist(Estimate.band) )) )
+           ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
 
-      for(i in 1 : h){
-        ys <- unlist(Estimate.band[[i]])
-        points(rep(training.set + i, length(ys)), ys, pch = 15, col = rgb(1, 0, 0, 0.125))
+      for(i in 1 : 399){
+        lines((training.set+1) : (training.set+h), CIs[,i],  col = rgb(0.75,0.75,0.75, 0.05))
       }
 
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
@@ -343,6 +330,15 @@ if(!is.null(cl)){
   }
 
   options(warn = oldw)
-  return(Estimates)
-
+  if(!is.null(conf.intervals)){
+      upper_CIs <- apply(CIs, 1, function(z) UPM.VaR(conf.intervals, 0, z))
+      lower_CIs <- apply(CIs, 1, function(z) LPM.VaR(conf.intervals, 0, z))
+      results <- cbind.data.frame(Estimates,  lower_CIs,  upper_CIs)
+      colnames(results) = c("Estimates",
+                            paste0("Lower ", round(conf.intervals*100,2), "% CI"),
+                            paste0("Upper ", round(conf.intervals*100,2), "% CI"))
+      return(data.table(results))
+  } else {
+      return(Estimates)
+  }
 }

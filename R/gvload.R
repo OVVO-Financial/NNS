@@ -6,9 +6,11 @@
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift
 #' @importFrom dtw dtw
+#' @importFrom meboot meboot
 #' @import doParallel
 #' @import rgl
 #' @import stringr
+#' @import meboot
 
 
 
@@ -32,6 +34,7 @@
   requireNamespace("rgl")
   requireNamespace("doParallel")
   requireNamespace("stringr")
+  requireNamespace("meboot")
 
   .datatable.aware = TRUE
 
