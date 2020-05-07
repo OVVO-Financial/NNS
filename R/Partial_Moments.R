@@ -334,14 +334,15 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = "mean", variable, pop.adj
 #' @export
 
 LPM.ratio <- function(degree, target, variable){
+  if(degree>0){
+      area <- LPM(degree, target, variable) + UPM(degree, target, variable)
+  } else {
+      area <- 1
+  }
+
   lpm <- LPM(degree, target, variable)
 
-  if(degree > 0){
-      upm <- UPM(degree, target, variable)
-      return(lpm / (lpm + upm))
-  } else {
-      return(lpm)
-  }
+  return(lpm / area)
 }
 
 
@@ -371,14 +372,13 @@ LPM.ratio <- function(degree, target, variable){
 
 
 UPM.ratio <- function(degree, target, variable){
-  upm <- UPM(degree, target, variable)
-
-  if(degree > 0){
-    lpm <- LPM(degree, target, variable)
-    return(upm / (lpm + upm))
+  if(degree>0){
+    area <- LPM(degree, target, variable) + UPM(degree, target, variable)
   } else {
-    return(upm)
+    area <- 1
   }
+
+  return(upm / area)
 }
 
 
