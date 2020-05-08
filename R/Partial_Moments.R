@@ -378,6 +378,8 @@ UPM.ratio <- function(degree, target, variable){
     area <- 1
   }
 
+  upm <- UPM(degree, target, variable)
+
   return(upm / area)
 }
 
