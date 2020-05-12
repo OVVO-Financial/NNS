@@ -129,8 +129,8 @@ NNS.dep.base <- function(x,
 
           disp[is.na(disp)] <- 0
 
-          nns.cor <- sum(disp * min_part.df[, mean(weight), by = quadrant]$V1)
-          nns.dep <- sum(abs(disp) * min_part.df[, mean(weight), by = quadrant]$V1)
+          nns.cor <- sum(disp * min_part.df[, weight[1], by = quadrant]$V1)
+          nns.dep <- sum(abs(disp) * min_part.df[, weight[1], by = quadrant]$V1)
 
           options(warn = oldw)
           return(list(Correlation = nns.cor, Dependence = nns.dep))

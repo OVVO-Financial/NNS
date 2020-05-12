@@ -276,9 +276,10 @@ NNS.stack <- function(IVs.train,
     if(1 %in% method){
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
-      if(length(relevant_vars)==0){
-          relevant_vars <- seq_along(dim(IVs.train)[2])
+      if(length(relevant_vars)<=1 || is.logical(relevant_vars)){
+          relevant_vars <- seq_len(dim(IVs.train)[2])
       }
+
       CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
       CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
 
