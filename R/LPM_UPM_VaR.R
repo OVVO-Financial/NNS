@@ -21,9 +21,8 @@ LPM.VaR <- function(percentile, degree, x){
     l <- length(x)
     sort_x <- sort(x)
     vars <- LPM.ratio(degree, sort_x, x)
-    index <- findInterval(1 - percentile, vars)
-    interpolation <-  approx(c(vars[index-1], vars[index+1]), c(sort_x[index-1], sort_x[index+1]), n = ifelse(l<100,l^2, l))
-    return(interpolation$y[which.min(abs(interpolation$x - (1 - percentile)))])
+    td <- tdigest(x, compression = max(100, log(l,10)*100))
+    return(tquantile(td, (1-percentile)))
 }
 
 #' UPM VaR
@@ -46,8 +45,7 @@ UPM.VaR <- function(percentile, degree, x){
     l <- length(x)
     sort_x <- sort(x)
     vars <- LPM.ratio(degree, sort_x, x)
-    index <- findInterval(percentile, vars)
-    interpolation <-  approx(c(vars[index-1], vars[index+1]), c(sort_x[index-1], sort_x[index+1]), n = ifelse(l<100,l^2, l))
-    return(interpolation$y[which.min(abs(interpolation$x - percentile))])
+    td <- tdigest(x, compression = max(100, log(l,10)*100))
+    return(tquantile(td, percentile))
 }
 

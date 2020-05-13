@@ -7,10 +7,12 @@
 #' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift
 #' @importFrom dtw dtw
 #' @importFrom meboot meboot
+#' @importFrom tdigest tdigest tquantile
 #' @import doParallel
 #' @import rgl
 #' @import stringr
 #' @import meboot
+#' @import tdigest
 
 
 
@@ -27,7 +29,8 @@
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
       "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
-      "%do%", "k", "V1", "residuals"
+      "%do%", "k", "V1", "residuals",
+      "tdigest", "tquantile"
     ))
 
   requireNamespace("data.table")
@@ -35,6 +38,7 @@
   requireNamespace("doParallel")
   requireNamespace("stringr")
   requireNamespace("meboot")
+  requireNamespace("tdigest")
 
   .datatable.aware = TRUE
 
