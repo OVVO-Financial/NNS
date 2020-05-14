@@ -78,14 +78,14 @@ NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
       }
   }
 
-  NNS.TM <- (t(sapply(1 : length(x[ , 1]), function(i) str_count(x[i, 1], unique.vocab))))
+  NNS.TM <- (t(sapply(1 : length(x[ , 1]), function(i) stringr::str_count(x[i, 1], unique.vocab))))
 
   if(names){
       colnames(NNS.TM) <- c(unique.vocab)
   }
 
   if(!is.null(oos)){
-      OOS.TM <- (t(sapply(1 : length(oos), function(i) str_count(oos[i], unique.vocab))))
+      OOS.TM <- (t(sapply(1 : length(oos), function(i) stringr::str_count(oos[i], unique.vocab))))
   if(names){
       colnames(OOS.TM) <- c(unique.vocab)
   }

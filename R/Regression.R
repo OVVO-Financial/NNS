@@ -381,9 +381,9 @@ NNS.reg = function (x, y,
 
           DENOMINATOR <- sum( abs( x.star.coef) > 0)
 
-          synthetic.x.equation.coef <- data.table(Variable = colnames.list, Coefficient = x.star.coef)
+          synthetic.x.equation.coef <- data.table::data.table(Variable = colnames.list, Coefficient = x.star.coef)
 
-          synthetic.x.equation <- rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
+          synthetic.x.equation <- data.table::rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
 
 
           if(!is.null(point.est)){
@@ -409,7 +409,7 @@ NNS.reg = function (x, y,
 
           x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
 
-          x.star <- data.table(x.star = x)
+          x.star <- data.table::data.table(x.star = x)
 
         }
 
@@ -475,7 +475,7 @@ NNS.reg = function (x, y,
 
   regression.points <- part.map$regression.points[,.(x,y)]
   regression.points$x <- pmin(max(x), pmax(regression.points$x, min(x)))
-  setkey(regression.points,x)
+  data.table::setkey(regression.points,x)
 
   min.range <- min(regression.points$x)
   max.range <- max(regression.points$x)
@@ -603,19 +603,19 @@ NNS.reg = function (x, y,
 
 
   ### Mid Endpoints
-  mid.max.rps <- data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
+  mid.max.rps <- data.table::data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
                                                c(max(x), mean(x.max)))))
 
-  mid.min.rps <- data.table(do.call(rbind,list(c(min(x), mean(x0)),
+  mid.min.rps <- data.table::data.table(do.call(rbind,list(c(min(x), mean(x0)),
                                                c(mid.min.range, Dynamic.average.mid.min))))
 
-  regression.points <- rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
+  regression.points <- data.table::rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
 
-  regression.points <- rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
+  regression.points <- data.table::rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
 
   regression.points <- regression.points[complete.cases(regression.points),]
   regression.points <- regression.points[ , .(x,y)]
-  setkey(regression.points, x, y)
+  data.table::setkey(regression.points, x, y)
   regression.points <- unique(regression.points)
 
   ### Consolidate possible duplicated points
@@ -638,15 +638,15 @@ NNS.reg = function (x, y,
   }
 
   if(dim(regression.points)[1]>1){
-    rise <- regression.points[ , 'rise' := y - shift(y)]
-    run <- regression.points[ , 'run' := x - shift(x)]
+    rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
+    run <- regression.points[ , 'run' := x - data.table::shift(x)]
   } else {
     rise <- max(y) - min(y)
     rise <- regression.points[ , 'rise' := rise]
     run <- max(x) - min(x)
     if(run==0) run <- 1
     run <- regression.points[ , 'run' := run]
-    regression.points <- rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
+    regression.points <- data.table::rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
   }
 
   Regression.Coefficients <- regression.points[ , .(rise,run)]
@@ -707,7 +707,7 @@ NNS.reg = function (x, y,
     estimate <- round(estimate)
   }
 
-  fitted <- data.table(x = part.map$dt$x,
+  fitted <- data.table::data.table(x = part.map$dt$x,
                        y = part.map$dt$y,
                        y.hat = estimate,
                        NNS.ID = part.map$dt$quadrant)
@@ -730,14 +730,14 @@ NNS.reg = function (x, y,
   fitted$residuals <- fitted$y.hat - fitted$y
 
   bias <- fitted
-  setkey(bias, x)
+  data.table::setkey(bias, x)
 
   bias <- bias[, mean(residuals)*-1, by = gradient]
   fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
 
-  bias[, bias := lapply(.SD, frollmean, n = 2, fill = NA, align = 'right'), .SDcols = 2]
+  bias[, bias := lapply(.SD, data.table::frollmean, n = 2, fill = NA, align = 'right'), .SDcols = 2]
 
-  bias <- rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
+  bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
   bias[is.na(bias)] <- 0
 
   if(!is.null(type)){
@@ -750,9 +750,9 @@ NNS.reg = function (x, y,
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))
 
-  if(!is.numeric(order) & !is.null(order)){
+  if(!is.numeric(order) && !is.null(order)){
     regression.points <- part.map$dt[, .(x,y)]
-    setkey(regression.points, x)
+    data.table::setkey(regression.points, x)
   }
 
   ### Regression Equation
@@ -761,8 +761,8 @@ NNS.reg = function (x, y,
   }
 
 
-  rise <- regression.points[ , 'rise' := y - shift(y)]
-  run <- regression.points[ , 'run' := x - shift(x)]
+  rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
+  run <- regression.points[ , 'run' := x - data.table::shift(x)]
 
 
   Regression.Coefficients <- regression.points[ , .(rise,run)]
@@ -820,7 +820,7 @@ NNS.reg = function (x, y,
     estimate <- round(estimate)
   }
 
-  fitted <- data.table(x = part.map$dt$x,
+  fitted <- data.table::data.table(x = part.map$dt$x,
                        y = part.map$dt$y,
                        y.hat = estimate,
                        NNS.ID = part.map$dt$quadrant)

@@ -397,7 +397,7 @@ NNS.VAR <- function(variables,
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
 
-  IE <- data.table(nns_IVs_interpolated_extrapolated)
+  IE <- data.table::data.table(nns_IVs_interpolated_extrapolated)
   colnames(IE) <- colnames(variables)
 
   return( list("interpolated_and_extrapolated" = IE,

@@ -28,13 +28,13 @@
 
 dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
 
-  order = NULL
+  order <- NULL
 
-  if(!is.null(ncol(x)) & is.null(colnames(x))){
+  if(!is.null(ncol(x)) && is.null(colnames(x))){
     x <- data.frame(x)
   }
 
-  if(length(eval.point) > 1 & deriv.method == "NNS"){
+  if(length(eval.point) > 1 && deriv.method == "NNS"){
     deriv.method <- "FS"
   }
 
@@ -97,7 +97,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.
       }
     } else {
       ## Second derivative form:
-      # f(x+h) - 2(f(x)) +f(x-h) / h^2
+      # [f(x+h) - 2(f(x)) + f(x-h)] / h^2
 
       h_step <- abs(h * diff(range(x)))
       deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)

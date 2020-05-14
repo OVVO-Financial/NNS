@@ -96,13 +96,13 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-  rep.x <- data.table(x)
+  rep.x <- data.table::data.table(x)
 
   fivenum.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
   mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(z))), by = .(y)]
   mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(z))), by = .(y)]
 
-  rep.x <- rbindlist(list(fivenum.x, mode.x, mean.x), use.names = FALSE)
+  rep.x <- data.table::rbindlist(list(fivenum.x, mode.x, mean.x), use.names = FALSE)
 
   rep.y <- unlist(rep.x[,1])
   rep.x <- rep.x[,-1]
@@ -171,14 +171,14 @@ NNS.boost <- function(IVs.train,
       }
 
       new.index <- unlist(new.index)
-      new.iv.train <- data.table(x[-new.index,])
+      new.iv.train <- data.table::data.table(x[-new.index,])
       new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
       mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
       mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
 
-      new.iv.train <- rbindlist(list(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train), use.names = FALSE)
+      new.iv.train <- data.table::rbindlist(list(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train), use.names = FALSE)
 
       new.iv.train <- as.data.frame(new.iv.train[,-1])
       new.dv.train <- unlist(new.iv.train[,1])
@@ -288,7 +288,7 @@ NNS.boost <- function(IVs.train,
       }
 
       new.index <- unlist(new.index)
-      new.iv.train <- data.table(x[-new.index, ])
+      new.iv.train <- data.table::data.table(x[-new.index, ])
       new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
       fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
@@ -301,7 +301,7 @@ NNS.boost <- function(IVs.train,
       names(mode.new.iv.train) <- c("y", colnames(new.iv.train))
 
 
-      new.iv.train <- rbindlist(list(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train), use.names = FALSE)
+      new.iv.train <- data.table::rbindlist(list(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train), use.names = FALSE)
 
       new.iv.train <- as.data.frame(new.iv.train[, -1])
       new.dv.train <- unlist(new.iv.train[, 1])
@@ -380,7 +380,7 @@ NNS.boost <- function(IVs.train,
   x <- rbind(rep.x, data.matrix(x))
   y <- c(rep.y, y)
 
-  kf <- data.table(table(as.character(keeper.features)))
+  kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
 
 

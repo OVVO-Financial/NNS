@@ -51,15 +51,15 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
     if(plot && n == 3){
 
-        plot3d(x = A[ , 1], y = A[ , 2], z = A[ , 3], box = FALSE, size = 3,
+        rgl::plot3d(x = A[ , 1], y = A[ , 2], z = A[ , 3], box = FALSE, size = 3,
            col=ifelse((A[ , 1] <= median(A[ , 1])) & (A[ , 2] <= median(A[ , 2])) & (A[ , 3] <= median(A[ , 3])), 'red' ,
                       ifelse((A[ , 1] > median(A[ , 1])) & (A[ , 2] > median(A[ , 2])) & (A[ , 3] > median(A[ , 3])), 'green',
                       'steelblue')), xlab = colnames(A)[1], ylab = colnames(A)[2], zlab = colnames(A)[3])
 
         if(independence.overlay == TRUE){
 
-            clpm.box <- cube3d(color = "red", alpha = 0.25)
-            cupm.box <- cube3d(color = "green", alpha = 0.25)
+            clpm.box <- rgl::cube3d(color = "red", alpha = 0.25)
+            cupm.box <- rgl::cube3d(color = "green", alpha = 0.25)
 
             clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == -1, min(A[ , 1]))
             clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == -1, min(A[ , 2]))
@@ -76,8 +76,8 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
             cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == -1, median(A[, 3]))
 
 
-            shade3d(clpm.box)
-            shade3d(cupm.box)
+            rgl::shade3d(clpm.box)
+            rgl::shade3d(cupm.box)
 
 
         }

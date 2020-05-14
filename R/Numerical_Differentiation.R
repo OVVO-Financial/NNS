@@ -185,9 +185,9 @@ NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
     }
 
 
-    new.B = mean(c(lower.B, upper.B))
+    new.B <- mean(c(lower.B, upper.B))
 
-    i = i + 1
+    i <- i + 1
   }
   options(digits = orig.dig)
 }

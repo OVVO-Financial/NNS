@@ -337,7 +337,7 @@ if(!is.null(cl)){
       colnames(results) = c("Estimates",
                             paste0("Lower ", round(conf.intervals*100,2), "% CI"),
                             paste0("Upper ", round(conf.intervals*100,2), "% CI"))
-      return(data.table(results))
+      return(data.table::data.table(results))
   } else {
       return(Estimates)
   }

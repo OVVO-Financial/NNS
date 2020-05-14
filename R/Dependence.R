@@ -132,8 +132,8 @@ NNS.dep = function(x,
     nns.dep <- list(5L)
 
     if(any(unlist(uniques)==1)){
-      DT <- data.table(x, y)
-      setkey(DT[, x := x], x)
+      DT <- data.table::data.table(x, y)
+      data.table::setkey(DT[, x := x], x)
 
       for(i in 1:3){
         if(i==1){

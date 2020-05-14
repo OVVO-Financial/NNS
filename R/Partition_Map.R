@@ -77,7 +77,7 @@ NNS.part = function(x, y,
         obs.req <- 0
     }
 
-    PART <- data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
+    PART <- data.table::data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
 
     if(Voronoi) {
         plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
@@ -247,7 +247,7 @@ NNS.part = function(x, y,
         }
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
-        RP <- setorder(RP[], quadrant)[]
+        RP <- data.table::setorder(RP[], quadrant)[]
 
         if (Voronoi) {
             title(main = paste0("NNS Order = ", i), cex.main = 2)
@@ -357,7 +357,7 @@ NNS.part = function(x, y,
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
-        RP <- setorder(RP[], quadrant)[]
+        RP <- data.table::setorder(RP[], quadrant)[]
 
         if(Voronoi) {
             abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1,max(x)), lty = 3)

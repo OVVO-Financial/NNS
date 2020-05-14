@@ -80,7 +80,7 @@ dy.d_<- function(x, y, wrt,
     message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
-  if(is.null(dim(eval.points)) || dim(eval.points)[2]==1){
+  if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
     h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
 
     if(length(eval.points)==dim(x)[2]){
@@ -188,8 +188,8 @@ dy.d_<- function(x, y, wrt,
     }
 
     z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
-    z <- z[,1]+z[,4]-z[,2]-z[,3]
-    mixed <- (z/mixed.distances)
+    z <- z[,1] + z[,4] - z[,2] - z[,3]
+    mixed <- (z / mixed.distances)
 
 
     return(list("First Derivative" = rise / distance_wrt,

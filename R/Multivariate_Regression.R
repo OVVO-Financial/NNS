@@ -40,7 +40,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   sections <- list()
 
   ###  Regression Point Matrix
-  if(is.numeric(order) | is.null(order)){
+  if(is.numeric(order) || is.null(order)){
 
     reg.points <- apply(original.IVs,2, function(b) NNS.reg(b, original.DV, factor.2.dummy = FALSE, order = order, stn = stn, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE)$x)
 
@@ -76,7 +76,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     colnames(reg.points.matrix) <- as.character(colnames.list)
   }
 
-  if(is.numeric(order) | is.null(order)){
+  if(is.numeric(order) || is.null(order)){
     reg.points.matrix <- unique(reg.points.matrix)
   }
 
@@ -103,7 +103,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   mean.by.id.matrix <- data.table(original.IVs, original.DV, NNS.ID, obs)
 
   setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
-  if(is.numeric(order) | is.null(order)){
+  if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
       mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
     }
@@ -135,13 +135,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   }
 
 
-  fitted.matrix <- data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
+  fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
   setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , obs := NULL]
 
 
-  if(is.numeric(order) | is.null(order)){
+  if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
       REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, function(z) as.numeric(gravity(z))), by = NNS.ID]
     }
@@ -314,10 +314,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     region.2 <- mean.by.id.matrix[[2]]
     region.3 <- mean.by.id.matrix[ , y.hat]
 
-    plot3d(x = original.IVs[ , 1], y = original.IVs[ , 2], z = original.DV, box = FALSE, size = 3, col='steelblue', xlab = colnames(reg.points.matrix)[1], ylab = colnames(reg.points.matrix)[2], zlab = y.label )
+    rgl::plot3d(x = original.IVs[ , 1], y = original.IVs[ , 2], z = original.DV, box = FALSE, size = 3, col='steelblue', xlab = colnames(reg.points.matrix)[1], ylab = colnames(reg.points.matrix)[2], zlab = y.label )
 
     if(plot.regions){
-      region.matrix <- data.table(original.IVs, original.DV, NNS.ID)
+      region.matrix <- data.table::data.table(original.IVs, original.DV, NNS.ID)
       region.matrix[ , `:=` (min.x1 = min(.SD), max.x1 = max(.SD)), by = NNS.ID, .SDcols = 1]
       region.matrix[ , `:=` (min.x2 = min(.SD), max.x2 = max(.SD)), by = NNS.ID, .SDcols = 2]
       if(noise.reduction == 'off'){
@@ -333,13 +333,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         region.matrix[ , `:=` (y.hat = mode(original.DV)), by = NNS.ID]
       }
 
-      setkey(region.matrix, NNS.ID, min.x1, max.x1, min.x2, max.x2)
+      data.table::setkey(region.matrix, NNS.ID, min.x1, max.x1, min.x2, max.x2)
       region.matrix[ ,{
-        quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),
+        rgl::quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),
                 y = .(min.x2[1], max.x2[1], max.x2[1], min.x2[1]),
                 z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col='pink', alpha=1)
-        if(identical(min.x1[1], max.x1[1]) | identical(min.x2[1], max.x2[1])){
-          segments3d(x = .(min.x1[1], max.x1[1]),
+        if(identical(min.x1[1], max.x1[1]) || identical(min.x2[1], max.x2[1])){
+          rgl::segments3d(x = .(min.x1[1], max.x1[1]),
                      y = .(min.x2[1], max.x2[1]),
                      z = .(y.hat[1], y.hat[1]), col = 'pink', alpha = 1)
         }
@@ -348,12 +348,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     }#plot.regions = T
 
 
-    points3d(x = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 1])), y = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 2])), z = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 3])), col = 'red', size = 5)
+    rgl::points3d(x = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 1])), y = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 2])), z = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 3])), col = 'red', size = 5)
     if(!is.null(point.est)){
       if(is.null(np)){
-        points3d(x = point.est[1], y = point.est[2], z = predict.fit, col = 'green', size = 5)
+        rgl::points3d(x = point.est[1], y = point.est[2], z = predict.fit, col = 'green', size = 5)
       } else {
-        points3d(x = point.est[,1], y = point.est[,2], z = predict.fit, col = 'green', size = 5)
+        rgl::points3d(x = point.est[,1], y = point.est[,2], z = predict.fit, col = 'green', size = 5)
       }
     }
   }
@@ -369,7 +369,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   }
 
 
-  rhs.partitions <- data.table(reg.points.matrix)
+  rhs.partitions <- data.table::data.table(reg.points.matrix)
 
   if(!is.null(type)){
     fitted.matrix$y.hat <- round(fitted.matrix$y.hat)

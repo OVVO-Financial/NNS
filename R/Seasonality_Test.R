@@ -28,7 +28,7 @@ NNS.seas <- function(variable,
                      plot = TRUE){
 
   if(length(variable)<5){
-    return(data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
+    return(data.table::data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
   }
 
   if(is.null(modulo)){
@@ -100,9 +100,9 @@ NNS.seas <- function(variable,
   if(insts){
     n <- rep(var.cov, length(instances[index]))
 
-    M <- data.table("Period" = instances[index], "Coefficient.of.Variation" = output[index], "Variable.Coefficient.of.Variation" = n, key = "Coefficient.of.Variation")
+    M <- data.table::data.table("Period" = instances[index], "Coefficient.of.Variation" = output[index], "Variable.Coefficient.of.Variation" = n, key = "Coefficient.of.Variation")
   } else {
-    M <- data.table("Period" = 1, "Coefficient.of.Variation" = var.cov, "Variable.Coefficient.of.Variation" = var.cov, key = "Coefficient.of.Variation")
+    M <- data.table::data.table("Period" = 1, "Coefficient.of.Variation" = var.cov, "Variable.Coefficient.of.Variation" = var.cov, key = "Coefficient.of.Variation")
   }
 
 
@@ -137,11 +137,11 @@ NNS.seas <- function(variable,
 
         periods <- unique(periods[!periods%in%unlist(M[, 1])])
 
-        mod_cv <- data.table(cbind(periods,
+        mod_cv <- data.table::data.table(cbind(periods,
                                    rep(M[1, 3], length(periods)),
                                    rep(M[1, 3], length(periods))))
 
-        M <- rbindlist(list(M[mod_index, ], mod_cv), use.names = FALSE)
+        M <- data.table::rbindlist(list(M[mod_index, ], mod_cv), use.names = FALSE)
 
     }
 

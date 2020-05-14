@@ -253,7 +253,7 @@ NNS.stack <- function(IVs.train,
             relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
         }
 
-        if(!is.null(type) & !is.null(nns.method.2$Point.est)){
+        if(!is.null(type) && !is.null(nns.method.2$Point.est)){
           nns.method.2 <- round(nns.method.2$Point.est)
         } else {
           nns.method.2 <- nns.method.2$Point.est
@@ -329,8 +329,8 @@ NNS.stack <- function(IVs.train,
         nns.cv.1[index] <- eval(obj.fn)
 
         if(length(na.omit(nns.cv.1)) > 2){
-          if(objective=='min' & nns.cv.1[index]>=nns.cv.1[index-1] & nns.cv.1[index]>=nns.cv.1[index-2]){ break }
-          if(objective=='max' & nns.cv.1[index]<=nns.cv.1[index-1] & nns.cv.1[index]<=nns.cv.1[index-2]){ break }
+          if(objective=='min' && nns.cv.1[index]>=nns.cv.1[index-1] && nns.cv.1[index]>=nns.cv.1[index-2]){ break }
+          if(objective=='max' && nns.cv.1[index]<=nns.cv.1[index-1] && nns.cv.1[index]<=nns.cv.1[index-2]){ break }
         }
       }
 
@@ -359,7 +359,7 @@ NNS.stack <- function(IVs.train,
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
         nns.method.1 <- NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = 1,
                                 type = type)$Point.est
-        if(!is.null(type) & !is.null(nns.method.1)){
+        if(!is.null(type) && !is.null(nns.method.1)){
           nns.method.1 <- round(nns.method.1)
         }
 
