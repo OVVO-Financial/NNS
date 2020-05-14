@@ -281,9 +281,9 @@
 
     if(is.ts(x)){
       ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
-      dimnames(ensemble)[[2]] <- paste("Series_", 1:reps)
+      dimnames(ensemble)[[2]] <- paste("Series", 1:reps)
     } else {
-      dimnames(ensemble)[[2]] <- paste("Replicate_", 1:reps)
+      dimnames(ensemble)[[2]] <- paste("Replicate", 1:reps)
     }
 
 
