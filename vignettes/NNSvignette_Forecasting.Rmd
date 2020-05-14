@@ -14,12 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r setup2, message=FALSE, warning = FALSE}
 library(NNS)
+library(data.table)
 require(knitr)
 require(rgl)
-require(data.table)
 require(tdigest)
 require(dtw)
-library(meboot)
+require(meboot)
 ```
 
 

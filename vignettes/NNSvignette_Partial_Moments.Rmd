@@ -10,7 +10,6 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-require(NNS)
 ```
 
 # Partial Moments
@@ -20,7 +19,8 @@ Why is it necessary to parse the variance with partial moments?  The additional 
 Below are some basic equivalences demonstrating partial moments role as the elements of variance.
 
 ## Mean
-```{r mean}
+```{r mean, message=FALSE}
+library(NNS)
 set.seed(123) ; x = rnorm(100) ; y = rnorm(100)
 
 mean(x)
