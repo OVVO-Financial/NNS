@@ -100,9 +100,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   ### Match y to unique identifier
   obs <- c(1 : length(Y))
 
-  mean.by.id.matrix <- data.table(original.IVs, original.DV, NNS.ID, obs)
+  mean.by.id.matrix <- data.table::data.table(original.IVs, original.DV, NNS.ID, obs)
 
-  setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
+  data.table::setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
   if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
       mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
@@ -128,7 +128,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   ###Order y.hat to order of original Y
   resid.plot <- mean.by.id.matrix[]
-  setkey(resid.plot, 'obs')
+  data.table::setkey(resid.plot, 'obs')
   y.hat <- mean.by.id.matrix[ , .(y.hat)]
   if(!is.null(type)){
     y.hat <- round(y.hat)
@@ -137,7 +137,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
-  setkey(mean.by.id.matrix, 'NNS.ID')
+  data.table::setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , obs := NULL]
 
 
