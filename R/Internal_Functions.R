@@ -182,4 +182,39 @@ RP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
 }
 
 
+### Refactored meboot.part function using tdigest
+
+NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
+{
+  # Generate random numbers from the [0,1] uniform interval
+  p <- runif(n, min=0, max=1)
+
+  # Assign quantiles of x from p
+  td <- tdigest::tdigest(x, compression = max(100, log(n,10)*100))
+  q <- tdigest::tquantile(td, p)
+
+  ref1 <- which(p <= (1/n))
+  if(length(ref1) > 0){
+    qq <- approx(c(0,1/n), c(xmin,z[1]), p[ref1])$y
+    q[ref1] <- qq
+    if(!reachbnd)  q[ref1] <- qq + desintxb[1]-0.5*(z[1]+xmin)
+  }
+
+  ref4 <- which(p == ((n-1)/n))
+  if(length(ref4) > 0)
+    q[ref4] <- z[n-1]
+
+  ref5 <- which(p > ((n-1)/n))
+  if(length(ref5) > 0){
+    # Right tail proportion p[i]
+    qq <- approx(c((n-1)/n,1), c(z[n-1],xmax), p[ref5])$y
+    q[ref5] <- qq   # this implicitly shifts xmax for algorithm
+    if(!reachbnd)  q[ref5] <- qq + desintxb[n]-0.5*(z[n-1]+xmax)
+    # such that the algorithm gives xmax when p[i]=1
+    # this is the meaning of reaching the bounds xmax and xmin
+  }
+
+  q
+
+}
 

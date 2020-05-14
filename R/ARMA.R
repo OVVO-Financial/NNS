@@ -171,7 +171,7 @@ NNS.ARMA <- function(variable,
   for (j in 1 : h){
       ## Regenerate seasonal.factor if dynamic
       if(dynamic){
-          seas.matrix = NNS.seas(variable, plot = FALSE)
+          seas.matrix <- NNS.seas(variable, plot = FALSE)
           if(!is.list(seas.matrix)){
               M <- t(1)
           } else {
@@ -264,9 +264,9 @@ if(!is.null(cl)){
     registerDoSEQ()
 }
 
-  #return(Estimates)
+
   if(!is.null(conf.intervals)){
-      CIs <- meboot(Estimates, reps=399)$ensemble
+      CIs <- NNS.meboot(Estimates, reps=399)$ensemble
   }
 
 

@@ -21,8 +21,8 @@ LPM.VaR <- function(percentile, degree, x){
     l <- length(x)
     sort_x <- sort(x)
     vars <- LPM.ratio(degree, sort_x, x)
-    td <- tdigest(x, compression = max(100, log(l,10)*100))
-    return(tquantile(td, (1-percentile)))
+    td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
+    return(tdigest::tquantile(td, (1-percentile)))
 }
 
 #' UPM VaR
@@ -45,7 +45,7 @@ UPM.VaR <- function(percentile, degree, x){
     l <- length(x)
     sort_x <- sort(x)
     vars <- LPM.ratio(degree, sort_x, x)
-    td <- tdigest(x, compression = max(100, log(l,10)*100))
-    return(tquantile(td, percentile))
+    td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
+    return(tdigest::tquantile(td, percentile))
 }
 
