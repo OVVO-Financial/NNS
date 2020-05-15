@@ -266,7 +266,7 @@ if(!is.null(cl)){
 
 
   if(!is.null(conf.intervals)){
-      CIs <- NNS.meboot(Estimates, reps=399)$ensemble
+      CIs <- NNS.meboot(Estimates, reps=399)$replicates
   }
 
 

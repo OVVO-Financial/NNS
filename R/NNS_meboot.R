@@ -1,6 +1,6 @@
 #' NNS meboot
 #'
-#' Adapted maximum entropy bootstrap routine from \href{meboot}{https://cran.r-project.org/package=meboot}.
+#' Adapted maximum entropy bootstrap routine from \code{meboot} \href{meboot}{https://cran.r-project.org/package=meboot}.
 #'
 #' @param x vector of data, \code{ts} object or \code{pdata.frame} object.
 #' @param reps numeric; number of replicates to generate.
@@ -12,8 +12,8 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \href{expand.sd}{https://cran.r-project.org/package=meboot}.
-#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \href{force.clt}{https://cran.r-project.org/package=meboot}.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \href{force.clt}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
@@ -21,12 +21,13 @@
 #' @param coldata numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
 #' @param coltimes numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 #' is not a \code{pdata.frame} object.
-#' @param ... possible argument \code{fiv} to be passed to \href{expand.sd}{https://cran.r-project.org/package=meboot}.
+#' @param ... possible argument \code{fiv} to be passed to \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
 #'
 #' @return
 #' \itemize{
 #'   \item{x} original data provided as input.
-#' \item{ensemble} maximum entropy bootstrap replicates.
+#' \item{replicates} maximum entropy bootstrap replicates.
+#' \item{ensemble} average observation over all replicates.
 #' \item{xx} sorted order stats (xx[1] is minimum value).
 #' \item{z} class intervals limits.
 #' \item{dv} deviations of consecutive data values.
@@ -53,10 +54,13 @@
 #' @examples
 #' \dontrun{
 #' # To generate an orthogonal rank correlated time-series to AirPassengers
-#' replicates <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
+#' boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
 #'
-#' # Plot
-#' matplot(replicates$ensemble, type = 'l')
+#' # Plot all replicates
+#' matplot(boots$replicates, type = 'l')
+#'
+#' # Plot ensemble
+#' lines(boots$ensemble, lwd = 3)
 #'}
 #'
 #' @export
@@ -85,8 +89,6 @@
       force.clt <- FALSE
       warning("force.clt was set to FALSE since the ensemble contains only one replicate.")
     }
-
-    if (reps == 1 && isTRUE(expand.sd)) expand.sd <- FALSE
 
     trim=list(trim=trim, xmin=xmin, xmax=xmax)
 
@@ -220,7 +222,8 @@
       func <- function(ab){
         a <- ab[1]
         b <- ab[2]
-        abs(cor((a*c(matrix2) + b*c(ensemble))/(a + b), c(ensemble), method = "spearman") - setSpearman)
+        (abs(cor((a*c(matrix2) + b*c(ensemble))/(a + b), c(ensemble), method = "spearman") - setSpearman) +
+            abs(mean((a*c(matrix2) + b*c(ensemble)))/mean(ensemble) - 1))
       }
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
@@ -236,7 +239,7 @@
 
 
     if(expand.sd)
-      ensemble <- meboot::expand.sd(x=x, ensemble=ensemble, ...)
+      ensemble <- NNS.meboot.expand.sd(x=x, ensemble=ensemble, ...)
     if(force.clt)
       ensemble <- meboot::force.clt(x=x, ensemble=ensemble)
 
@@ -284,6 +287,6 @@
       cat("\n  Elapsed time:", elapsr$elaps,
           paste(elapsr$units, ".", sep=""), "\n")
 
-    list(x=x, ensemble=ensemble, xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
+    list(x=x, replicates=ensemble, ensemble=rowMeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
          xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
   }

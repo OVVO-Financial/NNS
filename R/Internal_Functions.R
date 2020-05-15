@@ -182,7 +182,7 @@ RP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
 }
 
 
-### Refactored meboot.part function using tdigest
+### Refactored meboot::meboot.part function using tdigest
 
 NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 {
@@ -191,7 +191,10 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 
   # Assign quantiles of x from p
   td <- tdigest::tdigest(x, compression = max(100, log(n,10)*100))
-  q <- tdigest::tquantile(td, p)
+
+  q <- tryCatch(tdigest::tquantile(td, p) ,
+                error = LPM.VaR((1-p), 0, x))
+
 
   ref1 <- which(p <= (1/n))
   if(length(ref1) > 0){
@@ -216,5 +219,36 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 
   q
 
+}
+
+### Refactored meboot::expand.sd function
+NNS.meboot.expand.sd <- function(x, ensemble, fiv=5)
+{
+  sdx <- if (is.null(ncol(x)))
+    sd(x) else apply(x, 2, sd)
+
+  sdf <- c(sdx, apply(ensemble, 2, sd))
+  sdfa <- sdf/sdf[1]  # ratio of actual sd to that of original data
+  sdfd <- sdf[1]/sdf  # ratio of desired sd to actual sd
+
+  # expansion is needed since some of these are <1 due to attenuation
+  mx <- 1+(fiv/100)
+  # following are expansion factors
+  id <- which(sdfa < 1)
+  if (length(id) > 0)
+    sdfa[id] <- runif(n=length(id), min=1, max=mx)
+
+
+  sdfdXsdfa <- sdfd[-1]*sdfa[-1]
+  id <- which(floor(sdfdXsdfa) > 0)
+  if (length(id) > 0) {
+    if(length(id) > 1) ensemble[,id] <- ensemble[,id] %*% diag(sdfdXsdfa[id]) else ensemble[,id] <- ensemble[,id] * sdfdXsdfa[id]
+  } else
+
+
+    if(is.ts(x)){
+      ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
+    }
+  ensemble
 }
 
