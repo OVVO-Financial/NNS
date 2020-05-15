@@ -86,6 +86,8 @@
       warning("force.clt was set to FALSE since the ensemble contains only one replicate.")
     }
 
+    if (reps == 1 && isTRUE(expand.sd)) expand.sd <- FALSE
+
     trim=list(trim=trim, xmin=xmin, xmax=xmax)
 
     trimval <- if (is.null(trim$trim)) 0.1 else trim$trim
@@ -215,35 +217,23 @@
       matrix2 = matrix(, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
         # Intial search
-        init_ab=expand.grid(seq(-1,1,.1), seq(-1,1,.1))
-        init_ab = init_ab[-which(init_ab[,1]==0 & init_ab[,2]==0),]
-        cors = apply(init_ab, 1,
-                     function(z) cor((z[1]*c(matrix2)+z[2]*c(ensemble))/(z[1]+z[2]),
-                                     c(ensemble), method = "spearman"))
+      func <- function(ab){
+        a <- ab[1]
+        b <- ab[2]
+        abs(cor((a*c(matrix2) + b*c(ensemble))/(a + b), c(ensemble), method = "spearman") - setSpearman)
+      }
 
-        index = which.min(abs(cors - setSpearman))
+      res <- optim(c(.01,.01), func, control=list(abstol = .01))
 
-        # Narrowed search
-        ab = expand.grid(seq(init_ab[index,1]-.05,
-                             init_ab[index,1]+.05,.01), seq(init_ab[index,2]-.05, init_ab[index,2]+.05,.01))
-        if(length(which(ab[,1]==0 & ab[,2]==0))>0)
-          ab = ab[-which(ab[,1]==0 && ab[,2]==0),]
-
-        cors = apply(ab, 1,
-                     function(z) cor((z[1]*c(matrix2)+z[2]*c(ensemble))/(z[1]+z[2]),
-                                     c(ensemble), method = "spearman"))
-
-        index = which.min(abs(cors - setSpearman))
-
-        ensemble = (ab[index,1]*matrix2 +
-                      ab[index,2]*ensemble) / (ab[index,1]+ab[index,2])
-
+      ensemble = (res$par[1]*matrix2 +
+                    res$par[2]*ensemble) / (sum(abs(res$par)))
 
       if(identical(ordxx_2, ordxx)){
         if(reps>1) ensemble <- t(apply(ensemble, 1, function(x) sample(x, size = reps, replace = TRUE)))
       }
 
     }
+
 
     if(expand.sd)
       ensemble <- meboot::expand.sd(x=x, ensemble=ensemble, ...)
@@ -281,9 +271,9 @@
 
     if(is.ts(x)){
       ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
-      dimnames(ensemble)[[2]] <- paste("Series", 1:reps)
+      if(reps>1) dimnames(ensemble)[[2]] <- paste("Series", 1:reps)
     } else {
-      dimnames(ensemble)[[2]] <- paste("Replicate", 1:reps)
+      if(reps>1) dimnames(ensemble)[[2]] <- paste("Replicate", 1:reps)
     }
 
 
