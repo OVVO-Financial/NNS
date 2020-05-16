@@ -1,6 +1,6 @@
 #' NNS meboot
 #'
-#' Adapted maximum entropy bootstrap routine from \code{meboot} \href{meboot}{https://cran.r-project.org/package=meboot}.
+#' Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 #'
 #' @param x vector of data, \code{ts} object or \code{pdata.frame} object.
 #' @param reps numeric; number of replicates to generate.
@@ -12,8 +12,8 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
-#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \href{force.clt}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
@@ -21,7 +21,8 @@
 #' @param coldata numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
 #' @param coltimes numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 #' is not a \code{pdata.frame} object.
-#' @param ... possible argument \code{fiv} to be passed to \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param ... possible argument \code{fiv} to be passed to \code{expand.sd} in
+#' \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
 #'
 #' @return
 #' \itemize{
