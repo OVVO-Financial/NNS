@@ -7,7 +7,7 @@
 UPM.VaR(percentile, degree, x)
 }
 \arguments{
-\item{percentile}{numeric [0, 1]; The percentile for right-tail VaR.}
+\item{percentile}{numeric [0, 1]; The percentile for right-tail VaR (vectorized).}
 
 \item{degree}{integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.}
 

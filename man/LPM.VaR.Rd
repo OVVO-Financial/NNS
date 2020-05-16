@@ -7,7 +7,7 @@
 LPM.VaR(percentile, degree, x)
 }
 \arguments{
-\item{percentile}{numeric [0, 1]; The percentile for left-tail VaR.}
+\item{percentile}{numeric [0, 1]; The percentile for left-tail VaR (vectorized).}
 
 \item{degree}{integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.}
 
