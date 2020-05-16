@@ -4,8 +4,8 @@
 #'
 #' @param x vector of data, \code{ts} object or \code{pdata.frame} object.
 #' @param reps numeric; number of replicates to generate.
-#' @param setSpearman numeric [0,1]; The default setting \code{setSpearman=1} assumes that
-#' the user does want to generate replicates that are perfectly dependent on original time series, and recovers the original \code{meboot(...)} settings.
+#' @param setSpearman numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
+#' the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
 #' \code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.
 #' @param xmin numeric; the lower limit for the left tail.
@@ -90,7 +90,9 @@
       warning("force.clt was set to FALSE since the ensemble contains only one replicate.")
     }
 
-    trim=list(trim=trim, xmin=xmin, xmax=xmax)
+    if(is.null(setSpearman)) setSpearman <- -99
+
+    trim <- list(trim=trim, xmin=xmin, xmax=xmax)
 
     trimval <- if (is.null(trim$trim)) 0.1 else trim$trim
 
@@ -209,7 +211,15 @@
     # after applying the order according to 'ordxx' defined above.
 
     ensemble[ordxx,] <- qseq
-    #ensemble[ordxx$ix,] <- qseq
+
+
+    ### Pilot Spearman
+    if(setSpearman==-99){
+      y <- NNS.meboot(x, reps = 30, setSpearman = 1)$ensemble
+      pilot <- cbind(x,y)
+      setSpearman <-  min(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])
+    }
+
 
 
     ### Fred Viole SUGGESTION  PART 2 of 2
@@ -222,8 +232,10 @@
       func <- function(ab){
         a <- ab[1]
         b <- ab[2]
+        # Desired correlation and mean preservation
         (abs(cor((a*c(matrix2) + b*c(ensemble))/(a + b), c(ensemble), method = "spearman") - setSpearman) +
-            abs(mean((a*c(matrix2) + b*c(ensemble)))/mean(ensemble) - 1))
+            abs(mean((a*c(matrix2) + b*c(ensemble)))/mean(ensemble) - 1)
+        )
       }
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
