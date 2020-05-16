@@ -79,17 +79,12 @@
   {
     if ("pdata.frame" %in% class(x))
     {
-      res <- meboot.pdata.frame (x, reps, trim$trim, reachbnd,
+      res <- meboot::meboot.pdata.frame (x, reps, trim$trim, reachbnd,
                                  expand.sd, force.clt, scl.adjustment, sym, elaps,
                                  colsubj, coldata, coltimes, ...)
       return(res)
     }
 
-    if (reps == 1 && isTRUE(force.clt))
-    {
-      force.clt <- FALSE
-      warning("force.clt was set to FALSE since the ensemble contains only one replicate.")
-    }
 
     if(is.null(setSpearman)) setSpearman <- -99
 
@@ -218,7 +213,7 @@
     if(setSpearman==-99){
       y <- NNS.meboot(x, reps = 30, setSpearman = 1)$ensemble
       pilot <- cbind(x,y)
-      setSpearman <-  min(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])
+      setSpearman <-  fivenum(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])[2]
     }
 
 
@@ -241,7 +236,7 @@
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
 
-      ensemble = (res$par[1]*matrix2 +
+      ensemble <- (res$par[1]*matrix2 +
                     res$par[2]*ensemble) / (sum(abs(res$par)))
 
       if(identical(ordxx_2, ordxx)){

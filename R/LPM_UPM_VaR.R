@@ -1,7 +1,7 @@
 #' LPM VaR
 #'
 #' Generates a value at risk (VaR) based on the Lower Partial Moment ratio.
-#' @param percentile numeric [0, 1]; The percentile for left-tail VaR.
+#' @param percentile numeric [0, 1]; The percentile for left-tail VaR (vectorized).
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
@@ -19,16 +19,22 @@
 LPM.VaR <- function(percentile, degree, x){
 
     l <- length(x)
-    sort_x <- sort(x)
-    vars <- LPM.ratio(degree, sort_x, x)
-    td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
-    return(tdigest::tquantile(td, (1-percentile)))
+
+    if(degree == 0){
+        td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
+        return(tdigest::tquantile(td, (1-percentile)))
+    } else {
+        sort_x <- sort(x)
+        vars <- LPM.ratio(degree, sort_x, x)
+        index <- findInterval(1 - percentile, LPM.ratio(degree, sort_x, x))
+        return(sapply(index, function(z) mean(sort_x[z:(z + 1)])))
+    }
 }
 
 #' UPM VaR
 #'
 #' Generates an upside value at risk (VaR) based on the Upper Partial Moment ratio
-#' @param percentile numeric [0, 1]; The percentile for right-tail VaR.
+#' @param percentile numeric [0, 1]; The percentile for right-tail VaR (vectorized).
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
@@ -43,9 +49,15 @@ LPM.VaR <- function(percentile, degree, x){
 UPM.VaR <- function(percentile, degree, x){
 
     l <- length(x)
-    sort_x <- sort(x)
-    vars <- LPM.ratio(degree, sort_x, x)
-    td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
-    return(tdigest::tquantile(td, percentile))
+    if(degree==0){
+        td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
+        return(tdigest::tquantile(td, percentile))
+    } else {
+        sort_x <- sort(x)
+        vars <- LPM.ratio(degree, sort_x, x)
+        index <- findInterval(percentile, LPM.ratio(degree, sort_x, x))
+        return(sapply(index, function(z) mean(sort_x[(z-1):z])))
+    }
+
 }
 
