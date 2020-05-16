@@ -28,8 +28,8 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman=1} assumes that
-the user does want to generate replicates that are perfectly dependent on original time series, and recovers the original \code{meboot(...)} settings.
+\item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
+the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
 \code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.}
 
 \item{trim}{numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.}
@@ -41,9 +41,9 @@ the user does want to generate replicates that are perfectly dependent on origin
 \item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
 
-\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \href{expand.sd}{https://cran.r-project.org/package=meboot}.}
+\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
 
-\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \href{force.clt}{https://cran.r-project.org/package=meboot}.}
+\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \href{force.clt}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
 
 \item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.}
 
@@ -58,12 +58,13 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 \item{coltimes}{numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 is not a \code{pdata.frame} object.}
 
-\item{...}{possible argument \code{fiv} to be passed to \href{expand.sd}{https://cran.r-project.org/package=meboot}.}
+\item{...}{possible argument \code{fiv} to be passed to \code{expand.sd} in \href{expand.sd}{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
 }
 \value{
 \itemize{
   \item{x} original data provided as input.
-\item{ensemble} maximum entropy bootstrap replicates.
+\item{replicates} maximum entropy bootstrap replicates.
+\item{ensemble} average observation over all replicates.
 \item{xx} sorted order stats (xx[1] is minimum value).
 \item{z} class intervals limits.
 \item{dv} deviations of consecutive data values.
@@ -77,15 +78,18 @@ is not a \code{pdata.frame} object.}
 }
 }
 \description{
-Adapted maximum entropy bootstrap routine from \href{meboot}{https://cran.r-project.org/package=meboot}.
+Adapted maximum entropy bootstrap routine from \code{meboot} \href{meboot}{https://cran.r-project.org/package=meboot}.
 }
 \examples{
 \dontrun{
 # To generate an orthogonal rank correlated time-series to AirPassengers
-replicates <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
+boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
 
-# Plot
-matplot(replicates$ensemble, type = 'l')
+# Plot all replicates
+matplot(boots$replicates, type = 'l')
+
+# Plot ensemble
+lines(boots$ensemble, lwd = 3)
 }
 
 }
