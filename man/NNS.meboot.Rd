@@ -29,9 +29,9 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
+\item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman = NULL} assumes that
 the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
-\code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.}
+\code{setSpearman < 1} admits less perfect (more realistic for some purposes) dependence.}
 
 \item{drift}{logical; \code{TRUE} default preserves the drift of the original series.}
 
@@ -44,9 +44,9 @@ the user does not want to generate replicates that are perfectly dependent on or
 \item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
 
-\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
+\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.}
 
-\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
+\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.}
 
 \item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.}
 
@@ -61,8 +61,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 \item{coltimes}{numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 is not a \code{pdata.frame} object.}
 
-\item{...}{possible argument \code{fiv} to be passed to \code{expand.sd} in
-\url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.}
+\item{...}{possible argument \code{fiv} to be passed to \code{expand.sd}.}
 }
 \value{
 \itemize{
