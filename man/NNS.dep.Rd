@@ -82,9 +82,9 @@ cor_p_value
 ## Confidence Intervals
 ## For 95th percentile VaR (both-tails) see [LPM.VaR] and [UPM.VaR]
 ## Lower CI
-LPM.VaR(.975, 0, cors)
+LPM.VaR(.025, 0, cors)
 ## Upper CI
-UPM.VaR(.975, 0, cors)
+UPM.VaR(.025, 0, cors)
 
 ## Left tailed dependence p-value
 dep_p_value <- LPM(0, nns_cor_dep$Dependence, deps)

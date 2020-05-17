@@ -14,15 +14,15 @@ UPM.VaR(percentile, degree, x)
 \item{x}{a numeric vector.}
 }
 \value{
-Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
+Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 }
 \description{
-Generates an upside value at risk (VaR) based on the Upper Partial Moment ratio
+Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio
 }
 \examples{
 set.seed(123)
 x <- rnorm(100)
 
-## For 95th percentile VaR (right-tail)
-UPM.VaR(0.95, 0, x)
+## For 5\% quantile, right-tail
+UPM.VaR(0.05, 0, x)
 }

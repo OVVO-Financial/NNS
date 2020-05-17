@@ -14,17 +14,17 @@ LPM.VaR(percentile, degree, x)
 \item{x}{a numeric vector.}
 }
 \value{
-Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
+Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 }
 \description{
-Generates a value at risk (VaR) based on the Lower Partial Moment ratio.
+Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio.
 }
 \examples{
 set.seed(123)
 x <- rnorm(100)
 
-## For 95th percentile VaR (left-tail)
-LPM.VaR(0.95, 0, x)
+## For 5\% quantile, left-tail
+LPM.VaR(0.05, 0, x)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

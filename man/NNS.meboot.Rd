@@ -8,6 +8,7 @@ NNS.meboot(
   x,
   reps = 999,
   setSpearman = 1,
+  drift = TRUE,
   trim = 0.1,
   xmin = NULL,
   xmax = NULL,
@@ -31,6 +32,8 @@ NNS.meboot(
 \item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
 the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
 \code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.}
+
+\item{drift}{logical; \code{TRUE} default preserves the drift of the original series.}
 
 \item{trim}{numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.}
 
@@ -85,6 +88,9 @@ Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r
 \dontrun{
 # To generate an orthogonal rank correlated time-series to AirPassengers
 boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
+
+# Verify correlation of replicates ensemble to original
+cor(boots$ensemble, AirPassengers, method = "spearman")
 
 # Plot all replicates
 matplot(boots$replicates, type = 'l')
