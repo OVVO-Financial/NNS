@@ -27,7 +27,7 @@ LPM.VaR <- function(percentile, degree, x){
         sort_x <- sort(x)
         vars <- LPM.ratio(degree, sort_x, x)
         index <- findInterval(1 - percentile, LPM.ratio(degree, sort_x, x))
-        return(sapply(index, function(z) mean(sort_x[z:(z + 1)])))
+        return(rowMeans(cbind(sort_x[index],sort_x[index+1])))
     }
 }
 
@@ -56,7 +56,7 @@ UPM.VaR <- function(percentile, degree, x){
         sort_x <- sort(x)
         vars <- LPM.ratio(degree, sort_x, x)
         index <- findInterval(percentile, LPM.ratio(degree, sort_x, x))
-        return(sapply(index, function(z) mean(sort_x[(z-1):z])))
+        return(rowMeans(cbind(sort_x[index],sort_x[index-1])))
     }
 
 }

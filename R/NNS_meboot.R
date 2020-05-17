@@ -7,6 +7,7 @@
 #' @param setSpearman numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
 #' the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
 #' \code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.
+#' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.
 #' @param xmin numeric; the lower limit for the left tail.
 #' @param xmax numeric; the upper limit for the right tail.
@@ -69,6 +70,7 @@
  NNS.meboot <- function(x,
                         reps=999,
                         setSpearman=1,
+                        drift=TRUE,
                         trim=0.10,
                         xmin=NULL,
                         xmax=NULL,
@@ -225,13 +227,21 @@
       matrix2 = matrix(, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
         # Intial search
-      func <- function(ab){
+      func <- function(ab, drift){
         a <- ab[1]
         b <- ab[2]
-        # Desired correlation and mean preservation
-        (abs(cor((a*c(matrix2) + b*c(ensemble))/(a + b), c(ensemble), method = "spearman") - setSpearman) +
-            abs(mean((a*c(matrix2) + b*c(ensemble)))/mean(ensemble) - 1)
-        )
+        e <- c(ensemble)
+        m <- c(matrix2)
+        l <- length(e)
+        ifelse(drift,
+              (abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
+                  abs(mean((a*m + b*e))/mean(e) - 1) +
+                    abs( cor((a*m + b*e)/(a + b), 1:l) - cor(e, 1:l))
+              ),
+              abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
+                abs(mean((a*m + b*e))/mean(e) - 1)
+              )
+
       }
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
