@@ -8,10 +8,10 @@ NNS.ANOVA.bin<- function(control, treatment,
 
   if(is.null(upper.25.target) && is.null(lower.25.target)){
         mean.of.means <- mean(c(mean(control), mean(treatment)))
-        upper.25.target <- mean(c(UPM.VaR(.75, 1, control), UPM.VaR(.75, 1, treatment)))
-        lower.25.target <- mean(c(LPM.VaR(.75, 1, control), LPM.VaR(.75, 1, treatment)))
-        upper.125.target <- mean(c(UPM.VaR(.875, 1, control), UPM.VaR(.875, 1, treatment)))
-        lower.125.target <- mean(c(LPM.VaR(.875, 1, control), LPM.VaR(.875, 1, treatment)))
+        upper.25.target <- mean(c(UPM.VaR(.25, 1, control), UPM.VaR(.25, 1, treatment)))
+        lower.25.target <- mean(c(LPM.VaR(.25, 1, control), LPM.VaR(.25, 1, treatment)))
+        upper.125.target <- mean(c(UPM.VaR(.125, 1, control), UPM.VaR(.125, 1, treatment)))
+        lower.125.target <- mean(c(LPM.VaR(.125, 1, control), LPM.VaR(.125, 1, treatment)))
   }
 
 

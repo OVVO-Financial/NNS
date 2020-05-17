@@ -193,7 +193,7 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
   td <- tdigest::tdigest(x, compression = max(100, log(n,10)*100))
 
   q <- tryCatch(tdigest::tquantile(td, p) ,
-                error = LPM.VaR((1-p), 0, x))
+                error = LPM.VaR(p, 0, x))
 
 
   ref1 <- which(p <= (1/n))

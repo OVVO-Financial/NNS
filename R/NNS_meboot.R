@@ -58,6 +58,9 @@
 #' # To generate an orthogonal rank correlated time-series to AirPassengers
 #' boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
 #'
+#' # Verify correlation of replicates ensemble to original
+#' cor(boots$ensemble, AirPassengers, method = "spearman")
+#'
 #' # Plot all replicates
 #' matplot(boots$replicates, type = 'l')
 #'
@@ -227,13 +230,13 @@
       matrix2 = matrix(, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
         # Intial search
-      func <- function(ab, drift){
+      func <- function(ab, d=drift){
         a <- ab[1]
         b <- ab[2]
         e <- c(ensemble)
         m <- c(matrix2)
         l <- length(e)
-        ifelse(drift,
+        ifelse(d,
               (abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
                   abs(mean((a*m + b*e))/mean(e) - 1) +
                     abs( cor((a*m + b*e)/(a + b), 1:l) - cor(e, 1:l))

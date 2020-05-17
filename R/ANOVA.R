@@ -81,10 +81,10 @@ NNS.ANOVA <- function(control,
   #Continuous CDF for each variable from Mean of Means
         LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
 
-        lower.25.target = mean(sapply(1:n, function(i) LPM.VaR(.75,1,A[,i])))
-        upper.25.target = mean(sapply(1:n, function(i) UPM.VaR(.75,1,A[,i])))
-        lower.125.target = mean(sapply(1:n, function(i) LPM.VaR(.875,1,A[,i])))
-        upper.125.target = mean(sapply(1:n, function(i) UPM.VaR(.875,1,A[,i])))
+        lower.25.target = mean(sapply(1:n, function(i) LPM.VaR(.25,1,A[,i])))
+        upper.25.target = mean(sapply(1:n, function(i) UPM.VaR(.25,1,A[,i])))
+        lower.125.target = mean(sapply(1:n, function(i) LPM.VaR(.125,1,A[,i])))
+        upper.125.target = mean(sapply(1:n, function(i) UPM.VaR(.125,1,A[,i])))
 
 
         raw.certainties <- list()

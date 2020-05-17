@@ -331,8 +331,8 @@ if(!is.null(cl)){
 
   options(warn = oldw)
   if(!is.null(conf.intervals)){
-      upper_CIs <- apply(CIs, 1, function(z) UPM.VaR(conf.intervals, 0, z))
-      lower_CIs <- apply(CIs, 1, function(z) LPM.VaR(conf.intervals, 0, z))
+      upper_CIs <- apply(CIs, 1, function(z) UPM.VaR(1-conf.intervals, 0, z))
+      lower_CIs <- apply(CIs, 1, function(z) LPM.VaR(1-conf.intervals, 0, z))
       results <- cbind.data.frame(Estimates,  lower_CIs,  upper_CIs)
       colnames(results) = c("Estimates",
                             paste0("Lower ", round(conf.intervals*100,2), "% CI"),
