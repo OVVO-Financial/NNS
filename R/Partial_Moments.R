@@ -553,7 +553,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       }
     }
 
-    values <- data.table(cbind.data.frame(x, CDF))
+    values <- data.table::data.table(cbind.data.frame(x, CDF))
     colnames(values) <- c(deparse(substitute(variable)), ylabel)
 
 
@@ -622,7 +622,7 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
   }
 
-  return(list("CDF" = data.table(cbind((variable), CDF = CDF)),
+  return(list("CDF" = data.table::data.table(cbind((variable), CDF = CDF)),
               "P" = P))
 
 
