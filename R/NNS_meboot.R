@@ -4,17 +4,17 @@
 #'
 #' @param x vector of data, \code{ts} object or \code{pdata.frame} object.
 #' @param reps numeric; number of replicates to generate.
-#' @param setSpearman numeric [0,1]; The default setting \code{setSpearman=NULL} assumes that
+#' @param setSpearman numeric [0,1]; The default setting \code{setSpearman = NULL} assumes that
 #' the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
-#' \code{setSpearman<1} admits less perfect (more realistic for some purposes) dependence.
+#' \code{setSpearman < 1} admits less perfect (more realistic for some purposes) dependence.
 #' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.
 #' @param xmin numeric; the lower limit for the left tail.
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
-#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.
+#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
@@ -22,8 +22,7 @@
 #' @param coldata numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
 #' @param coltimes numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 #' is not a \code{pdata.frame} object.
-#' @param ... possible argument \code{fiv} to be passed to \code{expand.sd} in
-#' \url{https://cran.r-project.org/web/packages/meboot/meboot.pdf}.
+#' @param ... possible argument \code{fiv} to be passed to \code{expand.sd}.
 #'
 #' @return
 #' \itemize{

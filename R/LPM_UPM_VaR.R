@@ -22,12 +22,14 @@ LPM.VaR <- function(percentile, degree, x){
 
     if(degree == 0){
         td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
-        return(tdigest::tquantile(td, percentile))
+        q <- tryCatch(tdigest::tquantile(td, percentile),
+                      error = quantile(x, percentile))
+        return(q)
     } else {
         sort_x <- sort(x)
         vars <- LPM.ratio(degree, sort_x, x)
         index <- findInterval(percentile, LPM.ratio(degree, sort_x, x))
-        return(rowMeans(cbind(sort_x[index], sort_x[index + 1])))
+        return(rowMeans(cbind(sort_x[index], sort_x[pmin(l, (index + 1))])))
     }
 }
 
@@ -51,12 +53,15 @@ UPM.VaR <- function(percentile, degree, x){
     l <- length(x)
     if(degree==0){
         td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
-        return(tdigest::tquantile(td, (1 - percentile)))
+        q <- tryCatch(tdigest::tquantile(td, 1 - percentile),
+                      error = quantile(x, 1 - percentile))
+
+        return(q)
     } else {
         sort_x <- sort(x)
         vars <- LPM.ratio(degree, sort_x, x)
         index <- findInterval(1 - percentile, LPM.ratio(degree, sort_x, x))
-        return(rowMeans(cbind(sort_x[index], sort_x[index - 1])))
+        return(rowMeans(cbind(sort_x[index], sort_x[pmax(1,(index - 1))])))
     }
 
 }
