@@ -243,12 +243,12 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv=5)
   id <- which(floor(sdfdXsdfa) > 0)
   if (length(id) > 0) {
     if(length(id) > 1) ensemble[,id] <- ensemble[,id] %*% diag(sdfdXsdfa[id]) else ensemble[,id] <- ensemble[,id] * sdfdXsdfa[id]
-  } else
+  }
 
-
-    if(is.ts(x)){
+  if(is.ts(x)){
       ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
-    }
+  }
+
   ensemble
 }
 

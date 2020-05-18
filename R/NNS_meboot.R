@@ -228,13 +228,17 @@
     if(setSpearman<1){
       matrix2 = matrix(, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
-        # Intial search
+
+      # Intial search
+
+      e <- c(ensemble)
+      m <- c(matrix2)
+      l <- length(e)
+
       func <- function(ab, d=drift){
         a <- ab[1]
         b <- ab[2]
-        e <- c(ensemble)
-        m <- c(matrix2)
-        l <- length(e)
+
         ifelse(d,
               (abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
                   abs(mean((a*m + b*e))/mean(e) - 1) +
