@@ -28,7 +28,7 @@ NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
   rhos <- matrix(, n, n)
   rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
 
-  deps <- matrix(, n, n)
+  deps <- matrix(0, n, n)
   deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
 
     if(!asym){
@@ -49,8 +49,8 @@ NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
             raw.deps_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Dependence"])
         }
 
-        rhos[is.na(rhos)] = 0
-        deps[is.na(deps)] = 0
+        rhos[is.na(rhos)] <- 0
+        deps[is.na(deps)] <- 0
 
         rhos_upper[lower.tri(rhos_upper, diag=FALSE)] <- unlist(raw.rhos_upper)
         rhos_upper <- t(rhos_upper)

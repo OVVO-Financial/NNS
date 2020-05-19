@@ -273,10 +273,6 @@
     if (scl.adjustment)
     {
       zz <- c(xmin,z,xmax) #extended list of z values
-      #v <- rep(NA, n) #storing within variances
-      #for (i in 2:(n+1)) {
-      #  v[i-1] <- ((zz[i] - zz[i-1])^2) / 12
-      #}
       v <- diff(zz^2) / 12
       xb <- mean(x)
       s1 <- sum((desintxb - xb)^2)

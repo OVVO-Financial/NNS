@@ -128,10 +128,10 @@ NNS.stack <- function(IVs.train,
     }
   }
 
-  THRESHOLDS <- list()
-  best.k <- list()
-  best.nns.cv <- list()
-  best.nns.ord <- list()
+  THRESHOLDS <- list(folds)
+  best.k <- list(folds)
+  best.nns.cv <- list(folds)
+  best.nns.ord <- list(folds)
 
   if (is.null(ncores)) {
     num_cores <- detectCores() - 1
@@ -283,7 +283,7 @@ NNS.stack <- function(IVs.train,
       CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
       CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
 
-      for(i in c(1:l,length((IVs.train[ , 1])))){
+      for(i in c(1:l, length(IVs.train[ , 1]))){
         index <- which(c(1:l, length(IVs.train[ , 1])) %in% i)
         if(status){
           message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-index+1," ","\r",appendLF=TRUE)

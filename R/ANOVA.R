@@ -74,11 +74,7 @@ NNS.ANOVA <- function(control,
     mean.of.means <- mean(colMeans(A))
     n <- ncol(A)
     if(!pairwise){
-        LPM_ratio <- numeric(0L)
-        MAD.CDF <- numeric(0L)
-
-
-  #Continuous CDF for each variable from Mean of Means
+    #Continuous CDF for each variable from Mean of Means
         LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
 
         lower.25.target = mean(sapply(1:n, function(i) LPM.VaR(.25,1,A[,i])))
@@ -87,8 +83,9 @@ NNS.ANOVA <- function(control,
         upper.125.target = mean(sapply(1:n, function(i) UPM.VaR(.125,1,A[,i])))
 
 
-        raw.certainties <- list()
         n <- ncol(A)
+        raw.certainties <- list(n - 1)
+
         for(i in 1:(n - 1)){
           raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA.bin(A[ , i],A[ , b],
                                                                                 mean.of.means = mean.of.means,
@@ -115,14 +112,14 @@ NNS.ANOVA <- function(control,
         return(c("Certainty" = NNS.ANOVA.rho))
 
     } else {
-
-          raw.certainties <- list()
           n <- ncol(A)
+          raw.certainties <- list(n - 1)
+
           for(i in 1:(n - 1)){
               raw.certainties[[i]] <- sapply((i + 1) : n, function(b) NNS.ANOVA.bin(A[ , i],A[ , b], plot = FALSE)$Certainty)
           }
 
-          certainties <- matrix(, n, n)
+          certainties <- matrix(NA, n, n)
           certainties[lower.tri(certainties, diag = FALSE)] <- unlist(raw.certainties)
           diag(certainties) <- 1
           certainties <- pmax(certainties, t(certainties), na.rm = TRUE)

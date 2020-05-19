@@ -148,12 +148,13 @@ NNS.boost <- function(IVs.train,
       epochs <- NULL
     }
     old.threshold <- 1
-    test.features <- list()
-    results <- numeric()
 
     if(is.null(learner.trials)){learner.trials <- length(y)}
 
     learner.trials <- min(sum(choose(n, 1:n)), learner.trials)
+
+    results <- numeric(learner.trials)
+    test.features <- list(learner.trials)
 
     for(i in 1:learner.trials){
       set.seed(123 + i)

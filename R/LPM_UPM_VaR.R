@@ -55,7 +55,6 @@ UPM.VaR <- function(percentile, degree, x){
         td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
         q <- tryCatch(tdigest::tquantile(td, 1 - percentile),
                       error = quantile(x, 1 - percentile))
-
         return(q)
     } else {
         sort_x <- sort(x)

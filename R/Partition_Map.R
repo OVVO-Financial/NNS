@@ -93,7 +93,6 @@ NNS.part = function(x, y,
         hard.stop <- max(floor(log(length(x), 2)), 1)
     }
 
-    dims <- numeric()
 
     if(is.null(type)) {
         i <- 0L

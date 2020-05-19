@@ -16,7 +16,7 @@ n <- ncol(x)
         indiv.causes[[i]] <- indiv.causes[[i]][2, ]-indiv.causes[[i]][1, ]
     }
 
-    causes <- matrix(, n, n)
+    causes <- matrix(NA, n, n)
     causes[lower.tri(causes, diag = FALSE)] <- unlist(indiv.causes)
 
 

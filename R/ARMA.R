@@ -101,7 +101,7 @@ NNS.ARMA <- function(variable,
   variable <- as.numeric(variable)
   OV <- variable
 
-  if(min(variable)<0){negative.values=TRUE}
+  if(min(variable)<0) negative.values <- TRUE
 
   if(!is.null(training.set)){
       variable <- variable[1 : training.set]
@@ -197,10 +197,10 @@ NNS.ARMA <- function(variable,
     Component.series <- GV$Component.series
 
     ## Regression on Component Series
-    Regression.Estimates <- numeric()
+    #Regression.Estimates <- numeric()
 
     if(method == 'nonlin' | method == 'both'){
-      Regression.Estimates <- list()
+      Regression.Estimates <- list(length(lag))
 
       Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
         x <- Component.index[[i]] ; y <- Component.series[[i]]
@@ -225,7 +225,7 @@ NNS.ARMA <- function(variable,
 
     if(method == 'lin' | method == 'both'){
 
-      Regression.Estimates <- list()
+      Regression.Estimates <- list(length(lag))
 
       Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
           last.x <- tail(Component.index[[i]], 1)

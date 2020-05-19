@@ -37,7 +37,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete") {
     current_base <- numeric()
 
 
-    LPM_order <- sapply(1 : n,function(i) LPM(1, max_target, x[ , i]))
+    LPM_order <- sapply(1 : n, function(i) LPM(1, max_target, x[ , i]))
 
     final_ranked <- x[ , order(LPM_order)]
 

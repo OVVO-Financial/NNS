@@ -86,7 +86,7 @@ NNS.ANOVA.bin<- function(control, treatment,
         }
 
 
-            a <- UPM.VaR(CI, 1, control)
+            a <- UPM.VaR(1 - CI, 1, control)
             b <- mean(control)
             if(plot){
                 if(tails == "both" | tails == "right"){
@@ -96,7 +96,7 @@ NNS.ANOVA.bin<- function(control, treatment,
             }
 
             #Lower end of CDF confidence interval for control mean
-            c <- LPM.VaR(CI, 1, control)
+            c <- LPM.VaR(1 - CI, 1, control)
             d <- mean(control)
 
             if(plot){

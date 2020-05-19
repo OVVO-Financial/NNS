@@ -245,7 +245,7 @@ NNS.ARMA.optim <- function(variable, training.set,
     previous.estimates[[which(c("lin",'nonlin','both')==j)]] <- current.estimate
 
     overall.seasonals[[which(c("lin",'nonlin','both')==j)]] <- current.seasonals[length(current.estimate)]
-    overall.estimates[[which(c("lin",'nonlin','both')==j)]] = current.estimate[length(current.estimate)]
+    overall.estimates[[which(c("lin",'nonlin','both')==j)]] <- current.estimate[length(current.estimate)]
 
     if(print.trace){
         if(i > 1){

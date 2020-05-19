@@ -13,6 +13,7 @@
 #' @import stringr
 #' @import meboot
 #' @import tdigest
+#' @import data.table
 
 
 

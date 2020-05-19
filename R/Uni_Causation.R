@@ -7,8 +7,8 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
   min.length <- min(length(x), length(y))
 
-  x.vectors <- list()
-  y.vectors <- list()
+  x.vectors <- list(tau+1)
+  y.vectors <- list(tau+1)
 
   ## Create tau vectors
   if(tau > 0){

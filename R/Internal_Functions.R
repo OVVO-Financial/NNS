@@ -18,14 +18,14 @@ gravity <- function(x){
 
 
 ### cbind different length vectors
-alt_cbind <- function(x,y,first = FALSE) {
+alt_cbind <- function(x, y, first = FALSE) {
   if(length(x)<length(y)) {
-    if(first) x = c(rep(NA, length(y)-length(x)),x);y=y
-    if(!first) x = c(x,rep(NA, length(y)-length(x)));y=y
+    if(first) x <- c(rep(NA, length(y) - length(x)), x); y <- y
+    if(!first) x <- c(x,rep(NA, length(y) - length(x))); y <- y
   }
   if(length(y)<length(x)) {
-    if(first) y = c(rep(NA, length(x)-length(y)),y);x=x
-    if(!first) y = c(y,rep(NA, length(x)-length(y)));x=x
+    if(first) y <- c(rep(NA, length(x) - length(y)),y); x <- x
+    if(!first) y <- c(y,rep(NA, length(x) - length(y))); x <- x
   }
 
   return(cbind(x,y))
@@ -56,7 +56,7 @@ factor_2_dummy_FR <- function(x){
 
 
 ### Generator for 1:length(lag) vectors in NNS.ARMA
-generate.vectors <- function(x,l){
+generate.vectors <- function(x, l){
   Component.series <- list()
   Component.index <- list()
 
@@ -143,7 +143,7 @@ lag.mtx <- function(x, tau){
   }
   mtx <- as.data.frame(do.call(cbind, j.vectors))
 
-  relevant_lags <- list()
+  relevant_lags <- list(length(tau))
   if(length(unlist(tau)) > 1){
     for(i in 1:(length(tau))){
         relevant_lags[[i]] <- c((i-1)*max_tau + i, (i-1)*max_tau + unlist(tau[[i]]) + i)
@@ -193,7 +193,7 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
   td <- tdigest::tdigest(x, compression = max(100, log(n,10)*100))
 
   q <- tryCatch(tdigest::tquantile(td, p) ,
-                error = LPM.VaR(p, 0, x))
+                error = quantile(x, p))
 
 
   ref1 <- which(p <= (1/n))
