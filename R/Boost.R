@@ -393,7 +393,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(cl)){
     clusterExport(cl,c("x","y"))
     if(status){
-      message("Parallel process running, status unavailable...","\r",appendLF=FALSE)
+      message("Parallel process running, status unavailable...","\r","\n",appendLF=FALSE)
     }
 
     estimates <- foreach(i = 1:dim(kf)[1], .packages = c("NNS","data.table","dtw"))%dopar%{
