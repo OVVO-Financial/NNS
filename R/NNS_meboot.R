@@ -71,7 +71,7 @@
 
  NNS.meboot <- function(x,
                         reps=999,
-                        setSpearman=1,
+                        setSpearman=NULL,
                         drift=TRUE,
                         trim=0.10,
                         xmin=NULL,
@@ -299,7 +299,6 @@
     } else {
       if(reps>1) dimnames(ensemble)[[2]] <- paste("Replicate", 1:reps)
     }
-
 
 
     # Computation time

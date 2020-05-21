@@ -26,13 +26,10 @@ LPM.VaR <- function(percentile, degree, x){
                       error = quantile(x, percentile))
         return(q)
     } else {
-        sort_x <- sort(x)
-        vars <- LPM.ratio(degree, sort_x, x)
-        index <- findInterval(percentile, vars)
-        vars <- rowMeans(cbind(sort_x[index], sort_x[pmin(l, (index + 1))]))
-        vars[percentile==0] <- min(x)
-        vars[percentile==1] <- max(x)
-        return(vars)
+        func <- function(b){
+            abs(LPM.ratio(degree, b, x) - percentile)
+        }
+        return(optimize(func, c(min(x),max(x)))$minimum)
     }
 }
 
@@ -60,13 +57,10 @@ UPM.VaR <- function(percentile, degree, x){
                       error = quantile(x, 1 - percentile))
         return(q)
     } else {
-        sort_x <- sort(x)
-        vars <- LPM.ratio(degree, sort_x, x)
-        index <- findInterval(1 - percentile, vars)
-        vars <- rowMeans(cbind(sort_x[index], sort_x[pmax(1, (index - 1))]))
-        vars[(1-percentile)==0] <- min(x)
-        vars[(1-percentile)==1] <- max(x)
-        return(vars)
+        func <- function(b){
+            abs(LPM.ratio(degree, b, x) - (1 - percentile))
+        }
+        return(optimize(func, c(min(x),max(x)))$minimum)
     }
 
 }
