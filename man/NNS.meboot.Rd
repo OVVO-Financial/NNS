@@ -7,7 +7,7 @@
 NNS.meboot(
   x,
   reps = 999,
-  setSpearman = 1,
+  setSpearman = NULL,
   drift = TRUE,
   trim = 0.1,
   xmin = NULL,
