@@ -33,6 +33,9 @@ LPM.VaR <- function(percentile, degree, x){
     }
 }
 
+LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
+
+
 #' UPM VaR
 #'
 #' Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio
@@ -64,4 +67,6 @@ UPM.VaR <- function(percentile, degree, x){
     }
 
 }
+
+UPM.VaR <- Vectorize(UPM.VaR, vectorize.args = "percentile")
 
