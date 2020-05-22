@@ -21,14 +21,16 @@ See the following for NNS detailed examples and specific applications:
    1.2 [Bayes' Theorem](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf)
 
    1.3 [CDFs and ANOVA](https://ssrn.com/abstract=3007373)
-
-   1.4 [Correlation and Dependence](https://ssrn.com/abstract=3010414)
    
-   1.5 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
-   
-   1.6 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+   1.4 [Bias and Confidence Intervals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bias_and_CI.html)
 
-   1.7 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+   1.5 [Correlation and Dependence](https://ssrn.com/abstract=3010414)
+   
+   1.6 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
+   
+   1.7 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+
+   1.8 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
 
 # 2. Regression
