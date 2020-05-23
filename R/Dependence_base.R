@@ -81,7 +81,7 @@ NNS.dep.base <- function(x,
 
         part.df[, `:=`(c("x", "y", "quadrant", "mean.x", "mean.y"), NULL)]
 
-        setkey(part.df, prior.quadrant)
+        data.table::setkey(part.df, prior.quadrant)
 
         part.df <- unique(part.df[])
 
@@ -97,7 +97,7 @@ NNS.dep.base <- function(x,
         part.df <- part.df[, `:=`(weight = counts/(length(x) - zeros)), by = prior.quadrant]
 
         for (j in seq_len(ncol(part.df))) {
-          set(part.df, which(is.na(part.df[[j]])), j, 0)
+          data.table::set(part.df, which(is.na(part.df[[j]])), j, 0)
         }
 
         nns.cor <- part.df[, sum(nns.cor = weight * nns.cor)]
