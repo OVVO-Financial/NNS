@@ -20,9 +20,9 @@ dy.d_(
 
 \item{y}{a numeric vector with compatible dimsensions to \code{x}.}
 
-\item{wrt}{integer; Selects the regressor to differentiate with respect to.}
+\item{wrt}{integer; Selects the regressor to differentiate with respect to (vectorized).}
 
-\item{eval.points}{numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the overall partial derivative at every observation of the variable with respect to.}
+\item{eval.points}{numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.}
 
 \item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
@@ -54,6 +54,12 @@ dy.d_(B, y, wrt = 1, eval.points = c(.5))
 
 dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
 
+
+## To find average partial derivative of y wrt 1st regressor, for every oberservation of 1st regressor
+apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
+plot(B[,1], apd[[1]])
+
+
 ## To find derivatives of y wrt 1st regressor and specified 2nd regressor
 dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
 
@@ -61,7 +67,10 @@ dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
 ## Known function analysis: [y = a ^ 2 * b ^ 2]
 x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
 B <- expand.grid(x_1, x_2) ; y <- B[ , 1] ^ 2 * B[ , 2] ^ 2
-dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))}
+dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
+
+
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
