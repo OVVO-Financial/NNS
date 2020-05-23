@@ -137,7 +137,7 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE, folds = 1)$reg
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE)$reg
 
 
     if(length(unlist(eval.points)) == 1){
