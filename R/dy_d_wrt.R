@@ -152,9 +152,10 @@ dy.d_<- function(x, y, wrt,
                                                   position = position,
                                                   id = id))
 
-        lower <- estimates[position=="l", mean(as.numeric(estimates)), by = id]$V1
-        two.f.x <- 2 * estimates[position=="m", mean(as.numeric(estimates)), by = id]$V1
-        upper <- estimates[position=="u", mean(as.numeric(estimates)), by = id]$V1
+        lower <- estimates[position=="l", mode(as.numeric(estimates)), by = id]$V1
+        two.f.x <- 2 * estimates[position=="m", mode(as.numeric(estimates)), by = id]$V1
+        upper <- estimates[position=="u", mode(as.numeric(estimates)), by = id]$V1
+
     }
     if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
         lower <- estimates[1]
