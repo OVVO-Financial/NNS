@@ -117,11 +117,10 @@ dy.d_<- function(x, y, wrt,
       distance_wrt <-  (original.eval.points.max - original.eval.points.min)[1]
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
       id <- rep(1:n, each = sampsize, length.out = dim(deriv.points)[1])
-
     }
 
 
-    if(length(eval.points) == 1){
+    if(length(unlist(eval.points)) == 1){
         index <- sample.int(n = n, size = 30, replace = FALSE)
         deriv.points <- x[index, ]
         deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify=FALSE))
@@ -138,10 +137,10 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE)$reg
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE, folds = 1)$reg
 
 
-    if(length(eval.points) == 1){
+    if(length(unlist(eval.points)) == 1){
         lower <- mean(estimates[1:30])
         two.f.x <- 2 * mean(estimates[31:60])
         upper <- mean(estimates[61:90])
@@ -152,11 +151,12 @@ dy.d_<- function(x, y, wrt,
                                                   position = position,
                                                   id = id))
 
-        lower <- estimates[position=="l", mode(as.numeric(estimates)), by = id]$V1
-        two.f.x <- 2 * estimates[position=="m", mode(as.numeric(estimates)), by = id]$V1
-        upper <- estimates[position=="u", mode(as.numeric(estimates)), by = id]$V1
+        lower <- estimates[position=="l", mean(as.numeric(estimates)), by = id]$V1
+        two.f.x <- 2 * estimates[position=="m", mean(as.numeric(estimates)), by = id]$V1
+        upper <- estimates[position=="u", mean(as.numeric(estimates)), by = id]$V1
 
     }
+
     if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
         lower <- estimates[1]
         two.f.x <- 2 * estimates[2]
@@ -233,15 +233,15 @@ dy.d_<- function(x, y, wrt,
     z <- z[,1] + z[,4] - z[,2] - z[,3]
     mixed <- (z / mixed.distances)
 
-    results <- list("First Derivative" = as.vector(rise / distance_wrt),
-                    "Second Derivative" = as.vector((upper - two.f.x + lower) / ((distance_wrt) ^ 2)),
+    results <- list("First Derivative" = as.numeric(unlist(rise / distance_wrt)),
+                    "Second Derivative" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
                     "Mixed Derivative" = mixed)
 
     return(results)
   } else {
 
-    results <- list("First Derivative" = unlist(rise / distance_wrt),
-               "Second Derivative" = unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) ))
+    results <- list("First Derivative" = as.numeric(unlist(rise / distance_wrt)),
+               "Second Derivative" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
 
     return(results)
   }
