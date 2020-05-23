@@ -225,22 +225,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       }
 
 
-  #      cl <- makeCluster(num_cores)
-  #      registerDoParallel(cl)
+      distances <- data.table::data.table(point.est)
 
+      distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
 
-  #    DISTANCES <- foreach(i = 1:nrow(point.est),.packages = c("NNS","data.table", "dtw"))%dopar%{
- #       NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = point.est[i,],
- #                    type = dist, k = n.best)[1]
-  #    }
-
-      DISTANCES <- apply(point.est, 1, function(i) NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = i,
-                   type = dist, k = n.best)[1])
-
-   #   stopCluster(cl)
-  #    registerDoSEQ()
-
-      DISTANCES <- as.numeric(unlist(DISTANCES))
+      DISTANCES <- as.numeric(unlist(distances$DISTANCES))
 
       lows <- do.call(pmin,as.data.frame(t(point.est))) < minimums
       highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
