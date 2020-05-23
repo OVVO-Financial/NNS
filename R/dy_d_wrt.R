@@ -103,7 +103,7 @@ dy.d_<- function(x, y, wrt,
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
       sampsize <- 10
-      index <- which(diff(findInterval(eval.points, quantile(eval.points, seq(0,1,.1))))>0)
+      index <- apply(sapply(quantile(unlist(eval.points), seq(0,1,.1)), function(z) abs(z - unlist(eval.points))), 2, which.min)
 
       deriv.points <- x[index,]
 
