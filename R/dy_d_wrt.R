@@ -102,8 +102,8 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      sampsize <- 5
-      index <- sample.int(n = n, size = sampsize, replace = FALSE)
+      sampsize <- 10
+      index <- which(diff(findInterval(x, quantile(x, seq(0,1,.1))))>0)
 
       deriv.points <- x[index,]
 
