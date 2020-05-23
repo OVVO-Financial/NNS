@@ -24,7 +24,7 @@
   utils::globalVariables(
     c("quadrant","quadrant.new","prior.quadrant",".","tmp.x","tmp.y","min_x_seg","max_x_seg","min_y_seg","max_y_seg",
       "mean_y_seg","mean_x_seg","sub.clpm",'sub.cupm','sub.dlpm','sub.dupm','weight','mean.x','mean.y',"upm","lpm","area",
-      "Coefficient","X.Lower.Range","X.Upper.Range","y.hat","interval",
+      "Coefficient","X.Lower.Range","X.Upper.Range","y.hat","interval", "DISTANCES",
       "NNS.ID","max.x1","max.x2","min.x1","min.x2","counts",'old.counts',
       "Period","Coefficient.of.Variation","Variable.Coefficient.of.Variation", "Sum", "j","lpm","upm", "tau",
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
