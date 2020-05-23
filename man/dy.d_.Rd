@@ -49,13 +49,15 @@ Returns the numerical partial derivate of \code{y} with respect to [wrt] any reg
 set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 B <- cbind(x_1, x_2)
 
-## To find average partial derivative of y wrt 1st regressor, only supply 1 value in [eval.points]
+## To find average partial derivative of y wrt 1st regressor,
+only supply 1 value in [eval.points]:
 dy.d_(B, y, wrt = 1, eval.points = c(.5))
 
 dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
 
 
-## To find average partial derivative of y wrt 1st regressor, for every oberservation of 1st regressor
+## To find average partial derivative of y wrt 1st regressor,
+for every oberservation of 1st regressor:
 apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
 plot(B[,1], apd[[1]])
 
