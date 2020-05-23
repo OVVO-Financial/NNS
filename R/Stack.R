@@ -114,9 +114,7 @@ NNS.stack <- function(IVs.train,
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
   } else {
-    if(is.null(dim(IVs.test)) || dim(IVs.test)[2]==1){
       IVs.test <- data.frame(IVs.test)
-    }
   }
 
 
@@ -300,17 +298,13 @@ NNS.stack <- function(IVs.train,
 
           if(!is.null(dim(CV.IVs.train))){
             if(dim(CV.IVs.train)[2]>1){
-                cl <- makeCluster(num_cores)
-                registerDoParallel(cl)
 
-                CV.IVs.test <- do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR))
+                CV.IVs.test.new <- data.table::data.table(do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR)))
 
-                predicted <- foreach(j = 1:nrow(CV.IVs.test), .packages=c("NNS","data.table","dtw"))%dopar%{
-                    NNS.distance(setup$RPM, dist.estimate = as.vector(CV.IVs.test[j,]), type = dist, k = i)
-                }
+                CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(setup$RPM, dist.estimate = .SD, type = dist, k = i)[1], by = 1:nrow(CV.IVs.test)]
 
-                stopCluster(cl)
-                registerDoSEQ()
+                predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
+
             } else {
               predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
                                     type = type, factor.2.dummy = TRUE, dist = dist)$Point.est
@@ -325,7 +319,7 @@ NNS.stack <- function(IVs.train,
             predicted <- round(predicted)
           }
         }
-
+        rm(CV.IVs.test.new)
         nns.cv.1[index] <- eval(obj.fn)
 
         if(length(na.omit(nns.cv.1)) > 2){

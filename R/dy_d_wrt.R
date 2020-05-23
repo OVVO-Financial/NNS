@@ -102,7 +102,7 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      index <- apply(sapply(quantile(unlist(eval.points), seq(0,1,.25)), function(z) abs(z - unlist(eval.points))), 2, which.min)
+      index <- apply(sapply(quantile(unlist(eval.points), seq(.25,.75,.25)), function(z) abs(z - unlist(eval.points))), 2, which.min)
       sampsize <- length(index)
 
       deriv.points <- x[index,]
@@ -113,6 +113,8 @@ dy.d_<- function(x, y, wrt,
                                      rep(eval.points),
                                      rep(original.eval.points.max))
                               ), each = sampsize, length.out = dim(deriv.points)[1] )
+
+      deriv.points <- data.table::data.table(deriv.points)
 
       distance_wrt <-  (original.eval.points.max - original.eval.points.min)[1]
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
