@@ -1,4 +1,4 @@
-NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=ncores){
+NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2", return.values = FALSE, plot.regions = FALSE, ncores=NULL){
 
 
   ### For Multiple regressions
@@ -81,13 +81,35 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   }
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
+  ### PARALLEL
+
+  if (is.null(ncores)) {
+    num_cores <- as.integer(detectCores()) - 1
+  } else {
+    num_cores <- ncores
+  }
+
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else { cl <- NULL }
+
   NNS.ID <- list()
 
-  for(j in 1:n){
-    sorted.reg.points <- sort(reg.points.matrix[ , j])
-    sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
+  if(!is.null(cl)){
+      NNS.ID <- foreach(j = 1:n)%dopar%{
+        sorted.reg.points <- sort(reg.points.matrix[ , j])
+        sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
 
-    NNS.ID[[j]] <- findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+        findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+      }
+  } else {
+    for(j in 1:n){
+      sorted.reg.points <- sort(reg.points.matrix[ , j])
+      sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
+
+      NNS.ID[[j]] <- findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+    }
   }
 
 
@@ -216,20 +238,23 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       outsiders <- numeric()
       DISTANCES <- list()
 
-      ### PARALLEL
 
-      if (is.null(ncores)) {
-        num_cores <- as.integer(detectCores() / 2) - 1
-      } else {
-        num_cores <- ncores
-      }
 
 
       distances <- data.table::data.table(point.est)
 
-      distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
+      if(!is.null(cl)){
+        DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
 
-      DISTANCES <- as.numeric(unlist(distances$DISTANCES))
+        stopCluster(cl)
+        registerDoSEQ()
+      } else {
+
+        distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
+
+        DISTANCES <- as.numeric(unlist(distances$DISTANCES))
+      }
+
 
       lows <- do.call(pmin,as.data.frame(t(point.est))) < minimums
       highs <- do.call(pmax,as.data.frame(t(point.est))) > maximums
