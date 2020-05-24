@@ -400,9 +400,17 @@ NNS.VAR <- function(variables,
   IE <- data.table::data.table(nns_IVs_interpolated_extrapolated)
   colnames(IE) <- colnames(variables)
 
+  if(sum(na_s)>0){
   return( list("interpolated_and_extrapolated" = IE,
               "relevant_variables" = data.frame(RV),
                univariate = nns_IVs_results,
                multivariate = nns_DVs,
                ensemble = forecasts) )
+  } else {
+    return( list("relevant_variables" = data.frame(RV),
+                 univariate = nns_IVs_results,
+                 multivariate = nns_DVs,
+                 ensemble = forecasts) )
+
+  }
 }
