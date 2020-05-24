@@ -127,22 +127,22 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   data.table::setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
   if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := gravity(original.DV), by = 'NNS.ID']
+      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) gravity(as.numeric(z))), .SDcols = seq_len(n+1) ,by = 'NNS.ID']
     }
     if(noise.reduction == 'mean'){
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mean(original.DV), by = 'NNS.ID']
+      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mean(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'median'){
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := median(original.DV), by = 'NNS.ID']
+      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) median(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'mode' & is.null(type)){
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode(original.DV), by = 'NNS.ID']
+      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'mode' & !is.null(type)){
-      mean.by.id.matrix = mean.by.id.matrix[ , y.hat := mode_class(original.DV), by = 'NNS.ID']
+      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode_class(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
   } else {
-    mean.by.id.matrix = mean.by.id.matrix[ , y.hat := original.DV, by = 'NNS.ID']
+    mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := .SD , .SDcols = seq_len(n+1), by = 'NNS.ID']
   }
 
   y.identifier <- mean.by.id.matrix[ , NNS.ID]
@@ -160,30 +160,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
   data.table::setkey(mean.by.id.matrix, 'NNS.ID')
-  REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , obs := NULL]
+  REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , c("obs") := NULL]
+  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[,.SD,.SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
 
 
-  if(is.numeric(order) || is.null(order)){
-    if(noise.reduction == 'off'){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, function(z) as.numeric(gravity(z))), by = NNS.ID]
-    }
-    if(noise.reduction == 'mean'){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , lapply(.SD, function(z) as.numeric(mean(z))), by = NNS.ID]
-    }
-    if(noise.reduction == 'median'){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(median(z))), by = NNS.ID]
-    }
-    if(noise.reduction == 'mode' & is.null(type)){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode(z))), by = NNS.ID]
-    }
-    if(noise.reduction == 'mode' & !is.null(type)){
-      REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, lapply(.SD, function(z) as.numeric(mode_class(z))), by = NNS.ID]
-    }
-  }
-
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , NNS.ID := NULL]
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[ , original.DV := NULL]
-
+  data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, colnames(mean.by.id.matrix)[1:n])
 
   if(is.character(n.best)){
     n.best <- REGRESSION.POINT.MATRIX[ , .N]

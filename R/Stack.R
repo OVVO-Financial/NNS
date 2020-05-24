@@ -283,8 +283,8 @@ NNS.stack <- function(IVs.train,
         }
 
         if(index==1){
-          setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                           type = type, factor.2.dummy = TRUE, dist = dist)
+          setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
+                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1)
           predicted <- setup$Point.est
         } else {
 

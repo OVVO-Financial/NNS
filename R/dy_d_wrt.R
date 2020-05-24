@@ -10,6 +10,7 @@
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param plot logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
 #' Default setting is \code{(noise.reduction = "mean")}.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.
 #' @return Returns:
 #' \itemize{
@@ -57,6 +58,7 @@ dy.d_<- function(x, y, wrt,
                  folds = 5,
                  mixed = FALSE,
                  plot = FALSE,
+                 ncores = NULL,
                  messages = TRUE){
 
   order <- "max"
@@ -121,6 +123,9 @@ dy.d_<- function(x, y, wrt,
       distance_wrt <-  (original.eval.points.max - original.eval.points.min)[1]
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
       id <- rep(1:n, each = sampsize, length.out = dim(deriv.points)[1])
+      if(messages){
+          message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
+      }
     }
 
 
@@ -141,7 +146,8 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE)$reg
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE, ncores = ncores)$reg
+
 
 
     if(length(unlist(eval.points)) == 1){
