@@ -12,6 +12,7 @@ dy.d_(
   folds = 5,
   mixed = FALSE,
   plot = FALSE,
+  ncores = NULL,
   messages = TRUE
 )
 }
@@ -30,6 +31,8 @@ dy.d_(
 
 \item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
 Default setting is \code{(noise.reduction = "mean")}.}
+
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
 \item{messages}{logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.}
 }
