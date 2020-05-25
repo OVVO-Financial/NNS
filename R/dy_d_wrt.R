@@ -68,6 +68,8 @@ dy.d_<- function(x, y, wrt,
   n <- dim(x)[1]
   l <- dim(x)[2]
 
+  if(l > 2) mixed <- FALSE
+
   if(is.character(eval.points)){
     if(eval.points == "median"){
       eval.points <- median(x[ , wrt])
@@ -111,18 +113,24 @@ dy.d_<- function(x, y, wrt,
 
       deriv.points <- x[index,]
 
+
       deriv.points <- do.call(rbind, replicate(3*sampsize*n, deriv.points, simplify=FALSE))
 
       deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
-                                     rep(eval.points),
-                                     rep(original.eval.points.max))
-                              ), each = sampsize, length.out = dim(deriv.points)[1] )
+                                             rep(eval.points),
+                                             rep(original.eval.points.max))
+                                     ), each = sampsize, length.out = dim(deriv.points)[1] )
+
 
       deriv.points <- data.table::data.table(deriv.points)
 
       distance_wrt <-  (original.eval.points.max - original.eval.points.min)[1]
+
+
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
-      id <- rep(1:n, each = sampsize, length.out = dim(deriv.points)[1])
+      id <- rep(1:n, each = 3*sampsize, length.out = dim(deriv.points)[1])
+
+
       if(messages){
           message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
       }
@@ -161,9 +169,17 @@ dy.d_<- function(x, y, wrt,
                                                   position = position,
                                                   id = id))
 
-        lower <- estimates[position=="l", mean(as.numeric(estimates)), by = id]$V1
-        two.f.x <- 2 * estimates[position=="m", mean(as.numeric(estimates)), by = id]$V1
-        upper <- estimates[position=="u", mean(as.numeric(estimates)), by = id]$V1
+        lower_msd <- estimates[position=="l", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+        lower <- lower_msd$V1
+        lower_sd <- lower_msd$V2
+
+        fx_msd <- estimates[position=="m", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+        two.f.x <- 2* fx_msd$V1
+        two.f.x_sd <- fx_msd$V2
+
+        upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+        upper <- upper_msd$V1
+        upper_msd <- upper_msd$V2
 
     }
 
@@ -171,6 +187,7 @@ dy.d_<- function(x, y, wrt,
         lower <- estimates[1]
         two.f.x <- 2 * estimates[2]
         upper <- estimates[3]
+
     }
 
     rise <- upper - lower
