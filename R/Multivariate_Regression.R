@@ -80,6 +80,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     reg.points.matrix <- unique(reg.points.matrix)
   }
 
+  if(order=="max" && is.null(n.best)) n.best <- 1
+
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   ### PARALLEL
 
