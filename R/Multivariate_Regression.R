@@ -155,6 +155,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
   y.hat <- mean.by.id.matrix[ , .(y.hat)]
 
+  if(!is.null(type)){
+    y.hat <- round(y.hat)
+  }
+
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
 
@@ -176,21 +180,22 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     }
   }
 
-  if(!is.null(cl)){
-    fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
-  } else {
-    fits <- data.table::data.table(original.IVs)
-    fits <- fits[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(original.IVs)]
+  if(n.best > 1){
+    if(!is.null(cl)){
+        fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
+    } else {
+        fits <- data.table::data.table(original.IVs)
+        fits <- fits[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(original.IVs)]
 
-    fitted.matrix$y.hat <- as.numeric(unlist(fits$DISTANCES))
+        fitted.matrix$y.hat <- as.numeric(unlist(fits$DISTANCES))
+    }
+
+    y.hat <- fitted.matrix$y.hat
+
+    if(!is.null(type)){
+        y.hat <- round(y.hat)
+    }
   }
-
-  y.hat <- fitted.matrix$y.hat
-
-  if(!is.null(type)){
-    y.hat <- round(y.hat)
-  }
-
 
   ### Point estimates
   if(!is.null(point.est)){
