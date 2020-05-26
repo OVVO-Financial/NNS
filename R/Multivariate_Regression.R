@@ -97,12 +97,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   NNS.ID <- list()
 
   if(!is.null(cl)){
-      NNS.ID <- foreach(j = 1:n)%dopar%{
-        sorted.reg.points <- sort(reg.points.matrix[ , j])
-        sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
+    NNS.ID <- foreach(j = 1:n)%dopar%{
+      sorted.reg.points <- sort(reg.points.matrix[ , j])
+      sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
 
-        findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
-      }
+      findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
+    }
   } else {
     for(j in 1:n){
       sorted.reg.points <- sort(reg.points.matrix[ , j])
@@ -127,22 +127,22 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   data.table::setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
   if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
-      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) gravity(as.numeric(z))), .SDcols = seq_len(n+1) ,by = 'NNS.ID']
+      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) gravity(as.numeric(z))), .SDcols = seq_len(n+1) ,by = 'NNS.ID']
     }
     if(noise.reduction == 'mean'){
-      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mean(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
+      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mean(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'median'){
-      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) median(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
+      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) median(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'mode' & is.null(type)){
-      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
+      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
     if(noise.reduction == 'mode' & !is.null(type)){
-      mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode_class(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
+      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode_class(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
   } else {
-    mean.by.id.matrix = mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := .SD , .SDcols = seq_len(n+1), by = 'NNS.ID']
+    mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := .SD , .SDcols = seq_len(n+1), by = 'NNS.ID']
   }
 
   y.identifier <- mean.by.id.matrix[ , NNS.ID]
@@ -151,28 +151,46 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   ###Order y.hat to order of original Y
   resid.plot <- mean.by.id.matrix[]
   data.table::setkey(resid.plot, 'obs')
-  y.hat <- mean.by.id.matrix[ , .(y.hat)]
-  if(!is.null(type)){
-    y.hat <- round(y.hat)
-  }
 
+
+  y.hat <- mean.by.id.matrix[ , .(y.hat)]
 
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
+
   data.table::setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , c("obs") := NULL]
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[,.SD,.SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
+
+  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD[1], by = NNS.ID]
+
+  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD, .SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
 
 
   data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, colnames(mean.by.id.matrix)[1:n])
 
   if(is.character(n.best)){
-    n.best <- REGRESSION.POINT.MATRIX[ , .N]
+      n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
     if(is.null(n.best)){
-        n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
+      n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
     }
   }
+
+  if(!is.null(cl)){
+    fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
+  } else {
+    fits <- data.table::data.table(original.IVs)
+    fits <- fits[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(original.IVs)]
+
+    fitted.matrix$y.hat <- as.numeric(unlist(fits$DISTANCES))
+  }
+
+  y.hat <- fitted.matrix$y.hat
+
+  if(!is.null(type)){
+    y.hat <- round(y.hat)
+  }
+
 
   ### Point estimates
   if(!is.null(point.est)){
@@ -332,12 +350,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       data.table::setkey(region.matrix, NNS.ID, min.x1, max.x1, min.x2, max.x2)
       region.matrix[ ,{
         rgl::quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),
-                y = .(min.x2[1], max.x2[1], max.x2[1], min.x2[1]),
-                z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col='pink', alpha=1)
+                     y = .(min.x2[1], max.x2[1], max.x2[1], min.x2[1]),
+                     z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col='pink', alpha=1)
         if(identical(min.x1[1], max.x1[1]) || identical(min.x2[1], max.x2[1])){
           rgl::segments3d(x = .(min.x1[1], max.x1[1]),
-                     y = .(min.x2[1], max.x2[1]),
-                     z = .(y.hat[1], y.hat[1]), col = 'pink', alpha = 1)
+                          y = .(min.x2[1], max.x2[1]),
+                          z = .(y.hat[1], y.hat[1]), col = 'pink', alpha = 1)
         }
       }
       , by = NNS.ID]
