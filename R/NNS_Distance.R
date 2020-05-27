@@ -14,6 +14,7 @@
 NNS.distance <- function(rpm, dist.estimate, type, k){
   type <- toupper(type)
   n <- length(dist.estimate)
+  l <- nrow(rpm)
 
   y.hat <- rpm$y.hat
 
@@ -32,57 +33,50 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
 
   if(type=="L2"){
-    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)        ))][,Sum]
-                                    + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
+    rpm[, "Sum" := ( Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)        ))]#[,Sum]
+    rpm$Sum <- rpm$Sum + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
   }
 
   if(type=="L1"){
-    row.sums <- rpm[,  `:=` (Sum = Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))][,Sum]
-                                    + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
+    rpm[, "Sum" := ( Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))]#[,Sum]
+    rpm$Sum <- rpm$Sum + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
   }
 
   if(type=="DTW"){
-    row.sums <- rpm[,  `:=` (Sum = unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))][,Sum]
+    rpm[, "Sum" := ( unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))]#[,Sum]
   }
 
   if(type=="FACTOR"){
-    row.sums <- rpm[,  `:=` (Sum = 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate)))))][,Sum]
+    rpm[, "Sum"  := ( 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate)))))]#[,Sum]
   }
 
-  row.sums[row.sums == 0] <- 1e-10
+  rpm$Sum[rpm$Sum == 0] <- 1e-10
+
+  data.table::setkey(rpm, Sum)
 
   if(k==1){
-    if(length(which(row.sums == min(row.sums)))>1){
-      return(mode(rpm$y.hat[which(row.sums == min(row.sums))]))
+    index <- which.min(rpm$Sum)
+    if(length(index)>1){
+        return(mode(rpm$y.hat[index]))
     }  else {
-      return(rpm$y.hat[which.min(row.sums)][1])
+        return(rpm$y.hat[1])
     }
   }
 
-  total.row.sums <- sum(1 / row.sums)
-  weights <- (1 / row.sums) / total.row.sums
+  rpm <- rpm[1:min(k,l),]
 
-  highest <- rev(order(weights))[1 : min(k, length(weights))]
+  weights <- (1 / rpm$Sum) / sum(1 / rpm$Sum)
 
-  weights[-highest] <- 0
-
-  weights.sum <- sum(weights)
-
-  weights <- weights / weights.sum
+  norm <- dnorm(1 / rpm$Sum)
+  norm_weights <- norm / sum(norm)
 
   if(type!="FACTOR"){
-    weights <- rowMeans(cbind(weights, rep(1/k, length(weights))))
-
-    weights[-highest] <- 0
-
+    weights <- rowMeans(cbind(weights, norm_weights, rep(1/min(k,l), length(weights))))
     weights.sum <- sum(weights)
-
     weights <- weights / weights.sum
   }
 
   single.estimate <- sum(weights * rpm$y.hat)
 
-  rpm[,"Sum":=NULL]
-
-  return(mean(single.estimate))
+  return(single.estimate)
 }
