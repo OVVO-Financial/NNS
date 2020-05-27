@@ -80,7 +80,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     reg.points.matrix <- unique(reg.points.matrix)
   }
 
-  if(order=="max" && is.null(n.best)) n.best <- 1
+  if(!is.null(order) && order=="max" && is.null(n.best)) n.best <- 1
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   ### PARALLEL
@@ -99,7 +99,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   NNS.ID <- list()
 
   if(!is.null(cl)){
-    NNS.ID <- foreach(j = 1:n)%dopar%{
+  NNS.ID <- foreach(j = 1:n)%dopar%{
       sorted.reg.points <- sort(reg.points.matrix[ , j])
       sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
 
@@ -112,10 +112,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
       NNS.ID[[j]] <- findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
     }
+
   }
 
-
-  NNS.ID <- do.call(cbind,NNS.ID)
+  NNS.ID <- do.call(cbind, NNS.ID)
 
   ### Create unique identifier of each observation's interval
   NNS.ID <- gsub(do.call(paste, as.data.frame(NNS.ID)), pattern = " ", replacement = ".")
