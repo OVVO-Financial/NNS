@@ -83,37 +83,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(!is.null(order) && order=="max" && is.null(n.best)) n.best <- 1
 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
-  ### PARALLEL
-
-  if (is.null(ncores)) {
-    num_cores <- as.integer(detectCores()) - 1
-  } else {
-    num_cores <- ncores
-  }
-
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
-
   NNS.ID <- list()
 
-  if(!is.null(cl)){
-  NNS.ID <- foreach(j = 1:n)%dopar%{
-      sorted.reg.points <- sort(reg.points.matrix[ , j])
-      sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
 
-      findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
-    }
-  } else {
-    for(j in 1:n){
-      sorted.reg.points <- sort(reg.points.matrix[ , j])
-      sorted.reg.points <- sorted.reg.points[!is.na(sorted.reg.points)]
-
-      NNS.ID[[j]] <- findInterval(original.IVs[ , j], sorted.reg.points, left.open = FALSE)
-    }
-
+  for(j in 1:n){
+      sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
+      NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
   }
+
 
   NNS.ID <- do.call(cbind, NNS.ID)
 
@@ -181,6 +158,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
     }
   }
+
+  ### PARALLEL
+
+  if (is.null(ncores)) {
+    num_cores <- as.integer(detectCores()) - 1
+  } else {
+    num_cores <- ncores
+  }
+
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else { cl <- NULL }
 
   if(n.best > 1 && is.null(point.est)){
     if(!is.null(cl)){
