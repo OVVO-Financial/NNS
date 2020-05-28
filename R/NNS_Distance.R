@@ -67,7 +67,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   weights <- (1 / rpm$Sum) / sum(1 / rpm$Sum)
 
-  norm <- dnorm(1 / rpm$Sum)
+  norm <- dt(1 / rpm$Sum, df = min(k,l), log = FALSE)
   norm_weights <- norm / sum(norm)
 
   if(type!="FACTOR"){
