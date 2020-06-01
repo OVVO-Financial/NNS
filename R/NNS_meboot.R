@@ -111,7 +111,7 @@
     ### Fred Viole SUGGESTION PART 1 of 2
 
     if(setSpearman < 1){
-      if(setSpearman < 0) ordxx_2 <- rev(ordxx) else ordxx_2 <- order(ordxx)
+      if(setSpearman < -0.7) ordxx_2 <- rev(ordxx) else ordxx_2 <- order(ordxx)
     }
 
     # symmetry
@@ -247,6 +247,7 @@
               )
 
       }
+
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
 
