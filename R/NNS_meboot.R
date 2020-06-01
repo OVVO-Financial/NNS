@@ -111,10 +111,10 @@
     ### Fred Viole SUGGESTION PART 1 of 2
 
     if(setSpearman < 1){
-      if(setSpearman < 0) ordxx_2 <- rev(order(ordxx)) else ordxx_2 <- order(ordxx)
+      ordxx_2 <- unique(rev(order(c(rbind(ordxx[c(FALSE,FALSE,TRUE)],
+                                          ordxx[c(FALSE,TRUE,FALSE)],
+                                          ordxx[c(TRUE,FALSE,FALSE)])))))
     }
-
-
 
     # symmetry
 
