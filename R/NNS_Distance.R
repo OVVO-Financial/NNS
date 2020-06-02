@@ -1,6 +1,6 @@
 #' NNS Distance
 #'
-#' Internal function for NNS multivariate regression \link{NNS.reg} parallel instances.
+#' Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.
 #' @param rpm REGRESSION.POINT.MATRIX from \link{NNS.reg}
 #' @param dist.estimate Vector to generate distances from.
 #' @param type "L1", "L2" or "DTW"
@@ -67,7 +67,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
 
   weights <- (1 / rpm$Sum) / sum(1 / rpm$Sum)
 
-  norm <- dt(1 / rpm$Sum, df = min(k,l), log = FALSE)
+  norm <- dnorm(rpm$Sum)
   norm_weights <- norm / sum(norm)
 
   if(type!="FACTOR"){
