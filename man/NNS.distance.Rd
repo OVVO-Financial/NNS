@@ -19,5 +19,5 @@ NNS.distance(rpm, dist.estimate, type, k)
 Returns sum of weighted distances.
 }
 \description{
-Internal function for NNS multivariate regression \link{NNS.reg} parallel instances.
+Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.
 }

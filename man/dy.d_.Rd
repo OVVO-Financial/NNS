@@ -64,8 +64,14 @@ for every oberservation of 1st regressor:
 apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
 plot(B[,1], apd[[1]])
 
+## 95\% Confidence Interval to test if 0 is within
+### Lower CI
+LPM.VaR(.025, 0, apd)
 
-## To find derivatives of y wrt 1st regressor and specified 2nd regressor
+### Upper CI
+UPM.VaR(.025, 0, apd)
+
+## To find derivatives of y wrt 1st regressor and specified 2nd regressor points
 dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
 
 
