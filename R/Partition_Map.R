@@ -235,7 +235,7 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
             }
             if((min(PART$counts) <= obs.req) && i >= 1) break
-            if(obs.req == 0 & old.parts >= new.parts) break
+            if(obs.req == 0 && old.parts >= new.parts) break
             i = i + 1L
         }
         if (!is.numeric(order)) {
@@ -258,15 +258,15 @@ NNS.part = function(x, y,
     if(!is.null(type)) {
         i <- 0L
         while (i >= 0) {
-            if(i == order | i == hard.stop) break
-            PART[counts >= 1 * obs.req, `:=`(counts, .N), by = quadrant]
-            PART[old.counts >= 1 * obs.req, `:=`(old.counts, .N), by = prior.quadrant]
+            if(i == order || i == hard.stop) break
+            PART[counts >= obs.req, `:=`(counts, .N), by = quadrant]
+            PART[old.counts >= obs.req, `:=`(old.counts, .N), by = prior.quadrant]
 
-            obs.req.rows <- PART[counts >= 1 * obs.req, which = TRUE]
+            obs.req.rows <- PART[counts >= obs.req, which = TRUE]
 
-            old.obs.req.rows <- PART[old.counts >= 1 * obs.req, which = TRUE]
+            old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
-            if(obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) break
+            if(obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
             if(noise.reduction == "off") {
                 RP <- PART[obs.req.rows, lapply(.SD, gravity), by = quadrant, .SDcols = x:y]
 
@@ -344,7 +344,7 @@ NNS.part = function(x, y,
             }
 
             if((min(PART$counts) <= obs.req) && i >= 1) break
-            if(obs.req == 0 & old.parts >= new.parts) break
+            if(obs.req == 0 && old.parts >= new.parts) break
             i <- i + 1L
         }
 
