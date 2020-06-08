@@ -667,6 +667,7 @@ NNS.reg = function (x, y,
 
   Regression.Coefficients <- unique(Regression.Coefficients)
   Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+  Regression.Coefficients[is.na(Regression.Coefficients)] <- 0
 
   ### Fitted Values
   p <- length(regression.points[ , x])
@@ -715,6 +716,7 @@ NNS.reg = function (x, y,
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
+  fitted$y.hat[is.na(fitted$y.hat)] <- mean(na.omit(fitted$y.hat))
 
 
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
@@ -779,6 +781,7 @@ NNS.reg = function (x, y,
 
   Regression.Coefficients <- unique(Regression.Coefficients)
   Regression.Coefficients$Coefficient[Regression.Coefficients$Coefficient==Inf] <- 1
+  Regression.Coefficients$Coefficient[is.na(Regression.Coefficients$Coefficient)] <- 0
 
 
   ### Fitted Values
@@ -828,7 +831,7 @@ NNS.reg = function (x, y,
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
-
+  fitted$y.hat[is.na(fitted$y.hat)] <- mean(na.omit(fitted$y.hat))
 
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
 
@@ -858,7 +861,7 @@ NNS.reg = function (x, y,
   }
 
 
-  ###Standard errors estimatation
+  ###Standard errors estimation
   if(std.errors){
 
     fitted[, `:=`

@@ -228,11 +228,14 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
+
         best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
-        nns.method.2 <- NNS.reg(IVs.train, DV.train,point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
+
+        nns.method.2 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
                                 type = type)
 
         rel_vars <- nns.method.2$equation
+
         rel_vars <- rel_vars[rel_vars$Coefficient>0,1][-.N]
 
 
