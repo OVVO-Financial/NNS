@@ -716,7 +716,7 @@ NNS.reg = function (x, y,
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
-  fitted$y.hat[is.na(fitted$y.hat)] <- mean(na.omit(fitted$y.hat))
+  fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
 
 
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
@@ -831,7 +831,7 @@ NNS.reg = function (x, y,
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
-  fitted$y.hat[is.na(fitted$y.hat)] <- mean(na.omit(fitted$y.hat))
+  fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
 
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
 
