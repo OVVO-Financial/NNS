@@ -39,9 +39,9 @@ Default setting is \code{(noise.reduction = "mean")}.}
 \value{
 Returns:
 \itemize{
-\item{\code{dy.d_(...)$"First Derivative"}} the 1st derivative
-\item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
-\item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
+\item{\code{dy.d_(...)$"First"}} the 1st derivative
+\item{\code{dy.d_(...)$"Second"}} the 2nd derivative
+\item{\code{dy.d_(...)$"Mixed"}} the mixed derivative (for two independent variables only).
 }
 }
 \description{
