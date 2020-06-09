@@ -67,7 +67,7 @@ dy.d_<- function(x, y, wrt,
                  ncores = NULL,
                  messages = TRUE){
 
-  order <- "max"
+  order <- NULL #"max"
 
   h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
 
@@ -103,7 +103,7 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
-    h_step <- abs(diff(range(x[, wrt]))/h)  + (.1 * abs(diff(range(x[, wrt]))))
+    h_step <- abs(diff(range(x[, wrt]))/h)  + (.05 * abs(diff(range(x[, wrt]))))
 
     if(length(eval.points)==dim(x)[2]){
         original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
@@ -160,7 +160,7 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = 1, stack = FALSE, ncores = ncores)$reg
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = c(1,2), stack = FALSE, ncores = ncores)$stack
 
 
 
@@ -201,7 +201,7 @@ dy.d_<- function(x, y, wrt,
   } else {
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points
-    h_step <- abs(diff(range(x[, wrt]))/h) + (.1 * diff(range(x[, wrt])))
+    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
     original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
@@ -210,7 +210,7 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points.max)
 
 
-    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = 1)$reg
+    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = c(1,2), stack = FALSE, ncores = ncores)$stack
 
     lower <- head(estimates,n)
     two.f.x <- 2 * estimates[(n+1):(2*n)]
@@ -234,8 +234,8 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points))){
-      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.1 * diff(range(x[, 1])))
-      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.1 * diff(range(x[, 2])))
+      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.05 * diff(range(x[, 1])))
+      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.05 * diff(range(x[, 2])))
       mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
@@ -256,7 +256,7 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = 1, stack = FALSE)$reg
+    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = c(1,2), stack = FALSE)$stack
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)
