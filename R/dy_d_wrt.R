@@ -14,9 +14,9 @@
 #' @param messages logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.
 #' @return Returns:
 #' \itemize{
-#' \item{\code{dy.d_(...)$"First Derivative"}} the 1st derivative
-#' \item{\code{dy.d_(...)$"Second Derivative"}} the 2nd derivative
-#' \item{\code{dy.d_(...)$"Mixed Derivative"}} the mixed derivative (for two independent variables only).
+#' \item{\code{dy.d_(...)$"First"}} the 1st derivative
+#' \item{\code{dy.d_(...)$"Second"}} the 2nd derivative
+#' \item{\code{dy.d_(...)$"Mixed"}} the mixed derivative (for two independent variables only).
 #' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -103,7 +103,7 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
-    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
+    h_step <- abs(diff(range(x[, wrt]))/h)  + (.1 * abs(diff(range(x[, wrt]))))
 
     if(length(eval.points)==dim(x)[2]){
         original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
@@ -201,7 +201,7 @@ dy.d_<- function(x, y, wrt,
   } else {
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points
-    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
+    h_step <- abs(diff(range(x[, wrt]))/h) + (.1 * diff(range(x[, wrt])))
     original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
@@ -234,8 +234,8 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points))){
-      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.05 * diff(range(x[, 1])))
-      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.05 * diff(range(x[, 2])))
+      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.1 * diff(range(x[, 1])))
+      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.1 * diff(range(x[, 2])))
       mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
@@ -266,20 +266,18 @@ dy.d_<- function(x, y, wrt,
     z <- z[,1] + z[,4] - z[,2] - z[,3]
     mixed <- (z / mixed.distances)
 
-    results <- list("First Derivative" = as.numeric(unlist(rise / distance_wrt)),
-                    "Second Derivative" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
-                    "Mixed Derivative" = mixed)
+    results <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+                    "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
+                    "Mixed" = mixed)
 
     return(results)
   } else {
 
-    results <- list("First Derivative" = as.numeric(unlist(rise / distance_wrt)),
-               "Second Derivative" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
+    results <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
 
     return(results)
   }
 
 
 }
-
-#dy.d_ <- Vectorize(dy.d_, vectorize.args = "wrt")
