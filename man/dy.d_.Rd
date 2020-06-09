@@ -66,10 +66,10 @@ plot(B[,1], apd[[1]])
 
 ## 95\% Confidence Interval to test if 0 is within
 ### Lower CI
-LPM.VaR(.025, 0, apd)
+LPM.VaR(.025, 0, apd[[1]])
 
 ### Upper CI
-UPM.VaR(.025, 0, apd)
+UPM.VaR(.025, 0, apd[[1]])
 
 ## To find derivatives of y wrt 1st regressor and specified 2nd regressor points
 dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
