@@ -29,15 +29,15 @@ NNS.boost(
 \arguments{
 \item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
 
-\item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
+\item{DV.train}{a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.}
 
-\item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
+\item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
 
-\item{type}{\code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
+\item{type}{\code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be signifcantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
+\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.}
 

@@ -19,7 +19,7 @@ dy.d_(
 \arguments{
 \item{x}{a numeric matrix or data frame.}
 
-\item{y}{a numeric vector with compatible dimsensions to \code{x}.}
+\item{y}{a numeric vector with compatible dimensions to \code{x}.}
 
 \item{wrt}{integer; Selects the regressor to differentiate with respect to (vectorized).}
 
@@ -45,7 +45,7 @@ Returns:
 }
 }
 \description{
-Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
+Returns the numerical partial derivative of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
 }
 \examples{
 \dontrun{

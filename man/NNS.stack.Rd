@@ -27,17 +27,17 @@ NNS.stack(
 \arguments{
 \item{IVs.train}{a vector, matrix or data frame of variables of numeric or factor data types.}
 
-\item{DV.train}{a numeric or factor vector with compatible dimsensions to \code{(IVs.train)}.}
+\item{DV.train}{a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.}
 
-\item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types with compatible dimsensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
+\item{IVs.test}{a vector, matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
 
-\item{type}{\code{NULL} (default).  To perform a classification of disrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].}
+\item{type}{\code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].}
 
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
-\item{dist}{options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.}
+\item{dist}{options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.}
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
 
@@ -62,7 +62,7 @@ NNS.stack(
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
-\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} paramater for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.

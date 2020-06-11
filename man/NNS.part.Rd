@@ -18,7 +18,7 @@ NNS.part(
 \arguments{
 \item{x}{a numeric vector.}
 
-\item{y}{a numeric vector with compatible dimsensions to \code{x}.}
+\item{y}{a numeric vector with compatible dimensions to \code{x}.}
 
 \item{Voronoi}{logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.}
 
@@ -30,7 +30,7 @@ NNS.part(
 
 \item{min.obs.stop}{logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.}
 
-\item{noise.reduction}{the method of determing regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used.}
+\item{noise.reduction}{the method of determining regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used.}
 }
 \value{
 Returns:
