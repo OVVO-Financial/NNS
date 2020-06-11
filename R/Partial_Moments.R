@@ -1,6 +1,7 @@
 #' Lower Partial Moment
 #'
 #' This function generates a univariate lower partial moment for any degree or target.
+#'
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.

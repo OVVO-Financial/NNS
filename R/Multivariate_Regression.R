@@ -108,7 +108,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
       NNS.ID <- foreach(j = 1:n)%dopar%{
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
-      }
+    }
   }
 
   NNS.ID <- do.call(cbind, NNS.ID)

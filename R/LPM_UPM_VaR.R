@@ -1,6 +1,7 @@
 #' LPM VaR
 #'
 #' Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio.
+#'
 #' @param percentile numeric [0, 1]; The percentile for left-tail VaR (vectorized).
 #' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions.
 #' @param x a numeric vector.

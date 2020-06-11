@@ -1,6 +1,7 @@
 #' NNS SSD Test
 #'
 #' Bi-directional test of second degree stochastic dominance using lower partial moments.
+#'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @return Returns one of the following SSD results: \code{"X SSD Y"}, \code{"Y SSD X"}, or \code{"NO SSD EXISTS"}.

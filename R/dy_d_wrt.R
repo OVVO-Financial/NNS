@@ -1,9 +1,9 @@
 #' Partial Derivative dy/d_[wrt]
 #'
-#' Returns the numerical partial derivate of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
+#' Returns the numerical partial derivative of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
 #'
 #' @param x a numeric matrix or data frame.
-#' @param y a numeric vector with compatible dimsensions to \code{x}.
+#' @param y a numeric vector with compatible dimensions to \code{x}.
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
 #' @param eval.points numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
@@ -67,14 +67,27 @@ dy.d_<- function(x, y, wrt,
                  ncores = NULL,
                  messages = TRUE){
 
-  order <- NULL #"max"
 
-  h <- NNS.dep.hd(cbind(x,y))$Dependence * length(y)
+  dep <- NNS.dep.hd(cbind(x,y))
+
+  h <- dep$Dependence * length(y)
 
   n <- dim(x)[1]
   l <- dim(x)[2]
 
-  if(l > 2) mixed <- FALSE
+  if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
+
+  order <- NULL
+
+  if(dep$actual.observations > 2*dep$independent.null){
+    stack <- FALSE
+    method <- 1
+  } else {
+    stack <- TRUE
+    method <- c(1,2)
+  }
+
+  if(l != 2) mixed <- FALSE
 
   if(is.character(eval.points)){
     if(eval.points == "median"){
@@ -114,7 +127,7 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      index <- apply(sapply(quantile(unlist(eval.points), c(.25,.4,.5,.6,.75)), function(z) abs(z - unlist(eval.points))), 2, which.min)
+      index <- apply(sapply(quantile(unlist(eval.points), c(.1,.25,.5,.75,.9)), function(z) abs(z - unlist(eval.points))), 2, which.min)
       sampsize <- length(index)
 
       deriv.points <- x[index,]
@@ -160,7 +173,7 @@ dy.d_<- function(x, y, wrt,
         distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = c(1,2), stack = FALSE, ncores = ncores)$stack
+    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = method, stack = stack, ncores = ncores)$stack
 
 
 
@@ -210,7 +223,7 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points.max)
 
 
-    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = c(1,2), stack = FALSE, ncores = ncores)$stack
+    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = method, stack = stack, ncores = ncores)$stack
 
     lower <- head(estimates,n)
     two.f.x <- 2 * estimates[(n+1):(2*n)]
@@ -256,7 +269,7 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = c(1,2), stack = FALSE)$stack
+    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = method, stack = stack)$stack
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)

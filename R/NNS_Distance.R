@@ -5,16 +5,18 @@
 #' @param dist.estimate Vector to generate distances from.
 #' @param type "L1", "L2" or "DTW"
 #' @param k \code{n.best} from \link{NNS.reg}
+#' @param n number of observations.
 #'
 #' @return Returns sum of weighted distances.
 #'
 #'
 #' @export
 
-NNS.distance <- function(rpm, dist.estimate, type, k){
+NNS.distance <- function(rpm, dist.estimate, type, k, n){
   type <- toupper(type)
   n <- length(dist.estimate)
   l <- nrow(rpm)
+
 
   y.hat <- rpm$y.hat
 
@@ -68,7 +70,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k){
   weights <- (1 / rpm$Sum) / sum(1 / rpm$Sum)
 
   if(type!="FACTOR"){
-    weights <- rowMeans(cbind(weights, rep(1/min(k,l), length(weights))))
+    weights <- rowMeans(cbind(weights,rep(1/min(k,l), length(weights))))
     weights.sum <- sum(weights)
     weights <- weights / weights.sum
   }

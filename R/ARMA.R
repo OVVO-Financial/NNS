@@ -4,29 +4,29 @@
 #'
 #' @param variable a numeric vector.
 #' @param h integer; 1 (default) Number of periods to forecast.
-#' @param training.set numeric; \code{NULL} (defualt) Sets the number of variable observations
+#' @param training.set numeric; \code{NULL} (default) Sets the number of variable observations
 #'
 #'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param weights numeric; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains.
-#' @param best.periods integer; [2] (default) used in conjuction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+#' @param best.periods integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #'
 #' \code{(seasonal.factor = FALSE)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.
-#' @param method options: ("lin", "nonlin", "both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlineaer regression, set to
+#' @param method options: ("lin", "nonlin", "both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
 #' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
-#' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstap \link{meboot} on the final estimates.
+#' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.
 #' @return Returns a vector of forecasts of length \code{(h)} if no \code{conf.intervals} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper confidence intervals per forecast point.
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
 #' \code{(seasonal.factor = c(36, 48, 72))}.
 #'
-#' \code{(seasonal.factor = FALSE)} can be a very comutationally expensive exercise due to the number of seasonal periods detected.
+#' \code{(seasonal.factor = FALSE)} can be a very computationally expensive exercise due to the number of seasonal periods detected.
 #'
 #' If error encountered when \code{(seasonal.factor = TRUE)}:
 #'

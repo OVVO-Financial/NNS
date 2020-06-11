@@ -1,6 +1,7 @@
 #' NNS Dependence Base
 #'
 #' Internal function for NNS dependence \link{NNS.dep} parallel instances.
+#'
 #' @param x from \link{NNS.part}
 #' @param y from \link{NNS.part}
 #' @param order from \link{NNS.part}

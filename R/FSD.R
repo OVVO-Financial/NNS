@@ -1,6 +1,7 @@
 #' NNS FSD Test
 #'
 #' Bi-directional test of first degree stochastic dominance using lower partial moments.
+#'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.

@@ -1,6 +1,7 @@
 #' NNS FSD Test uni-directional
 #'
 #' Uni-directional test of first degree stochastic dominance using lower partial moments used in SD Efficient Set routine.
+#'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.

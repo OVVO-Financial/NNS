@@ -1,6 +1,7 @@
 #' NNS TSD Test
 #'
 #' Bi-directional test of third degree stochastic dominance using lower partial moments.
+#'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @return Returns one of the following TSD results: \code{"X TSD Y"}, \code{"Y TSD X"}, or \code{"NO TSD EXISTS"}.

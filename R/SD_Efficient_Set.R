@@ -1,6 +1,7 @@
 #' NNS SD Efficient Set
 #'
 #' Determines the set of stochastic dominant variables for various degrees.
+#'
 #' @param x a numeric matrix or data frame.
 #' @param degree numeric options: (1, 2, 3); Degree of stochastic dominance test from (1, 2 or 3).
 #' @param type options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.

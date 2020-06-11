@@ -1,6 +1,7 @@
 #' NNS Normalization
 #'
 #' Normalizes a matrix of variables based on nonlinear scaling normalization method.
+#'
 #' @param A a numeric matrix or data frame.
 #' @param linear logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.
 #' @param chart.type  options: ("l", "b"); \code{NULL} (default).  Set \code{(chart.type = "l")} for line,
