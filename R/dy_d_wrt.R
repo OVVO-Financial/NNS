@@ -12,11 +12,11 @@
 #' Default setting is \code{(noise.reduction = "mean")}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.
-#' @return Returns:
+#' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
-#' \item{\code{dy.d_(...)$"First"}} the 1st derivative
-#' \item{\code{dy.d_(...)$"Second"}} the 2nd derivative
-#' \item{\code{dy.d_(...)$"Mixed"}} the mixed derivative (for two independent variables only).
+#' \item{\code{dy.d_(...)["First", ]} the 1st derivative
+#' \item{\code{dy.d_(...)["Second", ]} the 2nd derivative
+#' \item{\code{dy.d_(...)["Mixed", ]} the mixed derivative (for two independent variables only).
 #' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -36,17 +36,17 @@
 #' ## To find average partial derivative of y wrt 1st regressor,
 #' for every oberservation of 1st regressor:
 #' apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
-#' plot(B[,1], apd[[1]])
+#' plot(B[,1], apd["First",][[1]])
 #'
 #' ## 95% Confidence Interval to test if 0 is within
 #' ### Lower CI
-#' LPM.VaR(.025, 0, apd[[1]])
+#' LPM.VaR(.025, 0, apd["First",][[1]])
 #'
 #' ### Upper CI
-#' UPM.VaR(.025, 0, apd[[1]])
+#' UPM.VaR(.025, 0, apd["First",][[1]])
 #'
-#' ## To find derivatives of y wrt 1st regressor and specified 2nd regressor points
-#' dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
+#' ## To find derivatives of y wrt 1st regressor and specified 2nd regressor points for both regressors
+#' dy.d_(B, y, wrt = c(1, 2), eval.points = c(.5, .5))
 #'
 #'
 #' ## Known function analysis: [y = a ^ 2 * b ^ 2]
@@ -68,24 +68,17 @@ dy.d_<- function(x, y, wrt,
                  messages = TRUE){
 
 
-  dep <- NNS.dep.hd(cbind(x,y))
 
-  h <- dep$Dependence * length(y)
 
   n <- dim(x)[1]
   l <- dim(x)[2]
 
+
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
 
-  order <- NULL
+  h_step <-  abs(diff(range(x[, wrt])))/exp(1)
 
-  if(dep$actual.observations > 2*dep$independent.null){
-    stack <- FALSE
-    method <- 1
-  } else {
-    stack <- TRUE
-    method <- c(1,2)
-  }
+  order <- NULL
 
   if(l != 2) mixed <- FALSE
 
@@ -116,7 +109,6 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
-    h_step <- abs(diff(range(x[, wrt]))/h)  + (.05 * abs(diff(range(x[, wrt]))))
 
     if(length(eval.points)==dim(x)[2]){
         original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
@@ -127,7 +119,7 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      index <- apply(sapply(quantile(unlist(eval.points), c(.1,.25,.5,.75,.9)), function(z) abs(z - unlist(eval.points))), 2, which.min)
+      index <- apply(sapply(quantile(unlist(eval.points), seq(.01,1,.05)), function(z) abs(z - unlist(eval.points))), 2, which.min)
       sampsize <- length(index)
 
       deriv.points <- x[index,]
@@ -143,7 +135,7 @@ dy.d_<- function(x, y, wrt,
 
       deriv.points <- data.table::data.table(deriv.points)
 
-      distance_wrt <-  (original.eval.points.max - original.eval.points.min)[1]
+      distance_wrt <- 2*h_step # (original.eval.points.max - original.eval.points.min)[1]
 
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
@@ -157,30 +149,30 @@ dy.d_<- function(x, y, wrt,
 
 
     if(length(unlist(eval.points)) == 1){
-        index <- sample.int(n = n, size = 30, replace = FALSE)
+      set.seed(317)
+        index <- sample.int(n = n, size = 100, replace = FALSE)
         deriv.points <- x[index, ]
-        deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify=FALSE))
-        deriv.points[, wrt] <- c(rep(original.eval.points.min, 30),
-                                 rep(eval.points, 30),
-                                 rep(original.eval.points.max, 30))
+        deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify = FALSE))
+        deriv.points[, wrt] <- c(rep(original.eval.points.min, 100),
+                                 rep(eval.points, 100),
+                                 rep(original.eval.points.max, 100))
 
-        distance_wrt <-  original.eval.points.max - original.eval.points.min
+        distance_wrt <- 2 * h_step
 
     }
 
     if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
         deriv.points <- matrix(c(original.eval.points.min, original.eval.points, original.eval.points.max), ncol = dim(x)[2], byrow = TRUE)
-        distance_wrt <-  original.eval.points.max[wrt] - original.eval.points.min[wrt]
+        distance_wrt <- 2 * h_step
     }
 
-    estimates <- NNS.stack(x, y, IVs.test = deriv.points, order = order, method = method, stack = stack, ncores = ncores)$stack
-
+    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
 
 
     if(length(unlist(eval.points)) == 1){
-        lower <- mean(estimates[1:30])
-        two.f.x <- 2 * mean(estimates[31:60])
-        upper <- mean(estimates[61:90])
+        lower <- mean(estimates[1:100])
+        two.f.x <- 2 * mean(estimates[101:200])
+        upper <- mean(estimates[201:300])
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2] == 1){
@@ -214,7 +206,6 @@ dy.d_<- function(x, y, wrt,
   } else {
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points
-    h_step <- abs(diff(range(x[, wrt]))/h) + (.05 * diff(range(x[, wrt])))
     original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
@@ -223,7 +214,8 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points.max)
 
 
-    estimates <- NNS.stack(x, y, IVs.test = original.eval.points, order = order, method = method, stack = stack, ncores = ncores)$stack
+    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
+
 
     lower <- head(estimates,n)
     two.f.x <- 2 * estimates[(n+1):(2*n)]
@@ -231,7 +223,7 @@ dy.d_<- function(x, y, wrt,
 
     rise <- upper - lower
 
-    distance_wrt <- original.eval.points.max[ , wrt] - original.eval.points.min[ , wrt]
+    distance_wrt <- 2 * h_step
   }
 
 
@@ -247,8 +239,8 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points))){
-      h_step_1 <- abs(diff(range(x[, 1]))/h) + (.05 * diff(range(x[, 1])))
-      h_step_2 <- abs(diff(range(x[, 2]))/h) + (.05 * diff(range(x[, 2])))
+      h_step_1 <- abs(diff(range(x[, 1])))/exp(1)
+      h_step_2 <- abs(diff(range(x[, 2])))/exp(1)
       mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
@@ -257,9 +249,6 @@ dy.d_<- function(x, y, wrt,
       mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
 
     } else {
-
-      h_step <- h * mean(x[,wrt])
-
       mixed.deriv.points <- matrix(c(h_step + eval.points,
                                      eval.points[1] - h_step, h_step + eval.points[2],
                                      h_step + eval.points[1], eval.points[2] - h_step,
@@ -269,7 +258,8 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, order = order, method = method, stack = stack)$stack
+    mixed.estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
+
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)
@@ -287,10 +277,13 @@ dy.d_<- function(x, y, wrt,
   } else {
 
     results <- list("First" = as.numeric(unlist(rise / distance_wrt)),
-               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
+                    "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
 
     return(results)
+
   }
 
 
 }
+
+dy.d_ <- Vectorize(dy.d_, vectorize.args = "wrt")

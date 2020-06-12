@@ -366,6 +366,7 @@ NNS.reg = function (x, y,
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
+          x.star.coef <- abs(x.star.coef)
           preserved.coef <- x.star.coef
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
