@@ -14,9 +14,9 @@
 #' @param messages logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.
 #' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
-#' \item{\code{dy.d_(...)["First", ]} the 1st derivative
-#' \item{\code{dy.d_(...)["Second", ]} the 2nd derivative
-#' \item{\code{dy.d_(...)["Mixed", ]} the mixed derivative (for two independent variables only).
+#' \item{\code{dy.d_(...)[, wrt]$First}} the 1st derivative
+#' \item{\code{dy.d_(...)[, wrt]$Second}} the 2nd derivative
+#' \item{\code{dy.d_(...)[, wrt]$Mixed}} the mixed derivative (for two independent variables only).
 #' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -36,14 +36,14 @@
 #' ## To find average partial derivative of y wrt 1st regressor,
 #' for every oberservation of 1st regressor:
 #' apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
-#' plot(B[,1], apd["First",][[1]])
+#' plot(B[,1], apd[,1]$First)
 #'
 #' ## 95% Confidence Interval to test if 0 is within
 #' ### Lower CI
-#' LPM.VaR(.025, 0, apd["First",][[1]])
+#' LPM.VaR(.025, 0, apd[,1]$First)
 #'
 #' ### Upper CI
-#' UPM.VaR(.025, 0, apd["First",][[1]])
+#' UPM.VaR(.025, 0, apd[,1]$First)
 #'
 #' ## To find derivatives of y wrt 1st regressor and specified 2nd regressor points for both regressors
 #' dy.d_(B, y, wrt = c(1, 2), eval.points = c(.5, .5))
