@@ -35,21 +35,21 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
 
   if(type=="L2"){
-    rpm[, "Sum" := ( Reduce(`+`, lapply(1 : n, function(i) (rpm[[i]]-as.numeric(dist.estimate)[i])^2)        ))]
-    rpm$Sum <- rpm$Sum + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
+    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - as.numeric(dist.estimate))^2)
+    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[, 1:n]) == as.numeric(dist.estimate)))))
   }
 
   if(type=="L1"){
-    rpm[, "Sum" := ( Reduce(`+`, lapply(1 : n, function(i) abs(rpm[[i]]-as.numeric(dist.estimate)[i]))))]
-    rpm$Sum <- rpm$Sum + 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate))))
+    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - as.numeric(dist.estimate)))
+    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[1:n]) == as.numeric(dist.estimate)))))
   }
 
   if(type=="DTW"){
-    rpm[, "Sum" := ( unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, ]), as.numeric(dist.estimate))$distance)))]
+    rpm[, "Sum" := ( unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, 1:n]), as.numeric(dist.estimate))$distance)))]
   }
 
   if(type=="FACTOR"){
-    rpm[, "Sum"  := ( 1/(1+Reduce(`+`, Map("==", rpm[, 1:n], as.numeric(dist.estimate)))))]
+    rpm$Sum <- 1/(1 + ( rowSums(t(t(rpm[,1:n]) == as.numeric(dist.estimate)))))
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
@@ -67,13 +67,9 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
   rpm <- rpm[1:min(k,l),]
 
-  weights <- (1 / rpm$Sum) / sum(1 / rpm$Sum)
+  inv <- (1 / rpm$Sum)
 
-  if(type!="FACTOR"){
-    weights <- rowMeans(cbind(weights,rep(1/min(k,l), length(weights))))
-    weights.sum <- sum(weights)
-    weights <- weights / weights.sum
-  }
+  weights <- inv / sum(inv)
 
   single.estimate <- sum(weights * rpm$y.hat)
 
