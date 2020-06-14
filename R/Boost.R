@@ -385,33 +385,32 @@ NNS.boost <- function(IVs.train,
   kf$N <- kf$N / sum(kf$N)
 
 
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
+### Error in parallel implementation
+#  if(num_cores>1){
+#    cl <- makeCluster(num_cores)
+#    registerDoParallel(cl)
+#  } else { cl <- NULL }
 
-  if(!is.null(cl)){
-    clusterExport(cl,c("x","y"))
-    if(status){
-      message("Parallel process running, status unavailable...","\r","\n",appendLF=FALSE)
-    }
+#  if(!is.null(cl)){
+#    clusterExport(cl,c("x","y","z"))
+#    if(status){
+#      message("Parallel process running, status unavailable...","\r","\n",appendLF=FALSE)
+#    }
 
-    estimates <- foreach(i = 1:dim(kf)[1], .packages = c("NNS","data.table","dtw"))%dopar%{
+#    estimates <- foreach(i = 1:dim(kf)[1], .packages = c("NNS","data.table","dtw", "Rfast"))%dopar%{
 
-      NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
-              plot=FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-              factor.2.dummy = FALSE, ncores = 1, type = type, dist = dist)$Point.est * kf$N[i]
-    }
-  } else {
+#      NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
+#              plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
+#              factor.2.dummy = FALSE, ncores = 1, type = type, dist = dist)$Point.est * kf$N[i]
+#    }
+
+
+
+#  } else {
     for(i in 1:dim(kf)[1]){
 
       if(status){
         message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
-        if(i == length(keeper.features)){
-          message("% of Final Estimate = 1.000             ","\r", appendLF = FALSE)
-          message("                                        ","\r", appendLF = TRUE)
-          flush.console()
-        }
       }
 
 
@@ -424,12 +423,12 @@ NNS.boost <- function(IVs.train,
 
     }
 
-  }
+# }
 
-  if(!is.null(cl)){
-    stopCluster(cl)
-    registerDoSEQ()
-  }
+#  if(!is.null(cl)){
+#    stopCluster(cl)
+#    registerDoSEQ()
+#  }
 
   estimates <- Reduce("+", estimates)
 

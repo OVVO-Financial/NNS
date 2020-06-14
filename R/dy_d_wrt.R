@@ -135,7 +135,7 @@ dy.d_<- function(x, y, wrt,
 
       deriv.points <- data.table::data.table(deriv.points)
 
-      distance_wrt <- 2*h_step # (original.eval.points.max - original.eval.points.min)[1]
+      distance_wrt <- 2*h_step
 
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])

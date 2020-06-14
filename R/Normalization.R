@@ -23,7 +23,7 @@ NNS.norm <- function(A,
                      chart.type = NULL,
                      location = "topleft"){
 
-  m  <- colMeans(A)
+  m  <- Rfast::colmeans(A)
   m[m==0] <- 1e-10
   RG <- m %o% (1 / m)
 
@@ -33,9 +33,9 @@ NNS.norm <- function(A,
       } else {
         scale.factor <- abs(NNS.dep(A)$Dependence)
       }
-    scales <- colMeans(RG * scale.factor)
+    scales <- Rfast::colmeans(RG * scale.factor)
   } else {
-      scales <- colMeans(RG)
+      scales <- Rfast::colmeans(RG)
   }
 
 

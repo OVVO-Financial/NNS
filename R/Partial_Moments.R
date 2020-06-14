@@ -16,8 +16,10 @@
 #' @export
 
 LPM <-  function(degree, target, variable){
-          sum((target - (variable[variable <= target])) ^ degree) / length(variable)
-        }
+    if(degree == 0) return(mean(variable <= target))
+
+    sum((target - (variable[variable <= target])) ^ degree) / length(variable)
+}
 LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 
@@ -40,8 +42,10 @@ LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 
 UPM <-  function(degree, target, variable){
-          sum(((variable[variable > target]) - target) ^ degree) / length(variable)
-        }
+  if(degree == 0) return(mean(variable > target))
+
+  sum(((variable[variable > target]) - target) ^ degree) / length(variable)
+}
 UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 #' Co-Upper Partial Moment
@@ -66,20 +70,11 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(length(x)>1){
-    z <- cbind(x,y); z <- z[complete.cases(z),]
-    x <- z[,1]
-    y <- z[,2]
-  }
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  x <- x - target.x
-  y <- y - target.y
-  x[x <= 0] <- 0
-  y[y <= 0] <- 0
-  x[x > 0] <- x[x > 0] ^ degree.x
-  y[y > 0] <- y[y > 0] ^ degree.y
-  return(x %*% y / length(x))
+  z <- cbind(x,y)
+  z <- t(t(z) - c(target.x, target.y))
+  z[z<=0] <- NA
+  z <- z[complete.cases(z), , drop = FALSE]
+  return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
   }
 Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 
@@ -104,21 +99,12 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(length(x)>1){
-      z <- cbind(x,y); z <- z[complete.cases(z),]
-      x <- z[,1]
-      y <- z[,2]
-  }
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  x <- target.x - x
-  y <- target.y - y
-  x[x <= 0] <- 0
-  y[y <= 0] <- 0
-  x[x > 0] <- x[x > 0] ^ degree.x
-  y[y > 0] <- y[y > 0] ^ degree.y
-  return(x %*% y / length(x))
-  }
+  z <- cbind(x,y)
+  z <- t(c(target.x, target.y) - t(z))
+  z[z<=0] <- NA
+  z <- z[complete.cases(z), , drop = FALSE]
+  return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
+}
 Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Lower Partial Moment
@@ -142,21 +128,13 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(length(x)>1){
-    z <- cbind(x,y); z <- z[complete.cases(z),]
-    x <- z[,1]
-    y <- z[,2]
-  }
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  x <- x - target.x
-  y <- target.y - y
-  x[x <= 0] <- 0
-  y[y <= 0] <- 0
-  x[x > 0] <- x[x > 0] ^ degree.x
-  y[y > 0] <- y[y > 0] ^ degree.y
-  return(x %*% y / length(x))
-  }
+  z <- cbind(x,y)
+  z[,1] <- z[,1] - target.x
+  z[,2] <- target.y - z[,2]
+  z[z<=0] <- NA
+  z <- z[complete.cases(z), , drop = FALSE]
+  return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
+}
 D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Divergent-Upper Partial Moment
@@ -180,20 +158,12 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  if(length(x)>1){
-    z <- cbind(x,y); z <- z[complete.cases(z),]
-    x <- z[,1]
-    y <- z[,2]
-  }
-  if(degree.x == 0){x[x == target.x] <- target.x - 1}
-  if(degree.y == 0){y[y == target.y] <- target.y - 1}
-  x <- target.x - x
-  y <- y - target.y
-  x[x <= 0] <- 0
-  y[y <= 0] <- 0
-  x[x > 0] <- x[x > 0] ^ degree.x
-  y[y > 0] <- y[y > 0] ^ degree.y
-  return(x %*% y / length(x))
+  z <- cbind(x,y)
+  z[,1] <- target.x - z[,1]
+  z[,2] <- z[,2] - target.y
+  z[z<=0] <- NA
+  z <- z[complete.cases(z), , drop = FALSE]
+  return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
  }
 D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 

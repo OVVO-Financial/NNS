@@ -16,17 +16,13 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   type <- toupper(type)
   n <- length(dist.estimate)
   l <- nrow(rpm)
-
-
   y.hat <- rpm$y.hat
-
-  cols <- colnames(rpm)[names(rpm)!="y.hat"]
 
 
   if(type!="FACTOR"){
-    rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = cols])
+    rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
     rpm[, names(rpm) := lapply(.SD, as.numeric)]
-    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b))))]
+    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
     dist.estimate <- as.numeric(rpm[1, ])
     rpm <- rpm[-1,]
   }
@@ -35,13 +31,13 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
 
   if(type=="L2"){
-    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - as.numeric(dist.estimate))^2)
-    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[, 1:n]) == as.numeric(dist.estimate)))))
+    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - (dist.estimate))^2)
+    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[, 1:n]) == (dist.estimate)))))
   }
 
   if(type=="L1"){
-    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - as.numeric(dist.estimate)))
-    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[1:n]) == as.numeric(dist.estimate)))))
+    rpm$Sum <- rowSums(t(t(rpm[, 1:n]) - (dist.estimate)))
+    rpm$Sum <- rpm$Sum +  1/(1 + ( rowSums(t(t(rpm[1:n]) == (dist.estimate)))))
   }
 
   if(type=="DTW"){
@@ -49,7 +45,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   }
 
   if(type=="FACTOR"){
-    rpm$Sum <- 1/(1 + ( rowSums(t(t(rpm[,1:n]) == as.numeric(dist.estimate)))))
+    rpm$Sum <- 1/(1 + ( rowSums(t(t(rpm[,1:n]) == (dist.estimate)))))
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
@@ -59,9 +55,9 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   if(k==1){
     index <- which.min(rpm$Sum)
     if(length(index)>1){
-        return(mode(rpm$y.hat[index]))
+      return(mode(rpm$y.hat[index]))
     }  else {
-        return(rpm$y.hat[1])
+      return(rpm$y.hat[1])
     }
   }
 

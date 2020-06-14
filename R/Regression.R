@@ -639,7 +639,7 @@ NNS.reg = function (x, y,
     }
   }
 
-  if(dim(regression.points)[1]>1){
+  if(dim(regression.points)[1] > 1){
     rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
     run <- regression.points[ , 'run' := x - data.table::shift(x)]
   } else {
@@ -736,7 +736,7 @@ NNS.reg = function (x, y,
   bias <- fitted
   data.table::setkey(bias, x)
 
-  bias <- bias[, mean(residuals)*-1, by = gradient]
+  bias <- bias[, mode(residuals)*-1, by = gradient]
   fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
 
   bias[, bias := lapply(.SD, data.table::frollmean, n = 2, fill = NA, align = 'right'), .SDcols = 2]
