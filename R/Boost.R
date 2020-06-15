@@ -385,28 +385,7 @@ NNS.boost <- function(IVs.train,
   kf$N <- kf$N / sum(kf$N)
 
 
-### Error in parallel implementation
-#  if(num_cores>1){
-#    cl <- makeCluster(num_cores)
-#    registerDoParallel(cl)
-#  } else { cl <- NULL }
 
-#  if(!is.null(cl)){
-#    clusterExport(cl,c("x","y","z"))
-#    if(status){
-#      message("Parallel process running, status unavailable...","\r","\n",appendLF=FALSE)
-#    }
-
-#    estimates <- foreach(i = 1:dim(kf)[1], .packages = c("NNS","data.table","dtw", "Rfast"))%dopar%{
-
-#      NNS.reg(x[,eval(parse(text=kf$V1[i]))], y, point.est = z[,eval(parse(text=kf$V1[i]))],
-#              plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
-#              factor.2.dummy = FALSE, ncores = 1, type = type, dist = dist)$Point.est * kf$N[i]
-#    }
-
-
-
-#  } else {
     for(i in 1:dim(kf)[1]){
 
       if(status){
@@ -418,17 +397,11 @@ NNS.boost <- function(IVs.train,
                                 point.est = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
                                 plot = FALSE, residual.plot = FALSE, order = depth,
                                 n.best = n.best,
-                                factor.2.dummy = FALSE, ncores = 1,
-                                type = type, dist = dist)$Point.est * kf$N[i]
+                                factor.2.dummy = FALSE, ncores = ncores,
+                                type = type, dist = dist)$Point.est/dim(kf)[1]
 
     }
 
-# }
-
-#  if(!is.null(cl)){
-#    stopCluster(cl)
-#    registerDoSEQ()
-#  }
 
   estimates <- Reduce("+", estimates)
 
