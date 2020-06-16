@@ -7,11 +7,8 @@
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
 #' @param eval.points numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
-#' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
-#' @param plot logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
-#' Default setting is \code{(noise.reduction = "mean")}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-#' @param messages logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.
+#' @param messages logical; \code{TRUE} (default) Prints status messages.
 #' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
 #' \item{\code{dy.d_(...)[, wrt]$First}} the 1st derivative
@@ -61,7 +58,6 @@
 
 dy.d_<- function(x, y, wrt,
                  eval.points = "median",
-                 folds = 5,
                  mixed = FALSE,
                  plot = FALSE,
                  ncores = NULL,
@@ -75,8 +71,10 @@ dy.d_<- function(x, y, wrt,
 
 
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
+  if(l<2) stop("Please use dy.dx(...) for univariate partial derivatives.")
+  if(plot && eval.points!="all") stop("Please select either (plot = FALSE) or (eval.points = 'all').")
 
-  h_step <-  abs(diff(range(x[, wrt])))/exp(1)
+  if(NNS.dep.hd(cbind(x, y))$Dependence>.25) h<- .1 else h <-   max(.1, 1/exp(l-2))
 
   order <- NULL
 
@@ -111,9 +109,15 @@ dy.d_<- function(x, y, wrt,
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
 
     if(length(eval.points)==dim(x)[2]){
+        h_step <- LPM.ratio(1, eval.points[wrt], x[, wrt])
+        h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
+
         original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
         original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
     } else {
+        h_step <- LPM.ratio(1, eval.points, x[, wrt])
+        h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
+
         original.eval.points.min <- original.eval.points.min - h_step
         original.eval.points.max <- h_step + original.eval.points.max
     }
@@ -135,7 +139,7 @@ dy.d_<- function(x, y, wrt,
 
       deriv.points <- data.table::data.table(deriv.points)
 
-      distance_wrt <- 2*h_step
+      distance_wrt <- 2 * h_step
 
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
@@ -163,10 +167,11 @@ dy.d_<- function(x, y, wrt,
 
     if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
         deriv.points <- matrix(c(original.eval.points.min, original.eval.points, original.eval.points.max), ncol = dim(x)[2], byrow = TRUE)
+
         distance_wrt <- 2 * h_step
     }
 
-    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
+    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 
 
     if(length(unlist(eval.points)) == 1){
@@ -214,7 +219,7 @@ dy.d_<- function(x, y, wrt,
                                   original.eval.points.max)
 
 
-    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
+    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 
 
     lower <- head(estimates,n)
@@ -239,8 +244,12 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points))){
-      h_step_1 <- abs(diff(range(x[, 1])))/exp(1)
-      h_step_2 <- abs(diff(range(x[, 2])))/exp(1)
+      h_step_1 <- LPM.ratio(1, eval.points, x[, 1])
+      h_step_1 <- LPM.VaR(h_step_1 + h, 1, x[, 1]) - LPM.VaR(h_step_1 - h, 1, x[, 1])
+
+      h_step_2 <- LPM.ratio(1, eval.points, x[, 2])
+      h_step_2 <- LPM.VaR(h_step_2 + h, 1, x[, 2]) - LPM.VaR(h_step_2 - h, 1, x[, 2])
+
       mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
@@ -258,7 +267,7 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0)$Point.est
+    mixed.estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 
 
     if(messages){
@@ -280,7 +289,6 @@ dy.d_<- function(x, y, wrt,
                     "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
 
     return(results)
-
   }
 
 

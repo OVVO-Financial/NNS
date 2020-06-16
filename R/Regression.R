@@ -313,18 +313,16 @@ NNS.reg = function (x, y,
           dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
 
-          if(dim.red.method!="cor"){
-            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE)
+          if(dim.red.method!="cor" && dim.red.method!="equal"){
+            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE)$Dependence
             x.star.dep[is.na(x.star.dep)] <- 0
-            x.star.cor <- cor(cbind(x, y), method = "spearman")
-            x.star.cor[is.na(x.star.cor)] <- 0
-          } else {
-            x.star.cor <- cor(cbind(x, y), method = "spearman")
-            x.star.cor[is.na(x.star.cor)] <- 0
           }
 
+          x.star.cor <- cor(cbind(x, y), method = "spearman")
+          x.star.cor[is.na(x.star.cor)] <- 0
+
           if(dim.red.method == "nns.dep"){
-            x.star.coef <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
@@ -360,13 +358,21 @@ NNS.reg = function (x, y,
 
             x.star.coef.3 <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
-            x.star.coef.2 <- x.star.dep$Dependence[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.2 <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.2[is.na(x.star.coef.2)] <- 0
-            x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+            x.star.coef <- rowMeans(abs(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3)))
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
+          if(dim.red.method == "equal") {
+            x.star.coef <- rep(1/ncol(x), ncol(x))
+          }
+
           x.star.coef <- abs(x.star.coef)
+
+
+
+
           preserved.coef <- x.star.coef
           x.star.coef[abs(x.star.coef) < threshold] <- 0
 
@@ -424,7 +430,7 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
   dependence[is.na(dependence)] <- .01
-  ifelse(dependence < 0.5, dependence <- min(.5, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^1))
+  ifelse(dependence < 0.5, dependence <- min(0, dependence^(1/2)), dependence <- max(sqrt(0.5), dependence^1))
 
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
@@ -442,9 +448,9 @@ NNS.reg = function (x, y,
 
 
   if(dependence > stn){
-    part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 5, min.obs.stop = FALSE)
+    part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
     if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
     }
     if(dependence == 1){
       if(is.null(order)) {
