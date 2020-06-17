@@ -5,7 +5,14 @@
 #' @param x a numeric matrix or data frame.
 #' @param y a numeric vector with compatible dimensions to \code{x}.
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
-#' @param eval.points numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.
+#' @param eval.points numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
+#' \itemize{
+#' \item Set to \code{(eval.points = "obs")} (defalut) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
+#' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
+#' \item Set to \code{(eval.points = "median")} to find the average partial derivative at the median of the variable with respect to.
+#' \item Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).
+#' \item Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to.
+#' }
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
@@ -32,7 +39,7 @@
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
 #' for every oberservation of 1st regressor:
-#' apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
+#' apd <- dy.d_(B, y, wrt = 1, eval.points = "apd")
 #' plot(B[,1], apd[,1]$First)
 #'
 #' ## 95% Confidence Interval to test if 0 is within
@@ -57,7 +64,7 @@
 
 
 dy.d_<- function(x, y, wrt,
-                 eval.points = "median",
+                 eval.points = "obs",
                  mixed = FALSE,
                  ncores = NULL,
                  messages = TRUE){
@@ -80,6 +87,7 @@ dy.d_<- function(x, y, wrt,
   if(l != 2) mixed <- FALSE
 
   if(is.character(eval.points)){
+    eval.points <- tolower(eval.points)
     if(eval.points == "median"){
       eval.points <- median(x[ , wrt])
     } else {
@@ -89,8 +97,10 @@ dy.d_<- function(x, y, wrt,
         if(eval.points == "mean"){
           eval.points <- mean(x[ , wrt])
         } else {
-          if(eval.points == "all"){
+          if(eval.points == "apd"){
             eval.points <- x[ , wrt, drop = FALSE]
+          } else {
+            eval.points <- x
           }
         }
       }
@@ -106,7 +116,6 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
-
     if(length(eval.points)==dim(x)[2]){
         h_step <- LPM.ratio(1, unlist(eval.points[wrt]), x[, wrt])
         h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
@@ -210,10 +219,14 @@ dy.d_<- function(x, y, wrt,
   } else {
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points
+
+    h_step <- LPM.ratio(0, unlist(eval.points[, wrt]), x[, wrt])
+    h_step <- mean(LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt]))
+
     original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
-    original.eval.points <- rbind(original.eval.points.min,
+    deriv.points <- rbind(original.eval.points.min,
                                   original.eval.points,
                                   original.eval.points.max)
 
