@@ -122,7 +122,7 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      index <- apply(sapply(quantile(unlist(eval.points), seq(.01,1,.05)), function(z) abs(z - unlist(eval.points))), 2, which.min)
+      index <- apply(sapply(quantile(unlist(eval.points), seq(.05,.95,.05)), function(z) abs(z - unlist(eval.points))), 2, which.min)
       sampsize <- length(index)
 
       deriv.points <- x[index,]
