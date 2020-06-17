@@ -8,7 +8,7 @@ dy.d_(
   x,
   y,
   wrt,
-  eval.points = "median",
+  eval.points = "obs",
   mixed = FALSE,
   ncores = NULL,
   messages = TRUE
@@ -21,7 +21,14 @@ dy.d_(
 
 \item{wrt}{integer; Selects the regressor to differentiate with respect to (vectorized).}
 
-\item{eval.points}{numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.}
+\item{eval.points}{numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
+\itemize{
+\item Set to \code{(eval.points = "obs")} (defalut) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
+\item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
+\item Set to \code{(eval.points = "median")} to find the average partial derivative at the median of the variable with respect to.
+\item Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).
+\item Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to.
+}}
 
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
@@ -54,7 +61,7 @@ dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
 
 ## To find average partial derivative of y wrt 1st regressor,
 for every oberservation of 1st regressor:
-apd <- dy.d_(B, y, wrt = 1, eval.points = "all")
+apd <- dy.d_(B, y, wrt = 1, eval.points = "apd")
 plot(B[,1], apd[,1]$First)
 
 ## 95\% Confidence Interval to test if 0 is within
