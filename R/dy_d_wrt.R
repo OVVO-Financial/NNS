@@ -59,7 +59,6 @@
 dy.d_<- function(x, y, wrt,
                  eval.points = "median",
                  mixed = FALSE,
-                 plot = FALSE,
                  ncores = NULL,
                  messages = TRUE){
 
@@ -73,7 +72,6 @@ dy.d_<- function(x, y, wrt,
 
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l<2) stop("Please use dy.dx(...) for univariate partial derivatives.")
-  if(plot && eval.points!="all") stop("Please select either (plot = FALSE) or (eval.points = 'all').")
 
   if(NNS.dep.hd(cbind(x, y))$Dependence>.25) h<- .1 else h <-   max(.1, 1/exp(l-2))
 
