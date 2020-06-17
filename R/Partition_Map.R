@@ -85,15 +85,12 @@ NNS.part = function(x, y,
     }
 
     if(!is.numeric(order)) {
-        obs.req <- 1
-        type <- type
-        hard.stop <- max(ceiling(log(length(x), 2)), 1)
+        obs.req <- 0
     } else {
         obs.req <- obs.req
-        type <- type
-        hard.stop <- max(floor(log(length(x), 2)), 1)
     }
 
+    hard.stop <- max(ceiling(log(length(x), 2)), 1)
 
     if(is.null(type)) {
         i <- 0L
@@ -236,7 +233,6 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
             }
             if((min(PART$counts) <= obs.req) && i >= 1) break
-            if(obs.req == 0 && old.parts >= new.parts) break
             i = i + 1L
         }
         if (!is.numeric(order)) {
@@ -345,7 +341,6 @@ NNS.part = function(x, y,
             }
 
             if((min(PART$counts) <= obs.req) && i >= 1) break
-            if(obs.req == 0 && old.parts >= new.parts) break
             i <- i + 1L
         }
 

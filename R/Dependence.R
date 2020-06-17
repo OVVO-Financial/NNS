@@ -106,25 +106,21 @@ NNS.dep = function(x,
 
     l <- length(x)
 
-    if(l < 150){
-        return(NNS.dep.base(x, y, order = order, degree = degree, print.map = print.map, asym = asym, type = "XONLY"))
-    }
-
     seg <- as.integer(.2*l)
     segs <- list(5L)
     uniques <- list(5L)
 
     for(i in 1:5){
       if(i == 1){
-        segs[[i]] <- 1 : min(l, min(100, l/2.5))
+        segs[[i]] <- 1 : min(l, min(50, l/5))
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
       if(i > 1 & i < 5){
-        segs[[i]] <- max(1, (i*seg - min(50, l/5))) : min(l,(i*seg + min(50, l/5)))
+        segs[[i]] <- max(1, (i*seg - min(50, l/10))) : min(l,(i*seg + min(50, l/10)))
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
       if(i == 5){
-        segs[[i]] <- max(1, (l - min(100, l/2.5))) : l
+        segs[[i]] <- max(1, (l - min(50, l/5))) : l
         uniques[[i]] <- length(unique(x[segs[[i]]]))
       }
     }
@@ -148,16 +144,16 @@ NNS.dep = function(x,
       }
 
     } else {
-        for(i in 1:5){
-            nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE, order = order, asym = asym)
-        }
+      for(i in 1:5){
+        nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE, order = order, asym = asym)
+      }
 
     }
 
-
-    if(l >= 150 & print.map){
+    if(print.map){
       NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, type = type, noise.reduction = "mean")
     }
+
     options(warn = oldw)
     return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),
                 "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))

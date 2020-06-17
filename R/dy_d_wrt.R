@@ -67,6 +67,7 @@ dy.d_<- function(x, y, wrt,
 
 
   n <- dim(x)[1]
+  nn <- min(n, 100)
   l <- dim(x)[2]
 
 
@@ -109,13 +110,13 @@ dy.d_<- function(x, y, wrt,
   if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
 
     if(length(eval.points)==dim(x)[2]){
-        h_step <- LPM.ratio(1, eval.points[wrt], x[, wrt])
+        h_step <- LPM.ratio(1, unlist(eval.points[wrt]), x[, wrt])
         h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
 
         original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
         original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
     } else {
-        h_step <- LPM.ratio(1, eval.points, x[, wrt])
+        h_step <- LPM.ratio(1, unlist(eval.points), x[, wrt])
         h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
 
         original.eval.points.min <- original.eval.points.min - h_step
@@ -129,7 +130,7 @@ dy.d_<- function(x, y, wrt,
       deriv.points <- x[index,]
 
 
-      deriv.points <- do.call(rbind, replicate(3*sampsize*n, deriv.points, simplify=FALSE))
+      deriv.points <- do.call(rbind, replicate(3*sampsize*nn, deriv.points, simplify=FALSE))
 
       deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
                                              rep(eval.points),
@@ -154,12 +155,12 @@ dy.d_<- function(x, y, wrt,
 
     if(length(unlist(eval.points)) == 1){
       set.seed(317)
-        index <- sample.int(n = n, size = 100, replace = FALSE)
+        index <- sample.int(n = n, size = nn, replace = FALSE)
         deriv.points <- x[index, ]
         deriv.points <- do.call(rbind, replicate(3, deriv.points, simplify = FALSE))
-        deriv.points[, wrt] <- c(rep(original.eval.points.min, 100),
-                                 rep(eval.points, 100),
-                                 rep(original.eval.points.max, 100))
+        deriv.points[, wrt] <- c(rep(original.eval.points.min, nn),
+                                 rep(eval.points, nn),
+                                 rep(original.eval.points.max, nn))
 
         distance_wrt <- 2 * h_step
 
@@ -175,9 +176,9 @@ dy.d_<- function(x, y, wrt,
 
 
     if(length(unlist(eval.points)) == 1){
-        lower <- mean(estimates[1:100])
-        two.f.x <- 2 * mean(estimates[101:200])
-        upper <- mean(estimates[201:300])
+        lower <- mean(estimates[1:nn])
+        two.f.x <- 2 * mean(estimates[(nn+1):(2*nn)])
+        upper <- mean(estimates[(2*nn+1):(3*nn)])
     }
 
     if(!is.null(dim(eval.points)) && dim(eval.points)[2] == 1){
