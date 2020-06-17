@@ -9,9 +9,7 @@ dy.d_(
   y,
   wrt,
   eval.points = "median",
-  folds = 5,
   mixed = FALSE,
-  plot = FALSE,
   ncores = NULL,
   messages = TRUE
 )
@@ -25,16 +23,11 @@ dy.d_(
 
 \item{eval.points}{numeric or options: ("mean", median", "last", "all"); Regressor points to be evaluated.  \code{(eval.points = "median")} (default) to find the average partial derivative at the median of the variable with respect to.  Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).  Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to. Set to \code{(eval.points = "all")} to find the average partial derivative at every observation of the variable with respect to.}
 
-\item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
-
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
-
-\item{plot}{logical; \code{FALSE} (default) Set to \code{(plot = TRUE)} to view plot.
-Default setting is \code{(noise.reduction = "mean")}.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{messages}{logical; \code{TRUE} (default) Prints status messages of cross-validation on \code{n.best} parameter for \link{NNS.reg}.}
+\item{messages}{logical; \code{TRUE} (default) Prints status messages.}
 }
 \value{
 Returns column-wise matrix of wrt regressors:
