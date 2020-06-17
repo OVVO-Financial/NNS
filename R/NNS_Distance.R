@@ -66,6 +66,10 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   inv <- (1 / rpm$Sum)
 
   weights <- inv / sum(inv)
+  norm_weights <- dnorm(rpm$Sum)
+  norm_weights <- norm_weights / sum(norm_weights)
+
+  weights <- (weights + norm_weights)/2
 
   single.estimate <- sum(weights * rpm$y.hat)
 

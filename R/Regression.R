@@ -360,17 +360,13 @@ NNS.reg = function (x, y,
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
             x.star.coef.2 <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.2[is.na(x.star.coef.2)] <- 0
-            x.star.coef <- rowMeans(abs(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3)))
+            x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
           if(dim.red.method == "equal") {
             x.star.coef <- rep(1, ncol(x))
           }
-
-          x.star.coef <- abs(x.star.coef)
-
-
 
 
           preserved.coef <- x.star.coef
