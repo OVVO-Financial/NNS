@@ -10,9 +10,9 @@
 #' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
 #' \item Set to \code{(eval.points = "obs")} (defalut) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
 #' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
-#' \item Set to \code{(eval.points = "median")} to find the average partial derivative at the median of the variable with respect to.
-#' \item Set to \code{(eval.points = "last")} to find the average partial derivative at the last observation of the variable with respect to (relevant for time-series data).
-#' \item Set to \code{(eval.points="mean")} to find the average partial derivative at the mean of the variable with respect to.
+#' \item Set to \code{(eval.points = "mean")} to find the partial derivative at the mean of value of every variable.
+#' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
+#' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
@@ -82,13 +82,13 @@ dy.d_<- function(x, y, wrt,
   if(is.character(eval.points)){
     eval.points <- tolower(eval.points)
     if(eval.points == "median"){
-      eval.points <- median(x[ , wrt])
+      eval.points <- t(apply(x, 2, median))
     } else {
       if(eval.points == "last"){
-        eval.points <- as.numeric(tail(x[ , wrt], 1))
+        eval.points <- tail(x, 1)
       } else {
         if(eval.points == "mean"){
-          eval.points <- mean(x[ , wrt])
+          eval.points <- t(apply(x, 2, mean))
         } else {
           if(eval.points == "apd"){
             eval.points <- as.vector(x[ , wrt, drop = FALSE])
