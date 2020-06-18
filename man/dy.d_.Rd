@@ -23,6 +23,7 @@ dy.d_(
 
 \item{eval.points}{numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
 \itemize{
+\item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
 \item Set to \code{(eval.points = "obs")} (defalut) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
 \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
 \item Set to \code{(eval.points = "median")} to find the average partial derivative at the median of the variable with respect to.
@@ -52,11 +53,14 @@ Returns the numerical partial derivative of \code{y} with respect to [wrt] any r
 set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 B <- cbind(x_1, x_2)
 
+#' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
+dy.d_(B, y, wrt = c(1, 2), eval.points = t(c(.5, .5)))
+
 ## To find average partial derivative of y wrt 1st regressor,
-only supply 1 value in [eval.points]:
+only supply 1 value in [eval.points], or a vector of [eval.points]:
 dy.d_(B, y, wrt = 1, eval.points = c(.5))
 
-dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
+dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
 
 
 ## To find average partial derivative of y wrt 1st regressor,
@@ -70,17 +74,6 @@ LPM.VaR(.025, 0, apd[,1]$First)
 
 ### Upper CI
 UPM.VaR(.025, 0, apd[,1]$First)
-
-## To find derivatives of y wrt 1st regressor and specified 2nd regressor points for both regressors
-dy.d_(B, y, wrt = c(1, 2), eval.points = c(.5, .5))
-
-
-## Known function analysis: [y = a ^ 2 * b ^ 2]
-x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
-B <- expand.grid(x_1, x_2) ; y <- B[ , 1] ^ 2 * B[ , 2] ^ 2
-dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
-
-
 }
 }
 \references{
