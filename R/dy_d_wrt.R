@@ -7,6 +7,7 @@
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
 #' @param eval.points numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
 #' \itemize{
+#' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
 #' \item Set to \code{(eval.points = "obs")} (defalut) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
 #' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
 #' \item Set to \code{(eval.points = "median")} to find the average partial derivative at the median of the variable with respect to.
@@ -30,11 +31,14 @@
 #' set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
 #' B <- cbind(x_1, x_2)
 #'
+#' #' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
+#' dy.d_(B, y, wrt = c(1, 2), eval.points = t(c(.5, .5)))
+#'
 #' ## To find average partial derivative of y wrt 1st regressor,
-#' only supply 1 value in [eval.points]:
+#' only supply 1 value in [eval.points], or a vector of [eval.points]:
 #' dy.d_(B, y, wrt = 1, eval.points = c(.5))
 #'
-#' dy.d_(B, y, wrt = 1, eval.points = mean(B[, 1]))
+#' dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
 #'
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
@@ -48,17 +52,6 @@
 #'
 #' ### Upper CI
 #' UPM.VaR(.025, 0, apd[,1]$First)
-#'
-#' ## To find derivatives of y wrt 1st regressor and specified 2nd regressor points for both regressors
-#' dy.d_(B, y, wrt = c(1, 2), eval.points = c(.5, .5))
-#'
-#'
-#' ## Known function analysis: [y = a ^ 2 * b ^ 2]
-#' x_1 <- seq(0, 1, .1) ; x_2 <- seq(0, 1, .1)
-#' B <- expand.grid(x_1, x_2) ; y <- B[ , 1] ^ 2 * B[ , 2] ^ 2
-#' dy.d_(B, y, wrt = 1, eval.points = c(.5, .5))
-#'
-#'
 #' }
 #' @export
 
@@ -80,7 +73,7 @@ dy.d_<- function(x, y, wrt,
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l<2) stop("Please use dy.dx(...) for univariate partial derivatives.")
 
-  if(NNS.dep.hd(cbind(x, y))$Dependence>.25) h<- .1 else h <-   max(.1, 1/exp(l-2))
+  if(NNS.dep.hd(cbind(x, y))$Dependence > 0.25) h <- 0.2 else h <- max(0.1, 1/exp(l-2))
 
   order <- NULL
 
@@ -98,7 +91,7 @@ dy.d_<- function(x, y, wrt,
           eval.points <- mean(x[ , wrt])
         } else {
           if(eval.points == "apd"){
-            eval.points <- x[ , wrt, drop = FALSE]
+            eval.points <- as.vector(x[ , wrt, drop = FALSE])
           } else {
             eval.points <- x
           }
@@ -106,6 +99,7 @@ dy.d_<- function(x, y, wrt,
       }
     }
   }
+
 
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
@@ -115,49 +109,44 @@ dy.d_<- function(x, y, wrt,
     message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
-  if(any(is.null(dim(eval.points)) || dim(eval.points)[2]==1)){
-    if(length(eval.points)==dim(x)[2]){
-        h_step <- LPM.ratio(1, unlist(eval.points[wrt]), x[, wrt])
-        h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
-
-        original.eval.points.min[wrt] <- original.eval.points.min[wrt] - h_step
-        original.eval.points.max[wrt] <- h_step + original.eval.points.max[wrt]
-    } else {
+  if(is.vector(eval.points)){
         h_step <- LPM.ratio(1, unlist(eval.points), x[, wrt])
         h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
 
         original.eval.points.min <- original.eval.points.min - h_step
         original.eval.points.max <- h_step + original.eval.points.max
-    }
 
-    if(!is.null(dim(eval.points)) && dim(eval.points)[2]==1){
-      index <- apply(sapply(quantile(unlist(eval.points), seq(.05,.95,.05)), function(z) abs(z - unlist(eval.points))), 2, which.min)
-      sampsize <- length(index)
+        if(length(unique(eval.points)) > 1){
+            index <- unique(apply(sapply(quantile(unlist(eval.points), seq(.05,.95,.05)), function(z) abs(z - unlist(eval.points))), 2, which.min))
+        } else {
+            index <- findInterval(eval.points,sort(x[,wrt]))
+        }
 
-      deriv.points <- x[index,]
+        sampsize <- length(index)
 
+        deriv.points <- x[index,]
 
-      deriv.points <- do.call(rbind, replicate(3*sampsize*nn, deriv.points, simplify=FALSE))
+        deriv.points <- do.call(rbind, replicate(3*sampsize, deriv.points, simplify=FALSE))
 
-      deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
-                                             rep(eval.points),
-                                             rep(original.eval.points.max))
-                                     ), each = sampsize, length.out = dim(deriv.points)[1] )
-
-
-      deriv.points <- data.table::data.table(deriv.points)
-
-      distance_wrt <- 2 * h_step
+        deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
+                                               rep(eval.points),
+                                               rep(original.eval.points.max))
+                                           ), each = sampsize, length.out = dim(deriv.points)[1] )
 
 
-      position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
-      id <- rep(1:n, each = 3*sampsize, length.out = dim(deriv.points)[1])
+        deriv.points <- data.table::data.table(deriv.points)
+
+        distance_wrt <- 2 * h_step
+
+
+        position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
+        id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
 
 
       if(messages){
           message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
       }
-    }
+
 
 
     if(length(unlist(eval.points)) == 1){
@@ -170,14 +159,8 @@ dy.d_<- function(x, y, wrt,
                                  rep(original.eval.points.max, nn))
 
         distance_wrt <- 2 * h_step
-
     }
 
-    if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
-        deriv.points <- matrix(c(original.eval.points.min, original.eval.points, original.eval.points.max), ncol = dim(x)[2], byrow = TRUE)
-
-        distance_wrt <- 2 * h_step
-    }
 
     estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 
@@ -186,9 +169,7 @@ dy.d_<- function(x, y, wrt,
         lower <- mean(estimates[1:nn])
         two.f.x <- 2 * mean(estimates[(nn+1):(2*nn)])
         upper <- mean(estimates[(2*nn+1):(3*nn)])
-    }
-
-    if(!is.null(dim(eval.points)) && dim(eval.points)[2] == 1){
+    } else {
         estimates <- data.table::data.table(cbind(estimates = estimates,
                                                   position = position,
                                                   id = id))
@@ -204,17 +185,8 @@ dy.d_<- function(x, y, wrt,
         upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
         upper <- upper_msd$V1
         upper_msd <- upper_msd$V2
-
     }
-
-    if((!is.null(dim(original.eval.points)[2]) && dim(original.eval.points)[2] > 1)  || (length(original.eval.points) > 1 && is.null(dim(original.eval.points)))){
-        lower <- estimates[1]
-        two.f.x <- 2 * estimates[2]
-        upper <- estimates[3]
-
-    }
-
-    rise <- upper - lower
+        rise <- upper - lower
 
   } else {
     n <- dim(eval.points)[1]
