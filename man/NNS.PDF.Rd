@@ -11,9 +11,9 @@ NNS.PDF(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE)
 
 \item{degree}{integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.}
 
-\item{target}{a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.}
+\item{target}{a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} min and max observations respectively.}
 
-\item{bins}{numeric; \code{NULL} (default) Selects number of observations as default number of bins.}
+\item{bins}{numeric; \code{NULL} Selects number of bins.  Defaults to \code{length(hist(x)$breaks)}.}
 
 \item{plot}{logical; plots PDF.}
 }

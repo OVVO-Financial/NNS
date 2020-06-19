@@ -4,36 +4,29 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(
-  x,
-  y,
-  eval.point = median(x),
-  deriv.order = 1,
-  h = 0.05,
-  deriv.method = "FS"
-)
+dy.dx(x, y, eval.point = median(x), deriv.method = "FD")
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
 
-\item{eval.point}{numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.}
+\item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
 
-\item{deriv.order}{numeric options: (1, 2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order = 2)}.}
-
-\item{h}{numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the independent variable.}
-
-\item{deriv.method}{method of derivative estimation, options: ("NNS", "FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite step method \code{(deriv.method = "FS")} (Defualt).}
+\item{deriv.method}{method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Defualt).}
 }
 \value{
-Returns the value of the partial derivative estimate for the given order.
+Returns a list of both 1st and 2nd derivative:
+\itemize{
+\item{\code{dy.dx(...)$First}} the 1st derivative.
+\item{\code{dy.dx(...)$Second}} the 2nd derivative.
+}
 }
 \description{
 Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
 }
 \note{
-If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
+If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 }
 \examples{
 \dontrun{
@@ -41,7 +34,7 @@ x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # Vector of derivatives
-dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")}
+dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
