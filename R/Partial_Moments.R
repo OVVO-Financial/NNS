@@ -365,7 +365,7 @@ UPM.ratio <- function(degree, target, variable){
 #' @param variable a numeric vector.
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.
 #' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} observations.
-#' @param bins numeric; \code{NULL} (default) Selects number of observations as default number of bins.
+#' @param bins numeric; \code{NULL} Selects number of bins.  Defaults to \code{length(hist(x)$breaks)}.
 #' @param plot logical; plots PDF.
 #' @return Returns a data.table containing the intervals used and resulting PDF of the variable.
 #' @author Fred Viole, OVVO Financial Systems
@@ -385,13 +385,13 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
   if(is.null(target)){target <- sort(variable)}
 
 # d/dx approximation
-  if(is.null(bins)){bins <- length(variable)}
+  if(is.null(bins)) bins <- length(hist(variable, plot = FALSE)$breaks)
 
   d.dx <- (abs(max(target)) + abs(min(target))) / bins
   tgt <- seq(min(target), max(target), d.dx)
 
   CDF <- NNS.CDF(variable, plot = FALSE, degree = degree)$Function
-  PDF <- dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt)$First
+  PDF <- dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt, deriv.method = "FD")$First
 
   if(plot){plot(tgt, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
 

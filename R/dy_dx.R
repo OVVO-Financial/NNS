@@ -35,7 +35,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   dep <- NNS.dep(x, y)$Dependence
 
-  if(dep > 0.9){
+  if(dep > 0.85){
       h <- 0.01
   } else {
       if(dep > 0.5){
