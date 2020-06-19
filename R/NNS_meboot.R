@@ -287,10 +287,9 @@
     } else
       kappa <- NULL
 
-
     # Force min / max values
-    if(!is.null(trim[[2]])) ensemble <- pmax(trim[[2]], ensemble)
-    if(!is.null(trim[[3]])) ensemble <- pmin(trim[[3]], ensemble)
+    if(!is.null(trim[[2]])) ensemble <- apply(ensemble, 2, function(z) pmax(trim[[2]], z))
+    if(!is.null(trim[[3]])) ensemble <- apply(ensemble, 2, function(z) pmin(trim[[3]], z))
 
     if(is.ts(x)){
       ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
@@ -306,6 +305,6 @@
       cat("\n  Elapsed time:", elapsr$elaps,
           paste(elapsr$units, ".", sep=""), "\n")
 
-    list(x=x, replicates=ensemble, ensemble=rowMeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
+    list(x=x, replicates=ensemble, ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
          xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
   }
