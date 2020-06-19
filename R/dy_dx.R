@@ -4,12 +4,15 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param eval.point numeric; \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate.
-#' @param deriv.order numeric options: (1, 2); 1 (default) for first derivative.  For second derivative estimate of \code{f(x)}, set \code{(deriv.order = 2)}.
-#' @param h numeric [0, ...]; Percentage step used for finite step method.  Defaults to \code{h = .05} representing a 5 percent step from the value of the independent variable.
-#' @param deriv.method method of derivative estimation, options: ("NNS", "FS"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite step method \code{(deriv.method = "FS")} (Defualt).
-#' @return Returns the value of the partial derivative estimate for the given order.
-#' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FS")}.
+#' @param eval.point numeric or ("overall"); \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
+#' @param deriv.method method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Defualt).
+#' @return Returns a list of both 1st and 2nd derivative:
+#' \itemize{
+#' \item{\code{dy.dx(...)$First}} the 1st derivative.
+#' \item{\code{dy.dx(...)$Second}} the 2nd derivative.
+#' }
+#'
+#' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995}
@@ -23,22 +26,36 @@
 #' dy.dx(x, y, eval.point = 1.75)
 #'
 #' # Vector of derivatives
-#' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FS")}
+#' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")}
 #' @export
 
-dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.method = "FS"){
+dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   order <- NULL
 
+  dep <- NNS.dep(x, y)$Dependence
+
+  if(dep > 0.9){
+      h <- 0.01
+  } else {
+      if(dep > 0.5){
+          h <- 0.05
+      } else {
+          h <- 0.2
+      }
+  }
+
+
   if(!is.null(ncol(x)) && is.null(colnames(x))){
     x <- data.frame(x)
+    x <- unlist(x)
   }
 
   if(length(eval.point) > 1 && deriv.method == "NNS"){
-    deriv.method <- "FS"
+    deriv.method <- "FD"
   }
 
-  if(class(eval.point) == "character"){
+  if(is.character(eval.point)){
     ranges <- NNS.reg(x, y, order = order, plot = FALSE)$derivative
     ranges[ , interval := seq(1 : length(ranges$Coefficient))]
 
@@ -50,20 +67,23 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.
 
     range.weights <- range.weights$N / sum(range.weights$N)
 
-    return(sum(ranges[,Coefficient]*range.weights))
-
+    return("First" = sum(ranges[,Coefficient]*range.weights))
   } else {
 
     original.eval.point.min <- eval.point
     original.eval.point.max <- eval.point
 
-    h_step <- abs(h * diff(range(x)))
+    h_step <- LPM.ratio(1, unlist(eval.point), x)
+    h_step <- LPM.VaR(h_step + h, 1, x) - LPM.VaR(h_step - h, 1, x)
 
     eval.point.min <- original.eval.point.min - h_step
     eval.point.max <- h_step + original.eval.point.max
 
-    run <- eval.point.max - eval.point.min
+    deriv.points <- cbind(eval.point.min, eval.point, eval.point.max)
 
+    n <- dim(deriv.points)[1]
+
+    run <- eval.point.max - eval.point.min
 
     if(any(run == 0)) {
       z <- which(run == 0)
@@ -72,52 +92,42 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.order = 1, h = .05, deriv.
       run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
-    if(deriv.order == 1){
-      if(deriv.method == "FS"){
-        estimates.min <- NNS.reg(x, y, plot = FALSE, order = order, point.est = eval.point.min)$Point.est
-        estimates.max <- NNS.reg(x, y, plot = FALSE, order = order, point.est = eval.point.max)$Point.est
+    reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, point.est = as.vector(deriv.points))
 
+    estimates.min <- reg.output$Point.est[1:n]
+    estimates.max <- reg.output$Point.est[(2*n+1):(3*n)]
+    estimates <- reg.output$Point.est[(n+1):(2*n)]
+
+      if(deriv.method == "FD"){
         rise <- estimates.max - estimates.min
 
-        return(rise / run)
+        first.deriv <-  rise / run
       } else {
-
-        reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order)
-
         output <- reg.output$derivative
         if(length(output[ , Coefficient]) == 1){
-          return(output[ , Coefficient])
+          first.deriv <- output[ , Coefficient]
         }
 
         if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]) < eval.point){
-          return(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1])
+          first.deriv <-  output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1]
         } else {
-          return(mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1])))
+          first.deriv <-  mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]))
         }
       }
-    } else {
+
+
       ## Second derivative form:
       # [f(x+h) - 2(f(x)) + f(x-h)] / h^2
+      f.x__h <- estimates.min
 
-      h_step <- abs(h * diff(range(x)))
-      deriv.points <- cbind(h_step + eval.point, eval.point, eval.point - h_step)
+      two_f.x <- 2 * estimates
 
-      second.deriv.estimates.1 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 1])$Point.est
-      second.deriv.estimates.2 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 2])$Point.est
-      second.deriv.estimates.3 <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, point.est = deriv.points[ , 3])$Point.est
+      f.x_h <- estimates.max
 
+      second.deriv <- (f.x_h - two_f.x + f.x__h) / (h_step ^ 2)
 
-      f.x_h <- second.deriv.estimates.1
-
-      two_f.x <- 2 * second.deriv.estimates.2
-
-      f.x__h <- second.deriv.estimates.3
-
-      run <- ((1 + h) * eval.point) - eval.point
-      return((f.x_h - two_f.x + f.x__h) / (run ^ 2))
-
-    }
+    return(list("First" = first.deriv,
+                "Second" = second.deriv))
 
   }
-
 }

@@ -214,7 +214,7 @@ dy.d_<- function(x, y, wrt,
                                      h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
                                      eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
 
-      mixed.distances <- 2 * (h_step_1) * 2 * (h_step_2)
+      mixed.distances <- 4 * h_step_1 * h_step_2
 
     } else {
       mixed.deriv.points <- matrix(c(h_step + eval.points,
