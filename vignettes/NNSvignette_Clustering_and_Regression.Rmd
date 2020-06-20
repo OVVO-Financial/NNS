@@ -100,7 +100,7 @@ a=NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, l
 ```
 
 Thus, our model for this further reduced dimension regression would be:
-$$Species = \frac{\: `r round(a$Coefficient[1],3)`*Sepal.Length - `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{3} $$
+$$Species = \frac{\: `r round(a$Coefficient[1],3)`*Sepal.Length + `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{3} $$
 
 and the `point.est = (...)` operates in the same manner as the full regression above, again called with `$Point.est`.
 ```{r final,fig.width=5,fig.height=3,fig.align = "center"}
