@@ -116,12 +116,12 @@ dy.d_<- function(x, y, wrt,
         original.eval.points.min <- original.eval.points.min - h_step
         original.eval.points.max <- h_step + original.eval.points.max
 
+        deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0.05,0.95,.05), 0, z))
 
-        index <- unique(apply(sapply(LPM.ratio(0, seq(.05,.95,.05), as.vector(x[,wrt])), function(z) abs(z - unlist(x[,wrt]))), 2, which.min))
 
-        sampsize <- length(index)
+        sampsize <- dim(deriv.points)[1]
 
-        deriv.points <- x[index,]
+
         deriv.points <- do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify=FALSE))
 
         deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
