@@ -9,21 +9,18 @@
 #' @importFrom meboot meboot
 #' @importFrom tdigest tdigest tquantile
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
-#' @importFrom conflicted conflict_prefer
 #' @import doParallel
 #' @import rgl
 #' @import stringr
 #' @import meboot
 #' @import tdigest
 #' @import data.table
-#' @import Rfast
+
 
 
 
 
 .onLoad <- function(libname = find.package("NNS"), pkgname = "NNS"){
-
-  conflicted::conflict_prefer(name = "transpose", winner = "data.table")
 
   # CRAN Note avoidance
 
