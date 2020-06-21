@@ -395,7 +395,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
   if(plot){plot(tgt, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
 
-  return(data.table(cbind("Intervals" = tgt, PDF)))
+  return(data.table::data.table(cbind("Intervals" = tgt, PDF)))
 }
 
 

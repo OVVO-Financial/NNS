@@ -116,7 +116,7 @@ dy.d_<- function(x, y, wrt,
         original.eval.points.min <- original.eval.points.min - h_step
         original.eval.points.max <- h_step + original.eval.points.max
 
-        deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0.05,0.95,.05), 0, z))
+        deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,.05), 0, z))
 
 
         sampsize <- dim(deriv.points)[1]
