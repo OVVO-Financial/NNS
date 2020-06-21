@@ -365,7 +365,7 @@ UPM.ratio <- function(degree, target, variable){
 #' @param variable a numeric vector.
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} (default) is area.
 #' @param target a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} min and max observations respectively.
-#' @param bins numeric; \code{NULL} Selects number of bins.  Defaults to \code{length(hist(x)$breaks)}.
+#' @param bins integer; \code{NULL} Selects number of bins.  Bin width defaults to \code{density(x)$bw}.
 #' @param plot logical; plots PDF.
 #' @return Returns a data.table containing the intervals used and resulting PDF of the variable.
 #' @author Fred Viole, OVVO Financial Systems
@@ -385,10 +385,15 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
   if(is.null(target)){target <- sort(variable)}
 
 # d/dx approximation
-  if(is.null(bins)) bins <- length(hist(variable, plot = FALSE)$breaks)
+  if(is.null(bins)){
+      bins <- density(x)$bw
+      tgt <- seq(min(target), max(target), bins)
+  } else {
+      d.dx <- (abs(max(target)) + abs(min(target))) / bins
+      tgt <- seq(min(target), max(target), d.dx)
+  }
 
-  d.dx <- (abs(max(target)) + abs(min(target))) / bins
-  tgt <- seq(min(target), max(target), d.dx)
+
 
   CDF <- NNS.CDF(variable, plot = FALSE, degree = degree)$Function
   PDF <- pmax(dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt, deriv.method = "FD")$First, 0)
