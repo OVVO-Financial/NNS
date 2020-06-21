@@ -13,7 +13,7 @@ NNS.PDF(variable, degree = 1, target = NULL, bins = NULL, plot = TRUE)
 
 \item{target}{a numeric range of values [a,b] where a < b.  \code{NULL} (default) uses the \code{variable} min and max observations respectively.}
 
-\item{bins}{numeric; \code{NULL} Selects number of bins.  Defaults to \code{length(hist(x)$breaks)}.}
+\item{bins}{integer; \code{NULL} Selects number of bins.  Bin width defaults to \code{density(x)$bw}.}
 
 \item{plot}{logical; plots PDF.}
 }
