@@ -386,7 +386,7 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
 # d/dx approximation
   if(is.null(bins)){
-      bins <- density(x)$bw
+      bins <- density(variable)$bw
       tgt <- seq(min(target), max(target), bins)
   } else {
       d.dx <- (abs(max(target)) + abs(min(target))) / bins
