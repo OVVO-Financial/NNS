@@ -521,7 +521,8 @@ NNS.reg = function (x, y,
                     x0 <- mode_class(y.min)
                 } else {
 
-                    Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
+                    Dynamic.average.mid.min <- tryCatch(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2],
+                                                        error = function(e) NA)
                     if(l_y.min>1 && l_y.mid.min>1){
                         x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
                             lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
@@ -536,7 +537,8 @@ NNS.reg = function (x, y,
                     Dynamic.average.mid.min <- mode_class(y.min)
                     x0 <- mode_class(y.min)
                 } else {
-                    Dynamic.average.mid.min <- lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2]
+                    Dynamic.average.mid.min <- tryCatch(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$coef[2],
+                                                        error = function(e) NA)
                     x0 <- unique(y[x == min(x)])
                 }
             }
@@ -565,7 +567,8 @@ NNS.reg = function (x, y,
                   Dynamic.average.mid.max <- mode_class(y.max)
                   x.max <- mode_class(y.max)
               } else {
-                  Dynamic.average.mid.max <-  lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$coef[2]
+                  Dynamic.average.mid.max <-  tryCatch(lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$coef[2],
+                                                       error = function(e) NA)
                   if(l_y.max>1 && l_y.mid.max>1){
                       x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
                         lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
@@ -580,7 +583,8 @@ NNS.reg = function (x, y,
                   x.max <- mode_class(y.max)
               } else {
                   x.max <- unique(y[x == max(x)])
-                  Dynamic.average.mid.max <- lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
+                  Dynamic.average.mid.max <- tryCatch(lm((y[which(x >= max.range)]) ~  (x[which(x >= max.range)]))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2],
+                                                      error = function(e) NA)
               }
           }
       } else {
