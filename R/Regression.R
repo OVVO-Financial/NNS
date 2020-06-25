@@ -550,9 +550,10 @@ NNS.reg = function (x, y,
                 if(l_y.min<5){
                     Dynamic.average.mid.min <- NA
                 } else {
-                    Dynamic.average.mid.min <- lm((y[x <= head(regression.points$x, 1)]) ~
+                    Dynamic.average.mid.min <- tryCatch(lm((y[x <= head(regression.points$x, 1)]) ~
                                         (x[x <= head(regression.points$x, 1)]))$fitted[which.max(x[x <= head(regression.points$x, 1)])]  +
-                        (mid.min.range - head(regression.points$x, 1)) * lm((y[x <= head(regression.points$x, 1)]) ~  (x[x <= head(regression.points$x, 1)]))$coef[2]
+                        (mid.min.range - head(regression.points$x, 1)) * lm((y[x <= head(regression.points$x, 1)]) ~  (x[x <= head(regression.points$x, 1)]))$coef[2],
+                        error = function(e) NA)
                 }
             }
       }
@@ -592,10 +593,10 @@ NNS.reg = function (x, y,
               if(l_y.max<5){
                   Dynamic.average.mid.max <- NA
               } else {
-                  Dynamic.average.mid.max <- lm((y[x >= tail(regression.points$x, 1)]) ~
-                                        (x[x >= tail(regression.points$x, 1)]))$fitted[which.min(x[x >= tail(regression.points$x, 1)])] +
-                  (mid.max.range - tail(regression.points$x, 1)) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2]
-
+                  Dynamic.average.mid.max <- tryCatch(lm((y[x >= tail(regression.points$x, 1)]) ~
+                                                           (x[x >= tail(regression.points$x, 1)]))$fitted[which.min(x[x >= tail(regression.points$x, 1)])] +
+                                                        (mid.max.range - tail(regression.points$x, 1)) * lm((y[x >= tail(regression.points$x, 1)]) ~  (x[x >= tail(regression.points$x, 1)]))$coef[2],
+                                                      error = function(e) NA)
               }
 
           }
