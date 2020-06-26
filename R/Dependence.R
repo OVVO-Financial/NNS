@@ -110,20 +110,23 @@ NNS.dep = function(x,
     segs <- list(5L)
     uniques <- list(5L)
 
-    for(i in 1:5){
-      if(i == 1){
-        segs[[i]] <- 1 : min(l, min(50, l/5))
-        uniques[[i]] <- length(unique(x[segs[[i]]]))
-      }
-      if(i > 1 & i < 5){
-        segs[[i]] <- max(1, (i*seg - min(50, l/10))) : min(l,(i*seg + min(50, l/10)))
-        uniques[[i]] <- length(unique(x[segs[[i]]]))
-      }
-      if(i == 5){
-        segs[[i]] <- max(1, (l - min(50, l/5))) : l
-        uniques[[i]] <- length(unique(x[segs[[i]]]))
-      }
-    }
+    # Define indicies for segments
+        segs[[1]] <- as.integer(1 : min(l, min(50, l/5)))
+        uniques[[1]] <- length(unique(x[segs[[1]]]))
+
+        segs[[2]] <- as.integer(max(1, (2*seg - min(50, l/10))) : min(l,(2*seg + min(50, l/10))))
+        uniques[[2]] <- length(unique(x[segs[[2]]]))
+
+        segs[[3]] <- as.integer(max(1, (3*seg - min(50, l/10))) : min(l,(3*seg + min(50, l/10))))
+        uniques[[3]] <- length(unique(x[segs[[3]]]))
+
+        segs[[4]] <- as.integer(max(1, (4*seg - min(50, l/10))) : min(l,(4*seg + min(50, l/10))))
+        uniques[[4]] <- length(unique(x[segs[[4]]]))
+
+        segs[[5]] <- as.integer(max(1, (l - min(50, l/5))) : l)
+        uniques[[5]] <- length(unique(x[segs[[5]]]))
+
+
 
     nns.dep <- list(5L)
 
@@ -131,22 +134,13 @@ NNS.dep = function(x,
       DT <- data.table::data.table(x, y)
       data.table::setkey(DT[, x := x], x)
 
-      for(i in 1:3){
-        if(i==1){
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
-        }
-        if(i==2) {
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
-        }
-        if(i==3) {
-          nns.dep[[i]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
-        }
-      }
+      nns.dep[[1]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
+      nns.dep[[2]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
+      nns.dep[[3]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
 
     } else {
-      for(i in 1:5){
-        nns.dep[[i]] <- NNS.dep.base(x[segs[[i]]], y[segs[[i]]], print.map = FALSE, order = order, asym = asym)
-      }
+
+      nns.dep <- lapply(segs, function(z) NNS.dep.base(x[z], y[z], print.map = FALSE, order = order, asym = asym))
 
     }
 
