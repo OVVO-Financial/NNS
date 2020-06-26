@@ -15,6 +15,7 @@ NNS.ANOVA.bin<- function(control, treatment,
   }
 
 
+
   #Continuous CDF for each variable from Mean of Means
         LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
         LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)
@@ -37,20 +38,20 @@ NNS.ANOVA.bin<- function(control, treatment,
 
 
   #Continuous CDF Deviation from 0.5
-        MAD.CDF <- mean(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5)))
-        upper.25.CDF <- mean(c(Upper_25_ratio.1, Upper_25_ratio.2))
-        lower.25.CDF <- mean(c(Lower_25_ratio.1, Lower_25_ratio.2))
-        upper.125.CDF <- mean(c(Upper_125_ratio.1, Upper_125_ratio.2))
-        lower.125.CDF <- mean(c(Lower_125_ratio.1, Lower_125_ratio.2))
+        MAD.CDF <- min(0.5, max(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5))))
+        upper.25.CDF <- min(0.25, max(c(abs(Upper_25_ratio.1 - 0.25), abs(Upper_25_ratio.2 - 0.25))))
+        lower.25.CDF <- min(0.25, max(c(abs(Lower_25_ratio.1 - 0.25), abs(Lower_25_ratio.2 - 0.25))))
+        upper.125.CDF <- min(0.125, max(c(abs(Upper_125_ratio.1 - 0.125), abs(Upper_125_ratio.2 - 0.125))))
+        lower.125.CDF <- min(0.125, max(c(abs(Lower_125_ratio.1 - 0.125), abs(Lower_125_ratio.2 - 0.125))))
 
 
   #Certainty associated with samples
-        NNS.ANOVA.rho <- sum(c( ((.5- MAD.CDF)^2) / .25 ,
-                                ifelse(Upper_25_ratio==0, 0, .5 * ( abs(Upper_25_ratio)/ upper.25.CDF)),
-                                ifelse(Lower_25_ratio==0, 0, .5 * ( abs(Lower_25_ratio)/ lower.25.CDF)),
-                                ifelse(Upper_125_ratio==0, 0, .25 * ( abs(Upper_125_ratio)/ upper.125.CDF)),
-                                ifelse(Lower_125_ratio==0, 0, .25 * ( abs(Lower_125_ratio)/ lower.125.CDF)))
-                             ) / 2.25
+        NNS.ANOVA.rho <- sum(c( ((.5 - MAD.CDF)^2) / .25 ,
+                                .5 * (( (.25 - upper.25.CDF)^2) / .25^2),
+                                .5 * (( (.25 - lower.25.CDF)^2) / .25^2),
+                                .25 * (( (.125 - upper.125.CDF)^2) / .125^2),
+                                .25 * (( (.125 - lower.125.CDF)^2) / .125^2)
+                             )) / 2.5
 
         pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
