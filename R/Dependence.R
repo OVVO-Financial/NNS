@@ -4,13 +4,13 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
-#' @param order integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = 3)}.  Errors can generally be rectified by setting \code{(order = 1)}.
-#' @param degree integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.
 #' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
+#'
+#' \code{NNS.cor} has been deprecated \code{(NNS >= 0.5.4)} and can be called via \code{NNS.dep}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995}
@@ -74,14 +74,13 @@
 
 NNS.dep = function(x,
                    y = NULL,
-                   order = 3,
-                   degree = NULL,
                    asym = FALSE,
                    print.map = FALSE,
                    ncores = NULL){
 
   oldw <- getOption("warn")
   options(warn = -1)
+  order <- NULL
 
   if(asym){type <- "XONLY"} else {type <- NULL}
 
@@ -134,13 +133,13 @@ NNS.dep = function(x,
       DT <- data.table::data.table(x, y)
       data.table::setkey(DT[, x := x], x)
 
-      nns.dep[[1]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
-      nns.dep[[2]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
-      nns.dep[[3]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, order = order, asym = asym)
+      nns.dep[[1]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, asym = asym)
+      nns.dep[[2]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, asym = asym)
+      nns.dep[[3]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, asym = asym)
 
     } else {
 
-      nns.dep <- lapply(segs, function(z) NNS.dep.base(x[z], y[z], print.map = FALSE, order = order, asym = asym))
+      nns.dep <- lapply(segs, function(z) NNS.dep.base(x[z], y[z], print.map = FALSE, asym = asym))
 
     }
 
@@ -153,7 +152,7 @@ NNS.dep = function(x,
                 "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))
 
   } else {
-    return(NNS.dep.matrix(x, order = order, degree = degree, asym = asym))
+    return(NNS.dep.matrix(x, asym = asym))
   }
 
 }

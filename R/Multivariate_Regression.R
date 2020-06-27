@@ -58,7 +58,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   if(length(reg.points.matrix[ , 1]) == 0){
     for(i in 1 : n){
       part.map <- NNS.part(original.IVs[ , i], original.DV, order = order, type = type, noise.reduction = noise.reduction, obs.req = 0)
-      dep <- NNS.dep(original.IVs[ , i], original.DV, order = 3)$Dependence
+      dep <- NNS.dep(original.IVs[ , i], original.DV)$Dependence
       if(dep > stn){
         reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = round(dep * max(nchar(part.map$df$quadrant))), type = type, noise.reduction = 'off', obs.req = 0)$regression.points$x
       } else {

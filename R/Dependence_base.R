@@ -68,7 +68,7 @@ NNS.dep.base <- function(x,
 
     part.df <- part.map$dt
 
-    if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0 | length(x)<100 )){
+    if(any(length(unique(x)) < sqrt(length(x)) | length(unique(y)) < sqrt(length(y))  | is.na(sd(x)) | is.na(sd(y)) | sd(x)==0 | sd(y)==0 | length(x) < 20)){
       part.df[, `:=`(mean.x = mean(x), mean.y = mean(y)), by = prior.quadrant]
 
       if (degree == 0) {
@@ -139,6 +139,6 @@ NNS.dep.base <- function(x,
     }
 
   } else {
-    NNS.dep.matrix(x, order = order, degree = degree, asym = asym)
+    NNS.dep.matrix(x, asym = asym)
   }
 }

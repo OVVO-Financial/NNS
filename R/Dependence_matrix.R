@@ -18,7 +18,7 @@ NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
   raw.both_lower <- list()
 
   for(i in 1 : (n-1)){
-        raw.both_lower[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, order = order, degree = degree, asym = asym))
+        raw.both_lower[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, asym = asym))
 
         raw.rhos_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Correlation"])
         raw.deps_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Dependence"])
@@ -43,7 +43,7 @@ NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
         raw.both_upper <- list()
 
         for(i in 1 : (n-1)){
-            raw.both_upper[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , b], x[ , i], print.map = FALSE, order = order, degree = degree, asym = asym))
+            raw.both_upper[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , b], x[ , i], print.map = FALSE, asym = asym))
 
             raw.rhos_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Correlation"])
             raw.deps_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Dependence"])
