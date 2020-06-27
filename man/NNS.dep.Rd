@@ -4,24 +4,12 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(
-  x,
-  y = NULL,
-  order = 3,
-  degree = NULL,
-  asym = FALSE,
-  print.map = FALSE,
-  ncores = NULL
-)
+NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE, ncores = NULL)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
-
-\item{order}{integer; Controls the level of quadrant partitioning.  Defaults to \code{(order = 3)}.  Errors can generally be rectified by setting \code{(order = 1)}.}
-
-\item{degree}{integer; Defaults to NULL to allow number of observations to be \code{"degree"} determinant.}
 
 \item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
 
@@ -37,6 +25,8 @@ Returns the dependence and nonlinear correlation between two variables based on 
 }
 \note{
 p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
+
+\code{NNS.cor} has been deprecated \code{(NNS >= 0.5.4)} and can be called via \code{NNS.dep}.
 }
 \examples{
 \dontrun{
