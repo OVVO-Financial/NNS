@@ -109,8 +109,10 @@ dy.d_<- function(x, y, wrt,
     message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
-  if(is.vector(eval.points)){
-        h_step <- LPM.ratio(1, unlist(eval.points), x[, wrt])
+  if(is.vector(eval.points) || dim(eval.points)[2] == 1){
+        eval.points <- unlist(eval.points)
+
+        h_step <- LPM.ratio(1, eval.points, x[, wrt])
         h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
 
         original.eval.points.min <- original.eval.points.min - h_step
@@ -118,22 +120,22 @@ dy.d_<- function(x, y, wrt,
 
         deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,.05), 0, z))
 
-
-        sampsize <- dim(deriv.points)[1]
-
-
-        deriv.points <- do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify=FALSE))
-
-        deriv.points[, wrt] <- rep(c(rbind(rep(original.eval.points.min),
-                                               rep(eval.points),
-                                               rep(original.eval.points.max))
-                                           ), each = sampsize, length.out = dim(deriv.points)[1] )
+        if(dim(deriv.points)[2]!=dim(x)[2]){
+              deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
+        }
 
 
-        deriv.points <- data.table::data.table(deriv.points)
+        sampsize <- length(seq(0,1,.05))
+
+        deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
+
+        data.table::set(deriv.points, i=NULL, j = wrt, value = rep(unlist(rbind(original.eval.points.min,
+                                                                                eval.points,
+                                                                                original.eval.points.max))
+                                                                      , each = sampsize, length.out = dim(deriv.points)[1] ))
+        colnames(deriv.points) <- colnames(x)
 
         distance_wrt <- 2 * h_step
-
 
         position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
         id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
@@ -142,7 +144,6 @@ dy.d_<- function(x, y, wrt,
       if(messages){
           message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
       }
-
 
         estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 

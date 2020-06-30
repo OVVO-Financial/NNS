@@ -212,7 +212,9 @@ NNS.reg = function (x, y,
       point.est.y <- numeric()
 
       if(!is.null(dim(x))){
+
         new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
+
       } else {
         new_x <- factor_2_dummy_FR(new_x)
       }
