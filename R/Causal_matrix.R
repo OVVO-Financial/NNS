@@ -11,9 +11,8 @@ n <- ncol(x)
         indiv.causes[[i]] <- sapply((i + 1) : n, function(b) NNS.caus(x[ , i], x[ , b], plot = FALSE, tau = tau))
     }
 
-
     for(i in 1 : length(indiv.causes)){
-        indiv.causes[[i]] <- indiv.causes[[i]][2, ]-indiv.causes[[i]][1, ]
+        indiv.causes[[i]] <- abs(indiv.causes[[i]][2, ]) - abs(indiv.causes[[i]][1, ])
     }
 
     causes <- matrix(NA, n, n)
