@@ -12,7 +12,7 @@ n <- ncol(x)
     }
 
     for(i in 1 : length(indiv.causes)){
-        indiv.causes[[i]] <- abs(indiv.causes[[i]][2, ]) - abs(indiv.causes[[i]][1, ])
+        indiv.causes[[i]] <-  (abs(indiv.causes[[i]][2, ]) - abs(indiv.causes[[i]][1, ]))
     }
 
     causes <- matrix(NA, n, n)

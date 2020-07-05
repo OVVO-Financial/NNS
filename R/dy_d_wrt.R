@@ -110,60 +110,60 @@ dy.d_<- function(x, y, wrt,
   }
 
   if(is.vector(eval.points) || dim(eval.points)[2] == 1){
-        eval.points <- unlist(eval.points)
+    eval.points <- unlist(eval.points)
 
-        h_step <- LPM.ratio(1, eval.points, x[, wrt])
-        h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
+    h_step <- LPM.ratio(1, eval.points, x[, wrt])
+    h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
 
-        original.eval.points.min <- original.eval.points.min - h_step
-        original.eval.points.max <- h_step + original.eval.points.max
+    original.eval.points.min <- original.eval.points.min - h_step
+    original.eval.points.max <- h_step + original.eval.points.max
 
-        deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,.05), 0, z))
+    deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,.05), 0, z))
 
-        if(dim(deriv.points)[2]!=dim(x)[2]){
-              deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
-        }
-
-
-        sampsize <- length(seq(0,1,.05))
-
-        deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
-
-        data.table::set(deriv.points, i=NULL, j = wrt, value = rep(unlist(rbind(original.eval.points.min,
-                                                                                eval.points,
-                                                                                original.eval.points.max))
-                                                                      , each = sampsize, length.out = dim(deriv.points)[1] ))
-        colnames(deriv.points) <- colnames(x)
-
-        distance_wrt <- 2 * h_step
-
-        position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
-        id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
+    if(dim(deriv.points)[2]!=dim(x)[2]){
+      deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
+    }
 
 
-      if(messages){
-          message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
-      }
+    sampsize <- length(seq(0,1,.05))
 
-        estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
+    deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
 
-        estimates <- data.table::data.table(cbind(estimates = estimates,
-                                                  position = position,
-                                                  id = id))
+    data.table::set(deriv.points, i=NULL, j = wrt, value = rep(unlist(rbind(original.eval.points.min,
+                                                                            eval.points,
+                                                                            original.eval.points.max))
+                                                               , each = sampsize, length.out = dim(deriv.points)[1] ))
+    colnames(deriv.points) <- colnames(x)
 
-        lower_msd <- estimates[position=="l", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-        lower <- lower_msd$V1
-        lower_sd <- lower_msd$V2
+    distance_wrt <- 2 * h_step
 
-        fx_msd <- estimates[position=="m", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-        two.f.x <- 2* fx_msd$V1
-        two.f.x_sd <- fx_msd$V2
+    position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
+    id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
 
-        upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-        upper <- upper_msd$V1
-        upper_msd <- upper_msd$V2
 
-        rise <- upper - lower
+    if(messages){
+      message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
+    }
+
+    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
+
+    estimates <- data.table::data.table(cbind(estimates = estimates,
+                                              position = position,
+                                              id = id))
+
+    lower_msd <- estimates[position=="l", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+    lower <- lower_msd$V1
+    lower_sd <- lower_msd$V2
+
+    fx_msd <- estimates[position=="m", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+    two.f.x <- 2* fx_msd$V1
+    two.f.x_sd <- fx_msd$V2
+
+    upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=mean(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
+    upper <- upper_msd$V1
+    upper_msd <- upper_msd$V2
+
+    rise <- upper - lower
 
   } else {
     n <- dim(eval.points)[1]
@@ -176,8 +176,8 @@ dy.d_<- function(x, y, wrt,
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
     deriv.points <- rbind(original.eval.points.min,
-                                  original.eval.points,
-                                  original.eval.points.max)
+                          original.eval.points,
+                          original.eval.points.max)
 
     estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
 

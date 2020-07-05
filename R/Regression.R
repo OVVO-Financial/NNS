@@ -360,7 +360,7 @@ NNS.reg = function (x, y,
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
             x.star.coef.2 <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef.2[is.na(x.star.coef.2)] <- 0
-            x.star.coef <- rowMeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
+            x.star.coef <- Rfast::rowmeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
@@ -411,7 +411,7 @@ NNS.reg = function (x, y,
           }
 
 
-          x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
+          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0))
 
           x.star <- data.table::data.table(x.star = x)
 
@@ -482,142 +482,142 @@ NNS.reg = function (x, y,
   data.table::setkey(regression.points,x)
 
   if(dependence < 1){
-      min.range <- min(regression.points$x)
-      max.range <- max(regression.points$x)
+    min.range <- min(regression.points$x)
+    max.range <- max(regression.points$x)
 
-      mid.min.range <- mean(c(min(x),min(regression.points$x)))
-      mid.max.range <- mean(c(max(x),max(regression.points$x)))
+    mid.min.range <- mean(c(min(x),min(regression.points$x)))
+    mid.max.range <- mean(c(max(x),max(regression.points$x)))
 
-      y.min <-  na.omit(y[x <= min.range])
-      l_y.min <- length(y.min)
-      l_y.min_unique <- length(unique(y.min))
+    y.min <-  na.omit(y[x <= min.range])
+    l_y.min <- length(y.min)
+    l_y.min_unique <- length(unique(y.min))
 
-      y.mid.min <- na.omit(y[x <= mid.min.range])
-      l_y.mid.min <- length(y.mid.min)
-      l_y.mid.min_unique <- length(unique(y.mid.min))
+    y.mid.min <- na.omit(y[x <= mid.min.range])
+    l_y.mid.min <- length(y.mid.min)
+    l_y.mid.min_unique <- length(unique(y.mid.min))
 
-      x.mid.min <- na.omit(x[x <= mid.min.range])
-      l_x.mid.min <- length(x.mid.min)
-      l_x.mid.min_unique <- length(unique(x.mid.min))
+    x.mid.min <- na.omit(x[x <= mid.min.range])
+    l_x.mid.min <- length(x.mid.min)
+    l_x.mid.min_unique <- length(unique(x.mid.min))
 
-      y.max <- na.omit(y[x >= max.range])
-      l_y.max <- length(y.max)
-      l_y.max_unique <- length(unique(y.max))
+    y.max <- na.omit(y[x >= max.range])
+    l_y.max <- length(y.max)
+    l_y.max_unique <- length(unique(y.max))
 
-      y.mid.max <- na.omit(y[x >= mid.max.range])
-      l_y.mid.max <- length(y.mid.max)
-      l_y.mid.max_unique <- length(unique(y.mid.max))
+    y.mid.max <- na.omit(y[x >= mid.max.range])
+    l_y.mid.max <- length(y.mid.max)
+    l_y.mid.max_unique <- length(unique(y.mid.max))
 
-      x.mid.max <- na.omit(x[x >= mid.max.range])
-      l_x.mid.max <- length(x.mid.max)
-      l_x.mid.max_unique <- length(unique(x.mid.max))
-
-
-      ### Endpoints
-      if(l_x.mid.min_unique > 1){
-            if(dependence < stn){
-                if(!is.null(type)){
-                    Dynamic.average.mid.min <- mode_class(y.min)
-                    x0 <- mode_class(y.min)
-                } else {
-
-                    Dynamic.average.mid.min <- tryCatch(lm(y[which(x <= min.range)] ~ 0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm(y[which(x <= min.range)] ~  0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])) )$coef[1],
-                                                        error = function(e) NA)
-                    if(l_y.min>1 && l_y.mid.min>1){
-                        x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
-                            lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
-                                sum(l_y.min, l_y.mid.min)
-                    } else {
-
-                        x0 <- y.min
-                    }
-                }
-            } else {
-                if(!is.null(type)){
-                    Dynamic.average.mid.min <- mode_class(y.min)
-                    x0 <- mode_class(y.min)
-                } else {
-                    Dynamic.average.mid.min <- tryCatch(lm(y[which(x <= min.range)] ~  0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm(y[x <= head(regression.points$x, 1)] ~  0 + x[x <= head(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$coef[1],
-                                                        error = function(e) NA)
-                    x0 <- unique(y[x == min(x)])
-                }
-            }
-      } else {
-            if(!is.null(type)){
-                Dynamic.average.mid.min <- mode_class(y.min)
-                x0 <- mode_class(y.min)
-            } else {
-                x0 <- unique(gravity(y[x == min(x)]))
-
-                if(l_y.min < 5){
-                    Dynamic.average.mid.min <- NA
-                } else {
-                    Dynamic.average.mid.min <- tryCatch(lm(y[x <= head(regression.points$x, 1)] ~ 0 +
-                                        x[x <= head(regression.points$x, 1)], offset = rep(head(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$fitted[which.max(x[x <= head(regression.points$x, 1)])]  +
-                        (mid.min.range - head(regression.points$x, 1)) * lm(y[x <= head(regression.points$x, 1)] ~  0 + x[x <= head(regression.points$x, 1)], offset = rep(head(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$coef[1],
-                        error = function(e) NA)
-                }
-            }
-      }
+    x.mid.max <- na.omit(x[x >= mid.max.range])
+    l_x.mid.max <- length(x.mid.max)
+    l_x.mid.max_unique <- length(unique(x.mid.max))
 
 
-      if(l_x.mid.max_unique > 1){
-          if(dependence < stn){
-              if(!is.null(type)){
-                  Dynamic.average.mid.max <- mode_class(y.max)
-                  x.max <- mode_class(y.max)
-              } else {
-                  Dynamic.average.mid.max <-  tryCatch(lm(y[which(x >= max.range)] ~ 0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm(y[which(x >= max.range)] ~  0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$coef[1],
-                                                       error = function(e) NA)
-                  if(l_y.max>1 && l_y.mid.max>1){
-                      x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
-                        lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
-                          sum(l_y.max, l_y.mid.max)
-                  } else{
-                      x.max <- y.max
-                  }
-              }
+    ### Endpoints
+    if(l_x.mid.min_unique > 1){
+      if(dependence < stn){
+        if(!is.null(type)){
+          Dynamic.average.mid.min <- mode_class(y.min)
+          x0 <- mode_class(y.min)
+        } else {
+
+          Dynamic.average.mid.min <- tryCatch(lm(y[which(x <= min.range)] ~ 0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])))$fitted[which.max(x[which(x <= min.range)])]  + (mid.min.range - max(x[which(x <= min.range)])) * lm(y[which(x <= min.range)] ~  0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])) )$coef[1],
+                                              error = function(e) NA)
+          if(l_y.min>1 && l_y.mid.min>1){
+            x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
+                      lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
+              sum(l_y.min, l_y.mid.min)
           } else {
-              if(!is.null(type)){
-                  Dynamic.average.mid.max <- mode_class(y.max)
-                  x.max <- mode_class(y.max)
-              } else {
-                  x.max <- unique(y[x == max(x)])
-                  Dynamic.average.mid.max <- tryCatch(lm(y[which(x >= max.range)] ~  0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm(y[x >= tail(regression.points$x, 1)] ~  0 + x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$coef[1],
-                                                      error = function(e) NA)
-              }
+
+            x0 <- y.min
           }
+        }
       } else {
-          if(!is.null(type)){
-              Dynamic.average.mid.max <- mode_class(y.max)
-              x.max <- mode_class(y.max)
-          } else{
-              x.max <- unique(gravity(y[x == max(x)]))
-
-              if(l_y.max < 5){
-                  Dynamic.average.mid.max <- NA
-              } else {
-                  Dynamic.average.mid.max <- tryCatch(lm(y[x >= tail(regression.points$x, 1)] ~ 0 +
-                                                           x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$fitted[which.min(x[x >= tail(regression.points$x, 1)])] +
-                                                        (mid.max.range - tail(regression.points$x, 1)) * lm(y[x >= tail(regression.points$x, 1)] ~  0 + x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$coef[1],
-                                                      error = function(e) NA)
-              }
-
-          }
+        if(!is.null(type)){
+          Dynamic.average.mid.min <- mode_class(y.min)
+          x0 <- mode_class(y.min)
+        } else {
+          Dynamic.average.mid.min <- tryCatch(lm(y[which(x <= min.range)] ~  0 + x[which(x <= min.range)], offset = rep(head(regression.points$y, 1), length(y[which(x <= min.range)])))$fitted[which.max(x[which(x <= min.range)])] + (mid.min.range - max(x[which(x <= min.range)])) * lm(y[x <= head(regression.points$x, 1)] ~  0 + x[x <= head(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$coef[1],
+                                              error = function(e) NA)
+          x0 <- unique(y[x == min(x)])
+        }
       }
+    } else {
+      if(!is.null(type)){
+        Dynamic.average.mid.min <- mode_class(y.min)
+        x0 <- mode_class(y.min)
+      } else {
+        x0 <- unique(gravity(y[x == min(x)]))
+
+        if(l_y.min < 5){
+          Dynamic.average.mid.min <- NA
+        } else {
+          Dynamic.average.mid.min <- tryCatch(lm(y[x <= head(regression.points$x, 1)] ~ 0 +
+                                                   x[x <= head(regression.points$x, 1)], offset = rep(head(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$fitted[which.max(x[x <= head(regression.points$x, 1)])]  +
+                                                (mid.min.range - head(regression.points$x, 1)) * lm(y[x <= head(regression.points$x, 1)] ~  0 + x[x <= head(regression.points$x, 1)], offset = rep(head(regression.points$y, 1), length(y[x <= head(regression.points$x, 1)])))$coef[1],
+                                              error = function(e) NA)
+        }
+      }
+    }
+
+
+    if(l_x.mid.max_unique > 1){
+      if(dependence < stn){
+        if(!is.null(type)){
+          Dynamic.average.mid.max <- mode_class(y.max)
+          x.max <- mode_class(y.max)
+        } else {
+          Dynamic.average.mid.max <-  tryCatch(lm(y[which(x >= max.range)] ~ 0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$fitted[which.min(x[which(x >= max.range)])] + (mid.max.range - min(x[which(x >= max.range)])) * lm(y[which(x >= max.range)] ~  0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$coef[1],
+                                               error = function(e) NA)
+          if(l_y.max>1 && l_y.mid.max>1){
+            x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
+                         lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
+              sum(l_y.max, l_y.mid.max)
+          } else{
+            x.max <- y.max
+          }
+        }
+      } else {
+        if(!is.null(type)){
+          Dynamic.average.mid.max <- mode_class(y.max)
+          x.max <- mode_class(y.max)
+        } else {
+          x.max <- unique(y[x == max(x)])
+          Dynamic.average.mid.max <- tryCatch(lm(y[which(x >= max.range)] ~  0 + x[which(x >= max.range)], offset = rep(tail(regression.points$y, 1), length(y[which(x >= max.range)])))$fitted[which.min(x[which(x >= max.range)])]  + (mid.max.range - min(x[which(x >= max.range)])) * lm(y[x >= tail(regression.points$x, 1)] ~  0 + x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$coef[1],
+                                              error = function(e) NA)
+        }
+      }
+    } else {
+      if(!is.null(type)){
+        Dynamic.average.mid.max <- mode_class(y.max)
+        x.max <- mode_class(y.max)
+      } else{
+        x.max <- unique(gravity(y[x == max(x)]))
+
+        if(l_y.max < 5){
+          Dynamic.average.mid.max <- NA
+        } else {
+          Dynamic.average.mid.max <- tryCatch(lm(y[x >= tail(regression.points$x, 1)] ~ 0 +
+                                                   x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$fitted[which.min(x[x >= tail(regression.points$x, 1)])] +
+                                                (mid.max.range - tail(regression.points$x, 1)) * lm(y[x >= tail(regression.points$x, 1)] ~  0 + x[x >= tail(regression.points$x, 1)], offset = rep(tail(regression.points$y, 1), length(y[x >= tail(regression.points$x, 1)])))$coef[1],
+                                              error = function(e) NA)
+        }
+
+      }
+    }
 
 
 
-      ### Mid Endpoints
-      mid.max.rps <- data.table::data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
-                                               c(max(x), mean(x.max)))))
+    ### Mid Endpoints
+    mid.max.rps <- data.table::data.table(do.call(rbind,list(c(mid.max.range, Dynamic.average.mid.max),
+                                                             c(max(x), mean(x.max)))))
 
-      mid.min.rps <- data.table::data.table(do.call(rbind,list(c(min(x), mean(x0)),
-                                               c(mid.min.range, Dynamic.average.mid.min))))
+    mid.min.rps <- data.table::data.table(do.call(rbind,list(c(min(x), mean(x0)),
+                                                             c(mid.min.range, Dynamic.average.mid.min))))
 
-      regression.points <- data.table::rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
+    regression.points <- data.table::rbindlist(list(regression.points, mid.max.rps ), use.names = FALSE)
 
-      regression.points <- data.table::rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
+    regression.points <- data.table::rbindlist(list(regression.points, mid.min.rps ), use.names = FALSE)
   }
 
   regression.points <- regression.points[complete.cases(regression.points),]
@@ -698,10 +698,10 @@ NNS.reg = function (x, y,
     point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
 
     if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 1))
       point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
 
-      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 1))
       point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
     }
 
@@ -716,9 +716,9 @@ NNS.reg = function (x, y,
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,
-                       y = part.map$dt$y,
-                       y.hat = estimate,
-                       NNS.ID = part.map$dt$quadrant)
+                                   y = part.map$dt$y,
+                                   y.hat = estimate,
+                                   NNS.ID = part.map$dt$quadrant)
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
@@ -831,9 +831,9 @@ NNS.reg = function (x, y,
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,
-                       y = part.map$dt$y,
-                       y.hat = estimate,
-                       NNS.ID = part.map$dt$quadrant)
+                                   y = part.map$dt$y,
+                                   y.hat = estimate,
+                                   NNS.ID = part.map$dt$quadrant)
 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
 
