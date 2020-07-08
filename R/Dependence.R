@@ -110,20 +110,20 @@ NNS.dep = function(x,
     uniques <- list(5L)
 
     # Define indicies for segments
-        segs[[1]] <- as.integer(1 : min(l, min(50, l/5)))
-        uniques[[1]] <- length(unique(x[segs[[1]]]))
+    segs[[1]] <- as.integer(1 : min(50, l/5))
+    uniques[[1]] <- length(unique(x[segs[[1]]]))
 
-        segs[[2]] <- as.integer(max(1, (2*seg - min(50, l/10))) : min(l,(2*seg + min(50, l/10))))
-        uniques[[2]] <- length(unique(x[segs[[2]]]))
+    segs[[2]] <- as.integer(max(1, (2*seg - min(50, l/10))) : min(l,(2*seg + min(50, l/10))))
+    uniques[[2]] <- length(unique(x[segs[[2]]]))
 
-        segs[[3]] <- as.integer(max(1, (3*seg - min(50, l/10))) : min(l,(3*seg + min(50, l/10))))
-        uniques[[3]] <- length(unique(x[segs[[3]]]))
+    segs[[3]] <- as.integer(max(1, (3*seg - min(50, l/10))) : min(l,(3*seg + min(50, l/10))))
+    uniques[[3]] <- length(unique(x[segs[[3]]]))
 
-        segs[[4]] <- as.integer(max(1, (4*seg - min(50, l/10))) : min(l,(4*seg + min(50, l/10))))
-        uniques[[4]] <- length(unique(x[segs[[4]]]))
+    segs[[4]] <- as.integer(max(1, (4*seg - min(50, l/10))) : min(l,(4*seg + min(50, l/10))))
+    uniques[[4]] <- length(unique(x[segs[[4]]]))
 
-        segs[[5]] <- as.integer(max(1, (l - min(50, l/5))) : l)
-        uniques[[5]] <- length(unique(x[segs[[5]]]))
+    segs[[5]] <- as.integer(max(1, (l - min(50, l/5))) : l)
+    uniques[[5]] <- length(unique(x[segs[[5]]]))
 
 
 
