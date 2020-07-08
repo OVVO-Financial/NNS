@@ -424,7 +424,6 @@ NNS.reg = function (x, y,
   } # Multivariate
 
   if(x == 1:length(x)) asymmetry <- FALSE else asymmetry <- TRUE
-
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry)$Dependence
   dependence[is.na(dependence)] <- .01
 
@@ -435,7 +434,9 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- max(1, ceiling(ceiling(log(length(y),2)) * dependence))
+    dep.reduced.order <- max(1, ifelse( (ceiling(log(length(y), 2)) * dependence)%%1 < .5 ,
+                                        floor(ceiling(log(length(y),2)) * dependence),
+                                        ceiling(ceiling(log(length(y),2)) * dependence)))
   } else {
     dep.reduced.order <- order
   }
