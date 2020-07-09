@@ -105,28 +105,35 @@ NNS.dep = function(x,
 
     l <- length(x)
 
-    seg <- as.integer(.2*l)
     segs <- list(5L)
     uniques <- list(5L)
 
     # Define indicies for segments
     segs[[1]] <- as.integer(1 : min(50, l/5))
     uniques[[1]] <- length(unique(x[segs[[1]]]))
-
-    segs[[2]] <- as.integer(max(1, (2*seg - min(50, l/10))) : min(l,(2*seg + min(50, l/10))))
-    uniques[[2]] <- length(unique(x[segs[[2]]]))
-
-    segs[[3]] <- as.integer(max(1, (3*seg - min(50, l/10))) : min(l,(3*seg + min(50, l/10))))
-    uniques[[3]] <- length(unique(x[segs[[3]]]))
-
-    segs[[4]] <- as.integer(max(1, (4*seg - min(50, l/10))) : min(l,(4*seg + min(50, l/10))))
-    uniques[[4]] <- length(unique(x[segs[[4]]]))
+    first_point <- tail(segs[[1]],1)
 
     segs[[5]] <- as.integer(max(1, (l - min(50, l/5))) : l)
     uniques[[5]] <- length(unique(x[segs[[5]]]))
+    last_point <- segs[[5]][1]
+
+    ll <- last_point - first_point
+    seg <- as.integer(ll/4)
 
 
 
+    segs[[2]] <- as.integer(max(1, (first_point + 1*seg - min(50, l/10))) : min(l,(first_point + 1*seg + min(50, l/10))))
+    uniques[[2]] <- length(unique(x[segs[[2]]]))
+
+    segs[[3]] <- as.integer(max(1, (first_point + 2*seg - min(50, l/10))) : min(l,(first_point + 2*seg + min(50, l/10))))
+    uniques[[3]] <- length(unique(x[segs[[3]]]))
+
+    segs[[4]] <- as.integer(max(1, (first_point + 3*seg - min(50, l/10))) : min(l,(first_point + 3*seg + min(50, l/10))))
+    uniques[[4]] <- length(unique(x[segs[[4]]]))
+
+
+
+    weights <- (c(.5, 1, 1, 1, .5)/4)
     nns.dep <- list(5L)
 
     if(any(unlist(uniques)==1)){
@@ -148,8 +155,9 @@ NNS.dep = function(x,
     }
 
     options(warn = oldw)
-    return(list("Correlation" = mean(unlist(lapply(nns.dep, `[[`, 1))),
-                "Dependence" = mean(unlist(lapply(nns.dep, `[[`, 2)))))
+
+    return(list("Correlation" = sum(weights * unlist(lapply(nns.dep, `[[`, 1))),
+                "Dependence" = sum(weights * unlist(lapply(nns.dep, `[[`, 2)))))
 
   } else {
     return(NNS.dep.matrix(x, asym = asym))

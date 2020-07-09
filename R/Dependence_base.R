@@ -28,11 +28,8 @@ NNS.dep.base <- function(x,
 
   if(!missing(y)) {
     if(any(length(x) < 20 | class(x) == "factor" | class(y) == "factor")) {
-      order <- 2
       y <- as.numeric(y)
       asym <- TRUE
-    } else {
-      order <- order
     }
 
     if(is.null(degree)) {
@@ -40,7 +37,6 @@ NNS.dep.base <- function(x,
     }
   } else {
     if(any(length(x[, 1]) < 20 | any(unlist(lapply(x, is.factor))))) {
-      order <- 2
       x <- data.matrix(x)
       asym <- TRUE
     }
@@ -50,9 +46,9 @@ NNS.dep.base <- function(x,
     }
   }
 
-  if(any(length(unique(x)) < sqrt(length(x)) || length(unique(y)) < sqrt(length(y)))) {
-    order <- 1
-  }
+
+  order <- 1
+  sd_var <- sd(y)
 
   if(!missing(y)) {
     n <- length(x)
@@ -108,7 +104,7 @@ NNS.dep.base <- function(x,
       return(list(Correlation = nns.cor, Dependence = nns.dep))
 
     } else {
-      part.df[, counts := .N , by = quadrant]
+      part.df[, counts := .N , by = prior.quadrant]
       min_part.df <- part.df[counts >= 5, ]
 
       n <- dim(min_part.df)[1]
@@ -124,10 +120,17 @@ NNS.dep.base <- function(x,
       min_part.df[, `:=` (weight = .N/n), by = quadrant]
 
       if(asym){
-        disp <- min_part.df[,.(sign(cor(x,abs(y)))*summary(lm(abs(y)~x))$r.squared), by = quadrant]$V1
+        disp <- min_part.df[,"results" := ifelse(abs(cor(x,abs(y))) < .3, (sign(cor(x,abs(y)))*(1 - min(1, abs(sd(abs(y))/sd_var)))),
+                                               (sign(cor(x,abs(y)))*summary(lm(abs(y)~x))$r.squared)), by = quadrant]
+
+        disp <- disp[, results[1], by  = quadrant]$V1
+
       } else {
-        disp <- min_part.df[,.(sign(cor(x,y))*summary(lm(y~x))$r.squared), by = quadrant]$V1
-      }
+         disp <- min_part.df[,"results" := ifelse(abs(cor(x,y)) < .3, (sign(cor(x,y))*(1 - min(1, abs(sd(y)/sd_var)))),
+                                     (sign(cor(x,y))*summary(lm(y~x))$r.squared)), by = quadrant]
+
+         disp <- disp[, results[1], by  = quadrant]$V1
+         }
 
       disp[is.na(disp)] <- 0
 
