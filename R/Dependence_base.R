@@ -120,16 +120,16 @@ NNS.dep.base <- function(x,
       min_part.df[, `:=` (weight = .N/n), by = quadrant]
 
       if(asym){
-        disp <- min_part.df[,"results" := ifelse(abs(cor(x,abs(y))) < .3, (sign(cor(x,abs(y)))*(1 - min(1, abs(sd(abs(y))/sd_var)))),
+        disp <- min_part.df[,"nns_results" := ifelse(abs(cor(x,abs(y))) < .3, (sign(cor(x,abs(y)))*(1 - min(1, abs(sd(abs(y))/sd_var)))),
                                                (sign(cor(x,abs(y)))*summary(lm(abs(y)~x))$r.squared)), by = quadrant]
 
-        disp <- disp[, results[1], by  = quadrant]$V1
+        disp <- disp[, nns_results[1], by  = quadrant]$V1
 
       } else {
-         disp <- min_part.df[,"results" := ifelse(abs(cor(x,y)) < .3, (sign(cor(x,y))*(1 - min(1, abs(sd(y)/sd_var)))),
+         disp <- min_part.df[,"nns_results" := ifelse(abs(cor(x,y)) < .3, (sign(cor(x,y))*(1 - min(1, abs(sd(y)/sd_var)))),
                                      (sign(cor(x,y))*summary(lm(y~x))$r.squared)), by = quadrant]
 
-         disp <- disp[, results[1], by  = quadrant]$V1
+         disp <- disp[, nns_results[1], by  = quadrant]$V1
          }
 
       disp[is.na(disp)] <- 0

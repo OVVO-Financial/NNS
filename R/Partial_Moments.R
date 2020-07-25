@@ -65,12 +65,12 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.UPM(0,0,x,y,mean(x),mean(y))
+#' Co.UPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-  z <- cbind(x,y)
+  z <- cbind(x, y)
   z <- t(t(z) - c(target.x, target.y))
   z[z<=0] <- NA
   z <- z[complete.cases(z), , drop = FALSE]
@@ -460,11 +460,11 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     }
   }
 
-  type = tolower(type)
+  type <- tolower(type)
 
   if(!(type%in%c("cdf","survival", "hazard", "cumulative hazard"))) stop(paste("Please select a type from: ", "`CDF`, ", "`survival`, ",  "`hazard`, ", "`cumulative hazard`"))
 
-  if(is.null(dim(variable)) || dim(variable)[2]==1){
+  if(is.null(dim(variable)) || dim(variable)[2] == 1){
 
     overall_target <- sort(variable)
     x <- overall_target

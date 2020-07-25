@@ -33,7 +33,7 @@
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
       "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
-      "%do%", "k", "V1", "residuals",
+      "%do%", "k", "V1", "residuals", "nns_results",
       "tdigest", "tquantile"
     ))
 

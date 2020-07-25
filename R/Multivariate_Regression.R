@@ -55,7 +55,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
   ### If regression points are error (not likely)...
-  if(length(reg.points.matrix[ , 1]) == 0){
+  if(length(reg.points.matrix[ , 1]) == 0  || is.null(reg.points.matrix)){
     for(i in 1 : n){
       part.map <- NNS.part(original.IVs[ , i], original.DV, order = order, type = type, noise.reduction = noise.reduction, obs.req = 0)
       dep <- NNS.dep(original.IVs[ , i], original.DV)$Dependence
@@ -99,7 +99,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   } else { cl <- NULL }
 
   if(is.null(cl)){
-
       for(j in 1:n){
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
