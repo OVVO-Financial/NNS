@@ -101,7 +101,7 @@ lines(boots$ensemble, lwd = 3)
 }
 \references{
 \itemize{
-\item Vinod, H.D. and Viole, F. (2020) Maximum Entropy Bootstrap and Improved Monte Carlo Simulations
+\item Vinod, H.D. and Viole, F. (2020) Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations
 \href{https://ssrn.com/abstract=3621614}{https://ssrn.com/abstract=3621614}
 
 \item Vinod, H.D. (2013), Maximum Entropy Bootstrap Algorithm Enhancements.
