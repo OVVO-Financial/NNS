@@ -71,7 +71,16 @@ dy.d_<- function(x, y, wrt,
 
 
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
-  if(l<2) stop("Please use dy.dx(...) for univariate partial derivatives.")
+  if(l < 2) stop("Please use dy.dx(...) for univariate partial derivatives.")
+
+  if(is.null(colnames(x))){
+    colnames.list <- list()
+    for(i in 1 : l){
+      colnames.list[i] <- paste0("X", i)
+    }
+    colnames(x) <- as.character(colnames.list)
+  }
+
 
   if(NNS.dep.hd(cbind(x, y))$Dependence > 0.25) h <- 0.2 else h <- max(0.1, 1/exp(l-2))
 
@@ -133,6 +142,8 @@ dy.d_<- function(x, y, wrt,
                                                                             eval.points,
                                                                             original.eval.points.max))
                                                                , each = sampsize, length.out = dim(deriv.points)[1] ))
+
+
     colnames(deriv.points) <- colnames(x)
 
     distance_wrt <- 2 * h_step
