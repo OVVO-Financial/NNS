@@ -744,10 +744,17 @@ NNS.reg = function (x, y,
   bias <- bias[, mode(residuals)*-1, by = gradient]
   fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
 
-  bias[, bias := lapply(.SD, data.table::frollmean, n = 2, fill = NA, align = 'right'), .SDcols = 2]
+  bias[, bias_r := lapply(.SD, data.table::frollmean, n = 2, fill = NA, align = 'right'), .SDcols = 2]
+  bias[, bias_l := lapply(.SD, data.table::frollmean, n = 2, fill = NA, align = 'left'), .SDcols = 2]
+  bias[is.na(bias)] <- 0
+
+  bias[, bias := (bias_r + bias_l)/2]
+
+  bias[, bias_r := NULL]
+  bias[, bias_l := NULL]
 
   bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
-  bias[is.na(bias)] <- 0
+#  bias[is.na(bias)] <- 0
 
   if(!is.null(type)){
     regression.points[, y := round(y + bias$bias)]
@@ -755,6 +762,9 @@ NNS.reg = function (x, y,
   } else {
     regression.points[, y := y + bias$bias]
   }
+
+
+
 
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))

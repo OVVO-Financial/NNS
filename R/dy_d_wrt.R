@@ -138,7 +138,7 @@ dy.d_<- function(x, y, wrt,
 
     deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
 
-    data.table::set(deriv.points, i=NULL, j = wrt, value = rep(unlist(rbind(original.eval.points.min,
+    data.table::set(deriv.points, i=NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
                                                                             eval.points,
                                                                             original.eval.points.max))
                                                                , each = sampsize, length.out = dim(deriv.points)[1] ))
