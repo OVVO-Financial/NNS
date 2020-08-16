@@ -754,7 +754,6 @@ NNS.reg = function (x, y,
   bias[, bias_l := NULL]
 
   bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
-#  bias[is.na(bias)] <- 0
 
   if(!is.null(type)){
     regression.points[, y := round(y + bias$bias)]
