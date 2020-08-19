@@ -150,10 +150,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   data.table::setkey(resid.plot, 'obs')
 
 
-  y.hat <- mean.by.id.matrix[ , .(y.hat)]
+  y.hat <- unlist(mean.by.id.matrix[ , .(y.hat)])
 
   if(!is.null(type)){
-    y.hat <- round(y.hat)
+    y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
   }
 
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
@@ -192,7 +192,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
     y.hat <- fitted.matrix$y.hat
 
     if(!is.null(type)){
-        y.hat <- round(y.hat)
+        y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
     }
   }
 
@@ -225,7 +225,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
         last.known.gradient_2 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points, type = dist, k = n.best)) / last.known.distance_2
         last.known.gradient_3 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points_2, type = dist, k = n.best)) / last.known.distance_3
 
-        last.known.gradient <- (last.known.gradient_1 + 2*last.known.gradient_2 + 4*last.known.gradient_3) / 7
+        last.known.gradient <- (last.known.gradient_1 + 1*last.known.gradient_2 + 1*last.known.gradient_3) / 3
 
         last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
 
@@ -300,7 +300,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
           last.known.gradient_2 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points, type = dist, k = n.best)) / last.known.distance_2
           last.known.gradient_3 <- (boundary.estimates - NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = mid.points_2, type = dist, k = n.best)) / last.known.distance_3
 
-          last.known.gradient <- (last.known.gradient_1 + 2*last.known.gradient_2 + 4*last.known.gradient_3) / 7
+          last.known.gradient <- (last.known.gradient_1 + 1*last.known.gradient_2 + 1*last.known.gradient_3) / 4
 
           last.distance <- sqrt(sum((outside.points - boundary.points) ^ 2))
 
@@ -390,9 +390,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
   rhs.partitions <- data.table::data.table(reg.points.matrix)
 
   if(!is.null(type)){
-    fitted.matrix$y.hat <- round(fitted.matrix$y.hat)
+    fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat %% 1 < 0.5, floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
     if(!is.null(predict.fit)){
-      predict.fit <- round(predict.fit)
+      predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
     }
   }
 
