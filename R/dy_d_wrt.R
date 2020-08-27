@@ -23,7 +23,9 @@
 #' \item{\code{dy.d_(...)[, wrt]$Second}} the 2nd derivative
 #' \item{\code{dy.d_(...)[, wrt]$Mixed}} the mixed derivative (for two independent variables only).
 #' }
+#'
 #' @author Fred Viole, OVVO Financial Systems
+#'
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995}
 #'
@@ -40,7 +42,7 @@
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
 #' only supply 1 value in [eval.points], or a vector of [eval.points]:
-#' dy.d_(B, y, wrt = 1, eval.points = c(.5))
+#' dy.d_(B, y, wrt = 1, eval.points = .5)
 #'
 #' dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
 #'
