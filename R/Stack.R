@@ -99,9 +99,6 @@ NNS.stack <- function(IVs.train,
     }
   }
 
- # if(dist == "FACTOR"){
- #   method <- 1
- #  }
 
   objective <- tolower(objective)
 
@@ -122,7 +119,7 @@ NNS.stack <- function(IVs.train,
     if(is.null(IVs.test)){
       CV.size <- 0.25
     } else {
-      CV.size <- mean(c(.2, min(length(IVs.test[ , 1]) / l, .5)))
+      CV.size <- mean(c(.25, min(length(IVs.test[ , 1]) / length(IVs.train[ , 1]), .5)))
     }
   }
 
