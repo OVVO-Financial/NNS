@@ -58,7 +58,7 @@ dy.d_(B, y, wrt = c(1, 2), eval.points = t(c(.5, .5)))
 
 ## To find average partial derivative of y wrt 1st regressor,
 only supply 1 value in [eval.points], or a vector of [eval.points]:
-dy.d_(B, y, wrt = 1, eval.points = c(.5))
+dy.d_(B, y, wrt = 1, eval.points = .5)
 
 dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
 
