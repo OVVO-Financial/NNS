@@ -2820,8 +2820,8 @@ logistic_conf &lt;- table(pred, RetailMart_train$PREGNANT)
 nns_conf</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 488 181
-##   1  12 319</code></pre>
+##   0 487 157
+##   1  13 343</code></pre>
 <pre class="r"><code>logistic_conf</code></pre>
 <pre><code>##     
 ## pred   0   1
@@ -2867,8 +2867,8 @@ nns_stack_conf_oos &lt;- table(round(nns_stack_oos$stack), na.omit(RetailMart_te
 <pre class="r"><code>nns_stack_conf_oos</code></pre>
 <pre><code>##    
 ##       0   1
-##   0 858  22
-##   1  82  38</code></pre>
+##   0 851  21
+##   1  89  39</code></pre>
 </div>
 </div>
 <div id="interpretability-of-nns-results." class="section level2">
@@ -2901,8 +2901,8 @@ rf.pred &lt;- predict(rf.fit, newdata = RetailMart_test_IV)
 table(rf.pred, na.omit(RetailMart_test$PREGNANT))</code></pre>
 <pre><code>##        
 ## rf.pred   0   1
-##       0 832  13
-##       1 108  47</code></pre>
+##       0 833  13
+##       1 107  47</code></pre>
 </div>
 <div id="xgboost" class="section level3">
 <h3><span class="header-section-number">5.4.2</span> xgboost</h3>
@@ -2933,10 +2933,14 @@ xgb.fit=xgb.train(
   early_stopping_rounds=10,
   watchlist=list(val1=xgb.train),
   verbose=0
-)
-
-
-xgb.pred = predict(xgb.fit,as.matrix(RetailMart_test_IV),reshape = TRUE)
+)</code></pre>
+<pre><code>## [11:57:49] WARNING: amalgamation/../src/learner.cc:480: 
+## Parameters: { nthreads } might not be used.
+## 
+##   This may not be accurate due to some parameters are only used in language bindings but
+##   passed down to XGBoost core.  Or some parameters are not used but slip through this
+##   verification. Please open an issue if you find above cases.</code></pre>
+<pre class="r"><code>xgb.pred = predict(xgb.fit,as.matrix(RetailMart_test_IV),reshape = TRUE)
 colnames(xgb.pred)= c(0,1)
 
 xgb.pred$prediction = apply(xgb.pred,1,function(x) colnames(xgb.pred)[which.max(x)])
@@ -2965,7 +2969,7 @@ table(xgb.pred$prediction,na.omit(RetailMart_test$PREGNANT))</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p><a href="https://www.r-bloggers.com/learning-data-science-the-supermarket-knows-you-are-pregnant-before-your-dad-does/" class="uri">https://www.r-bloggers.com/learning-data-science-the-supermarket-knows-you-are-pregnant-before-your-dad-does/</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn1"><p><a href="https://www.r-bloggers.com/learning-data-science-the-supermarket-knows-you-are-pregnant-before-your-dad-does/" class="uri">https://www.r-bloggers.com/learning-data-science-the-supermarket-knows-you-are-pregnant-before-your-dad-does/</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 
@@ -3019,7 +3023,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
