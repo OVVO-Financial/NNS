@@ -140,7 +140,18 @@ NNS.stack <- function(IVs.train,
     if(b > 1){
       maxes <- as.vector(apply(IVs.train, 2, which.max))
       mins <- as.vector(apply(IVs.train, 2, which.min))
-      test.set_half <- unique(c(rbind(test.set.1, test.set.2)))[1:(length(test.set)/2)]
+
+      if(identical(sort(method),c(1,2))){
+          test.set_half <- unique(c(rbind(test.set.1[1:(length(test.set.1)/2)], test.set.2[1:(length(test.set.2)/2)])))[1:(length(test.set)/2)]
+      } else {
+        if(method==1){
+            test.set_half <- (test.set.1)[1:(length(test.set)/2)]
+        } else {
+          if(method==2) {
+            test.set_half <- (test.set.2)[1:(length(test.set)/2)]
+          }
+        }
+      }
 
       test.set <- unique(c(mins, maxes, test.set_half, sample(1 : length(IVs.train[ , 1]), replace = FALSE)))[1:length(test.set)]
       test.set <- na.omit(test.set)
@@ -387,7 +398,7 @@ NNS.stack <- function(IVs.train,
   if(identical(sort(method),c(1,2))){
     estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
     if(!is.null(type)){
-      estimates <- round(estimates)
+      estimates <- ifelse(estimates%%1 < 0.5, floor(estimates), ceiling(estimates))
     }
   } else {
     if(method==1){

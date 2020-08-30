@@ -439,7 +439,8 @@ NNS.boost <- function(IVs.train,
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    return(list("results" = round(estimates),
+    estimates <- ifelse(estimates%%1 < 0.5, floor(estimates), ceiling(estimates))
+    return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   }
 }
