@@ -6,7 +6,7 @@
 #' @param y a numeric vector.
 #' @return Returns one of the following SSD results: \code{"X SSD Y"}, \code{"Y SSD X"}, or \code{"NO SSD EXISTS"}.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{http://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
+#' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{https://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)

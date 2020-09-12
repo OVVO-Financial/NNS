@@ -12,7 +12,7 @@
 #' \item{$Dependence} Multivariate nonlinear dependence coefficient [0,1]
 #' }
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{http://ssrn.com/abstract=2745308}.
+#' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)

@@ -8,7 +8,7 @@
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)

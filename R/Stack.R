@@ -10,6 +10,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
+#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
 #' @param order options: (integer, "max", NULL); \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent, which is suggested for mixed continuous and discrete (unordered, ordered) data.
@@ -33,7 +34,7 @@
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-#' \url{https://ssrn.com/abstract=2864711}
+#' \url{https://www.ssrn.com/abstract=2864711}
 #'
 #' @note
 #' \itemize{
@@ -70,6 +71,7 @@ NNS.stack <- function(IVs.train,
                       objective = "min",
                       dist = "L2",
                       CV.size = NULL,
+                      balance = FALSE,
                       ts.test = NULL,
                       folds = 5,
                       order = NULL,
@@ -79,6 +81,7 @@ NNS.stack <- function(IVs.train,
                       dim.red.method = "cor",
                       status = TRUE,
                       ncores = NULL){
+
 
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
@@ -99,17 +102,22 @@ NNS.stack <- function(IVs.train,
     }
   }
 
+  if(balance && type!="class") stop("Please select 'type='CLASS'' when 'balance=TRUE'.")
 
   objective <- tolower(objective)
 
-  DV.train <- as.numeric(DV.train)
+  if(1%in%DV.train){
+    DV.train <- as.numeric(as.character(DV.train))
+  } else {
+    DV.train <- as.numeric(as.character(as.numeric(DV.train)))
+  }
 
   n <- ncol(IVs.train)
 
   l <- floor(sqrt(length(IVs.train[ , 1])))
 
   if(is.null(IVs.test)){
-    IVs.test <- IVs.train
+      IVs.test <- IVs.train
   } else {
       IVs.test <- data.frame(IVs.test)
   }
@@ -173,8 +181,29 @@ NNS.stack <- function(IVs.train,
     training <- cbind(IVs.train[c(-test.set),], DV.train[c(-test.set)])
     training <- training[complete.cases(training),]
 
+    if(balance && type=="class"){
+      if(1%in%DV.train){
+            DV.train <- as.numeric(as.character(DV.train))
+        } else {
+            DV.train <- as.numeric(as.character(as.numeric(DV.train)))
+        }
+
+        CV.DV.train <- DV.train[c(-test.set)]
+        CV.DV.test <- DV.train[c(test.set)]
+
+        y_train <- as.factor(CV.DV.train)
+        training_1 <- do.call(cbind, caret::downSample(CV.IVs.train, y_train, list = TRUE))
+        training_2 <- do.call(cbind, caret::upSample(CV.IVs.train, y_train, list = TRUE))
+
+        training <- rbind.data.frame(training_1, training_2)
+
+        colnames(training) <- c(colnames(CV.IVs.train), names(CV.DV.train))
+    }
+
+
     CV.IVs.train <- data.frame(training[, -(ncol(training))])
-    CV.DV.train <- training[, ncol(training)]
+
+    CV.DV.train <- as.numeric(as.character(training[, ncol(training)]))
 
 
     # Dimension Reduction Regression Output

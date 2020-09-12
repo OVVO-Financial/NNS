@@ -12,6 +12,7 @@
 #' @param learner.trials integer; \code{NULL} (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  \code{(learner.trials = 100)} is the default setting.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
+#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
@@ -29,7 +30,7 @@
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-#' \url{https://ssrn.com/abstract=2864711}
+#' \url{https://www.ssrn.com/abstract=2864711}
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
@@ -39,7 +40,7 @@
 #'  type = "CLASS")
 #'
 #'  ## Test accuracy
-#'  mean( a$results == as.numeric(iris[141:150, 5]))
+#'  mean(a$results == as.numeric(iris[141:150, 5]))
 #'  }
 #'
 #' @export
@@ -55,6 +56,7 @@ NNS.boost <- function(IVs.train,
                       learner.trials = 100,
                       epochs = NULL,
                       CV.size = .25,
+                      balance = FALSE,
                       ts.test = NULL,
                       folds = 5,
                       threshold = NULL,
@@ -77,7 +79,7 @@ NNS.boost <- function(IVs.train,
 
   objective <- tolower(objective)
 
-  if(is.null(IVs.test)) {IVs.test <- IVs.train}
+
 
   # Parallel process...
   if (is.null(ncores)) {
@@ -89,6 +91,32 @@ NNS.boost <- function(IVs.train,
   }
 
   if((num_cores)>cores){ stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))}
+  if(balance && type!="class") stop("Please select 'type='CLASS'' when 'balance=TRUE'.")
+
+  if(balance && type=="class"){
+    if(1%in%DV.train){
+      DV.train <- as.numeric(as.character(DV.train))
+    } else {
+      DV.train <- as.numeric(as.character(as.numeric(DV.train)))
+    }
+
+    y_train <- as.factor(as.character(DV.train))
+
+    training_1 <- do.call(cbind, caret::downSample(IVs.train, y_train, list = TRUE))
+    training_2 <- do.call(cbind, caret::upSample(IVs.train, y_train, list = TRUE))
+
+    training <- rbind.data.frame(training_1, training_2)
+
+    colnames(training) <- c(colnames(IVs.train), names(DV.train))
+
+    IVs.train <- training[, -ncol(training)]
+    DV.train <- as.numeric(as.character(training[,ncol(training)]))
+
+
+    if(is.null(IVs.test)) {IVs.test <- IVs.train}
+  }
+
+  if(is.null(IVs.test)) {IVs.test <- IVs.train}
 
   x <- IVs.train
   y <- DV.train

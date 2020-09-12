@@ -9,7 +9,7 @@
 #' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)

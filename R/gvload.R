@@ -9,6 +9,7 @@
 #' @importFrom meboot meboot
 #' @importFrom tdigest tdigest tquantile
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
+#' @importFrom caret upSample downSample
 #' @import doParallel
 #' @import rgl
 #' @import stringr

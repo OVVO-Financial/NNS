@@ -3,7 +3,7 @@
 #' Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.
 #' @param rpm REGRESSION.POINT.MATRIX from \link{NNS.reg}
 #' @param dist.estimate Vector to generate distances from.
-#' @param type "L1", "L2" or "DTW"
+#' @param type "L1", "L2", "DTW" or "FACTOR"
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param n number of observations.
 #'

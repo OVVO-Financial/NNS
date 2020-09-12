@@ -64,7 +64,7 @@
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995}
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #'
 #' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 #' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
@@ -868,7 +868,8 @@ NNS.reg = function (x, y,
     Prediction.Accuracy <- NULL
   }
 
-  if((sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2)==0){
+
+  if((sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) == 0){
     R2 <- 1
   } else {
     R2 <- (sum((fitted[ , y.hat] - mean(y)) * (y - mean(y))) ^ 2) / (sum((y - mean(y)) ^ 2) * sum((fitted[ , y.hat] - mean(y)) ^ 2))
