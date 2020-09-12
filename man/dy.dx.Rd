@@ -38,7 +38,7 @@ dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995}
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 
 Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}

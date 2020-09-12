@@ -11,7 +11,7 @@ NNS.distance(rpm, dist.estimate, type, k, n)
 
 \item{dist.estimate}{Vector to generate distances from.}
 
-\item{type}{"L1", "L2" or "DTW"}
+\item{type}{"L1", "L2", "DTW" or "FACTOR"}
 
 \item{k}{\code{n.best} from \link{NNS.reg}}
 

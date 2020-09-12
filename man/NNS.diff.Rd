@@ -30,7 +30,7 @@ NNS.diff(f, 4.1)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995}
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 }
 \author{
 Fred Viole, OVVO Financial Systems

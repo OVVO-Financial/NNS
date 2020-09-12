@@ -13,6 +13,7 @@ NNS.stack(
   objective = "min",
   dist = "L2",
   CV.size = NULL,
+  balance = FALSE,
   ts.test = NULL,
   folds = 5,
   order = NULL,
@@ -40,6 +41,8 @@ NNS.stack(
 \item{dist}{options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.}
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.}
+
+\item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.}
 
 \item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
@@ -101,7 +104,7 @@ reduce the \code{CV.size}.
 }
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-\url{https://ssrn.com/abstract=2864711}
+\url{https://www.ssrn.com/abstract=2864711}
 }
 \author{
 Fred Viole, OVVO Financial Systems

@@ -78,10 +78,10 @@ UPM.VaR(.025, 0, apd[,1]$First)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995}
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 
 Vinod, H. and Viole, F. (2020) "Comparing Old and New Partial Derivative Estimates from Nonlinear Nonparametric Regressions"
-\url{https://ssrn.com/abstract=3681104}
+\url{https://www.ssrn.com/abstract=3681104}
 }
 \author{
 Fred Viole, OVVO Financial Systems

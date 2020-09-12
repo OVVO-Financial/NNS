@@ -64,10 +64,10 @@ NNS.ANOVA(A)
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995}
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 
 Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
-\url{https://ssrn.com/abstract=3007373}
+\url{https://www.ssrn.com/abstract=3007373}
 }
 \author{
 Fred Viole, OVVO Financial Systems
