@@ -119,7 +119,7 @@ NNS.stack <- function(IVs.train,
   if(is.null(IVs.test)){
       IVs.test <- IVs.train
   } else {
-      IVs.test <- data.frame(IVs.test)
+      if(is.null(dim(IVs.test))) IVs.test <- data.frame(t(IVs.test)) else IVs.test <- data.frame(IVs.test)
   }
 
 

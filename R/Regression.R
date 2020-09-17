@@ -191,7 +191,7 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(point.est)){
-      if(!is.null(dim(x))){
+      if(!is.null(dim(x)) && dim(x)[2]>1){
         if(is.null(dim(point.est))) point.est <- data.frame(t(point.est)) else point.est <- data.frame(point.est)
         new_x <- data.table::rbindlist(list(data.frame(x), point.est), use.names = FALSE)
       } else {
@@ -200,7 +200,7 @@ NNS.reg = function (x, y,
     }
 
 
-    if(!is.null(dim(x))){
+    if(!is.null(dim(x)) && dim(x)[2]>1){
       x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
     } else {
       x <- factor_2_dummy_FR(x)
@@ -211,7 +211,7 @@ NNS.reg = function (x, y,
     if(!is.null(point.est)){
       point.est.y <- numeric()
 
-      if(!is.null(dim(x))){
+      if(!is.null(dim(x)) && dim(x)[2]>1){
         new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
       } else {
         new_x <- factor_2_dummy_FR(new_x)
