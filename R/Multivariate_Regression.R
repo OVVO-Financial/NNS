@@ -179,7 +179,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = FALSE, order = NULL, stn = NULL,
 
 
 
-  if(n.best > 1 && is.null(point.est)){
+  if(n.best > 1){
     if(!is.null(cl)){
         fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
     } else {
