@@ -19,7 +19,7 @@ NNS.ARMA.optim(
 \arguments{
 \item{variable}{a numeric vector.}
 
-\item{training.set}{numeric; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
+\item{training.set}{integer; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
 
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
