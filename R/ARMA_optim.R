@@ -3,7 +3,7 @@
 #' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
 #'
 #' @param variable a numeric vector.
-#' @param training.set numeric; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.
+#' @param training.set integer; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
@@ -61,6 +61,8 @@ NNS.ARMA.optim <- function(variable, training.set,
                         linear.approximation = TRUE,
                         print.trace = TRUE,
                         ncores = NULL){
+
+  if(length(training.set)==length(variable)){ stop("Please provide a 'training.set' value (integer) less than the length of the variable.")}
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
   objective <- tolower(objective)
