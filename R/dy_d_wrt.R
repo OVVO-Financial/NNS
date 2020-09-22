@@ -87,7 +87,6 @@ dy.d_<- function(x, y, wrt,
     colnames(x) <- as.character(colnames.list)
   }
 
-
   if(NNS.dep.hd(cbind(x, y))$Dependence > 0.25) h <- 0.2 else h <- max(0.1, 1/exp(l-2))
 
   order <- NULL

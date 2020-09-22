@@ -137,6 +137,9 @@ NNS.dep = function(x,
     nns.dep <- list(5L)
 
     if(any(unlist(uniques)==1)){
+      weights <- c(1/3, 1/3, 1/3)
+      nns.dep <- list(3L)
+
       DT <- data.table::data.table(x, y)
       data.table::setkey(DT[, x := x], x)
 
@@ -155,6 +158,7 @@ NNS.dep = function(x,
     }
 
     options(warn = oldw)
+
 
     return(list("Correlation" = sum(weights * unlist(lapply(nns.dep, `[[`, 1))),
                 "Dependence" = sum(weights * unlist(lapply(nns.dep, `[[`, 2)))))
