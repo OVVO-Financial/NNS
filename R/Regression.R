@@ -753,12 +753,10 @@ NNS.reg = function (x, y,
   bias[, bias_r := NULL]
   bias[, bias_l := NULL]
 
-
   bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
 
   if(!is.null(type)){
     regression.points[, y := ifelse((y + bias$bias)%%1 < 0.5, floor(y + bias$bias), ceiling(y + bias$bias))]
-
   } else {
     regression.points[, y := y + bias$bias]
   }
