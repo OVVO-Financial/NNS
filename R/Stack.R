@@ -210,14 +210,18 @@ NNS.stack <- function(IVs.train,
     if(2 %in% method && dim(IVs.train)[2]>1){
 
       actual <- CV.DV.test
+      if(dim.red.method=="cor"){
+          var.cutoffs_1 <- abs(round(cor(cbind(DV.train, IVs.train))[-1,1], digits = 2))
+          var.cutoffs_2 <- abs(round(cor(cbind(CV.DV.train, CV.IVs.train))[-1,1], digits = 2))
+      } else {
+          var.cutoffs_1 <- abs(round(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+                                             type = type)$equation$Coefficient[-(n+1)], digits = 2))
 
-      var.cutoffs_1 <- abs(round(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                         type = type)$equation$Coefficient, digits = 2))
+          var.cutoffs_2 <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+                                             type = type)$equation$Coefficient[-(n+1)], digits = 2))
+      }
 
-      var.cutoffs_2 <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                         type = type)$equation$Coefficient, digits = 2))
-
-      var.cutoffs <- (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2
+      var.cutoffs <- c(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2)
 
       var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs > 0]
 
@@ -249,13 +253,13 @@ NNS.stack <- function(IVs.train,
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- min(na.omit(nns.ord))
           if(i > 2 && is.na(nns.ord[i])) break
-          if(i > 2 && (nns.ord[i] >= nns.ord[i-1])) break
+          if(i > 2 && (nns.ord[i] >= nns.ord[i-1]) && (nns.ord[i] >= nns.ord[i-2])) break
         } else {
           best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- max(na.omit(nns.ord))
           if(i > 2 && is.na(nns.ord[i])) break
-          if(i > 2  && (nns.ord[i] <= nns.ord[i-1])) break
+          if(i > 2  && (nns.ord[i] <= nns.ord[i-1]) && (nns.ord[i] <= nns.ord[i-2])) break
         }
       }
 
@@ -266,7 +270,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
 
-        best.nns.ord <- mean(na.omit(unlist(best.nns.ord)))
+        best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
 
         nns.method.2 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
                                 type = type)
@@ -383,10 +387,10 @@ NNS.stack <- function(IVs.train,
 
 
       best.k[[b]] <- k
-      best.nns.cv[[b]] <- nns.cv.1
+      best.nns.cv[[b]] <- if(type=="class"){min(max(nns.cv.1,0),1)} else {nns.cv.1}
 
       if(b==folds){
-        best.nns.cv <- mean(na.omit(unlist(best.nns.cv)))
+        best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
         nns.method.1 <- NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                 type = type)$Point.est
