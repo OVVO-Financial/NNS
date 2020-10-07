@@ -96,7 +96,7 @@ NNS.stack <- function(IVs.train,
 
   if(!is.null(type)){
     type <- tolower(type)
-    if(type=="class"){
+    if(type == "class"){
       obj.fn <- expression(mean( predicted == as.numeric(actual)))
       objective <- "max"
     }
@@ -387,7 +387,7 @@ NNS.stack <- function(IVs.train,
 
 
       best.k[[b]] <- k
-      best.nns.cv[[b]] <- if(type=="class"){min(max(nns.cv.1,0),1)} else {nns.cv.1}
+      best.nns.cv[[b]] <- if(!is.null(type)){min(max(nns.cv.1,0),1)} else {nns.cv.1}
 
       if(b==folds){
         best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))

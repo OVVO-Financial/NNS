@@ -40,6 +40,7 @@
 #' DT
 #' @export
 
+
 NNS.part = function(x, y,
                     Voronoi = FALSE,
                     type = NULL,
@@ -74,7 +75,7 @@ NNS.part = function(x, y,
     y <- as.numeric(y)
 
     if (length(x) <= 8) {
-        order <- 1
+        if(is.null(order)) order <- 1 else order <- length(x)
         obs.req <- 0
     }
 
@@ -90,7 +91,7 @@ NNS.part = function(x, y,
         obs.req <- obs.req
     }
 
-    hard.stop <- max(ceiling(log(length(x), 2)), 1)
+    hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
 
     if(is.null(type)) {
         i <- 0L
