@@ -75,7 +75,7 @@ NNS.part = function(x, y,
     y <- as.numeric(y)
 
     if (length(x) <= 8) {
-        if(is.null(order)) order <- 1 else order <- length(x)
+        order <- 1
         obs.req <- 0
     }
 
@@ -91,7 +91,7 @@ NNS.part = function(x, y,
         obs.req <- obs.req
     }
 
-    hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
+    hard.stop <- max(ceiling(log(length(x), 2)), 1)
 
     if(is.null(type)) {
         i <- 0L
