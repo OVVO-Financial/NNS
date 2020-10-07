@@ -75,6 +75,16 @@ NNS.part = function(x, y,
         plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
     }
 
+    if (length(x) <= 8) {
+        obs.req <- 0
+        if(is.null(order)){
+            order <- 1
+            hard.stop <- max(ceiling(log(length(x), 2)), 1)
+        } else {
+            hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
+        }
+    }
+
     if(is.null(order)) order <- max(ceiling(log(length(x), 2)), 1)
 
     if(!is.numeric(order)) {
@@ -87,15 +97,7 @@ NNS.part = function(x, y,
 
 
 
-    if (length(x) <= 8) {
-        obs.req <- 0
-        if(is.null(order)){
-            order <- 1
-            hard.stop <- max(ceiling(log(length(x), 2)), 1)
-        } else {
-            hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
-        }
-    }
+
 
 
     if(is.null(type)) {
