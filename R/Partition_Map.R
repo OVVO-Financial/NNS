@@ -56,15 +56,8 @@ NNS.part = function(x, y,
     }
     if (is.null(obs.req)) obs.req <- 8
 
-    if (!is.null(order)) {
-        if (order == 0) {
-            order <- 1
-        } else {
-            order <- order
-        }
-    } else {
-        order <- Inf
-    }
+    if (!is.null(order) && order == 0) order <- 1
+
 
     if (Voronoi) {
         x.label <- deparse(substitute(x))
@@ -74,10 +67,7 @@ NNS.part = function(x, y,
     x <- as.numeric(x)
     y <- as.numeric(y)
 
-    if (length(x) <= 8) {
-        order <- 1
-        obs.req <- 0
-    }
+
 
     PART <- data.table::data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
 
@@ -85,13 +75,28 @@ NNS.part = function(x, y,
         plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
     }
 
+    if(is.null(order)) order <- max(ceiling(log(length(x), 2)), 1)
+
     if(!is.numeric(order)) {
         obs.req <- 0
+        hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
     } else {
         obs.req <- obs.req
+        hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
     }
 
-    hard.stop <- max(ceiling(log(length(x), 2)), 1)
+
+
+    if (length(x) <= 8) {
+        obs.req <- 0
+        if(is.null(order)){
+            order <- 1
+            hard.stop <- max(ceiling(log(length(x), 2)), 1)
+        } else {
+            hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
+        }
+    }
+
 
     if(is.null(type)) {
         i <- 0L
@@ -257,6 +262,7 @@ NNS.part = function(x, y,
         i <- 0L
         while (i >= 0) {
             if(i == order || i == hard.stop) break
+
             PART[counts > obs.req/2, `:=`(counts, .N), by = quadrant]
             PART[old.counts > obs.req/2, `:=`(old.counts, .N), by = prior.quadrant]
 
