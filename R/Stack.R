@@ -211,8 +211,8 @@ NNS.stack <- function(IVs.train,
 
       actual <- CV.DV.test
       if(dim.red.method=="cor"){
-          var.cutoffs_1 <- abs(round(cor(cbind(DV.train, IVs.train))[-1,1], digits = 2))
-          var.cutoffs_2 <- abs(round(cor(cbind(CV.DV.train, CV.IVs.train))[-1,1], digits = 2))
+          var.cutoffs_1 <- abs(round(cor(data.matrix(cbind(DV.train, IVs.train)))[-1,1], digits = 2))
+          var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
           var.cutoffs_1 <- abs(round(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
                                              type = type)$equation$Coefficient[-(n+1)], digits = 2))
