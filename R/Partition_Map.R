@@ -76,11 +76,11 @@ NNS.part = function(x, y,
     }
 
     if (length(x) <= 8) {
-        obs.req <- 0
         if(is.null(order)){
             order <- 1
             hard.stop <- max(ceiling(log(length(x), 2)), 1)
         } else {
+            obs.req <- 0
             hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
         }
     }

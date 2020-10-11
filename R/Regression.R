@@ -514,7 +514,7 @@ NNS.reg = function (x, y,
 
 
     ### Endpoints
-    if(l_x.mid.min_unique > 1){
+    if(l_x.mid.min_unique > 1 && l_y.min > 5){
       if(dependence < stn){
         if(!is.null(type)){
           Dynamic.average.mid.min <- mode_class(y.min)
@@ -561,7 +561,7 @@ NNS.reg = function (x, y,
     }
 
 
-    if(l_x.mid.max_unique > 1){
+    if(l_x.mid.max_unique > 1 && l_y.max > 5){
       if(dependence < stn){
         if(!is.null(type)){
           Dynamic.average.mid.max <- mode_class(y.max)

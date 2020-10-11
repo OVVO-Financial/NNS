@@ -270,7 +270,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
 
-        best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
+        if(!is.null(type)) best.nns.ord <- min(1, mode(na.omit(unlist(best.nns.ord)))) else best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
 
         nns.method.2 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
                                 type = type)
@@ -390,7 +390,7 @@ NNS.stack <- function(IVs.train,
       best.nns.cv[[b]] <- if(!is.null(type)){min(max(nns.cv.1,0),1)} else {nns.cv.1}
 
       if(b==folds){
-        best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
+        if(!is.null(type))  best.nns.cv <- min(1, mode(na.omit(unlist(best.nns.cv))))   else best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
         nns.method.1 <- NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                 type = type)$Point.est
