@@ -221,7 +221,7 @@ NNS.stack <- function(IVs.train,
                                              type = type)$equation$Coefficient[-(n+1)], digits = 2))
       }
 
-      var.cutoffs <- c(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2)
+      var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
 
       var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs > 0]
 

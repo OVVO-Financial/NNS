@@ -169,7 +169,8 @@ RowP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
   else if (!is.null(rows)) x <- x[rows, , drop = FALSE]
   else if (!is.null(cols)) x <- x[, cols, drop = FALSE]
 
-  n <- nrow(x)
+  n <- ifelse(is.null(nrow(x)), 0, nrow(x))
+
   y <- double(length = n)
 
   if (n == 0L) return(y)

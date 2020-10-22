@@ -185,7 +185,7 @@ NNS.reg = function (x, y,
     }
   }
 
-  if(factor.2.dummy && !multivariate.call){
+  if(factor.2.dummy){# && !multivariate.call){
     if(is.list(x) & !is.data.frame(x)){
       x <- do.call(cbind, x)
     }
@@ -434,7 +434,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- max(1, ifelse( (ceiling(log(length(y), 2)) * dependence)%%1 < .5 ,
+    dep.reduced.order <- max(1, ifelse( ((log(length(y), 2)) * dependence)%%1 < .5 ,
                                         floor(ceiling(log(length(y),2)) * dependence),
                                         ceiling(ceiling(log(length(y),2)) * dependence)))
   } else {
