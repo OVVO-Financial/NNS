@@ -4,7 +4,7 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE, ncores = NULL)
+NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -14,8 +14,6 @@ NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE, ncores = NULL)
 \item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.

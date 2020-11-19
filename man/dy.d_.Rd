@@ -9,6 +9,7 @@ dy.d_(
   y,
   wrt,
   eval.points = "obs",
+  bypass = FALSE,
   mixed = FALSE,
   ncores = NULL,
   messages = TRUE
@@ -31,6 +32,8 @@ dy.d_(
 \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 }}
 
+\item{bypass}{logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the dimension reduction alternative.}
+
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
@@ -50,10 +53,10 @@ Returns the numerical partial derivative of \code{y} with respect to [wrt] any r
 }
 \examples{
 \dontrun{
-set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
+set.seed(123) ; x_1 <- runif(1000) ; x_2 <- runif(1000) ; y <- x_1 ^ 2 * x_2 ^ 2
 B <- cbind(x_1, x_2)
 
-#' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
+## To find derivatives of y wrt 1st regressor for specific points of both regressors
 dy.d_(B, y, wrt = c(1, 2), eval.points = t(c(.5, .5)))
 
 ## To find average partial derivative of y wrt 1st regressor,

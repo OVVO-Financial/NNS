@@ -26,6 +26,7 @@ NNS.reg(
   noise.reduction = "off",
   dist = "L2",
   ncores = NULL,
+  point.only = FALSE,
   multivariate.call = FALSE
 )
 }
@@ -73,7 +74,9 @@ NNS.reg(
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{multivariate.call}{Internal parameter for multivariate regressions.}
+\item{point.only}{Internal argument for abbreviated output.}
+
+\item{multivariate.call}{Internal argument for multivariate regressions.}
 }
 \value{
 UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
