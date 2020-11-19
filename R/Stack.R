@@ -215,10 +215,10 @@ NNS.stack <- function(IVs.train,
           var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
           var.cutoffs_1 <- abs(round(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                             type = type)$equation$Coefficient[-(n+1)], digits = 2))
+                                             type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2))
 
           var.cutoffs_2 <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                             type = type)$equation$Coefficient[-(n+1)], digits = 2))
+                                             type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2))
       }
 
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
@@ -244,7 +244,7 @@ NNS.stack <- function(IVs.train,
         }
 
         predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
-                             type = type, dist = dist)$Point.est
+                             type = type, dist = dist, point.only = TRUE)$Point.est
 
         nns.ord[i] <- eval(obj.fn)
 
@@ -273,7 +273,7 @@ NNS.stack <- function(IVs.train,
         if(!is.null(type)) best.nns.ord <- min(1, mode(na.omit(unlist(best.nns.ord)))) else best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
 
         nns.method.2 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
-                                type = type)
+                                type = type, point.only = TRUE)
 
         rel_vars <- nns.method.2$equation
 
@@ -328,7 +328,7 @@ NNS.stack <- function(IVs.train,
 
         if(index==1){
           setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
-                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1)
+                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE)
           predicted <- setup$Point.est
         } else {
 
@@ -337,22 +337,20 @@ NNS.stack <- function(IVs.train,
 
           if(!is.null(dim(CV.IVs.train))){
             if(dim(CV.IVs.train)[2]>1){
-
                 CV.IVs.test.new <- data.table::data.table(do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR)))
 
                 CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(setup$RPM, dist.estimate = .SD, type = dist, k = i)[1], by = 1:nrow(CV.IVs.test)]
 
                 predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
-
             } else {
-              predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                    type = type, factor.2.dummy = TRUE, dist = dist)$Point.est
+                predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+                                      type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est
             }
 
             rm(CV.IVs.test.new)
           } else {
             predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                  type = type, factor.2.dummy = TRUE, dist = dist)$Point.est
+                                  type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est
           }
           predicted <- unlist(predicted)
 
@@ -393,7 +391,7 @@ NNS.stack <- function(IVs.train,
         if(!is.null(type))  best.nns.cv <- min(1, mode(na.omit(unlist(best.nns.cv))))   else best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
         best.k <- round(fivenum(as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k)))))[4])
         nns.method.1 <- NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = type)$Point.est
+                                type = type, point.only = TRUE)$Point.est
         if(!is.null(type) && !is.null(nns.method.1)){
           nns.method.1 <- round(nns.method.1)
         }

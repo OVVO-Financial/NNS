@@ -14,6 +14,7 @@
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
+#' @param bypass logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the dimension reduction alternative.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
@@ -34,10 +35,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' set.seed(123) ; x_1 <- runif(100) ; x_2 <- runif(100) ; y <- x_1 ^ 2 * x_2 ^ 2
+#' set.seed(123) ; x_1 <- runif(1000) ; x_2 <- runif(1000) ; y <- x_1 ^ 2 * x_2 ^ 2
 #' B <- cbind(x_1, x_2)
 #'
-#' #' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
+#' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
 #' dy.d_(B, y, wrt = c(1, 2), eval.points = t(c(.5, .5)))
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
@@ -62,19 +63,36 @@
 #' @export
 
 
-dy.d_<- function(x, y, wrt,
-                 eval.points = "obs",
-                 mixed = FALSE,
-                 ncores = NULL,
-                 messages = TRUE){
 
+dy.d_ <- function(x, y, wrt,
+                      eval.points = "obs",
+                      bypass = FALSE,
+                      mixed = FALSE,
+                      ncores = NULL,
+                      messages = TRUE){
 
+results <- list()
 
+if (is.null(ncores)) {
+  num_cores <- as.integer(detectCores()) - 1
+} else {
+  num_cores <- ncores
+}
+
+if(num_cores>1){
+  cl <- makeCluster(num_cores)
+  registerDoParallel(cl)
+} else { cl <- NULL }
+
+if(!is.null(cl) && messages){message(paste0("Parallel process running, status unavailable.  Regressor ", wrt))}
+
+results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "tdigest"))%dopar%{
+
+  index <- which(h == seq(.2, .3, .025))
 
   n <- dim(x)[1]
   nn <- min(n, 100)
   l <- dim(x)[2]
-
 
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l < 2) stop("Please use dy.dx(...) for univariate partial derivatives.")
@@ -87,9 +105,16 @@ dy.d_<- function(x, y, wrt,
     colnames(x) <- as.character(colnames.list)
   }
 
-  if(NNS.dep.hd(cbind(x, y))$Dependence > 0.25) h <- 0.2 else h <- max(0.1, 1/exp(l-2))
+  dep <- median(unlist(apply(x, 2, function(z) NNS.dep(z, y, asym = FALSE)$Dependence)))
 
-  order <- NULL
+  if(dep < 0.5) {
+      if(!bypass) message("There is a low signal:noise detected, invoking the cross-validation procedure.  To bypass, select dy.d_(..., bypass = TRUE).")
+      expand <- TRUE
+  } else {
+      expand <- FALSE
+  }
+
+  if(bypass) expand <- FALSE
 
   if(l != 2) mixed <- FALSE
 
@@ -123,11 +148,12 @@ dy.d_<- function(x, y, wrt,
     message("Currently generating NNS.reg finite difference estimates...","\r",appendLF=TRUE)
   }
 
+
   if(is.vector(eval.points) || dim(eval.points)[2] == 1){
     eval.points <- unlist(eval.points)
 
-    h_step <- LPM.ratio(1, eval.points, x[, wrt])
-    h_step <- LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt])
+    h_step <- pmax(.01, LPM.ratio(1, eval.points, x[, wrt]))
+    h_step <- LPM.VaR(h_step * (1 + h), 1, x[, wrt]) - LPM.VaR(h_step * (1 - h), 1, x[, wrt])
 
     original.eval.points.min <- original.eval.points.min - h_step
     original.eval.points.max <- h_step + original.eval.points.max
@@ -138,8 +164,7 @@ dy.d_<- function(x, y, wrt,
       deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
     }
 
-
-    sampsize <- length(seq(0,1,.05))
+    sampsize <- length(seq(0, 1, .05))
 
     deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
 
@@ -161,7 +186,11 @@ dy.d_<- function(x, y, wrt,
       message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
     }
 
-    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
+    if(expand){
+      estimates <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 1)$stack
+    } else {
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
+    }
 
     estimates <- data.table::data.table(cbind(estimates = estimates,
                                               position = position,
@@ -185,8 +214,9 @@ dy.d_<- function(x, y, wrt,
     n <- dim(eval.points)[1]
     original.eval.points <- eval.points
 
-    h_step <- LPM.ratio(1, unlist(eval.points[, wrt]), x[, wrt])
-    h_step <- mean(LPM.VaR(h_step + h, 1, x[, wrt]) - LPM.VaR(h_step - h, 1, x[, wrt]))
+    h_step <- pmax(.01, LPM.ratio(1, unlist(eval.points[, wrt]), x[, wrt]))
+    h_step <- mean(LPM.VaR(h_step * (1 + h), 1, x[, wrt]) - LPM.VaR(h_step * (1 - h), 1, x[, wrt]))
+
 
     original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
     original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
@@ -195,7 +225,11 @@ dy.d_<- function(x, y, wrt,
                           original.eval.points,
                           original.eval.points.max)
 
-    estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
+    if(expand){
+      estimates <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 1)$stack
+    } else {
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
+    }
 
 
     lower <- head(estimates,n)
@@ -220,11 +254,11 @@ dy.d_<- function(x, y, wrt,
     }
 
     if(!is.null(dim(eval.points))){
-      h_step_1 <- LPM.ratio(1, eval.points, x[, 1])
-      h_step_1 <- LPM.VaR(h_step_1 + h, 1, x[, 1]) - LPM.VaR(h_step_1 - h, 1, x[, 1])
+      h_step_1 <- pmax(.01, LPM.ratio(1, eval.points, x[, 1]))
+      h_step_1 <- LPM.VaR(h_step_1 * (1 + h), 1, x[, 1]) - LPM.VaR(h_step_1 * (1 - h), 1, x[, 1])
 
-      h_step_2 <- LPM.ratio(1, eval.points, x[, 2])
-      h_step_2 <- LPM.VaR(h_step_2 + h, 1, x[, 2]) - LPM.VaR(h_step_2 - h, 1, x[, 2])
+      h_step_2 <- pmax(.01, LPM.ratio(1, eval.points, x[, 2]))
+      h_step_2 <- LPM.VaR(h_step_2 * (1 + h), 1, x[, 2]) - LPM.VaR(h_step_2 * (1 - h), 1, x[, 2])
 
       mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                      eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
@@ -243,8 +277,11 @@ dy.d_<- function(x, y, wrt,
     }
 
 
-    mixed.estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = order)$Point.est
-
+    if(expand){
+      mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, method = 1, status = messages, folds = 1)$stack
+    } else {
+      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
+    }
 
     if(messages){
       message("Done :-)","\r",appendLF=TRUE)
@@ -254,20 +291,42 @@ dy.d_<- function(x, y, wrt,
     z <- z[,1] + z[,4] - z[,2] - z[,3]
     mixed <- (z / mixed.distances)
 
-    results <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+    results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
                     "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
                     "Mixed" = mixed)
 
-    return(results)
   } else {
 
-    results <- list("First" = as.numeric(unlist(rise / distance_wrt)),
-                    "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
+    results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+                            "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
 
-    return(results)
   }
+}
 
+if(!is.null(cl)){
+  stopCluster(cl)
+  registerDoSEQ()
+}
+
+if(mixed){
+    final_results <- list("First" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 1))),
+                         "Second" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 2))),
+                         "Mixed" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 3))))
+} else {
+
+
+    final_results <- list("First" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 1))),
+                         "Second" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 2))))
 
 }
 
-dy.d_ <- Vectorize(dy.d_, vectorize.args = "wrt")
+return(final_results)
+
+}
+
+dy.d_ <- Vectorize(dy.d_, vectorize.args = c("wrt"))
+
+
+
+
+

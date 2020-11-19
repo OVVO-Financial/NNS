@@ -123,8 +123,10 @@ NNS.VAR <- function(variables,
     num_cores <- ncores
   }
 
-  cl <- makeCluster(detectCores()-1)
-  registerDoParallel(cl)
+  if(num_cores>1){
+    cl <- makeCluster(num_cores)
+    registerDoParallel(cl)
+  } else { cl <- NULL }
 
   if(status){
     message("Currently generating univariate estimates...","\r", appendLF=TRUE)
@@ -171,17 +173,17 @@ NNS.VAR <- function(variables,
              method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
 
-
     if(na_s[i] > 0){
         na_s_extrapolation <- rowMeans(cbind(tail(nns_IVs$interpolation, na_s[i]), head(nns_IVs$results, na_s[i])))
         nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
+    } else {
+        na_s[i] = length(nns_IVs$results)
     }
 
 
     nns_IVs$obj_fn <- b$obj.fn
 
     return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, na_s[i])))
-
   }
 
 
@@ -217,8 +219,11 @@ NNS.VAR <- function(variables,
 
   }
 
-  stopCluster(cl)
-  registerDoSEQ()
+
+  if(!is.null(cl)){
+      stopCluster(cl)
+      registerDoSEQ()
+  }
 
   nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs_interpolated_extrapolated_2, function(x) head(x, dim(variables)[1]))))
 

@@ -24,7 +24,8 @@
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-#' @param multivariate.call Internal parameter for multivariate regressions.
+#' @param multivariate.call Internal argument for multivariate regressions.
+#' @param point.only Internal argument for abbreviated output.
 #' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 #' \itemize{
 #'  \item{\code{"R2"}} provides the goodness of fit;
@@ -131,6 +132,7 @@ NNS.reg = function (x, y,
                     n.best = NULL,
                     noise.reduction = "off",
                     dist = "L2", ncores = NULL,
+                    point.only = FALSE,
                     multivariate.call = FALSE){
 
   oldw <- getOption("warn")
@@ -293,10 +295,10 @@ NNS.reg = function (x, y,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
+                         point.only = point.only,
                          ncores = ncores))
 
       } else { # Multivariate dim.red == FALSE
-
         if(is.null(original.names)){
           colnames.list <- list()
           for(i in 1 : ncol(x)){
@@ -424,6 +426,7 @@ NNS.reg = function (x, y,
   } # Multivariate
 
   if(all(x == 1:length(x))) asymmetry <- FALSE else asymmetry <- TRUE
+
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry)$Dependence
   dependence[is.na(dependence)] <- .01
 
@@ -440,7 +443,6 @@ NNS.reg = function (x, y,
   } else {
     dep.reduced.order <- order
   }
-
 
 
   if(dependence > stn){
