@@ -54,13 +54,13 @@ NNS.seas <- function(variable,
     reverse.var_2 <- variable_2[seq(length(variable_2), 1, -i)]
 
     if(mean(variable) != 0){
-        test <- abs(sd(reverse.var) / mean(reverse.var)); test <- ifelse(is.na(test), var.cov + 1, test)
-        test_1 <- abs(sd(reverse.var_1) / mean(reverse.var_1)); test_1 <- ifelse(is.na(test_1), var.cov + 1, test_1)
-        test_2 <- abs(sd(reverse.var_2) / mean(reverse.var_2)); test_2 <- ifelse(is.na(test_2), var.cov + 1, test_2)
+        test <- abs(sd(reverse.var) / mean(reverse.var)); test <- ifelse(is.na(test), var.cov, test)
+        test_1 <- abs(sd(reverse.var_1) / mean(reverse.var_1)); test_1 <- ifelse(is.na(test_1), var.cov, test_1)
+        test_2 <- abs(sd(reverse.var_2) / mean(reverse.var_2)); test_2 <- ifelse(is.na(test_2), var.cov, test_2)
     } else {
-        test <- abs(acf(reverse.var, lag.max = 1)$acf[2])^-1; test <- ifelse(is.na(test), var.cov + 1, test)
-        test_1 <- abs(acf(reverse.var_1, lag.max = 1)$acf[2])^-1; test_1 <- ifelse(is.na(test_1), var.cov + 1, test_1)
-        test_2 <- abs(acf(reverse.var_2, lag.max = 1)$acf[2])^-1; test_2 <- ifelse(is.na(test_2), var.cov + 1, test_2)
+        test <- abs(acf(reverse.var, lag.max = 1)$acf[2])^-1; test <- ifelse(is.na(test), var.cov, test)
+        test_1 <- abs(acf(reverse.var_1, lag.max = 1)$acf[2])^-1; test_1 <- ifelse(is.na(test_1), var.cov, test_1)
+        test_2 <- abs(acf(reverse.var_2, lag.max = 1)$acf[2])^-1; test_2 <- ifelse(is.na(test_2), var.cov, test_2)
     }
 
     if (test <= var.cov){

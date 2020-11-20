@@ -143,7 +143,6 @@ NNS.VAR <- function(variables,
     a <- a[, c(1,(i+1))]
     interpolation_start <- which(!is.na(a[,2]))[1]
     interpolation_point <- tail(which(!is.na(a[,2])), 1)
-    a <- a[interpolation_start:interpolation_point,]
     a <- a[complete.cases(a),]
 
     if(dim(a)[1]<last_point){
@@ -183,6 +182,7 @@ NNS.VAR <- function(variables,
 
     return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, na_s[i])))
   }
+
 
 
   univariate_extrapolation <- lapply(nns_IVs, `[[`, 3)
