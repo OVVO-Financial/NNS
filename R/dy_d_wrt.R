@@ -14,7 +14,7 @@
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
-#' @param bypass logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the dimension reduction alternative.
+#' @param bypass logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the faster dimension reduction alternative.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
@@ -86,9 +86,9 @@ if(num_cores>1){
 
 if(!is.null(cl) && messages){message(paste0("Parallel process running, status unavailable.  Regressor ", wrt))}
 
-results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "tdigest"))%dopar%{
+results <- foreach(h = c(.2, .3), .packages = c("NNS", "data.table", "tdigest"))%dopar%{
 
-  index <- which(h == seq(.2, .3, .025))
+  index <- which(h == c(.2, .3))
 
   n <- dim(x)[1]
   nn <- min(n, 100)
@@ -105,16 +105,6 @@ results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "td
     colnames(x) <- as.character(colnames.list)
   }
 
-  dep <- median(unlist(apply(x, 2, function(z) NNS.dep(z, y, asym = FALSE)$Dependence)))
-
-  if(dep < 0.5) {
-      if(!bypass) message("There is a low signal:noise detected, invoking the cross-validation procedure.  To bypass, select dy.d_(..., bypass = TRUE).")
-      expand <- TRUE
-  } else {
-      expand <- FALSE
-  }
-
-  if(bypass) expand <- FALSE
 
   if(l != 2) mixed <- FALSE
 
@@ -186,8 +176,9 @@ results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "td
       message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
     }
 
-    if(expand){
-      estimates <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 1)$stack
+    if(!bypass){
+      estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
+                                         NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
     }
@@ -225,8 +216,9 @@ results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "td
                           original.eval.points,
                           original.eval.points.max)
 
-    if(expand){
-      estimates <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 1)$stack
+    if(!bypass){
+      estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
+                                  NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
     }
@@ -277,8 +269,9 @@ results <- foreach(h = seq(.2, .3, .025), .packages = c("NNS", "data.table", "td
     }
 
 
-    if(expand){
-      mixed.estimates <- NNS.stack(x, y, IVs.test = mixed.deriv.points, method = 1, status = messages, folds = 1)$stack
+    if(!bypass){
+      mixed.estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = mixed.deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
+                                               NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {
       mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
     }

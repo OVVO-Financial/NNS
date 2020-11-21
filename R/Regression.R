@@ -430,7 +430,6 @@ NNS.reg = function (x, y,
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry)$Dependence
   dependence[is.na(dependence)] <- .01
 
-
   if(is.null(original.columns) || is.null(dim.red.method)){
     synthetic.x.equation <- NULL
     x.star <- NULL
