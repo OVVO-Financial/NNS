@@ -14,7 +14,7 @@
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
-#' @param bypass logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the faster dimension reduction alternative.
+#' @param cross.val logical; \code{TRUE} (default) To utilize the cross-validation regression \link{NNS.stack} for finite differences.  Cross-validation is more accurate than the faster dimension reduction alternative.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
@@ -66,7 +66,7 @@
 
 dy.d_ <- function(x, y, wrt,
                       eval.points = "obs",
-                      bypass = FALSE,
+                      cross.val = TRUE,
                       mixed = FALSE,
                       ncores = NULL,
                       messages = TRUE){
@@ -86,9 +86,11 @@ if(num_cores>1){
 
 if(!is.null(cl) && messages){message(paste0("Parallel process running, status unavailable.  Regressor ", wrt))}
 
-results <- foreach(h = c(.2, .3), .packages = c("NNS", "data.table", "tdigest"))%dopar%{
+if(cross.val) h_vals <- c(.2, .3) else h_vals <- seq(.2, .3, .025)
 
-  index <- which(h == c(.2, .3))
+results <- foreach(h = h_vals, .packages = c("NNS", "data.table", "tdigest"))%dopar%{
+
+  index <- which(h == h_vals)
 
   n <- dim(x)[1]
   nn <- min(n, 100)
@@ -176,7 +178,7 @@ results <- foreach(h = c(.2, .3), .packages = c("NNS", "data.table", "tdigest"))
       message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
     }
 
-    if(!bypass){
+    if(cross.val){
       estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
                                          NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {
@@ -216,9 +218,9 @@ results <- foreach(h = c(.2, .3), .packages = c("NNS", "data.table", "tdigest"))
                           original.eval.points,
                           original.eval.points.max)
 
-    if(!bypass){
+    if(cross.val){
       estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
-                                  NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
+                                         NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL)$Point.est
     }
@@ -269,7 +271,7 @@ results <- foreach(h = c(.2, .3), .packages = c("NNS", "data.table", "tdigest"))
     }
 
 
-    if(!bypass){
+    if(cross.val){
       mixed.estimates <- Rfast::rowmeans(cbind(NNS.stack(x, y, IVs.test = mixed.deriv.points, method = 1, status = messages, folds = 3, order = "max")$stack,
                                                NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE)$Point.est))
     } else {

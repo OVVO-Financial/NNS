@@ -1,0 +1,641 @@
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage{color}
+\usepackage{amsmath,amssymb,amsfonts,textcomp}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage[round]{natbib}
+\usepackage{Sweave}
+\usepackage[round]{natbib}
+\usepackage{setspace}
+\usepackage[section]{placeins}
+\usepackage{fancyvrb}
+
+\DefineVerbatimEnvironment{Soutput}{Verbatim}{formatcom=\color{blue}}
+\DefineVerbatimEnvironment{Sinput}{Verbatim}{fontshape=sl,
+formatcom=\color{red}}
+\SweaveOpts{concordance=TRUE}
+
+
+\begin{document}
+
+\title{Comparing Old and New Partial Derivative Estimates from Nonlinear Nonparametric
+  Regressions : SUPPLEMENTAL MATERIALS}
+\author{H. D. Vinod and Fred Viole
+\thanks{ Vinod is
+	Professor of Economics, \url{vinod@fordham.edu}
+and F. Viole is a Ph.D. Candidate \url{fviole@fordham.edu} at Fordham University, Bronx, New York 10458.
+}}
+\date{}
+
+
+
+
+\maketitle
+
+\begin{abstract}
+This paper contains the R-code and output for all experiments of partial derivative estimation using \textbf{NNS (>= 0.5.5)}, \textbf{np}, and OLS techniques.
+\end{abstract}
+
+
+<<setup, echo=FALSE, message=FALSE, cache=FALSE>>=
+options(prompt = " ", continue = "  ", width = 68,
+useFancyQuotes = FALSE)
+@
+
+
+\section{Example 1}
+
+For a known function $y = x_1^2 * x_2^2$, we know analytically the first derivative of $y$ with regard to $x_1$ is equal to $2x_1x_2^2$.
+
+So for points $x_1 = 0.5, x_2 = 0.5$, $\frac{\partial{y}}{\partial{x_1}} = 0.25$
+
+In order to compare gradients in \textbf{np} we can add the points of interest to the regressor vectors.  This way, extraction is simply the last gradient, the 1001st entry.
+
+<< data1>>=
+set.seed(123)
+x_1 = c(runif(1000, -2, 2), 0.5)
+x_2 = c(runif(1000, -2, 2), 0.5)
+
+y = x_1 ^ 2 * x_2 ^ 2
+@
+
+\subsection{NNS}
+
+<< dyd_, message=FALSE, cache=FALSE>>=
+library(NNS); library(data.table)
+IVs = cbind(x_1, x_2)
+
+nns_ex_1 = dy.d_(IVs, y, wrt = 1:2,
+                 eval.points = t(c(0.5, 0.5)), bypass = TRUE)["First",]
+
+nns_ex_1
+
+nns_res = mean((unlist(nns_ex_1) - 0.25)^2)
+@
+
+\subsection{np}
+
+<< npgrad, message=FALSE, cache=FALSE>>=
+library(np)
+options(np.messages=FALSE)
+
+np_est = npreg(y ~ x_1 + x_2, gradients = TRUE, regtype = "ll")
+
+tail(np_est$grad, 1)
+
+np_res = mean((tail(np_est$grad, 1)  - 0.25)^2)
+@
+
+\subsection{Linear Model}
+
+<< lin1>>=
+coef(lm(y ~ x_1 * x_2))[2:3]
+
+ols_res = mean((coef(lm(y ~ x_1 * x_2))[2:3] - 0.25)^2)
+@
+
+
+
+
+\subsection{Asymptotic Effects}
+We will increase the number of observations to note any asymptotic effects on the accuracy.
+
+<< data1_asymp, message=FALSE>>=
+set.seed(123)
+x_1 = c(runif(10000, -2, 2), 0.5)
+x_2 = c(runif(10000, -2, 2), 0.5)
+
+y = x_1 ^ 2 * x_2 ^ 2
+
+IVs = cbind(x_1, x_2)
+
+nns_ex_1_asym = dy.d_(IVs, y, wrt = 1:2,
+                      eval.points = t(c(0.5, 0.5)), bypass = TRUE)["First",]
+
+nns_ex_1_asym
+
+nns_res_asym = mean((unlist(nns_ex_1_asym) - 0.25)^2)
+
+ols_res_asym = mean((coef(lm(y ~ x_1 * x_2))[2:3] - 0.25)^2)
+@
+
+
+\subsection{Bootstrap}
+Given the relatively fast computation time for \textbf{NNS}, bootstrapping the statistic is another available option.
+
+<<boot1, message= FALSE>>=
+estimates = list()
+
+ set.seed(123)
+ x_1 = c(runif(1000, -2, 2), 0.5)
+ x_2 = c(runif(1000, -2, 2), 0.5)
+
+ y = x_1 ^ 2 * x_2 ^ 2
+ IVs = cbind(x_1, x_2)
+
+for(i in 1:100){
+  set.seed(123*i)
+  index = sample.int(length(y), size = length(y), replace = TRUE)
+  X = IVs[index,]
+  Y = y[index]
+  estimates[[i]] = dy.d_(X, Y, wrt = 1:2,
+                         eval.points = t(c(.5,.5)), bypass = TRUE)["First",]
+}
+
+unlist(estimates)
+
+nns_res_boot = mean((unlist(estimates) - 0.25)^2)
+@
+
+\subsection{Overall Results}
+
+<<res, results=tex>>=
+library(xtable)
+xtable(cbind("NNS" = nns_res,
+             "np" = np_res,
+             "OLS" = ols_res,
+             "NNS (increased obs)" = nns_res_asym,
+             "OLS (increased obs)" = ols_res_asym,
+             "NNS (bootstrap)" = nns_res_boot),
+             digits = 4)
+@
+
+
+\section{Example 1 with Noise}
+
+
+<< data1noise>>=
+set.seed(123)
+x_1 = c(runif(1000, -2, 2), 0.5)
+x_2 = c(runif(1000, -2, 2), 0.5)
+
+y = x_1 ^ 2 * x_2 ^ 2 + rnorm(1001)
+@
+
+\subsection{NNS}
+
+<< noisedyd_, message=FALSE, cache=FALSE>>=
+IVs = cbind(x_1, x_2)
+
+nns_ex_1 = dy.d_(IVs, y, wrt = 1:2,
+                 eval.points = t(c(0.5, 0.5)), bypass = TRUE)["First",]
+nns_ex_1
+
+nns_res = mean((unlist(nns_ex_1) - 0.25)^2)
+@
+
+\subsection{np}
+
+<< noisenpgrad, message=FALSE, cache=FALSE>>=
+library(np)
+
+np_est = npreg(y ~ x_1 + x_2, gradients = TRUE, regtype="ll")
+tail(np_est$grad, 1)
+
+np_res = mean((tail(np_est$grad, 1) - 0.25)^2)
+@
+
+\subsection{Linear Model}
+
+<< noiselin1>>=
+coef(lm(y ~ x_1 * x_2))[2:3]
+
+ols_res = mean((coef(lm(y ~ x_1 * x_2))[2:3]  - 0.25)^2)
+@
+
+
+
+
+\subsection{Asymptotic Effects with Noise}
+
+<< data1noise_asymp , message=FALSE>>=
+set.seed(123)
+x_1 = c(runif(100000, -2, 2), 0.5)
+x_2 = c(runif(100000, -2, 2), 0.5)
+
+y = x_1 ^ 2 + x_2 ^ 2 + rnorm(100001)
+
+IVs = cbind(x_1, x_2)
+
+nns_ex_1_asym = dy.d_(IVs, y, wrt = 1:2,
+                      eval.points = t(c(0.5, 0.5)), bypass = TRUE)["First",]
+nns_res_asym = mean((unlist(nns_ex_1_asym) - 0.25)^2)
+
+ols_res_asym = mean((coef(lm(y ~ x_1 * x_2))[2:3] - 0.25)^2)
+@
+
+
+\subsection{Bootstrap}
+
+<<boot2, message=FALSE>>=
+estimates = list()
+
+set.seed(123)
+x_1 = c(runif(1000, -2, 2), 0.5)
+x_2 = c(runif(1000, -2, 2), 0.5)
+
+IVs = cbind(x_1, x_2)
+y = x_1 ^ 2 * x_2 ^ 2 + rnorm(1001)
+
+for(i in 1:100){
+  set.seed(123*i)
+  index = sample.int(length(y), size = length(y), replace = TRUE)
+  X = IVs[index,]
+  Y = y[index]
+  estimates[[i]] = dy.d_(X, Y, wrt = 1:2,
+                         eval.points = t(c(.5,.5)), bypass = TRUE)["First",]
+}
+
+nns_res_boot = mean((unlist(estimates) - 0.25)^2)
+@
+
+
+
+\subsection{Overall Results}
+
+<<results2, results=tex>>=
+xtable(cbind("NNS" = nns_res,
+             "np" = np_res,
+             "OLS" = ols_res,
+             "NNS (increased obs)" = nns_res_asym,
+             "OLS (increased obs)" = ols_res_asym,
+             "NNS (bootstrap)" = nns_res_boot),
+             digits = 4)
+@
+
+
+\section{Example 2}
+
+For a known function $y = x_1^2 * x_2^2 * x_3^2 * x_4^2 * x_5^2$, we know analytically the first derivative of $y$ with regard to $x_1$ is equal to $2x_2^2 x_3^2x_4^2x_5^2$.  So for points $x_1 = 1, x_2 = 1, x_3 = 1, x_4 = 1, x_5 = 1$, $\frac{\partial{y}}{\partial{x_1}} = 2$.
+
+Furthermore, this result is true of all other regressors for this tuple of observations.
+
+<< data2>>=
+set.seed(123)
+
+x_1 = c(runif(1000, -2, 2),1) ; x_2 = c(runif(1000, -2, 2),1)
+x_3 = c(runif(1000, -2, 2),1) ; x_4 = c(runif(1000, -2, 2),1)
+x_5 = c(runif(1000, -2, 2),1)
+
+y = x_1 ^ 2 * x_2 ^ 2 * x_3 ^ 2 * x_4 ^ 2 * x_5 ^ 2 + rnorm(1001)
+@
+
+\subsection{NNS}
+
+<< dyd_2, message=FALSE, cache=FALSE>>=
+start.time = Sys.time()
+IVs = cbind(x_1, x_2, x_3, x_4, x_5)
+
+nns_ex_2 = dy.d_(IVs, y, wrt = 1:5,
+                 eval.points = t(rep(1, 5)), bypass = TRUE)["First",]
+nns_ex_2
+
+nns_res = mean((unlist(nns_ex_2) - 2)^2)
+
+Sys.time() - start.time
+@
+
+
+\subsection{np}
+
+<< noisenpgrad2, message=FALSE, cache=TRUE>>=
+start.time = Sys.time()
+np_est = npreg(y ~ x_1 + x_2 + x_3 + x_4 + x_5, gradients = TRUE, regtype="ll")
+tail(np_est$grad, 1)
+
+np_res = mean((tail(np_est$grad, 1) - 2)^2)
+
+Sys.time() - start.time
+@
+
+
+\subsection{Linear Model}
+
+<< lin2>>=
+coef(lm(y ~ x_1*x_2*x_3*x_4*x_5))[2:6]
+
+ols_res = mean((coef(lm(y ~ x_1*x_2*x_3*x_4*x_5))[2:6] - 2)^2)
+@
+
+
+
+\subsection{Asymptotic Effects}
+
+<< large_asymp, message=FALSE>>=
+set.seed(123)
+x_1 = c(runif(1000000, -2, 2),1) ; x_2 = c(runif(1000000, -2, 2),1) ;
+x_3 = c(runif(1000000, -2, 2),1) ; x_4 = c(runif(1000000, -2, 2),1) ;
+x_5 = c(runif(1000000, -2, 2),1)
+
+y = x_1 ^ 2 * x_2 ^ 2 * x_3 ^ 2 * x_4 ^ 2 * x_5 ^ 2 + rnorm(1000001)
+
+
+start.time = Sys.time()
+IVs = cbind(x_1, x_2, x_3, x_4, x_5)
+
+nns_ex_2_asym = dy.d_(IVs, y, wrt = 1:5,
+                      eval.points = t(rep(1, 5)), bypass = TRUE)["First",]
+
+nns_ex_2_asym
+
+nns_res_asym = mean((unlist(nns_ex_2_asym) - 2)^2)
+
+ols_res_asym = mean((coef(lm(y ~ x_1*x_2*x_3*x_4*x_5))[2:6]  - 2)^2)
+
+Sys.time() - start.time
+@
+
+
+\subsection{Overall Results}
+<<results3, results=tex>>=
+xtable(cbind("NNS" = nns_res,
+             "np" = np_res,
+             "OLS" = ols_res,
+             "NNS (increased obs)" = nns_res_asym,
+             "OLS (increased obs)" = ols_res_asym),
+             digits = 4)
+@
+
+
+\section{Example 3}
+In this example, we can evaluate the average partial effect of cylinders on miles per gallon in the \textbf{mtcars} dataset.
+
+<<mtcars, message=FALSE>>=
+nns_car = dy.d_(cbind(mtcars$wt, mtcars$cyl), mtcars$mpg, wrt = 2,
+                 eval.points = c(4,6,8))["First",]
+
+nns_car = cbind("Cylinders" = c(4,6,8), "NNS APE" = unlist(nns_car))
+@
+
+
+
+<<mtcars_np, message = FALSE>>=
+np_car = npreg(mtcars$mpg ~ mtcars$cyl+ mtcars$wt, gradients = TRUE, regtype="ll")
+
+np_car = data.table(cbind(np_car$grad, mtcars$cyl))
+
+np_car = np_car[, mean(V1), by = V3]
+setkey(np_car, V3)
+@
+
+
+<<mtcars_ols, message = FALSE>>=
+ols_car_4 = coef(lm(mpg ~ cyl+ wt, data = mtcars, subset = (cyl==4)))[3]
+ols_car_6 = coef(lm(mpg ~ cyl+ wt, data = mtcars, subset = (cyl==6)))[3]
+ols_car_8 = coef(lm(mpg ~ cyl+ wt, data = mtcars, subset = (cyl==8)))[3]
+@
+
+It should be noted that the \textbf{np} gradients are not true average partial effects, rather they are the average of specific tuples from the given observations.  This does not ensure a particular point for the regressor of interest is evaluated over the entire support of the other regressors.
+
+
+\subsection{Overall Results}
+<<results4, results=tex>>=
+xtable(cbind(#nns_car,
+             "np APE" = np_car$V1,
+             "OLS APE" = rbind(ols_car_4,
+                               ols_car_6,
+                               ols_car_8)),
+             digits = 4)
+@
+
+
+
+
+\section{Example 4: CES Production Function}
+In this example, we will consider a constant elasticity of substitution production problem, which is given by:
+
+$$y = \gamma[\delta K^{-\rho} + (1-\delta)L^{-\rho}]^{-\frac{1}{\rho}} $$
+where the output quantity $y$ is defined by $\gamma$, the productivity, $\delta$, the optimal distribution of capital $(K)$ and labor $(L)$, and $\rho$, the elasticity of substitution.  Our known partial forms are:
+
+$$\frac{\partial y}{\partial K} = \delta  \gamma^{-\rho}  {\bigg(\frac{y}{K}\bigg)^{(\frac{1}{\rho})}}$$
+$$\frac{\partial y}{\partial L} = (1-\delta)  \gamma^{-\rho}  {\bigg(\frac{y}{L}\bigg)^{(\frac{1}{\rho})}}$$
+and our values are, $\gamma = 0.95, \delta = 0.6, \rho = 0.5$.
+
+<<ces, message=FALSE>>=
+library(Ecdat); data(Metal); names(Metal);
+met = as.matrix(Metal)
+
+L = met[,2]
+K = met[,3]
+
+gamma = 0.95
+delta = 0.6
+rho = 0.5
+
+y = gamma*(delta*K^(-rho)+ (1-delta)*L^(-rho))^(-1/rho)
+
+dy_dK = delta *gamma^(- rho) * ( (y/K)^(1/rho) )
+dy_dK
+
+
+dy_dL = (1-delta)* gamma^(- rho) * ( (y/L)^(1/rho) )
+dy_dL
+@
+
+We will report the mean absolute percentage error for all methods of this relatively small 27 observation example.
+
+
+
+\subsection{NNS}
+<< nnsces, message=FALSE, cache=FALSE>>=
+nns_est = dy.d_(cbind(K, L), y, wrt = 1:2,
+                eval.points = "obs", bypass = TRUE)["First",]
+nns_est
+
+nns_est_K = mean((nns_est[[1]] - dy_dK)^2)
+
+nns_est_L = mean((nns_est[[2]] - dy_dL)^2)
+
+nns_res = mean(nns_est_K, nns_est_L)
+@
+
+\subsection{np}
+<< npces, cache=TRUE>>=
+np_est = npreg(y ~ K + L, gradients = TRUE, regtype="ll")
+np_est$grad[,1:2]
+
+np_est_K = mean((np_est$grad[,1] - dy_dK)^2)
+
+np_est_L = mean((np_est$grad[,2] - dy_dL)^2)
+
+np_res = mean(np_est_K, np_est_L)
+@
+
+\subsection{Linear Model}
+We will compare the linear partial derivative estimates using all interaction terms in the model specification.
+
+<< lin3>>=
+coefs = coef(lm(y ~ K * L))
+coefs[2:3]
+
+# Capital Partial
+ols_K = mean((coefs[2] - dy_dK)^2)
+
+# Labor Partial
+ols_L = mean((coefs[3] - dy_dL)^2)
+
+ols_res = mean(ols_K, ols_L)
+@
+
+
+\subsection{Bootstrapping}
+On this time series example, we will use the maximum entropy bootstrap procedure.
+
+<< meboot3, message=FALSE>>=
+library(meboot)
+nns_mse_K = list()
+nns_mse_L = list()
+
+  Y = t(t(mebootSpear(y, setSpearman = NULL, reps = 100)$ensemble))
+
+for(i in 1:dim(Y)[2]){
+  nns_est = dy.d_(cbind(K, L), Y[,i], wrt = 1:2,
+                  eval.points = "apd", bypass = TRUE)["First",]
+
+  nns_est_K = nns_est[[1]]
+  nns_mse_K[[i]] = mean((nns_est_K - dy_dK)^2)
+
+  nns_est_L = nns_est[[2]]
+  nns_mse_L[[i]] = mean((nns_est_L - dy_dL)^2)
+}
+
+nns_est_K_boot = mean(unlist(nns_mse_K))
+
+nns_est_L_boot = mean(unlist(nns_mse_L))
+
+nns_res_boot = mean(nns_est_K_boot, nns_est_L_boot)
+@
+
+
+
+\subsection{Overall Results}
+<<results5, results=tex>>=
+xtable(cbind("NNS" = nns_res,
+             "np" = np_res,
+             "OLS" = ols_res,
+             "NNS (bootstrap)" = nns_res_boot,
+             digits = 4))
+@
+
+
+
+
+\section{Example 5}
+
+We will estimate a consumption (Personal Consumption Expenditures) function from data downloaded from the St. Louis Fed.  The independent variables are personal income, the unemployment rate, and the University of Michigan consumer confidence.
+
+We posit a nonlinear functional form for our consumption function as
+\begin{equation}
+\label{eq.consu}
+C=a Y  \, D^b,
+\end{equation}
+where $C$ is personal consumption expenditures, and $D$ is
+the University of Michigan index of consumer confidence.
+This experiment compares OLS, {\bf np}, and {\bf NNS}
+estimates of the marginal
+propensity to consume ($\partial C/\partial Y$ or MPC)
+based on the consumption function  (\ref{eq.consu}) using recent
+real-world macroeconomic
+data downloaded from the St. Louis Federal Reserve Bank.
+
+<< quand, echo=FALSE, message=FALSE>>=
+library(Quandl)
+Quandl.api_key("_2Fks-kuqsxnvzXGSJzF")
+@
+
+
+<< cons, cache=TRUE, message=FALSE>>=
+library(Quandl)
+
+econ_variables = Quandl(c("FRED/PCE", "FRED/PI", "UMICH/SOC1"),
+                        type = 'ts', collapse = "monthly",
+                        order = "asc", start_date = "2000-01-01")
+
+econ_variables = econ_variables[complete.cases(econ_variables),]
+colnames(econ_variables) = c("PCE", "PI", "MICH")
+tail(econ_variables)
+@
+
+\subsection{Estimate Nonlinear Function}
+
+As in the previous section, we first find plausible estimates
+of parameters $a, b$.  Here we use
+a nonlinear least squares fit to choose
+$a=0.822841$, $b=-0.009072$.
+
+
+<< nls>>=
+nonlin_fx = nls(econ_variables[,1] ~ I(a * econ_variables[,2] *
+                                         econ_variables[,3]^b),
+                start = list(a = 1, b = 1), trace = FALSE)
+
+summary(nonlin_fx)
+@
+
+Isolating our dependent variable (PCE):
+
+<< PCE>>=
+PCE = econ_variables[,1]
+@
+
+the correct value of the marginal propensity to consume
+from our known functional form
+is known analytically to be
+$$MPC = 0.822841* D^{-0.009072},$$
+
+
+This historical information is not particularly relevant.  Of particular interest, we will test the MPC for the latest monthly value to ascertain the multiplier effect (1/(1-MPC)) during the COVID-19 pandemic and the influence of unemployment benefits.
+
+Our known MPC for the last monthly values is:
+
+<< MPC>>=
+MPC = round(coef(nonlin_fx)[1],3) *
+  tail(econ_variables[,3],1)^round(coef(nonlin_fx)[2],3)
+
+MPC
+@
+
+\subsection{NNS}
+
+\textbf{NNS} has an option to use the last data point of all regressors by setting \textbf{eval.points = "last"}.
+
+<<nnscons, message=FALSE, cache=FALSE>>=
+nns_MPC = dy.d_(econ_variables[,2:3], PCE, wrt = 1,
+                eval.points = "last", bypass = TRUE)["First", ]
+
+nns_MPC
+@
+
+Alternatively, we can find the average partial effect for just the last observation of the regressor of interest via
+
+<<nnscons_ape, message=FALSE, cache=FALSE>>=
+nns_MPC = dy.d_(econ_variables[,2:3], PCE, wrt = 1,
+                eval.points = tail(econ_variables[,2],1))["First", ]
+
+nns_MPC
+@
+
+
+
+\subsection{np}
+<< npcons, cache=TRUE>>=
+np_MPC = npreg(PCE ~ econ_variables[,2] + econ_variables[,3],
+               gradients = TRUE, regtype="ll")$grad
+
+tail(np_MPC[,1], 1)
+@
+
+
+\subsection{Linear Model}
+
+<< lin4>>=
+coef(lm(PCE ~ econ_variables[,2] * econ_variables[,3]))[2]
+@
+
+
+
+
+\end{document}
