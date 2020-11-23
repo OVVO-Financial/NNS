@@ -9,7 +9,7 @@ dy.d_(
   y,
   wrt,
   eval.points = "obs",
-  bypass = FALSE,
+  cross.val = TRUE,
   mixed = FALSE,
   ncores = NULL,
   messages = TRUE
@@ -32,7 +32,7 @@ dy.d_(
 \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 }}
 
-\item{bypass}{logical; \code{FALSE} (default) To bypass the cross-validation used under low signal:noise situations.  Cross-validation is more accurate than the faster dimension reduction alternative.}
+\item{cross.val}{logical; \code{TRUE} (default) To utilize the cross-validation regression \link{NNS.stack} for finite differences.  Cross-validation is more accurate than the faster dimension reduction alternative.}
 
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
