@@ -4,14 +4,16 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE)
+NNS.dep(x, y = NULL, asym = FALSE, fact = FALSE, print.map = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
 
-\item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
+\item{y}{\code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.}
 
 \item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
+
+\item{fact}{logical; \code{FALSE} (default) If any variable is a factor, set to \code{factor = TRUE}.}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means.}
 }
