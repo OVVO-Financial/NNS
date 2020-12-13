@@ -23,7 +23,6 @@ LPM <-  function(degree, target, variable){
 LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 
-
 #' Upper Partial Moment
 #'
 #' This function generates a univariate upper partial moment for any degree or target.

@@ -3,8 +3,9 @@
 #' Returns the dependence and nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.
 #'
 #' @param x a numeric vector, matrix or data frame.
-#' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
+#' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
 #' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
+#' @param fact logical; \code{FALSE} (default) If any variable is a factor, set to \code{factor = TRUE}.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
@@ -74,16 +75,18 @@
 NNS.dep = function(x,
                    y = NULL,
                    asym = FALSE,
+                   fact = FALSE,
                    print.map = FALSE){
 
   oldw <- getOption("warn")
   options(warn = -1)
   order <- NULL
 
-  if(asym){type <- "XONLY"} else {type <- NULL}
+  if(asym) type <- "XONLY" else type <- NULL
 
   if(!is.null(y)){
     # No dependence if only a single value
+    if(is.factor(y) | fact) factor_signal <- TRUE else factor_signal <- FALSE
     if(length(unique(x))==1 | length(unique(y))==1){
       if(print.map){
         NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
@@ -151,9 +154,17 @@ NNS.dep = function(x,
 
     options(warn = oldw)
 
+    dep <- sum(weights * unlist(lapply(nns.dep, `[[`, 2)))
+
+    seasonal <- dim(NNS.seas(y, plot = FALSE)$all.periods)[1]
+
+    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- ((l-seasonal)/l)^2
+
+    if(dep == 1 | seasonal == 1) dependence <- 1
+    if(dep > seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
 
     return(list("Correlation" = sum(weights * unlist(lapply(nns.dep, `[[`, 1))),
-                "Dependence" = sum(weights * unlist(lapply(nns.dep, `[[`, 2)))))
+                "Dependence" = dependence))
 
   } else {
     return(NNS.dep.matrix(x, asym = asym))

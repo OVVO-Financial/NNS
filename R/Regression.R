@@ -316,7 +316,8 @@ NNS.reg = function (x, y,
           x.star.matrix <- matrix(nrow = length(y))
 
           if(dim.red.method!="cor" && dim.red.method!="equal"){
-            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE)$Dependence
+            if(!is.null(type)) fact <- TRUE else fact <- FALSE
+            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE, fact = fact)$Dependence
             x.star.dep[is.na(x.star.dep)] <- 0
           }
 
@@ -427,7 +428,8 @@ NNS.reg = function (x, y,
 
   if(all(x == 1:length(x))) asymmetry <- FALSE else asymmetry <- TRUE
 
-  dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry)$Dependence
+  if(!is.null(type)) fact <- TRUE else fact <- FALSE
+  dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry, fact = fact)$Dependence
   dependence[is.na(dependence)] <- .01
 
   if(is.null(original.columns) || is.null(dim.red.method)){

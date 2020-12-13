@@ -26,7 +26,7 @@ LPM.VaR <- function(percentile, degree, x){
     if(degree == 0){
         td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
         q <- tryCatch(tdigest::tquantile(td, percentile),
-                      error = quantile(x, percentile))
+                      error = quantile(x, percentile, na.rm = TRUE))
         return(q)
     } else {
         func <- function(b){
@@ -62,7 +62,7 @@ UPM.VaR <- function(percentile, degree, x){
     if(degree==0){
         td <- tdigest::tdigest(x, compression = max(100, log(l,10)*100))
         q <- tryCatch(tdigest::tquantile(td, 1 - percentile),
-                      error = quantile(x, 1 - percentile))
+                      error = quantile(x, 1 - percentile, na.rm = TRUE))
         return(q)
     } else {
         func <- function(b){
