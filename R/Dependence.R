@@ -158,7 +158,9 @@ NNS.dep = function(x,
 
     seasonal <- dim(NNS.seas(y, plot = FALSE)$all.periods)[1]
 
-    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- ((l-seasonal)/l)^2
+    ll <- l / 2
+
+    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- ((ll-seasonal)/ll)^2
 
     if(dep == 1 | seasonal == 1) dependence <- 1
     if(dep > seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
