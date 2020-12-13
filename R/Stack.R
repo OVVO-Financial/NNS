@@ -321,7 +321,7 @@ NNS.stack <- function(IVs.train,
       CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
 
       for(i in c(1:l, length(IVs.train[ , 1]))){
-        index <- which(c(1:l, length(IVs.train[ , 1])) %in% i)
+        index <- which(c(1:l, length(IVs.train[ , 1])) == i)
         if(status){
           message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-index+1," ","\r",appendLF=TRUE)
         }

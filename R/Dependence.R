@@ -87,7 +87,7 @@ NNS.dep = function(x,
   if(!is.null(y)){
     # No dependence if only a single value
     if(is.factor(y) | fact) factor_signal <- TRUE else factor_signal <- FALSE
-    if(length(unique(x))==1 | length(unique(y))==1){
+    if(length(unique(x))<= 2| length(unique(y))<= 2){
       if(print.map){
         NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
       }
@@ -156,7 +156,7 @@ NNS.dep = function(x,
 
     dep <- sum(weights * unlist(lapply(nns.dep, `[[`, 2)))
 
-    seasonal <- dim(NNS.seas(y, plot = FALSE)$all.periods)[1]
+    seasonal <- tryCatch(dim(NNS.seas(y, plot = FALSE)$all.periods)[1], error = NULL)
 
     ll <- l / 2
 
