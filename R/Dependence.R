@@ -84,22 +84,24 @@ NNS.dep = function(x,
 
   if(asym) type <- "XONLY" else type <- NULL
 
+  l <- length(x)
+
   if(!is.null(y)){
     # No dependence if only a single value
     if(is.factor(y) | fact) factor_signal <- TRUE else factor_signal <- FALSE
-    if(length(unique(x))<= 2| length(unique(y))<= 2){
+    if(length(unique(x))<= sqrt(l)| length(unique(y))<= sqrt(l)){
       if(print.map){
         NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
       }
 
       options(warn = oldw)
-      no_res = cor(x, y, method = "spearman")
-      return(list("Correlation" = no_res,
-                  "Dependence" = abs(no_res)))
+      discrete_res = cor(x, y, method = "spearman")
+      return(list("Correlation" = discrete_res,
+                  "Dependence" = abs(discrete_res)))
     }
 
 
-    l <- length(x)
+
 
     segs <- list(5L)
     uniques <- list(5L)
