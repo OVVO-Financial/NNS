@@ -93,8 +93,9 @@ NNS.dep = function(x,
       }
 
       options(warn = oldw)
-      return(list("Correlation" = 0,
-                  "Dependence" = 0))
+      no_res = cor(x, y, method = "spearman")
+      return(list("Correlation" = no_res,
+                  "Dependence" = abs(no_res)))
     }
 
 
