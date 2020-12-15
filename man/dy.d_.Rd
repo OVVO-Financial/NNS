@@ -9,9 +9,8 @@ dy.d_(
   y,
   wrt,
   eval.points = "obs",
-  cross.val = TRUE,
   mixed = FALSE,
-  ncores = NULL,
+  ncores = 1,
   messages = TRUE
 )
 }
@@ -31,8 +30,6 @@ dy.d_(
 \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 }}
-
-\item{cross.val}{logical; \code{TRUE} (default) To utilize the cross-validation regression \link{NNS.stack} for finite differences.  Cross-validation is more accurate than the faster dimension reduction alternative.}
 
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
 
@@ -67,7 +64,7 @@ dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
 
 
 ## To find average partial derivative of y wrt 1st regressor,
-for every oberservation of 1st regressor:
+for every observation of 1st regressor:
 apd <- dy.d_(B, y, wrt = 1, eval.points = "apd")
 plot(B[,1], apd[,1]$First)
 
