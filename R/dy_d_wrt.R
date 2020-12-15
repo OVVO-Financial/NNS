@@ -15,7 +15,7 @@
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
-#' @param ncores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure. If NULL, the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
 #' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
@@ -133,7 +133,7 @@ dy.d_ <- function(x, y, wrt,
   h_s = 1/log(length(x),c(2, 10))
   h_s = c(h_s, 10*h_s)
 
-for(h in h_s){
+results <- foreach(h = h_s, .packages = c("NNS", "data.table"))%dopar%{
       index <- which(h == h_s)
       if(is.vector(eval.points) || dim(eval.points)[2] == 1){
           eval.points <- unlist(eval.points)
@@ -260,19 +260,22 @@ for(h in h_s){
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
 
-      results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+          return( list("First" = as.numeric(unlist(rise / distance_wrt)),
                       "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
-                      "Mixed" = mixed)
+                      "Mixed" = mixed))
 
       } else {
-          results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
-                                  "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
+          return( list("First" = as.numeric(unlist(rise / distance_wrt)),
+                                  "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) ))))
       }
 
 
 }
 
-
+  if(!is.null(cl)){
+    stopCluster(cl)
+    registerDoSEQ()
+  }
 
 
   if(mixed){
