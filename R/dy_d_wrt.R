@@ -15,7 +15,6 @@
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
 #' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
@@ -66,7 +65,6 @@
 dy.d_ <- function(x, y, wrt,
                       eval.points = "obs",
                       mixed = FALSE,
-                      ncores = 1,
                       messages = TRUE){
 
 
@@ -131,9 +129,9 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points <- eval.points
 
   h_s = 1/log(length(x),c(2, 10))
-  h_s = c(h_s, 10*h_s)
+  h_s = c(h_s, 10*h_s[1])
 
-results <- foreach(h = h_s, .packages = c("NNS", "data.table"))%dopar%{
+for(h in h_s){
       index <- which(h == h_s)
       if(is.vector(eval.points) || dim(eval.points)[2] == 1){
           eval.points <- unlist(eval.points)
@@ -260,23 +258,17 @@ results <- foreach(h = h_s, .packages = c("NNS", "data.table"))%dopar%{
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
 
-          return( list("First" = as.numeric(unlist(rise / distance_wrt)),
-                      "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
-                      "Mixed" = mixed))
+          results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+                                   "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
+                                   "Mixed" = mixed)
 
       } else {
-          return( list("First" = as.numeric(unlist(rise / distance_wrt)),
-                                  "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) ))))
+          results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+                                   "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
       }
 
 
 }
-
-  if(!is.null(cl)){
-    stopCluster(cl)
-    registerDoSEQ()
-  }
-
 
   if(mixed){
       final_results <- list("First" = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
