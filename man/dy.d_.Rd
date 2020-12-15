@@ -4,15 +4,7 @@
 \alias{dy.d_}
 \title{Partial Derivative dy/d_[wrt]}
 \usage{
-dy.d_(
-  x,
-  y,
-  wrt,
-  eval.points = "obs",
-  mixed = FALSE,
-  ncores = 1,
-  messages = TRUE
-)
+dy.d_(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
@@ -32,8 +24,6 @@ dy.d_(
 }}
 
 \item{mixed}{logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
 \item{messages}{logical; \code{TRUE} (default) Prints status messages.}
 }
