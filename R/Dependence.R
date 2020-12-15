@@ -89,7 +89,7 @@ NNS.dep = function(x,
   if(!is.null(y)){
     # No dependence if only a single value
     if(is.factor(y) | fact) factor_signal <- TRUE else factor_signal <- FALSE
-    if(length(unique(x))<= sqrt(l)| length(unique(y))<= sqrt(l)){
+    if(length(unique(x))<= sqrt(l) | length(unique(y))<= sqrt(l)){
       if(print.map){
         NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
       }

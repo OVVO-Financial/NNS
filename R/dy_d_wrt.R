@@ -14,9 +14,8 @@
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
 #' }
-#' @param cross.val logical; \code{TRUE} (default) To utilize the cross-validation regression \link{NNS.stack} for finite differences.  Cross-validation is more accurate than the faster dimension reduction alternative.
 #' @param mixed logical; \code{FALSE} (default) If mixed derivative is to be evaluated, set \code{(mixed = TRUE)}.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores integer; 1 (default) value specifying the number of cores to be used in the parallelized procedure. If NULL, the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param messages logical; \code{TRUE} (default) Prints status messages.
 #' @return Returns column-wise matrix of wrt regressors:
 #' \itemize{
@@ -49,7 +48,7 @@
 #'
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
-#' for every oberservation of 1st regressor:
+#' for every observation of 1st regressor:
 #' apd <- dy.d_(B, y, wrt = 1, eval.points = "apd")
 #' plot(B[,1], apd[,1]$First)
 #'
@@ -66,9 +65,8 @@
 
 dy.d_ <- function(x, y, wrt,
                       eval.points = "obs",
-                      cross.val = TRUE,
                       mixed = FALSE,
-                      ncores = NULL,
+                      ncores = 1,
                       messages = TRUE){
 
 
@@ -87,14 +85,14 @@ dy.d_ <- function(x, y, wrt,
       num_cores <- ncores
   }
 
-  if(num_cores>1){
+  if(num_cores > 1){
       cl <- makeCluster(num_cores)
       registerDoParallel(cl)
   } else { cl <- NULL }
 
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r",appendLF=TRUE)
 
-  if(cross.val) h <- .1 else h <- .2
+
 
   if(is.null(colnames(x))){
     colnames.list <- list()
@@ -132,7 +130,11 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
 
+  h_s = 1/log(length(x),c(2, 10))
+  h_s = c(h_s, 10*h_s)
 
+for(h in h_s){
+      index <- which(h == h_s)
       if(is.vector(eval.points) || dim(eval.points)[2] == 1){
           eval.points <- unlist(eval.points)
 
@@ -169,19 +171,9 @@ dy.d_ <- function(x, y, wrt,
               message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
           }
 
-          dimred1 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-          dimred2 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-          dimred3 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "NNS.dep", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
 
+          estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
 
-          dimred <- Rfast::rowmeans(cbind(dimred1, dimred2, dimred3))
-
-          if(cross.val){
-            cross <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = NULL, ncores = ncores)$stack
-            estimates <- Rfast::rowmeans(cbind(cross, cross, dimred))
-          } else {
-            estimates <- dimred
-          }
 
           estimates <- data.table::data.table(cbind(estimates = estimates,
                                                     position = position,
@@ -202,31 +194,22 @@ dy.d_ <- function(x, y, wrt,
           rise <- upper - lower
 
       } else {
-          n <- dim(eval.points)[1]
-          original.eval.points <- eval.points
 
-          h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[,wrt]))))
+              n <- dim(eval.points)[1]
+              original.eval.points <- eval.points
+
+              h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[,wrt]))))
+
+              original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
+              original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
+
+              deriv.points <- rbind(original.eval.points.min,
+                                    original.eval.points,
+                                    original.eval.points.max)
 
 
-          original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
-          original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
 
-          deriv.points <- rbind(original.eval.points.min,
-                                original.eval.points,
-                                original.eval.points.max)
-
-          dimred1 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-          dimred2 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-          dimred3 <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "NNS.dep", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-
-          dimred <- Rfast::rowmeans(cbind(dimred1, dimred2, dimred3))
-
-          if(cross.val){
-            cross <- NNS.stack(x, y, IVs.test = deriv.points, method = 1, status = messages, folds = 3, order = NULL, ncores = ncores)$stack
-            estimates <- Rfast::rowmeans(cbind(cross, cross, dimred))
-          } else {
-            estimates <- dimred
-          }
+          estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
 
 
           lower <- head(estimates,n)
@@ -268,19 +251,8 @@ dy.d_ <- function(x, y, wrt,
       }
 
 
-        mixed.dimred1 <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-        mixed.dimred2 <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "cor", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-        mixed.dimred3 <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "NNS.dep", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
+          mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
 
-
-        mixed.dimred <- Rfast::rowmeans(cbind(mixed.dimred1, mixed.dimred2, mixed.dimred3))
-
-        if(cross.val){
-          mixed.cross <- NNS.stack(x, y, IVs.test = mixed.deriv.points, method = 1, status = messages, folds = 3, order = NULL, ncores = ncores)$stack
-          mixed.estimates <- Rfast::rowmeans(cbind(mixed.cross, mixed.cross, mixed.dimred))
-        } else {
-          mixed.estimates <- mixed.dimred
-        }
 
       if(messages) message("Done :-)","\r",appendLF=TRUE)
 
@@ -288,22 +260,28 @@ dy.d_ <- function(x, y, wrt,
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
 
-      results[[1]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+      results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
                       "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
                       "Mixed" = mixed)
 
       } else {
-          results[[1]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
+          results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
                                   "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
       }
 
+
+}
+
+
+
+
   if(mixed){
-      final_results <- list("First" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 1))),
-                          "Second" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 2))),
-                          "Mixed" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 3))))
+      final_results <- list("First" = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
+                          "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE),
+                          "Mixed" = rowMeans(do.call(cbind, lapply(results, `[[`, 3)), na.rm = TRUE))
   } else {
-      final_results <- list("First" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 1))),
-                         "Second" = Rfast::rowmeans(do.call(cbind, lapply(results, `[[`, 2))))
+      final_results <- list("First" = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
+                         "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE))
 
   }
 
