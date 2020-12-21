@@ -8,6 +8,8 @@
 #'
 #'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
+#' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
+#' @param mod.only logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param weights numeric; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains.
 #' @param best.periods integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #'
@@ -65,6 +67,8 @@ NNS.ARMA <- function(variable,
                      seasonal.factor = TRUE,
                      weights = NULL,
                      best.periods = 2,
+                     modulo = NULL,
+                     mod.only = TRUE,
                      negative.values = FALSE,
                      method = "nonlin",
                      dynamic = FALSE,
@@ -137,7 +141,7 @@ NNS.ARMA <- function(variable,
       }
 
   } else {
-    M <- NNS.seas(variable, plot=FALSE)
+    M <- NNS.seas(variable, plot=FALSE, modulo = modulo)
     if(!is.list(M)){
         M <- t(1)
     } else {
