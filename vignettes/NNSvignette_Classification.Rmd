@@ -101,12 +101,12 @@ mean( b$stack == as.numeric(iris[test.set, 5]) )
 
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
-* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://ssrn.com/abstract=2148522)
+* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://www.ssrn.com/abstract=2148522)
 
-* [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
+* [Nonparametric Regression Using Clusters](https://link.springer.com/article/10.1007/s10614-017-9713-5)
 
-* [Clustering and Curve Fitting by Line Segments](https://ssrn.com/abstract=2861339)
+* [Clustering and Curve Fitting by Line Segments](https://www.ssrn.com/abstract=2861339)
 
-* [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
+* [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)

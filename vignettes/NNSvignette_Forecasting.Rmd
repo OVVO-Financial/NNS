@@ -182,9 +182,18 @@ Provides the values for the specified confidence intervals within [0,1] for each
 
 We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
 
+
 * `best.periods`
 
 This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjunction with  `seasonal.factor = FALSE`.
+
+* `modulo`
+
+To be used in conjunction with `seasonal.factor = FALSE`.  This parameter will ensure logical seasonal patterns (i.e., `modulo = 7` for daily data) are included along with the results.
+
+* `mod.only`
+
+To be used in conjunction with `seasonal.factor = FALSE & modulo != NULL`.  This parameter will ensure empirical patterns are kept along with the logical seasonal patterns.
 
 * `dynamic = TRUE`
 
@@ -197,12 +206,12 @@ These are the plotting arguments, easily enabled or disabled with `TRUE` or `FAL
 # Multivariate Time Series Forecasting
 The extension to a generalized multivariate instance is provided in the following documentation of the `NNS.VAR()` function:
 
-* [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://ssrn.com/abstract=3489550)
+* [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://www.ssrn.com/abstract=3489550)
 
 
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
-* [Forecasting Using NNS](https://ssrn.com/abstract=3382300)
+* [Forecasting Using NNS](https://www.ssrn.com/abstract=3382300)

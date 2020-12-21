@@ -126,12 +126,12 @@ $$P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}$$
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](http://a.co/5bpHvUg)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
-* [Cumulative Distribution Functions and UPM/LPM Analysis](https://ssrn.com/abstract=2148482)
+* [Cumulative Distribution Functions and UPM/LPM Analysis](https://www.ssrn.com/abstract=2148482)
 
-* [Continuous CDFs and ANOVA with NNS](https://ssrn.com/abstract=3007373)
+* [Continuous CDFs and ANOVA with NNS](https://www.ssrn.com/abstract=3007373)
 
-* [f(Newton)](https://ssrn.com/abstract=2186471)
+* [f(Newton)](https://www.ssrn.com/abstract=2186471)
 
-* [Bayes' Theorem From Partial Moments](https://ssrn.com/abstract=3457377)
+* [Bayes' Theorem From Partial Moments](https://www.ssrn.com/abstract=3457377)
