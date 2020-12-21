@@ -77,16 +77,6 @@ dy.d_ <- function(x, y, wrt,
 
   results <- list()
 
-  if (is.null(ncores)) {
-      num_cores <- as.integer(detectCores()) - 1
-  } else {
-      num_cores <- ncores
-  }
-
-  if(num_cores > 1){
-      cl <- makeCluster(num_cores)
-      registerDoParallel(cl)
-  } else { cl <- NULL }
 
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r",appendLF=TRUE)
 
