@@ -11,6 +11,8 @@ NNS.ARMA(
   seasonal.factor = TRUE,
   weights = NULL,
   best.periods = 2,
+  modulo = NULL,
+  mod.only = TRUE,
   negative.values = FALSE,
   method = "nonlin",
   dynamic = FALSE,
@@ -36,6 +38,10 @@ NNS.ARMA(
 \item{best.periods}{integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 
 \code{(seasonal.factor = FALSE)}.}
+
+\item{modulo}{integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.}
+
+\item{mod.only}{logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
 \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.}
