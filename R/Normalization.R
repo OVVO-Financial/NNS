@@ -56,6 +56,8 @@ NNS.norm <- function(A,
 
   colnames(A_Normalized) <- labels[(n + 1) : (2 * n)]
 
+  rows <- rownames(A_Normalized)
+
 if(!is.null(chart.type)){
     original.par=par(no.readonly = TRUE)
         if(chart.type == 'b' ){
@@ -65,19 +67,21 @@ if(!is.null(chart.type)){
 
         if(chart.type == 'l' ){
             par(mfrow = c(2, 1))
-            par(mar = c(ifelse(class(rownames(A))=="character",5,2), nchar(max(A_Normalized))*1/exp(1), 1, 2))
+            par(mar = c(ifelse((class(rows)!="numeric" || !is.null(rows)),5,2), nchar(max(A_Normalized))*1/exp(1), 1, 2))
 
 
             matplot(A, type = 'l', col = c('steelblue', rainbow(n)), ylab = '', xaxt = 'n', lwd = 2, las = 1)
             legend(location, inset = c(0,0), c(colnames(A)), lty = 1, col = c('steelblue', rainbow(n)), bty = 'n', ncol = floor(n/sqrt(n)), lwd = 2, cex = n/sqrt(n)^exp(1))
-            axis(1, at = seq(length(A[ , 1]), 1, -floor(sqrt(length(A[ , 1])))),
-                 labels = rownames(A[seq(length(A[ , 1]), 1, -floor(sqrt(length(A[ , 1])))),]), las = 1,
-                 cex.axis = ifelse(class(rownames(A))=="character",.75,1), las = ifelse(class(rownames(A))=="character",3,1),srt=45)
+            axis(1, at = seq(length(A_Normalized[ , 1]), 1, -floor(sqrt(length(A_Normalized[ , 1])))),
+                 labels = rownames(A_Normalized[seq(length(A_Normalized[ , 1]), 1, -floor(sqrt(length(A_Normalized[ , 1])))),]), las = 1,
+                 cex.axis = ifelse((class(rows)!="numeric" || !is.null(rows)),.75,1),
+                 las = ifelse((class(rows)!="numeric" || !is.null(rows)),3,1),srt=45)
 
             matplot(A_Normalized, type = 'l', col = c('steelblue', rainbow(n)), ylab = '', xaxt = 'n', lwd = 2, las = 1)
-            axis(1, at = seq(length(A[ , 1]), 1, -floor(sqrt(length(A[ , 1])))),
-                 labels = rownames(A[seq(length(A[ , 1]), 1, -floor(sqrt(length(A[ , 1])))),]), las = 1,
-                 cex.axis = ifelse(class(rownames(A))=="character",.75,1), las = ifelse(class(rownames(A))=="character",3,1),srt=45)
+            axis(1, at = seq(length(A_Normalized[ , 1]), 1, -floor(sqrt(length(A_Normalized[ , 1])))),
+                 labels = rownames(A_Normalized[seq(length(A_Normalized[ , 1]), 1, -floor(sqrt(length(A_Normalized[ , 1])))),]), las = 1,
+                 cex.axis = ifelse((class(rows)!="numeric" || !is.null(rows)),.75,1),
+                 las = ifelse((class(rows)!="numeric" || !is.null(rows)),3,1),srt=45)
 
             legend(location, c(paste0(colnames(A), " Normalized")), lty = 1, col = c('steelblue', rainbow(n)), bty = 'n', ncol = ceiling(n/sqrt(n)), lwd = 2, cex = n/sqrt(n)^exp(1))
         }
