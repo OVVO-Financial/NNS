@@ -91,12 +91,12 @@ ARMA.seas.weighting <- function(sf,mat){
 
     # Determine lag from seasonality test
     if(!sf){
-      lag <- na.omit(M$Period)
+      lag <- na.omit(unlist(M$Period))
       Observation.weighting <- (1 / sqrt(lag))
       if(is.na(M$Coefficient.of.Variation)  && length(M$Coefficient.of.Variation)==1){
         Lag.weighting <- 1
       } else {
-        Lag.weighting <- (M$Variable.Coefficient.of.Variation - M$Coefficient.of.Variation)
+        Lag.weighting <- (unlist(M$Variable.Coefficient.of.Variation) - unlist(M$Coefficient.of.Variation))
       }
       Weights <- (Lag.weighting * Observation.weighting) / sum(Lag.weighting * Observation.weighting)
       return(list(lag = lag, Weights = Weights))

@@ -141,7 +141,7 @@ NNS.ARMA <- function(variable,
       }
 
   } else {
-    M <- NNS.seas(variable, plot=FALSE, modulo = modulo)
+    M <- NNS.seas(variable, plot=FALSE, modulo = modulo, mod.only = mod.only)
     if(!is.list(M)){
         M <- t(1)
     } else {
@@ -157,7 +157,6 @@ NNS.ARMA <- function(variable,
         M <- M$all.periods[1 : best.periods, ]
       }
     }
-
 
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
