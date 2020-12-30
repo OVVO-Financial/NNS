@@ -161,17 +161,12 @@ NNS.ARMA <- function(variable,
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
 
-    if(is.null(weights)){
-        Weights <- ASW$Weights
-    } else {weights <- weights}
+    if(is.null(weights)) Weights <- ASW$Weights else Weights <- weights
 
-    if(is.character(weights)) {
-        Weights <- rep(1/length(lag), length(lag))
-    } else {
-        Weights <- weights
-    }
+    if(is.character(weights)) Weights <- rep(1/length(lag), length(lag))
 
   }
+
 
   # Regression for each estimate in h
   for (j in 1 : h){
