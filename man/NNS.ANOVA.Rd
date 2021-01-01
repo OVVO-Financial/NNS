@@ -10,8 +10,7 @@ NNS.ANOVA(
   confidence.interval = 0.95,
   tails = "Both",
   pairwise = FALSE,
-  plot = TRUE,
-  binary = TRUE
+  plot = TRUE
 )
 }
 \arguments{
@@ -19,28 +18,24 @@ NNS.ANOVA(
 
 \item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
 
-\item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the control mean when \code{(binary = TRUE)}.  Defaults to \code{(confidence.interval = 0.95)}.}
+\item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.}
 
 \item{tails}{options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.}
 
-\item{pairwise}{logical; \code{FALSE} (defualt) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.}
+\item{pairwise}{logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.}
 
-\item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification.  When \code{(binary = TRUE)}, returns the boxplot of both variables along with grand mean identification and confidence interval thereof.}
-
-\item{binary}{logical; \code{TRUE} (default) Selects binary analysis between a control and treatment variable.}
+\item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.}
 }
 \value{
-For \code{(binary = FALSE)} returns the degree certainty the difference in sample means is zero [0, 1].
-
-For \code{(binary = TRUE)} returns:
+Returns the following:
 \itemize{
-\item{\code{"Control Mean"}}
-\item{\code{"Treatment Mean"}}
-\item{\code{"Grand Mean"}}
-\item{\code{"Control CDF"}}
-\item{\code{"Treatment CDF"}}
-\item{\code{"Certainty"}} the certainty of the same population statistic
-\item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the treatment for the specified confidence interval
+\item{\code{"Control Mean"}} \code{control} mean.
+\item{\code{"Treatment Mean"}} \code{treatment} mean.
+\item{\code{"Grand Mean"}} mean of means.
+\item{\code{"Control CDF"}} CDF of the \code{control} from the grand mean.
+\item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
+\item{\code{"Certainty"}} the certainty of the same population statistic.
+\item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
 }
 }
 \description{
