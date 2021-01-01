@@ -190,7 +190,7 @@
     # The first and last interval means have distinct formulas.
     # See Theil and Laitinen (1980) for details.
 
-    aux <- Rfast::colsums( t(embed(xx, 3))*c(0.25,0.5,0.25) )
+    aux <- Rfast::colsums( t(embed(xx, 3))*c(0.25,0.5,0.25), parallel = TRUE )
     desintxb <- c(0.75*xx[1]+0.25*xx[2], aux, 0.25*xx[n-1]+0.75*xx[n])
 
     # Generate random numbers from the [0,1] uniform interval and

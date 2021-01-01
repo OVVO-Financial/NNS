@@ -414,7 +414,7 @@ NNS.reg = function (x, y,
           }
 
 
-          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0))
+          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = TRUE)
 
           x.star <- data.table::data.table(x.star = x)
 

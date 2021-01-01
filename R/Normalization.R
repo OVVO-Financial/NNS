@@ -59,7 +59,7 @@ NNS.norm <- function(A,
   rows <- rownames(A_Normalized)
 
 if(!is.null(chart.type)){
-    original.par=par(no.readonly = TRUE)
+    original.par <- par(no.readonly = TRUE)
         if(chart.type == 'b' ){
             par(mar = c(10, 4, 3, 2) + 0.1)
             boxplot(cbind(A, A_Normalized), las = 2, names = labels, col = c(rep("grey", n), rainbow(n)))

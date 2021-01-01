@@ -118,10 +118,10 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
 
-  h_s = 1/log(length(x),c(2, 10))
-  h_s = c(h_s, 10*h_s)
+  h_s <- 1/log(length(x),c(2, 10))
+  h_s <- c(h_s, 10*h_s)
 
-  if(NNS.dep(x[,wrt],y)$Dependence < .5) h_s = 2 * h_s
+  if(NNS.dep(x[,wrt],y)$Dependence < .5) h_s <- 2 * h_s
 
 for(h in h_s){
       index <- which(h == h_s)
