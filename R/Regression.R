@@ -438,9 +438,13 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- max(1, floor(ceiling(log(length(y),2)) * dependence))
+      if(is.null(type)){
+          dep.reduced.order <- max(1, floor(floor(log(length(y),2)) * dependence))
+      } else {
+          dep.reduced.order <- max(1, ceiling(ceiling(log(length(y),2)) * dependence))
+      }
   } else {
-    dep.reduced.order <- order
+      dep.reduced.order <- order
   }
 
 

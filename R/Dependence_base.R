@@ -117,9 +117,9 @@ NNS.dep.base <- function(x,
       min_part.df[, `:=` (weight = .N/n), by = quadrant]
 
       if(asym){
-          disp <- min_part.df[,"nns_results" := sign(cor(x,abs(y)))*summary(lm(abs(y)~x))$r.squared, by = quadrant]
+          disp <- min_part.df[,"nns_results" := sign(cor(x,abs(y)))*summary(lm(abs(y)~poly(x,5,raw = TRUE)))$r.squared, by = quadrant]
       } else {
-          disp <- min_part.df[,"nns_results" := sign(cor(x,y))*summary(lm(y~x))$r.squared, by = quadrant]
+          disp <- min_part.df[,"nns_results" := sign(cor(x,y))*summary(lm(y~poly(x,5,raw = TRUE)))$r.squared, by = quadrant]
       }
 
       disp <- disp[, nns_results[1], by  = quadrant]$V1
