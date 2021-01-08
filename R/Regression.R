@@ -153,7 +153,7 @@ NNS.reg = function (x, y,
   }
 
   if(!is.null(type)){
-    type <- "class"
+    type <- tolower(type)
     noise.reduction <- "mode"
   }
 
@@ -522,7 +522,7 @@ NNS.reg = function (x, y,
     if(l_x.mid.min_unique > 1 && l_y.min > 5){
       if(dependence < stn){
         if(!is.null(type)){
-          x0 <- mode_class(y.min)
+          if(type=="class") x0 <- mode_class(y.min) else x0 <- unique(gravity(y[x == min(x)]))
         } else {
           if(l_y.min>1 && l_y.mid.min>1){
             x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
@@ -534,14 +534,14 @@ NNS.reg = function (x, y,
         }
       } else {
         if(!is.null(type)){
-          x0 <- mode_class(y.min)
+          if(type=="class") x0 <- mode_class(y.min) else x0 <- unique(y[x == min(x)])
         } else {
           x0 <- unique(y[x == min(x)])
         }
       }
     } else {
       if(!is.null(type)){
-        x0 <- mode_class(y.min)
+        if(type=="class") x0 <- mode_class(y.min) else x0 <- unique(gravity(y[x == min(x)]))
       } else {
         x0 <- unique(gravity(y[x == min(x)]))
       }
@@ -551,7 +551,7 @@ NNS.reg = function (x, y,
     if(l_x.mid.max_unique > 1 && l_y.max > 5){
       if(dependence < stn){
         if(!is.null(type)){
-          x.max <- mode_class(y.max)
+          if(type=="class") x.max <- mode_class(y.max) else x.max <- unique(gravity(y[x == max(x)]))
         } else {
           if(l_y.max > 1 && l_y.mid.max > 1){
             x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
@@ -563,14 +563,14 @@ NNS.reg = function (x, y,
         }
       } else {
         if(!is.null(type)){
-          x.max <- mode_class(y.max)
+          if(type=="class") x.max <- mode_class(y.max) else x.max <- unique(gravity(y[x == max(x)]))
         } else {
           x.max <- unique(y[x == max(x)])
         }
       }
     } else {
       if(!is.null(type)){
-        x.max <- mode_class(y.max)
+        if(type=="class") x.max <- mode_class(y.max) else x.max <- unique(gravity(y[x == max(x)]))
       } else{
         x.max <- unique(gravity(y[x == max(x)]))
       }
@@ -675,13 +675,13 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      point.est.y <- round(point.est.y)
+      if(type=="class") point.est.y <- round(point.est.y)
     }
   }
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    estimate <- round(estimate)
+    if(type=="class") estimate <- round(estimate)
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,
@@ -725,7 +725,7 @@ NNS.reg = function (x, y,
     bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
 
     if(!is.null(type)){
-      regression.points[, y := ifelse((y + bias$bias)%%1 < 0.5, floor(y + bias$bias), ceiling(y + bias$bias))]
+      if(type=="class") regression.points[, y := ifelse((y + bias$bias)%%1 < 0.5, floor(y + bias$bias), ceiling(y + bias$bias))] else regression.points[, y := y + bias$bias]
     } else {
       regression.points[, y := y + bias$bias]
     }
@@ -801,13 +801,13 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      point.est.y <- ifelse(point.est.y%%1 < 0.5, floor(point.est.y), ceiling(point.est.y))
+      if(type=="class") point.est.y <- ifelse(point.est.y%%1 < 0.5, floor(point.est.y), ceiling(point.est.y))
     }
   }
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    estimate <- ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))
+      if(type=="class") estimate <- ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,
@@ -834,7 +834,7 @@ NNS.reg = function (x, y,
 
 
   if(!is.null(type)){
-    Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y)
+    if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
   } else {
     Prediction.Accuracy <- NULL
   }
