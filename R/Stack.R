@@ -173,7 +173,13 @@ NNS.stack <- function(IVs.train,
     test.set <- unlist(test.set)
 
     CV.IVs.train <- data.frame(IVs.train[c(-test.set), ])
+    if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
+    if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
+
+
     CV.IVs.test <- data.frame(IVs.train[test.set, ])
+    if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
+    if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
 
     CV.DV.train <- DV.train[c(-test.set)]
     CV.DV.test <- DV.train[c(test.set)]
@@ -318,7 +324,12 @@ NNS.stack <- function(IVs.train,
       }
 
       CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
+      if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
+      if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
+
       CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
+      if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
+      if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
 
       for(i in c(1:l, length(IVs.train[ , 1]))){
         index <- which(c(1:l, length(IVs.train[ , 1])) == i)
