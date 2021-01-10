@@ -36,8 +36,7 @@ NNS.ARMA(
 \item{weights}{numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.}
 
 \item{best.periods}{integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
-
-\code{(seasonal.factor = FALSE)}.}
+\code{(seasonal.factor = FALSE, best.periods = NULL)}.}
 
 \item{modulo}{integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.}
 

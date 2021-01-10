@@ -18,7 +18,7 @@ NNS.VAR(
 \arguments{
 \item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
 
-\item{h}{integer; 1 (default) Number of periods to forecast.}
+\item{h}{integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
 \item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.}
 
