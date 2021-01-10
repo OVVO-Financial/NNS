@@ -3,7 +3,7 @@
 #' Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 #'
 #' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
-#' @param h integer; 1 (default) Number of periods to forecast.
+#' @param h integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
 #' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param obj.fn expression;
@@ -161,8 +161,11 @@ NNS.VAR <- function(variables,
     periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
 
+    ts <- interpolation_point - 2*(h + na_s[i])
+    if(ts < 100) ts <- interpolation_point - (h + na_s[i])
+
     b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
-                        training.set = interpolation_point - 2*(h + na_s[i]),
+                        training.set = ts,
                         obj.fn = obj.fn,
                         objective = objective,
                         print.trace = status,
@@ -197,7 +200,7 @@ NNS.VAR <- function(variables,
 
   nns_IVs_interpolated_extrapolated_2 <- list()
 
-  nns_IVs_interpolated_extrapolated_2 <-foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
+  nns_IVs_interpolated_extrapolated_2 <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
       if(na_s[i] > 0){
           index <- seq_len(dim(nns_IVs_interpolated_extrapolated)[1])
           last_point <- tail(index, 1) - na_s[i]
@@ -223,6 +226,12 @@ NNS.VAR <- function(variables,
   }
 
   nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs_interpolated_extrapolated_2, function(x) head(x, dim(variables)[1]))))
+
+  if(h == 0){
+      colnames(nns_IVs_interpolated_extrapolated) <- as.character(colnames(variables))
+      return(nns_IVs_interpolated_extrapolated)
+  }
+
 
   new_values <- list()
 
