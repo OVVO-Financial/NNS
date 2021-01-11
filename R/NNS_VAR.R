@@ -197,7 +197,6 @@ NNS.VAR <- function(variables,
   nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(x, h))))
   colnames(nns_IVs_results) <- colnames(variables)
 
-
   nns_IVs_interpolated_extrapolated_2 <- list()
 
   nns_IVs_interpolated_extrapolated_2 <- foreach(i = 1:ncol(variables), .packages = c('NNS', 'data.table'))%dopar%{
@@ -294,7 +293,7 @@ NNS.VAR <- function(variables,
                                objective = objective,
                                method = 2,
                                dim.red.method = dim.red.method,
-                               order = NULL)
+                               order = "max")
 
     if(any(dim.red.method == "cor" | dim.red.method == "all")){
         rel.1 <- abs(cor(cbind(lagged_new_values_train[, i], lagged_new_values_train[, -i]), method = "spearman"))
@@ -335,7 +334,6 @@ NNS.VAR <- function(variables,
 
 # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
     if(length(rel_vars)>1){
-
         DV_values <- NNS.stack(lagged_new_values_train[, rel_vars],
                                lagged_new_values_train[, i],
                                IVs.test =  tail(lagged_new_values[, rel_vars], h),
