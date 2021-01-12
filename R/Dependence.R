@@ -146,9 +146,7 @@ NNS.dep = function(x,
       nns.dep[[3]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, asym = asym)
 
     } else {
-
       nns.dep <- lapply(segs, function(z) NNS.dep.base(x[z], y[z], print.map = FALSE, asym = asym))
-
     }
 
     if(print.map){
@@ -161,9 +159,12 @@ NNS.dep = function(x,
 
     seasonal <- tryCatch(dim(NNS.seas(y, plot = FALSE)$all.periods)[1], error = NULL)
 
+    # Noise baseline
+    baseline <- tryCatch(dim(NNS.seas(rnorm(length(y)), plot = FALSE)$all.periods)[1], error = NULL)
+
     ll <- l / 2
 
-    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- ((ll-seasonal) / ll)^2
+    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- (max(0,(baseline-seasonal)) / baseline)^2
 
     if(dep == 1 | seasonal == 1) dependence <- 1
     if(dep > seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
