@@ -278,11 +278,11 @@ if(!is.null(cl)){
     if(seasonal.plot){
       par(mfrow = c(2, 1))
       if(ncol(M) > 1){
-        plot(M[, 1], M[, 3],
-             xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * M[1, 3]))
-        points(M[ , 1], M[ , 3], pch = 19, col = 'red')
-        abline(h = M[1, 2], col = "red", lty = 5)
-        text((M[ , min(Period)] + M[ , max(Period)]) / 2, M[1, 2], pos = 3, "Variable Coefficient of Variation", col = 'red')
+        plot(unlist(M[, 1]), unlist(M[, 2]),
+             xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 1.5 * unlist(M[, 3])[1]))
+        points(unlist(M[ , 1]), unlist(M[ , 2]), pch = 19, col = 'red')
+        abline(h = unlist(M[, 3])[1], col = "red", lty = 5)
+        text((min(unlist(M[ , 1])) + max(unlist(M[ , 1]))) / 2, unlist(M[, 3])[1], pos = 3, "Variable Coefficient of Variation", col = 'red')
       } else {
         plot(1,1, pch = 19, col = 'blue', xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test",
              ylim = c(0, 2 * abs(sd(FV) / mean(FV))))
