@@ -162,12 +162,11 @@ NNS.dep = function(x,
     # Noise baseline
     baseline <- tryCatch(dim(NNS.seas(rnorm(length(y)), plot = FALSE)$all.periods)[1], error = NULL)
 
-    ll <- l / 2
 
     if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- (max(0,(baseline-seasonal)) / baseline)^2
 
     if(dep == 1 | seasonal == 1) dependence <- 1
-    if(dep > seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
+    if(dep >= seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
 
     return(list("Correlation" = sum(weights * unlist(lapply(nns.dep, `[[`, 1))),
                 "Dependence" = dependence))
