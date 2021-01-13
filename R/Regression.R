@@ -426,10 +426,8 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-  if(all(x == 1:length(x))) asymmetry <- FALSE else asymmetry <- TRUE
 
-  if(!is.null(type) && type=="class") fact <- TRUE else fact <- FALSE
-  dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry, fact = fact)$Dependence
+  dependence <- NNS.dep(x, y, print.map = FALSE, asym = FALSE)$Dependence
   dependence[is.na(dependence)] <- .01
 
   if(is.null(original.columns) || is.null(dim.red.method)){

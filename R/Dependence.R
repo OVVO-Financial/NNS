@@ -5,7 +5,6 @@
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
 #' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
-#' @param fact logical; \code{FALSE} (default) If any variable is a factor, set to \code{factor = TRUE}.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #' @note p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
@@ -75,7 +74,6 @@
 NNS.dep = function(x,
                    y = NULL,
                    asym = FALSE,
-                   fact = FALSE,
                    print.map = FALSE){
 
   oldw <- getOption("warn")
