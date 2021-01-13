@@ -428,7 +428,7 @@ NNS.reg = function (x, y,
 
   if(all(x == 1:length(x))) asymmetry <- FALSE else asymmetry <- TRUE
 
-  if(!is.null(type)) fact <- TRUE else fact <- FALSE
+  if(!is.null(type) && type=="class") fact <- TRUE else fact <- FALSE
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = asymmetry, fact = fact)$Dependence
   dependence[is.na(dependence)] <- .01
 
@@ -581,6 +581,13 @@ NNS.reg = function (x, y,
     max.rps <- data.table::data.table(t(c(max(x), mean(x.max))))
 
     min.rps <- data.table::data.table(t(c(min(x), mean(x0))))
+
+    regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
+  } else {
+    ### Endpoints
+    max.rps <- data.table::data.table(t(c(max(x), y[x == max(x)][1])))
+
+    min.rps <- data.table::data.table(t(c(min(x), y[x == min(x)][1])))
 
     regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
   }

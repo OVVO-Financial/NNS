@@ -80,95 +80,32 @@ NNS.dep = function(x,
 
   oldw <- getOption("warn")
   options(warn = -1)
-  order <- NULL
-
-  if(asym) type <- "XONLY" else type <- NULL
 
   l <- length(x)
 
   if(!is.null(y)){
-    # No dependence if only a single value
-    if(is.factor(y) | fact) factor_signal <- TRUE else factor_signal <- FALSE
-    if(length(unique(x))<= sqrt(l) | length(unique(y))<= sqrt(l)){
-      if(print.map){
-        NNS.part(x, y, order = 1, Voronoi = TRUE, type = type)
-      }
-
-      options(warn = oldw)
-      discrete_res = cor(x, y, method = "spearman")
-      return(list("Correlation" = discrete_res,
-                  "Dependence" = abs(discrete_res)))
-    }
 
 
+    # Define segments
+    if(print.map) PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = FALSE)$dt
 
+    res <- PART[,  sign(cor(x,y))*summary(lm(y~poly(x,min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res[is.na(res)] <- 0
 
-    segs <- list(5L)
-    uniques <- list(5L)
+    # Compare each asymmetry
+    res_xy <- PART[,  sign(cor(x,abs(y)))*summary(lm(abs(y)~poly(x,min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_yx <- PART[,  sign(cor(y,abs(x)))*summary(lm(abs(x)~poly(y,min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
 
-    # Define indicies for segments
-    segs[[1]] <- as.integer(1 : min(50, l/5))
-    uniques[[1]] <- length(unique(x[segs[[1]]]))
-    first_point <- tail(segs[[1]],1)
-
-    segs[[5]] <- as.integer(max(1, (l - min(50, l/5))) : l)
-    uniques[[5]] <- length(unique(x[segs[[5]]]))
-    last_point <- segs[[5]][1]
-
-    ll <- last_point - first_point
-    seg <- as.integer(ll/4)
-
-
-
-    segs[[2]] <- as.integer(max(1, (first_point + 1*seg - min(50, l/10))) : min(l,(first_point + 1*seg + min(50, l/10))))
-    uniques[[2]] <- length(unique(x[segs[[2]]]))
-
-    segs[[3]] <- as.integer(max(1, (first_point + 2*seg - min(50, l/10))) : min(l,(first_point + 2*seg + min(50, l/10))))
-    uniques[[3]] <- length(unique(x[segs[[3]]]))
-
-    segs[[4]] <- as.integer(max(1, (first_point + 3*seg - min(50, l/10))) : min(l,(first_point + 3*seg + min(50, l/10))))
-    uniques[[4]] <- length(unique(x[segs[[4]]]))
-
-
-
-    weights <- (c(.5, 1, 1, 1, .5)/4)
-    nns.dep <- list(5L)
-
-    if(any(unlist(uniques)==1)){
-      weights <- c(1/3, 1/3, 1/3)
-      nns.dep <- list(3L)
-
-      DT <- data.table::data.table(x, y)
-      data.table::setkey(DT[, x := x], x)
-
-      nns.dep[[1]] <- NNS.dep.base(DT[, .SD[1], by="x"]$x, DT[, .SD[1], by = "x"]$y, print.map = FALSE, asym = asym)
-      nns.dep[[2]] <- NNS.dep.base(DT[, .SD[min(1,round(.N/2))], by="x"]$x, DT[, .SD[min(1,round(.N/2))], by = "x"]$y, print.map = FALSE, asym = asym)
-      nns.dep[[3]] <- NNS.dep.base(DT[, .SD[.N], by = "x"]$x, DT[, .SD[.N], by = "x"]$y, print.map = FALSE, asym = asym)
-
-    } else {
-      nns.dep <- lapply(segs, function(z) NNS.dep.base(x[z], y[z], print.map = FALSE, asym = asym))
-    }
-
-    if(print.map){
-      NNS.part(x, y, order = order, min.obs.stop = TRUE, Voronoi = TRUE, type = type, noise.reduction = "mean")
-    }
+    res_xy[is.na(res_xy)] <- 0
+    res_yx[is.na(res_yx)] <- 0
 
     options(warn = oldw)
 
-    dep <- sum(weights * unlist(lapply(nns.dep, `[[`, 2)))
+    if(asym) dependence <- mean(abs(res_xy$V1)) else dependence <- mean(c(abs(res_xy$V1), abs(res_yx$V1)))
 
-    seasonal <- tryCatch(dim(NNS.seas(y, plot = FALSE)$all.periods)[1], error = NULL)
+    corr <- mean(res$V1)
 
-    # Noise baseline
-    baseline <- tryCatch(dim(NNS.seas(rnorm(length(y)), plot = FALSE)$all.periods)[1], error = NULL)
-
-
-    if(is.null(seasonal) | factor_signal) seasonal <- dep else seasonal <- (max(0,(baseline-seasonal)) / baseline)^2
-
-    if(dep == 1 | seasonal == 1) dependence <- 1
-    if(dep >= seasonal) dependence <- dep else dependence <- mean(c(dep, seasonal))
-
-    return(list("Correlation" = sum(weights * unlist(lapply(nns.dep, `[[`, 1))),
+    return(list("Correlation" = corr,
                 "Dependence" = dependence))
 
   } else {
