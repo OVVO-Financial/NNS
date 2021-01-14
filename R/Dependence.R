@@ -87,8 +87,12 @@ NNS.dep = function(x,
     # Define segments
     if(print.map) PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = FALSE)$dt
 
+    PART[, weights := .N/l, by = prior.quadrant]
+
     res <- PART[,  sign(cor(x,y))*summary(lm(y~poly(x,min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
     res[is.na(res)] <- 0
+
+    weights <- PART[, weights[1], by = prior.quadrant]$V1
 
     # Compare each asymmetry
     res_xy <- PART[,  sign(cor(x,abs(y)))*summary(lm(abs(y)~poly(x,min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
@@ -99,9 +103,10 @@ NNS.dep = function(x,
 
     options(warn = oldw)
 
-    if(asym) dependence <- mean(abs(res_xy$V1)) else dependence <- mean(c(abs(res_xy$V1), abs(res_yx$V1)))
+    if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- mean(sum(abs(res_xy$V1) * weights),
+                                                                                 sum(abs(res_yx$V1) * weights))
 
-    corr <- mean(res$V1)
+    corr <- sum(res$V1 * weights)
 
     return(list("Correlation" = corr,
                 "Dependence" = dependence))
