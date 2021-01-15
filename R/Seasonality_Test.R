@@ -137,7 +137,7 @@ NNS.seas <- function(variable,
         M <- data.table::rbindlist(list(M[mod_index, ], mod_cv), use.names = FALSE)
     }
 
-    M <- M[Period < length(variable)/3,]
+    M <- M[Period < length(variable)/2,]
 
     if(plot){
         plot(unlist(M[, 1]), unlist(M[, 2]), xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
