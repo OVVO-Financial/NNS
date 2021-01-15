@@ -135,20 +135,21 @@ NNS.seas <- function(variable,
                                    rep(M[1, 3], length(periods))))
 
         M <- data.table::rbindlist(list(M[mod_index, ], mod_cv), use.names = FALSE)
-
     }
 
-    if(plot){
-        plot(M[, Period], M[, Coefficient.of.Variation], xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
+    M <- M[Period < length(variable)/3,]
 
-        points(M[1, Period], M[1, Coefficient.of.Variation], pch = 19, col = 'red')
+    if(plot){
+        plot(unlist(M[, 1]), unlist(M[, 2]), xlab = "Period", ylab = "Coefficient of Variation", main = "Seasonality Test", ylim = c(0, 2 * abs(sd(variable) / mean(variable))))
+
+        points(unlist(M[, 1])[1], unlist(M[, 2])[1], pch = 19, col = 'red')
 
         abline(h = abs(sd(variable) / mean(variable)), col = "red", lty = 5)
-        text(mean(instances[index]), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variation", col = 'red')
+        text(mean(unlist(M[, 1])), abs(sd(variable) / mean(variable)), pos = 3, "Variable Coefficient of Variation", col = 'red')
     }
 
     return(list("all.periods" = M,
-                "best.period" = unlist(M[1, Period]),
+                "best.period" = unlist(M[1, 1]),
                 "periods" = as.vector(unlist(M[, 1]))))
 
 }
