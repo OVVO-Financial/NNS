@@ -317,7 +317,7 @@ NNS.reg = function (x, y,
 
           if(dim.red.method!="cor" && dim.red.method!="equal"){
             if(!is.null(type)) fact <- TRUE else fact <- FALSE
-            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE, fact = fact)$Dependence
+            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE)$Dependence
             x.star.dep[is.na(x.star.dep)] <- 0
           }
 
@@ -436,11 +436,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    if(is.null(type)){
-      dep.reduced.order <- max(1, floor(floor(log(length(y),2)) * dependence))
-    } else {
-      dep.reduced.order <- max(1, ceiling(ceiling(log(length(y),2)) * dependence))
-    }
+    dep.reduced.order <- min(ceiling(log(length(y), 4)), ceiling(ceiling(log(length(y),2)) * dependence))
   } else {
     dep.reduced.order <- order
   }

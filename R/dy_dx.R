@@ -33,7 +33,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   order <- NULL
 
-  dep <- NNS.dep(x, y)$Dependence
+  dep <- NNS.dep(x, y, asym =  TRUE)$Dependence
 
   if(dep > 0.85){
       h <- 0.01
