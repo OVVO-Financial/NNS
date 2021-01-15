@@ -436,7 +436,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- min(ceiling(log(length(y), 4)), ceiling(ceiling(log(length(y),2)) * dependence))
+    dep.reduced.order <- min(ceiling(log(length(y))), ceiling(ceiling(log(length(y),2)) * dependence))
   } else {
     dep.reduced.order <- order
   }

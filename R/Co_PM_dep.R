@@ -84,16 +84,9 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
     }
 
-
-    if(observed > independence){
-            return(list(actual.observations = observed * l,
+    return(list(actual.observations = observed * l,
                         independent.null = independence * l,
-                        Dependence = sqrt((observed - independence) / (1 - independence))))
-    } else {
-            return(list(actual.observations = observed * l,
-                        independent.null = independence * l,
-                        Dependence = sqrt((independence - observed) / independence)))
-    }
+                        Dependence = abs(observed - independence) / independence ))
 
 
 }
