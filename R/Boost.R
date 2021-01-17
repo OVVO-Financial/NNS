@@ -97,7 +97,7 @@ NNS.boost <- function(IVs.train,
     if(1%in%DV.train){
       DV.train <- as.numeric(as.character(DV.train))
     } else {
-      DV.train <- as.numeric(as.character(as.numeric(DV.train)))
+      DV.train <- as.numeric(factor(DV.train))
     }
 
     y_train <- as.factor(as.character(DV.train))
@@ -159,11 +159,14 @@ NNS.boost <- function(IVs.train,
       message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
     }
 
-    n.best <- NNS.stack(x, y, folds = 1, status = status,
+    nns_est <- NNS.stack(x, y, folds = 1, status = status,
                         method = 1, order = depth,
                         obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
-                        ncores = ncores, type = type)$NNS.reg.n.best
+                        ncores = ncores, type = type)
+
+    n.best <- nns_est$NNS.reg.n.best
+    probability.threshold <- nns_est$probability.threshold
 
     if(status){
       message("Currently determining learning threshold...","\r",appendLF=TRUE)
@@ -235,11 +238,14 @@ NNS.boost <- function(IVs.train,
                            n.best = n.best, factor.2.dummy = FALSE,
                            ncores = 1, type = type)$Point.est
 
+
       # Do not predict a new unseen class
       if(!is.null(type)){
           predicted <- pmin(predicted, max(as.numeric(y)))
           predicted <- pmax(predicted, min(as.numeric(y)))
       }
+
+      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -361,11 +367,14 @@ NNS.boost <- function(IVs.train,
                            plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
                            factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
 
+
       # Do not predict a new unseen class
       if(!is.null(type)){
           predicted <- pmin(predicted,max(as.numeric(y)))
           predicted <- pmax(predicted,min(as.numeric(y)))
       }
+
+      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -421,23 +430,25 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      estimates[[i]] <- NNS.stack(IVs.train = data.matrix(x[, eval(parse(text=kf$V1[i]))]),
-                                  DV.train = y,
-                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                  status = FALSE, order = depth,
-                                  ncores = ncores,
-                                  folds = 1,
-                                  type = type, dist = dist)$stack/dim(kf)[1]
-
+      estimates[[i]] <- NNS.reg(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+                                y,
+                                point.est = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
+                                plot = FALSE, order = depth,
+                                ncores = ncores,
+                                point.only = TRUE,
+                                type = type, dist = dist)$Point.est/dim(kf)[1]
     }
 
 
   estimates <- Reduce("+", estimates)
 
+
   if(!is.null(type)){
       estimates <- pmin(estimates, max(as.numeric(y)))
       estimates <- pmax(estimates, min(as.numeric(y)))
   }
+
+
 
   plot.table <- table(unlist(keeper.features))
   names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
@@ -465,10 +476,12 @@ NNS.boost <- function(IVs.train,
   }
   gc()
   if(is.null(type)){
+    estimates[is.na(estimates)] <- mean(unlist(estimates))
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    estimates <- ifelse(estimates%%1 < 0.5, floor(estimates), ceiling(estimates))
+    estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
+    estimates[is.na(estimates)] <- mean(unlist(estimates))
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   }
