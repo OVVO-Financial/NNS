@@ -11,6 +11,7 @@ NNS.stack(
   type = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
+  optimize.threshold = TRUE,
   dist = "L2",
   CV.size = NULL,
   balance = FALSE,
@@ -37,6 +38,8 @@ NNS.stack(
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+
+\item{optimize.threshold}{logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.}
 
 \item{dist}{options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.}
 
@@ -69,6 +72,7 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
+\item{\code{"probability.threshold"}} returns the optimum probability threshold for classification.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
 \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
 \item{\code{"stack"}} returns the output of the stacked model.

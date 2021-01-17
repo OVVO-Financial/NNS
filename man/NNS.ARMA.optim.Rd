@@ -12,6 +12,7 @@ NNS.ARMA.optim(
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
   linear.approximation = TRUE,
+  lin.only = FALSE,
   print.trace = TRUE,
   ncores = NULL
 )
@@ -31,6 +32,8 @@ NNS.ARMA.optim(
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
+
+\item{lin.only}{logical; \code{FALSE} (default) Restricts the optimization to linear methods only.}
 
 \item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
