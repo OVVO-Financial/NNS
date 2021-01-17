@@ -421,12 +421,13 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      estimates[[i]] <- NNS.reg(data.matrix(x[, eval(parse(text=kf$V1[i]))]), y,
-                                point.est = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                plot = FALSE, residual.plot = FALSE, order = depth,
-                                n.best = n.best,
-                                factor.2.dummy = FALSE, ncores = ncores,
-                                type = type, dist = dist)$Point.est/dim(kf)[1]
+      estimates[[i]] <- NNS.stack(IVs.train = data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+                                  DV.train = y,
+                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
+                                  status = FALSE, order = depth,
+                                  ncores = ncores,
+                                  folds = 1,
+                                  type = type, dist = dist)$stack/dim(kf)[1]
 
     }
 
