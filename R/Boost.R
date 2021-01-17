@@ -476,12 +476,12 @@ NNS.boost <- function(IVs.train,
   }
   gc()
   if(is.null(type)){
-    estimates[is.na(estimates)] <- mean(unlist(estimates))
+    estimates[is.na(estimates)] <- mean(unlist(estimates), na.rm = TRUE)
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
+    estimates[is.na(estimates)] <- mean(unlist(estimates), na.rm = TRUE)
     estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
-    estimates[is.na(estimates)] <- mean(unlist(estimates))
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   }
