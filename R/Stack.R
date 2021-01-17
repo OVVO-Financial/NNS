@@ -112,7 +112,7 @@ NNS.stack <- function(IVs.train,
   if(1%in%DV.train){
     DV.train <- as.numeric(as.character(DV.train))
   } else {
-    DV.train <- as.numeric(as.character(as.numeric(DV.train)))
+    DV.train <- as.numeric(factor(DV.train))
   }
 
   n <- ncol(IVs.train)
@@ -255,6 +255,8 @@ NNS.stack <- function(IVs.train,
         predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
                              type = NULL, dist = dist, point.only = TRUE)$Point.est
 
+        predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
+
         if(!is.null(type)){
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
           threshold_results_2[[i]] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
@@ -357,7 +359,9 @@ NNS.stack <- function(IVs.train,
           setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE)
           predicted <- setup$Point.est
+          predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+
           threshold_results_1[index] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
 
           predicted <- ifelse(predicted%%1 < threshold_results_1[index], floor(predicted), ceiling(predicted))
