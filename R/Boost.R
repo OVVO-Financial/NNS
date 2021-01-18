@@ -79,6 +79,14 @@ NNS.boost <- function(IVs.train,
 
   objective <- tolower(objective)
 
+  features <- colnames(IVs.train)
+
+  transform <- data.matrix(cbind(DV.train, IVs.train))
+
+  IVs.train <- transform[,-1]
+  colnames(IVs.train) <- features
+
+  DV.train <- transform[,1]
 
 
   # Parallel process...
@@ -220,6 +228,8 @@ NNS.boost <- function(IVs.train,
         new.dv.train <- c(new.dv.train, y[-new.index])
       }
 
+      colnames(new.iv.train) <- features
+
       actual <- as.numeric(y[new.index])
       new.iv.test <- x[new.index,]
 
@@ -238,14 +248,12 @@ NNS.boost <- function(IVs.train,
                            n.best = n.best, factor.2.dummy = FALSE,
                            ncores = 1, type = type)$Point.est
 
-
+      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
       # Do not predict a new unseen class
       if(!is.null(type)){
           predicted <- pmin(predicted, max(as.numeric(y)))
           predicted <- pmax(predicted, min(as.numeric(y)))
       }
-
-      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -367,14 +375,12 @@ NNS.boost <- function(IVs.train,
                            plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
                            factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
 
-
+      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
       # Do not predict a new unseen class
       if(!is.null(type)){
           predicted <- pmin(predicted,max(as.numeric(y)))
           predicted <- pmax(predicted,min(as.numeric(y)))
       }
-
-      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
       new.index.1 <- rev(order(abs(predicted - actual)))
 
@@ -437,21 +443,23 @@ NNS.boost <- function(IVs.train,
                                 ncores = ncores,
                                 point.only = TRUE,
                                 type = type, dist = dist)$Point.est/dim(kf)[1]
+
+      estimates[[i]][is.na(predicted)] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
+
     }
 
 
   estimates <- Reduce("+", estimates)
-
+  estimates <- na.omit(estimates)
 
   if(!is.null(type)){
       estimates <- pmin(estimates, max(as.numeric(y)))
       estimates <- pmax(estimates, min(as.numeric(y)))
   }
 
-
-
   plot.table <- table(unlist(keeper.features))
-  names(plot.table) <- colnames(x[as.numeric(names(plot.table))])
+
+  names(plot.table) <- features[eval(as.numeric(names(plot.table)))]
 
   if(feature.importance){
 
@@ -476,11 +484,9 @@ NNS.boost <- function(IVs.train,
   }
   gc()
   if(is.null(type)){
-    estimates[is.na(estimates)] <- mean(unlist(estimates), na.rm = TRUE)
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    estimates[is.na(estimates)] <- mean(unlist(estimates), na.rm = TRUE)
     estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
