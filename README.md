@@ -1,4 +1,4 @@
-[![packageversion](https://img.shields.io/badge/NNS%20version-0.5.8-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![packageversion](https://img.shields.io/badge/NNS%20version-0.6.0-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
 # NNS
@@ -47,7 +47,7 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 0.5.8},
+    note = {R package version 0.6.0},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```
