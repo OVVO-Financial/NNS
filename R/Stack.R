@@ -109,11 +109,7 @@ NNS.stack <- function(IVs.train,
 
   objective <- tolower(objective)
 
-  if(1%in%DV.train){
-    DV.train <- as.numeric(as.character(DV.train))
-  } else {
-    DV.train <- as.numeric(factor(DV.train))
-  }
+  if(!is.null(type) && type=="class") DV.train <- as.numeric(factor(DV.train)) else DV.train <- as.numeric(DV.train)
 
   n <- ncol(IVs.train)
 
