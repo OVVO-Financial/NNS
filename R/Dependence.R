@@ -85,19 +85,19 @@ NNS.dep = function(x,
 
 
     # Define segments
-    if(print.map) PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = 3, type = "XONLY", Voronoi = FALSE)$dt
+    if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = l/5, min.obs.stop = FALSE, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = NULL, obs.req = l/5, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)$dt
 
     PART[, weights := .N/l, by = prior.quadrant]
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
-    ll <- 100
+    ll <- expression(max(min(100, .N/5), 10))
 
-    res <- PART[,  sign(cor(x[1:min(.N, ll)],y[1:min(.N, ll)]))*summary(lm(y[1:min(.N, ll)]~poly(x[1:min(.N, ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
     res[is.na(res)] <- 0
 
     # Compare each asymmetry
-    res_xy <- PART[,  sign(cor(x[1:min(.N, ll)],(y[1:min(.N, ll)])))*summary(lm(abs(y[1:min(.N, ll)])~poly(x[1:min(.N, ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
-    res_yx <- PART[,  sign(cor(y[1:min(.N, ll)],(x[1:min(.N, ll)])))*summary(lm(abs(x[1:min(.N, ll)])~poly(y[1:min(.N, ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_xy <- PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_yx <- PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
 
     res_xy[is.na(res_xy)] <- 0
     res_yx[is.na(res_yx)] <- 0

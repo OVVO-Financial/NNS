@@ -84,6 +84,7 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
     }
 
+
     return(list(actual.observations = observed * l,
                         independent.null = independence * l,
                         Dependence = abs(observed - independence) / independence ))
