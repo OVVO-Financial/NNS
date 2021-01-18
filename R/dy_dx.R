@@ -36,14 +36,15 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
   dep <- NNS.dep(x, y, asym =  TRUE)$Dependence
 
   if(dep > 0.85){
-      h <- 0.01
+    h <- 1/log(length(x),2)
   } else {
       if(dep > 0.5){
-          h <- 0.05
+        h <- 1/log(length(x))
       } else {
-          h <- 0.2
+        h <- 1/log(length(x),4)
       }
   }
+
 
 
   if(!is.null(ncol(x)) && is.null(colnames(x))){
@@ -92,7 +93,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
       run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
-    reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, point.est = as.vector(deriv.points))
+    reg.output <- NNS.reg(x, y, plot = FALSE, return.values = TRUE, order = order, point.est = as.vector(deriv.points), type = "XONLY")
 
     estimates.min <- reg.output$Point.est[1:n]
     estimates.max <- reg.output$Point.est[(2*n+1):(3*n)]
