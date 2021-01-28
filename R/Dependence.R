@@ -90,14 +90,14 @@ NNS.dep = function(x,
     PART[, weights := .N/l, by = prior.quadrant]
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
-    ll <- expression(max(min(100, .N/5), 8))
+    ll <- expression(max(min(100, .N), 8))
 
-    res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
     res[is.na(res)] <- 0
 
     # Compare each asymmetry
-    res_xy <- PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
-    res_yx <- PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)],min(5, floor(log(l,4)+2)), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_xy <- PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_yx <- PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
 
     res_xy[is.na(res_xy)] <- 0
     res_yx[is.na(res_yx)] <- 0

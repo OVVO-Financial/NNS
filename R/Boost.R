@@ -99,13 +99,12 @@ NNS.boost <- function(IVs.train,
   }
 
   if((num_cores)>cores){ stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))}
-  if(balance && type!="class") stop("Please select 'type='CLASS'' when 'balance=TRUE'.")
 
-  if(balance && type=="class"){
+  if(balance){
     if(1%in%DV.train){
-      DV.train <- as.numeric(as.character(DV.train))
+      DV.train <- as.numeric(as.factor(DV.train))
     } else {
-      DV.train <- as.numeric(factor(DV.train))
+      DV.train <- as.numeric(as.factor(DV.train))
     }
 
     y_train <- as.factor(as.character(DV.train))

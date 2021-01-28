@@ -346,6 +346,7 @@ NNS.VAR <- function(variables,
 
 
         nns_DVs <- DV_values$stack
+        nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
     } else {
         nns_DVs <- nns_IVs_results[,i]
     }
