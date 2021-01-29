@@ -22,13 +22,13 @@
 
 
 NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
-
-
-    if(any(class(A)=="tbl")) A <- as.data.frame(A)
-
     A <- x
     n <- ncol(A)
     l <- dim(A)[1]
+
+    if(any(class(A)=="tbl")) A <- as.data.frame(A)
+
+
 
     if(is.null(colnames(A))){
         colnames.list <- list()
