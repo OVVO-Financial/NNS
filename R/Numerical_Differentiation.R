@@ -5,7 +5,8 @@
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
 #' @param h numeric [0, ...]; Initial step for secant projection.  Defaults to \code{(h = 0.1)}.
-#' @param tol numeric; Sets the tolerance for the stopping condition of the inferred \code{h}.  Defualts to \code{(tol = 1e-10)}.
+#' @param tol numeric; Sets the tolerance for the stopping condition of the inferred \code{h}.  Defaults to \code{(tol = 1e-10)}.
+#' @param digits numeric; Sets the number of digits specification of the output.  Defaults to \code{(digits = 12)}.
 #' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.
 #' @return Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
 #' @author Fred Viole, OVVO Financial Systems
@@ -18,7 +19,7 @@
 #' @export
 
 
-NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
+NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = FALSE){
 
 
   Finite.step <- function(f, point, h){
@@ -37,10 +38,6 @@ NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
   }
 
 
-
-
-  orig.dig <- getOption("digits")
-  options(digits = 20)
   Bs <- numeric()
   Bl <- numeric()
   Bu <- numeric()
@@ -151,7 +148,7 @@ NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
               par(original.par)
 
-              return(as.matrix(c("Value of f(x) at point" = f(point),
+              return(round(as.matrix(c("Value of f(x) at point" = f(point),
                                 "Final y-intercept (B)" = final.B,
                                 "DERIVATIVE" = slope,
                                 "Inferred h" = inferred.h,
@@ -160,7 +157,7 @@ NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
                                 "Averaged Finite Step Initial h " = Finite.step(f, point, h)[3],
                                 "Inferred h" = Finite.step(f, point, inferred.h)[1 : 2],
                                 "Inferred h Averaged Finite Step" = Finite.step(f, point, inferred.h)[3],
-                                "Complex Step Derivative (Initial h)" = Im(f(z)) / Im(z))))
+                                "Complex Step Derivative (Initial h)" = Im(f(z)) / Im(z))), digits))
 
           }
 
@@ -189,7 +186,7 @@ NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
     i <- i + 1
   }
-  options(digits = orig.dig)
+
 }
 
 
