@@ -30,7 +30,7 @@ If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 }
 \examples{
 \dontrun{
-x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
+x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # Vector of derivatives

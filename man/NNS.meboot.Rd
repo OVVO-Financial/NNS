@@ -25,7 +25,7 @@ NNS.meboot(
 )
 }
 \arguments{
-\item{x}{vector of data, \code{ts} object or \code{pdata.frame} object.}
+\item{x}{vector of data.}
 
 \item{reps}{numeric; number of replicates to generate.}
 

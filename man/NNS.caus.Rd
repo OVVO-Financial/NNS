@@ -4,12 +4,12 @@
 \alias{NNS.caus}
 \title{NNS Causation}
 \usage{
-NNS.caus(x, y, factor.2.dummy = FALSE, tau = 0, plot = FALSE)
+NNS.caus(x, y = NULL, factor.2.dummy = FALSE, tau = 0, plot = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
 
-\item{y}{\code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.}
+\item{y}{\code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.}
 
 \item{factor.2.dummy}{logical; \code{FALSE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.}
 

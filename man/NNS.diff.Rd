@@ -21,7 +21,7 @@ NNS.diff(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE)
 Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
 }
 \description{
-Determines numerical derivative of a given function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
+Determines numerical derivative of a given univariate function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
 }
 \examples{
 f <- function(x) sin(x) / x
