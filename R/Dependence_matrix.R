@@ -1,10 +1,11 @@
-NNS.dep.matrix = function(x, order = NULL, degree = NULL, asym = FALSE){
+NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   n <- ncol(x)
   if(is.null(n)){
       stop("supply both 'x' and 'y' or a matrix-like 'x'")
   }
 
+  if(any(class(x)=="tbl")) x <- as.data.frame(x)
 
   x <- data.matrix(x)
 

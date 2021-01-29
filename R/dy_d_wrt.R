@@ -80,7 +80,6 @@ dy.d_ <- function(x, y, wrt,
 
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r",appendLF=TRUE)
 
-#  xstar <- rowMeans(x)
 
   if(is.null(colnames(x))){
     colnames.list <- list()
@@ -90,6 +89,8 @@ dy.d_ <- function(x, y, wrt,
     colnames(x) <- as.character(colnames.list)
   }
 
+  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(!is.null(y) && any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   if(l != 2) mixed <- FALSE
 
@@ -163,11 +164,6 @@ dy.d_ <- function(x, y, wrt,
 
 
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-#      xstar <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$x.star
-
-#      estimates <- NNS.stack(cbind(xstar, xstar), y,
-#                             IVs.test = cbind(rowMeans(deriv.points),rowMeans(deriv.points)),
-#                             order = NULL, folds = 1)$stack
 
 
       estimates <- data.table::data.table(cbind(estimates = estimates,
@@ -206,10 +202,6 @@ dy.d_ <- function(x, y, wrt,
 
 
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$Point.est
-#      xstar <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = ncores)$x.star
-
-#      estimates <- NNS.stack(cbind(xstar, xstar), y, IVs.test = cbind(rowMeans(deriv.points),rowMeans(deriv.points)),
-#                             method = 1, folds = 1)$stack
 
 
       lower <- head(estimates,n)

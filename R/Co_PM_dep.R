@@ -24,7 +24,9 @@
 NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
     A <- x
     n <- ncol(A)
-    l <- length(A[ , 1])
+    l <- dim(A)[1]
+
+    if(any(class(A)=="tbl")) A <- as.data.frame(A)
 
     if(is.null(colnames(A))){
         colnames.list <- list()

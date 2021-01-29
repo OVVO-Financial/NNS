@@ -17,6 +17,10 @@
 #' @export
 
 NNS.FSD.uni <- function(x, y, type = "discrete"){
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
     type <- tolower(type)
 
     if(!any(type%in%c("discrete", "continuous"))){
@@ -68,6 +72,10 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
 
 
 NNS.SSD.uni <- function(x, y){
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
     if(min(y) > min(x) | mean(y) > mean(x)) {
         return(0)
     } else {
@@ -106,6 +114,10 @@ NNS.SSD.uni <- function(x, y){
 
 
 NNS.TSD.uni <- function(x, y){
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
     if(min(y) > min(x) | mean(y) > mean(x)) {
         return(0)
     } else {

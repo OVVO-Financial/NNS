@@ -54,6 +54,10 @@ NNS.part = function(x, y,
                                     "off"))) {
         stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'")
     }
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
     if (is.null(obs.req)) obs.req <- 8
 
     if (!is.null(order) && order == 0) order <- 1

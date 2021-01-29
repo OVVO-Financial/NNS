@@ -1,6 +1,6 @@
 #' NNS Numerical Differentiation
 #'
-#' Determines numerical derivative of a given function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
+#' Determines numerical derivative of a given univariate function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
 #'
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
@@ -18,7 +18,7 @@
 #' @export
 
 
-NNS.diff<- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
+NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, print.trace = FALSE){
 
 
   Finite.step <- function(f, point, h){

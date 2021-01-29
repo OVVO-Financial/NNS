@@ -138,13 +138,14 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
 
-  if(plot.regions && !is.null(order) && order == 'max'){
-    stop('Please reduce the "order" or set "plot.regions = FALSE".')
-  }
+  if(plot.regions && !is.null(order) && order == 'max') stop('Please reduce the "order" or set "plot.regions = FALSE".')
 
-  if(!is.null(confidence.interval) && std.errors == FALSE){
-    std.errors <- TRUE
-  }
+  if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
+
+  if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+
+
 
   if(!is.null(dim.red.method)){
     if(is.null(dim(x)) || dim(x)[1]==1){
@@ -157,40 +158,34 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode"
   }
 
-  if(class(y) == "factor"){
+  if(any(class(y) == "factor")){
     type <- "class"
     noise.reduction <- "mode"
   }
 
-  if(!plot){
-    residual.plot <- FALSE
-  }
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
+  if(!plot) residual.plot <- FALSE
 
   # Variable names
   original.names <- colnames(x)
   original.columns <- ncol(x)
 
-  if(!is.null(original.columns) & is.null(colnames(x))){
-    x <- data.frame(x)
-  }
+  if(!is.null(original.columns) & is.null(colnames(x))) x <- data.frame(x)
 
   y.label <- deparse(substitute(y))
-  if(is.null(y.label)){
-    y.label <- "y"
-  }
+
+  if(is.null(y.label)) y.label <- "y"
 
 
   if(is.null(original.columns)){
     x.label <- deparse(substitute(x))
-    if(is.null(x.label)){
-      x.label <- "x"
-    }
+    if(is.null(x.label)) x.label <- "x"
   }
 
   if(factor.2.dummy){# && !multivariate.call){
-    if(is.list(x) & !is.data.frame(x)){
-      x <- do.call(cbind, x)
-    }
+    if(is.list(x) & !is.data.frame(x)) x <- do.call(cbind, x)
+
 
     if(!is.null(point.est)){
       if(!is.null(dim(x)) && dim(x)[2]>1){
@@ -202,11 +197,8 @@ NNS.reg = function (x, y,
     }
 
 
-    if(!is.null(dim(x)) && dim(x)[2]>1){
-      x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
-    } else {
-      x <- factor_2_dummy_FR(x)
-    }
+    if(!is.null(dim(x)) && dim(x)[2]>1) x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR)) else x <- factor_2_dummy_FR(x)
+
 
     x <- data.matrix(x)
 
@@ -219,17 +211,12 @@ NNS.reg = function (x, y,
         new_x <- factor_2_dummy_FR(new_x)
       }
 
-      if(is.null(dim(point.est))){
-        l_point.est <- length(point.est)
-      } else {
-        l_point.est <- dim(point.est)[1]
-      }
+      if(is.null(dim(point.est))) l_point.est <- length(point.est) else l_point.est <- dim(point.est)[1]
+
 
       point.est <- tail(new_x, l_point.est)
 
-      if(is.null(dim(point.est)) || dim(point.est)[2]==1){
-        point.est <- as.vector(unlist(point.est))
-      }
+      if(is.null(dim(point.est)) || dim(point.est)[2]==1) point.est <- as.vector(unlist(point.est))
 
     } else { # is.null(point.est)
       point.est.y <- NULL
@@ -241,9 +228,7 @@ NNS.reg = function (x, y,
   original.columns <- ncol(x)
 
   y.label <- deparse(substitute(y))
-  if(is.null(y.label)){
-    y.label <- "y"
-  }
+  if(is.null(y.label)) y.label <- "y"
 
 
   y <- as.numeric(y)

@@ -2,7 +2,7 @@
 #'
 #' Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 #'
-#' @param x vector of data, \code{ts} object or \code{pdata.frame} object.
+#' @param x vector of data.
 #' @param reps numeric; number of replicates to generate.
 #' @param setSpearman numeric [0,1]; The default setting \code{setSpearman = NULL} assumes that
 #' the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
@@ -84,14 +84,8 @@
                         scl.adjustment = FALSE, sym = FALSE, elaps=FALSE,
                         colsubj, coldata, coltimes,...)
   {
-    if ("pdata.frame" %in% class(x))
-    {
-      res <- meboot::meboot.pdata.frame (x, reps, trim$trim, reachbnd,
-                                 expand.sd, force.clt, scl.adjustment, sym, elaps,
-                                 colsubj, coldata, coltimes, ...)
-      return(res)
-    }
 
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
 
     if(is.null(setSpearman)) setSpearman <- -99
 

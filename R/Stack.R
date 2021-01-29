@@ -87,7 +87,10 @@ NNS.stack <- function(IVs.train,
 
 
 
-  if(is.null(obj.fn)){ stop("Please provide an objective function")}
+  if(is.null(obj.fn)) stop("Please provide an objective function")
+
+  if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
+  if(any(class(DV.train)=="tbl")) DV.train <- as.vector(unlist(DV.train))
 
   if(is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
     IVs.train <- data.frame(IVs.train)
@@ -116,8 +119,10 @@ NNS.stack <- function(IVs.train,
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
   } else {
-    if(is.null(dim(IVs.test))) IVs.test <- data.frame(t(IVs.test)) else IVs.test <- data.frame(IVs.test)
+    if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
   }
+
+  if(is.null(dim(IVs.test))) IVs.test <- data.frame(t(IVs.test)) else IVs.test <- data.frame(IVs.test)
 
 
   if(is.null(CV.size)){

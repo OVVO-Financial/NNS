@@ -22,7 +22,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' x <- seq(0, 2 * pi, pi / 100) ; y <-sin(x)
+#' x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 #' dy.dx(x, y, eval.point = 1.75)
 #'
 #' # Vector of derivatives
@@ -30,6 +30,9 @@
 #' @export
 
 dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
+
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   order <- NULL
 

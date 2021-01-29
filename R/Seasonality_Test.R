@@ -27,7 +27,9 @@ NNS.seas <- function(variable,
                      mod.only = TRUE,
                      plot = TRUE){
 
-  if(length(variable)<5){
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
+  if(length(variable) < 5){
     return(data.table::data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
   }
 

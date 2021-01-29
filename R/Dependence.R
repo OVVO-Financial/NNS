@@ -76,6 +76,10 @@ NNS.dep = function(x,
                    asym = FALSE,
                    print.map = FALSE){
 
+  if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(!is.null(y) && any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
   oldw <- getOption("warn")
   options(warn = -1)
 

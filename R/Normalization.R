@@ -23,6 +23,8 @@ NNS.norm <- function(A,
                      chart.type = NULL,
                      location = "topleft"){
 
+  if(any(class(A)=="tbl")) A <- as.data.frame(A)
+
   m  <- Rfast::colmeans(A)
   m[m==0] <- 1e-10
   RG <- m %o% (1 / m)

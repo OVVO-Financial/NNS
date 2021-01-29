@@ -3,7 +3,7 @@
 #' Returns the causality from observational data between two variables.
 #'
 #' @param x a numeric vector, matrix or data frame.
-#' @param y \code{NULL} (default) or a numeric vector with compatible dimsensions to \code{x}.
+#' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
 #' @param factor.2.dummy logical; \code{FALSE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
 #' @param tau options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
 #' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
@@ -27,13 +27,18 @@
 #' }
 #' @export
 
-NNS.caus <- function(x, y,
+NNS.caus <- function(x, y = NULL,
                      factor.2.dummy = FALSE,
                      tau = 0,
                      plot = FALSE){
 
   orig.tau <- tau
   orig.plot <- plot
+
+  if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(!is.null(y) && any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
 
   if(factor.2.dummy){
     if(!is.null(dim(x))){
@@ -57,10 +62,9 @@ NNS.caus <- function(x, y,
     }
   }
 
-  if(!missing(y)){
-    if(is.factor(y)){
-      y <- as.numeric(y)
-    }
+  if(!is.null(y)){
+    if(is.factor(y)) y <- as.numeric(y)
+
     if(is.numeric(tau)){
       Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
       Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
@@ -107,12 +111,10 @@ NNS.caus <- function(x, y,
       if(abs(Causation.x.given.y) <= abs(Causation.y.given.x)){
         if(plot){
           # For plotting only
-          if(tau == "cs"){
-            tau <- 0
-          }
-          if(tau == "ts"){
-            tau <- 3
-          }
+          if(tau == "cs") tau <- 0
+
+          if(tau == "ts") tau <- 3
+
           Uni.caus(y, x, tau = tau, plot = plot)
         }
         return(c(Causation.x.given.y = Causation.x.given.y,
@@ -121,12 +123,10 @@ NNS.caus <- function(x, y,
       } else {
         if(plot){
           # For plotting only
-          if(tau == "cs"){
-            tau <- 0
-          }
-          if(tau == "ts"){
-            tau <- 3
-          }
+          if(tau == "cs") tau <- 0
+
+          if(tau == "ts") tau <- 3
+
           Uni.caus(x, y, tau = tau, plot = plot)
         }
         return(c(Causation.x.given.y = Causation.x.given.y,

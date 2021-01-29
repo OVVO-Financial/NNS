@@ -67,7 +67,10 @@ NNS.boost <- function(IVs.train,
                       status = TRUE,
                       ncores = NULL){
 
-  if(is.null(obj.fn)){ stop("Please provide an objective function")}
+  if(is.null(obj.fn)) stop("Please provide an objective function")
+
+  if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
+  if(any(class(DV.train)=="tbl")) DV.train <- as.vector(unlist(DV.train))
 
   if(!is.null(type)){
     type <- tolower(type)
@@ -98,14 +101,17 @@ NNS.boost <- function(IVs.train,
     num_cores <- ncores
   }
 
-  if((num_cores)>cores){ stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))}
+  if((num_cores)>cores) stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))
+
+
+  if(is.null(IVs.test)){
+    IVs.test <- IVs.train
+  } else {
+    if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
+  }
 
   if(balance){
-    if(1%in%DV.train){
-      DV.train <- as.numeric(as.factor(DV.train))
-    } else {
-      DV.train <- as.numeric(as.factor(DV.train))
-    }
+    DV.train <- as.numeric(as.factor(DV.train))
 
     y_train <- as.factor(as.character(DV.train))
 
@@ -118,12 +124,9 @@ NNS.boost <- function(IVs.train,
 
     IVs.train <- training[, -ncol(training)]
     DV.train <- as.numeric(as.character(training[,ncol(training)]))
-
-
-    if(is.null(IVs.test)) {IVs.test <- IVs.train}
   }
 
-  if(is.null(IVs.test)) {IVs.test <- IVs.train}
+
 
   x <- IVs.train
   y <- DV.train

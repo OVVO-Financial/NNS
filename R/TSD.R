@@ -14,6 +14,10 @@
 #' @export
 
 NNS.TSD <- function(x, y){
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
     x_sort <- sort(x, decreasing = FALSE)
     y_sort <- sort(y, decreasing = FALSE)
 

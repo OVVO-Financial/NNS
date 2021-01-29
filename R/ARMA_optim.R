@@ -64,6 +64,8 @@ NNS.ARMA.optim <- function(variable, training.set,
                         print.trace = TRUE,
                         ncores = NULL){
 
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
   if(length(training.set)==length(variable)){ stop("Please provide a 'training.set' value (integer) less than the length of the variable.")}
 
   if(is.null(obj.fn)){ stop("Please provide an objective function")}

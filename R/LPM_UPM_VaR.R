@@ -19,6 +19,8 @@
 
 LPM.VaR <- function(percentile, degree, x){
 
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+
     percentile <- pmax(pmin(percentile, 1), 0)
 
     l <- length(x)
@@ -55,6 +57,8 @@ LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
 #' @export
 
 UPM.VaR <- function(percentile, degree, x){
+
+    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
 
     percentile <- pmax(pmin(percentile, 1), 0)
 

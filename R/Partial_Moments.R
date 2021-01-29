@@ -16,6 +16,9 @@
 #' @export
 
 LPM <-  function(degree, target, variable){
+
+    if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
     if(degree == 0) return(mean(variable <= target))
 
     sum((target - (variable[variable <= target])) ^ degree) / length(variable)
@@ -41,6 +44,9 @@ LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 
 UPM <-  function(degree, target, variable){
+
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
   if(degree == 0) return(mean(variable > target))
 
   sum(((variable[variable > target]) - target) ^ degree) / length(variable)
@@ -69,6 +75,10 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
+
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
   z <- cbind(x, y)
   z <- t(t(z) - c(target.x, target.y))
   z[z<=0] <- NA
@@ -98,6 +108,10 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
+
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
   z <- cbind(x,y)
   z <- t(c(target.x, target.y) - t(z))
   z[z<=0] <- NA
@@ -127,6 +141,10 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
+
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
   z <- cbind(x,y)
   z[,1] <- z[,1] - target.x
   z[,2] <- target.y - z[,2]
@@ -157,6 +175,10 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
+
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
   z <- cbind(x,y)
   z[,1] <- target.x - z[,1]
   z[,2] <- z[,2] - target.y
@@ -202,6 +224,8 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 
 
 PM.matrix <- function(LPM.degree, UPM.degree, target = "mean", variable, pop.adj=FALSE){
+
+  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
   n <- ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
@@ -304,15 +328,12 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = "mean", variable, pop.adj
 #' @export
 
 LPM.ratio <- function(degree, target, variable){
+
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
   lpm <- LPM(degree, target, variable)
 
-  if(degree>0){
-      area <- lpm + UPM(degree, target, variable)
-  } else {
-      area <- 1
-  }
-
-
+  if(degree>0) area <- lpm + UPM(degree, target, variable) else area <- 1
 
   return(lpm / area)
 }
@@ -344,13 +365,12 @@ LPM.ratio <- function(degree, target, variable){
 
 
 UPM.ratio <- function(degree, target, variable){
+
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
   upm <- UPM(degree, target, variable)
 
-  if(degree>0){
-    area <- LPM(degree, target, variable) + upm
-  } else {
-    area <- 1
-  }
+  if(degree>0) area <- LPM(degree, target, variable) + upm else area <- 1
 
   return(upm / area)
 }
@@ -381,7 +401,10 @@ UPM.ratio <- function(degree, target, variable){
 
 
 NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TRUE){
-  if(is.null(target)){target <- sort(variable)}
+
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+
+  if(is.null(target)) target <- sort(variable)
 
 # d/dx approximation
   if(is.null(bins)){
@@ -449,6 +472,9 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
 
 NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
+
+  if(any(class(variable)=="tbl") && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
   if(!is.null(target)){
      if(is.null(dim(variable)) || dim(variable)[2]==1){

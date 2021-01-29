@@ -64,9 +64,12 @@ NNS.ANOVA <- function(control,
             stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         }
         if(n >= 2){
-            A <- control
+            if(any(class(control)=="tbl")) A <- as.data.frame(control)
         }
     } else {
+        if(any(class(control)=="tbl")) control <- as.vector(unlist(control))
+        if(any(class(treatment)=="tbl")) treatment <- as.vector(unlist(treatment))
+
         return(NNS.ANOVA.bin(control, treatment, confidence.interval = confidence.interval, plot = plot, tails = tails))
     }
 
