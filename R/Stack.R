@@ -482,6 +482,15 @@ NNS.stack <- function(IVs.train,
   if(!is.null(type)) probability.threshold <-  mean(c(threshold_results_1, threshold_results_2), na.rm = TRUE) else probability.threshold <- .5
 
   if(identical(sort(method),c(1,2))){
+    if(sum(is.na(nns.method.1)>0)){
+        na.1.index <- which(is.na(nns.method.1))
+        nns.method.1[na.1.index] <- nns.method.2[na.1.index]
+    }
+    if(sum(is.na(nns.method.2)>0)){
+      na.2.index <- which(is.na(nns.method.2))
+      nns.method.2[na.2.index] <- nns.method.1[na.2.index]
+    }
+
     estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
     if(!is.null(type)){
       estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
