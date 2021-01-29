@@ -22,11 +22,13 @@
 
 
 NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
+
+
+    if(any(class(A)=="tbl")) A <- as.data.frame(A)
+
     A <- x
     n <- ncol(A)
     l <- dim(A)[1]
-
-    if(any(class(A)=="tbl")) A <- as.data.frame(A)
 
     if(is.null(colnames(A))){
         colnames.list <- list()
@@ -86,10 +88,14 @@ NNS.dep.hd <- function (x, plot = FALSE, independence.overlay = FALSE){
 
     }
 
-
-    return(list(actual.observations = observed * l,
-                        independent.null = independence * l,
-                        Dependence = abs(observed - independence) / independence ))
-
+    if(observed > independence){
+        return(list(actual.observations = observed * l,
+                    independent.null = independence * l,
+                    Dependence = (observed - independence) /(1 - independence)))
+    } else {
+        return(list(actual.observations = observed * l,
+                    independent.null = independence * l,
+                    Dependence = (independence - observed) / independence))
+    }
 
 }
