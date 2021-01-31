@@ -367,6 +367,8 @@ NNS.part = function(x, y,
 
         RP <- data.table::setorder(RP[], quadrant)[]
 
+        if(length(unique(diff(x))) < .33*length(x)) RP$x <- ifelse(RP$x%%1 < .5, floor(RP$x), ceiling(RP$x))
+
         if(Voronoi) {
             abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1,max(x)), lty = 3)
             points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
