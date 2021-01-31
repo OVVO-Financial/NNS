@@ -63,10 +63,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     for(i in 1 : n){
       part.map <- NNS.part(original.IVs[ , i], original.DV, order = order, type = type, noise.reduction = noise.reduction, obs.req = 0)
       dep <- NNS.dep(original.IVs[ , i], original.DV)$Dependence
+      char_length_order <- dep * max(nchar(part.map$df$quadrant))
       if(dep > stn){
-        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = round(dep * max(nchar(part.map$df$quadrant))), type = type, noise.reduction = 'off', obs.req = 0)$regression.points$x
+        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = ifelse(char_length_order%%1 < .5, floor(char_length_order), ceiling(char_length_order)), type = type, noise.reduction = 'off', obs.req = 0)$regression.points$x
       } else {
-        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = round(dep * max(nchar(part.map$df$quadrant))), noise.reduction = noise.reduction, type = "XONLY", obs.req = 1)$regression.points$x
+        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = ifelse(char_length_order%%1 < .5, floor(char_length_order), ceiling(char_length_order)), noise.reduction = noise.reduction, type = "XONLY", obs.req = 1)$regression.points$x
       }
     }
     reg.points.matrix <- do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))

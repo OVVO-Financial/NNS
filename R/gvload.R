@@ -10,6 +10,7 @@
 #' @importFrom tdigest tdigest tquantile
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
 #' @importFrom caret upSample downSample
+#' @importFrom plyr is.discrete
 #' @import doParallel
 #' @import rgl
 #' @import stringr

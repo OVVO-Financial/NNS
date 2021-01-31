@@ -158,7 +158,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode"
   }
 
-  if(any(class(y) == "factor")){
+  if(plyr::is.discrete(y)){
     type <- "class"
     noise.reduction <- "mode"
   }
@@ -639,7 +639,7 @@ NNS.reg = function (x, y,
   coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
   reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
 
-  if(!is.null(order) && is.character(order)){
+  if(plyr::is.discrete(order)){
     estimate <- y
   } else{
     estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
@@ -661,13 +661,13 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      if(type=="class") point.est.y <- round(point.est.y)
+      if(type=="class") point.est.y <- ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))
     }
   }
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    if(type=="class") estimate <- round(estimate)
+    if(type=="class") estimate <- ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,
@@ -692,7 +692,7 @@ NNS.reg = function (x, y,
   fitted <- cbind(fitted, gradient)
   fitted$residuals <- fitted$y.hat - fitted$y
 
-  if(dependence < stn){
+  if(dependence < stn && !plyr::is.discrete(x) && length(unique(diff(x))) > sqrt(length(x))){
     bias <- fitted
     data.table::setkey(bias, x)
 

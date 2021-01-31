@@ -204,7 +204,7 @@ NNS.ARMA <- function(variable,
     if(method == 'nonlin' | method == 'both'){
       Regression.Estimates <- list(length(lag))
 
-      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = "NNS")%dopar%{
+      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = c("NNS", "data.table", "plyr"))%dopar%{
         x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
 
