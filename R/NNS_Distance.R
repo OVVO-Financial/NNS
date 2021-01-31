@@ -18,11 +18,9 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   l <- nrow(rpm)
   y.hat <- rpm$y.hat
 
-
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
-    rpm[, names(rpm) := lapply(.SD, as.numeric)]
-    rpm <- rpm[,lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
+    rpm <- rpm[,names(rpm) :=lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
     dist.estimate <- as.numeric(rpm[1, ])
     rpm <- rpm[-1,]
   }
@@ -64,9 +62,8 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   rpm <- rpm[1:min(k,l),]
 
   inv <- (1 / rpm$Sum)
-
   weights <- inv / sum(inv)
-  norm_weights <- dnorm(rpm$Sum)
+  norm_weights <- dnorm(rpm$Sum, mean(rpm$Sum), sd(rpm$Sum))
   norm_weights <- norm_weights / sum(norm_weights)
 
   weights <- (weights + norm_weights)/2

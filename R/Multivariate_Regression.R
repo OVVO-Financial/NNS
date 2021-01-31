@@ -161,6 +161,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
   }
 
+
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
 
 
@@ -171,10 +172,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
   REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD, .SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
 
-
   data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, colnames(mean.by.id.matrix)[1:n])
 
-  if(is.character(n.best)){
+  if(plyr::is.discrete(n.best)){
       n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
     if(is.null(n.best)){
@@ -185,13 +185,16 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
 
   if(n.best > 1 && !point.only){
+
     if(!is.null(cl)){
         fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
     } else {
         fits <- data.table::data.table(original.IVs)
+
         fits <- fits[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(original.IVs)]
 
         fitted.matrix$y.hat <- as.numeric(unlist(fits$DISTANCES))
+
     }
 
     y.hat <- fitted.matrix$y.hat
@@ -199,6 +202,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     if(!is.null(type)){
         y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
     }
+
   }
 
   ### Point estimates
