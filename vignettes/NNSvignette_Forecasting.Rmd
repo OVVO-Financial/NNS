@@ -20,6 +20,7 @@ require(rgl)
 require(tdigest)
 require(dtw)
 require(meboot)
+require(plyr)
 ```
 
 
@@ -172,11 +173,11 @@ We included the ability to use any number of specified seasonal periods simultan
 * `weights`
 
 Instead of weighting by the `seasonal.factor` strength of seasonality, we offer the ability to weight each per any defined compatible vector summing to 1.  
-Equal weighting would be `weights = rep((1/length(seasonal.factor)), length(seasonal.factor))`.
+Equal weighting would be `weights = "equal"`.
 
 * `conf.intervals`
 
-Provides the values for the specified confidence intervals within [0,1] for each forecasted point and plots the bootstapped replicates for the forecasted points.
+Provides the values for the specified confidence intervals within [0,1] for each forecasted point and plots the bootstrapped replicates for the forecasted points.
 
 * `seasonal.factor = FALSE`
 

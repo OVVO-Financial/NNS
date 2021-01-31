@@ -18,6 +18,7 @@ library(data.table)
 require(knitr)
 require(rgl)
 require(meboot)
+require(plyr)
 require(tdigest)
 require(dtw)
 ```
@@ -128,6 +129,8 @@ LPM.VaR(.025, 0, deps)
 ## Upper CI
 UPM.VaR(.025, 0, deps)
 ```
+
+
 
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
