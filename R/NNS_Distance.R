@@ -21,7 +21,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
     rpm <- rpm[, names(rpm) := lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
-    dist.estimate <- as.numeric(rpm[1, ])
+    dist.estimate <- unlist(rpm[1, ])
     rpm <- rpm[-1,]
   }
 

@@ -692,7 +692,7 @@ NNS.reg = function (x, y,
   fitted <- cbind(fitted, gradient)
   fitted$residuals <- fitted$y.hat - fitted$y
 
-  if(dependence < stn && !plyr::is.discrete(x) && length(unique(diff(x))) > .33*length(x)){
+  if(dependence < stn && !plyr::is.discrete(x) && mean(c(length(unique(diff(x))), length(unique(x)))) > .33*length(x)){
     bias <- fitted
     data.table::setkey(bias, x)
 

@@ -76,10 +76,6 @@ NNS.dep = function(x,
                    asym = FALSE,
                    print.map = FALSE){
 
-  if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
-  if(!is.null(y) && any(class(y)=="tbl")) y <- as.vector(unlist(y))
-
   oldw <- getOption("warn")
   options(warn = -1)
 
@@ -87,9 +83,10 @@ NNS.dep = function(x,
 
   if(!is.null(y)){
 
+    obs <- max(10, l/5)
 
     # Define segments
-    if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = l/5, min.obs.stop = FALSE, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = NULL, obs.req = l/5, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)$dt
+    if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE)$dt
 
     PART[, weights := .N/l, by = prior.quadrant]
     weights <- PART[, weights[1], by = prior.quadrant]$V1
