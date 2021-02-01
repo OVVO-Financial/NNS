@@ -211,7 +211,7 @@ NNS.VAR <- function(variables,
           mutlivariate_extrapolation <- NNS.stack(a[1:last_point, -i], a[1:last_point, i],
                                                   IVs.test = a[, -i],
                                                   order = NULL,
-                                                  folds = 1)$stack
+                                                  folds = 1, stack = FALSE)$stack
 
           return(rowMeans(cbind(a[,i], mutlivariate_extrapolation)))
 

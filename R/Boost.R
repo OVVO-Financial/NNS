@@ -173,7 +173,7 @@ NNS.boost <- function(IVs.train,
                         method = 1, order = depth,
                         obj.fn = obj.fn, ts.test = ts.test,
                         objective = objective,
-                        ncores = ncores, type = type)
+                        ncores = ncores, type = type, stack = FALSE)
 
     n.best <- nns_est$NNS.reg.n.best
     probability.threshold <- nns_est$probability.threshold
