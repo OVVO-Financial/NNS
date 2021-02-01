@@ -438,13 +438,13 @@ NNS.boost <- function(IVs.train,
       }
 
 
-      estimates[[i]] <- NNS.reg(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
-                                y,
-                                point.est = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                plot = FALSE, order = depth,
-                                ncores = ncores,
-                                point.only = TRUE,
-                                type = type, dist = dist)$Point.est/dim(kf)[1]
+      estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+                                  y,
+                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
+                                  order = depth, method = 1,
+                                  ncores = ncores,
+                                  stack = FALSE, status = FALSE,
+                                  type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
 
       estimates[[i]][is.na(predicted)] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
 
