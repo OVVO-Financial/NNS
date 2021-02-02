@@ -23,8 +23,7 @@ NNS.boost(
   objective = "min",
   extreme = FALSE,
   feature.importance = TRUE,
-  status = TRUE,
-  ncores = NULL
+  status = TRUE
 )
 }
 \arguments{
@@ -66,8 +65,6 @@ NNS.boost(
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
