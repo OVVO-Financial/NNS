@@ -22,7 +22,6 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
@@ -64,8 +63,7 @@ NNS.boost <- function(IVs.train,
                       objective = "min",
                       extreme = FALSE,
                       feature.importance = TRUE,
-                      status = TRUE,
-                      ncores = NULL){
+                      status = TRUE){
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 
@@ -90,18 +88,6 @@ NNS.boost <- function(IVs.train,
   colnames(IVs.train) <- features
 
   DV.train <- transform[,1]
-
-
-  # Parallel process...
-  if (is.null(ncores)) {
-    cores <- detectCores()
-    num_cores <- cores - 1
-  } else {
-    cores <- detectCores()
-    num_cores <- ncores
-  }
-
-  if((num_cores)>cores) stop(paste0("Please ensure total number of cores [ncores] is less than ", cores))
 
 
   if(is.null(IVs.test)){
@@ -170,10 +156,10 @@ NNS.boost <- function(IVs.train,
     }
 
     nns_est <- NNS.stack(x, y, folds = 1, status = status,
-                        method = 1, order = depth,
-                        obj.fn = obj.fn, ts.test = ts.test,
-                        objective = objective,
-                        ncores = ncores, type = type, stack = FALSE)
+                         method = 1, order = depth,
+                         obj.fn = obj.fn, ts.test = ts.test,
+                         objective = objective,
+                         ncores = 1, type = type, stack = FALSE)
 
     n.best <- nns_est$NNS.reg.n.best
     probability.threshold <- nns_est$probability.threshold
@@ -253,8 +239,8 @@ NNS.boost <- function(IVs.train,
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
       # Do not predict a new unseen class
       if(!is.null(type)){
-          predicted <- pmin(predicted, max(as.numeric(y)))
-          predicted <- pmax(predicted, min(as.numeric(y)))
+        predicted <- pmin(predicted, max(as.numeric(y)))
+        predicted <- pmax(predicted, min(as.numeric(y)))
       }
 
       new.index.1 <- rev(order(abs(predicted - actual)))
@@ -263,7 +249,7 @@ NNS.boost <- function(IVs.train,
 
     } # i in learner.trials
   } else {
-      results <- threshold
+    results <- threshold
   } # NULL threshold
 
 
@@ -380,8 +366,8 @@ NNS.boost <- function(IVs.train,
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
       # Do not predict a new unseen class
       if(!is.null(type)){
-          predicted <- pmin(predicted,max(as.numeric(y)))
-          predicted <- pmax(predicted,min(as.numeric(y)))
+        predicted <- pmin(predicted,max(as.numeric(y)))
+        predicted <- pmax(predicted,min(as.numeric(y)))
       }
 
       new.index.1 <- rev(order(abs(predicted - actual)))
@@ -414,9 +400,9 @@ NNS.boost <- function(IVs.train,
   if(length(keeper.features)==0){
     if(old.threshold==0){
       if(objective=="min"){
-          stop("Please increase [threshold].")
+        stop("Please increase [threshold].")
       } else {
-          stop("Please reduce [threshold].")
+        stop("Please reduce [threshold].")
       }
     } else {
       keeper.features <- test.features[which.max(results)]
@@ -431,32 +417,32 @@ NNS.boost <- function(IVs.train,
 
 
 
-    for(i in 1:dim(kf)[1]){
+  for(i in 1:dim(kf)[1]){
 
-      if(status){
-        message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
-      }
-
-
-      estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
-                                  y,
-                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                  order = depth, method = 1,
-                                  ncores = ncores,
-                                  stack = FALSE, status = FALSE,
-                                  type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
-
-      estimates[[i]][is.na(predicted)] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
-
+    if(status){
+      message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
     }
+
+
+    estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+                                y,
+                                IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
+                                order = depth, method = 1,
+                                ncores = 1,
+                                stack = FALSE, status = FALSE,
+                                type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
+
+    estimates[[i]][is.na(predicted)] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
+
+  }
 
 
   estimates <- Reduce("+", estimates)
   estimates <- na.omit(estimates)
 
   if(!is.null(type)){
-      estimates <- pmin(estimates, max(as.numeric(y)))
-      estimates <- pmax(estimates, min(as.numeric(y)))
+    estimates <- pmin(estimates, max(as.numeric(y)))
+    estimates <- pmax(estimates, min(as.numeric(y)))
   }
 
   plot.table <- table(unlist(keeper.features))
