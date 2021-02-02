@@ -80,7 +80,7 @@ Using the reduced features (if any and calling them from `names(a$feature.weight
 b = NNS.stack(IVs.train = iris[-test.set, names(a$feature.weights)], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, names(a$feature.weights)],
-              type = "CLASS",
+              type = "CLASS", stack = FALSE,
               ncores = 1)
 
 b
