@@ -59,8 +59,7 @@ a = NNS.boost(IVs.train = iris[-test.set, 1:4],
               IVs.test = iris[test.set, 1:4],
               epochs = 100, learner.trials = 100, 
               status = FALSE,
-              type = "CLASS",
-              ncores = 1)
+              type = "CLASS")
 
 a$results
 
