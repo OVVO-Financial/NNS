@@ -105,10 +105,13 @@ NNS.dep = function(x,
 
     options(warn = oldw)
 
-    if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- mean(sum(abs(res_xy$V1) * weights),
-                                                                                 sum(abs(res_yx$V1) * weights))
+    if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- max(sum(abs(res$V1) * weights),
+                                                                                sum(abs(res_xy$V1) * weights),
+                                                                                sum(abs(res_yx$V1) * weights))
 
-    corr <- sum(res$V1 * weights)
+    corr <- mean(c(sum(res$V1 * weights),
+                   sum(res_xy$V1 * weights),
+                   sum(res_yx$V1 * weights)))
 
     return(list("Correlation" = corr,
                 "Dependence" = dependence))
