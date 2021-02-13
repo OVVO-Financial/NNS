@@ -31,11 +31,11 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
 
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums(t(rpm_mat - dist.estimate)^2 + 1/(1/l + t(rpm_mat == dist.estimate)), parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(t(rpm_mat - dist.estimate)^2 + 1/(1/l + t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat)) == dist.estimate)), parallel = TRUE)
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(rpm_mat - dist.estimate)) + 1/(1/l + t(rpm_mat == dist.estimate)), parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(abs(t(rpm_mat - dist.estimate)) + 1/(1/l + t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat))  == dist.estimate)), parallel = TRUE)
   }
 
   if(type=="DTW"){
@@ -43,7 +43,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   }
 
   if(type=="FACTOR"){
-    rpm$Sum <- 1/(1/l + ( Rfast::rowsums(t(rpm_mat == dist.estimate), parallel = TRUE)))
+    rpm$Sum <- 1/(1/l + ( Rfast::rowsums(t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat)) == dist.estimate), parallel = TRUE)))
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
@@ -51,7 +51,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   data.table::setkey(rpm, Sum)
 
   if(k==1){
-    index <- which.min(rpm$Sum)
+    index <- which(rpm$Sum==min(rpm$Sum))
     if(length(index)>1){
       return(mode(rpm$y.hat[index]))
     }  else {
@@ -61,14 +61,18 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
   rpm <- rpm[1:min(k,l),]
 
-  inv <- (1 / rpm$Sum)
-  weights <- inv / sum(inv)
+  inv <- 1 / rpm$Sum
+  emp_weights <- inv / sum(inv)
 
   norm_weights <- pmin(max(rpm$Sum), dnorm(rpm$Sum, mean(rpm$Sum), sd(rpm$Sum)))
   norm_weights <- norm_weights / sum(norm_weights)
-  weights <- (weights + norm_weights)/2
 
-  single.estimate <- sum(weights * rpm$y.hat)
+  t_weights <- pmin(max(rpm$Sum), dt(x = rpm$y.hat, df = min(k,l)))
+  t_weights <- t_weights/sum(t_weights)
+
+  weights <- (emp_weights + norm_weights + t_weights)/3
+
+  single.estimate <- weights%*%rpm$y.hat
 
   return(single.estimate)
 }
