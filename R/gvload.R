@@ -2,7 +2,7 @@
 
 #' @importFrom grDevices adjustcolor rainbow rgb
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
-#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm
+#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dt
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift transpose
 #' @importFrom dtw dtw
