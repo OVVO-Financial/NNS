@@ -9,17 +9,21 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   x <- data.matrix(x)
 
-  if(dim(x)[1] < 20 ) {
-    order <- 2
-    asym <- TRUE
-  }
+  if(dim(x)[1] < 20 ) order <- 2
 
   raw.rhos_lower <- list()
   raw.deps_lower <- list()
   raw.both_lower <- list()
+  raw.rhos_upper <- list()
+  raw.deps_upper <- list()
+  raw.both_upper <- list()
 
   for(i in 1 : (n-1)){
         raw.both_lower[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, asym = asym))
+        raw.both_upper[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , b], x[ , i], print.map = FALSE, asym = asym))
+
+        raw.rhos_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Correlation"])
+        raw.deps_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Dependence"])
 
         raw.rhos_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Correlation"])
         raw.deps_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Dependence"])
@@ -27,28 +31,20 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
 
   rhos <- matrix(, n, n)
-  rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
-
   deps <- matrix(0, n, n)
-  deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
 
     if(!asym){
+        rhos[lower.tri(rhos, diag = FALSE)] <- (unlist(raw.rhos_upper) + unlist(raw.rhos_lower)) / 2
+        deps[lower.tri(deps, diag = FALSE)] <- (unlist(raw.deps_upper) + unlist(raw.deps_lower)) / 2
+
         rhos <- pmax(rhos, t(rhos), na.rm = TRUE)
         deps <- pmax(deps, t(deps), na.rm = TRUE)
     } else {
+        rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
+        deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
+
         rhos_upper <- matrix(0, n, n)
         deps_upper <- matrix(0, n, n)
-
-        raw.rhos_upper <- list()
-        raw.deps_upper <- list()
-        raw.both_upper <- list()
-
-        for(i in 1 : (n-1)){
-            raw.both_upper[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , b], x[ , i], print.map = FALSE, asym = asym))
-
-            raw.rhos_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Correlation"])
-            raw.deps_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Dependence"])
-        }
 
         rhos[is.na(rhos)] <- 0
         deps[is.na(deps)] <- 0
