@@ -4,7 +4,7 @@
 \alias{NNS.SD.efficient.set}
 \title{NNS SD Efficient Set}
 \usage{
-NNS.SD.efficient.set(x, degree, type = "discrete")
+NNS.SD.efficient.set(x, degree, type = "discrete", status = TRUE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
@@ -12,6 +12,8 @@ NNS.SD.efficient.set(x, degree, type = "discrete")
 \item{degree}{numeric options: (1, 2, 3); Degree of stochastic dominance test from (1, 2 or 3).}
 
 \item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
+
+\item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 }
 \value{
 Returns set of stochastic dominant variable names.
