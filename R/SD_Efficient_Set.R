@@ -52,7 +52,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
     if(status) message("Checking ", i, " of ", (n-1), "\r", appendLF=FALSE)
     if(i == (n-1) & status) message("                                        ", appendLF=TRUE)
 
-        base <- final_ranked[ , current_base[length(current_base)]]
+        base <- final_ranked[ , tail(current_base, 1)]
 
         challenger <- final_ranked[ , i + 1]
 
@@ -84,10 +84,9 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
                 }
             }
 
-            if(!I) current_base[i + 1] <- i + 1
+            if(!I) current_base <- c(current_base, i + 1)
       }
 
-      current_base <- na.omit(current_base)
     }
 
 
