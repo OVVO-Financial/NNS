@@ -62,13 +62,10 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
 
         if(degree == 3) sd.test <- NNS.TSD.uni(base, challenger)
 
-        if (sd.test == 1){
-            current_base[i + 1] <- current_base[length(current_base)]
-            Dominated_set[i] <- i + 1
-        }
-
+        if (sd.test == 1) Dominated_set[i] <- i + 1
 
         if (sd.test == 0){
+
             for (j in current_base){
                 base <- final_ranked[ , j]
                 if(degree == 1) new.base.sd.test <- NNS.FSD.uni(base, challenger, type = type)
@@ -90,6 +87,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
             if(!I) current_base[i + 1] <- i + 1
       }
 
+      current_base <- na.omit(current_base)
     }
 
 
