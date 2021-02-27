@@ -85,6 +85,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
 
     }
 
+    if(status) message("                                        ", appendLF=FALSE)
 
     if(length(Dominated_set) > 0){
         return(colnames(final_ranked[ , - na.omit(Dominated_set)]))
