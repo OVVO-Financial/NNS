@@ -140,9 +140,7 @@ NNS.stack <- function(IVs.train,
 
 
   for(b in 1 : folds){
-    if(status){
-      message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
-    }
+    if(status) message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
 
     set.seed(123 * b)
     test.set <- sample(1 : length(IVs.train[ , 1]), as.integer(CV.size * length(IVs.train[ , 1])), replace = FALSE)
