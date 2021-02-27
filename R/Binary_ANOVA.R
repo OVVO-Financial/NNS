@@ -111,25 +111,25 @@ NNS.ANOVA.bin<- function(control, treatment,
 
             #Effect Size Lower Bound
             if(tails == "both"){
-                Lower.Bound.Effect <- min(mean(treatment) - max(a, b), 0)
+                Lower.Bound.Effect <- mean(treatment) - max(a, b)
             }
             if(tails == "left"){
-                Lower.Bound.Effect <- min(mean(treatment) - max(c, d), 0)
+                Lower.Bound.Effect <- mean(treatment) - max(c, d)
             }
             if(tails == "right"){
-                Lower.Bound.Effect <- min(mean(treatment) - max(a, b), 0)
+                Lower.Bound.Effect <- mean(treatment) - max(a, b)
             }
 
 
   #Effect Size Upper Bound
             if(tails == "both"){
-                Upper.Bound.Effect <- max(mean(treatment) - min(c, d), 0)
+                Upper.Bound.Effect <- mean(treatment) - min(c, d)
             }
             if(tails == "left"){
-                Upper.Bound.Effect <- max(mean(treatment) - min(c, d), 0)
+                Upper.Bound.Effect <- mean(treatment) - min(c, d)
             }
             if(tails == "right"){
-                Upper.Bound.Effect <- max(mean(treatment) - min(a, b), 0)
+                Upper.Bound.Effect <- mean(treatment) - min(a, b)
             }
 
 
