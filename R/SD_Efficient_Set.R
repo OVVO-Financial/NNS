@@ -50,6 +50,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
 
     for (i in 1:(n-1)) {
     if(status) message("Checking ", i, " of ", (n-1), "\r", appendLF=FALSE)
+    if(i == (n-1) & status) message("                                        ", appendLF=TRUE)
 
         base <- final_ranked[ , current_base[length(current_base)]]
 
@@ -62,7 +63,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
         if(degree == 3) sd.test <- NNS.TSD.uni(base, challenger)
 
         if (sd.test == 1){
-            current_base[i] <- current_base[length(current_base)]
+            current_base[i + 1] <- current_base[length(current_base)]
             Dominated_set[i] <- i + 1
         }
 
@@ -76,16 +77,22 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
 
                 if(degree == 3) new.base.sd.test <- NNS.TSD.uni(base, challenger)
 
-                if (new.base.sd.test == 0) next  else Dominated_set[i] <- i + 1
-
+                if (new.base.sd.test == 0){
+                    I <- FALSE
+                    next
+                } else {
+                    I <- TRUE
+                    Dominated_set[i] <- i + 1
+                    break
+                }
             }
 
-        current_base[i] <- i + 1
+            if(!I) current_base[i + 1] <- i + 1
       }
 
     }
 
-    if(status) message("                                        ", appendLF=FALSE)
+
 
     if(length(Dominated_set) > 0){
         return(colnames(final_ranked[ , - na.omit(Dominated_set)]))
