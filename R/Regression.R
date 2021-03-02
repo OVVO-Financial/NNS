@@ -424,7 +424,7 @@ NNS.reg = function (x, y,
   }
 
   if(is.null(order)){
-    dep.reduced.order <- ifelse((dependence*10) %% 1 < .5, floor(dependence*10), ceiling(dependence*10))
+    dep.reduced.order <- floor(dependence*10)
   } else {
     dep.reduced.order <- order
   }
