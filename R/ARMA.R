@@ -199,8 +199,6 @@ NNS.ARMA <- function(variable,
     Component.series <- GV$Component.series
 
     ## Regression on Component Series
-    #Regression.Estimates <- numeric()
-
     if(method == 'nonlin' | method == 'both'){
       Regression.Estimates <- list(length(lag))
 
@@ -210,12 +208,11 @@ NNS.ARMA <- function(variable,
 
 
         ## Skeleton NNS regression for NNS.ARMA
-        reg.points <- tail(NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE), 4)
+        reg.points <- NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
         reg.points <- reg.points[complete.cases(reg.points),]
 
-
-        run <- mean(rep(diff(reg.points$x), 1:length(diff(reg.points$x))))
-        rise <- mean(rep(diff(reg.points$y), 1:length(diff(reg.points$y))))
+        run <- mean(rep(diff(reg.points$x), (1:length(diff(reg.points$x)))^2))
+        rise <- mean(rep(diff(reg.points$y), (1:length(diff(reg.points$y)))^2))
 
         last.y + (rise / run)
       }
