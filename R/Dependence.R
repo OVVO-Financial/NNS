@@ -112,14 +112,11 @@ NNS.dep = function(x,
 
     lx <- length(unique(as.numeric(x)))
     ly <- length(unique(as.numeric(y)))
-    degree_x <- min(10, sqrt(length(x)))
-    degree_x <- min(degree_x, max(1,lx-1), max(1,ly-1))
-
-    if(lx && ly > sqrt(length(x))) poly_base <-  tryCatch(suppressWarnings(summary(lm(abs(y)~poly(x, degree_x, raw = TRUE)))$r.squared), error = function(e) dependence) else poly_base <- dependence
+    degree_x <- min(10, sqrt(length(x)), max(1,lx-1), max(1,ly-1))
 
     poly_base <- dependence
-    poly_base[is.na(poly_base)] <- dependence
-    if(is.null(poly_base)) poly_base <- dependence
+
+    if(lx > sqrt(length(x)) && ly > sqrt(length(x))) poly_base <- tryCatch(suppressWarnings(summary(lm(abs(y)~poly(x, degree_x, raw = TRUE)))$r.squared), error = function(e) dependence)
 
     dependence <- mean(c(rep(dependence,3), poly_base))
 
