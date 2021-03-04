@@ -105,9 +105,23 @@ NNS.dep = function(x,
 
     options(warn = oldw)
 
+
     if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- max(sum(abs(res$V1) * weights),
                                                                                 sum(abs(res_xy$V1) * weights),
                                                                                 sum(abs(res_yx$V1) * weights))
+
+    lx <- length(unique(as.numeric(x)))
+    ly <- length(unique(as.numeric(y)))
+    degree_x <- min(10, sqrt(length(x)))
+    degree_x <- min(degree_x, max(1,lx-1), max(1,ly-1))
+
+    if(lx && ly > sqrt(length(x))) poly_base <-  tryCatch(suppressWarnings(summary(lm(abs(y)~poly(x, degree_x, raw = TRUE)))$r.squared), error = function(e) dependence) else poly_base <- dependence
+
+    poly_base <- dependence
+    poly_base[is.na(poly_base)] <- dependence
+    if(is.null(poly_base)) poly_base <- dependence
+
+    dependence <- mean(c(rep(dependence,3), poly_base))
 
     corr <- mean(c(sum(res$V1 * weights),
                    sum(res_xy$V1 * weights),

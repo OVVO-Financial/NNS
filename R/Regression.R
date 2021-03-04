@@ -153,6 +153,9 @@ NNS.reg = function (x, y,
     }
   }
 
+  synthetic.x.equation <- NULL
+  x.star <- NULL
+
   if(!is.null(type)){
     type <- tolower(type)
     noise.reduction <- "mode"
@@ -183,7 +186,7 @@ NNS.reg = function (x, y,
     if(is.null(x.label)) x.label <- "x"
   }
 
-  if(factor.2.dummy){# && !multivariate.call){
+  if(factor.2.dummy){
     if(is.list(x) & !is.data.frame(x)) x <- do.call(cbind, x)
 
 
@@ -221,7 +224,7 @@ NNS.reg = function (x, y,
     } else { # is.null(point.est)
       point.est.y <- NULL
     }
-  } #if(factor.2.dummy && !multivariate.call)
+  } #if(factor.2.dummy)
 
   # Variable names
   original.names <- colnames(x)
@@ -411,6 +414,10 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
+#  if(is.null(original.columns) || is.null(dim.red.method)){
+#    synthetic.x.equation <- NULL
+#    x.star <- NULL
+#  }
 
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
   if(dependence < .5) dependence <- dependence + .1
@@ -418,17 +425,9 @@ NNS.reg = function (x, y,
 
   dependence <- min(1, dependence)
 
-  if(is.null(original.columns) || is.null(dim.red.method)){
-    synthetic.x.equation <- NULL
-    x.star <- NULL
-  }
+  if(is.null(type)) dep.reduced.order <- ceiling(dependence*10) else dep.reduced.order <- floor(dependence*10)
 
-  if(is.null(order)){
-    dep.reduced.order <- floor(dependence*10)
-  } else {
-    dep.reduced.order <- order
-  }
-
+  if(!is.null(order)) dep.reduced.order <- order
 
   if(dependence > stn){
     part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
@@ -563,17 +562,14 @@ NNS.reg = function (x, y,
     max.rps <- data.table::data.table(t(c(max(x), mean(x.max))))
 
     min.rps <- data.table::data.table(t(c(min(x), mean(x0))))
-
-    regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
   } else {
     ### Endpoints
     max.rps <- data.table::data.table(t(c(max(x), y[x == max(x)][1])))
 
     min.rps <- data.table::data.table(t(c(min(x), y[x == min(x)][1])))
-
-    regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
   }
 
+  regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
   regression.points <- regression.points[complete.cases(regression.points),]
   regression.points <- regression.points[ , .(x,y)]
   data.table::setkey(regression.points, x, y)
