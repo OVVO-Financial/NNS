@@ -79,10 +79,11 @@ NNS.dep = function(x,
   oldw <- getOption("warn")
   options(warn = -1)
 
-  x <- as.numeric(x)
-  l <- length(x)
 
   if(!is.null(y)){
+    x <- as.numeric(x)
+    l <- length(x)
+
     y <- as.numeric(y)
     obs <- max(10, l/5)
 
@@ -95,8 +96,6 @@ NNS.dep = function(x,
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
     ll <- expression(max(min(100, .N), 8))
-
-
 
     res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
     res[is.na(res)] <- 0
@@ -125,8 +124,9 @@ NNS.dep = function(x,
 
     poly_base <- dependence
 
-    if(I == 1) poly_base <- mean(c(suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence)),
-                                   suppressWarnings(tryCatch(summary(lm(PART$y)~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence))))
+    if(I == 1) poly_base <- tryCatch(summary(lm(abs(y)~poly(x, degree_x), raw = TRUE))$r.squared,
+                                                      warning = function(w) dependence,
+                                                      error = function(e) dependence)
 
     dependence <- mean(c(rep(dependence,3), poly_base))
 
