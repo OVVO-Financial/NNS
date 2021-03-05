@@ -125,7 +125,7 @@ NNS.dep = function(x,
 
     poly_base <- dependence
 
-    if(I == 1) poly_base <- suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared), error = function(e) dependence)
+    if(I == 1) poly_base <- suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence))
 
     dependence <- mean(c(rep(dependence,3), poly_base))
 
