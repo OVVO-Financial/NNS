@@ -79,19 +79,24 @@ NNS.dep = function(x,
   oldw <- getOption("warn")
   options(warn = -1)
 
+  x <- as.numeric(x)
   l <- length(x)
 
   if(!is.null(y)){
-
+    y <- as.numeric(y)
     obs <- max(10, l/5)
 
     # Define segments
     if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE)$dt
 
+    PART <- PART[complete.cases(PART),]
+
     PART[, weights := .N/l, by = prior.quadrant]
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
     ll <- expression(max(min(100, .N), 8))
+
+
 
     res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
     res[is.na(res)] <- 0
@@ -110,13 +115,17 @@ NNS.dep = function(x,
                                                                                 sum(abs(res_xy$V1) * weights),
                                                                                 sum(abs(res_yx$V1) * weights))
 
-    lx <- length(unique(as.numeric(x)))
-    ly <- length(unique(as.numeric(y)))
-    degree_x <- min(10, sqrt(l), max(1,lx-1), max(1,ly-1))
+    lx <- length(unique(as.numeric(as.character(PART$x))))
+    ly <- length(unique(as.numeric(as.character(PART$y))))
+    degree_x <- min(10, max(1,lx-1), max(1,ly-1))
+
+    I_x <- lx > sqrt(l)
+    I_y <- ly > sqrt(l)
+    I <- I_x * I_y
 
     poly_base <- dependence
 
-    if(lx > sqrt(l) && ly > sqrt(l)) poly_base <- tryCatch(suppressWarnings(summary(lm(abs(y)~poly(x, degree_x, raw = TRUE)))$r.squared), error = function(e) dependence)
+    if(I == 1) poly_base <- suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared), error = function(e) dependence)
 
     dependence <- mean(c(rep(dependence,3), poly_base))
 
