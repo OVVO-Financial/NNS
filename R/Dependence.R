@@ -108,7 +108,7 @@ NNS.dep = function(x,
     res_xy[is.na(res_xy)] <- 0
     res_yx[is.na(res_yx)] <- 0
 
-    options(warn = oldw)
+
 
 
     if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- max(sum(abs(res$V1) * weights),
@@ -125,13 +125,16 @@ NNS.dep = function(x,
 
     poly_base <- dependence
 
-    if(I == 1) poly_base <- suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence))
+    if(I == 1) poly_base <- mean(c(suppressWarnings(tryCatch(summary(lm(abs(PART$y))~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence)),
+                                   suppressWarnings(tryCatch(summary(lm(PART$y)~poly(PART$x, degree_x), raw = TRUE)$r.squared, error = function(e) dependence))))
 
     dependence <- mean(c(rep(dependence,3), poly_base))
 
     corr <- mean(c(sum(res$V1 * weights),
                    sum(res_xy$V1 * weights),
                    sum(res_yx$V1 * weights)))
+
+    options(warn = oldw)
 
     return(list("Correlation" = corr,
                 "Dependence" = dependence))

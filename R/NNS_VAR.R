@@ -113,6 +113,9 @@ NNS.VAR <- function(variables,
                     status = TRUE,
                     ncores = NULL){
 
+  oldw <- getOption("warn")
+  options(warn = -1)
+
   if(any(class(variables)=="tbl")) variables <- as.data.frame(variables)
 
   dim.red.method <- tolower(dim.red.method)
@@ -419,6 +422,8 @@ NNS.VAR <- function(variables,
 
   IE <- data.table::data.table(nns_IVs_interpolated_extrapolated)
   colnames(IE) <- colnames(variables)
+
+  options(warn = oldw)
 
   if(sum(na_s)>0){
   return( list("interpolated_and_extrapolated" = IE,
