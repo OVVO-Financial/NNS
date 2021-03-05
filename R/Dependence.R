@@ -114,8 +114,8 @@ NNS.dep = function(x,
                                                                                 sum(abs(res_xy$V1) * weights),
                                                                                 sum(abs(res_yx$V1) * weights))
 
-    lx <- length(unique(as.numeric(as.character(PART$x))))
-    ly <- length(unique(as.numeric(as.character(PART$y))))
+    lx <- PART[, length(unique(x))]
+    ly <- PART[, length(unique(y))]
     degree_x <- min(10, max(1,lx-1), max(1,ly-1))
 
     I_x <- lx > sqrt(l)
