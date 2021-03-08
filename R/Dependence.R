@@ -76,9 +76,6 @@ NNS.dep = function(x,
                    asym = FALSE,
                    print.map = FALSE){
 
-  oldw <- getOption("warn")
-  options(warn = -1)
-
 
   if(!is.null(y)){
     x <- as.numeric(x)
@@ -97,12 +94,12 @@ NNS.dep = function(x,
 
     ll <- expression(max(min(100, .N), 8))
 
-    res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res <- PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*suppressWarnings(summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared), by = prior.quadrant]
     res[is.na(res)] <- 0
 
     # Compare each asymmetry
-    res_xy <- PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
-    res_yx <- PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared, by = prior.quadrant]
+    res_xy <- PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*suppressWarnings(summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared), by = prior.quadrant]
+    res_yx <- PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*suppressWarnings(summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], min(10, as.integer(sqrt(.N))), raw = TRUE)))$r.squared), by = prior.quadrant]
 
     res_xy[is.na(res_xy)] <- 0
     res_yx[is.na(res_yx)] <- 0
@@ -134,7 +131,6 @@ NNS.dep = function(x,
                    sum(res_xy$V1 * weights),
                    sum(res_yx$V1 * weights)))
 
-    options(warn = oldw)
 
     return(list("Correlation" = corr,
                 "Dependence" = dependence))

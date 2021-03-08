@@ -7,7 +7,7 @@
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
 #' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.95 to ensure high dependence for higher \code{("order")} and endpoint determination.
-#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", \code{numeric vector}, NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  Alternatively, user can specify a numeric vector of coefficients.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
 #' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
@@ -300,10 +300,10 @@ NNS.reg = function (x, y,
         y <- as.numeric(y)
 
         if(!is.null(dim.red.method) & !is.null(dim(x))){
-          dim.red.method <- tolower(dim.red.method)
+          if(!is.numeric(dim.red.method)) dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
 
-          if(dim.red.method!="cor" && dim.red.method!="equal"){
+          if(!is.numeric(dim.red.method) && dim.red.method!="cor" && dim.red.method!="equal"){
             if(!is.null(type)) fact <- TRUE else fact <- FALSE
             x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE)$Dependence
             x.star.dep[is.na(x.star.dep)] <- 0
@@ -312,17 +312,17 @@ NNS.reg = function (x, y,
           x.star.cor <- cor(cbind(x, y), method = "spearman")
           x.star.cor[is.na(x.star.cor)] <- 0
 
-          if(dim.red.method == "nns.dep"){
+          if(!is.numeric(dim.red.method) && dim.red.method == "nns.dep"){
             x.star.coef <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
-          if(dim.red.method == "cor"){
+          if(!is.numeric(dim.red.method) && dim.red.method == "cor"){
             x.star.coef <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
-          if(dim.red.method == "nns.caus"){
+          if(!is.numeric(dim.red.method) && dim.red.method == "nns.caus"){
             if(is.null(tau)){
               tau <- "cs"
             }
@@ -331,10 +331,9 @@ NNS.reg = function (x, y,
             cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
             cause[is.na(cause)] <- 0
             x.star.coef <- (cause[(ncol(x) + 1), ] - cause[ ,(ncol(x) + 1)])[-(ncol(x) + 1)]
-
           }
 
-          if(dim.red.method == "all"){
+          if(!is.numeric(dim.red.method) && dim.red.method == "all"){
             if(is.null(tau)){
               tau <- "cs"
             }
@@ -355,9 +354,9 @@ NNS.reg = function (x, y,
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
-          if(dim.red.method == "equal") {
-            x.star.coef <- rep(1, ncol(x))
-          }
+          if(!is.numeric(dim.red.method) && dim.red.method == "equal")  x.star.coef <- rep(1, ncol(x))
+
+          if(is.numeric(dim.red.method)) x.star.coef <- dim.red.method
 
 
           preserved.coef <- x.star.coef
@@ -374,7 +373,7 @@ NNS.reg = function (x, y,
             x.star.coef[x.star.coef == 0] <- preserved.coef
           }
 
-          DENOMINATOR <- sum( abs( x.star.coef) > 0)
+          if(is.numeric(dim.red.method)) DENOMINATOR <- sum(dim.red.method) else DENOMINATOR <- sum( abs( x.star.coef) > 0)
 
           synthetic.x.equation.coef <- data.table::data.table(Variable = colnames.list, Coefficient = x.star.coef)
 
