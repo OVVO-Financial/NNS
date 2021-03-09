@@ -413,18 +413,14 @@ NNS.reg = function (x, y,
 
   } # Multivariate
 
-#  if(is.null(original.columns) || is.null(dim.red.method)){
-#    synthetic.x.equation <- NULL
-#    x.star <- NULL
-#  }
 
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
-  if(dependence < .5) dependence <- dependence + .1
+  if(dependence < .25) dependence <- min(.25, dependence + .1)
   dependence[is.na(dependence)] <- .1
 
   dependence <- min(1, dependence)
 
-  if(is.null(type)) dep.reduced.order <- ceiling(dependence*10) else dep.reduced.order <- floor(dependence*10)
+  dep.reduced.order <- ifelse((dependence*10)%%1<.5, floor(dependence*10), ceiling(dependence*10))
 
   if(!is.null(order)) dep.reduced.order <- order
 
