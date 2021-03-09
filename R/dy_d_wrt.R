@@ -134,6 +134,7 @@ dy.d_ <- function(x, y, wrt,
 
       h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[,wrt]))))
       if(h_step==0) h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, .2), 0, x[,wrt]))))
+      if(h_step==0) h_step <- mean(x[,wrt])
 
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
@@ -195,6 +196,7 @@ dy.d_ <- function(x, y, wrt,
 
       h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[,wrt]))))
       if(h_step==0) h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, .2), 0, x[,wrt]))))
+      if(h_step==0) h_step <- mean(x[,wrt])
 
       original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
       original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
