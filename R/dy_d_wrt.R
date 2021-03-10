@@ -119,19 +119,14 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
 
-  h_s <- 1/log(length(x),c(2, 10))
-  h_s <- c(h_s, 2*h_s)
+  h_s <- abs(scale(LPM.VaR(seq(0, 1, .05), 1, x[,wrt]))+.5)
 
   if(NNS.dep(x[,wrt],y)$Dependence < .5) h_s <- 2*h_s
 
-  if(all(h_s<1)) h_s <- h_s <- c(.2, .4, .6, .8)
+  if(all(h_s>1)) h_s <- c(.2, .4, .5, .6, .8)
   h_s <- h_s[h_s<1]
 
-  if(length(h_s)==1){
-      h_s <- c(h_s, h_s/2, h_s/4, 1.25*h_s, 1.5*h_s)
-      h_s <- h_s[h_s<1]
-  }
-
+  h_s <- fivenum(h_s[h_s<1])
 
   for(h in h_s){
     index <- which(h == h_s)
@@ -237,13 +232,13 @@ dy.d_ <- function(x, y, wrt,
       }
 
       if(!is.null(dim(eval.points))){
-        h_step_1 <- mean(abs(diff(LPM.VaR(seq(.01, 1, h), 1, x[ ,1]))))
-        if(h_step_1==0) h_step_1 <- mean(abs(diff(LPM.VaR(seq(.01, 1, .2)[-1], 1, x[,1]))))
+        h_step_1 <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[ ,1]))))
+        if(h_step_1==0) h_step_1 <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,1]))))
         if(h_step_1==0) h_step_1 <- abs(mean(x[,1]))
 
 
-        h_step_2 <- mean(abs(diff(LPM.VaR(seq(.01, 1, h), 1, x[ ,2]))))
-        if(h_step_2==0) h_step_2 <- mean(abs(diff(LPM.VaR(seq(.01, 1, .2)[-1], 1, x[,2]))))
+        h_step_2 <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[ ,2]))))
+        if(h_step_2==0) h_step_2 <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,2]))))
         if(h_step_2==0) h_step_2 <- abs(mean(x[,2]))
 
         mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
