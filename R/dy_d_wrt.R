@@ -127,7 +127,11 @@ dy.d_ <- function(x, y, wrt,
   if(all(h_s<1)) h_s <- h_s <- c(.2, .4, .6, .8)
   h_s <- h_s[h_s<1]
 
-  if(length(h_s)==1) h_s <- c(h_s, h_s/2, h_s/4)
+  if(length(h_s)==1){
+      h_s <- c(h_s, h_s/2, h_s/4, 1.25*h_s, 1.5*h_s)
+      h_s <- h_s[h_s<1]
+  }
+
 
   for(h in h_s){
     index <- which(h == h_s)
