@@ -694,20 +694,16 @@ NNS.reg = function (x, y,
 
     fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
 
-    bias[, bias_r := lapply(.SD, data.table::frollmean, n = 2, fill = 0, align = 'right'), .SDcols = 2]
-    bias[, bias_l := lapply(.SD, data.table::frollmean, n = 2, fill = 0, align = 'left'), .SDcols = 2]
+    bias_r <- c(bias[, bias_r := lapply(.SD, data.table::frollmean, n = 2, fill = 0, align = 'right'), .SDcols = 2]$bias_r, 0)
+    bias_l <- c(0, bias[, bias_l := lapply(.SD, data.table::frollmean, n = 2, fill = 0, align = 'left'), .SDcols = 2]$bias_l)
+    bias_c <- bias[, bias_c := lapply(.SD, data.table::frollmean, n = 3, fill = 0, align = 'center'), .SDcols = 2]$bias_c
 
-    bias[, bias := rowMeans(.SD, na.rm = TRUE), .SDcols = c("bias_r", "bias_l")]
-
-    bias[, bias_r := NULL]
-    bias[, bias_l := NULL]
-
-    bias <- data.table::rbindlist(list(bias, data.frame(t(c(0,0,0)))), use.names = FALSE)
+    bias <- (bias_r + bias_l + bias_c)/3
 
     if(!is.null(type)){
-      if(type=="class") regression.points[, y := ifelse((y + bias$bias)%%1 < 0.5, floor(y + bias$bias), ceiling(y + bias$bias))] else regression.points[, y := y + bias$bias]
+      if(type=="class") regression.points[, y := ifelse((y + bias)%%1 < 0.5, floor(y + bias), ceiling(y + bias))] else regression.points[, y := y + bias]
     } else {
-      regression.points[, y := y + bias$bias]
+      regression.points[, y := y + bias]
     }
   }
 
