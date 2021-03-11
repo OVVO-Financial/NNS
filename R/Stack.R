@@ -220,11 +220,11 @@ NNS.stack <- function(IVs.train,
         var.cutoffs_1 <- abs(round(cor(data.matrix(cbind(DV.train, IVs.train)))[-1,1], digits = 2))
         var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
-        var.cutoffs_1 <- abs(round(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2))
+        var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2)))
 
-        var.cutoffs_2 <- abs(round(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2))
+        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2)))
       }
 
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
@@ -249,8 +249,8 @@ NNS.stack <- function(IVs.train,
           message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
         }
 
-        predicted <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
-                             type = NULL, dist = dist, point.only = TRUE)$Point.est
+        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
+                             type = NULL, dist = dist, point.only = TRUE)$Point.est)
 
         predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
@@ -287,8 +287,8 @@ NNS.stack <- function(IVs.train,
 
         if(!is.null(type)) best.nns.ord <- min(1, mode(na.omit(unlist(best.nns.ord)))) else best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
 
-        nns.method.2 <- NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
-                                type = NULL, point.only = TRUE)
+        nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
+                                type = NULL, point.only = TRUE))
 
         rel_vars <- nns.method.2$equation
 
@@ -363,8 +363,8 @@ NNS.stack <- function(IVs.train,
         }
 
         if(index==1){
-          setup <- NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
-                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE)
+          setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
+                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
           predicted <- setup$Point.est
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
@@ -385,14 +385,14 @@ NNS.stack <- function(IVs.train,
 
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {
-              predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                    type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est
+              predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+                                    type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
             }
 
             rm(CV.IVs.test.new)
           } else {
-            predicted <-  NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                  type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est
+            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+                                  type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
           }
           predicted <- unlist(predicted)
 
@@ -438,8 +438,8 @@ NNS.stack <- function(IVs.train,
         if(!is.null(type))  best.nns.cv <- min(1, mode(na.omit(unlist(best.nns.cv))))   else best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
 
         best.k <- ceiling(LPM.VaR(.625, 0, as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k))))))
-        nns.method.1 <- NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = NULL, point.only = TRUE)$Point.est
+        nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+                                type = NULL, point.only = TRUE)$Point.est)
         if(!is.null(type) && !is.null(nns.method.1)){
           threshold_results_1 <- mean(unlist(threshold_results_1))
           nns.method.1 <- ifelse(nns.method.1%%1 < threshold_results_1, floor(nns.method.1), ceiling(nns.method.1))

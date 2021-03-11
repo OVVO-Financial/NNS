@@ -698,12 +698,12 @@ NNS.reg = function (x, y,
     bias_l <- c(0, bias[, bias_l := lapply(.SD, data.table::frollmean, n = 2, fill = 0, align = 'left'), .SDcols = 2]$bias_l)
     bias_c <- bias[, bias_c := lapply(.SD, data.table::frollmean, n = 3, fill = 0, align = 'center'), .SDcols = 2]$bias_c
 
-    bias <- (bias_r + bias_l + bias_c)/3
+    bias <- suppressWarnings((bias_r + bias_l + bias_c)/3)
 
     if(!is.null(type)){
-      if(type=="class") regression.points[, y := ifelse((y + bias)%%1 < 0.5, floor(y + bias), ceiling(y + bias))] else regression.points[, y := y + bias]
+      if(type=="class") suppressWarnings(regression.points[, y := ifelse((y + bias)%%1 < 0.5, floor(y + bias), ceiling(y + bias))]) else suppressWarnings(regression.points[, y := y + bias])
     } else {
-      regression.points[, y := y + bias]
+      suppressWarnings(regression.points[, y := y + bias])
     }
   }
 
