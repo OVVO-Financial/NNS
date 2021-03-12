@@ -221,10 +221,10 @@ NNS.stack <- function(IVs.train,
         var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
         var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2)))
+                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
 
         var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)], digits = 2)))
+                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
       }
 
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
