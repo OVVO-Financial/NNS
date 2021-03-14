@@ -564,7 +564,20 @@ NNS.reg = function (x, y,
     min.rps <- data.table::data.table(t(c(min(x), y[x == min(x)][1])))
   }
 
-  regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps ), use.names = FALSE)
+  if(type!="class" || is.null(type)){
+      central_rows <- c(floor(median(1:nrow(regression.points))), ceiling(median(1:nrow(regression.points))))
+      central_x <- regression.points[central_rows,]$x
+
+      central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]])
+      central_x <- mean(central_x)
+      med.rps <- data.table::data.table(t(c(central_x, central_y)))
+  } else {
+      med.rps <- data.table::data.table(t(c(NA, NA)))
+  }
+
+  regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps, med.rps ), use.names = FALSE)
+
+
   regression.points <- regression.points[complete.cases(regression.points),]
   regression.points <- regression.points[ , .(x,y)]
   data.table::setkey(regression.points, x, y)

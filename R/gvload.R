@@ -17,6 +17,7 @@
 #' @import meboot
 #' @import tdigest
 #' @import data.table
+#' @import dynlm
 
 
 
@@ -46,7 +47,7 @@
   requireNamespace("meboot")
   requireNamespace("tdigest")
   requireNamespace("Rfast")
-
+  requireNamespace("dynlm")
 
 
   .datatable.aware = TRUE
