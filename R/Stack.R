@@ -506,6 +506,8 @@ NNS.stack <- function(IVs.train,
 
   gc()
 
+  if(is.null(probability.threshold)) probability.threshold <- .5
+
   return(list(OBJfn.reg = best.nns.cv,
               NNS.reg.n.best = best.k,
               probability.threshold = probability.threshold,

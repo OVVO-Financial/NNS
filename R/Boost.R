@@ -8,7 +8,6 @@
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
 #' @param depth options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.
-#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}. Analogous to \code{k} in a \code{k Nearest Neighbors} algorithm.  If \code{NULL}, determines the optimal clusters via the \link{NNS.stack} procedure.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
@@ -22,6 +21,8 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
@@ -36,7 +37,7 @@
 #'  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
 #'  IVs.test = iris[141:150, 1:4],
 #'  epochs = 100, learner.trials = 100,
-#'  type = "CLASS")
+#'  type = "CLASS", depth = NULL)
 #'
 #'  ## Test accuracy
 #'  mean(a$results == as.numeric(iris[141:150, 5]))
@@ -51,7 +52,6 @@ NNS.boost <- function(IVs.train,
                       type = NULL,
                       representative.sample = FALSE,
                       depth = "max",
-                      n.best = NULL,
                       learner.trials = 100,
                       epochs = NULL,
                       CV.size = .25,
@@ -63,7 +63,8 @@ NNS.boost <- function(IVs.train,
                       objective = "min",
                       extreme = FALSE,
                       feature.importance = TRUE,
-                      status = TRUE){
+                      status = TRUE,
+                      ncores = NULL){
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 
@@ -150,25 +151,6 @@ NNS.boost <- function(IVs.train,
 
   old.threshold <- 0
 
-  if(is.null(n.best)){
-    if(status){
-      message("Currently determining optimal [n.best] clusters...","\r",appendLF=TRUE)
-    }
-
-    nns_est <- NNS.stack(x, y, folds = 1, status = status,
-                         method = 1, order = depth,
-                         obj.fn = obj.fn, ts.test = ts.test,
-                         objective = objective,
-                         ncores = 1, type = type, stack = FALSE)
-
-    n.best <- nns_est$NNS.reg.n.best
-    probability.threshold <- nns_est$probability.threshold
-
-    if(status){
-      message("Currently determining learning threshold...","\r",appendLF=TRUE)
-    }
-  }
-
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
     if(!extreme){
@@ -232,8 +214,9 @@ NNS.boost <- function(IVs.train,
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
                            new.dv.train,
                            point.est = new.iv.test[,test.features[[i]]],
+                           dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
-                           n.best = n.best, factor.2.dummy = FALSE,
+                           factor.2.dummy = FALSE,
                            ncores = 1, type = type)$Point.est
 
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
@@ -360,7 +343,8 @@ NNS.boost <- function(IVs.train,
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
                            new.dv.train, point.est = new.iv.test[, features],
-                           plot = FALSE, residual.plot = FALSE, order = depth, n.best = n.best,
+                           dim.red.method = "equal",
+                           plot = FALSE, residual.plot = FALSE, order = depth,
                            factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
 
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
@@ -415,27 +399,36 @@ NNS.boost <- function(IVs.train,
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
 
+  ### PARALLEL
+
+  if (is.null(ncores)) {
+    num_cores <- as.integer(detectCores()) - 1
+  } else {
+    num_cores <- ncores
+  }
+
+
+
 
 
   for(i in 1:dim(kf)[1]){
-
     if(status){
       message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
     }
 
 
-    estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
-                                y,
-                                IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                order = depth, method = 1,
-                                ncores = 1,
-                                stack = FALSE, status = FALSE,
-                                type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
+      estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+                                  y,
+                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
+                                  order = depth, method = 1,
+                                  ncores = 1,
+                                  stack = FALSE, status = FALSE,
+                                  type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
 
-    estimates[[i]][is.na(predicted)] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
 
+
+      estimates[[i]][is.na(estimates[[i]])] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
   }
-
 
   estimates <- Reduce("+", estimates)
   estimates <- na.omit(estimates)
@@ -444,6 +437,7 @@ NNS.boost <- function(IVs.train,
     estimates <- pmin(estimates, max(as.numeric(y)))
     estimates <- pmax(estimates, min(as.numeric(y)))
   }
+
 
   plot.table <- table(unlist(keeper.features))
 
@@ -475,7 +469,9 @@ NNS.boost <- function(IVs.train,
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   } else {
-    estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
+
+    estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
+
     return(list("results" = estimates,
                 "feature.weights" = plot.table/sum(plot.table)))
   }
