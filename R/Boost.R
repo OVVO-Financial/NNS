@@ -355,7 +355,7 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(n, sample(2:n, 1), replace = FALSE))
+      features <- sort(sample(n, sample(1:ceiling(sqrt(n)), 1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
