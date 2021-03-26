@@ -402,22 +402,19 @@ NNS.boost <- function(IVs.train,
 
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
-  if((min(unlist(kf_reduced))-1)>0)  kf_reduced <- as.numeric(rep(names(table(unlist(kf_reduced))), round(as.numeric(table(unlist(kf_reduced))/(min(unlist(kf_reduced))-1)))))
-
-
  # for(i in 1:length(kf_reduced)){
     if(status){
       message("Generating Final Estimate" ,"\r", appendLF = TRUE)
     }
 
 
-      estimates<- NNS.stack(data.matrix(x[, unlist(final_scale)]),
-                                  y,
-                                  IVs.test = data.matrix(z[, unlist(final_scale)]),
-                                  order = depth, dim.red.method = "equal",
-                                  ncores = 1,
-                                  stack = FALSE, status = status,
-                                  type = type, dist = dist, folds = 1)$stack
+      estimates <- NNS.stack(data.matrix(x[, unlist(final_scale)]),
+                             y,
+                             IVs.test = data.matrix(z[, unlist(final_scale)]),
+                             order = depth, dim.red.method = "equal",
+                             ncores = 1,
+                             stack = FALSE, status = status,
+                             type = type, dist = dist, folds = 1)$stack
 
       estimates[is.na(unlist(estimates))] <- mean(unlist(estimates), na.rm = TRUE)
 
