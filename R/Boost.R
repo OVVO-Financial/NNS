@@ -7,7 +7,7 @@
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
 #' @param representative.sample logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.
-#' @param depth options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.
+#' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
@@ -21,8 +21,6 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
 #'
@@ -37,7 +35,7 @@
 #'  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
 #'  IVs.test = iris[141:150, 1:4],
 #'  epochs = 100, learner.trials = 100,
-#'  type = "CLASS", depth = NULL)
+#'  type = "CLASS", depth = NULL, ncores = 1)
 #'
 #'  ## Test accuracy
 #'  mean(a$results == as.numeric(iris[141:150, 5]))
@@ -51,7 +49,7 @@ NNS.boost <- function(IVs.train,
                       IVs.test = NULL,
                       type = NULL,
                       representative.sample = FALSE,
-                      depth = "max",
+                      depth = NULL,
                       learner.trials = 100,
                       epochs = NULL,
                       CV.size = .25,
@@ -63,8 +61,7 @@ NNS.boost <- function(IVs.train,
                       objective = "min",
                       extreme = FALSE,
                       feature.importance = TRUE,
-                      status = TRUE,
-                      ncores = NULL){
+                      status = TRUE){
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 
@@ -399,39 +396,31 @@ NNS.boost <- function(IVs.train,
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
 
-  ### PARALLEL
+  kf_reduced <- apply(kf, 1, function(x) eval(parse(text=x[1])))
 
-  if (is.null(ncores)) {
-    num_cores <- as.integer(detectCores()) - 1
-  } else {
-    num_cores <- ncores
-  }
+  scale_factor <- table(unlist(kf_reduced))/min(table(unlist(kf_reduced)))
 
+  final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
+  if((min(unlist(kf_reduced))-1)>0)  kf_reduced <- as.numeric(rep(names(table(unlist(kf_reduced))), round(as.numeric(table(unlist(kf_reduced))/(min(unlist(kf_reduced))-1)))))
 
 
-
-  for(i in 1:dim(kf)[1]){
+ # for(i in 1:length(kf_reduced)){
     if(status){
-      message("% of Final Estimate = ", format(i/dim(kf)[1], digits =  3, nsmall = 2),"     ","\r", appendLF = FALSE)
+      message("Generating Final Estimate" ,"\r", appendLF = TRUE)
     }
 
 
-      estimates[[i]] <- NNS.stack(data.matrix(x[, eval(parse(text=kf$V1[i]))]),
+      estimates<- NNS.stack(data.matrix(x[, unlist(final_scale)]),
                                   y,
-                                  IVs.test = data.matrix(z[, eval(parse(text=kf$V1[i]))]),
-                                  order = depth, method = 1,
+                                  IVs.test = data.matrix(z[, unlist(final_scale)]),
+                                  order = depth, dim.red.method = "equal",
                                   ncores = 1,
-                                  stack = FALSE, status = FALSE,
-                                  type = type, dist = dist, folds = 1)$stack/dim(kf)[1]
+                                  stack = FALSE, status = status,
+                                  type = type, dist = dist, folds = 1)$stack
 
+      estimates[is.na(unlist(estimates))] <- mean(unlist(estimates), na.rm = TRUE)
 
-
-      estimates[[i]][is.na(estimates[[i]])] <- mean(unlist(estimates[[i]]), na.rm = TRUE)
-  }
-
-  estimates <- Reduce("+", estimates)
-  estimates <- na.omit(estimates)
 
   if(!is.null(type)){
     estimates <- pmin(estimates, max(as.numeric(y)))
