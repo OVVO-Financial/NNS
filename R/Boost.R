@@ -35,7 +35,7 @@
 #'  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
 #'  IVs.test = iris[141:150, 1:4],
 #'  epochs = 100, learner.trials = 100,
-#'  type = "CLASS", depth = NULL, ncores = 1)
+#'  type = "CLASS", depth = NULL)
 #'
 #'  ## Test accuracy
 #'  mean(a$results == as.numeric(iris[141:150, 5]))
@@ -279,6 +279,11 @@ NNS.boost <- function(IVs.train,
     message("                                       ", "\r", appendLF = FALSE)
   }
 
+  if(objective=="max"){
+    reduced.test.features <- test.features[which(results>=threshold)]
+  } else {
+    reduced.test.features <- test.features[which(results<=threshold)]
+  }
 
   keeper.features <- list()
 
@@ -335,7 +340,7 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(n, sample(1:ceiling(sqrt(n)), 1), replace = FALSE))
+      features <- sort(sample(unlist(reduced.test.features), sample(2:n,1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
@@ -370,11 +375,7 @@ NNS.boost <- function(IVs.train,
       }
     }
   } else { # !is.null(epochs)
-    if(objective=="max"){
-      keeper.features <- test.features[which(results>=threshold)]
-    } else {
-      keeper.features <- test.features[which(results<=threshold)]
-    }
+      keeper.features <- reduced.test.features
   }
 
   keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
@@ -402,10 +403,8 @@ NNS.boost <- function(IVs.train,
 
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
- # for(i in 1:length(kf_reduced)){
-    if(status){
-      message("Generating Final Estimate" ,"\r", appendLF = TRUE)
-    }
+
+  if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
 
 
       estimates <- NNS.stack(data.matrix(x[, unlist(final_scale)]),
