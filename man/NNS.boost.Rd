@@ -22,8 +22,7 @@ NNS.boost(
   objective = "min",
   extreme = FALSE,
   feature.importance = TRUE,
-  status = TRUE,
-  ncores = NULL
+  status = TRUE
 )
 }
 \arguments{
@@ -37,7 +36,7 @@ NNS.boost(
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = NULL)}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
+\item{depth}{options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.}
 
 \item{learner.trials}{integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.}
 
@@ -63,8 +62,6 @@ NNS.boost(
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
@@ -81,7 +78,7 @@ Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary
  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
  IVs.test = iris[141:150, 1:4],
  epochs = 100, learner.trials = 100,
- type = "CLASS", depth = NULL)
+ type = "CLASS", depth = NULL, ncores = 1)
 
  ## Test accuracy
  mean(a$results == as.numeric(iris[141:150, 5]))
