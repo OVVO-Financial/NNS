@@ -10,7 +10,7 @@ NNS.boost(
   IVs.test = NULL,
   type = NULL,
   representative.sample = FALSE,
-  depth = "max",
+  depth = NULL,
   learner.trials = 100,
   epochs = NULL,
   CV.size = 0.25,
@@ -37,7 +37,7 @@ NNS.boost(
 
 \item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
-\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = "max")}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
+\item{depth}{options: (integer, NULL, "max"); Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors.  \code{(depth = NULL)}(default) will be significantly faster, but increase the variance of results, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
 
 \item{learner.trials}{integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.}
 
