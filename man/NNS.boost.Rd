@@ -78,7 +78,7 @@ Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary
  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
  IVs.test = iris[141:150, 1:4],
  epochs = 100, learner.trials = 100,
- type = "CLASS", depth = NULL, ncores = 1)
+ type = "CLASS", depth = NULL)
 
  ## Test accuracy
  mean(a$results == as.numeric(iris[141:150, 5]))
