@@ -72,10 +72,8 @@ NNS.ARMA.optim <- function(variable, training.set,
   objective <- tolower(objective)
 
   if (is.null(ncores)) {
-      cores <- detectCores()
-      num_cores <- as.integer(cores - 1)
+      num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
-      cores <- detectCores()
       num_cores <- ncores
   }
 
@@ -165,7 +163,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       } else {
 
-          if(num_cores>1) registerDoParallel(cores = num_cores)
+          if(num_cores>1) doParallel::registerDoParallel(cores = num_cores)
 
           nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table", "plyr"))%dopar%{
           actual <- tail(variable, h)
@@ -176,7 +174,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
         }
 
-        if(num_cores>1) registerDoSEQ()
+        if(num_cores>1) foreach::registerDoSEQ()
 
       }
 

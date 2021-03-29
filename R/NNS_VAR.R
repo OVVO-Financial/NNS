@@ -136,13 +136,12 @@ NNS.VAR <- function(variables,
 
   # Parallel process...
   if (is.null(ncores)) {
-    cores <- detectCores()
-    num_cores <- cores - 1
+    num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
     num_cores <- ncores
   }
 
-  if(num_cores>1) registerDoParallel(cores = num_cores)
+  if(num_cores>1) doParallel::registerDoParallel(cores = num_cores)
 
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
 
@@ -354,7 +353,7 @@ NNS.VAR <- function(variables,
 
   }
 
-  if(num_cores>1) registerDoSEQ()
+  if(num_cores>1) foreach::registerDoSEQ()
 
       nns_DVs <- lists[[1]]
       relevant_vars <- lists[[2]]

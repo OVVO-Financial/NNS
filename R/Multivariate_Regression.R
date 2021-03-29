@@ -93,7 +93,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   ### PARALLEL
 
   if(is.null(ncores)) {
-    num_cores <- as.integer(detectCores()) - 1
+    num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
     num_cores <- ncores
   }
@@ -104,7 +104,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
           NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
       }
   } else {
-      registerDoParallel(cores = num_cores)
+      cl <- parallel::makeCluster(num_cores)
+      doParallel::registerDoParallel(cl, cores = num_cores)
       NNS.ID <- foreach(j = 1:n)%dopar%{
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
@@ -183,7 +184,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   if(n.best > 1 && !point.only){
     RPM <- (REGRESSION.POINT.MATRIX)
     if(num_cores>1){
-        fitted.matrix$y.hat <- parallel::parApply(num_cores, original.IVs, 1, function(z) NNS::NNS.distance(RPM, dist.estimate = z, type = dist, k = n.best)[1])
+        fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(RPM, dist.estimate = z, type = dist, k = n.best)[1])
     } else {
         fits <- data.table::data.table(original.IVs)
 
@@ -246,9 +247,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       distances <- data.table::data.table(point.est)
 
       if(num_cores>1){
-        DISTANCES <- parallel::parApply(num_cores, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
+        DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
 
-        registerDoSEQ()
+        foreach::registerDoSEQ()
       } else {
         distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
 

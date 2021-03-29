@@ -88,12 +88,12 @@ NNS.ARMA <- function(variable,
 
 
   if (is.null(ncores)) {
-      num_cores <- as.integer(detectCores() / 2) - 1
+      num_cores <- as.integer(parallel::detectCores()  - 1)
   } else {
       num_cores <- ncores
   }
 
-  if(num_cores>1) registerDoParallel(cores = num_cores)
+  if(num_cores>1) doParallel::registerDoParallel(cores = num_cores)
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
       seasonal.factor <- FALSE
@@ -254,7 +254,7 @@ NNS.ARMA <- function(variable,
 
   } # j loop
 
-  if(num_cores>1) registerDoSEQ()
+  if(num_cores>1) foreach::registerDoSEQ()
 
   if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399)$replicates
 
