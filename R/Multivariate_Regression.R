@@ -105,7 +105,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       }
   } else {
       cl <- parallel::makeCluster(num_cores)
-      doParallel::registerDoParallel(cl, cores = num_cores)
+      doParallel::registerDoParallel(cl)
       NNS.ID <- foreach(j = 1:n)%dopar%{
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
@@ -249,6 +249,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       if(num_cores>1){
         DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
 
+        parallel::stopCluster(cl)
         registerDoSEQ()
       } else {
         distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
