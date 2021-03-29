@@ -139,18 +139,12 @@ NNS.VAR <- function(variables,
     cores <- detectCores()
     num_cores <- cores - 1
   } else {
-    cores <- detectCores()
     num_cores <- ncores
   }
 
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
+  if(num_cores>1) registerDoParallel(num_cores)
 
-  if(status){
-    message("Currently generating univariate estimates...","\r", appendLF=TRUE)
-  }
+  if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
 
   na_s <- numeric()
 
@@ -239,11 +233,6 @@ NNS.VAR <- function(variables,
   }
 
 
-  if(!is.null(cl)){
-      stopCluster(cl)
-      registerDoSEQ()
-  }
-
   nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs_interpolated_extrapolated_2, function(x) head(x, dim(variables)[1]))))
 
   if(h == 0){
@@ -273,19 +262,11 @@ NNS.VAR <- function(variables,
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
 
 
-  if(status){
-    message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
-  }
+  if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
+
 
   if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
-
-  if(!is.null(cl)){
-    if(status){
-      message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
-    }
+    if(status) message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     status <- FALSE
   }
 
@@ -301,9 +282,7 @@ NNS.VAR <- function(variables,
                    .multicombine = TRUE)%dopar%{
 
 
-    if(status){
-      message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
-    }
+    if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
 
 # Dimension reduction NNS.reg to reduce variables
     cor_threshold <- NNS.stack(IVs.train = lagged_new_values_train[, -i],
@@ -375,10 +354,7 @@ NNS.VAR <- function(variables,
 
   }
 
-  if(num_cores>1){
-      stopCluster(cl)
-      registerDoSEQ()
-  }
+  if(num_cores>1) registerDoSEQ()
 
       nns_DVs <- lists[[1]]
       relevant_vars <- lists[[2]]

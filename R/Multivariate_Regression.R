@@ -92,23 +92,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
   ### PARALLEL
 
-  if (is.null(ncores)) {
+  if(is.null(ncores)) {
     num_cores <- as.integer(detectCores()) - 1
   } else {
     num_cores <- ncores
   }
 
-  if(num_cores>1){
-    cl <- makeCluster(num_cores)
-    registerDoParallel(cl)
-  } else { cl <- NULL }
-
-  if(is.null(cl)){
+  if(num_cores<=1){
       for(j in 1:n){
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
       }
   } else {
+      registerDoParallel(num_cores)
       NNS.ID <- foreach(j = 1:n)%dopar%{
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
@@ -186,8 +182,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
   if(n.best > 1 && !point.only){
     RPM <- (REGRESSION.POINT.MATRIX)
-    if(!is.null(cl)){
-        fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(RPM, dist.estimate = z, type = dist, k = n.best)[1])
+    if(num_cores>1){
+        fitted.matrix$y.hat <- parallel::parApply(num_cores, original.IVs, 1, function(z) NNS::NNS.distance(RPM, dist.estimate = z, type = dist, k = n.best)[1])
     } else {
         fits <- data.table::data.table(original.IVs)
 
@@ -242,25 +238,18 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     }
 
     if(!is.null(np)){
-
-
       lows <- logical()
       highs <- logical()
       outsiders <- numeric()
       DISTANCES <- list()
 
-
-
-
       distances <- data.table::data.table(point.est)
 
-      if(!is.null(cl)){
-        DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
+      if(num_cores>1){
+        DISTANCES <- parallel::parApply(num_cores, distances, 1, function(z) NNS::NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = z, type = dist, k = n.best)[1])
 
-        stopCluster(cl)
         registerDoSEQ()
       } else {
-
         distances <- distances[, DISTANCES :=  NNS.distance(REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best)[1], by = 1:nrow(point.est)]
 
         DISTANCES <- as.numeric(unlist(distances$DISTANCES))
