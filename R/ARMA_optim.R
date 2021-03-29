@@ -174,7 +174,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
         }
 
-        if(num_cores>1) foreach::registerDoSEQ()
+        if(num_cores>1) registerDoSEQ()
 
       }
 

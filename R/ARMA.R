@@ -254,7 +254,7 @@ NNS.ARMA <- function(variable,
 
   } # j loop
 
-  if(num_cores>1) foreach::registerDoSEQ()
+  if(num_cores>1) registerDoSEQ()
 
   if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399)$replicates
 

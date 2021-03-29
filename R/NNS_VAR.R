@@ -353,7 +353,7 @@ NNS.VAR <- function(variables,
 
   }
 
-  if(num_cores>1) foreach::registerDoSEQ()
+  if(num_cores>1) registerDoSEQ()
 
       nns_DVs <- lists[[1]]
       relevant_vars <- lists[[2]]
