@@ -93,7 +93,7 @@ NNS.ARMA <- function(variable,
       num_cores <- ncores
   }
 
-  if(num_cores>1) registerDoParallel(num_cores)
+  if(num_cores>1) registerDoParallel(cores = num_cores)
 
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)){
       seasonal.factor <- FALSE

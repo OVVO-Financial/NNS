@@ -104,7 +104,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
           NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
       }
   } else {
-      registerDoParallel(num_cores)
+      registerDoParallel(cores = num_cores)
       NNS.ID <- foreach(j = 1:n)%dopar%{
           sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
           return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))

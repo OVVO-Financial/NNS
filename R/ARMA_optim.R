@@ -165,7 +165,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       } else {
 
-          if(num_cores>1) registerDoParallel(num_cores)
+          if(num_cores>1) registerDoParallel(cores = num_cores)
 
           nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table", "plyr"))%dopar%{
           actual <- tail(variable, h)
