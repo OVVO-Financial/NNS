@@ -146,7 +146,6 @@ NNS.reg = function (x, y,
   if(any(class(x)=="tbl")) x <- as.data.frame(x)
 
 
-
   if(!is.null(dim.red.method)){
     if(is.null(dim(x)) || dim(x)[1]==1){
       dim.red.method <- NULL

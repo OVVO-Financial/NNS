@@ -99,7 +99,6 @@ NNS.stack <- function(IVs.train,
   }
 
 
-
   if(!is.null(type)){
     type <- tolower(type)
     if(type == "class"){
@@ -153,10 +152,10 @@ NNS.stack <- function(IVs.train,
         test.set_half <- unique(c(rbind(test.set.1[1:(length(test.set.1)/2)], test.set.2[1:(length(test.set.2)/2)])))[1:(length(test.set)/2)]
       } else {
         if(method==1){
-          test.set_half <- (test.set.1)[1:(length(test.set)/2)]
+          test.set_half <- (test.set.1)[1:(length(test.set)*min(.5, max(.01,CV.size)))]
         } else {
           if(method==2) {
-            test.set_half <- (test.set.2)[1:(length(test.set)/2)]
+            test.set_half <- (test.set.2)[1:(length(test.set)*min(.5, max(.01,CV.size)))]
           }
         }
       }
@@ -363,7 +362,7 @@ NNS.stack <- function(IVs.train,
         }
 
         if(index==1){
-          setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order,
+          setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
           predicted <- setup$Point.est
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
@@ -414,18 +413,15 @@ NNS.stack <- function(IVs.train,
         }
       }
 
-      if(length(predicted > 0)){
-        test.set.1 <- test.set[rev(order(abs(predicted - actual)))]
-      } else {
-        test.set.1 <- test.set
-      }
+      if(length(predicted > 0)) test.set.1 <- test.set[rev(order(abs(predicted - actual)))] else test.set.1 <- test.set
+
+
+      ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
 
       if(objective=='min'){
-        ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
         k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
-        ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
         k <- ks[which.max(na.omit(nns.cv.1))]
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }
