@@ -149,7 +149,7 @@ NNS.stack <- function(IVs.train,
       mins <- as.vector(apply(IVs.train, 2, which.min))
 
       if(identical(sort(method),c(1,2))){
-        test.set_half <- unique(c(rbind(test.set.1[1:(length(test.set.1)/2)], test.set.2[1:(length(test.set.2)/2)])))[1:(length(test.set)/2)]
+        test.set_half <- unique(c(rbind(test.set.1[1:(length(test.set.1)*min(.5, max(.01,CV.size)))], test.set.2[1:(length(test.set.2)/2)])))[1:(length(test.set)*min(.5, max(.01,CV.size)))]
       } else {
         if(method==1){
           test.set_half <- (test.set.1)[1:(length(test.set)*min(.5, max(.01,CV.size)))]
