@@ -86,11 +86,7 @@ NNS.ARMA.optim <- function(variable, training.set,
   h <- length(variable) - training.set
   actual <- tail(variable, h)
 
-  if(is.null(training.set)){
-      l <- length(variable)
-  } else {
-      l <- training.set
-  }
+  if(is.null(training.set)) l <- length(variable) else l <- training.set
 
   denominator <- min(5, max(3, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
 
@@ -177,7 +173,10 @@ NNS.ARMA.optim <- function(variable, training.set,
 
         }
 
-        if(num_cores>1) registerDoSEQ()
+        if(num_cores>1){
+            stopCluster(cl)
+            registerDoSEQ()
+        }
 
       }
 
