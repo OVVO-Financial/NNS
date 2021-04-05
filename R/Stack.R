@@ -428,12 +428,12 @@ NNS.stack <- function(IVs.train,
 
 
       best.k[[b]] <- k
-      best.nns.cv[[b]] <- if(!is.null(type)){min(max(nns.cv.1,0),1)} else {nns.cv.1}
+      best.nns.cv[[b]] <- if(!is.null(type)) min(max(nns.cv.1,0),1) else nns.cv.1
 
       if(b==folds){
-        if(!is.null(type))  best.nns.cv <- min(1, mode(na.omit(unlist(best.nns.cv))))   else best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
+        if(!is.null(type))  best.nns.cv <- min(1, mode(na.omit(unlist(best.nns.cv)))) else best.nns.cv <- mode(na.omit(unlist(best.nns.cv)))
 
-        best.k <- ceiling(LPM.VaR(.625, 0, as.numeric(rep(names(table(unlist(best.k))), table(unlist(best.k))))))
+        best.k <- ifelse(mode(as.numeric(names(table(unlist(best.k)))))%%1 < .5, floor(mode(as.numeric(names(table(unlist(best.k)))))), ceiling(mode(as.numeric(names(table(unlist(best.k)))))))
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                 type = NULL, point.only = TRUE)$Point.est)
         if(!is.null(type) && !is.null(nns.method.1)){
