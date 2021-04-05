@@ -92,7 +92,7 @@ NNS.ARMA.optim <- function(variable, training.set,
       l <- training.set
   }
 
-  denominator <- min(4, max(2, as.integer(l/100)))
+  denominator <- min(5, max(3, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
 
   seasonal.factor <- seasonal.factor[seasonal.factor <= (l/denominator)]
   seasonal.factor <- unique(seasonal.factor)
@@ -163,7 +163,10 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       } else {
 
-          if(num_cores>1) doParallel::registerDoParallel(cores = num_cores)
+          if(num_cores>1){
+            cl <- parallel::makeCluster(num_cores)
+            doParallel::registerDoParallel(cl)
+          }
 
           nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table", "plyr"))%dopar%{
           actual <- tail(variable, h)
