@@ -36,7 +36,7 @@ NNS.VAR(
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
- \item{\code{"interpolated_and_extrapolated"}} Returns a \link{data.table} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
+ \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.

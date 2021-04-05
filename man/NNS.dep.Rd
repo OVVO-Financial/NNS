@@ -4,7 +4,7 @@
 \alias{NNS.dep}
 \title{NNS Dependence}
 \usage{
-NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE)
+NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -13,7 +13,9 @@ NNS.dep(x, y = NULL, asym = FALSE, print.map = FALSE)
 
 \item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
 
-\item{print.map}{logical; \code{FALSE} (default) Plots quadrant means.}
+\item{p.value}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.}
+
+\item{print.map}{logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.}
 }
 \value{
 Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
@@ -22,8 +24,6 @@ Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlati
 Returns the dependence and nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.
 }
 \note{
-p-values and confidence intervals can be obtained from sampling random permutations of \code{y_p} and running \code{NNS.dep(x,y_p)} to compare against a null hypothesis of 0 correlation or independence between \code{x,y}.
-
 \code{NNS.cor} has been deprecated \code{(NNS >= 0.5.4)} and can be called via \code{NNS.dep}.
 }
 \examples{
@@ -36,51 +36,6 @@ NNS.dep(x, y)
 x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 B <- cbind(x, y, z)
 NNS.dep(B)
-
-
-## p-values for [NNS.dep]
-x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
-
-
-nns_cor_dep <- NNS.dep(x, y, print.map = TRUE)
-nns_cor_dep
-
-## Create permutations of y
-y_p <- replicate(1000, sample.int(length(y)))
-
-## Generate new correlation and dependence measures on each new permutation of y
-nns.mc <- apply(y_p, 2, function(g) NNS.dep(x, y[g]))
-
-## Store results
-cors <- unlist(lapply(nns.mc, "[[", 1))
-deps <- unlist(lapply(nns.mc, "[[", 2))
-
-## View results
-hist(cors)
-hist(deps)
-
-## Left tailed correlation p-value
-cor_p_value <- LPM(0, nns_cor_dep$Correlation, cors)
-cor_p_value
-
-## Right tailed correlation p-value
-cor_p_value <- UPM(0, nns_cor_dep$Correlation, cors)
-cor_p_value
-
-## Confidence Intervals
-## For 95th percentile VaR (both-tails) see [LPM.VaR] and [UPM.VaR]
-## Lower CI
-LPM.VaR(.025, 0, cors)
-## Upper CI
-UPM.VaR(.025, 0, cors)
-
-## Left tailed dependence p-value
-dep_p_value <- LPM(0, nns_cor_dep$Dependence, deps)
-dep_p_value
-
-## Right tailed dependence p-value
-dep_p_value <- UPM(0, nns_cor_dep$Dependence, deps)
-dep_p_value
 }
 }
 \references{
