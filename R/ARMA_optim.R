@@ -88,7 +88,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   if(is.null(training.set)) l <- length(variable) else l <- training.set
 
-  denominator <- min(5, max(3, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
+  denominator <- min(5, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
 
   seasonal.factor <- seasonal.factor[seasonal.factor <= (l/denominator)]
   seasonal.factor <- unique(seasonal.factor)
