@@ -138,7 +138,7 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
 
-  if(plot.regions && !is.null(order) && order == 'max') stop('Please reduce the "order" or set "plot.regions = FALSE".')
+  if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
 
   if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
 
