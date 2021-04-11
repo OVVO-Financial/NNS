@@ -415,12 +415,8 @@ NNS.reg = function (x, y,
 
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
   dependence <- (dependence^2 + sqrt(dependence))/2
-  if(dependence < .25) dependence <- min(.25, dependence + .1)
-  dependence[is.na(dependence)] <- .1
 
-  dependence <- min(1, dependence)
-
-  dep.reduced.order <- ifelse((dependence*10)%%1<= .5, floor(dependence*10), ceiling(dependence*10))
+  dep.reduced.order <- max(1, ifelse(multivariate.call, ceiling(dependence*10)+1, floor(dependence*10)))
 
   if(!is.null(order)) dep.reduced.order <- order
 

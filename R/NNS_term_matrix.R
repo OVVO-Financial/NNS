@@ -24,7 +24,7 @@
 #' data(NYTimes)
 #'
 #' ### Concatenate Columns 3 and 4 containing text, with column 5 as DV
-#' NYT=data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
+#' NYT <- data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
 #'                      as.numeric(as.character(NYTimes[ , 5]))))
 #' NNS.term.matrix(NYT)}
 #' @export
@@ -78,21 +78,21 @@ NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
       }
   }
 
-  NNS.TM <- (t(sapply(1 : length(x[ , 1]), function(i) stringr::str_count(x[i, 1], unique.vocab))))
+  NNS.TM <- t(sapply(1 : length(x[ , 1]), function(i) as.integer(tryCatch(stringr::str_count(x[i, 1], unique.vocab), error = function (e) 0))))
 
   if(names) colnames(NNS.TM) <- c(unique.vocab)
 
   if(!is.null(oos)){
-      OOS.TM <- (t(sapply(1 : length(oos), function(i) stringr::str_count(oos[i], unique.vocab))))
+      OOS.TM <- t(sapply(1 : length(oos), function(i) stringr::str_count(oos[i], unique.vocab)))
 
       if(names) colnames(OOS.TM) <- c(unique.vocab)
 
       return(list("IV" = NNS.TM,
-                  "DV" = as.numeric(as.character(x[ , 2])),
+                  "DV" = as.integer(as.character(x[ , 2])),
                   "OOS" = OOS.TM))
   } else {
       return(list("IV" = NNS.TM,
-                "DV" = as.numeric(as.character(x[ , 2]))))
+                "DV" = as.integer(as.character(x[ , 2]))))
   }
 
 }
