@@ -22,7 +22,7 @@
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
 #'
 #' @note Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
 #'
@@ -440,7 +440,7 @@ NNS.boost <- function(IVs.train,
               main="Feature Frequency in Final Estimate",
               xlab = "Frequency",las=1)
     } else {
-      barplot(sort(plot.table,decreasing = FALSE)[1:min(n,10)],
+      barplot(sort(plot.table,decreasing = FALSE),
               horiz = TRUE,
               col='steelblue',
               main="Feature Frequency in Final Estimate",
@@ -452,12 +452,14 @@ NNS.boost <- function(IVs.train,
   gc()
   if(is.null(type)){
     return(list("results" = estimates,
-                "feature.weights" = plot.table/sum(plot.table)))
+                "feature.weights" = plot.table/sum(plot.table),
+                "feature.frequency" = plot.table))
   } else {
 
     estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
 
     return(list("results" = estimates,
-                "feature.weights" = plot.table/sum(plot.table)))
+                "feature.weights" = plot.table/sum(plot.table),
+                "feature.frequency" = plot.table))
   }
 }
