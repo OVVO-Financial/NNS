@@ -394,8 +394,11 @@ NNS.VAR <- function(variables,
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
 
   colnames(nns_IVs_results) <- colnames(variables)
+  rownames(nns_IVs_results) <- NULL
   colnames(nns_DVs) <- colnames(variables)
+  rownames(nns_DVs) <- NULL
   colnames(forecasts) <- colnames(variables)
+  rownames(forecasts) <- NULL
 
   options(warn = oldw)
 
