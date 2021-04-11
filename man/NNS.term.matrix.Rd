@@ -35,7 +35,7 @@ require(RTextTools)
 data(NYTimes)
 
 ### Concatenate Columns 3 and 4 containing text, with column 5 as DV
-NYT=data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
+NYT <- data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
                      as.numeric(as.character(NYTimes[ , 5]))))
 NNS.term.matrix(NYT)}
 }
