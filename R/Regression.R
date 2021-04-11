@@ -420,6 +420,8 @@ NNS.reg = function (x, y,
 
   if(!is.null(order)) dep.reduced.order <- order
 
+  if(multivariate.call) stn <- 0
+
   if(dependence > stn){
     part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
     if(length(part.map$regression.points$x) == 0){
