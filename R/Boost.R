@@ -340,7 +340,7 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(unlist(reduced.test.features), sample(2:n,1), replace = FALSE))
+      features <- sort(sample(unlist(reduced.test.features), sample(2:length(unlist(reduced.test.features)),1), replace = TRUE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
@@ -426,7 +426,7 @@ NNS.boost <- function(IVs.train,
 
   plot.table <- table(unlist(keeper.features))
 
-  names(plot.table) <- features[eval(as.numeric(names(plot.table)))]
+  names(plot.table) <- colnames(IVs.train)[eval(as.numeric(names(plot.table)))]
 
   if(feature.importance){
 
