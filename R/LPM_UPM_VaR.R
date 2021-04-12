@@ -13,7 +13,7 @@
 #' set.seed(123)
 #' x <- rnorm(100)
 #'
-#' ## For 5% quantile, left-tail
+#' ## For 5th percentile, left-tail
 #' LPM.VaR(0.05, 0, x)
 #' @export
 
@@ -52,7 +52,7 @@ LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
 #' set.seed(123)
 #' x <- rnorm(100)
 #'
-#' ## For 5% quantile, right-tail
+#' ## For 5th percentile, right-tail
 #' UPM.VaR(0.05, 0, x)
 #' @export
 
