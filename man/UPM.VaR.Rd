@@ -23,6 +23,6 @@ Generates an upside value at risk (VaR) quantile based on the Upper Partial Mome
 set.seed(123)
 x <- rnorm(100)
 
-## For 5\% quantile, right-tail
+## For 5th percentile, right-tail
 UPM.VaR(0.05, 0, x)
 }

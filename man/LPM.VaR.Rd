@@ -23,7 +23,7 @@ Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio
 set.seed(123)
 x <- rnorm(100)
 
-## For 5\% quantile, left-tail
+## For 5th percentile, left-tail
 LPM.VaR(0.05, 0, x)
 }
 \references{
