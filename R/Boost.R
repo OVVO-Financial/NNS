@@ -428,6 +428,8 @@ NNS.boost <- function(IVs.train,
 
   names(plot.table) <- colnames(IVs.train)[eval(as.numeric(names(plot.table)))]
 
+  plot.table <- plot.table[rev(order(plot.table))]
+
   if(feature.importance){
 
     linch <-  max(strwidth(names(plot.table), "inch") + 0.4, na.rm = TRUE)
