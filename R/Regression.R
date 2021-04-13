@@ -145,6 +145,8 @@ NNS.reg = function (x, y,
   if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
   if(any(class(x)=="tbl")) x <- as.data.frame(x)
 
+  if(length(y) < 2000) ncores <- 1
+
   if(!is.null(dim.red.method)){
     if(is.null(dim(x)) || dim(x)[1]==1){
       dim.red.method <- NULL
@@ -332,9 +334,7 @@ NNS.reg = function (x, y,
           }
 
           if(!is.numeric(dim.red.method) && dim.red.method == "all"){
-            if(is.null(tau)){
-              tau <- "cs"
-            }
+            if(is.null(tau)) tau <- "cs"
 
             x.star.coef.1 <- numeric()
 

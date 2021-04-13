@@ -334,12 +334,7 @@ NNS.stack <- function(IVs.train,
       actual <- CV.DV.test
       nns.cv.1 <- numeric()
 
-      if(is.character(relevant_vars)){
-          if(length(relevant_vars)<dim(IVs.train)[1]){
-              CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
-              CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
-          }
-      }
+      if(is.character(relevant_vars)) relevant_vars <- relevant_vars!=""
 
       if(is.logical(relevant_vars)){
         if(sum(relevant_vars)<dim(IVs.train)[1]){
@@ -347,6 +342,7 @@ NNS.stack <- function(IVs.train,
           CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
         }
       }
+
 
 
       if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
