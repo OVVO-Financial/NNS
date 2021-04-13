@@ -448,7 +448,7 @@ NNS.boost <- function(IVs.train,
               main="Feature Frequency in Final Estimate",
               xlab = "Frequency", las = 1)
     }
-    par(mar=c(5.1, 4.1, 4.1, 2.1))
+    par(mfrow=c(1,1))
     par(original.par)
   }
   gc()
