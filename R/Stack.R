@@ -306,7 +306,7 @@ NNS.stack <- function(IVs.train,
         rel_vars <- which(rel_vars$Coefficient>0)
         rel_vars <- rel_vars[rel_vars <= dim(IVs.train)[2]]
 
-        if(is.null(rel_vars)) rel_vars <- 1:dim(IVs.train)[2]
+        if(is.null(rel_vars) || length(rel_vars)==0) rel_vars <- 1:dim(IVs.train)[2]
 
         if(!stack) relevant_vars <- 1:dim(IVs.train)[2]
 
@@ -439,7 +439,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         best.k <- ifelse(mode(as.numeric(names(table(unlist(best.k)))))%%1 < .5, floor(mode(as.numeric(names(table(unlist(best.k)))))), ceiling(mode(as.numeric(names(table(unlist(best.k)))))))
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = NULL, point.only = FALSE))
+                                type = NULL, point.only = !2%in%method))
 
         actual <- DV.train
         predicted <- nns.method.1$Fitted.xy$y.hat
