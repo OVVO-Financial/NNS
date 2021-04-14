@@ -293,10 +293,13 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
 
-        if(!is.null(type)) best.nns.ord <- min(1, mode(na.omit(unlist(best.nns.ord)))) else best.nns.ord <- mode(na.omit(unlist(best.nns.ord)))
-
         nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
                                 type = NULL, point.only = TRUE))
+
+        actual <- DV.train
+        predicted <- nns.method.2$Fitted.xy$y.hat
+
+        best.nns.ord <- eval(obj.fn)
 
         rel_vars <- nns.method.2$equation
 
@@ -438,7 +441,15 @@ NNS.stack <- function(IVs.train,
 
         best.k <- ifelse(mode(as.numeric(names(table(unlist(best.k)))))%%1 < .5, floor(mode(as.numeric(names(table(unlist(best.k)))))), ceiling(mode(as.numeric(names(table(unlist(best.k)))))))
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = NULL, point.only = TRUE)$Point.est)
+                                type = NULL, point.only = FALSE))
+
+        actual <- DV.train
+        predicted <- nns.method.1$Fitted.xy$y.hat
+
+        best.nns.cv <- eval(obj.fn)
+
+        nns.method.1 <- nns.method.1$Point.est
+
         if(!is.null(type) && !is.null(nns.method.1)){
           threshold_results_1 <- mean(unlist(threshold_results_1))
           nns.method.1 <- ifelse(nns.method.1%%1 < threshold_results_1, floor(nns.method.1), ceiling(nns.method.1))
