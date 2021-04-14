@@ -94,6 +94,15 @@ NNS.boost <- function(IVs.train,
     if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
   }
 
+  if(is.null(colnames(IVs.train))){
+    colnames.list <- list()
+    for(i in 1 : dim(IVs.train)[2]){
+      colnames.list[i] <- paste0("X", i)
+    }
+    colnames(IVs.train) <- as.character(colnames.list)
+    colnames(IVs.test) <- colnames(IVs.train)
+  }
+
   if(balance){
     DV.train <- as.numeric(as.factor(DV.train))
 

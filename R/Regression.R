@@ -457,6 +457,7 @@ NNS.reg = function (x, y,
 
   regression.points <- part.map$regression.points[,.(x,y)]
   regression.points$x <- pmin(max(x), pmax(regression.points$x, min(x)))
+
   data.table::setkey(regression.points,x)
 
   if(dependence < 1){
@@ -599,6 +600,7 @@ NNS.reg = function (x, y,
     }
   }
 
+
   if(dim(regression.points)[1] > 1){
     rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
     run <- regression.points[ , 'run' := x - data.table::shift(x)]
@@ -632,6 +634,8 @@ NNS.reg = function (x, y,
 
   ### Fitted Values
   p <- length(regression.points[ , x])
+
+
 
   if(is.na(Regression.Coefficients[1, Coefficient])){
     Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]

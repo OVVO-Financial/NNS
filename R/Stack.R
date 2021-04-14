@@ -137,6 +137,14 @@ NNS.stack <- function(IVs.train,
   best.nns.cv <- list(folds)
   best.nns.ord <- list(folds)
 
+  if(is.null(colnames(IVs.train))){
+    colnames.list <- list()
+    for(i in 1 : n){
+      colnames.list[i] <- paste0("X", i)
+    }
+    colnames(IVs.train) <- as.character(colnames.list)
+    colnames(IVs.test) <- colnames(IVs.train)
+  }
 
   for(b in 1 : folds){
     if(status) message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
@@ -280,6 +288,7 @@ NNS.stack <- function(IVs.train,
       test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
       relevant_vars <- colnames(IVs.train)
+      if(is.null(relevant_vars)) relevant_vars <- 1:dim(IVs.train)[2]
 
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
@@ -291,17 +300,15 @@ NNS.stack <- function(IVs.train,
 
         rel_vars <- nns.method.2$equation
 
-        rel_vars <- rel_vars[rel_vars$Coefficient>0,1][-.N]
+        rel_vars <- which(rel_vars$Coefficient>0)
+        rel_vars <- rel_vars[rel_vars <= dim(IVs.train)[2]]
 
+        if(is.null(rel_vars)) rel_vars <- 1:dim(IVs.train)[2]
 
-        if(stack){
-          relevant_vars <- colnames(IVs.train)%in%unlist(rel_vars)
-        } else {
-          relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
-        }
+        if(!stack) relevant_vars <- 1:dim(IVs.train)[2]
 
         if(all(relevant_vars=="FALSE")){
-          relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
+          relevant_vars <- 1:dim(IVs.train)[2]
         }
 
         if(!is.null(type) && !is.null(nns.method.2$Point.est)){
@@ -324,7 +331,7 @@ NNS.stack <- function(IVs.train,
       if(objective=='min'){best.nns.ord <- Inf} else {best.nns.ord <- -Inf}
       nns.ord.threshold <- NA
       threshold_results_2 <- NA
-      relevant_vars <- colnames(IVs.train)%in%colnames(IVs.train)
+      relevant_vars <- 1:dim(IVs.train)[2]
     } # 2 %in% method
 
 
