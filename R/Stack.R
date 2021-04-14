@@ -439,7 +439,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         best.k <- ifelse(mode(as.numeric(names(table(unlist(best.k)))))%%1 < .5, floor(mode(as.numeric(names(table(unlist(best.k)))))), ceiling(mode(as.numeric(names(table(unlist(best.k)))))))
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = NULL, point.only = !2%in%method))
+                                type = NULL, point.only = FALSE))
 
         actual <- DV.train
         predicted <- nns.method.1$Fitted.xy$y.hat

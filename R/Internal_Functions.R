@@ -38,8 +38,10 @@ alt_cbind <- function(x, y, first = FALSE) {
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
   if(class(x) == "factor" & length(unique(x)) > 1){
+    x <- unlist(x)
     output <- model.matrix(~(x) -1, x)[,-1]
   } else {
+    x <- unlist(x)
     output <- as.numeric(x)
   }
   output
@@ -48,8 +50,10 @@ factor_2_dummy <- function(x){
 ### Factor to dummy variable FULL RANK
 factor_2_dummy_FR <- function(x){
   if(class(x) == "factor" & length(unique(x)) > 1){
+    x <- unlist(x)
     output <- model.matrix(~(x) -1, x)
   } else {
+    x <- unlist(x)
     output <- as.numeric(x)
   }
   output

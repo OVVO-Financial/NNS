@@ -177,14 +177,8 @@ NNS.reg = function (x, y,
   if(!is.null(original.columns) & is.null(colnames(x))) x <- data.frame(x)
 
   y.label <- deparse(substitute(y))
-
   if(is.null(y.label)) y.label <- "y"
 
-
-  if(is.null(original.columns)){
-    x.label <- deparse(substitute(x))
-    if(is.null(x.label)) x.label <- "x"
-  }
 
   if(factor.2.dummy){
     if(is.list(x) & !is.data.frame(x)) x <- do.call(cbind, x)
@@ -229,10 +223,6 @@ NNS.reg = function (x, y,
   # Variable names
   original.names <- colnames(x)
   original.columns <- ncol(x)
-
-  y.label <- deparse(substitute(y))
-  if(is.null(y.label)) y.label <- "y"
-
 
   y <- as.numeric(y)
   original.y <- y
@@ -410,6 +400,10 @@ NNS.reg = function (x, y,
     } # Univariate
 
   } # Multivariate
+
+
+  x.label <- names(x)
+  if(is.null(x.label)) x.label <- "x"
 
 
   dependence <- NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence
