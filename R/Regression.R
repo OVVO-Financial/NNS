@@ -557,14 +557,14 @@ NNS.reg = function (x, y,
   }
 
   if(type!="class" || is.null(type)){
-      central_rows <- c(floor(median(1:nrow(regression.points))), ceiling(median(1:nrow(regression.points))))
-      central_x <- regression.points[central_rows,]$x
+    central_rows <- c(floor(median(1:nrow(regression.points))), ceiling(median(1:nrow(regression.points))))
+    central_x <- regression.points[central_rows,]$x
 
-      central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]])
-      central_x <- mean(central_x)
-      med.rps <- data.table::data.table(t(c(central_x, central_y)))
+    central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]])
+    central_x <- mean(central_x)
+    med.rps <- data.table::data.table(t(c(central_x, central_y)))
   } else {
-      med.rps <- data.table::data.table(t(c(NA, NA)))
+    med.rps <- data.table::data.table(t(c(NA, NA)))
   }
 
   regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps, med.rps ), use.names = FALSE)
@@ -791,7 +791,7 @@ NNS.reg = function (x, y,
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-      if(type=="class") estimate <- ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))
+    if(type=="class") estimate <- ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))
   }
 
   fitted <- data.table::data.table(x = part.map$dt$x,

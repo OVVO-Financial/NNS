@@ -270,16 +270,19 @@ NNS.stack <- function(IVs.train,
 
         nns.ord[i] <- eval(obj.fn)
 
+
         if(objective=="min"){
           best.threshold <- var.cutoffs[which.min(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- min(na.omit(nns.ord))
+          if(is.na(nns.ord[1])) nns.ord[1] <- Inf
           if(i > 2 && is.na(nns.ord[i])) break
           if(i > 2 && (nns.ord[i] >= nns.ord[i-1]) && (nns.ord[i] >= nns.ord[i-2])) break
         } else {
           best.threshold <- var.cutoffs[which.max(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- max(na.omit(nns.ord))
+          if(is.na(nns.ord[1])) nns.ord[1] <- -Inf
           if(i > 2 && is.na(nns.ord[i])) break
           if(i > 2 && (nns.ord[i] <= nns.ord[i-1]) && (nns.ord[i] <= nns.ord[i-2])) break
         }
