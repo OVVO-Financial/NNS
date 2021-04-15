@@ -195,7 +195,7 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' This function generates a co-partial moment matrix for the specified co-partial moment.
 #' @param LPM.degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param UPM.degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = "mean")} (default) will set the target as the mean of every variable.
+#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
 #' @param variable a numeric matrix or data.frame.
 #' @param pop.adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
 #' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
@@ -209,13 +209,13 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #' A <- cbind(x,y,z)
-#' PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
+#' PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
 #'
 #' ## Use of vectorized numeric targets (target_x, target_y, target_z)
 #' PM.matrix(LPM.degree = 1, UPM.degree = 1, target = c(0, 0.15, .25), variable = A)
 #'
 #' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, target = "mean", variable = A)
+#' cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
 #' cov.mtx$cupm
 #'
 #' ## Full covariance matrix
@@ -223,7 +223,9 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 
-PM.matrix <- function(LPM.degree, UPM.degree, target = "mean", variable, pop.adj=FALSE){
+PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=FALSE){
+
+  if(is.null(target)) target <- "mean"
 
   if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
