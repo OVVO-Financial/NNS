@@ -75,16 +75,7 @@ NNS.dep(df$x, df$y)
 ```
 
 
-# Multi-Dimensional Dependence
-These partial moment insights permit us to extend the analysis to multivariate
-instances. This level of analysis is simply impossible with Pearson or other rank
-based correlation methods, which are restricted to pairwise cases.
 
-```{r multi}
-set.seed(123)
-x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
-NNS.dep.hd(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
-```
 
 # p-values for `NNS.dep()`
 p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running `NNS.dep(x,$y_p$)` to compare against a null hypothesis of 0 correlation, or independence between $(x, y)$.
@@ -104,6 +95,52 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 ```
 
+# Multi-Dimensional Dependence
+These partial moment insights permit us to extend the analysis to multivariate
+instances. This level of analysis is simply impossible with Pearson or other rank
+based correlation methods, which are restricted to pairwise cases.
+
+```{r multi}
+set.seed(123)
+x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
+NNS.dep.hd(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
+```
+
+# Simulating a Multivariate Dependence Structure
+We can generate new data from the dependence structure of our `original data` via the following steps:
+
+* **Determine the dependence structure:**
+
+This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `LPM.ratio(0, x, x)` for discrete variables.
+
+* **Generate or supply the new data:**
+
+`new data` must be of equal dimensions to `original data`.  `new data` does not have to be of the same distribution as the `original data`, nor does each dimension of `new data` have to share a distribution type.
+
+* **Apply our dependence structure to our `new data`:**
+
+We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix with the same dimensions as `original.data`.
+
+
+```{r multisim}
+# Add variable x to original data to avoid total independence (example only)
+original.data <- cbind(x, y, z, x)
+
+# Determine dependence structure
+dep.structure <- apply(original.data, 2, function(x) LPM.ratio(1, x, x))
+  
+# Generate new data of equal dimensions to original data with different mean and sd (or distribution)
+new.data <- sapply(1:ncol(original.data), function(x) rnorm(dim(original.data)[1], mean = 10, sd = 20))
+
+# Apply dependence structure to new data
+new.dep.data <- sapply(1:ncol(original.data), function(x) LPM.VaR(dep.structure[,x], 1, new.data[,x]))
+```
+
+## Compare Multivariate Dependence Structures
+```{r comparison}
+NNS.dep.hd(original.data)
+NNS.dep.hd(new.dep.data)
+```
 
 
 # References
