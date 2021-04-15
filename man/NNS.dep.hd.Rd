@@ -4,24 +4,22 @@
 \alias{NNS.dep.hd}
 \title{NNS Co-Partial Moments Higher Dimension Dependence}
 \usage{
-NNS.dep.hd(x, plot = FALSE, independence.overlay = FALSE)
+NNS.dep.hd(x, continuous = TRUE, plot = FALSE, independence.overlay = FALSE)
 }
 \arguments{
 \item{x}{a numeric matrix or data frame.}
+
+\item{continuous}{logical; \code{TRUE} (default) Generates a continuous measure using degree 1 \link{PM.matrix}, while discrete \code{FALSE} uses degree 0 \link{PM.matrix}.}
 
 \item{plot}{logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.}
 
 \item{independence.overlay}{logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.}
 }
 \value{
-\itemize{
-\item{$actual.observations} Number of \link{Co.LPM} and \link{Co.UPM} observations.
-\item{$independent.null} Expected number of \link{Co.LPM} and \link{Co.UPM} observations under the null hypothesis of independence.
-\item{$Dependence} Multivariate nonlinear dependence coefficient [0,1]
-}
+Returns a multi-dimension dependence value [0,1].
 }
 \description{
-Determines higher dimension dependence coefficients based on degree 0 co-partial moments.
+Determines higher dimension dependence coefficients based on co-partial moment matrices ratios.
 }
 \examples{
 set.seed(123)
