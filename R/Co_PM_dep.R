@@ -51,8 +51,8 @@ NNS.copula <- function (x,
     if(plot && n == 3){
 
         rgl::plot3d(x = A[ , 1], y = A[ , 2], z = A[ , 3], box = FALSE, size = 3,
-           col=ifelse((A[ , 1] <= gravity(A[ , 1])) & (A[ , 2] <= gravity(A[ , 2])) & (A[ , 3] <= gravity(A[ , 3])), 'red' ,
-                      ifelse((A[ , 1] > gravity(A[ , 1])) & (A[ , 2] > gravity(A[ , 2])) & (A[ , 3] > gravity(A[ , 3])), 'green',
+           col=ifelse((A[ , 1] <= mean(A[ , 1])) & (A[ , 2] <= mean(A[ , 2])) & (A[ , 3] <= mean(A[ , 3])), 'red' ,
+                      ifelse((A[ , 1] > mean(A[ , 1])) & (A[ , 2] > mean(A[ , 2])) & (A[ , 3] > mean(A[ , 3])), 'green',
                       'steelblue')), xlab = colnames(A)[1], ylab = colnames(A)[2], zlab = colnames(A)[3])
 
         if(independence.overlay == TRUE){
