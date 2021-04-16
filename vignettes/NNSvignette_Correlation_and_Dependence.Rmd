@@ -97,8 +97,8 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 
 # Multivariate Dependence `NNS.copula()`
 These partial moment insights permit us to extend the analysis to multivariate
-instances. This level of analysis is simply impossible with Pearson or other rank
-based correlation methods, which are restricted to pairwise cases.
+instances and deliver a dependence measure $(D)$ such that $D \in [0,1]$. This level of analysis is simply impossible with Pearson or other rank
+based correlation methods, which are restricted to bivariate cases.
 
 ```{r multi}
 set.seed(123)
@@ -111,15 +111,15 @@ Analogous to an empirical copula transformation, we can generate `new data` from
 
 * **Determine the dependence structure:**
 
-This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `LPM.ratio(0, x, x)` for discrete variables, which are the joint empirical CDFs of the variables.
+This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `LPM.ratio(0, x, x)` for discrete variables, which are the empirical CDFs of the marginal variables.
 
-* **Generate or supply the new data:**
+* **Generate or supply `new data`:**
 
 `new data` must be of equal dimensions to `original data`.  `new data` does not have to be of the same distribution as the `original data`, nor does each dimension of `new data` have to share a distribution type.
 
-* **Apply our dependence structure to our `new data`:**
+* **Apply dependence structure to `new data`:**
 
-We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.
+We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.  `LPM.VaR(..., degree = 0, ...)` is the discrete transformation and significantly faster than the continuous transformation `LPM.VaR(..., degree = 1, ...)`.
 
 
 ```{r multisim}
