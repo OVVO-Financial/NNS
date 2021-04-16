@@ -7,7 +7,7 @@
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
 #'
-#' @return Returns a multi-dimension dependence value [0,1].
+#' @return Returns a multivariate dependence value [0,1].
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.
@@ -15,11 +15,11 @@
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 #' A <- data.frame(x, y, z)
-#' NNS.dep.hd(A, plot = TRUE, independence.overlay = TRUE)
+#' NNS.copula(A, plot = TRUE, independence.overlay = TRUE)
 #' @export
 
 
-NNS.dep.hd <- function (x,
+NNS.copula <- function (x,
                         continuous = TRUE,
                         plot = FALSE,
                         independence.overlay = FALSE){
