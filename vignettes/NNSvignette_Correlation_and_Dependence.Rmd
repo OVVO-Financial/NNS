@@ -119,7 +119,8 @@ This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `L
 
 * **Apply dependence structure to `new data`:**
 
-We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.  `LPM.VaR(..., degree = 0, ...)` is the discrete transformation and significantly faster than the continuous transformation `LPM.VaR(..., degree = 1, ...)`.
+We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.  
+`LPM.VaR(..., degree = 0, ...)` is the discrete transformation and significantly faster than the continuous transformation `LPM.VaR(..., degree = 1, ...)`.
 
 
 ```{r multisim}
