@@ -5,7 +5,7 @@
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
 #' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
-#' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)}, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
+#' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
@@ -40,7 +40,7 @@
 #'
 #' @note
 #' \itemize{
-#' \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].
+#' \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for multiple class problems.
 #'
 #' \item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 #' }
@@ -88,6 +88,8 @@ NNS.stack <- function(IVs.train,
 
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
+
+  if(tolower(type) == "class" && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
 
   if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
   if(any(class(DV.train)=="tbl")) DV.train <- as.vector(unlist(DV.train))
