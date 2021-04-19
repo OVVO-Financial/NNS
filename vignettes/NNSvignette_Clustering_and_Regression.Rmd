@@ -122,6 +122,7 @@ The `NNS.stack()` routine cross-validates for a given objective function the `n.
 
 Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`.
 
+***NOTE: Base category of response variable should be 1, not 0 for classification problems when using `type = "CLASS"`.***
 
 ```{r stack,fig.width=5,fig.height=3,fig.align = "center", message=FALSE}
 NNS.stack(IVs.train = iris[ , 1 : 4], 
