@@ -221,7 +221,7 @@ NNS.VAR <- function(variables,
 
       mutlivariate_extrapolation <- NNS.stack(a[1:last_point, -i], a[1:last_point, i],
                                               IVs.test = a[, -i],
-                                              order = "max",
+                                              order = "max", method = 1,
                                               folds = 1, stack = FALSE)$stack
 
       return(rowMeans(cbind(a[,i], mutlivariate_extrapolation)))
@@ -292,7 +292,7 @@ NNS.VAR <- function(variables,
                                                 objective = objective,
                                                 method = 2,
                                                 dim.red.method = dim.red.method,
-                                                order = "max")
+                                                order = NULL)
 
                      if(any(dim.red.method == "cor" | dim.red.method == "all")){
                        rel.1 <- abs(cor(cbind(lagged_new_values_train[, i], lagged_new_values_train[, -i]), method = "spearman"))
@@ -379,7 +379,11 @@ NNS.VAR <- function(variables,
 
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
-      uni[i] <-  .5 + .5*((equal_tau - unequal_tau)/(equal_tau + unequal_tau))
+
+      if(equal_tau > unequal_tau) uni[i] <-  .5 + .5*((equal_tau)/(equal_tau + unequal_tau)) else uni[i] <-  .5 - .5*((unequal_tau)/(equal_tau + unequal_tau))
+
+      if(equal_tau == unequal_tau)uni[i] <- 0.5
+
       multi[i] <- 1 - uni[i]
     } else {
       uni[i] <- 0.5
