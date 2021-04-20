@@ -48,8 +48,11 @@ NNS.dep = function(x,
     obs <- max(10, l/5)
 
     # Define segments
-    if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE)$dt else PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE)$dt
+    if(print.map) PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE) else PART <- NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE)
 
+    if(dim(PART$regression.points)[1]==0) return(list("Correlation" = 0, "Dependence" = 0))
+
+    PART <- PART$dt
     PART <- PART[complete.cases(PART),]
 
     PART[, weights := .N/l, by = prior.quadrant]

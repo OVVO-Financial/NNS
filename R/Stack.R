@@ -442,7 +442,10 @@ NNS.stack <- function(IVs.train,
       best.nns.cv[[b]] <- if(!is.null(type)) min(max(nns.cv.1,0),1) else nns.cv.1
 
       if(b==folds){
-        best.k <- ifelse(mode(as.numeric(names(table(unlist(best.k)))))%%1 < .5, floor(mode(as.numeric(names(table(unlist(best.k)))))), ceiling(mode(as.numeric(names(table(unlist(best.k)))))))
+        ks <- table(unlist(best.k))
+        ks.mode <-  mode(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
+        best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
+
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                 type = NULL, point.only = FALSE))
 
