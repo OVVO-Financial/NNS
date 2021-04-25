@@ -45,7 +45,7 @@ See the following for NNS detailed examples and specific applications:
    
    2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
    
-   2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression-Residuals.html)
+   2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression_Residuals.html)
    
    2.6 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
    
