@@ -168,29 +168,8 @@ lag.mtx <- function(x, tau){
 
 
 
-### Row products for NNS.dep.hd
-RowP <- function(x, rows = NULL, cols = NULL, na.rm = FALSE) {
-
-  if (!is.null(rows) && !is.null(cols)) x <- x[rows, cols, drop = FALSE]
-  else if (!is.null(rows)) x <- x[rows, , drop = FALSE]
-  else if (!is.null(cols)) x <- x[, cols, drop = FALSE]
-
-  n <- ifelse(is.null(nrow(x)), 0, nrow(x))
-
-  y <- double(length = n)
-
-  if (n == 0L) return(y)
-
-  for (ii in seq_len(n)) {
-    y[ii] <- prod(x[ii, , drop = TRUE], na.rm = na.rm)
-  }
-
-  y
-}
-
 
 ### Refactored meboot::meboot.part function using tdigest
-
 NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 {
   # Generate random numbers from the [0,1] uniform interval
@@ -229,12 +208,11 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 }
 
 ### Refactored meboot::expand.sd function
-NNS.meboot.expand.sd <- function(x, ensemble, fiv=5)
-{
-  sdx <- if (is.null(ncol(x)))
-    sd(x) else apply(x, 2, sd)
+NNS.meboot.expand.sd <- function(x, ensemble, fiv=5){
+  sdx <- if (is.null(ncol(x))) sd(x) else apply(x, 2, sd)
 
   sdf <- c(sdx, apply(ensemble, 2, sd))
+
   sdfa <- sdf/sdf[1]  # ratio of actual sd to that of original data
   sdfd <- sdf[1]/sdf  # ratio of desired sd to actual sd
 
@@ -242,19 +220,18 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv=5)
   mx <- 1+(fiv/100)
   # following are expansion factors
   id <- which(sdfa < 1)
-  if (length(id) > 0)
-    sdfa[id] <- runif(n=length(id), min=1, max=mx)
-
+  if (length(id) > 0) sdfa[id] <- runif(n=length(id), min=1, max=mx)
 
   sdfdXsdfa <- sdfd[-1]*sdfa[-1]
+
   id <- which(floor(sdfdXsdfa) > 0)
+
   if (length(id) > 0) {
     if(length(id) > 1) ensemble[,id] <- ensemble[,id] %*% diag(sdfdXsdfa[id]) else ensemble[,id] <- ensemble[,id] * sdfdXsdfa[id]
   }
 
-  if(is.ts(x)){
-      ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
-  }
+  if(is.ts(x)) ensemble <- ts(ensemble, frequency=frequency(x), start=start(x))
+
 
   ensemble
 }

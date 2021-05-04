@@ -425,7 +425,7 @@ NNS.boost <- function(IVs.train,
                              order = depth, dim.red.method = "equal",
                              ncores = 1,
                              stack = FALSE, status = status,
-                             type = type, dist = dist, folds = 1)$stack
+                             type = type, dist = dist, folds = folds)$stack
 
       estimates[is.na(unlist(estimates))] <- mean(unlist(estimates), na.rm = TRUE)
 

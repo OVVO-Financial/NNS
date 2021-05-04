@@ -4,9 +4,10 @@
 #'
 #' @param x vector of data.
 #' @param reps numeric; number of replicates to generate.
-#' @param setSpearman numeric [0,1]; The default setting \code{setSpearman = NULL} assumes that
-#' the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
-#' \code{setSpearman < 1} admits less perfect (more realistic for some purposes) dependence.
+#' @param rho numeric [0,1]; The default setting \code{rho = NULL} assumes that
+#' the user does not want to generate replicates that are perfectly dependent on original time series, \code{rho=1} recovers the original \code{meboot(...)} settings.
+#' \code{rho < 1} admits less perfect (more realistic for some purposes) dependence.
+#' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.
 #' @param xmin numeric; the lower limit for the left tail.
@@ -58,7 +59,7 @@
 #' @examples
 #' \dontrun{
 #' # To generate an orthogonal rank correlated time-series to AirPassengers
-#' boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
+#' boots <- NNS.meboot(AirPassengers, reps=100, rho = 0, xmin = 0)
 #'
 #' # Verify correlation of replicates ensemble to original
 #' cor(boots$ensemble, AirPassengers, method = "spearman")
@@ -74,7 +75,8 @@
 
  NNS.meboot <- function(x,
                         reps=999,
-                        setSpearman=NULL,
+                        rho=NULL,
+                        type="spearman",
                         drift=TRUE,
                         trim=0.10,
                         xmin=NULL,
@@ -85,9 +87,11 @@
                         colsubj, coldata, coltimes,...)
   {
 
+    type <- tolower(type)
+
     if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
 
-    if(is.null(setSpearman)) setSpearman <- -99
+    if(is.null(rho)) rho <- -99
 
     trim <- list(trim=trim, xmin=xmin, xmax=xmax)
 
@@ -107,8 +111,8 @@
 
     ### Fred Viole SUGGESTION PART 1 of 2
 
-    if(setSpearman < 1){
-      if(setSpearman < -0.5) ordxx_2 <- rev(ordxx) else ordxx_2 <- order(ordxx)
+    if(rho < 1){
+      if(rho < -0.5) ordxx_2 <- rev(ordxx) else ordxx_2 <- order(ordxx)
     }
 
     # symmetry
@@ -207,20 +211,17 @@
 
     ensemble[ordxx,] <- qseq
 
-
     ### Pilot Spearman
-    if(setSpearman==-99){
-      y <- NNS.meboot(x, reps = 30, setSpearman = 1)$ensemble
+    if(rho==-99){
+      y <- NNS.meboot(x, reps = 30, rho = 1, expand.sd = FALSE)$ensemble
       pilot <- cbind(x,y)
-      setSpearman <-  fivenum(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])[2]
+      rho <-  fivenum(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])[2]
     }
-
-
 
     ### Fred Viole SUGGESTION  PART 2 of 2
     ### Average two ordxx ensemble matrices
 
-    if(setSpearman<1){
+    if(rho<1){
       matrix2 = matrix(, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
 
@@ -230,18 +231,40 @@
       m <- c(matrix2)
       l <- length(e)
 
-      func <- function(ab, d=drift){
+      func <- function(ab, d=drift, ty=type){
         a <- ab[1]
         b <- ab[2]
 
-        ifelse(d,
-              (abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
-                  abs(mean((a*m + b*e))/mean(e) - 1) +
-                    abs( cor((a*m + b*e)/(a + b), 1:l) - cor(e, 1:l))
-              ),
-              abs(cor((a*m + b*e)/(a + b), e, method = "spearman") - setSpearman) +
-                abs(mean((a*m + b*e))/mean(e) - 1)
+        if(ty=="spearman" || ty=="pearson"){
+            ifelse(d,
+                  (abs(cor((a*m + b*e)/(a + b), e, method = ty) - rho) +
+                      abs(mean((a*m + b*e))/mean(e) - 1) +
+                        abs( cor((a*m + b*e)/(a + b), 1:l) - cor(e, 1:l))
+                  ),
+                  abs(cor((a*m + b*e)/(a + b), e, method = ty) - rho) +
+                    abs(mean((a*m + b*e))/mean(e) - 1)
+                  )
+        } else {
+            if(ty=="nnsdep"){
+                ifelse(d,
+                      (abs(NNS.dep((a*m + b*e)/(a + b), e)$Dependence - rho) +
+                          abs(mean((a*m + b*e))/mean(e) - 1) +
+                            abs( NNS.dep((a*m + b*e)/(a + b), 1:l)$Dependence - NNS.dep(e, 1:l)$Dependence)
+                      ),
+                      abs(NNS.dep((a*m + b*e)/(a + b), e)$Dependence - rho) +
+                        abs(mean((a*m + b*e))/mean(e) - 1)
+                      )
+            } else {
+              ifelse(d,
+                     (abs(NNS.dep((a*m + b*e)/(a + b), e)$Correlation - rho) +
+                        abs(mean((a*m + b*e))/mean(e) - 1) +
+                        abs( NNS.dep((a*m + b*e)/(a + b), 1:l)$Correlation - NNS.dep(e, 1:l)$Correlation)
+                     ),
+                     abs(NNS.dep((a*m + b*e)/(a + b), e)$Correlation - rho) +
+                       abs(mean((a*m + b*e))/mean(e) - 1)
               )
+            }
+        }
 
       }
 
@@ -257,12 +280,9 @@
 
     }
 
+    if(expand.sd) ensemble <- NNS.meboot.expand.sd(x=x, ensemble=ensemble, ...)
 
-    if(expand.sd)
-      ensemble <- NNS.meboot.expand.sd(x=x, ensemble=ensemble, ...)
-
-    if(force.clt && reps > 1)
-      ensemble <- meboot::force.clt(x=x, ensemble=ensemble)
+    if(force.clt && reps > 1) ensemble <- meboot::force.clt(x=x, ensemble=ensemble)
 
     # scale adjustment
 
