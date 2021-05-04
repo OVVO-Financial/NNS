@@ -7,7 +7,8 @@
 NNS.meboot(
   x,
   reps = 999,
-  setSpearman = NULL,
+  rho = NULL,
+  type = "spearman",
   drift = TRUE,
   trim = 0.1,
   xmin = NULL,
@@ -29,9 +30,11 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{setSpearman}{numeric [0,1]; The default setting \code{setSpearman = NULL} assumes that
-the user does not want to generate replicates that are perfectly dependent on original time series, \code{setSpearman=1} recovers the original \code{meboot(...)} settings.
-\code{setSpearman < 1} admits less perfect (more realistic for some purposes) dependence.}
+\item{rho}{numeric [0,1]; The default setting \code{rho = NULL} assumes that
+the user does not want to generate replicates that are perfectly dependent on original time series, \code{rho=1} recovers the original \code{meboot(...)} settings.
+\code{rho < 1} admits less perfect (more realistic for some purposes) dependence.}
+
+\item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
 \item{drift}{logical; \code{TRUE} default preserves the drift of the original series.}
 
@@ -86,7 +89,7 @@ Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r
 \examples{
 \dontrun{
 # To generate an orthogonal rank correlated time-series to AirPassengers
-boots <- NNS.meboot(AirPassengers, reps=100, setSpearman = 0, xmin = 0)
+boots <- NNS.meboot(AirPassengers, reps=100, rho = 0, xmin = 0)
 
 # Verify correlation of replicates ensemble to original
 cor(boots$ensemble, AirPassengers, method = "spearman")
