@@ -70,7 +70,7 @@ Returns a vector of fitted values for the dependent variable test set \code{$res
 Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
 }
 \note{
-Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for multiple class problems.
+Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
 }
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.

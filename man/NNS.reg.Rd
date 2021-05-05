@@ -118,7 +118,11 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 Generates a nonlinear regression based on partial moment quadrant means.
 }
 \note{
-Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
+\itemize{
+ \item Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
+
+ \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
+}
 }
 \examples{
 \dontrun{
