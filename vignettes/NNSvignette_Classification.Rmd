@@ -23,34 +23,34 @@ require(dtw)
 ```
 
 # Classification
-`NNS.reg` is a very robust regression technique capable of nonlinear regressions of continuous variables and classification tasks in machine learning problems.
+**`NNS.reg`** is a very robust regression technique capable of nonlinear regressions of continuous variables and classification tasks in machine learning problems.
 
-We have extended the `NNS.reg` applications per the use of an ensemble method of classification in `NNS.boost`.
+We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**.
 
 ***One major advantage `NNS.boost` has over tree based methods is the ability to seamlessly extrapolate beyond the current range of observations.***
 
 ## Splits vs. Partitions
-Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs.  `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable.  We can directly control the number of "splits" with the `NNS.reg(..., order = , ...)` parameter.
+Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs.  `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable.  We can directly control the number of "splits" with the **`NNS.reg(..., order = , ...)`** parameter.
 
 ### NNS Partitions
 We can see how `NNS` partitions each regressor by calling the `$rhs.partitions` output.  You will notice that each partition is not an equal interval, nor of equal length, which differentiates `NNS` from other bandwidth or tree-based techniques.
 
-Higher dependence between a regressor and the dependent variable will allow for a larger number of partitions.  This is determined internally with the `NNS.dep` measure.
+Higher dependence between a regressor and the dependent variable will allow for a larger number of partitions.  This is determined internally with the **`NNS.dep`** measure.
 
 ```{r rhs, rows.print=18}
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 ```
 
-# `NNS.boost`
+# `NNS.boost()`
 Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value.  From there we simply aggregate the predictions.
 
-`NNS.boost` will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console.  A plot of the frequency of the learning accuracy on the training set is also provided.
+**`NNS.boost`** will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console.  A plot of the frequency of the learning accuracy on the training set is also provided.
 
-Once a `threshold` is obtained, `NNS.boost` will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
+Once a `threshold` is obtained, **`NNS.boost`** will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
 
 Let's have a look and see how it works.  We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set.
 
-***NOTE: Base category of response variable should be 1, not 0 for classification problems when using `type = "CLASS"`.***
+**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
 set.seed(1234)
@@ -72,10 +72,12 @@ mean( a$results == as.numeric(iris[test.set, 5]) )
 
 A perfect classification.
 
-# Cross-Validation Classification Using `NNS.stack`
-The `NNS.stack()` routine cross-validates for a given objective function the `n.best` parameter in the multivariate `NNS.reg` function as well as the `threshold` parameter in the dimension reduction `NNS.reg` version. `NNS.stack` can be used for classification via `NNS.stack(..., type = "CLASS", ...)`.
+# Cross-Validation Classification Using `NNS.stack()`
+The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
 
-Using the reduced features (if any and calling them from `names(a$feature.weights)`) from our `NNS.boost` output, we can further cross-validate the classification using `NNS.stack`.
+Using the reduced features (if any and calling them from `names(a$feature.weights)`) from our **`NNS.boost`** output, we can further cross-validate the classification using **`NNS.stack`**.
+
+**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
 ```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE}
 b = NNS.stack(IVs.train = iris[-test.set, names(a$feature.weights)], 

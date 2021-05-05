@@ -24,9 +24,9 @@ require(dtw)
 ```
 
 # Correlation and Dependence
-The limitations of linear correlation are well known.  Often one uses correlation, when dependence is the intended measure for defining the relationship between variables.  NNS dependence `NNS.dep` is a signal:noise measure robust to nonlinear signals.
+The limitations of linear correlation are well known.  Often one uses correlation, when dependence is the intended measure for defining the relationship between variables.  NNS dependence **`NNS.dep`** is a signal:noise measure robust to nonlinear signals.
 
-Below are some examples comparing NNS correlation `NNS.cor` and `NNS.dep` with the standard Pearson's correlation coefficient `cor`.
+Below are some examples comparing NNS correlation **`NNS.cor`** and **`NNS.dep`** with the standard Pearson's correlation coefficient `cor`.
 
 ## Linear Equivalence
 Note the fact that all observations occupy the co-partial moment quadrants.
@@ -78,9 +78,9 @@ NNS.dep(df$x, df$y)
 
 
 # p-values for `NNS.dep()`
-p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running `NNS.dep(x,$y_p$)` to compare against a null hypothesis of 0 correlation, or independence between $(x, y)$.
+p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running **`NNS.dep(x,$y_p$)`** to compare against a null hypothesis of 0 correlation, or independence between $(x, y)$.
 
-Simply set `NNS.dep(..., p.value = TRUE, print.map = TRUE)` to run 100 permutations and plot the results.
+Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run 100 permutations and plot the results.
 
 ```{r permutations}
 ## p-values for [NNS.dep]
@@ -111,7 +111,7 @@ Analogous to an empirical copula transformation, we can generate `new data` from
 
 * **Determine the dependence structure:**
 
-This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `LPM.ratio(0, x, x)` for discrete variables, which are the empirical CDFs of the marginal variables.
+This is accomplished using **`LPM.ratio(1, x, x)`** for continuous variables, and **`LPM.ratio(0, x, x)`** for discrete variables, which are the empirical CDFs of the marginal variables.
 
 * **Generate or supply `new data`:**
 
@@ -119,8 +119,8 @@ This is accomplished using `LPM.ratio(1, x, x)` for continuous variables, and `L
 
 * **Apply dependence structure to `new data`:**
 
-We then utilize `LPM.VaR(...)` to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.  
-`LPM.VaR(..., degree = 0, ...)` is the discrete transformation and significantly faster than the continuous transformation `LPM.VaR(..., degree = 1, ...)`.
+We then utilize **`LPM.VaR(...)`** to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `original.data`.  
+**`LPM.VaR(..., degree = 0, ...)`** is the discrete transformation and significantly faster than the continuous transformation **`LPM.VaR(..., degree = 1, ...)`**.
 
 
 ```{r multisim}
