@@ -463,17 +463,12 @@ NNS.boost <- function(IVs.train,
     par(mfrow=c(1,1))
     par(original.par)
   }
+
   gc()
-  if(is.null(type)){
-    return(list("results" = estimates,
-                "feature.weights" = plot.table/sum(plot.table),
-                "feature.frequency" = plot.table))
-  } else {
+  if(is.null(type)) estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
 
-    estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
+  return(list("results" = estimates,
+              "feature.weights" = plot.table/sum(plot.table),
+              "feature.frequency" = plot.table))
 
-    return(list("results" = estimates,
-                "feature.weights" = plot.table/sum(plot.table),
-                "feature.frequency" = plot.table))
-  }
 }
