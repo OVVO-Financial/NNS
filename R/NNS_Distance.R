@@ -12,7 +12,7 @@
 #'
 #' @export
 
-NNS.distance <- function(rpm, dist.estimate, type, k, n){
+NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
   type <- toupper(type)
   n <- length(dist.estimate)
   l <- nrow(rpm)
@@ -27,15 +27,12 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
 
   rpm$y.hat <- y.hat
 
-  rpm_mat <- t(rpm[, 1:n])
-
-
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums(t(rpm_mat - dist.estimate)^2 + 1/(1/l + t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat)) == dist.estimate)), parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(t(t(rpm[,1:n]) - dist.estimate)^2 + 1/(1/l + (rpm_class == dist.estimate)), parallel = TRUE)
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(rpm_mat - dist.estimate)) + 1/(1/l + t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat))  == dist.estimate)), parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[,1:n]) - dist.estimate)) + 1/(1/l + (rpm_class == dist.estimate)), parallel = TRUE)
   }
 
   if(type=="DTW"){
@@ -43,7 +40,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, n){
   }
 
   if(type=="FACTOR"){
-    rpm$Sum <- 1/(1/l + ( Rfast::rowsums(t(ifelse(rpm_mat%%1 < .5, floor(rpm_mat), ceiling(rpm_mat)) == dist.estimate), parallel = TRUE)))
+    rpm$Sum <- 1/(1/l + ( Rfast::rowsums( (rpm_class == dist.estimate), parallel = TRUE)))
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
