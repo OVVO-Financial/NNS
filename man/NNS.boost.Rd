@@ -21,6 +21,7 @@ NNS.boost(
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
   extreme = FALSE,
+  features.only = FALSE,
   feature.importance = TRUE,
   status = TRUE
 )
@@ -58,6 +59,8 @@ NNS.boost(
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{extreme}{logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.}
+
+\item{features.only}{logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.}
 
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
