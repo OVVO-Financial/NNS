@@ -383,7 +383,7 @@ NNS.stack <- function(IVs.train,
 
           predicted <- ifelse(predicted%%1 < threshold_results_1[index], floor(predicted), ceiling(predicted))
 
-          RPM_CLASS <- do.call(cbind, lapply(setup$RPM[,1:(dim(setup$RPM)[2]-1)], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z))))
+          RPM_CLASS <- apply(do.call(cbind, lapply(setup$RPM[,1:(dim(setup$RPM)[2]-1)], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
         } else {
 
           predicted <- list()
