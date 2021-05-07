@@ -53,7 +53,7 @@ Let's have a look and see how it works.  We use 140 random `iris` observations a
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
-set.seed(1234)
+set.seed(123)
 test.set = sample(150,10)
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
