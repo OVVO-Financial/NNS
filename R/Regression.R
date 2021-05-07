@@ -145,6 +145,8 @@ NNS.reg = function (x, y,
 
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
 
+  dist <- tolower(dist)
+
   if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
 
   if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))

@@ -65,6 +65,10 @@ NNS.boost <- function(IVs.train,
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 
+  if(balance && is.null(type)) warning("type = 'CLASS' selected due to balance = TRUE.")
+  if(balance) type <- "CLASS"
+
+
   if(!is.null(type) && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
 
 

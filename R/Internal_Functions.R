@@ -1,6 +1,6 @@
 ### Continuous Mode of a distribution
 mode <- function(x) {
-      d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 100), error = function(e) (mean(x) + median(x))/2)
+      d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 100), error = function(e) (mean(fivenum(x)[2:4]) + median(x))/2)
       tryCatch(d$x[which.max(d$y)], error = function(e) d)
   }
 

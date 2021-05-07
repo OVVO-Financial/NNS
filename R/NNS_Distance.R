@@ -14,12 +14,12 @@
 #' @export
 
 NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
-  type <- toupper(type)
+  type <- tolower(type)
   n <- length(dist.estimate)
   l <- nrow(rpm)
   y.hat <- rpm$y.hat
 
-  if(type!="FACTOR"){
+  if(type!="factor"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
     rpm <- rpm[, names(rpm) := lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
     dist.estimate <- unlist(rpm[1, ])
@@ -28,19 +28,19 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm$y.hat <- y.hat
 
-  if(type=="L2"){
+  if(type=="l2"){
     rpm$Sum <- Rfast::rowsums(t(t(rpm[,1:n]) - dist.estimate)^2 + 1/(1/l + (rpm_class == dist.estimate)), parallel = TRUE)
   }
 
-  if(type=="L1"){
+  if(type=="l1"){
     rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[,1:n]) - dist.estimate)) + 1/(1/l + (rpm_class == dist.estimate)), parallel = TRUE)
   }
 
-  if(type=="DTW"){
+  if(type=="dtw"){
     rpm[, "Sum" := ( unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, 1:n]), as.numeric(dist.estimate))$distance)))]
   }
 
-  if(type=="FACTOR"){
+  if(type=="factor"){
     rpm$Sum <- 1/(1/l + ( Rfast::rowsums( (rpm_class == dist.estimate), parallel = TRUE)))
   }
 

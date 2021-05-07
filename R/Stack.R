@@ -176,7 +176,7 @@ NNS.stack <- function(IVs.train,
 
     if(!is.null(ts.test)){
       test.set <- 1:(length(DV.train) - ts.test)
-      dist <- "DTW"
+      dist <- "dtw"
     }
 
     test.set <- unlist(test.set)

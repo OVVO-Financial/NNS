@@ -2,6 +2,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
                        plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2",
                        return.values = FALSE, plot.regions = FALSE, ncores=NULL){
 
+  dist <- tolower(dist)
 
   ### For Multiple regressions
   ###  Turn each column into numeric values
@@ -168,12 +169,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
   RPM_CLASS <- apply(do.call(cbind, lapply(REGRESSION.POINT.MATRIX[ ,1:n], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
 
-  if(plyr::is.discrete(n.best)){
+  if(sum(original.DV%%1==0)==length(original.DV) && length(unique(original.DV)) < sqrt(length(original.DV)) && is.null(n.best)){
       n.best <- REGRESSION.POINT.MATRIX[ , .N]
   } else {
-    if(is.null(n.best)){
-      n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
-    }
+      if(is.null(n.best)) n.best <- floor(sqrt(REGRESSION.POINT.MATRIX[ , .N]))
   }
 
 
