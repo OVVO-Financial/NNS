@@ -15,7 +15,7 @@ mode_class <- function(x){
 
 ### Central Tendency
 gravity <- function(x){
-  (median(x) + mode(x))/2
+  (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
 }
 
 

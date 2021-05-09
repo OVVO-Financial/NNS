@@ -125,6 +125,7 @@ NNS.stack <- function(IVs.train,
 
   if(is.null(dim(IVs.test))) IVs.test <- data.frame(t(IVs.test)) else IVs.test <- data.frame(IVs.test)
 
+  dist <- tolower(dist)
 
   if(is.null(CV.size)){
     if(is.null(IVs.test)){
@@ -393,7 +394,7 @@ NNS.stack <- function(IVs.train,
             if(dim(CV.IVs.train)[2]>1){
               CV.IVs.test.new <- data.table::data.table(do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR)))
 
-              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i)[1], by = 1:nrow(CV.IVs.test)]
+              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS::NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i)[1], by = 1:nrow(CV.IVs.test)]
 
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {
@@ -421,6 +422,7 @@ NNS.stack <- function(IVs.train,
         nns.cv.1[index] <- eval(obj.fn)
 
         if(length(na.omit(nns.cv.1)) > 2){
+          if(objective=="min") nns.cv.1[is.na(nns.cv.1)] <- max(na.omit(nns.cv.1)) else nns.cv.1[is.na(nns.cv.1)] <- min(na.omit(nns.cv.1))
           if(objective=='min' && nns.cv.1[index]>=nns.cv.1[index-1] && nns.cv.1[index]>=nns.cv.1[index-2]){ break }
           if(objective=='max' && nns.cv.1[index]<=nns.cv.1[index-1] && nns.cv.1[index]<=nns.cv.1[index-2]){ break }
         }
@@ -445,6 +447,7 @@ NNS.stack <- function(IVs.train,
 
       if(b==folds){
         ks <- table(unlist(best.k))
+
         ks.mode <-  mode(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
 
