@@ -89,6 +89,9 @@ NNS.stack <- function(IVs.train,
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 
+  if(balance && is.null(type)) warning("type = 'CLASS' selected due to balance = TRUE.")
+  if(balance) type <- "CLASS"
+
   if(!is.null(type) && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
 
   if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
@@ -421,7 +424,7 @@ NNS.stack <- function(IVs.train,
 
         nns.cv.1[index] <- eval(obj.fn)
 
-        if(length(na.omit(nns.cv.1)) > 2){
+        if(length(na.omit(nns.cv.1)) > 3){
           if(objective=="min") nns.cv.1[is.na(nns.cv.1)] <- max(na.omit(nns.cv.1)) else nns.cv.1[is.na(nns.cv.1)] <- min(na.omit(nns.cv.1))
           if(objective=='min' && nns.cv.1[index]>=nns.cv.1[index-1] && nns.cv.1[index]>=nns.cv.1[index-2]){ break }
           if(objective=='max' && nns.cv.1[index]<=nns.cv.1[index-1] && nns.cv.1[index]<=nns.cv.1[index-2]){ break }
@@ -494,6 +497,7 @@ NNS.stack <- function(IVs.train,
   } else {
     weights <- c(max(1e-10, best.nns.cv), max(1e-10, best.nns.ord))
   }
+
 
   weights <- pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0

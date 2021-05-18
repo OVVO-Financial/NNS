@@ -120,6 +120,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   mean.by.id.matrix <- data.table::data.table(original.IVs, original.DV, NNS.ID, obs)
 
   data.table::setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
+
   if(is.numeric(order) || is.null(order)){
     if(noise.reduction == 'off'){
       mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) gravity(as.numeric(z))), .SDcols = seq_len(n+1) ,by = 'NNS.ID']
@@ -130,10 +131,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     if(noise.reduction == 'median'){
       mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) median(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
-    if(noise.reduction == 'mode' & is.null(type)){
+    if(noise.reduction == 'mode'){
       mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
-    if(noise.reduction == 'mode' & !is.null(type)){
+    if(noise.reduction == 'mode_class'){
       mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode_class(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
     }
   } else {
@@ -185,9 +186,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
 
     y.hat <- fitted.matrix$y.hat
 
-    if(!is.null(type)){
-        y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
-    }
+    if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
 
   }
 
@@ -195,7 +194,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   if(!is.null(point.est)){
 
     ### Point estimates
-    central.points <- apply(original.IVs, 2, function(x) mean(c(mean(x), median(x), mode(x), mean(c(max(x), min(x))))))
+    central.points <- apply(original.IVs, 2, function(x) gravity(x))
 
     predict.fit <- numeric()
 
@@ -328,13 +327,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       if(noise.reduction == 'off'){
         region.matrix[ , `:=` (y.hat = gravity(original.DV)), by = NNS.ID]
       }
-      if(noise.reduction == 'mean'){
+      if(noise.reduction =="mean"){
         region.matrix[ , `:=` (y.hat = mean(original.DV)), by = NNS.ID]
       }
-      if(noise.reduction == 'median'){
+      if(noise.reduction =="median"){
         region.matrix[ , `:=` (y.hat = median(original.DV)), by = NNS.ID]
       }
-      if(noise.reduction=='mode'){
+      if(noise.reduction=="mode"|| noise.reduction=="mode_class"){
         region.matrix[ , `:=` (y.hat = mode(original.DV)), by = NNS.ID]
       }
 
@@ -342,11 +341,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       region.matrix[ ,{
         rgl::quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),
                      y = .(min.x2[1], max.x2[1], max.x2[1], min.x2[1]),
-                     z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col='pink', alpha=1)
+                     z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col="pink", alpha=1)
         if(identical(min.x1[1], max.x1[1]) || identical(min.x2[1], max.x2[1])){
           rgl::segments3d(x = .(min.x1[1], max.x1[1]),
                           y = .(min.x2[1], max.x2[1]),
-                          z = .(y.hat[1], y.hat[1]), col = 'pink', alpha = 1)
+                          z = .(y.hat[1], y.hat[1]), col = "pink", alpha = 1)
         }
       }
       , by = NNS.ID]

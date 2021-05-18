@@ -1,6 +1,6 @@
 #' NNS Partition Map
 #'
-#' Creates partitions based on partial moment quadrant means, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
+#' Creates partitions based on partial moment quadrant centroids, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector with compatible dimensions to \code{x}.
@@ -9,7 +9,7 @@
 #' @param order integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.
 #' @param obs.req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
 #' @param min.obs.stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
-#' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used.
+#' @param noise.reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
 #' @return Returns:
 #'  \itemize{
 #'   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
@@ -51,7 +51,7 @@ NNS.part = function(x, y,
 
     noise.reduction <- tolower(noise.reduction)
     if (!any(noise.reduction %in% c("mean", "median", "mode",
-                                    "off"))) {
+                                    "off", "mode_class"))) {
         stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'")
     }
 
@@ -100,10 +100,6 @@ NNS.part = function(x, y,
     }
 
 
-
-
-
-
     if(is.null(type)) {
         i <- 0L
         while (i >= 0) {
@@ -131,24 +127,8 @@ NNS.part = function(x, y,
                         }, by = quadrant]
                     }
                 }
-
-                RP <- PART[obs.req.rows, lapply(.SD, gravity), by = quadrant, .SDcols = x:y]
-
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x <= i.x
-                    loy = x.y <= i.y
-                    1L + lox + loy * 2L
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = gravity), .SD), by = quadrant,
+                           .SDcols = x:y]
             }
 
             if(noise.reduction == "mean") {
@@ -162,25 +142,10 @@ NNS.part = function(x, y,
                         }, by = quadrant]
                     }
                 }
-
-                RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x:y]
-
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x <= i.x
-                    loy = x.y <= i.y
-                    1L + lox + loy * 2L
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mean), .SD), by = quadrant,
+                           .SDcols = x:y]
             }
+
 
 
             if(noise.reduction == "median") {
@@ -194,24 +159,8 @@ NNS.part = function(x, y,
                         }, by = quadrant]
                     }
                 }
-
-                RP <- PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x:y]
-
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x <= i.x
-                    loy = x.y <= i.y
-                    1L + lox + loy * 2L
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = median), .SD), by = quadrant,
+                           .SDcols = x:y]
             }
 
             if(noise.reduction == "mode") {
@@ -226,7 +175,24 @@ NNS.part = function(x, y,
                     }
                 }
 
-                RP <- PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x:y]
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mode), .SD), by = quadrant,
+                           .SDcols = x:y]
+            }
+
+            if(noise.reduction == "mode_class") {
+                if(Voronoi) {
+                    if(l.PART > obs.req) {
+                        PART[obs.req.rows, {
+                            segments(min(x), mode_class(y), max(x), mode_class(y),
+                                     lty = 3)
+                            segments(gravity_class(x), min(y), gravity_class(x), max(y),
+                                     lty = 3)
+                        }, by = quadrant]
+                    }
+                }
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity_class, y = mode_class), .SD), by = quadrant,
+                           .SDcols = x:y]
+            }
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
 
@@ -243,7 +209,7 @@ NNS.part = function(x, y,
                 PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
 
                 new.parts <- length(unique(PART$quadrant))
-            }
+
             if((min(PART$counts) <= obs.req) && i >= 1) break
             i = i + 1L
         }
@@ -278,64 +244,29 @@ NNS.part = function(x, y,
 
             if(obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
             if(noise.reduction == "off") {
-                RP <- PART[obs.req.rows, lapply(.SD, gravity), by = quadrant, .SDcols = x:y]
-
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x > i.x
-                    1L + lox
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = gravity), .SD), by = quadrant,
+                           .SDcols = x:y]
             }
 
             if(noise.reduction == "mean") {
-                RP <- PART[obs.req.rows, lapply(.SD, mean), by = quadrant, .SDcols = x:y]
-
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x > i.x
-                    1L + lox
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mean), .SD), by = quadrant,
+                           .SDcols = x:y]
             }
 
             if(noise.reduction == "mode") {
-                RP <- PART[obs.req.rows, lapply(.SD, mode), by = quadrant, .SDcols = x:y]
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mode), .SD), by = quadrant,
+                           .SDcols = x:y]
+            }
 
-                RP[, `:=`(prior.quadrant, (quadrant))]
-
-                PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-
-                old.parts <- length(unique(PART$quadrant))
-
-                PART[RP, on = .(quadrant), `:=`(q_new, {
-                    lox = x.x > i.x
-                    1L + lox
-                })]
-
-                PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
+            if(noise.reduction == "mode_class") {
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity_class, y = mode_class), .SD), by = quadrant,
+                           .SDcols=x:y]
             }
 
             if(noise.reduction == "median") {
-                RP <- PART[obs.req.rows, lapply(.SD, median), by = quadrant, .SDcols = x:y]
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = median), .SD), by = quadrant,
+                           .SDcols = x:y]
+            }
 
                 RP[, `:=`(prior.quadrant, (quadrant))]
 
@@ -351,7 +282,7 @@ NNS.part = function(x, y,
                 PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
 
                 new.parts <- length(unique(PART$quadrant))
-            }
+
 
             if((min(PART$counts) <= obs.req) && i >= 1) break
             i <- i + 1L

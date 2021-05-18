@@ -165,12 +165,12 @@ NNS.reg = function (x, y,
 
   if(!is.null(type)){
     type <- tolower(type)
-    noise.reduction <- "mode"
+    noise.reduction <- "mode_class"
   }
 
-  if(plyr::is.discrete(y)){
+  if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
     type <- "class"
-    noise.reduction <- "mode"
+    noise.reduction <- "mode_class"
   }
 
   if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
@@ -263,11 +263,9 @@ NNS.reg = function (x, y,
 
   np <- nrow(point.est)
 
-#  if(!is.null(type) && type == "class" ){
-#    if(is.null(n.best)){
-#      n.best <- 1
-#    }
-#  }
+  if(!is.null(type) && type == "class" ){
+    if(is.null(n.best)) n.best <- 1
+  }
 
 
 
@@ -441,7 +439,7 @@ NNS.reg = function (x, y,
     } else {
       if(type == "class"){
         type2 = "XONLY"
-        noise.reduction2 <- "mode"
+        noise.reduction2 <- "mode_class"
       } else {
         noise.reduction2 <- noise.reduction
         type2 <- "XONLY"
@@ -597,7 +595,7 @@ NNS.reg = function (x, y,
       regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
     }
 
-    if(noise.reduction == "mode"){
+    if(noise.reduction == "mode" || noise.reduction == "mode_class"){
       regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
     }
   }

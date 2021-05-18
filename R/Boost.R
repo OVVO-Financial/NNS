@@ -71,7 +71,7 @@ NNS.boost <- function(IVs.train,
   if(balance) type <- "CLASS"
 
 
-  if(!is.null(type) && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
+  if(!is.null(type) && min(as.numeric(as.factor(DV.train)))==0) warning("Base response variable category should be 1, not 0.")
 
 
   if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
@@ -151,15 +151,9 @@ NNS.boost <- function(IVs.train,
 
   n <- ncol(x)
 
-  if(is.null(epochs)){
-    epochs <- 2*length(y)
-  }
+  if(is.null(epochs)) epochs <- 2*length(y)
 
-  if(!is.null(ts.test)){
-    dist <- "DTW"
-  } else {
-    dist <- "L2"
-  }
+  if(!is.null(ts.test)) dist <- "DTW" else dist <- "L2"
 
   estimates <- list()
   fold <- list()
@@ -252,17 +246,9 @@ NNS.boost <- function(IVs.train,
 
 
   if(extreme){
-    if(objective=="max"){
-      threshold <- max(results)
-    } else {
-      threshold <- min(results)
-    }
+    if(objective=="max") threshold <- max(results) else threshold <- min(results)
   } else {
-    if(objective=="max"){
-      threshold <- fivenum(results)[4]
-    } else {
-      threshold <- fivenum(results)[2]
-    }
+    if(objective=="max") threshold <- fivenum(results)[4] else threshold <- fivenum(results)[2]
   }
 
   if(feature.importance){
@@ -274,17 +260,9 @@ NNS.boost <- function(IVs.train,
     abline(v = threshold, col = 'red', lty = 2, lwd = 2)
     mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
     if(extreme){
-      if(objective=='max'){
-        mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1)
-      } else {
-        mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
-      }
+      if(objective=='max') mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1) else mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
     } else {
-      if(objective=='max'){
-        mtext("Threshold >", side = 3, col = "red", at = threshold)
-      } else {
-        mtext("< Threshold", side = 3, col = "red", at = threshold)
-      }
+      if(objective=='max') mtext("Threshold >", side = 3, col = "red", at = threshold) else mtext("< Threshold", side = 3, col = "red", at = threshold)
     }
   }
 
@@ -297,11 +275,8 @@ NNS.boost <- function(IVs.train,
     message("                                       ", "\r", appendLF = FALSE)
   }
 
-  if(objective=="max"){
-    reduced.test.features <- test.features[which(results>=threshold)]
-  } else {
-    reduced.test.features <- test.features[which(results<=threshold)]
-  }
+  if(objective=="max") reduced.test.features <- test.features[which(results>=threshold)] else reduced.test.features <- test.features[which(results<=threshold)]
+
 
   keeper.features <- list()
 
@@ -317,9 +292,7 @@ NNS.boost <- function(IVs.train,
         new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
       }
 
-      if(!is.null(ts.test)){
-        new.index <- length(y) - (2*ts.test):0
-      }
+      if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
 
       new.index <- unlist(new.index)
       new.iv.train <- data.table::data.table(x[-new.index, ])
@@ -379,17 +352,9 @@ NNS.boost <- function(IVs.train,
       new.results <- eval(obj.fn)
 
       if(objective=="max"){
-        if(new.results>=threshold){
-          keeper.features[[j]] <- features
-        } else {
-          keeper.features[[j]] <- NULL
-        }
+        if(new.results>=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
       } else {
-        if(new.results<=threshold){
-          keeper.features[[j]] <- features
-        } else {
-          keeper.features[[j]] <- NULL
-        }
+        if(new.results<=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
       }
     }
   } else { # !is.null(epochs)
@@ -399,11 +364,7 @@ NNS.boost <- function(IVs.train,
   keeper.features <- keeper.features[!sapply(keeper.features, is.null)]
   if(length(keeper.features)==0){
     if(old.threshold==0){
-      if(objective=="min"){
-        stop("Please increase [threshold].")
-      } else {
-        stop("Please reduce [threshold].")
-      }
+      if(objective=="min") stop("Please increase [threshold].") else stop("Please reduce [threshold].")
     } else {
       keeper.features <- test.features[which.max(results)]
     }
@@ -436,19 +397,17 @@ NNS.boost <- function(IVs.train,
 
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
-
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
-
 
       estimates <- NNS.stack(data.matrix(x[, unlist(final_scale)]),
                              y,
                              IVs.test = data.matrix(z[, unlist(final_scale)]),
-                             order = depth, dim.red.method = "equal",
+                             order = depth, dim.red.method = "cor",
                              ncores = 1,
                              stack = FALSE, status = status,
-                             type = type, dist = dist, folds = folds)$stack
+                             type = type, dist = dist, folds = 5)$stack
 
-      estimates[is.na(unlist(estimates))] <- mean(unlist(estimates), na.rm = TRUE)
+      estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
 
 
   if(!is.null(type)){

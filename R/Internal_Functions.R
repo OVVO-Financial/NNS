@@ -1,6 +1,6 @@
 ### Continuous Mode of a distribution
 mode <- function(x) {
-      d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 100), error = function(e) (mean(fivenum(x)[2:4]) + median(x))/2)
+      d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 100), error = function(e) (median(x) + mean(fivenum(x)[2:4]))/2)
       tryCatch(d$x[which.max(d$y)], error = function(e) d)
   }
 
@@ -14,25 +14,9 @@ mode_class <- function(x){
 
 
 ### Central Tendency
-gravity <- function(x){
-  (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
-}
+gravity <- function(x) (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
+gravity_class <- function(x)  (mean(x) + mean(fivenum(x)[2:4]))/2
 
-
-### cbind different length vectors
-alt_cbind <- function(x, y, first = FALSE) {
-  if(length(x)<length(y)) {
-    if(first) x <- c(rep(NA, length(y) - length(x)), x); y <- y
-    if(!first) x <- c(x,rep(NA, length(y) - length(x))); y <- y
-  }
-  if(length(y)<length(x)) {
-    if(first) y <- c(rep(NA, length(x) - length(y)),y); x <- x
-    if(!first) y <- c(y,rep(NA, length(x) - length(y))); x <- x
-  }
-
-  return(cbind(x,y))
-
-}
 
 
 ### Factor to dummy variable

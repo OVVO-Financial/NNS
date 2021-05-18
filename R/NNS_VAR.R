@@ -211,29 +211,6 @@ NNS.VAR <- function(variables,
   nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(x, h))))
   colnames(nns_IVs_results) <- colnames(variables)
 
-  nns_IVs_interpolated_extrapolated_2 <- list()
-
-  nns_IVs_interpolated_extrapolated_2 <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table", "plyr"))%dopar%{
-    if(na_s[i] > 0){
-      index <- seq_len(dim(nns_IVs_interpolated_extrapolated)[1])
-      last_point <- tail(index, 1) - na_s[i]
-      a <- cbind.data.frame(nns_IVs_interpolated_extrapolated, "index" = index)
-
-      mutlivariate_extrapolation <- NNS.stack(a[1:last_point, -i], a[1:last_point, i],
-                                              IVs.test = a[, -i],
-                                              order = "max", method = 1,
-                                              folds = 1, stack = FALSE)$stack
-
-      return(rowMeans(cbind(a[,i], mutlivariate_extrapolation)))
-
-    } else {
-      return(nns_IVs_interpolated_extrapolated[,i])
-    }
-
-  }
-
-
-  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs_interpolated_extrapolated_2, function(x) head(x, dim(variables)[1]))))
 
   if(h == 0){
     colnames(nns_IVs_interpolated_extrapolated) <- as.character(colnames(variables))
