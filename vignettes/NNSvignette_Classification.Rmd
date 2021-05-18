@@ -53,14 +53,14 @@ Let's have a look and see how it works.  We use 140 random `iris` observations a
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
-set.seed(123)
+set.seed(1234)
 test.set = sample(150,10)
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
               epochs = 100, learner.trials = 100, 
-              status = FALSE,
+              status = FALSE, balance = TRUE,
               type = "CLASS")
 
 a$results
@@ -75,15 +75,14 @@ A perfect classification.
 # Cross-Validation Classification Using `NNS.stack()`
 The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
 
-Using the reduced features (if any and calling them from `names(a$feature.weights)`) from our **`NNS.boost`** output, we can further cross-validate the classification using **`NNS.stack`**.
 
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
 ```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE}
-b = NNS.stack(IVs.train = iris[-test.set, names(a$feature.weights)], 
+b = NNS.stack(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
-              IVs.test = iris[test.set, names(a$feature.weights)],
-              type = "CLASS", stack = FALSE,
+              IVs.test = iris[test.set, 1:4],
+              type = "CLASS", balance = TRUE,
               ncores = 1)
 
 b
