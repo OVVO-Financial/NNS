@@ -112,9 +112,7 @@ NNS.part = function(x, y,
             obs.req.rows <- PART[counts >= obs.req, which = TRUE]
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
-            if(min.obs.stop & obs.req > 0 & length(obs.req.rows) < length(old.obs.req.rows)) {
-                break
-            }
+            if(min.obs.stop && obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
 
             if(noise.reduction == "off") {
                 if(Voronoi) {
@@ -137,7 +135,7 @@ NNS.part = function(x, y,
                         PART[obs.req.rows, {
                             segments(min(x), mean(y), max(x), mean(y),
                                      lty = 3)
-                            segments(mean(x), min(y), mean(x), max(y),
+                            segments(gravity(x), min(y), gravity(x), max(y),
                                      lty = 3)
                         }, by = quadrant]
                     }
@@ -154,7 +152,7 @@ NNS.part = function(x, y,
                         PART[obs.req.rows, {
                             segments(min(x), median(y), max(x), median(y),
                                      lty = 3)
-                            segments(median(x), min(y), median(x), max(y),
+                            segments(gravity(x), min(y), gravity(x), max(y),
                                      lty = 3)
                         }, by = quadrant]
                     }
@@ -169,7 +167,7 @@ NNS.part = function(x, y,
                         PART[obs.req.rows, {
                             segments(min(x), mode(y), max(x), mode(y),
                                      lty = 3)
-                            segments(mode(x), min(y), mode(x), max(y),
+                            segments(gravity(x), min(y), gravity(x), max(y),
                                      lty = 3)
                         }, by = quadrant]
                     }
@@ -213,12 +211,9 @@ NNS.part = function(x, y,
             if((min(PART$counts) <= obs.req) && i >= 1) break
             i = i + 1L
         }
-        if (!is.numeric(order)) {
-            RP <- PART[, c("quadrant", "x", "y")]
-        }
-        else {
-            RP[, `:=`(prior.quadrant = NULL)]
-        }
+
+        if (!is.numeric(order)) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
+
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
         RP <- data.table::setorder(RP[], quadrant)[]
@@ -288,11 +283,7 @@ NNS.part = function(x, y,
             i <- i + 1L
         }
 
-        if(!is.numeric(order)) {
-            RP <- PART[, c("quadrant", "x", "y")]
-        } else {
-            RP[, `:=`(prior.quadrant = NULL)]
-        }
+        if(!is.numeric(order)) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
