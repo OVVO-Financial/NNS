@@ -34,7 +34,7 @@ Below are some examples demonstrating unsupervised learning with NNS clustering 
 ```{r linear}
 x = seq(-5, 5, .05); y = x ^ 3
 
-for(i in 1 : 4){NNS.part(x, y, order = i, min.obs.stop = FALSE, Voronoi = TRUE, obs.req = 0)}
+for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
 ```
 
 
