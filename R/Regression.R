@@ -422,15 +422,13 @@ NNS.reg = function (x, y,
   if(multivariate.call) stn <- 0
 
   if(dependence > stn){
-    part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+    part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0)
     if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
     }
     if(dependence == 1){
-      if(is.null(order)) {
-        dep.reduced.order <- "max"
-      }
-      part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0, min.obs.stop = FALSE)
+      if(is.null(order)) dep.reduced.order <- "max"
+      part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
     }
   } else {
     if(is.null(type)){
@@ -446,9 +444,9 @@ NNS.reg = function (x, y,
       }
     }
 
-    part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = type2, min.obs.stop = FALSE, obs.req = 0)
+    part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = type2, obs.req = 0)
     if(length(part.map$regression.points$x) == 0){
-      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0, min.obs.stop = FALSE)
+      part.map <- NNS.part(x, y, type =  type2, noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0)
     }
   } # Dependence < stn
 

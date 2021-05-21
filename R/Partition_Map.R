@@ -17,6 +17,8 @@
 #'   \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
 #'   }
 #'
+#' @note \code{min.obs.stop = FALSE} will not generate regression points due to possible unequal partitioning of quadrants from individual cluster observations.
+#'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
@@ -75,9 +77,7 @@ NNS.part = function(x, y,
 
     PART <- data.table::data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
 
-    if(Voronoi) {
-        plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
-    }
+    if(Voronoi) plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
 
     if (length(x) <= 8) {
         if(is.null(order)){
@@ -91,12 +91,12 @@ NNS.part = function(x, y,
 
     if(is.null(order)) order <- max(ceiling(log(length(x), 2)), 1)
 
-    if(!is.numeric(order)) {
+    if(!is.numeric(order)){
         obs.req <- 0
         hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
     } else {
         obs.req <- obs.req
-        hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
+        hard.stop <- length(x)# max(ceiling(log(length(x), 2)), 1) + 2
     }
 
 
@@ -112,6 +112,7 @@ NNS.part = function(x, y,
             obs.req.rows <- PART[counts >= obs.req, which = TRUE]
             old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
 
+            if(length(obs.req.rows)==0) break
             if(min.obs.stop && obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
 
             if(noise.reduction == "off") {
@@ -125,8 +126,10 @@ NNS.part = function(x, y,
                         }, by = quadrant]
                     }
                 }
-                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = gravity), .SD), by = quadrant,
+                 RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = gravity), .SD), by = quadrant,
                            .SDcols = x:y]
+
+
             }
 
             if(noise.reduction == "mean") {
@@ -220,8 +223,10 @@ NNS.part = function(x, y,
 
         if (Voronoi) {
             title(main = paste0("NNS Order = ", i), cex.main = 2)
-            points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+            if(min.obs.stop) points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
         }
+
+        if(min.obs.stop == FALSE) RP <- NULL
         return(list(order = i, dt = PART[], regression.points = RP))
     }
 
@@ -237,7 +242,9 @@ NNS.part = function(x, y,
 
             old.obs.req.rows <- PART[old.counts > obs.req/2, which = TRUE]
 
+            if(length(obs.req.rows)==0) break
             if(obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
+
             if(noise.reduction == "off") {
                 RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = gravity), .SD), by = quadrant,
                            .SDcols = x:y]
@@ -293,10 +300,10 @@ NNS.part = function(x, y,
 
         if(Voronoi) {
             abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1,max(x)), lty = 3)
-            points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+            if(min.obs.stop) points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
             title(main = paste0("NNS Order = ", i), cex.main = 2)
         }
-
+        if(min.obs.stop == FALSE) RP <- NULL
         return(list(order = i, dt = PART[], regression.points = RP))
     }
 }
