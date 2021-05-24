@@ -17,7 +17,7 @@
 #'   \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
 #'   }
 #'
-#' @note \code{min.obs.stop = FALSE} will not generate regression points due to possible unequal partitioning of quadrants from individual cluster observations.
+#' @note \code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -215,7 +215,7 @@ NNS.part = function(x, y,
             i = i + 1L
         }
 
-        if (!is.numeric(order)) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
+        if(!is.numeric(order) || is.null(dim(RP))) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
@@ -290,7 +290,7 @@ NNS.part = function(x, y,
             i <- i + 1L
         }
 
-        if(!is.numeric(order)) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
+        if(!is.numeric(order) || is.null(dim(RP))) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
@@ -303,6 +303,7 @@ NNS.part = function(x, y,
             if(min.obs.stop) points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
             title(main = paste0("NNS Order = ", i), cex.main = 2)
         }
+
         if(min.obs.stop == FALSE) RP <- NULL
         return(list(order = i, dt = PART[], regression.points = RP))
     }
