@@ -1,11 +1,11 @@
 #' Partial Derivative dy/dx
 #'
-#' Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
+#' Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param eval.point numeric or ("overall"); \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
-#' @param deriv.method method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Defualt).
+#' @param deriv.method method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Default).
 #' @return Returns a list of both 1st and 2nd derivative:
 #' \itemize{
 #' \item{\code{dy.dx(...)$First}} the 1st derivative.
@@ -36,19 +36,11 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   order <- NULL
 
-  dep <- NNS.dep(x, y, asym =  TRUE)$Dependence
+  dep <- NNS.dep(x, y, asym = TRUE)$Dependence
 
-  if(dep > 0.85){
-    h <- 1/log(length(x),2)
-  } else {
-      if(dep > 0.5){
-        h <- 1/log(length(x))
-      } else {
-        h <- 1/log(length(x),10)
-      }
-  }
+  h <- mean(abs(diff(LPM.VaR(seq(0, 1, min(.05, max(.01, 1-dep))), 1, x))))
 
-
+  if(dep < .85) h <- 2*h
 
   if(!is.null(ncol(x)) && is.null(colnames(x))){
     x <- data.frame(x)
@@ -100,22 +92,20 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
     estimates.max <- reg.output$Point.est[(2*n+1):(3*n)]
     estimates <- reg.output$Point.est[(n+1):(2*n)]
 
-      if(deriv.method == "FD"){
+   if(deriv.method == "FD"){
         rise <- estimates.max - estimates.min
 
         first.deriv <-  rise / run
-      } else {
+    } else {
         output <- reg.output$derivative
-        if(length(output[ , Coefficient]) == 1){
-          first.deriv <- output[ , Coefficient]
-        }
+        if(length(output[ , Coefficient]) == 1) first.deriv.coef <- output[ , Coefficient]
 
         if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]) < eval.point){
           first.deriv <-  output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1]
         } else {
           first.deriv <-  mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]))
         }
-      }
+    }
 
 
       ## Second derivative form:
