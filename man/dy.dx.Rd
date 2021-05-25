@@ -13,7 +13,7 @@ dy.dx(x, y, eval.point = median(x), deriv.method = "FD")
 
 \item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
 
-\item{deriv.method}{method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Defualt).}
+\item{deriv.method}{method of derivative estimation, options: ("NNS", "FD"); Determines the partial derivative from the coefficient of the \link{NNS.reg} output when \code{(deriv.method = "NNS")} or generates a partial derivative using the finite difference method \code{(deriv.method = "FD")} (Default).}
 }
 \value{
 Returns a list of both 1st and 2nd derivative:
@@ -23,7 +23,7 @@ Returns a list of both 1st and 2nd derivative:
 }
 }
 \description{
-Returns the numerical partial derivate of \code{y} wrt \code{x} for a point of interest.
+Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
 }
 \note{
 If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.

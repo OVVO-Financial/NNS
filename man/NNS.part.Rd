@@ -44,7 +44,7 @@ Returns:
 Creates partitions based on partial moment quadrant centroids, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
 }
 \note{
-\code{min.obs.stop = FALSE} will not generate regression points due to possible unequal partitioning of quadrants from individual cluster observations.
+\code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
 }
 \examples{
 set.seed(123)
