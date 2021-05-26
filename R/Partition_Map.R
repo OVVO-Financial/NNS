@@ -215,7 +215,8 @@ NNS.part = function(x, y,
             i = i + 1L
         }
 
-        if(!is.numeric(order) || is.null(dim(RP))) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
+        if(!exists("RP"))  RP <- PART[, c("quadrant", "x", "y")]
+        if(!is.numeric(order) || is.null(dim(RP)))  RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
 
@@ -290,6 +291,7 @@ NNS.part = function(x, y,
             i <- i + 1L
         }
 
+        if(!exists("RP"))  RP <- PART[, c("quadrant", "x", "y")]
         if(!is.numeric(order) || is.null(dim(RP))) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
 
         PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]

@@ -200,10 +200,9 @@ NNS.ARMA <- function(variable,
     if(method == 'nonlin' | method == 'both'){
       Regression.Estimates <- list(length(lag))
 
-      Regression.Estimates <- foreach(i = 1 : length(lag),.packages = c("NNS", "data.table", "plyr"))%dopar%{
+      for(i in 1:length(lag)){
         x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
-
 
         ## Skeleton NNS regression for NNS.ARMA
         reg.points <- NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
@@ -212,7 +211,7 @@ NNS.ARMA <- function(variable,
         run <- mean(rep(diff(reg.points$x), (1:length(diff(reg.points$x)))^2))
         rise <- mean(rep(diff(reg.points$y), (1:length(diff(reg.points$y)))^2))
 
-        last.y + (rise / run)
+        Regression.Estimates[[i]] <- last.y + (rise / run)
       }
 
       Regression.Estimates <- unlist(Regression.Estimates)
