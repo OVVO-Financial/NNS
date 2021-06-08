@@ -208,8 +208,15 @@ NNS.ARMA <- function(variable,
         reg.points <- NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
         reg.points <- reg.points[complete.cases(reg.points),]
 
-        run <- mean(rep(diff(reg.points$x), (1:length(diff(reg.points$x)))^2))
-        rise <- mean(rep(diff(reg.points$y), (1:length(diff(reg.points$y)))^2))
+        xs <- (tail(reg.points$x, 1) - reg.points$x)
+        ys <- (tail(reg.points$y, 1) - reg.points$y)
+
+        xs <- head(xs, (length(xs)-1))
+        ys <- head(ys, (length(ys)-1))
+
+        run <- mean(rep(xs, (1:length(xs))^2))
+        rise <- mean(rep(ys, (1:length(ys))^2))
+
 
         Regression.Estimates[[i]] <- last.y + (rise / run)
       }

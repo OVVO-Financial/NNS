@@ -564,7 +564,7 @@ NNS.reg = function (x, y,
     central_rows <- c(floor(median(1:nrow(regression.points))), ceiling(median(1:nrow(regression.points))))
     central_x <- regression.points[central_rows,]$x
 
-    central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]])
+    ifelse(length(unique(central_rows))>1, central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]]), central_y <- regression.points[central_rows[1],]$y)
     central_x <- mean(central_x)
     med.rps <- data.table::data.table(t(c(central_x, central_y)))
   } else {

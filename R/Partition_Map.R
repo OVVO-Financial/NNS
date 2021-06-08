@@ -85,7 +85,7 @@ NNS.part = function(x, y,
             hard.stop <- max(ceiling(log(length(x), 2)), 1)
         } else {
             obs.req <- 0
-            hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
+            hard.stop <- length(x)
         }
     }
 
@@ -96,7 +96,7 @@ NNS.part = function(x, y,
         hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
     } else {
         obs.req <- obs.req
-        hard.stop <- length(x)# max(ceiling(log(length(x), 2)), 1) + 2
+        hard.stop <- 2*max(ceiling(log(length(x), 2)), 1) + 2
     }
 
 
