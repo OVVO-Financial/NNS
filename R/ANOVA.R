@@ -1,6 +1,7 @@
 #' NNS ANOVA
 #'
 #' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
+#'
 #' @param control a numeric vector, matrix or data frame.
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
@@ -80,10 +81,10 @@ NNS.ANOVA <- function(control,
     #Continuous CDF for each variable from Mean of Means
         LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))
 
-        lower.25.target = mean(sapply(1:n, function(i) LPM.VaR(.25,1,A[,i])))
-        upper.25.target = mean(sapply(1:n, function(i) UPM.VaR(.25,1,A[,i])))
-        lower.125.target = mean(sapply(1:n, function(i) LPM.VaR(.125,1,A[,i])))
-        upper.125.target = mean(sapply(1:n, function(i) UPM.VaR(.125,1,A[,i])))
+        lower.25.target <- mean(sapply(1:n, function(i) LPM.VaR(.25,1,A[,i])))
+        upper.25.target <- mean(sapply(1:n, function(i) UPM.VaR(.25,1,A[,i])))
+        lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125,1,A[,i])))
+        upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125,1,A[,i])))
 
 
         n <- ncol(A)

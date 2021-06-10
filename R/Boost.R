@@ -136,18 +136,19 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-  rep.x <- data.table::data.table(x)
+  if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+      rep.x <- data.table::data.table(x)
 
-  fivenum.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
-  mode.x <- rep.x[,lapply(.SD, function(z) mode(as.numeric(as.character(z)))), by = .(y)]
-  mean.x <- rep.x[,lapply(.SD, function(z) mean(as.numeric(as.character(z)))), by = .(y)]
+      rep.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
 
-  rep.x <- data.table::rbindlist(list(fivenum.x, mode.x, mean.x), use.names = FALSE)
+      rep.y <- unlist(rep.x[,1])
+      rep.x <- rep.x[,-1]
 
-  rep.y <- unlist(rep.x[,1])
-  rep.x <- rep.x[,-1]
-
-  rep.x <- as.data.frame(rep.x)
+      rep.x <- as.data.frame(rep.x)
+  } else {
+      rep.x <- x
+      rep.y <- NULL
+  }
 
   n <- ncol(x)
 
@@ -185,33 +186,30 @@ NNS.boost <- function(IVs.train,
         new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
       }
 
-      if(!is.null(ts.test)){
-        new.index <- 1:(length(y) - ts.test)
-      }
+      if(!is.null(ts.test)) new.index <- 1:(length(y) - ts.test)
 
       new.index <- unlist(new.index)
-      new.iv.train <- data.table::data.table(x[-new.index,])
-      new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
-      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
-      mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(as.character(z)))), by = .(y[-new.index])]
-      mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(as.character(z)))), by = .(y[-new.index])]
+      if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+          new.iv.train <- data.table::data.table(x[-new.index,])
+          new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
-      new.iv.train <- data.table::rbindlist(list(fivenum.new.iv.train,mode.new.iv.train,mean.new.iv.train), use.names = FALSE)
+          new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
 
-      new.iv.train <- as.data.frame(new.iv.train[,-1])
-      new.dv.train <- unlist(new.iv.train[,1])
+          new.dv.train <- unlist(new.iv.train[,1])
+          new.iv.train <- as.data.frame(new.iv.train[,-1])
 
-      if(!representative.sample){
-        new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
-        new.dv.train <- c(new.dv.train, y[-new.index])
+          new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
+          new.dv.train <- c(new.dv.train, y[-new.index])
+      } else {
+          new.iv.train <- data.matrix(x[-new.index,])
+          new.dv.train <- y[-new.index]
       }
 
       colnames(new.iv.train) <- features
 
       actual <- as.numeric(y[new.index])
       new.iv.test <- x[new.index,]
-
 
       if(status){
         message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
@@ -229,6 +227,7 @@ NNS.boost <- function(IVs.train,
                            ncores = 1, type = type)$Point.est
 
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
+
       # Do not predict a new unseen class
       if(!is.null(type)){
         predicted <- pmin(predicted, max(as.numeric(y)))
@@ -295,29 +294,24 @@ NNS.boost <- function(IVs.train,
       if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
 
       new.index <- unlist(new.index)
-      new.iv.train <- data.table::data.table(x[-new.index, ])
-      new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
-      fivenum.new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-      mode.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mode(as.numeric(z))), by = .(y[-new.index])]
-      mean.new.iv.train <- new.iv.train[,lapply(.SD,function(z) mean(as.numeric(z))), by = .(y[-new.index])]
+      if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+          new.iv.train <- data.table::data.table(x[-new.index, ])
+          new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
+          new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
 
-      names(fivenum.new.iv.train) <- c("y", colnames(new.iv.train))
-      names(mean.new.iv.train) <- c("y", colnames(new.iv.train))
-      names(mode.new.iv.train) <- c("y", colnames(new.iv.train))
+          names(new.iv.train) <- c("y", colnames(new.iv.train))
 
+          new.dv.train <- unlist(new.iv.train[, 1])
+          new.iv.train <- as.data.frame(new.iv.train[, -1])
 
-      new.iv.train <- data.table::rbindlist(list(fivenum.new.iv.train, mode.new.iv.train, mean.new.iv.train), use.names = FALSE)
-
-      new.iv.train <- as.data.frame(new.iv.train[, -1])
-      new.dv.train <- unlist(new.iv.train[, 1])
-
-      if(!representative.sample){
-        new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
-        new.dv.train <- c(new.dv.train, y[-new.index])
+          new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
+          new.dv.train <- c(new.dv.train, y[-new.index])
+      } else {
+          new.iv.train <- data.matrix(x[-new.index,])
+          new.dv.train <- y[-new.index]
       }
-
 
       actual <- as.numeric(y[new.index])
       new.iv.test <- x[new.index,]
@@ -385,8 +379,12 @@ NNS.boost <- function(IVs.train,
   }
 
 
-  x <- rbind(rep.x, data.matrix(x))
-  y <- c(rep.y, y)
+  if(!is.null(rep.y)){
+      x <- rbind(rep.x, data.matrix(x))
+      y <- c(rep.y, y)
+  } else {
+      x <- data.matrix(x)
+  }
 
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
