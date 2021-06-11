@@ -5,4 +5,5 @@ cache: packages
 branches:
   only:
   - NNS-Beta-Version
-
+r_binary_packages:
+  - gsl
