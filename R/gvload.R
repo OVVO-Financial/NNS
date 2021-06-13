@@ -18,7 +18,6 @@
 #' @import tdigest
 #' @import data.table
 #' @import dynlm
-#' @import nowcasting
 #' @import Quandl
 
 
@@ -50,7 +49,6 @@
   requireNamespace("tdigest")
   requireNamespace("Rfast")
   requireNamespace("dynlm")
-  requireNamespace("nowcasting")
   requireNamespace("Quandl")
 
   .datatable.aware = TRUE

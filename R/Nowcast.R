@@ -61,7 +61,12 @@ NNS.nowcast <- function(h = 12,
       Quandl::Quandl.api_key(key)
   } else { Quandl::Quandl.api_key(Quandl.key) }
 
-  variables <- c(colnames(nowcasting::NYFED$base), "DGS10", "T10Y2Y", "ICSA")
+  variables <- c("PAYEMS", "JTSJOL",  "CPIAUCSL", "DGORDER", "RSAFS",
+                 "UNRATE", "HOUST", "INDPRO", "DSPIC96", "BOPTEXP",
+                 "BOPTIMP", "TTLCONS", "IR", "CPILFESL", "PCEPILFE",
+                 "PCEPI", "PERMIT", "TCU", "BUSINV", "ULCNFB",
+                 "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
+                 "DGS10", "T10Y2Y", "ICSA", "DGS10", "T10Y2Y", "ICSA")
 
   variable_list <- character()
 
