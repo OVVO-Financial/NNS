@@ -20,7 +20,7 @@ NNS.nowcast(
 
 \item{start.date}{character; \code{"2000-01-03"} (default) Starting date for all data series download.}
 
-\item{Quandl.key}{character; \code{NULL} (default) User provided \link{Quandl} API key.}
+\item{Quandl.key}{character; \code{NULL} (default) User provided \link{Quandl} API key WITH QUOTES.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
