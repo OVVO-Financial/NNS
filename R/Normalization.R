@@ -25,7 +25,7 @@ NNS.norm <- function(A,
 
   if(any(class(A)=="tbl")) A <- as.data.frame(A)
 
-  m  <- Rfast::colmeans(A)
+  m  <- colMeans(A)
   m[m==0] <- 1e-10
   RG <- m %o% (1 / m)
 
@@ -94,6 +94,6 @@ if(!is.null(chart.type)){
 
 
 
-  return(A_Normalized)
+  return(data.table::data.table(A_Normalized))
 
 }
