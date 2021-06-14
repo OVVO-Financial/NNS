@@ -5,7 +5,7 @@
 #' @param h integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
 #' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.quandl.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
-#' @param Quandl.key character; \code{NULL} (default) User provided \link{Quandl} API key.
+#' @param Quandl.key character; \code{NULL} (default) User provided \link{Quandl} API key WITH QUOTES.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
@@ -55,10 +55,11 @@ NNS.nowcast <- function(h = 12,
 
 
   if(is.null(Quandl.key)){
-      message("Please enter your Quandl API key and press enter:")
+      message("Please enter your Quandl API key WITHOUT QUOTES and press enter:")
 
       key <- readline(": ")
       Quandl::Quandl.api_key(key)
+
   } else { Quandl::Quandl.api_key(Quandl.key) }
 
   variables <- c("PAYEMS", "JTSJOL",  "CPIAUCSL", "DGORDER", "RSAFS",
@@ -76,7 +77,7 @@ NNS.nowcast <- function(h = 12,
 
   variable_list <- c(variable_list, additional.regressors)
 
-  econ_variables <- Quandl::Quandl(variable_list,type = 'ts',order = "asc",
+  econ_variables <- Quandl::Quandl(variable_list, type = 'ts',order = "asc",
                                    collapse = "monthly", start_date = start.date)
 
   if(!is.null(attributes(econ_variables)$errors)) return(attributes(econ_variables)$errors)
