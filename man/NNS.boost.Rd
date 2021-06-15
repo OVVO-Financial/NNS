@@ -9,7 +9,6 @@ NNS.boost(
   DV.train,
   IVs.test = NULL,
   type = NULL,
-  representative.sample = FALSE,
   depth = NULL,
   learner.trials = 100,
   epochs = NULL,
@@ -34,8 +33,6 @@ NNS.boost(
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
 
 \item{type}{\code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
-
-\item{representative.sample}{logical; \code{FALSE} (default) Reduces observations of \code{IVs.train} to a set of representative observations per regressor.}
 
 \item{depth}{options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.}
 
