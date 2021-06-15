@@ -1,6 +1,6 @@
 NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, point.only = FALSE,
                        plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2",
-                       return.values = FALSE, plot.regions = FALSE, ncores=NULL){
+                       return.values = FALSE, plot.regions = FALSE, ncores = NULL){
 
   dist <- tolower(dist)
 

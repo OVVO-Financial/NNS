@@ -161,9 +161,8 @@ NNS.boost <- function(IVs.train,
 
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
-    if(!extreme){
-      epochs <- NULL
-    }
+    if(!extreme) epochs <- NULL
+
     old.threshold <- 1
 
     if(is.null(learner.trials)){learner.trials <- length(y)}
@@ -323,7 +322,7 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(unlist(reduced.test.features), sample(2:length(unlist(reduced.test.features)),1), replace = TRUE))
+      features <- sort(sample(c(1:n, reduced.test.features), sample(2:n, 1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
@@ -344,8 +343,10 @@ NNS.boost <- function(IVs.train,
       new.results <- eval(obj.fn)
 
       if(objective=="max"){
+        if(is.na(new.results)) new.results <- .99*threshold
         if(new.results>=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
       } else {
+        if(is.na(new.results)) new.results <- 1.01*threshold
         if(new.results<=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
       }
     }
