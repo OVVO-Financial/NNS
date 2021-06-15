@@ -437,7 +437,7 @@ NNS.boost <- function(IVs.train,
   }
 
   gc()
-  if(is.null(type)) estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
+  if(!is.null(type)) estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
 
   return(list("results" = estimates,
               "feature.weights" = plot.table/sum(plot.table),
