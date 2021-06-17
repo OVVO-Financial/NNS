@@ -298,8 +298,6 @@ NNS.boost <- function(IVs.train,
 
           new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
 
-          names(new.iv.train) <- c("y", colnames(new.iv.train))
-
           new.dv.train <- unlist(new.iv.train[, 1])
           new.iv.train <- as.data.frame(new.iv.train[, -1])
 
