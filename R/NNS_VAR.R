@@ -11,6 +11,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param nowcast logical; \code{FALSE} (default) internal call for \link{NNS.nowcast}.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
@@ -112,10 +113,13 @@ NNS.VAR <- function(variables,
                     obj.fn = expression( sum((predicted - actual)^2) ),
                     objective = "min",
                     status = TRUE,
-                    ncores = NULL){
+                    ncores = NULL,
+                    nowcast = FALSE){
 
   oldw <- getOption("warn")
   options(warn = -1)
+
+  if(nowcast) dates <- zoo::as.yearmon(zoo::as.yearmon(rownames(variables)[1]) + seq(0, (dim(variables)[1] + (h-1)))/12)
 
   if(any(class(variables)=="tbl")) variables <- as.data.frame(variables)
 
@@ -376,11 +380,11 @@ NNS.VAR <- function(variables,
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
 
   colnames(nns_IVs_results) <- colnames(variables)
-  rownames(nns_IVs_results) <- NULL
+  rownames(nns_IVs_results) <- tail(dates, h)
   colnames(nns_DVs) <- colnames(variables)
-  rownames(nns_DVs) <- NULL
+  rownames(nns_DVs) <- tail(dates, h)
   colnames(forecasts) <- colnames(variables)
-  rownames(forecasts) <- NULL
+  rownames(forecasts) <- tail(dates, h)
 
   options(warn = oldw)
 
