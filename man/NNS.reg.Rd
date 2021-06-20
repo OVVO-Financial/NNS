@@ -122,6 +122,8 @@ Generates a nonlinear regression based on partial moment quadrant means.
  \item Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
 
  \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
+
+ \item For low signal:noise instances, increasing the dimension may yield better results using \code{NNS.stack(cbind(x,x), y, method = 1, ...)}.
 }
 }
 \examples{
