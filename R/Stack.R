@@ -493,9 +493,9 @@ NNS.stack <- function(IVs.train,
   best.nns.ord[best.nns.ord == 0] <- 1e-10
 
   if(objective=="min"){
-    weights <- c(max(1e-10, 1 / best.nns.cv), max(1e-10, 1 / best.nns.ord))
+    weights <- c(max(1e-10, 1 / best.nns.cv^2), max(1e-10, 1 / best.nns.ord^2))
   } else {
-    weights <- c(max(1e-10, best.nns.cv), max(1e-10, best.nns.ord))
+    weights <- c(max(1e-10, best.nns.cv^2), max(1e-10, best.nns.ord^2))
   }
 
 

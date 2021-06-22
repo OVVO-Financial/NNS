@@ -17,7 +17,7 @@
 #' @param obj.fn expression;
 #' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
-#' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
+#' @param  logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param features.only logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
@@ -213,7 +213,7 @@ NNS.boost <- function(IVs.train,
         message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
       }
 
-      test.features[[i]] <- sort(sample(n, sample(2:n,1), replace = FALSE))
+      test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
@@ -271,8 +271,20 @@ NNS.boost <- function(IVs.train,
     message("                                       ", "\r", appendLF = FALSE)
   }
 
-  if(objective=="max") reduced.test.features <- test.features[which(results>=threshold)] else reduced.test.features <- test.features[which(results<=threshold)]
+  if(extreme){
+      if(objective=="max") reduced.test.features <- test.features[which.max(results)] else reduced.test.features <- test.features[which.min(results)]
+  } else {
+      if(objective=="max") reduced.test.features <- test.features[which(results>=threshold)] else reduced.test.features <- test.features[which(results<=threshold)]
+  }
 
+  rf <- data.table::data.table(table(as.character(reduced.test.features)))
+  rf$N <- rf$N / sum(rf$N)
+
+  rf_reduced <- apply(rf, 1, function(x) eval(parse(text=x[1])))
+
+  scale_factor_rf <- table(unlist(rf_reduced))/min(table(unlist(rf_reduced)))
+
+  reduced.test.features <- as.numeric(rep(names(scale_factor_rf), ifelse(scale_factor_rf%%1 < .5, floor(scale_factor_rf), ceiling(scale_factor_rf))))
 
   keeper.features <- list()
 
@@ -320,7 +332,7 @@ NNS.boost <- function(IVs.train,
         }
       }
 
-      features <- sort(sample(c(1:n, unlist(reduced.test.features)), sample(2:n, 1), replace = FALSE))
+      features <- sort(c(unlist(reduced.test.features), sample(c(1:n), sample(1:n, 1), replace = FALSE)))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],

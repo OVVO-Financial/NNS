@@ -176,30 +176,30 @@ NNS.VAR <- function(variables,
 
     na_s[i] <- tail(index, 1) - interpolation_point
     if(na_s[i] > 0){
-        periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
-                            mod.only = FALSE, plot = FALSE)$periods
+      periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
+                          mod.only = FALSE, plot = FALSE)$periods
 
-        ts <- interpolation_point - 2*(h + na_s[i])
-        if(ts < 100) ts <- interpolation_point - (h + na_s[i])
+      ts <- interpolation_point - 2*(h + na_s[i])
+      if(ts < 100) ts <- interpolation_point - (h + na_s[i])
 
-        b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
-                            training.set = ts,
-                            obj.fn = obj.fn,
-                            objective = objective,
-                            print.trace = status,
-                            ncores = 1)
+      b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
+                          training.set = ts,
+                          obj.fn = obj.fn,
+                          objective = objective,
+                          print.trace = status,
+                          ncores = 1)
 
-        nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s[i]), seasonal.factor = b$periods, weights = b$weights,
-                                    method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
+      nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s[i]), seasonal.factor = b$periods, weights = b$weights,
+                                  method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
 
 
 
-        na_s_extrapolation <- rowMeans(cbind(tail(nns_IVs$interpolation, na_s[i]), head(nns_IVs$results, na_s[i])))
-        nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
+      na_s_extrapolation <- rowMeans(cbind(tail(nns_IVs$interpolation, na_s[i]), head(nns_IVs$results, na_s[i])))
+      nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
 
-        nns_IVs$obj_fn <- b$obj.fn
+      nns_IVs$obj_fn <- b$obj.fn
     } else {
-        nns_IVs$results <- nns_IVs$interpolation
+      nns_IVs$results <- nns_IVs$interpolation
     }
 
     return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, na_s[i])))

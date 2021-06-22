@@ -55,10 +55,10 @@ NNS.nowcast <- function(h = 12,
 
 
   if(is.null(Quandl.key)){
-      message("Please enter your Quandl API key WITHOUT QUOTES and press enter:")
+    message("Please enter your Quandl API key WITHOUT QUOTES and press enter:")
 
-      key <- readline(": ")
-      Quandl::Quandl.api_key(key)
+    key <- readline(": ")
+    Quandl::Quandl.api_key(key)
 
   } else { Quandl::Quandl.api_key(Quandl.key) }
 
@@ -72,7 +72,7 @@ NNS.nowcast <- function(h = 12,
   variable_list <- character()
 
   for(i in 1:length(variables)){
-      variable_list[i] <- paste0("FRED/", variables[i])
+    variable_list[i] <- paste0("FRED/", variables[i])
   }
 
   variable_list <- c(variable_list, additional.regressors)

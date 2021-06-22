@@ -32,11 +32,11 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
 
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums(t(t(rpm[, 1:n]) - dist.estimate)^2 + (1/l + (rpm_class == raw.dist.estimate))^-1, parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(t(t(rpm[, 1:n]) - dist.estimate)^2 + ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n]) - dist.estimate)) + (1/l + (rpm_class == raw.dist.estimate))^-1, parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n]) - dist.estimate)) + ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
   }
 
   if(type=="DTW"){
@@ -49,7 +49,9 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
 
+
   data.table::setkey(rpm, Sum)
+
 
   if(k==1){
     index <- which(rpm$Sum==min(rpm$Sum))
@@ -62,18 +64,17 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm <- rpm[1:min(k,l),]
 
-  inv <- 1 / rpm$Sum
-  emp_weights <- inv / sum(inv)
+  rpm$Sum <- rpm$Sum^-2
 
-  norm_weights <- pmin(max(rpm$Sum), dnorm(rpm$Sum, mean(rpm$Sum), sd(rpm$Sum)))
-  norm_weights <- norm_weights / sum(norm_weights)
+  emp <- rpm$Sum
+  emp_weights <- emp / sum(emp)
 
-  t_weights <- pmin(max(rpm$Sum), dt(x = rpm$y.hat, df = min(k,l)))
-  t_weights <- t_weights/sum(t_weights)
+  exp_weights <- dexp(1:min(k,l), rate = 1)
+  exp_weights <- exp_weights / sum(exp_weights)
 
-  weights <- (emp_weights + norm_weights + t_weights)/sum(emp_weights + norm_weights + t_weights)
+  weights <- (emp_weights + exp_weights)/sum(emp_weights + exp_weights)
 
-  single.estimate <- weights%*%rpm$y.hat
+  single.estimate <- rpm$y.hat%*%weights
 
   return(single.estimate)
 }
