@@ -17,7 +17,7 @@
 #' @param obj.fn expression;
 #' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
-#' @param  logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
+#' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param features.only logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
