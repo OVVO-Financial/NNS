@@ -2,8 +2,8 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
   xy <- NNS.norm(cbind(x, y), linear = FALSE)
 
-  NNS.x <- xy[ , 1]
-  NNS.y <- xy[ , 2]
+  NNS.x <- unlist(xy[ , 1])
+  NNS.y <- unlist(xy[ , 2])
 
   min.length <- min(length(x), length(y))
 
@@ -25,10 +25,10 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
       y.vectors.tau <- do.call(cbind, y.vectors)
 
       ## Normalize x to x.tau
-      x.norm.tau <- NNS.norm(x.vectors.tau)[ , 1]
+      x.norm.tau <- unlist(NNS.norm(x.vectors.tau)[ , 1])
 
       ## Normalize y to y.tau
-      y.norm.tau <- NNS.norm(y.vectors.tau)[ , 1]
+      y.norm.tau <- unlist(NNS.norm(y.vectors.tau)[ , 1])
 
   } else {
       x.norm.tau <- x
@@ -39,8 +39,8 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
   ## Normalize x.norm.tau to y.norm.tau
   x.tau.y.tau <- NNS.norm(cbind(x.norm.tau, y.norm.tau))
-  x.norm.to.y <- x.tau.y.tau[ , 1]
-  y.norm.to.x <- x.tau.y.tau[ , 2]
+  x.norm.to.y <- unlist(x.tau.y.tau[ , 1])
+  y.norm.to.x <- unlist(x.tau.y.tau[ , 2])
 
 
   ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
