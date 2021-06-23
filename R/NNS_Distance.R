@@ -21,6 +21,7 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
   n <- length(raw.dist.estimate)
 
 
+
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
     rpm <- rpm[, names(rpm) := lapply(.SD, function(b) (b - min(b)) / max(1e-10, (max(b) - min(b)))), .SDcols = 1:n]
@@ -30,9 +31,8 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm$y.hat <- y.hat
 
-
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums(t(t(rpm[, 1:n]) - dist.estimate)^2 * ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
+    rpm$Sum <- Rfast::rowsums( t((t(rpm[, 1:n]) - dist.estimate)^2) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
   }
 
   if(type=="L1"){
@@ -64,15 +64,15 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm <- rpm[1:min(k,l),]
 
-  rpm$Sum <- rpm$Sum^-2
-
-  emp <- rpm$Sum
+  emp <- rpm$Sum^(-1/sqrt(min(k,l)))
   emp_weights <- emp / sum(emp)
 
-  exp_weights <- dexp(1:min(k,l), rate = 1)
+  exp_weights <- dexp(1:min(k,l), rate = 1/sqrt(min(k,l)))
   exp_weights <- exp_weights / sum(exp_weights)
 
-  weights <- (emp_weights + exp_weights)/sum(emp_weights + exp_weights)
+  uni_weights <- rep(1/min(k,l), min(k,l))
+
+  weights <- (emp_weights + exp_weights + uni_weights)/sum(emp_weights + exp_weights + uni_weights)
 
   single.estimate <- rpm$y.hat%*%weights
 
