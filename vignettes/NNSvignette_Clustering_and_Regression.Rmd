@@ -142,9 +142,9 @@ NNS.stack(IVs.train = iris[ , 1 : 4],
 
 
 ## Increasing Dimensions
-Given multicollinearity is not an issue for nonparametric regressions as it is for OLS, in the case of an ill-fit univariate model a better option may be to increase the dimensionality of regressors with a copy of itself and cross-validate the number of clusters via:
+Given multicollinearity is not an issue for nonparametric regressions as it is for OLS, in the case of an ill-fit univariate model a better option may be to increase the dimensionality of regressors with a copy of itself and cross-validate the number of clusters `n.best` via:
 
-**`NNS.stack(..., method = 1, ...)`**.
+**`NNS.stack(IVs.train = cbind(x, x), DV.train = y, method = 1, ...)`**.
 
 ```{r stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide'}
 set.seed(123)
