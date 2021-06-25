@@ -67,9 +67,9 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
   uni_weights <- rep(1/min(k,l), min(k,l))
 
   emp <- rpm$Sum^(-1/min(k,l))
-  emp_weights <- (emp) / sum(emp)
+  emp_weights <- emp / sum(emp)
 
-  exp <- dexp(1:min(k,l), rate = 1)
+  exp <- dexp(1:min(k,l), rate = 1/min(k,l))
   exp_weights <- exp / sum(exp)
 
   lnorm <- abs(rev(dlnorm(1:min(k, l), meanlog = min(k, l), sdlog = min(k, l), log = TRUE)))
