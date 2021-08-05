@@ -479,11 +479,11 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
   if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
   if(!is.null(target)){
-     if(is.null(dim(variable)) || dim(variable)[2]==1){
-          if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
-     } else {
-        if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
-        if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
+    if(is.null(dim(variable)) || dim(variable)[2]==1){
+      if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
+    } else {
+      if(target[1]<min(variable[,1]) || target[1]>max(variable[,1])) stop("Please make sure target 1 is within the observed values of variable 1.")
+      if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
     }
   }
 
@@ -548,11 +548,11 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       lines(x, CDF, lty=2, col = 'steelblue')
 
       if(!is.null(target)){
-          segments(target,0,target,P, col = "red", lwd = 2, lty = 2)
-          segments(min(variable), P, target, P, col = "red", lwd = 2, lty = 2)
-          points(target, P, col = "green", pch = 19)
-          mtext(text = round(P,4), col = "red", side = 2, at = P,  las = 2)
-          mtext(text = round(target,4), col = "red", side = 1, at = target,  las = 1)
+        segments(target,0,target,P, col = "red", lwd = 2, lty = 2)
+        segments(min(variable), P, target, P, col = "red", lwd = 2, lty = 2)
+        points(target, P, col = "green", pch = 19)
+        mtext(text = round(P,4), col = "red", side = 2, at = P,  las = 2)
+        mtext(text = round(target,4), col = "red", side = 1, at = target,  las = 1)
       }
     }
 
@@ -568,34 +568,34 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
     overall_target_2 <- (variable[,2])
 
     CDF <- Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) /
-                (
-                 Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
-                 Co.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
-                 D.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
-                 D.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2)
-                )
+      (
+        Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+          Co.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+          D.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+          D.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2)
+      )
 
     if(type == "survival"){
-        CDF <- 1 - CDF
+      CDF <- 1 - CDF
     }
 
     if(type == "hazard"){
-        CDF <- sort(variable) / (1 - CDF)
+      CDF <- sort(variable) / (1 - CDF)
     }
 
     if(type == "cumulative hazard"){
-        CDF <- -log((1 - CDF))
+      CDF <- -log((1 - CDF))
     }
 
 
     if(!is.null(target)){
       P <- Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) /
-                (
-                  Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
-                  Co.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
-                  D.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
-                  D.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2])
-                )
+        (
+          Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+            Co.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+            D.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+            D.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2])
+        )
 
 
     } else {
@@ -608,17 +608,17 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
              zlab = "Probability", box = FALSE, pch = 19)
 
       if(!is.null(target)){
-          points3d(target[1], target[2], P, col = "green", pch = 19)
-          points3d(target[1], target[2], 0, col = "red", pch = 15, cex = 2)
-          lines3d(x= c(target[1], max(variable[,1])),
-                  y= c(target[2], max(variable[,2])),
-                  z= c(P, P),
-                  col = "red", lwd = 2, lty=3)
-          lines3d(x= c(target[1], target[1]),
-                  y= c(target[2], target[2]),
-                  z= c(0, P),
-                  col = "red", lwd = 1, lty=3)
-          text3d(max(variable[,1]), max(variable[,2]), P, texts = paste0("P = ", round(P,4)), pos = 4, col = "red")
+        points3d(target[1], target[2], P, col = "green", pch = 19)
+        points3d(target[1], target[2], 0, col = "red", pch = 15, cex = 2)
+        lines3d(x= c(target[1], max(variable[,1])),
+                y= c(target[2], max(variable[,2])),
+                z= c(P, P),
+                col = "red", lwd = 2, lty=3)
+        lines3d(x= c(target[1], target[1]),
+                y= c(target[2], target[2]),
+                z= c(0, P),
+                col = "red", lwd = 1, lty=3)
+        text3d(max(variable[,1]), max(variable[,2]), P, texts = paste0("P = ", round(P,4)), pos = 4, col = "red")
       }
 
     }
@@ -630,5 +630,3 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
 
 
 }
-
-

@@ -153,7 +153,7 @@ NNS.VAR <- function(variables,
   na_s <- numeric()
 
 
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table", "plyr"))%dopar%{
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
     last_point <- tail(index, 1)
@@ -259,7 +259,7 @@ NNS.VAR <- function(variables,
   nns_DVs <- list()
   relevant_vars <- list()
 
-  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table", "plyr"), .combine = 'comb', .init = list(list(), list()),
+  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list()),
                    .multicombine = TRUE)%dopar%{
 
 

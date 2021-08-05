@@ -379,6 +379,10 @@ NNS.stack <- function(IVs.train,
         if(index==1){
           setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
+
+          nns.id <- setup$Fitted.xy$NNS.ID
+          original.DV <- setup$Fitted.xy$y
+
           predicted <- setup$Point.est
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))

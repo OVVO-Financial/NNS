@@ -164,7 +164,7 @@ NNS.ARMA.optim <- function(variable, training.set,
             doParallel::registerDoParallel(cl)
           }
 
-          nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table", "plyr"))%dopar%{
+          nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table"))%dopar%{
           actual <- tail(variable, h)
 
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1)

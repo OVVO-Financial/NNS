@@ -135,7 +135,7 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-  if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+  if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
       rep.x <- data.table::data.table(x)
 
       rep.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
@@ -188,7 +188,7 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-      if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
           new.iv.train <- data.table::data.table(x[-new.index,])
           new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
@@ -304,7 +304,7 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-      if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
           new.iv.train <- data.table::data.table(x[-new.index, ])
           new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 

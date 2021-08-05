@@ -6,20 +6,18 @@
 #' @param dist.estimate Vector to generate distances from.
 #' @param type "L1", "L2", "DTW" or "FACTOR"
 #' @param k \code{n.best} from \link{NNS.reg}
-#' @param n number of observations.
 #'
 #' @return Returns sum of weighted distances.
 #'
 #'
 #' @export
 
-NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
+NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k){
   type <- toupper(type)
   l <- nrow(rpm)
   y.hat <- rpm$y.hat
   raw.dist.estimate <- unlist(dist.estimate)
   n <- length(raw.dist.estimate)
-
 
 
   if(type!="FACTOR"){
@@ -49,9 +47,9 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
 
-
   data.table::setkey(rpm, Sum)
 
+  rpm <- rpm[1:min(k,l),]
 
   if(k==1){
     index <- which(rpm$Sum==min(rpm$Sum))
@@ -62,20 +60,31 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, n){
     }
   }
 
-  rpm <- rpm[1:min(k,l),]
-
   uni_weights <- rep(1/min(k,l), min(k,l))
 
-  emp <- rpm$Sum^(-1/min(k,l))
+  emp <- rpm$Sum^(-1)
   emp_weights <- emp / sum(emp)
+  if(any(is.na(emp_weights))) emp_weights <- 0
 
   exp <- dexp(1:min(k,l), rate = 1/min(k,l))
   exp_weights <- exp / sum(exp)
+  if(any(is.na(exp_weights))) exp_weights <- 0
 
-  lnorm <- abs(rev(dlnorm(1:min(k, l), meanlog = min(k, l), sdlog = min(k, l), log = TRUE)))
+  lnorm <- abs(rev(dlnorm(1:min(k, l), meanlog = 0, sdlog = sd(1:min(k, l)), log = TRUE)))
   lnorm_weights <- lnorm / sum(lnorm)
+  if(any(is.na(lnorm_weights))) lnorm_weights <- 0
 
-  weights <- (emp_weights + exp_weights + lnorm_weights + uni_weights)/sum(emp_weights + exp_weights + lnorm_weights + uni_weights)
+  pl_weights <- (1:min(k, l)) ^ (-2)
+  pl_weights <- pl_weights / sum(pl_weights)
+  if(any(is.na(pl_weights))) pl_weights <- 0
+
+  norm_weights <- dnorm(rpm$Sum, mean = 0, sd = sd(rpm$Sum))
+  norm_weights <- norm_weights / sum(norm_weights)
+  if(any(is.na(norm_weights))) norm_weights <- 0
+
+  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + uni_weights)/
+    sum(emp_weights + exp_weights +  lnorm_weights + norm_weights + pl_weights + uni_weights)
+
 
   single.estimate <- rpm$y.hat%*%weights
 

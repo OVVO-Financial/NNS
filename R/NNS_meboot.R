@@ -126,7 +126,7 @@
 
     # Compute intermediate points on the sorted series.
 
-    z <- Rfast::rowmeans(embed(xx, 2))
+    z <- (xx[-1] + xx[-n])/2
 
     # Compute lower limit for left tail ('xmin') and
     # upper limit for right tail ('xmax').
@@ -188,7 +188,7 @@
     # The first and last interval means have distinct formulas.
     # See Theil and Laitinen (1980) for details.
 
-    aux <- Rfast::colsums( t(embed(xx, 3))*c(0.25,0.5,0.25), parallel = TRUE )
+    aux <- colSums( t(cbind(xx[-c(1,2)], xx[-c(1,n)], xx[-c((n-1),n)]))*c(0.25,0.5,0.25) )
     desintxb <- c(0.75*xx[1]+0.25*xx[2], aux, 0.25*xx[n-1]+0.75*xx[n])
 
     # Generate random numbers from the [0,1] uniform interval and

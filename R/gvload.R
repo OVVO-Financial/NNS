@@ -10,7 +10,6 @@
 #' @importFrom tdigest tdigest tquantile
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
 #' @importFrom caret upSample downSample
-#' @importFrom plyr is.discrete
 #' @importFrom zoo as.yearmon
 #' @import doParallel
 #' @import rgl
@@ -39,7 +38,7 @@
       "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
-      "tdigest", "tquantile"
+      "tdigest", "tquantile", "bias"
     ))
 
   requireNamespace("data.table")

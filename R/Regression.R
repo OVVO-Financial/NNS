@@ -154,7 +154,9 @@ NNS.reg = function (x, y,
   if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
   if(any(class(x)=="tbl")) x <- as.data.frame(x)
 
-  if(length(y) < 2000) ncores <- 1
+  n <- length(y)
+
+  if(n < 2000) ncores <- 1
 
   if(!is.null(dim.red.method)){
     if(is.null(dim(x)) || dim(x)[1]==1){
@@ -170,7 +172,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode_class"
   }
 
-  if(plyr::is.discrete(y) || (sum(as.numeric(y)%%1)==0 && length(unique(y)) < sqrt(length(y)))){
+  if(sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y))){
     type <- "class"
     noise.reduction <- "mode_class"
   }
@@ -203,7 +205,7 @@ NNS.reg = function (x, y,
     }
 
 
-    if(!is.null(dim(x)) && dim(x)[2]>1) x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR)) else x <- factor_2_dummy_FR(x)
+    if(!is.null(dim(x)) && dim(x)[2] > 1) x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR)) else x <- factor_2_dummy_FR(x)
 
 
     x <- data.matrix(x)
@@ -277,6 +279,7 @@ NNS.reg = function (x, y,
     } else {
       if(is.null(dim.red.method)){
         colnames(x) <- make.unique(colnames(x), sep = "_")
+
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
@@ -417,11 +420,12 @@ NNS.reg = function (x, y,
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) 0)
   dependence <- (dependence^2 + sqrt(dependence))/2
 
-  dep.reduced.order <- max(1, ifelse(multivariate.call, ceiling(dependence*10)+1, floor(dependence*10)))
+  dep.reduced.order <- max(1, ifelse(multivariate.call,
+                                     ceiling(max(1, (order * dependence * 10))) + 1,
+                                     floor(dependence*10)))
 
-  if(!is.null(order)) dep.reduced.order <- order
+  if(!multivariate.call) {if(!is.null(order)) dep.reduced.order <- order} else stn <- 0
 
-  if(multivariate.call) stn <- 0
 
   if(dependence > stn){
     part.map <- NNS.part(x, y, type = NULL, noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0)
@@ -619,7 +623,7 @@ NNS.reg = function (x, y,
 
   upper.x <- regression.points[(2 : .N), x]
 
-  if(length(unique(upper.x))>1){
+  if(length(unique(upper.x)) > 1){
     Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
   } else {
     Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'= 0,'X.Lower.Range' = unique(upper.x), 'X.Upper.Range' = unique(upper.x))]
@@ -647,9 +651,11 @@ NNS.reg = function (x, y,
   coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
   reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
 
-  if(plyr::is.discrete(order)){
+
+
+  if(is.discrete(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))){
     estimate <- y
-  } else{
+  } else {
     estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
   }
 
@@ -700,11 +706,11 @@ NNS.reg = function (x, y,
   fitted <- cbind(fitted, gradient)
   fitted$residuals <- fitted$y.hat - fitted$y
 
-  if(dependence < stn && !plyr::is.discrete(x) && mean(c(length(unique(diff(x))), length(unique(x)))) > .33*length(x)){
+  if(dependence < stn && mean(c(length(unique(diff(x))), length(unique(x)))) > .33*length(x)){
     bias <- fitted
     data.table::setkey(bias, x)
 
-    bias <- bias[, mode(residuals)*-1, by = gradient]
+    bias <- bias[, gravity(residuals)*-1, by = gradient]
 
     fitted <- fitted[bias, on=.(gradient), y.hat := y.hat + V1]
 

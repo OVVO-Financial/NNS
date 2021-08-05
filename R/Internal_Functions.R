@@ -223,3 +223,5 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv=5){
 }
 
 
+is.discrete <- function(x) is.factor(x) || is.character(x) || is.logical(x)
+
