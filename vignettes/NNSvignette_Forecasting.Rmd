@@ -20,7 +20,6 @@ require(rgl)
 require(tdigest)
 require(dtw)
 require(meboot)
-require(plyr)
 ```
 
 

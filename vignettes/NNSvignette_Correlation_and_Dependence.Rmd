@@ -18,7 +18,6 @@ library(data.table)
 require(knitr)
 require(rgl)
 require(meboot)
-require(plyr)
 require(tdigest)
 require(dtw)
 ```
@@ -46,14 +45,30 @@ NNS.dep(x, y)
 ## Nonlinear Relationship
 Note the fact that all observations occupy the co-partial moment quadrants.
 ```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center", results='hide'}
-x=seq(0, 3, .01) ; y = x ^ 10
+x = seq(0, 3, .01) ; y = x ^ 10
 ```
 
 ```{r nonlinear1,fig.width=5,fig.height=3,fig.align = "center", results='hide', echo=FALSE}
 NNS.part(x, y, Voronoi = TRUE, order = 3)
 ```
 
-```{r res2}
+```{r res2a}
+cor(x, y)
+NNS.dep(x, y)
+```
+
+
+## Cyclic Relationship
+Even the difficult inflection points, which span both the co- and divergent partial moment quadrants, are properly compensated for in **`NNS.dep`**.
+```{r nonlinear_sin,fig.width=5,fig.height=3,fig.align = "center", results='hide'}
+x = seq(0, 12*pi, pi/100) ; y = sin(x)
+```
+
+```{r nonlinear1_sin,fig.width=5,fig.height=3,fig.align = "center", results='hide', echo=FALSE}
+NNS.part(x, y, Voronoi = TRUE, order = 3, obs.req = 0)
+```
+
+```{r res2_sin}
 cor(x, y)
 NNS.dep(x, y)
 ```
