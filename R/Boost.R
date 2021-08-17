@@ -135,7 +135,7 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-  if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
+#  if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
       rep.x <- data.table::data.table(x)
 
       rep.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
@@ -144,10 +144,10 @@ NNS.boost <- function(IVs.train,
       rep.x <- rep.x[,-1]
 
       rep.x <- as.data.frame(rep.x)
-  } else {
-      rep.x <- x
-      rep.y <- NULL
-  }
+#  } else {
+#      rep.x <- x
+#      rep.y <- NULL
+#  }
 
   n <- ncol(x)
 
@@ -188,7 +188,7 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
+#      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
           new.iv.train <- data.table::data.table(x[-new.index,])
           new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
@@ -199,10 +199,10 @@ NNS.boost <- function(IVs.train,
 
           new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
           new.dv.train <- c(new.dv.train, y[-new.index])
-      } else {
-          new.iv.train <- data.matrix(x[-new.index,])
-          new.dv.train <- y[-new.index]
-      }
+ #     } else {
+ #         new.iv.train <- data.matrix(x[-new.index,])
+ #         new.dv.train <- y[-new.index]
+ #     }
 
       colnames(new.iv.train) <- features
 
@@ -304,7 +304,7 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
+#      if(!is.numeric(y) || (sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y)))){
           new.iv.train <- data.table::data.table(x[-new.index, ])
           new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
@@ -315,10 +315,10 @@ NNS.boost <- function(IVs.train,
 
           new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
           new.dv.train <- c(new.dv.train, y[-new.index])
-      } else {
-          new.iv.train <- data.matrix(x[-new.index,])
-          new.dv.train <- y[-new.index]
-      }
+ #     } else {
+#          new.iv.train <- data.matrix(x[-new.index,])
+ #         new.dv.train <- y[-new.index]
+ #     }
 
       actual <- as.numeric(y[new.index])
       new.iv.test <- x[new.index,]

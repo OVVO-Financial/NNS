@@ -151,8 +151,8 @@ NNS.reg = function (x, y,
 
   if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
 
-  if(any(class(x)=="tbl") && dim(x)[2]==1) x <- as.vector(unlist(x))
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(any(class(x)==c("tbl", "data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.data.frame(x)
 
   n <- length(y)
 
@@ -177,7 +177,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode_class"
   }
 
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
 
   if(!plot) residual.plot <- FALSE
 

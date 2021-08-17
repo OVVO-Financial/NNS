@@ -94,8 +94,8 @@ NNS.stack <- function(IVs.train,
 
   if(!is.null(type) && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
 
-  if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
-  if(any(class(DV.train)=="tbl")) DV.train <- as.vector(unlist(DV.train))
+  if(any(class(IVs.train)==c("tbl", "data.table"))) IVs.train <- as.data.frame(IVs.train)
+  if(any(class(DV.train)==c("tbl", "data.table"))) DV.train <- as.vector(unlist(DV.train))
 
   if(is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
     IVs.train <- data.frame(IVs.train)
@@ -156,7 +156,7 @@ NNS.stack <- function(IVs.train,
     if(status) message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
 
     set.seed(123 * b)
-    test.set <- sample(1 : length(IVs.train[ , 1]), as.integer(CV.size * length(IVs.train[ , 1])), replace = FALSE)
+    test.set <- sample(1 : length(unlist(IVs.train[ , 1])), as.integer(CV.size * length(unlist(IVs.train[ , 1]))), replace = FALSE)
 
     if(b > 1){
       maxes <- as.vector(apply(IVs.train, 2, which.max))
@@ -186,6 +186,7 @@ NNS.stack <- function(IVs.train,
     test.set <- unlist(test.set)
 
     CV.IVs.train <- data.frame(IVs.train[c(-test.set), ])
+
     if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
     if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
 
@@ -356,12 +357,9 @@ NNS.stack <- function(IVs.train,
       if(is.character(relevant_vars)) relevant_vars <- relevant_vars!=""
 
       if(is.logical(relevant_vars)){
-        if(sum(relevant_vars)<dim(IVs.train)[1]){
           CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
           CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
-        }
       }
-
 
 
       if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
@@ -384,6 +382,7 @@ NNS.stack <- function(IVs.train,
           original.DV <- setup$Fitted.xy$y
 
           predicted <- setup$Point.est
+
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
 

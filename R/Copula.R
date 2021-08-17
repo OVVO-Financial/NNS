@@ -27,7 +27,7 @@ NNS.copula <- function (x,
     n <- ncol(A)
     l <- dim(A)[1]
 
-    if(any(class(A)=="tbl")) A <- as.data.frame(A)
+    if(any(class(A)==c("tbl", "data.table"))) A <- as.data.frame(A)
 
     if(is.null(colnames(A))){
         colnames.list <- list()

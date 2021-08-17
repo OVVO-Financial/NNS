@@ -5,7 +5,7 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
       stop("supply both 'x' and 'y' or a matrix-like 'x'")
   }
 
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.data.frame(x)
 
   x <- data.matrix(x)
 

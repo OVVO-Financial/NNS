@@ -23,6 +23,9 @@
 #' \item{\code{dy.d_(...)[, wrt]$Mixed}} the mixed derivative (for two independent variables only).
 #' }
 #'
+#'
+#' @note For binary regressors, it is suggested to use \code{eval.points = seq(0, 1, .05)} for a better resolution around the midpoint.
+#'
 #' @author Fred Viole, OVVO Financial Systems
 #'
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -141,17 +144,19 @@ dy.d_ <- function(x, y, wrt,
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
 
-      deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,.05), 1, z))
+      seq_by <- .05
+      deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
+      sampsize <- length(seq(0, 1, seq_by))
 
       if(dim(deriv.points)[2]!=dim(x)[2]){
         deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
       }
 
-      sampsize <- length(seq(0, 1, .05))
+
 
       deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
 
-      data.table::set(deriv.points, i=NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
+      data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
                                                                                           eval.points,
                                                                                           original.eval.points.max))
                                                                              , each = sampsize, length.out = dim(deriv.points)[1] ))

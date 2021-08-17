@@ -81,7 +81,7 @@ NNS.ARMA <- function(variable,
       stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
   }
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)==c("tbl", "data.table"))) variable <- as.vector(unlist(variable))
 
   oldw <- getOption("warn")
   options(warn = -1)
