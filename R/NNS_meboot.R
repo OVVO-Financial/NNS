@@ -89,7 +89,9 @@
 
     type <- tolower(type)
 
-    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+    if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+
+    if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
 
     if(is.null(rho)) rho <- -99
 

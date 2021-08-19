@@ -34,6 +34,10 @@ NNS.dep = function(x,
                    p.value = FALSE,
                    print.map = FALSE){
 
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+
+  if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
+
   if(p.value){
       y_p <- replicate(100, sample.int(length(y)))
       x <- cbind(x, y, matrix(y[y_p], ncol = dim(y_p)[2], byrow = F))

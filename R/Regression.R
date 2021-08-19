@@ -145,6 +145,8 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
 
+  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
 
   dist <- tolower(dist)

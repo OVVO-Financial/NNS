@@ -85,7 +85,7 @@ NNS.stack <- function(IVs.train,
                       status = TRUE,
                       ncores = NULL){
 
-
+  if(sum(is.na(cbind(IVs.train,DV.train))) > 0) stop("You have some missing values, please address.")
 
   if(is.null(obj.fn)) stop("Please provide an objective function")
 

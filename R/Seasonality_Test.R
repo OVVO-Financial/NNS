@@ -27,15 +27,16 @@ NNS.seas <- function(variable,
                      mod.only = TRUE,
                      plot = TRUE){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)==c("tbl","data.table"))) variable <- as.vector(unlist(variable))
+
+  if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
 
   if(length(variable) < 5){
     return(data.table::data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))
   }
 
-  if(is.null(modulo)){
-      mod.only <- FALSE
-  }
+  if(is.null(modulo)) mod.only <- FALSE
+
 
   variable_1 <- variable[1 : (length(variable) - 1)]
   variable_2 <- variable_1[1 : (length(variable_1) - 1)]

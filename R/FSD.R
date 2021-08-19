@@ -23,8 +23,12 @@ NNS.FSD <- function(x, y, type = "discrete"){
 
   if(!any(type%in%c("discrete", "continuous"))) warning("type needs to be either 'discrete' or 'continuous'")
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+
+  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+
 
   x_sort <- sort(x, decreasing = FALSE)
   y_sort <- sort(y, decreasing = FALSE)

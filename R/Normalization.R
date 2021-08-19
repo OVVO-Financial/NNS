@@ -23,6 +23,8 @@ NNS.norm <- function(A,
                      chart.type = NULL,
                      location = "topleft"){
 
+  if(sum(is.na(A)) > 0) stop("You have some missing values, please address.")
+
   if(any(class(A)==c("tbl", "data.table"))) A <- as.data.frame(A)
 
   m  <- colMeans(A)

@@ -31,8 +31,10 @@
 
 dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+
+  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
 
   order <- NULL
 

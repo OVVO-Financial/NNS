@@ -32,7 +32,7 @@
 
 NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
 
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(any(class(x)==c("tbl", "data.table"))) x <- as.data.frame(x)
 
   p <- length(oos)
 
