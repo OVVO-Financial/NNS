@@ -86,7 +86,7 @@ NNS.ANOVA <- function(control,
             par(mfrow = c(1, 2))
             hist(nns.certainties, main = "NNS Certainty")
             abline(v = robust_estimate, col = 'red', lwd = 3)
-            mtext("Result", side = 3, col = "red", at = robust_estimate)
+            mtext("Robust Certainty Estimate", side = 3, col = "red", at = robust_estimate)
             abline(v =  cer_lower_CI, col = "red", lwd = 2, lty = 3)
             abline(v =  cer_upper_CI , col = "red", lwd = 2, lty = 3)
 
