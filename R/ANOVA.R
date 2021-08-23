@@ -7,7 +7,7 @@
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
 #' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
-#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with mode of all results.
+#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.
 #' @return Returns the following:
 #' \itemize{
@@ -80,7 +80,7 @@ NNS.ANOVA <- function(control,
             cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties[-1])
             cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties[-1])
 
-            robust_estimate <- mode(nns.certainties)
+            robust_estimate <- gravity(nns.certainties)
 
             original.par <- par(no.readonly = TRUE)
             par(mfrow = c(1, 2))
