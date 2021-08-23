@@ -7,6 +7,7 @@
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
 #' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
+#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with mode of all results.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.
 #' @return Returns the following:
 #' \itemize{
@@ -15,7 +16,7 @@
 #' \item{\code{"Grand Mean"}} mean of means.
 #' \item{\code{"Control CDF"}} CDF of the \code{control} from the grand mean.
 #' \item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
-#' \item{\code{"Certainty"}} the certainty of the same population statistic.
+#' \item{\code{"Certainty"}} the certainty of the same population statistic and confidence intervals if \code{robust} selected.
 #' \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
 #' }
 #'
@@ -49,34 +50,61 @@ NNS.ANOVA <- function(control,
                      confidence.interval = 0.95,
                      tails = "Both",
                      pairwise = FALSE,
-                     plot = TRUE){
+                     plot = TRUE,
+                     robust = FALSE){
 
     tails <- tolower(tails)
-    if(!any(tails%in%c("left","right","both"))){
-        stop("Please select tails from 'left', 'right', or 'both'")
-    }
+
+    if(!any(tails%in%c("left","right","both"))) stop("Please select tails from 'left', 'right', or 'both'")
 
     if(missing(treatment)){
         n <- ncol(control)
-        if(is.null(n)){
-            stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
-        }
-        if(n == 1){
-            stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
-        }
+        if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+        if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         if(n >= 2){
-            if(any(class(control)=="tbl")) A <- as.data.frame(control)
+            if(any(class(control)==c("tbl", "data.table"))) A <- as.data.frame(control)
         }
     } else {
-        if(any(class(control)=="tbl")) control <- as.vector(unlist(control))
-        if(any(class(treatment)=="tbl")) treatment <- as.vector(unlist(treatment))
+        if(any(class(control)==c("tbl", "data.table"))) control <- as.vector(unlist(control))
+        if(any(class(treatment)==c("tbl", "data.table"))) treatment <- as.vector(unlist(treatment))
 
-        return(NNS.ANOVA.bin(control, treatment, confidence.interval = confidence.interval, plot = plot, tails = tails))
+        if(robust){
+            treatment_p <- replicate(100, sample.int(length(treatment), replace = TRUE))
+            treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
+            treatment_matrix <- cbind(treatment, treatment_matrix[, rev(seq_len(ncol(treatment_matrix)))])
+            control_matrix <- matrix(control[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
+            full_matrix <- cbind(control, control_matrix, treatment, treatment_matrix)
+
+            nns.certainties <- sapply(1:ncol(control_matrix), function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], plot = FALSE)$Certainty)
+
+            cer_lower_CI <- LPM.VaR(.025, 0, nns.certainties[-c(1)])
+            cer_upper_CI <- UPM.VaR(.025, 0, nns.certainties[-c(1)])
+
+            robust_estimate <- mode(nns.certainties)
+
+            original.par <- par(no.readonly = TRUE)
+            par(mfrow = c(1, 2))
+            hist(nns.certainties, main = "NNS Certainty")
+            abline(v = robust_estimate, col = 'red', lwd = 3)
+            mtext("Result", side = 3, col = "red", at = nns.certainties[1])
+            abline(v =  cer_lower_CI, col = "red", lwd = 2, lty = 3)
+            abline(v =  cer_upper_CI , col = "red", lwd = 2, lty = 3)
+
+
+
+            return(list(NNS.ANOVA.bin(control, treatment, confidence.interval = confidence.interval, plot = plot, tails = tails, par = original.par),
+                        "Robust Certainty Estimate" = robust_estimate,
+                        "95% CI" = c(cer_lower_CI, cer_upper_CI)))
+
+        } else {
+            return(NNS.ANOVA.bin(control, treatment, confidence.interval = confidence.interval, plot = plot, tails = tails))
+        }
     }
 
 
     mean.of.means <- mean(colMeans(A))
     n <- ncol(A)
+
     if(!pairwise){
     #Continuous CDF for each variable from Mean of Means
         LPM_ratio <- sapply(1 : ncol(A), function(b) LPM.ratio(1, mean.of.means, A[ , b]))

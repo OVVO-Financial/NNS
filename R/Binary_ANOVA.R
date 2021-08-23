@@ -4,7 +4,7 @@ NNS.ANOVA.bin<- function(control, treatment,
                          lower.25.target = NULL,
                          upper.125.target = NULL,
                          lower.125.target = NULL,
-                         confidence.interval = NULL, tails = NULL, plot = TRUE){
+                         confidence.interval = NULL, tails = NULL, plot = TRUE, par = NULL){
 
   if(is.null(upper.25.target) && is.null(lower.25.target)){
         mean.of.means <- mean(c(mean(control), mean(treatment)))
@@ -58,7 +58,7 @@ NNS.ANOVA.bin<- function(control, treatment,
   #Graphs
 
         if(plot){
-            original.par <- par(no.readonly = TRUE)
+            if(is.null(par)) original.par <- par(no.readonly = TRUE) else original.par <- par
 
             boxplot(list(control, treatment), las = 2, names = c("Control", "Treatment"), xlab = "Means", horizontal = TRUE, main = "NNS ANOVA and Effect Size", col = c("grey", "white"), cex.axis = 0.75)
 
@@ -74,10 +74,9 @@ NNS.ANOVA.bin<- function(control, treatment,
                 "Grand Mean" = mean.of.means,
                 "Control CDF" = LPM_ratio.1,
                 "Treatment CDF" = LPM_ratio.2,
-                "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment)))}
+                "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment)))
+    } else {
 
-
-    if(!is.null(confidence.interval)){
         #Upper end of CDF confidence interval for control mean
         if(tails == "both"){
             CI <- confidence.interval+(1-confidence.interval)/2
