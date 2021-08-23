@@ -27,7 +27,7 @@ NNS.ANOVA(
 
 \item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.}
 
-\item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with mode of all results.}
+\item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results.}
 }
 \value{
 Returns the following:
