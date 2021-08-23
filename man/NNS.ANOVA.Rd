@@ -10,7 +10,8 @@ NNS.ANOVA(
   confidence.interval = 0.95,
   tails = "Both",
   pairwise = FALSE,
-  plot = TRUE
+  plot = TRUE,
+  robust = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ NNS.ANOVA(
 \item{pairwise}{logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.}
 
 \item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.}
+
+\item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with mode of all results.}
 }
 \value{
 Returns the following:
@@ -34,7 +37,7 @@ Returns the following:
 \item{\code{"Grand Mean"}} mean of means.
 \item{\code{"Control CDF"}} CDF of the \code{control} from the grand mean.
 \item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
-\item{\code{"Certainty"}} the certainty of the same population statistic.
+\item{\code{"Certainty"}} the certainty of the same population statistic and confidence intervals if \code{robust} selected.
 \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
 }
 }
