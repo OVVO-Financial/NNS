@@ -96,9 +96,10 @@ y -0.04372107  0.93506310
 > cov.xy/(sd.x*sd.y)
 [1] -0.04953215
 ```
-### Skewness*
+### Skewness
 A normalized difference between upside area and downside area.
 ```r
+> library(PerformanceAnalytics)
 > skewness(x)
 [1] 0.06049948
 > ((UPM(3,mean(x),x)-LPM(3,mean(x),x))/(UPM(2,mean(x),x)+LPM(2,mean(x),x))^(3/2))
@@ -106,12 +107,13 @@ A normalized difference between upside area and downside area.
 ```
 ### UPM/LPM - a more intuitive measure of skewness.  (Upside area / Downside area)
 ```r
-> UPM(1,0,x)/LPM(1,0,x)
-[1] 1.282673
+> UPM(2,mean(x),x)/LPM(2,mean(x),x)
+[1] 1.065997
 ```
-### Kurtosis*
+### Kurtosis
 A normalized sum of upside area and downside area.
 ```r
+> library(PerformanceAnalytics)
 > kurtosis(x)
 [1] -0.161053
 > ((UPM(4,mean(x),x)+LPM(4,mean(x),x))/(UPM(2,mean(x),x)+LPM(2,mean(x),x))^2)-3
@@ -156,11 +158,3 @@ A normalized sum of upside area and downside area.
 See the following example explaining Bayes' Theorem and partial moments: 
 ```
 https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf
-
-
-
-
-*Functions are called from the PerformanceAnalytics package
-```{r}
-require(PerformanceAnalytics)
-```
