@@ -695,7 +695,7 @@ NNS.reg = function (x, y,
 
   fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
 
-  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
+  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = original.y, Difference = fitted[ , y.hat] - original.y,  Accuracy = abs(round(fitted[ , y.hat]) - original.y))
 
   deg.fr <- length(y) - 2
 
@@ -706,7 +706,7 @@ NNS.reg = function (x, y,
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
 
   fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - fitted$y
+  fitted$residuals <- fitted$y.hat - original.y
 
   if(dependence < stn && mean(c(length(unique(diff(x))), length(unique(x)))) > .33*length(x)){
     bias <- fitted
@@ -847,7 +847,6 @@ NNS.reg = function (x, y,
 
   ###Standard errors estimation
   if(std.errors){
-
     fitted[, `:=`
            ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 2))) ) ), by = gradient]
 
@@ -925,6 +924,7 @@ NNS.reg = function (x, y,
   }# plot TRUE bracket
 
   options(warn = oldw)
+
 
   ### Return Values
   if(return.values){

@@ -384,6 +384,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     if(!is.null(predict.fit)) predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
   }
 
+  fitted.matrix$residuals <- fitted.matrix$y.hat - original.DV
+
   ### Return Values
   if(return.values){
     return(list(R2 = R2,
