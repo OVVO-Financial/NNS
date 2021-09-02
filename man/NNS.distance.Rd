@@ -4,7 +4,7 @@
 \alias{NNS.distance}
 \title{NNS Distance}
 \usage{
-NNS.distance(rpm, rpm_class, dist.estimate, type, k)
+NNS.distance(rpm, rpm_class, dist.estimate, type, k, class)
 }
 \arguments{
 \item{rpm}{REGRESSION.POINT.MATRIX from \link{NNS.reg}}
@@ -16,6 +16,8 @@ NNS.distance(rpm, rpm_class, dist.estimate, type, k)
 \item{type}{"L1", "L2", "DTW" or "FACTOR"}
 
 \item{k}{\code{n.best} from \link{NNS.reg}}
+
+\item{class}{if classification problem.}
 }
 \value{
 Returns sum of weighted distances.
