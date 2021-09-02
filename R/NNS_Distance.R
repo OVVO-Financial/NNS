@@ -6,13 +6,14 @@
 #' @param dist.estimate Vector to generate distances from.
 #' @param type "L1", "L2", "DTW" or "FACTOR"
 #' @param k \code{n.best} from \link{NNS.reg}
+#' @param class if classification problem.
 #'
 #' @return Returns sum of weighted distances.
 #'
 #'
 #' @export
 
-NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k){
+NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   type <- toupper(type)
   l <- nrow(rpm)
   y.hat <- rpm$y.hat
@@ -86,7 +87,13 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k){
     sum(emp_weights + exp_weights +  lnorm_weights + norm_weights + pl_weights + uni_weights)
 
 
-  single.estimate <- rpm$y.hat%*%weights
+
+  if(is.null(class)) single.estimate <- rpm$y.hat%*%weights else{
+    ks.mode <-  mode(rep(rpm$y.hat, ceiling(100*weights)))
+    single.estimate <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
+  }
+
+
 
   return(single.estimate)
 }

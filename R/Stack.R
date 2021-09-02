@@ -270,7 +270,8 @@ NNS.stack <- function(IVs.train,
 
         if(!is.null(type)){
           pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
-          threshold_results_2[[i]] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
+          z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
+          threshold_results_2[[i]] <- seq(.01,.99, .01)[as.integer(median(which(z==max(z))))]
 
           predicted <- ifelse(predicted%%1 < threshold_results_2[[i]], floor(predicted), ceiling(predicted))
         }
@@ -400,7 +401,7 @@ NNS.stack <- function(IVs.train,
             if(dim(CV.IVs.train)[2]>1){
               CV.IVs.test.new <- data.table::data.table(do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR)))
 
-              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS::NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i)[1], by = 1:nrow(CV.IVs.test)]
+              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS::NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
 
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {
@@ -417,7 +418,8 @@ NNS.stack <- function(IVs.train,
 
           if(!is.null(type)){
             pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
-            threshold_results_1[[index]] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
+            z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
+            threshold_results_1[[index]] <- seq(.01,.99, .01)[as.integer(median(which(z==max(z))))]
 
             predicted <- ifelse(predicted%%1 < threshold_results_1[[index]], floor(predicted), ceiling(predicted))
           }
@@ -454,7 +456,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         ks <- table(unlist(best.k))
 
-        ks.mode <-  mode(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
+        ks.mode <-  gravity(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
 
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
