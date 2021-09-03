@@ -423,7 +423,7 @@ NNS.reg = function (x, y,
   dependence <- (dependence^2 + dependence^(.5))/2
 
   dep.reduced.order <- max(1, ifelse(multivariate.call,
-                                     ceiling(max(1, (order * dependence * 10))) + 1,
+                                     ceiling(max(1, (dependence * 10))) + 1,
                                      floor(dependence*10)))
 
   if(!multivariate.call) {if(!is.null(order)) dep.reduced.order <- order} else stn <- 0
