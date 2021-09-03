@@ -435,20 +435,22 @@ NNS.reg = function (x, y,
       part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
       part.map1 <- part.map
     } else {
-        part.map1 <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0)
-        part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), type = "XONLY", noise.reduction = noise.reduction, order = dep.reduced.order, obs.req = 0)
-        i <- 1
-        while(length(part.map$regression.points$x) > length(x)){
-            part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), type = "XONLY", noise.reduction = noise.reduction, order = max(1, dep.reduced.order - i), obs.req = 0)
-            i <- i + 1
-        }
-            part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), type = "XONLY", noise.reduction = noise.reduction, order =  dep.reduced.order, obs.req = 0)
-            part.map <-  NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), type = "XONLY", noise.reduction = noise.reduction, order =  dep.reduced.order, obs.req = 0)
-            i <- 1
-            while(length(part.map$regression.points$x) > length(x)){
-                part.map <-  NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), type = "XONLY", noise.reduction = noise.reduction, order =  max(1, dep.reduced.order - i), obs.req = 0)
-                i <- i + 1
-            }
+      part.map1 <- NNS.part(x, y, noise.reduction = noise.reduction, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), noise.reduction = noise.reduction, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction, order =  dep.reduced.order, type = "XONLY", obs.req = 0)
+      part.map3 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), noise.reduction = noise.reduction, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      part.map4 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y), noise.reduction = noise.reduction, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+
+      part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
+                           c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
+                           noise.reduction = noise.reduction, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      i <- 1
+      while(length(part.map$regression.points$x) > length(x)){
+        part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
+                             c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
+                             noise.reduction = noise.reduction, order =  max(1, dep.reduced.order - i), type = "XONLY", obs.req = 0)
+        i <- i + 1
+      }
         if(length(part.map$regression.points$x) == 0){
           part.map <- NNS.part(x, y, type = "XONLY", noise.reduction = noise.reduction, order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
         }
@@ -462,18 +464,21 @@ NNS.reg = function (x, y,
 
     part.map1 <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
     part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+    part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+    part.map3 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type =  "XONLY", obs.req = 0)
+    part.map4 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type =  "XONLY", obs.req = 0)
+
+    part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
+                         c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
+                         noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+
     i <- 1
     while(length(part.map$regression.points$x) > length(x)){
-        part.map <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order =  max(1, dep.reduced.order - i), type = "XONLY", obs.req = 0)
-        i <- i + 1
+       part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
+                            c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
+                            noise.reduction = noise.reduction2, order =  max(1, dep.reduced.order - i), type = "XONLY", obs.req = 0)
+       i <- i + 1
     }
-        part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type = "XONLY", obs.req = 0)
-        part.map <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type = "XONLY", obs.req = 0)
-        i <- 1
-        while(length(part.map$regression.points$x) > length(x)){
-           part.map <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), noise.reduction = noise.reduction2, order =  max(1, dep.reduced.order - i), type = "XONLY", obs.req = 0)
-           i <- i + 1
-        }
     if(length(part.map$regression.points$x) == 0){
       part.map <- NNS.part(x, y, type =  "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0)
     }

@@ -102,7 +102,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
         output <- reg.output$derivative
         if(length(output[ , Coefficient]) == 1) first.deriv.coef <- output[ , Coefficient]
 
-        if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]) < eval.point){
+        if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - ifelse(length(output[, X.Upper.Range])==1,0,1)][1]) < eval.point){
           first.deriv <-  output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1]
         } else {
           first.deriv <-  mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]))
