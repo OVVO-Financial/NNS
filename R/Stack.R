@@ -456,7 +456,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         ks <- table(unlist(best.k))
 
-        ks.mode <-  mode(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
+        ks.mode <-  gravity(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
 
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
