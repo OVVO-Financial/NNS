@@ -429,11 +429,11 @@ NNS.reg = function (x, y,
   if(!multivariate.call) {if(!is.null(order)) dep.reduced.order <- order} else stn <- 0
 
   if(dependence > stn){
-    if(dependence == 1){
+    if(dependence == 1 || dep.reduced.order == "max"){
       if(is.null(order)) dep.reduced.order <- "max"
       part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
       part.map1 <- part.map
-    } else {
+    } else if(dep.reduced.order!= "max"){
       part.map1 <- NNS.part(x, y, noise.reduction = noise.reduction, order = dep.reduced.order, type = type, obs.req = 0)
       part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), noise.reduction = noise.reduction, order = dep.reduced.order, type = type, obs.req = 0)
       part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction, order =  dep.reduced.order, type = type, obs.req = 0)
@@ -462,6 +462,10 @@ NNS.reg = function (x, y,
       if(type == "class") noise.reduction2 <- "mode_class" else noise.reduction2 <- noise.reduction
     }
 
+    if(dep.reduced.order == "max"){
+      part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
+      part.map1 <- part.map
+    } else {
     part.map1 <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
     part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
     part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
@@ -482,6 +486,7 @@ NNS.reg = function (x, y,
     if(length(part.map1$regression.points$x) == 0){
       part.map <- NNS.part(x, y, type =  "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map1$dt$quadrant)), obs.req = 0)
       part.map1 <- part.map
+    }
     }
   } # Dependence < stn
 
