@@ -8,6 +8,7 @@
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param inference logical; \code{FALSE} (default) For inferential tasks, otherwise \code{inference = FALSE} is faster for predictive tasks.
 #' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
@@ -71,6 +72,7 @@ NNS.stack <- function(IVs.train,
                       type = NULL,
                       obj.fn = expression( sum((predicted - actual)^2) ),
                       objective = "min",
+                      inference = FALSE,
                       optimize.threshold = TRUE,
                       dist = "L2",
                       CV.size = NULL,
@@ -235,10 +237,10 @@ NNS.stack <- function(IVs.train,
         var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
         var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
+                                           type = type, inference = inference, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
 
         var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
-                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
+                                           type = type, inference = inference, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
       }
 
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
@@ -264,7 +266,7 @@ NNS.stack <- function(IVs.train,
         }
 
         predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
-                             type = NULL, dist = dist, point.only = TRUE)$Point.est)
+                             type = NULL, inference = inference, dist = dist, point.only = TRUE)$Point.est)
 
         predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
@@ -305,7 +307,7 @@ NNS.stack <- function(IVs.train,
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
 
         nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
-                                type = NULL, point.only = TRUE))
+                                type = NULL, inference = inference, point.only = TRUE))
 
         actual <- DV.train
         predicted <- nns.method.2$Fitted.xy$y.hat
@@ -377,7 +379,7 @@ NNS.stack <- function(IVs.train,
 
         if(index==1){
           setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
-                           type = type, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
+                           type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
 
           nns.id <- setup$Fitted.xy$NNS.ID
           original.DV <- setup$Fitted.xy$y
@@ -406,13 +408,13 @@ NNS.stack <- function(IVs.train,
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {
               predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                    type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
+                                    type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
             }
 
             rm(CV.IVs.test.new)
           } else {
             predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
-                                  type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
+                                  type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
           }
           predicted <- unlist(predicted)
 
@@ -460,7 +462,7 @@ NNS.stack <- function(IVs.train,
         best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
 
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                type = NULL, point.only = FALSE))
+                                type = NULL, inference = inference, point.only = FALSE))
 
         actual <- DV.train
         predicted <- nns.method.1$Fitted.xy$y.hat

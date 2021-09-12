@@ -202,7 +202,7 @@ NNS.ARMA <- function(variable,
         last.y <- tail(y, 1)
 
         ## Skeleton NNS regression for NNS.ARMA
-        reg.points <- NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
+        reg.points <- NNS.reg(x, y, inference = FALSE, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
         reg.points <- reg.points[complete.cases(reg.points),]
 
         xs <- (tail(reg.points$x, 1) - reg.points$x)

@@ -6,6 +6,7 @@
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
+#' @param inference logical; \code{FALSE} (default) For inferential tasks, otherwise \code{inference = FALSE} is faster for predictive tasks.
 #' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
@@ -48,6 +49,7 @@ NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
                       type = NULL,
+                      inference = FALSE,
                       depth = NULL,
                       learner.trials = 100,
                       epochs = NULL,
@@ -217,7 +219,7 @@ NNS.boost <- function(IVs.train,
                            dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
                            factor.2.dummy = FALSE,
-                           ncores = 1, type = type)$Point.est
+                           ncores = 1, type = type, inference = inference)$Point.est
 
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
 
@@ -331,7 +333,7 @@ NNS.boost <- function(IVs.train,
                            new.dv.train, point.est = new.iv.test[, features],
                            dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
-                           factor.2.dummy = FALSE, ncores = 1, type = type)$Point.est
+                           factor.2.dummy = FALSE, ncores = 1, type = type, inference = inference)$Point.est
 
       predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
       # Do not predict a new unseen class
@@ -404,7 +406,7 @@ NNS.boost <- function(IVs.train,
                              order = depth, dim.red.method = "cor",
                              ncores = 1,
                              stack = FALSE, status = status,
-                             type = type, dist = dist, folds = 5)$stack
+                             type = type, inference = inference, dist = dist, folds = 5)$stack
 
       estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
 

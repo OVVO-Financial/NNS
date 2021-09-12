@@ -88,7 +88,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
       run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
-    reg.output <- NNS.reg(x, y, plot = FALSE, point.est = as.vector(deriv.points), type = NULL, point.only = TRUE)
+    reg.output <- NNS.reg(x, y, plot = FALSE, point.est = as.vector(deriv.points), type = NULL, inference = TRUE, point.only = TRUE)
 
     estimates.min <- reg.output$Point.est[1:n]
     estimates.max <- reg.output$Point.est[(2*n+1):(3*n)]

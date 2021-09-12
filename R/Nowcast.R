@@ -23,7 +23,7 @@
 #'
 #' @note
 #' \itemize{
-#' \item This function requires an API key from Quandl \url{https://www.quandl.com/sign-up}.
+#' \item This function requires an API key from Quandl.  Sign up via \url{https://www.quandl.com/}.
 #' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
