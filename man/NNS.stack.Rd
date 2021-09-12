@@ -11,6 +11,7 @@ NNS.stack(
   type = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
+  inference = FALSE,
   optimize.threshold = TRUE,
   dist = "L2",
   CV.size = NULL,
@@ -38,6 +39,8 @@ NNS.stack(
 \item{obj.fn}{expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+
+\item{inference}{logical; \code{FALSE} (default) For inferential tasks, otherwise \code{inference = FALSE} is faster for predictive tasks.}
 
 \item{optimize.threshold}{logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.}
 

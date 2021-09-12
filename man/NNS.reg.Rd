@@ -13,6 +13,7 @@ NNS.reg(
   dim.red.method = NULL,
   tau = NULL,
   type = NULL,
+  inference = FALSE,
   point.est = NULL,
   location = "top",
   return.values = TRUE,
@@ -46,6 +47,8 @@ NNS.reg(
 \item{tau}{options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.}
 
 \item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].}
+
+\item{inference}{logical; \code{FALSE} (default) For inferential tasks, otherwise \code{inference = FALSE} is faster for predictive tasks.}
 
 \item{point.est}{a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.}
 

@@ -24,12 +24,14 @@ Returns a data.table containing the intervals used and resulting PDF of the vari
 This function generates an empirical PDF using \link{dy.dx} on \link{NNS.CDF}.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 NNS.PDF(x)
 
 ## Custom target range
 NNS.PDF(x, target = c(-5, 5))
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

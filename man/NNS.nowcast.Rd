@@ -44,7 +44,7 @@ Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in V
 }
 \note{
 \itemize{
-\item This function requires an API key from Quandl \url{https://www.quandl.com/sign-up}.
+\item This function requires an API key from Quandl.  Sign up via \url{https://www.quandl.com/}.
 }
 }
 \examples{
