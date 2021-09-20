@@ -63,16 +63,19 @@ NNS.dep = function(x,
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
     ll <- expression(max(min(100, .N), 8))
+    res <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
+                                     error = function(e) PART[, NNS.copula(cbind(x,y)), by = prior.quadrant]))
 
-    res <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant], error = function(e) 0))
-    res[is.na(res)] <- 0
+    if(sum(is.na(res))>0) res[is.na(res)] <- NNS.copula(cbind(x,y))
 
     # Compare each asymmetry
-    res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant], error = function(e) 0))
-    res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant], error = function(e) 0))
+    res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
+                                        error = function(e) PART[, NNS.copula(cbind(x,y)), by = prior.quadrant]))
+    res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
+                                        error = function(e) PART[, NNS.copula(cbind(x,y)), by = prior.quadrant]))
 
-    res_xy[is.na(res_xy)] <- 0
-    res_yx[is.na(res_yx)] <- 0
+    if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- NNS.copula(cbind(x,y))
+    if(sum(is.na(res_yx))>0) res_yx[is.na(res_yx)] <- NNS.copula(cbind(x,y))
 
 
     if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- max(sum(abs(res$V1) * weights),

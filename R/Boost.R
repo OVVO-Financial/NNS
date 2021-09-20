@@ -89,6 +89,15 @@ NNS.boost <- function(IVs.train,
 
   objective <- tolower(objective)
 
+  if(is.null(colnames(IVs.train))){
+    colnames.list <- list()
+    for(i in 1 : dim(IVs.train)[2]){
+      colnames.list[i] <- paste0("X", i)
+    }
+    colnames(IVs.train) <- as.character(colnames.list)
+    colnames(IVs.test) <- colnames(IVs.train)
+  }
+
   features <- colnames(IVs.train)
 
   transform <- data.matrix(cbind(DV.train, IVs.train))
@@ -106,14 +115,7 @@ NNS.boost <- function(IVs.train,
     if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
   }
 
-  if(is.null(colnames(IVs.train))){
-    colnames.list <- list()
-    for(i in 1 : dim(IVs.train)[2]){
-      colnames.list[i] <- paste0("X", i)
-    }
-    colnames(IVs.train) <- as.character(colnames.list)
-    colnames(IVs.test) <- colnames(IVs.train)
-  }
+
 
   if(balance){
     DV.train <- as.numeric(as.factor(DV.train))
@@ -210,7 +212,7 @@ NNS.boost <- function(IVs.train,
         message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
       }
 
-      test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
+      test.features[[i]] <- sort(sample(n, sample(2:(n-1), 1), replace = FALSE))
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],

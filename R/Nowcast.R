@@ -3,7 +3,7 @@
 #' Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in Viole (2020), \url{https://www.ssrn.com/abstract=3586658}.
 #'
 #' @param h integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
-#' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.quandl.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.
+#' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
 #' @param Quandl.key character; \code{NULL} (default) User provided \link{Quandl} API key WITH QUOTES.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
@@ -23,7 +23,7 @@
 #'
 #' @note
 #' \itemize{
-#' \item This function requires an API key from Quandl.  Sign up via \url{https://www.quandl.com/}.
+#' \item This function requires an API key from Quandl.  Sign up via \url{https://data.nasdaq.com/}.
 #' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
