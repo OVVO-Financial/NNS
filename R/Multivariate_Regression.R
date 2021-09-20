@@ -179,7 +179,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   if(is.null(n.best)) n.best <- floor(sqrt(n))
 
   if(n.best > 1 && !point.only){
-    if(num_cores>1){
+    if(num_cores > 1){
         fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
     } else {
         fits <- data.table::data.table(original.IVs)
@@ -208,7 +208,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       l <- length(point.est)
 
       if(sum(point.est >= minimums & point.est <= maximums) == l){
-
         predict.fit <- NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = point.est, type = dist, k = n.best, class = type)
       } else {
         boundary.points <- pmin(pmax(point.est, minimums), maximums)
@@ -311,8 +310,15 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     predict.fit <- NULL
   } # is.null point.est
 
+  if(!is.null(type)){
+    fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat %% 1 < 0.5, floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
+    if(!is.null(predict.fit)) predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
+  }
 
-  R2 <- (sum((y.hat - mean(original.DV)) * (original.DV - mean(original.DV))) ^ 2) / (sum((original.DV - mean(original.DV)) ^ 2) * sum((y.hat - mean(original.DV)) ^ 2))
+  rhs.partitions <- data.table::data.table(reg.points.matrix)
+  fitted.matrix$residuals <- fitted.matrix$y.hat - original.DV
+
+  R2 <- max(0, min(1,sum((fitted.matrix$y.hat - mean(fitted.matrix$y)) ^ 2) / sum((fitted.matrix$y - mean(fitted.matrix$y)) ^ 2)))
 
 
   ### 3d plot
@@ -376,14 +382,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
 
 
-  rhs.partitions <- data.table::data.table(reg.points.matrix)
 
-  if(!is.null(type)){
-    fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat %% 1 < 0.5, floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
-    if(!is.null(predict.fit)) predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
-  }
 
-  fitted.matrix$residuals <- fitted.matrix$y.hat - original.DV
+
+
+
 
   ### Return Values
   if(return.values){
