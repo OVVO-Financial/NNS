@@ -428,7 +428,7 @@ NNS.reg = function (x, y,
                                      ceiling(max(1, (dependence * 10))) + 1,
                                      floor(dependence*10)))
 
-  if(multivariate.call) stn <- 0
+#  if(multivariate.call) stn <- 0
   if(!is.null(order)) dep.reduced.order <- order
 
   if(dependence > stn){
