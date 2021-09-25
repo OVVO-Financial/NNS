@@ -280,7 +280,6 @@ NNS.stack <- function(IVs.train,
 
         nns.ord[i] <- eval(obj.fn)
 
-
         if(objective=="min"){
           best.threshold <- var.cutoffs[which.min(na.omit(nns.ord))]
           THRESHOLDS[[b]] <- best.threshold

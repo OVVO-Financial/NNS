@@ -471,7 +471,7 @@ NNS.reg = function (x, y,
     if(dep.reduced.order == "max"){
       part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
       part.map1 <- part.map
-    } else if(!inference) {
+    } else if(inference) {
         part.map1 <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
         part.map <- NNS.part(c(x, part.map1$regression.points$x), c(y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
         part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
@@ -494,7 +494,7 @@ NNS.reg = function (x, y,
           part.map1 <- part.map
         }
     } else {
-      part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
+      part.map <- NNS.part(x, y, type =  "XONLY", order = dep.reduced.order, obs.req = 0)
       part.map1 <- part.map
     }
   } # Dependence < stn
@@ -514,7 +514,7 @@ NNS.reg = function (x, y,
     mid.min.range <- mean(c(min(x),min(regression.points$x)))
     mid.max.range <- mean(c(max(x),max(regression.points$x)))
 
-    y.min <-  na.omit(y[x <= min.range])
+    y.min <-  na.omit(y[x < min.range])
     l_y.min <- length(y.min)
     l_y.min_unique <- length(unique(y.min))
 
@@ -526,7 +526,7 @@ NNS.reg = function (x, y,
     l_x.mid.min <- length(x.mid.min)
     l_x.mid.min_unique <- length(unique(x.mid.min))
 
-    y.max <- na.omit(y[x >= max.range])
+    y.max <- na.omit(y[x > max.range])
     l_y.max <- length(y.max)
     l_y.max_unique <- length(unique(y.max))
 
