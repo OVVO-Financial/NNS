@@ -282,6 +282,7 @@ NNS.reg = function (x, y,
       x <- original.variable
     } else {
       if(is.null(dim.red.method)){
+
         colnames(x) <- make.unique(colnames(x), sep = "_")
 
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
@@ -425,10 +426,9 @@ NNS.reg = function (x, y,
   dependence <- (dependence^2 + dependence^(.5))/2
 
   dep.reduced.order <- max(1, ifelse(multivariate.call,
-                                     ceiling(max(1, (dependence * 10))) + 1,
+                                     ifelse(is.null(order), floor(dependence*10), order),
                                      floor(dependence*10)))
 
-#  if(multivariate.call) stn <- 0
   if(!is.null(order)) dep.reduced.order <- order
 
   if(dependence > stn){
