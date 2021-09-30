@@ -349,7 +349,7 @@ NNS.VAR <- function(variables,
 
                        DV_weights <- c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
                        DV_weights <- DV_weights/sum(DV_weights)
-                       multi_of <- DV_weights%*%c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
+                       DV_weights <- DV_weights%*%c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
 
                        nns_DVs <- DV_values$stack
                        nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
@@ -358,7 +358,7 @@ NNS.VAR <- function(variables,
                        nns_DVs <- nns_IVs_results[,i]
                      }
                      if(is.null(DV_weights)) DV_weights <- c(NA, NA)
-                     list(nns_DVs, relevant_vars, multi_of)
+                     list(nns_DVs, relevant_vars, DV_weights)
                    }
 
 
