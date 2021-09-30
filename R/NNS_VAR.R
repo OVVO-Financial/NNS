@@ -409,6 +409,8 @@ NNS.VAR <- function(variables,
   uni_weights <- uni_weights / (uni_weights + multi_weights)
   uni_weights[is.na(uni_weights)] <- uni[is.na(uni_weights)]
 
+  uni_weights <- (uni_weights + uni + .5)/3
+
   uni <- uni_weights
   multi <- 1 - uni
 
