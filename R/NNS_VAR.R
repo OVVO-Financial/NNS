@@ -152,7 +152,6 @@ NNS.VAR <- function(variables,
 
   na_s <- numeric()
 
-
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
@@ -176,8 +175,9 @@ NNS.VAR <- function(variables,
 
     na_s[i] <- tail(index, 1) - interpolation_point
     if(na_s[i] > 0){
+
       periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
-                          mod.only = FALSE, plot = FALSE)$periods
+                          mod.only = TRUE, plot = FALSE)$periods
 
       ts <- interpolation_point - 2*(h + na_s[i])
       if(ts < 100) ts <- interpolation_point - (h + na_s[i])
@@ -186,7 +186,8 @@ NNS.VAR <- function(variables,
                           training.set = ts,
                           obj.fn = obj.fn,
                           objective = objective,
-                          print.trace = status,
+                          print.trace = FALSE,
+                          negative.values = min(new_variable)<0,
                           ncores = 1)
 
       nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s[i]), seasonal.factor = b$periods, weights = b$weights,
@@ -199,13 +200,31 @@ NNS.VAR <- function(variables,
 
       nns_IVs$obj_fn <- b$obj.fn
     } else {
-      nns_IVs$results <- nns_IVs$interpolation
+
+      periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
+                          mod.only = TRUE, plot = FALSE)$periods
+
+      ts <- interpolation_point - 2*(h)
+      if(ts < 100) ts <- interpolation_point - (h)
+
+      b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
+                          training.set = ts,
+                          obj.fn = obj.fn,
+                          objective = objective,
+                          print.trace = FALSE,
+                          negative.values = min(new_variable)<0,
+                          ncores = 1)
+
+      nns_IVs$results <- NNS.ARMA(new_variable, h = (h), seasonal.factor = b$periods, weights = b$weights,
+                                  method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
+
+      nns_IVs$obj_fn <- b$obj.fn
     }
 
-    return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, na_s[i])))
+    return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, na_s[i]), uni_of = nns_IVs$obj_fn))
   }
 
-
+  uni_weights <- unlist(lapply(nns_IVs, `[[`, 4))
   univariate_extrapolation <- lapply(nns_IVs, `[[`, 3)
   na_s <- unlist(lapply(nns_IVs, `[[`, 2))
   nns_IVs <- lapply(nns_IVs, `[[`, 1)
@@ -258,7 +277,7 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- list()
   relevant_vars <- list()
-  DV_weights <- list()
+  multi_of <- list()
 
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
@@ -330,6 +349,7 @@ NNS.VAR <- function(variables,
 
                        DV_weights <- c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
                        DV_weights <- DV_weights/sum(DV_weights)
+                       multi_of <- DV_weights%*%c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
 
                        nns_DVs <- DV_values$stack
                        nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
@@ -338,7 +358,7 @@ NNS.VAR <- function(variables,
                        nns_DVs <- nns_IVs_results[,i]
                      }
                      if(is.null(DV_weights)) DV_weights <- c(NA, NA)
-                     list(nns_DVs, relevant_vars, DV_weights)
+                     list(nns_DVs, relevant_vars, multi_of)
                    }
 
 
@@ -346,7 +366,7 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- lists[[1]]
   relevant_vars <- lists[[2]]
-  weights <- lists[[3]]
+  multi_of <- lists[[3]]
 
 
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
@@ -381,10 +401,15 @@ NNS.VAR <- function(variables,
     }
   }
 
-  dv_weights <- unlist(lapply(lists[[3]], `[[`,1))
-  dv_weights[is.na(dv_weights)] <- uni[is.na(dv_weights)]
+  multi_weights <- unlist(lapply(lists[[3]], `[[`,1))
+  multi_weights[is.na(uni_weights)] <- multi[is.na(uni_weights)]
 
-  uni <- dv_weights
+  uni_weights[is.na(uni_weights)] <- uni[is.na(uni_weights)]
+
+  uni_weights <- uni_weights / (uni_weights + multi_weights)
+  uni_weights[is.na(uni_weights)] <- uni[is.na(uni_weights)]
+
+  uni <- uni_weights
   multi <- 1 - uni
 
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))

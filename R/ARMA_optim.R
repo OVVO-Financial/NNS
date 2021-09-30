@@ -7,7 +7,8 @@
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.
-#' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param obj.fn expression;
+#' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param lin.only logical; \code{FALSE} (default) Restricts the optimization to linear methods only.
@@ -57,8 +58,8 @@
 NNS.ARMA.optim <- function(variable, training.set,
                         seasonal.factor,
                         negative.values = FALSE,
-                        obj.fn = expression(sum((predicted - actual)^2)),
-                        objective = "min",
+                        obj.fn = expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2)),
+                        objective = "max",
                         linear.approximation = TRUE,
                         lin.only = FALSE,
                         print.trace = TRUE,
@@ -279,8 +280,8 @@ NNS.ARMA.optim <- function(variable, training.set,
         if(weight.SSE<nns.SSE){
             nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-            bias <- mode(predicted - actual)
-            predicted <- predicted+bias
+            bias <- gravity(predicted - actual)
+            predicted <- predicted-bias
             bias.SSE <- eval(obj.fn)
 
             if(bias.SSE>weight.SSE){bias <- 0}
@@ -288,8 +289,8 @@ NNS.ARMA.optim <- function(variable, training.set,
         } else {
             nns.weights <- NULL
 
-            bias <- mode(predicted - actual)
-            predicted <- predicted+bias
+            bias <- gravity(predicted - actual)
+            predicted <- predicted-bias
             bias.SSE <- eval(obj.fn)
 
             if(bias.SSE>nns.SSE){bias <- 0}
@@ -297,8 +298,8 @@ NNS.ARMA.optim <- function(variable, training.set,
     } else {
         nns.weights <- NULL
 
-        bias <- mode(predicted - actual)
-        predicted <- predicted+bias
+        bias <- gravity(predicted - actual)
+        predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
         if(bias.SSE>nns.SSE){bias <- 0}
@@ -317,8 +318,8 @@ NNS.ARMA.optim <- function(variable, training.set,
           if(weight.SSE>nns.SSE){
               nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-              bias <- mode(predicted - actual)
-              predicted <- predicted+bias
+              bias <- gravity(predicted - actual)
+              predicted <- predicted-bias
               bias.SSE <- eval(obj.fn)
 
               if(bias.SSE<weight.SSE){bias <- 0}
@@ -326,8 +327,8 @@ NNS.ARMA.optim <- function(variable, training.set,
           } else {
               nns.weights <- NULL
 
-              bias <- mode(predicted - actual)
-              predicted <- predicted+bias
+              bias <- gravity(predicted - actual)
+              predicted <- predicted-bias
               bias.SSE <- eval(obj.fn)
               if(objective=="min"){
                 if(bias.SSE<=nns.SSE){bias <- 0}
@@ -338,8 +339,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       } else {
           nns.weights <- NULL
 
-          bias <- mode(predicted - actual)
-          predicted <- predicted+bias
+          bias <- gravity(predicted - actual)
+          predicted <- predicted-bias
           bias.SSE <- eval(obj.fn)
           if(objective=="min"){
               if(bias.SSE<=nns.SSE){bias <- 0}
@@ -354,9 +355,11 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   options(warn = oldw)
 
+  if(!negative.values) bias <- min(c(bias, variable))
+
   return(list(periods = nns.periods,
               weights = nns.weights,
               obj.fn = nns.SSE,
               method = nns.method,
-              bias.shift = bias))
+              bias.shift = -bias))
 }
