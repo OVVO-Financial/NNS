@@ -7,8 +7,8 @@
 #' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param obj.fn expression;
-#' \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
-#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param nowcast logical; \code{FALSE} (default) internal call for \link{NNS.nowcast}.
@@ -110,8 +110,8 @@ NNS.VAR <- function(variables,
                     h,
                     tau = 1,
                     dim.red.method = "cor",
-                    obj.fn = expression( sum((predicted - actual)^2) ),
-                    objective = "min",
+                    obj.fn = expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2)),
+                    objective = "max",
                     status = TRUE,
                     ncores = NULL,
                     nowcast = FALSE){
@@ -258,8 +258,9 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- list()
   relevant_vars <- list()
+  DV_weights <- list()
 
-  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list()),
+  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
 
 
@@ -313,6 +314,7 @@ NNS.VAR <- function(variables,
                        rel_vars <- names(lagged_new_values_train)
                      }
 
+
                      # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
                      if(length(rel_vars)>1){
                        DV_values <- NNS.stack(lagged_new_values_train[, rel_vars],
@@ -326,21 +328,26 @@ NNS.VAR <- function(variables,
                                               dim.red.method = dim.red.method,
                                               order = NULL, stack = TRUE)
 
+                       DV_weights <- c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
+                       DV_weights <- DV_weights/sum(DV_weights)
 
                        nns_DVs <- DV_values$stack
                        nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
                      } else {
+                       DV_weights <- c(.5, .5)
                        nns_DVs <- nns_IVs_results[,i]
                      }
-
-                     list(nns_DVs, relevant_vars)
-
+                     if(is.null(DV_weights)) DV_weights <- c(NA, NA)
+                     list(nns_DVs, relevant_vars, DV_weights)
                    }
+
 
   if(num_cores>1) registerDoSEQ()
 
   nns_DVs <- lists[[1]]
   relevant_vars <- lists[[2]]
+  weights <- lists[[3]]
+
 
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
   nns_DVs <- head(nns_DVs, h)
@@ -374,6 +381,11 @@ NNS.VAR <- function(variables,
     }
   }
 
+  dv_weights <- unlist(lapply(lists[[3]], `[[`,1))
+  dv_weights[is.na(dv_weights)] <- uni[is.na(dv_weights)]
+
+  uni <- dv_weights
+  multi <- 1 - uni
 
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
