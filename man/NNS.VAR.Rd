@@ -9,8 +9,9 @@ NNS.VAR(
   h,
   tau = 1,
   dim.red.method = "cor",
-  obj.fn = expression(sum((predicted - actual)^2)),
-  objective = "min",
+  obj.fn = expression(cor(predicted, actual, method = "spearman")/sum((predicted -
+    actual)^2)),
+  objective = "max",
   status = TRUE,
   ncores = NULL,
   nowcast = FALSE
@@ -26,9 +27,9 @@ NNS.VAR(
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{obj.fn}{expression;
-\code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+\code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
-\item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+\item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 

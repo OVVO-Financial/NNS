@@ -16,7 +16,7 @@ NNS.nowcast(
 \arguments{
 \item{h}{integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
-\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.quandl.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.}
+\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.}
 
 \item{start.date}{character; \code{"2000-01-03"} (default) Starting date for all data series download.}
 
@@ -44,7 +44,7 @@ Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in V
 }
 \note{
 \itemize{
-\item This function requires an API key from Quandl.  Sign up via \url{https://www.quandl.com/}.
+\item This function requires an API key from Quandl.  Sign up via \url{https://data.nasdaq.com/}.
 }
 }
 \examples{
