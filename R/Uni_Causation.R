@@ -39,8 +39,8 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
   ## Normalize x.norm.tau to y.norm.tau
   x.tau.y.tau <- NNS.norm(cbind(x.norm.tau, y.norm.tau))
-  x.norm.to.y <- unlist(x.tau.y.tau[ , 1])
-  y.norm.to.x <- unlist(x.tau.y.tau[ , 2])
+  x.norm.to.y <- as.vector(unlist(x.tau.y.tau[ , 1]))
+  y.norm.to.x <- as.vector(unlist(x.tau.y.tau[ , 2]))
 
 
   ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
