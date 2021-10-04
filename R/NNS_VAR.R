@@ -277,7 +277,6 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- list()
   relevant_vars <- list()
-  multi_of <- list()
 
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
@@ -366,7 +365,6 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- lists[[1]]
   relevant_vars <- lists[[2]]
-  multi_of <- lists[[3]]
 
 
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))

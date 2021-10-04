@@ -266,7 +266,7 @@ dy.d_ <- function(x, y, wrt,
       mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, inference = TRUE, point.only = TRUE, ncores = ncores)$Point.est
 
 
-      if(messages) message("Done :-)","\r",appendLF=TRUE)
+
 
       z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
       z <- z[,1] + z[,4] - z[,2] - z[,3]
@@ -293,7 +293,7 @@ dy.d_ <- function(x, y, wrt,
                           "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE))
 
   }
-
+  if(messages) message("Done :-)","\r",appendLF=TRUE)
   return(final_results)
 
 }
