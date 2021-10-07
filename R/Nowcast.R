@@ -54,7 +54,7 @@ NNS.nowcast <- function(h = 12,
                         ncores = NULL){
 
 
-  if(getOption("Quandl.api_key")==""){
+  if(getOption("Quandl.api_key")=="" || is.null(getOption("Quandl.api_key"))){
       if(is.null(Quandl.key)){
           message("Please enter your Quandl API key WITHOUT QUOTES and press enter:")
 

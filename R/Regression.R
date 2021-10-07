@@ -747,7 +747,7 @@ NNS.reg = function (x, y,
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
 
   fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - original.y
+  fitted$residuals <- original.y - fitted$y.hat
 
   if(dependence < stn && mean(c(length(unique(diff(x))), length(unique(x)))) > .33*length(x)){
     bias <- fitted
@@ -867,7 +867,7 @@ NNS.reg = function (x, y,
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
 
   fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - original.y
+  fitted$residuals <-  original.y - fitted$y.hat
 
 
   if(!is.null(type)){

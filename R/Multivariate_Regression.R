@@ -316,7 +316,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
 
   rhs.partitions <- data.table::data.table(reg.points.matrix)
-  fitted.matrix$residuals <- fitted.matrix$y.hat - original.DV
+  fitted.matrix$residuals <-  original.DV - fitted.matrix$y.hat
 
   R2 <- max(0, min(1, sum((fitted.matrix$y.hat - mean(fitted.matrix$y)) ^ 2) / sum((fitted.matrix$y - mean(fitted.matrix$y)) ^ 2)))
 
