@@ -174,10 +174,15 @@ NNS.VAR <- function(variables,
     }
 
     na_s[i] <- tail(index, 1) - interpolation_point
-    if(na_s[i] > 0){
 
-      periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
-                          mod.only = TRUE, plot = FALSE)$periods
+    periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
+                        mod.only = TRUE, plot = FALSE)$periods
+
+    if(na_s[i] > 0){
+      multi <- NNS.reg(a[,1], a[,2], order = NULL,
+                       point.est = index, plot = FALSE,
+                       ncores = 1, point.only = TRUE)$Point.est
+
 
       ts <- interpolation_point - 2*(h + na_s[i])
       if(ts < 100) ts <- interpolation_point - (h + na_s[i])
@@ -195,15 +200,11 @@ NNS.VAR <- function(variables,
 
 
 
-      na_s_extrapolation <- rowMeans(cbind(tail(nns_IVs$interpolation, na_s[i]), head(nns_IVs$results, na_s[i])))
+      na_s_extrapolation <- rowMeans(cbind(tail(multi, na_s[i]), head(nns_IVs$results, na_s[i])))
       nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
 
       nns_IVs$obj_fn <- b$obj.fn
     } else {
-
-      periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
-                          mod.only = TRUE, plot = FALSE)$periods
-
       ts <- interpolation_point - 2*(h)
       if(ts < 100) ts <- interpolation_point - (h)
 
