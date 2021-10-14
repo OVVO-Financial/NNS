@@ -4,7 +4,7 @@
 \alias{PM.matrix}
 \title{Partial Moment Matrix}
 \usage{
-PM.matrix(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE)
+PM.matrix(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = TRUE)
 }
 \arguments{
 \item{LPM.degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
@@ -15,7 +15,7 @@ PM.matrix(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE)
 
 \item{variable}{a numeric matrix or data.frame.}
 
-\item{pop.adj}{logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.}
+\item{pop.adj}{logical; \code{TRUE} (default) Adjusts the sample co-partial moment matrices for population statistics.}
 }
 \value{
 Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
