@@ -14,7 +14,7 @@ NNS.nowcast(
 )
 }
 \arguments{
-\item{h}{integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
+\item{h}{integer; \code{(h = 12)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
 \item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.}
 
