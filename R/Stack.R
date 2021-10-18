@@ -160,26 +160,6 @@ NNS.stack <- function(IVs.train,
     set.seed(123 * b)
     test.set <- sample(1 : length(unlist(IVs.train[ , 1])), as.integer(CV.size * length(unlist(IVs.train[ , 1]))), replace = FALSE)
 
-    if(b > 1){
-      maxes <- as.vector(apply(IVs.train, 2, which.max))
-      mins <- as.vector(apply(IVs.train, 2, which.min))
-
-      if(identical(sort(method),c(1,2))){
-        test.set_half <- unique(c(rbind(test.set.1[1:(length(test.set.1)*min(.5, max(.01,CV.size)))], test.set.2[1:(length(test.set.2)/2)])))[1:(length(test.set)*min(.5, max(.01,CV.size)))]
-      } else {
-        if(method==1){
-          test.set_half <- (test.set.1)[1:(length(test.set)*min(.5, max(.01,CV.size)))]
-        } else {
-          if(method==2) {
-            test.set_half <- (test.set.2)[1:(length(test.set)*min(.5, max(.01,CV.size)))]
-          }
-        }
-      }
-
-      test.set <- unique(c(mins, maxes, test.set_half, sample(1 : length(IVs.train[ , 1]), replace = FALSE)))[1:length(test.set)]
-      test.set <- na.omit(test.set)
-    }
-
     if(!is.null(ts.test)){
       test.set <- 1:(length(DV.train) - ts.test)
       dist <- "dtw"
@@ -297,7 +277,6 @@ NNS.stack <- function(IVs.train,
         }
       }
 
-      test.set.2 <- test.set[rev(order(abs(predicted - actual)))]
 
       relevant_vars <- colnames(IVs.train)
       if(is.null(relevant_vars)) relevant_vars <- 1:dim(IVs.train)[2]
@@ -436,8 +415,6 @@ NNS.stack <- function(IVs.train,
           if(objective=='max' && nns.cv.1[index]<=nns.cv.1[index-1] && nns.cv.1[index]<=nns.cv.1[index-2]){ break }
         }
       }
-
-      if(length(predicted > 0)) test.set.1 <- test.set[rev(order(abs(predicted - actual)))] else test.set.1 <- test.set
 
 
       ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]

@@ -179,13 +179,6 @@ NNS.boost <- function(IVs.train,
       set.seed(123 + i)
       new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-      if(i > 1){
-        maxes <- as.vector(apply(x, 2, which.max))
-        mins <- as.vector(apply(x, 2, which.min))
-        new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-        new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
-      }
-
       if(!is.null(ts.test)) new.index <- 1:(length(y) - ts.test)
 
       new.index <- unlist(new.index)
@@ -230,8 +223,6 @@ NNS.boost <- function(IVs.train,
         predicted <- pmin(predicted, max(as.numeric(y)))
         predicted <- pmax(predicted, min(as.numeric(y)))
       }
-
-      new.index.1 <- rev(order(abs(predicted - actual)))
 
       results[i] <- eval(obj.fn)
 
@@ -292,13 +283,6 @@ NNS.boost <- function(IVs.train,
       set.seed(123 * j)
       new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
-      if(j > 1){
-        maxes <- as.vector(apply(x, 2, which.max))
-        mins <- as.vector(apply(x, 2, which.min))
-        new.index_half <- new.index.1[1:(length(new.index.1)/2)]
-        new.index <- na.omit(unique(c(mins, maxes, new.index_half, new.index))[1:as.integer(CV.size*length(y))])
-      }
-
       if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
 
       new.index <- unlist(new.index)
@@ -344,7 +328,6 @@ NNS.boost <- function(IVs.train,
         predicted <- pmax(predicted,min(as.numeric(y)))
       }
 
-      new.index.1 <- rev(order(abs(predicted - actual)))
 
       new.results <- eval(obj.fn)
 
