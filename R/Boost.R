@@ -177,10 +177,11 @@ NNS.boost <- function(IVs.train,
 
     for(i in 1:learner.trials){
       set.seed(123 + i)
-###      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       l <- length(y)
-      new.index <- as.integer(seq(ifelse(i<=l/4, i, abs(i-l)/4), length(y), length.out = as.integer(CV.size * length(y))))
+      if(i<=l/4) new.index <- as.integer(seq(i, length(y), length.out = as.integer(CV.size * length(y)))) else {
+          new.index <- sample(l, as.integer(CV.size * l), replace = FALSE)
+      }
 
 
       if(!is.null(ts.test)) new.index <- 1:(length(y) - ts.test)
@@ -285,11 +286,11 @@ NNS.boost <- function(IVs.train,
   if(!is.null(epochs)){
     for(j in 1:epochs){
       set.seed(123 * j)
-###      new.index <- sample(length(y), as.integer(CV.size*length(y)), replace = FALSE)
 
       l <- length(y)
-      new.index <- as.integer(seq(ifelse(j<=l/4, j, abs(j-l)/4), length(y), length.out = as.integer(CV.size * length(y))))
-
+      if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(CV.size * length(y)))) else {
+        new.index <- sample(l, as.integer(CV.size * l), replace = FALSE)
+      }
       if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
 
       new.index <- unlist(new.index)

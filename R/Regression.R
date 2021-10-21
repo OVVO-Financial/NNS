@@ -431,6 +431,7 @@ NNS.reg = function (x, y,
 
   if(!is.null(order)) dep.reduced.order <- order
 
+
   if(dependence > stn){
     if(dependence == 1 || dep.reduced.order == "max"){
       if(is.null(order)) dep.reduced.order <- "max"
