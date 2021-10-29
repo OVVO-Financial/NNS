@@ -80,9 +80,13 @@ NNS.copula <- function (x,
 
     }
 
+    if(is.na(Co_pm) || is.null(Co_pm)) Co_pm <- 0
+    if(is.na(D_pm)|| is.null(D_pm)) D_pm <- 0
+
+    if(Co_pm == D_pm) return(0)
     if(Co_pm==0 || D_pm==0) return(1)
     if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
     if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
-    if(Co_pm == D_pm) return(0)
+
 
 }

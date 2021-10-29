@@ -9,14 +9,14 @@
 #'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
-#' @param mod.only logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
+#' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.
 #' @param best.periods integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #' \code{(seasonal.factor = FALSE, best.periods = NULL)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.
-#' @param method options: ("lin", "nonlin", "both"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
-#' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.
+#' @param method options: ("lin", "nonlin", "both", "means"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
+#' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.  Means for each subset are returned with \code{(method = "means")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
@@ -194,7 +194,7 @@ NNS.ARMA <- function(variable,
     Component.series <- GV$Component.series
 
     ## Regression on Component Series
-    if(method == 'nonlin' | method == 'both'){
+    if(method == 'nonlin' || method == 'both'){
       Regression.Estimates <- list(length(lag))
 
       for(i in 1:length(lag)){
@@ -225,16 +225,19 @@ NNS.ARMA <- function(variable,
 
     }#Linear == F
 
-    if(method == 'lin' | method == 'both'){
+    if(method == "lin" || method == "both" || method == "means"){
 
       Regression.Estimates <- list(length(lag))
 
-      Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
-          last.x <- tail(Component.index[[i]], 1)
-          coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
 
-          coefs[1] + (coefs[2] * (last.x + 1))
-      }
+          Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
+              last.x <- tail(Component.index[[i]], 1)
+              coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
+
+              coefs[1] + (coefs[2] * (last.x + 1))
+          }
+
+      if(method=="means") Regression.Estimates[[i]] <- mean(Component.series[[i]])
 
       Regression.Estimates <- unlist(Regression.Estimates)
 
