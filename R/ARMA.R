@@ -194,10 +194,12 @@ NNS.ARMA <- function(variable,
     Component.series <- GV$Component.series
 
     ## Regression on Component Series
+    for(i in 1:length(lag)){
     if(method == 'nonlin' || method == 'both'){
       Regression.Estimates <- list(length(lag))
 
-      for(i in 1:length(lag)){
+
+
         x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
 
@@ -216,7 +218,7 @@ NNS.ARMA <- function(variable,
 
 
         Regression.Estimates[[i]] <- last.y + (rise / run)
-      }
+
 
       Regression.Estimates <- unlist(Regression.Estimates)
 
@@ -225,10 +227,11 @@ NNS.ARMA <- function(variable,
 
     }#Linear == F
 
-    if(method == "lin" || method == "both" || method == "means"){
+    if(method == "lin" || method == "both" || method == "means") {
 
       Regression.Estimates <- list(length(lag))
 
+      if(method=="means") Regression.Estimates[[i]] <- mean(Component.series[[i]]) else {
 
           Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
               last.x <- tail(Component.index[[i]], 1)
@@ -236,8 +239,8 @@ NNS.ARMA <- function(variable,
 
               coefs[1] + (coefs[2] * (last.x + 1))
           }
+      }
 
-      if(method=="means") Regression.Estimates[[i]] <- mean(Component.series[[i]])
 
       Regression.Estimates <- unlist(Regression.Estimates)
 
@@ -258,7 +261,7 @@ NNS.ARMA <- function(variable,
 
     variable <- c(variable, Estimates[j])
     FV <- variable
-
+    } # i loop
   } # j loop
 
   if(num_cores>1) registerDoSEQ()
