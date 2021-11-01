@@ -18,6 +18,7 @@
 #' @param method options: ("lin", "nonlin", "both", "means"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
 #' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.  Means for each subset are returned with \code{(method = "means")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
+#' @param shrink logical; \code{FALSE} (default) Ensembles forecasts with \code{method = "means"}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
 #' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
@@ -71,6 +72,7 @@ NNS.ARMA <- function(variable,
                      negative.values = FALSE,
                      method = "nonlin",
                      dynamic = FALSE,
+                     shrink = FALSE,
                      plot = TRUE,
                      seasonal.plot = TRUE,
                      conf.intervals = NULL,
@@ -79,11 +81,12 @@ NNS.ARMA <- function(variable,
 
   if(is.numeric(seasonal.factor) && dynamic) stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
 
-
   if(any(class(variable)==c("tbl", "data.table"))) variable <- as.vector(unlist(variable))
 
   if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
 
+  method <- tolower(method)
+  if(method == "means") shrink <- FALSE
 
   oldw <- getOption("warn")
   options(warn = -1)
@@ -231,18 +234,21 @@ NNS.ARMA <- function(variable,
 
       Regression.Estimates <- list(length(lag))
 
-      if(method=="means") Regression.Estimates[[i]] <- mean(Component.series[[i]]) else {
-
+      if(method != "means"){
           Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
               last.x <- tail(Component.index[[i]], 1)
               coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
 
               coefs[1] + (coefs[2] * (last.x + 1))
           }
+          Regression.Estimates <- unlist(Regression.Estimates)
       }
 
-
-      Regression.Estimates <- unlist(Regression.Estimates)
+      if(method == "means" || shrink){
+        Regression.Estimates_means <- list(length(lag))
+        Regression.Estimates_means[[i]] <- mean(Component.series[[i]])
+        if(shrink) Regression.Estimates <- (Regression.Estimates + unlist(Regression.Estimates_means)) / 2 else Regression.Estimates <- unlist(Regression.Estimates_means)
+      }
 
       L.Regression.Estimates <- Regression.Estimates
       Lin.estimates <- sum(Regression.Estimates * Weights)

@@ -10,6 +10,7 @@
 #' @param obj.fn expression;
 #' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param shrink logical; \code{FALSE} (default) Ensembles \link{NNS.ARMA} forecasts with \code{method = "means"}.  Best used with stationary series.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param lin.only logical; \code{FALSE} (default) Restricts the optimization to linear methods only.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
@@ -60,6 +61,7 @@ NNS.ARMA.optim <- function(variable, training.set,
                         negative.values = FALSE,
                         obj.fn = expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2)),
                         objective = "max",
+                        shrink = FALSE,
                         linear.approximation = TRUE,
                         lin.only = FALSE,
                         print.trace = TRUE,
@@ -156,7 +158,7 @@ NNS.ARMA.optim <- function(variable, training.set,
           # Find the min (obj.fn) for a given seasonals sequence
           actual <- tail(variable, h)
 
-          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
+          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values, ncores = 1, shrink = shrink)
 
           nns.estimates.indiv <- eval(obj.fn)
 
@@ -170,7 +172,7 @@ NNS.ARMA.optim <- function(variable, training.set,
           nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table"))%dopar%{
           actual <- tail(variable, h)
 
-          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
+          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1, shrink = shrink)
 
           nns.estimates.indiv <- eval(obj.fn)
 
@@ -273,7 +275,7 @@ NNS.ARMA.optim <- function(variable, training.set,
       nns.SSE <- min(unlist(overall.estimates))
 
     if(length(nns.periods)>1){
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
+        predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)), shrink = shrink)
 
         weight.SSE <- eval(obj.fn)
 
@@ -311,7 +313,7 @@ NNS.ARMA.optim <- function(variable, training.set,
       nns.SSE <- max(unlist(overall.estimates))
 
       if(length(nns.periods)>1){
-          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
+          predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)), shrink = shrink)
 
           weight.SSE <- eval(obj.fn)
 
