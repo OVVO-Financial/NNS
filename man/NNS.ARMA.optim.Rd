@@ -12,6 +12,7 @@ NNS.ARMA.optim(
   obj.fn = expression(cor(predicted, actual, method = "spearman")/sum((predicted -
     actual)^2)),
   objective = "max",
+  shrink = FALSE,
   linear.approximation = TRUE,
   lin.only = FALSE,
   print.trace = TRUE,
@@ -32,6 +33,8 @@ NNS.ARMA.optim(
 \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+
+\item{shrink}{logical; \code{FALSE} (default) Ensembles \link{NNS.ARMA} forecasts with \code{method = "means"}.  Best used with stationary series.}
 
 \item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
 

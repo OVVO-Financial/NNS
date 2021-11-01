@@ -16,6 +16,7 @@ NNS.ARMA(
   negative.values = FALSE,
   method = "nonlin",
   dynamic = FALSE,
+  shrink = FALSE,
   plot = TRUE,
   seasonal.plot = TRUE,
   conf.intervals = NULL,
@@ -49,6 +50,8 @@ NNS.ARMA(
 \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.  Means for each subset are returned with \code{(method = "means")}.}
 
 \item{dynamic}{logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.}
+
+\item{shrink}{logical; \code{FALSE} (default) Ensembles forecasts with \code{method = "means"}.}
 
 \item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.}
 
