@@ -10,7 +10,7 @@ NNS.ARMA(
   training.set = NULL,
   seasonal.factor = TRUE,
   weights = NULL,
-  best.periods = 2,
+  best.periods = 1,
   modulo = NULL,
   mod.only = TRUE,
   negative.values = FALSE,
