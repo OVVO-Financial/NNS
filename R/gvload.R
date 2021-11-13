@@ -11,6 +11,7 @@
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
 #' @importFrom caret upSample downSample
 #' @importFrom zoo as.yearmon
+#' @importFrom tseries adf.test
 #' @import doParallel
 #' @import rgl
 #' @import stringr

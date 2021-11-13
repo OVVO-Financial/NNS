@@ -196,7 +196,7 @@ NNS.VAR <- function(variables,
                           ncores = 1)
 
       nns_IVs$results <- NNS.ARMA(new_variable, h = (h + na_s[i]), seasonal.factor = b$periods, weights = b$weights,
-                                  method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
+                                  method = b$method, ncores = 1, plot = FALSE, shrink = b$shrink) + b$bias.shift
 
 
 
@@ -217,7 +217,7 @@ NNS.VAR <- function(variables,
                           ncores = 1)
 
       nns_IVs$results <- NNS.ARMA(new_variable, h = (h), seasonal.factor = b$periods, weights = b$weights,
-                                  method = b$method, ncores = 1, plot = FALSE) + b$bias.shift
+                                  method = b$method, ncores = 1, plot = FALSE, shrink = b$shrink) + b$bias.shift
 
       nns_IVs$obj_fn <- b$obj.fn
     }
