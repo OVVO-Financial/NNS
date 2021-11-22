@@ -48,6 +48,7 @@ Returns a list containing:
 \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
 \item{\code{$obj.fn}} the objective function value
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+\item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 }
 }

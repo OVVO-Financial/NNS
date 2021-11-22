@@ -17,7 +17,7 @@ NNS.norm(A, linear = FALSE, chart.type = NULL, location = "topleft")
 \item{location}{Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.}
 }
 \value{
-Returns a \link{data.table} of normalized values.
+Returns a \link{data.frame} of normalized values.
 }
 \description{
 Normalizes a matrix of variables based on nonlinear scaling normalization method.
