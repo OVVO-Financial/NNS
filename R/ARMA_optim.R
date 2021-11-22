@@ -21,6 +21,7 @@
 #' \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
 #' \item{\code{$obj.fn}} the objective function value
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
+#' \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 #'}
 #' @note
@@ -355,18 +356,14 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = TRUE)
 
-  if(objective == "min"){
-    if(eval(obj.fn) < nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
-  }
+  if(objective == "min") if(eval(obj.fn) < nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
 
-  if(objective == "max"){
-    if(eval(obj.fn) > nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
-  }
-
+  if(objective == "max") if(eval(obj.fn) > nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
 
   options(warn = oldw)
 
   if(!negative.values) bias <- min(c(bias, variable))
+
 
   return(list(periods = nns.periods,
               weights = nns.weights,

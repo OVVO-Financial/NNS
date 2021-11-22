@@ -311,20 +311,22 @@ NNS.reg = function (x, y,
 
           if(!is.numeric(dim.red.method) && dim.red.method!="cor" && dim.red.method!="equal"){
             if(!is.null(type)) fact <- TRUE else fact <- FALSE
-            x.star.dep <- NNS.dep(cbind(x, y), print.map = FALSE, asym = TRUE)$Dependence
+            x.star.dep <- numeric()
+            for(i in 1:dim(x)[2]) x.star.dep[i] <- NNS.dep(x[,i], y, print.map = FALSE, asym = TRUE)$Dependence
             x.star.dep[is.na(x.star.dep)] <- 0
           }
 
-          x.star.cor <- cor(cbind(x, y), method = "spearman")
+          x.star.cor <- numeric()
+          for(i in 1:dim(x)[2]) x.star.cor[i] <- cor(x[,i],y, method = "spearman")
           x.star.cor[is.na(x.star.cor)] <- 0
 
           if(!is.numeric(dim.red.method) && dim.red.method == "nns.dep"){
-            x.star.coef <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef <- x.star.dep
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
           if(!is.numeric(dim.red.method) && dim.red.method == "cor"){
-            x.star.coef <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef <- x.star.cor
             x.star.coef[is.na(x.star.coef)] <- 0
           }
 
@@ -334,9 +336,10 @@ NNS.reg = function (x, y,
             }
             x.star.coef <- numeric()
 
-            cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
+            cause <- numeric()
+            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y - x[,i])
             cause[is.na(cause)] <- 0
-            x.star.coef <- (cause[(ncol(x) + 1), ] - cause[ ,(ncol(x) + 1)])[-(ncol(x) + 1)]
+            x.star.coef <- cause
           }
 
           if(!is.numeric(dim.red.method) && dim.red.method == "all"){
@@ -345,14 +348,14 @@ NNS.reg = function (x, y,
             x.star.coef.1 <- numeric()
 
 
-            cause <- NNS.caus(cbind(x, y), tau = tau, plot = FALSE)
+            cause <- numeric()
+            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y - x[,i])
             cause[is.na(cause)] <- 0
-            x.star.coef.1 <- (cause[(ncol(x) + 1), ] - cause[ , (ncol(x) + 1)])[-(ncol(x) + 1)]
+            x.star.coef.1 <- cause
 
-
-            x.star.coef.3 <- x.star.cor[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.3 <- x.star.cor
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
-            x.star.coef.2 <- x.star.dep[- (ncol(x) + 1), (ncol(x) + 1)]
+            x.star.coef.2 <- x.star.dep
             x.star.coef.2[is.na(x.star.coef.2)] <- 0
             x.star.coef <- Rfast::rowmeans(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3))
             x.star.coef[is.na(x.star.coef)] <- 0

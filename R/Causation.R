@@ -32,7 +32,8 @@ NNS.caus <- function(x, y = NULL,
                      tau = 0,
                      plot = FALSE){
 
-  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+  if(!is.null(y))  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+  if(is.null(y))  if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
 
   orig.tau <- tau
   orig.plot <- plot
