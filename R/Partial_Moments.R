@@ -17,11 +17,11 @@
 
 LPM <-  function(degree, target, variable){
 
-variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
 
-    if(degree == 0) return(mean(variable <= target))
+  if(degree == 0) return(mean(variable <= target))
 
-    sum((target - (variable[variable <= target])) ^ degree) / length(variable)
+  sum((target - (variable[variable <= target])) ^ degree) / length(variable)
 }
 LPM <- Vectorize(LPM, vectorize.args = 'target')
 
@@ -45,7 +45,7 @@ LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 UPM <-  function(degree, target, variable){
 
-  if(any(class(variable)==c("tbl", "data.table"))) variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
 
   if(degree == 0) return(mean(variable > target))
 
@@ -76,15 +76,15 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   z <- cbind(x, y)
   z <- t(t(z) - c(target.x, target.y))
   z[z<=0] <- NA
   z <- z[complete.cases(z), , drop = FALSE]
   return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
-  }
+}
 Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 
 #' Co-Lower Partial Moment
@@ -109,8 +109,8 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z <- t(c(target.x, target.y) - t(z))
@@ -142,8 +142,8 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z[,1] <- z[,1] - target.x
@@ -176,8 +176,8 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
+  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z[,1] <- target.x - z[,1]
@@ -185,7 +185,7 @@ D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(
   z[z<=0] <- NA
   z <- z[complete.cases(z), , drop = FALSE]
   return(z[,1]^degree.x %*% z[,2]^degree.y / length(x))
- }
+}
 D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 
 
@@ -197,7 +197,7 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @param UPM.degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
 #' @param variable a numeric matrix or data.frame.
-#' @param pop.adj logical; \code{TRUE} (default) Adjusts the sample co-partial moment matrices for population statistics.
+#' @param pop.adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
 #' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
@@ -223,58 +223,58 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 
-PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = TRUE){
+PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=FALSE){
 
   if(is.null(target)) target <- "mean"
 
-  if(any(class(variable)==c("tbl", "data.table"))) variable <- as.data.frame(variable)
+  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
   n <- ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
 
-    clpms <- list()
-    cupms <- list()
-    dlpms <- list()
-    dupms <- list()
+  clpms <- list()
+  cupms <- list()
+  dlpms <- list()
+  dupms <- list()
 
-    for(i in 1 : n){
-        if(is.numeric(target)){
-            clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
+  for(i in 1 : n){
+    if(is.numeric(target)){
+      clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
 
-            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
+      cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
 
-            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
+      dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
 
-            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
+      dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
 
-        } else {
-            clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+    } else {
+      clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
 
-            cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+      cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
 
-            dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+      dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
 
-            dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-        }
+      dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
     }
+  }
 
-    clpm.matrix <- matrix(unlist(clpms), n, n)
-    colnames(clpm.matrix) <- colnames(variable)
-    rownames(clpm.matrix) <- colnames(variable)
+  clpm.matrix <- matrix(unlist(clpms), n, n)
+  colnames(clpm.matrix) <- colnames(variable)
+  rownames(clpm.matrix) <- colnames(variable)
 
-    cupm.matrix <- matrix(unlist(cupms), n, n)
-    colnames(cupm.matrix) <- colnames(variable)
-    rownames(cupm.matrix) <- colnames(variable)
+  cupm.matrix <- matrix(unlist(cupms), n, n)
+  colnames(cupm.matrix) <- colnames(variable)
+  rownames(cupm.matrix) <- colnames(variable)
 
-    dlpm.matrix <- matrix(unlist(dlpms), n, n)
-    diag(dlpm.matrix) <- 0
-    colnames(dlpm.matrix) <- colnames(variable)
-    rownames(dlpm.matrix) <- colnames(variable)
+  dlpm.matrix <- matrix(unlist(dlpms), n, n)
+  diag(dlpm.matrix) <- 0
+  colnames(dlpm.matrix) <- colnames(variable)
+  rownames(dlpm.matrix) <- colnames(variable)
 
-    dupm.matrix <- matrix(unlist(dupms), n, n)
-    diag(dupm.matrix) <- 0
-    colnames(dupm.matrix) <- colnames(variable)
-    rownames(dupm.matrix) <- colnames(variable)
+  dupm.matrix <- matrix(unlist(dupms), n, n)
+  diag(dupm.matrix) <- 0
+  colnames(dupm.matrix) <- colnames(variable)
+  rownames(dupm.matrix) <- colnames(variable)
 
 
   if(pop.adj){
@@ -292,7 +292,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
               dlpm = dlpm.matrix,
               clpm = clpm.matrix,
               cov.matrix = cov.matrix
-              ))
+  ))
 }
 
 
@@ -331,7 +331,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
 
 LPM.ratio <- function(degree, target, variable){
 
-  variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
 
   lpm <- LPM(degree, target, variable)
 
@@ -368,7 +368,7 @@ LPM.ratio <- function(degree, target, variable){
 
 UPM.ratio <- function(degree, target, variable){
 
-  variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
 
   upm <- UPM(degree, target, variable)
 
@@ -406,17 +406,17 @@ UPM.ratio <- function(degree, target, variable){
 
 NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TRUE){
 
-  if(any(class(variable)==c("tbl", "data.table"))) variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
 
   if(is.null(target)) target <- sort(variable)
 
-# d/dx approximation
+  # d/dx approximation
   if(is.null(bins)){
-      bins <- density(variable)$bw
-      tgt <- seq(min(target), max(target), bins)
+    bins <- density(variable)$bw
+    tgt <- seq(min(target), max(target), bins)
   } else {
-      d.dx <- (abs(max(target)) + abs(min(target))) / bins
-      tgt <- seq(min(target), max(target), d.dx)
+    d.dx <- (abs(max(target)) + abs(min(target))) / bins
+    tgt <- seq(min(target), max(target), d.dx)
   }
 
 
@@ -477,8 +477,8 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
 NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
 
-  if(any(class(variable)==c("tbl", "data.table")) && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
-  if(any(class(variable)==c("tbl", "data.table"))) variable <- as.data.frame(variable)
+  if(any(class(variable)=="tbl") && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
+  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
 
   if(!is.null(target)){
     if(is.null(dim(variable)) || dim(variable)[2]==1){
