@@ -4,6 +4,7 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
+#' @param plot logical; \code{TRUE} (default) plots the TSD test.
 #' @return Returns one of the following TSD results: \code{"X TSD Y"}, \code{"Y TSD X"}, or \code{"NO TSD EXISTS"}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{https://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
@@ -13,7 +14,7 @@
 #' NNS.TSD(x, y)
 #' @export
 
-NNS.TSD <- function(x, y){
+NNS.TSD <- function(x, y, plot = TRUE){
 
     if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
     if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
@@ -24,8 +25,8 @@ NNS.TSD <- function(x, y){
     Combined <- c(x_sort, y_sort)
     Combined_sort <- sort(Combined, decreasing = FALSE)
 
-    LPM_x_sort <- LPM(2, Combined_sort, x)
-    LPM_y_sort <- LPM(2, Combined_sort, y)
+    LPM_x_sort <- LPM(1, Combined_sort,x)
+    LPM_y_sort <- LPM(1, Combined_sort,y)
 
     x.tsd.y <- any(LPM_x_sort > LPM_y_sort)
 
@@ -39,7 +40,7 @@ NNS.TSD <- function(x, y){
     lines(LPM_y_sort, type = "l", lwd =3,col = "blue")
     legend("topleft", c("X","Y"), lwd = 10, col=c("red","blue"))
 
-    ifelse (!x.tsd.y & min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
+    ifelse (!x.tsd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
             "X TSD Y",
             ifelse (!y.tsd.x && min(y) >= min(x) && mean(y) >= mean(x) && !identical(LPM_x_sort, LPM_y_sort),
                     "Y TSD X",

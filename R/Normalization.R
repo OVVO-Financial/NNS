@@ -27,6 +27,8 @@ NNS.norm <- function(A,
 
   if(any(class(A)==c("tbl", "data.table"))) A <- as.data.frame(A)
 
+  A <- apply(A, 2, unlist)
+
   m  <- colMeans(A)
   m[m==0] <- 1e-10
   RG <- m %o% (1 / m)
