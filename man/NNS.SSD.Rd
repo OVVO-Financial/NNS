@@ -4,12 +4,14 @@
 \alias{NNS.SSD}
 \title{NNS SSD Test}
 \usage{
-NNS.SSD(x, y)
+NNS.SSD(x, y, plot = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
+
+\item{plot}{logical; \code{TRUE} (default) plots the SSD test.}
 }
 \value{
 Returns one of the following SSD results: \code{"X SSD Y"}, \code{"Y SSD X"}, or \code{"NO SSD EXISTS"}.

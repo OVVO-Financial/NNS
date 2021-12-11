@@ -4,12 +4,14 @@
 \alias{NNS.TSD}
 \title{NNS TSD Test}
 \usage{
-NNS.TSD(x, y)
+NNS.TSD(x, y, plot = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
+
+\item{plot}{logical; \code{TRUE} (default) plots the TSD test.}
 }
 \value{
 Returns one of the following TSD results: \code{"X TSD Y"}, \code{"Y TSD X"}, or \code{"NO TSD EXISTS"}.

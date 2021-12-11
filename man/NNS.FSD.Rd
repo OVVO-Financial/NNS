@@ -4,7 +4,7 @@
 \alias{NNS.FSD}
 \title{NNS FSD Test}
 \usage{
-NNS.FSD(x, y, type = "discrete")
+NNS.FSD(x, y, type = "discrete", plot = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -12,6 +12,8 @@ NNS.FSD(x, y, type = "discrete")
 \item{y}{a numeric vector.}
 
 \item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
+
+\item{plot}{logical; \code{TRUE} (default) plots the FSD test.}
 }
 \value{
 Returns one of the following FSD results: \code{"X FSD Y"}, \code{"Y FSD X"}, or \code{"NO FSD EXISTS"}.
