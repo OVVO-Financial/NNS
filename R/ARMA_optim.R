@@ -113,6 +113,11 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   if(lin.only) methods <- "lin" else methods <- c('lin','nonlin','both')
 
+  if(num_cores>1){
+    cl <- parallel::makeCluster(num_cores)
+    doParallel::registerDoParallel(cl)
+  }
+
   for(j in methods){
     current.seasonals <- list()
     current.estimate <- numeric()
@@ -162,26 +167,13 @@ NNS.ARMA.optim <- function(variable, training.set,
         nns.estimates.indiv <- eval(obj.fn)
 
       } else {
-
-        if(num_cores>1){
-          cl <- parallel::makeCluster(num_cores)
-          doParallel::registerDoParallel(cl)
-        }
-
         nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table"))%dopar%{
           actual <- tail(variable, h)
 
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
 
           nns.estimates.indiv <- eval(obj.fn)
-
         }
-
-        if(num_cores>1){
-          stopCluster(cl)
-          registerDoSEQ()
-        }
-
       }
 
       gc()
@@ -266,6 +258,10 @@ NNS.ARMA.optim <- function(variable, training.set,
 
   } # for j in c('lin','nonlin','both')
 
+  if(num_cores>1){
+    stopCluster(cl)
+    registerDoSEQ()
+  }
 
 
   if(objective=='min'){
@@ -339,6 +335,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       }
     } else {
       nns.weights <- NULL
+      predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1)
+
 
       bias <- gravity(predicted - actual)
       predicted <- predicted-bias

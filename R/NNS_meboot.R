@@ -19,6 +19,7 @@
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
+#' @param digits integer; 6 (default) number of digits to round output to.
 #' @param colsubj numeric; the column in \code{x} that contains the individual index. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
 #' @param coldata numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
 #' @param coltimes numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
@@ -84,6 +85,7 @@
                         reachbnd=TRUE,
                         expand.sd=TRUE, force.clt=TRUE,
                         scl.adjustment = FALSE, sym = FALSE, elaps=FALSE,
+                        digits = 6,
                         colsubj, coldata, coltimes,...)
   {
 
@@ -288,8 +290,7 @@
 
     # scale adjustment
 
-    if (scl.adjustment)
-    {
+    if (scl.adjustment){
       zz <- c(xmin,z,xmax) #extended list of z values
       v <- diff(zz^2) / 12
       xb <- mean(x)
@@ -303,8 +304,7 @@
       kappa <- out - 1
 
       ensemble <- ensemble + kappa * (ensemble - xb)
-    } else
-      kappa <- NULL
+    } else kappa <- NULL
 
     # Force min / max values
     if(!is.null(trim[[2]])) ensemble <- apply(ensemble, 2, function(z) pmax(trim[[2]], z))
@@ -324,6 +324,6 @@
       cat("\n  Elapsed time:", elapsr$elaps,
           paste(elapsr$units, ".", sep=""), "\n")
 
-    list(x=x, replicates=ensemble, ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
+    list(x=x, replicates=round(ensemble, digits = digits), ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
          xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
   }
