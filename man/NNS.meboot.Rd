@@ -19,6 +19,7 @@ NNS.meboot(
   scl.adjustment = FALSE,
   sym = FALSE,
   elaps = FALSE,
+  digits = 6,
   colsubj,
   coldata,
   coltimes,
@@ -56,6 +57,8 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 \item{sym}{logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.}
 
 \item{elaps}{logical; If \code{TRUE} elapsed time during computations is displayed.}
+
+\item{digits}{integer; 6 (default) number of digits to round output to.}
 
 \item{colsubj}{numeric; the column in \code{x} that contains the individual index. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.}
 
