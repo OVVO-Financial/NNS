@@ -9,7 +9,7 @@
 #' \code{(negative.values = TRUE)}.
 #' @param obj.fn expression;
 #' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
-#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param lin.only logical; \code{FALSE} (default) Restricts the optimization to linear methods only.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
@@ -290,7 +290,7 @@ NNS.ARMA.optim <- function(variable, training.set,
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE>nns.SSE){bias <- 0}
+        if(bias.SSE>=nns.SSE){bias <- 0}
       }
     } else {
       nns.weights <- NULL
@@ -299,14 +299,14 @@ NNS.ARMA.optim <- function(variable, training.set,
       predicted <- predicted-bias
       bias.SSE <- eval(obj.fn)
 
-      if(bias.SSE>nns.SSE){bias <- 0}
+      if(bias.SSE>=nns.SSE){bias <- 0}
     }
 
   } else {
     nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
     nns.method <- c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
     nns.SSE <- max(unlist(overall.estimates))
-
+print(nns.SSE)
     if(length(nns.periods)>1){
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
 
@@ -319,7 +319,7 @@ NNS.ARMA.optim <- function(variable, training.set,
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE<weight.SSE){bias <- 0}
+        if(bias.SSE<=weight.SSE){bias <- 0}
 
       } else {
         nns.weights <- NULL
@@ -327,11 +327,8 @@ NNS.ARMA.optim <- function(variable, training.set,
         bias <- gravity(predicted - actual)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
-        if(objective=="min"){
-          if(bias.SSE<=nns.SSE){bias <- 0}
-        } else {
-          if(bias.SSE>=nns.SSE){bias <- 0}
-        }
+
+        if(bias.SSE<=nns.SSE){bias <- 0}
       }
     } else {
       nns.weights <- NULL
