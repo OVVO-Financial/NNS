@@ -32,11 +32,7 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
     if(min(y) > min(x)){
         return(0)
     } else {
-        x_sort <- sort(x, decreasing = FALSE)
-        y_sort <- sort(y, decreasing = FALSE)
-
-        Combined <- c(x_sort, y_sort)
-        Combined_sort <- sort(Combined, decreasing = FALSE)
+        Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
         if(type == "discrete"){
             degree <- 0
@@ -83,11 +79,7 @@ NNS.SSD.uni <- function(x, y){
     if(min(y) > min(x) | mean(y) > mean(x)) {
         return(0)
     } else {
-        x_sort <- sort(x, decreasing = FALSE)
-        y_sort <- sort(y, decreasing = FALSE)
-
-        Combined <- c(x_sort, y_sort)
-        Combined_sort <- sort(Combined, decreasing = FALSE)
+        Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
         LPM_x_sort <- LPM(1, Combined_sort, x)
         LPM_y_sort <- LPM(1, Combined_sort, y)
@@ -127,11 +119,7 @@ NNS.TSD.uni <- function(x, y){
     if(min(y) > min(x) | mean(y) > mean(x)) {
         return(0)
     } else {
-        x_sort <- sort(x, decreasing = FALSE)
-        y_sort <- sort(y, decreasing = FALSE)
-
-        Combined <- c(x_sort, y_sort)
-        Combined_sort <- sort(Combined, decreasing = FALSE)
+        Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
         LPM_x_sort <- LPM(2, Combined_sort, x)
         LPM_y_sort <- LPM(2, Combined_sort, y)

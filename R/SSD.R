@@ -22,11 +22,7 @@ NNS.SSD <- function(x, y, plot = TRUE){
 
     if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
 
-    x_sort <- sort(x, decreasing = FALSE)
-    y_sort <- sort(y, decreasing = FALSE)
-
-    Combined <- c(x_sort, y_sort)
-    Combined_sort <- sort(Combined, decreasing = FALSE)
+    Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
     LPM_x_sort <- LPM(1, Combined_sort,x)
     LPM_y_sort <- LPM(1, Combined_sort,y)

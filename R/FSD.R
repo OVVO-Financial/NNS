@@ -30,12 +30,7 @@ NNS.FSD <- function(x, y, type = "discrete", plot = TRUE){
 
   if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
 
-
-  x_sort <- sort(x, decreasing = FALSE)
-  y_sort <- sort(y, decreasing = FALSE)
-
-  Combined <- c(x_sort, y_sort)
-  Combined_sort <- sort(Combined, decreasing = FALSE)
+  Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
   ## Indicator function ***for all values of x and y*** as the continuous CDF target
   if(type == "discrete"){
