@@ -26,7 +26,7 @@ NNS.ARMA.optim(
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
-\code{(negative.values = TRUE)}.}
+\code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.}
 
 \item{obj.fn}{expression;
 \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
