@@ -6,7 +6,7 @@
 #' @param training.set integer; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
-#' \code{(negative.values = TRUE)}.
+#' \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.
 #' @param obj.fn expression;
 #' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -86,6 +86,8 @@ NNS.ARMA.optim <- function(variable, training.set,
   training.set <- floor(training.set)
 
   variable <- as.numeric(variable)
+
+  if(min(variable)<0) negative.values <- TRUE
 
   h <- length(variable) - training.set
   actual <- tail(variable, h)
@@ -285,7 +287,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       } else {
         nns.weights <- NULL
-
+print(cbind(predicted, actual))
         bias <- gravity(predicted - actual)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
@@ -306,7 +308,7 @@ NNS.ARMA.optim <- function(variable, training.set,
     nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
     nns.method <- c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
     nns.SSE <- max(unlist(overall.estimates))
-print(nns.SSE)
+
     if(length(nns.periods)>1){
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
 
