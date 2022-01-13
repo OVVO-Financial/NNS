@@ -287,7 +287,7 @@ NNS.ARMA.optim <- function(variable, training.set,
 
       } else {
         nns.weights <- NULL
-print(cbind(predicted, actual))
+
         bias <- gravity(predicted - actual)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
