@@ -23,6 +23,7 @@
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
+#' \item{\code{$errors}} a vector of model errors from internal calibration.
 #'}
 #' @note
 #' \itemize{
@@ -279,7 +280,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       if(weight.SSE<nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-        bias <- gravity(predicted - actual)
+        errors <- (predicted - actual)
+        bias <- gravity(errors)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
@@ -288,7 +290,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       } else {
         nns.weights <- NULL
 
-        bias <- gravity(predicted - actual)
+        errors <- (predicted - actual)
+        bias <- gravity(errors)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
@@ -297,7 +300,8 @@ NNS.ARMA.optim <- function(variable, training.set,
     } else {
       nns.weights <- NULL
 
-      bias <- gravity(predicted - actual)
+      errors <- (predicted - actual)
+      bias <- gravity(errors)
       predicted <- predicted-bias
       bias.SSE <- eval(obj.fn)
 
@@ -317,7 +321,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       if(weight.SSE>nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
-        bias <- gravity(predicted - actual)
+        errors <- (predicted - actual)
+        bias <- gravity(errors)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
@@ -326,7 +331,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       } else {
         nns.weights <- NULL
 
-        bias <- gravity(predicted - actual)
+        errors <- (predicted - actual)
+        bias <- gravity(errors)
         predicted <- predicted-bias
         bias.SSE <- eval(obj.fn)
 
@@ -336,8 +342,8 @@ NNS.ARMA.optim <- function(variable, training.set,
       nns.weights <- NULL
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1)
 
-
-      bias <- gravity(predicted - actual)
+      errors <- (predicted - actual)
+      bias <- gravity(errors)
       predicted <- predicted-bias
       bias.SSE <- eval(obj.fn)
       if(objective=="min"){
@@ -367,5 +373,6 @@ NNS.ARMA.optim <- function(variable, training.set,
               obj.fn = nns.SSE,
               method = nns.method,
               shrink = nns.shrink,
-              bias.shift = -bias))
+              bias.shift = -bias,
+              errors = errors))
 }
