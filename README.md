@@ -1,4 +1,4 @@
-[![packageversion](https://img.shields.io/badge/NNS%20version-0.8.4-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![packageversion](https://img.shields.io/badge/NNS%20version-0.8.5-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Build Status](https://travis-ci.org/OVVO-Financial/NNS.svg?branch=NNS-Beta-Version)](https://travis-ci.org/OVVO-Financial/NNS) [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
 # NNS
@@ -20,7 +20,7 @@ Companion R-package and datasets to:
 #### Viole, F. and Nawrocki, D. (2013) ["*Nonlinear Nonparametric Statistics: Using Partial Moments*"]( https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
 ## Current Version
-[![NNS](https://img.shields.io/badge/NNS%3E%3D-0.8.4-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![doParallel](https://img.shields.io/badge/doParallel%3E%3D-1.0.14-6666ff.svg)](https://cran.r-project.org/package=doParallel) architecture with notable performance enhancements.
+[![NNS](https://img.shields.io/badge/NNS%3E%3D-0.8.5-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![doParallel](https://img.shields.io/badge/doParallel%3E%3D-1.0.14-6666ff.svg)](https://cran.r-project.org/package=doParallel) architecture with notable performance enhancements.
 
 [![NNS](https://img.shields.io/badge/NNS%3E%3D-0.3.0-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![data.table](https://img.shields.io/badge/data.table%3E%3D-1.10.4-6666ff.svg)](https://cran.r-project.org/package=data.table) architecture with notable performance enhancements.
 
@@ -47,7 +47,7 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 0.8.4},
+    note = {R package version 0.8.5},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```
