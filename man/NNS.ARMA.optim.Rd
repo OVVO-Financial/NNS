@@ -6,7 +6,8 @@
 \usage{
 NNS.ARMA.optim(
   variable,
-  training.set,
+  h = NULL,
+  training.set = NULL,
   seasonal.factor,
   negative.values = FALSE,
   obj.fn = expression(cor(predicted, actual, method = "spearman")/sum((predicted -
@@ -21,7 +22,9 @@ NNS.ARMA.optim(
 \arguments{
 \item{variable}{a numeric vector.}
 
-\item{training.set}{integer; Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
+\item{h}{integer; \code{NULL} (default) Number of periods to forecast out of sample.  If \code{NULL}, \code{h = length(variable) - training.set}.}
+
+\item{training.set}{integer; \code{NULL} (default) Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
 
 \item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
 
@@ -51,6 +54,7 @@ Returns a list containing:
 \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 \item{\code{$errors}} a vector of model errors from internal calibration.
+\item{\code{$results}} a vector of length \code{h}.
 }
 }
 \description{
@@ -79,6 +83,10 @@ seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$b
 
 ## If variable cannot logically assume negative values
 nns.estimates <- pmax(0, nns.estimates)
+
+
+## To predict out of sample using best parameters:
+NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6))
 }
 
 }
