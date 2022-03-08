@@ -4,10 +4,10 @@
 \alias{NNS.copula}
 \title{NNS Co-Partial Moments Higher Dimension Dependence}
 \usage{
-NNS.copula(x, continuous = TRUE, plot = FALSE, independence.overlay = FALSE)
+NNS.copula(X, continuous = TRUE, plot = FALSE, independence.overlay = FALSE)
 }
 \arguments{
-\item{x}{a numeric matrix or data frame.}
+\item{X}{a numeric matrix or data frame.}
 
 \item{continuous}{logical; \code{TRUE} (default) Generates a continuous measure using degree 1 \link{PM.matrix}, while discrete \code{FALSE} uses degree 0 \link{PM.matrix}.}
 

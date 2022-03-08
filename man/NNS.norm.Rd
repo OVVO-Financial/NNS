@@ -4,10 +4,10 @@
 \alias{NNS.norm}
 \title{NNS Normalization}
 \usage{
-NNS.norm(A, linear = FALSE, chart.type = NULL, location = "topleft")
+NNS.norm(X, linear = FALSE, chart.type = NULL, location = "topleft")
 }
 \arguments{
-\item{A}{a numeric matrix or data frame.}
+\item{X}{a numeric matrix or data frame.}
 
 \item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
 
