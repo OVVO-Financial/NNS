@@ -92,8 +92,8 @@ dy.d_ <- function(x, y, wrt,
     colnames(x) <- as.character(colnames.list)
   }
 
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
-  if(!is.null(y) && any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)%in%c("tbl","data.table")))  x <- as.data.frame(x)
+  if(!is.null(y) && any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   if(l != 2) mixed <- FALSE
 

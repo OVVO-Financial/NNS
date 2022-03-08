@@ -17,8 +17,8 @@
 
 NNS.SSD <- function(x, y, plot = TRUE){
 
-    if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
-    if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+    if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
     if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
 

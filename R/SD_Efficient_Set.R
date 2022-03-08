@@ -31,8 +31,7 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
     warning("degree needs to be 1, 2, or 3")
   }
 
-
-  if(any(class(x)=="tbl")) x <- as.data.frame(x)
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
 
   n <- ncol(x)
   max_target <- max(x)

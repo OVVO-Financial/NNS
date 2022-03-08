@@ -34,7 +34,7 @@ NNS.dep = function(x,
                    p.value = FALSE,
                    print.map = FALSE){
 
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
 
   if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
 

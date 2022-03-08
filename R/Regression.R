@@ -155,8 +155,8 @@ NNS.reg = function (x, y,
 
   if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
 
-  if(any(class(x)==c("tbl", "data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
-  if(any(class(x)==c("tbl", "data.table"))) x <- as.data.frame(x)
+  if(any(class(x)%in%c("tbl","data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
 
   n <- length(y)
 

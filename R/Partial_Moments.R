@@ -17,7 +17,7 @@
 
 LPM <-  function(degree, target, variable){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   if(degree == 0) return(mean(variable <= target))
 
@@ -45,7 +45,7 @@ LPM <- Vectorize(LPM, vectorize.args = 'target')
 
 UPM <-  function(degree, target, variable){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   if(degree == 0) return(mean(variable > target))
 
@@ -76,8 +76,8 @@ UPM <- Vectorize(UPM, vectorize.args = 'target')
 
 Co.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   z <- cbind(x, y)
   z <- t(t(z) - c(target.x, target.y))
@@ -109,8 +109,8 @@ Co.UPM <- Vectorize(Co.UPM, vectorize.args = c('target.x', 'target.y'))
 
 Co.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z <- t(c(target.x, target.y) - t(z))
@@ -142,8 +142,8 @@ Co.LPM <- Vectorize(Co.LPM, vectorize.args = c('target.x', 'target.y'))
 
 D.LPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z[,1] <- z[,1] - target.x
@@ -176,8 +176,8 @@ D.LPM <- Vectorize(D.LPM, vectorize.args = c('target.x', 'target.y'))
 
 D.UPM <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
 
-  if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-  if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   z <- cbind(x,y)
   z[,1] <- target.x - z[,1]
@@ -227,7 +227,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=F
 
   if(is.null(target)) target <- "mean"
 
-  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
 
   n <- ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
@@ -331,7 +331,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=F
 
 LPM.ratio <- function(degree, target, variable){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   lpm <- LPM(degree, target, variable)
 
@@ -368,7 +368,7 @@ LPM.ratio <- function(degree, target, variable){
 
 UPM.ratio <- function(degree, target, variable){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   upm <- UPM(degree, target, variable)
 
@@ -406,7 +406,7 @@ UPM.ratio <- function(degree, target, variable){
 
 NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TRUE){
 
-  if(any(class(variable)=="tbl")) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   if(is.null(target)) target <- sort(variable)
 
@@ -477,8 +477,8 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
 NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
 
-  if(any(class(variable)=="tbl") && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
-  if(any(class(variable)=="tbl")) variable <- as.data.frame(variable)
+  if(any(class(variable)%in%c("tbl","data.table")) && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
 
   if(!is.null(target)){
     if(is.null(dim(variable)) || dim(variable)[2]==1){

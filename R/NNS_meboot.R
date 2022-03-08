@@ -91,7 +91,7 @@
 
     type <- tolower(type)
 
-    if(any(class(x)==c("tbl", "data.table"))) x <- as.vector(unlist(x))
+    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
 
     if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
 
@@ -173,17 +173,17 @@
     # do this here so that this warnings are printed after
     # the above warnings (if necessary)
 
-    if (is.list(trim))
-    {
-      if (!is.null(trim$xmin) && trim$xmin > min(x))
-        warning("the lower limit trim$xmin may not be satisfied in the replicates ",
-                "since it is higher than the minimum value observed ",
-                "in the input series x")
-      if (!is.null(trim$xmax) && trim$xmax < max(x))
-        warning("the upper limit trim$xmax may not be satisfied in the replicates ",
-                "since it is lower than the maximum value observed ",
-                "in the input series x")
-    }
+    # if (is.list(trim))
+    # {
+    #   if (!is.null(trim$xmin) && trim$xmin > min(x))
+    #     warning("the lower limit trim$xmin may not be satisfied in the replicates ",
+    #             "since it is higher than the minimum value observed ",
+    #             "in the input series x")
+    #   if (!is.null(trim$xmax) && trim$xmax < max(x))
+    #     warning("the upper limit trim$xmax may not be satisfied in the replicates ",
+    #             "since it is lower than the maximum value observed ",
+    #             "in the input series x")
+    # }
 
 
     # Compute the mean of the maximum entropy density within each
@@ -226,7 +226,7 @@
     ### Average two ordxx ensemble matrices
 
     if(rho<1){
-      matrix2 = matrix(, nrow=length(x), ncol = reps)
+      matrix2 = matrix(0, nrow=length(x), ncol = reps)
       matrix2[ordxx_2,] = qseq
 
       # Intial search
@@ -275,8 +275,7 @@
 
       res <- optim(c(.01,.01), func, control=list(abstol = .01))
 
-      ensemble <- (res$par[1]*matrix2 +
-                    res$par[2]*ensemble) / (sum(abs(res$par)))
+      ensemble <- (res$par[1]*matrix2 + res$par[2]*ensemble) / (sum(abs(res$par)))
 
       if(identical(ordxx_2, ordxx)){
         if(reps>1) ensemble <- t(apply(ensemble, 1, function(x) sample(x, size = reps, replace = TRUE)))

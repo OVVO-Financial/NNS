@@ -96,8 +96,8 @@ NNS.stack <- function(IVs.train,
 
   if(!is.null(type) && min(as.numeric(DV.train))==0) warning("Base response variable category should be 1, not 0.")
 
-  if(any(class(IVs.train)==c("tbl", "data.table"))) IVs.train <- as.data.frame(IVs.train)
-  if(any(class(DV.train)==c("tbl", "data.table"))) DV.train <- as.vector(unlist(DV.train))
+  if(any(class(IVs.train)%in%c("tbl","data.table"))) IVs.train <- as.data.frame(IVs.train)
+  if(any(class(DV.train)%in%c("tbl","data.table"))) DV.train <- as.vector(unlist(DV.train))
 
   if(is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
     IVs.train <- data.frame(IVs.train)
@@ -125,7 +125,7 @@ NNS.stack <- function(IVs.train,
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
   } else {
-    if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
+    if(any(class(IVs.test)%in%c("tbl","data.table"))) IVs.test <- as.data.frame(IVs.test)
   }
 
   if(is.null(dim(IVs.test))) IVs.test <- data.frame(t(IVs.test)) else IVs.test <- data.frame(IVs.test)

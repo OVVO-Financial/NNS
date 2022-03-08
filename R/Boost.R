@@ -76,8 +76,8 @@ NNS.boost <- function(IVs.train,
   if(!is.null(type) && min(as.numeric(as.factor(DV.train)))==0) warning("Base response variable category should be 1, not 0.")
 
 
-  if(any(class(IVs.train)=="tbl")) IVs.train <- as.data.frame(IVs.train)
-  if(any(class(DV.train)=="tbl")) DV.train <- as.vector(unlist(DV.train))
+  if(any(class(IVs.train)%in%c("tbl","data.table"))) IVs.train <- as.data.frame(IVs.train)
+  if(any(class(DV.train)%in%c("tbl","data.table"))) DV.train <- as.vector(unlist(DV.train))
 
   if(!is.null(type)){
     type <- tolower(type)
@@ -112,7 +112,7 @@ NNS.boost <- function(IVs.train,
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
   } else {
-    if(any(class(IVs.test)=="tbl")) IVs.test <- as.data.frame(IVs.test)
+    if(any(class(IVs.test)%in%c("tbl","data.table"))) IVs.test <- as.data.frame(IVs.test)
   }
 
 

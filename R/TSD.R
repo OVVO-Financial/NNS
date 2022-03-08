@@ -16,8 +16,8 @@
 
 NNS.TSD <- function(x, y, plot = TRUE){
 
-    if(any(class(x)=="tbl")) x <- as.vector(unlist(x))
-    if(any(class(y)=="tbl")) y <- as.vector(unlist(y))
+    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+    if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
     Combined_sort <- sort(c(x, y), decreasing = FALSE)
 

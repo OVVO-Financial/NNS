@@ -2,7 +2,7 @@
 #'
 #' Determines higher dimension dependence coefficients based on co-partial moment matrices ratios.
 #'
-#' @param x a numeric matrix or data frame.
+#' @param X a numeric matrix or data frame.
 #' @param continuous logical; \code{TRUE} (default) Generates a continuous measure using degree 1 \link{PM.matrix}, while discrete \code{FALSE} uses degree 0 \link{PM.matrix}.
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
@@ -19,31 +19,30 @@
 #' @export
 
 
-NNS.copula <- function (x,
+NNS.copula <- function (X,
                         continuous = TRUE,
                         plot = FALSE,
                         independence.overlay = FALSE){
 
-    if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
+    if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
 
-    A <- x
-    n <- ncol(A)
-    l <- dim(A)[1]
+    n <- ncol(X)
+    l <- dim(X)[1]
 
-    if(any(class(A)==c("tbl", "data.table"))) A <- as.data.frame(A)
+    if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
 
-    if(is.null(colnames(A))){
+    if(is.null(colnames(X))){
         colnames.list <- list()
         for(i in 1 : n){
             colnames.list[i] <- paste0("Var ", i)
         }
-        colnames(A) <- c(colnames.list)
+        colnames(X) <- c(colnames.list)
     }
 
     if(continuous) degree <- 1 else degree <- 0
 
     # Generate partial moment matrices
-    pm_cov <- PM.matrix(degree, degree, variable = x, pop.adj = TRUE)
+    pm_cov <- PM.matrix(degree, degree, variable = X, pop.adj = TRUE)
 
     # Isolate the upper triangles from each of the partial moment matrices
     Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
@@ -51,28 +50,28 @@ NNS.copula <- function (x,
 
     if(plot && n == 3){
 
-        rgl::plot3d(x = A[ , 1], y = A[ , 2], z = A[ , 3], box = FALSE, size = 3,
-           col=ifelse((A[ , 1] <= mean(A[ , 1])) & (A[ , 2] <= mean(A[ , 2])) & (A[ , 3] <= mean(A[ , 3])), 'red' ,
-                      ifelse((A[ , 1] > mean(A[ , 1])) & (A[ , 2] > mean(A[ , 2])) & (A[ , 3] > mean(A[ , 3])), 'green',
-                      'steelblue')), xlab = colnames(A)[1], ylab = colnames(A)[2], zlab = colnames(A)[3])
+        rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
+           col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
+                      ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
+                      'steelblue')), xlab = colnames(X)[1], ylab = colnames(X)[2], zlab = colnames(X)[3])
 
         if(independence.overlay == TRUE){
             clpm.box <- rgl::cube3d(color = "red", alpha = 0.25)
             cupm.box <- rgl::cube3d(color = "green", alpha = 0.25)
 
-            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == -1, min(A[ , 1]))
-            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == -1, min(A[ , 2]))
-            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == -1, min(A[ , 3]))
-            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == 1, mean(A[, 1]))
-            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == 1, mean(A[, 2]))
-            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == 1, mean(A[, 3]))
+            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == -1, min(X[ , 1]))
+            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == -1, min(X[ , 2]))
+            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == -1, min(X[ , 3]))
+            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == 1, mean(X[, 1]))
+            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == 1, mean(X[, 2]))
+            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == 1, mean(X[, 3]))
 
-            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == 1, max(A[ , 1]))
-            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == 1, max(A[ , 2]))
-            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == 1, max(A[ , 3]))
-            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == -1, mean(A[, 1]))
-            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == -1, mean(A[, 2]))
-            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == -1, mean(A[, 3]))
+            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == 1, max(X[ , 1]))
+            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == 1, max(X[ , 2]))
+            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == 1, max(X[ , 3]))
+            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == -1, mean(X[, 1]))
+            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == -1, mean(X[, 2]))
+            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == -1, mean(X[, 3]))
 
             rgl::shade3d(clpm.box)
             rgl::shade3d(cupm.box)

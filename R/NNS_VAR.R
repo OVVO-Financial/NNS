@@ -121,7 +121,7 @@ NNS.VAR <- function(variables,
 
   if(nowcast) dates <- zoo::as.yearmon(zoo::as.yearmon(rownames(variables)[1]) + seq(0, (dim(variables)[1] + (h-1)))/12) else dates <- NULL
 
-  if(any(class(variables)==c("tbl", "data.table"))) variables <- as.data.frame(variables)
+  if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
 
   dim.red.method <- tolower(dim.red.method)
   if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method is set to one of "cor", "nns.dep", "nns.caus" or "all".')}

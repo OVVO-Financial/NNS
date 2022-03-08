@@ -63,11 +63,11 @@ NNS.ANOVA <- function(control,
         if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
         if(n >= 2){
-            if(any(class(control)==c("tbl", "data.table"))) A <- as.data.frame(control)
+            if(any(class(control)%in%c("tbl","data.table"))) A <- as.data.frame(control)
         }
     } else {
-        if(any(class(control)==c("tbl", "data.table"))) control <- as.vector(unlist(control))
-        if(any(class(treatment)==c("tbl", "data.table"))) treatment <- as.vector(unlist(treatment))
+        if(any(class(control)%in%c("tbl","data.table"))) control <- as.vector(unlist(control))
+        if(any(class(treatment)%in%c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
 
         if(robust){
             treatment_p <- replicate(100, sample.int(length(treatment), replace = TRUE))

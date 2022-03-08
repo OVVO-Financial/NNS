@@ -27,7 +27,7 @@ NNS.seas <- function(variable,
                      mod.only = TRUE,
                      plot = TRUE){
 
-  if(any(class(variable)==c("tbl","data.table"))) variable <- as.vector(unlist(variable))
+  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
   if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
 
