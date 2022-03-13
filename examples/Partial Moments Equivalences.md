@@ -59,29 +59,29 @@ A sum of the squared upside area and the squared downside area.
 x  0.83323283 -0.04372107
 y -0.04372107  0.93506310
 
-> cov.mtx=PM.matrix(LPM.degree = 1,UPM.degree = 1,target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
+> cov.mtx=PM.matrix(LPM.degree = 1, UPM.degree = 1, target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
 > cov.mtx
-$clpm
-          x         y
-x 0.4033078 0.1559295
-y 0.1559295 0.3939005
-
 $cupm
           x         y
 x 0.4299250 0.1033601
 y 0.1033601 0.5411626
-
-$dlpm
-          x         y
-x 0.0000000 0.1469182
-y 0.1560924 0.0000000
 
 $dupm
           x         y
 x 0.0000000 0.1560924
 y 0.1469182 0.0000000
 
-$matrix
+$dlpm
+          x         y
+x 0.0000000 0.1469182
+y 0.1560924 0.0000000
+
+$clpm
+          x         y
+x 0.4033078 0.1559295
+y 0.1559295 0.3939005
+
+$cov.matrix
             x           y
 x  0.83323283 -0.04372107
 y -0.04372107  0.93506310
