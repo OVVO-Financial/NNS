@@ -337,7 +337,7 @@ NNS.reg = function (x, y,
             x.star.coef <- numeric()
 
             cause <- numeric()
-            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y - x[,i])
+            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y, x[,i], tau = tau, plot = FALSE)
             cause[is.na(cause)] <- 0
             x.star.coef <- cause
           }
@@ -349,7 +349,7 @@ NNS.reg = function (x, y,
 
 
             cause <- numeric()
-            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y - x[,i])
+            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y, x[,i], tau = tau, plot = FALSE)
             cause[is.na(cause)] <- 0
             x.star.coef.1 <- cause
 

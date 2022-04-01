@@ -1,6 +1,9 @@
 Uni.caus <- function(x, y, tau, plot = TRUE){
 
-  xy <- NNS.norm(cbind(x, y), linear = FALSE)
+  if(tau=="cs") tau <- 0
+  if(tau=="ts") tau <- 3
+
+  xy <- NNS.norm(cbind(x, y), linear = FALSE, chart.type = NULL)
 
   NNS.x <- unlist(xy[ , 1])
   NNS.y <- unlist(xy[ , 2])

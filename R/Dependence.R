@@ -39,9 +39,9 @@ NNS.dep = function(x,
   if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
 
   if(p.value){
-      y_p <- replicate(100, sample.int(length(y)))
-      x <- cbind(x, y, matrix(y[y_p], ncol = dim(y_p)[2], byrow = F))
-      y <- NULL
+    y_p <- replicate(100, sample.int(length(y)))
+    x <- cbind(x, y, matrix(y[y_p], ncol = dim(y_p)[2], byrow = F))
+    y <- NULL
   }
 
   if(!is.null(y)){
@@ -117,23 +117,23 @@ NNS.dep = function(x,
       deps <- unlist(lapply(nns.mc, "[[", 2))
 
 
-          cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1,2)])
-          cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1,2)])
-          dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1,2)])
-          dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1,2)])
+      cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1,2)])
+      cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1,2)])
+      dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1,2)])
+      dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1,2)])
       if(print.map){
-          par(mfrow = c(1, 2))
-          hist(cors[-c(1,2)], main = "NNS Correlation", xlab = NULL, xlim = c(min(cors), max(cors[-1])))
-          abline(v = cors[2], col = "red", lwd = 2)
-          mtext("Result", side = 3, col = "red", at = cors[2])
-          abline(v =  cor_lower_CI, col = "red", lwd = 2, lty = 3)
-          abline(v =  cor_upper_CI , col = "red", lwd = 2, lty = 3)
-          hist(deps[-c(1,2)], main = "NNS Dependence", xlab = NULL, xlim = c(min(deps), max(deps[-1])))
-          abline(v = deps[2], col = "red", lwd = 2)
-          mtext("Result", side = 3, col = "red", at = deps[2])
-          abline(v =  dep_lower_CI , col = "red", lwd = 2, lty = 3)
-          abline(v =  dep_upper_CI , col = "red", lwd = 2, lty = 3)
-          par(mfrow = original.par)
+        par(mfrow = c(1, 2))
+        hist(cors[-c(1,2)], main = "NNS Correlation", xlab = NULL, xlim = c(min(cors), max(cors[-1])))
+        abline(v = cors[2], col = "red", lwd = 2)
+        mtext("Result", side = 3, col = "red", at = cors[2])
+        abline(v =  cor_lower_CI, col = "red", lwd = 2, lty = 3)
+        abline(v =  cor_upper_CI , col = "red", lwd = 2, lty = 3)
+        hist(deps[-c(1,2)], main = "NNS Dependence", xlab = NULL, xlim = c(min(deps), max(deps[-1])))
+        abline(v = deps[2], col = "red", lwd = 2)
+        mtext("Result", side = 3, col = "red", at = deps[2])
+        abline(v =  dep_lower_CI , col = "red", lwd = 2, lty = 3)
+        abline(v =  dep_upper_CI , col = "red", lwd = 2, lty = 3)
+        par(mfrow = original.par)
       }
 
       return(list("Correlation" = as.numeric((cors)[2]),
