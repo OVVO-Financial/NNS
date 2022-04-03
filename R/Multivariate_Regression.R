@@ -40,7 +40,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   reg.points <- list()
   sections <- list()
 
-  if(is.null(order)) order <- floor(max(1,(NNS.copula(original.matrix)* 10)))
+  if(is.null(order)) order <- floor(max(1,(NNS.copula(original.matrix, ncores = 1)* 10)))
 
 
   ###  Regression Point Matrix

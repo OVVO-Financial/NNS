@@ -199,6 +199,7 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @param variable a numeric matrix or data.frame.
 #' @param pop.adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
 #' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -209,13 +210,13 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #' A <- cbind(x,y,z)
-#' PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
+#' PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A, ncores = 1)
 #'
 #' ## Use of vectorized numeric targets (target_x, target_y, target_z)
-#' PM.matrix(LPM.degree = 1, UPM.degree = 1, target = c(0, 0.15, .25), variable = A)
+#' PM.matrix(LPM.degree = 1, UPM.degree = 1, target = c(0, 0.15, .25), variable = A, ncores = 1)
 #'
 #' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
+#' cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A, ncores = 1)
 #' cov.mtx$cupm
 #'
 #' ## Full covariance matrix
@@ -223,7 +224,7 @@ D.UPM <- Vectorize(D.UPM, vectorize.args = c('target.x', 'target.y'))
 #' @export
 
 
-PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=FALSE){
+PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
 
   if(is.null(target)) target <- "mean"
 
@@ -237,41 +238,69 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj=F
   dlpms <- list()
   dupms <- list()
 
-  for(i in 1 : n){
-    if(is.numeric(target)){
-      clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
-
-      cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
-
-      dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
-
-      dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
-
-    } else {
-      clpms[[i]] <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-
-      cupms[[i]] <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-
-      dlpms[[i]] <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-
-      dupms[[i]] <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-    }
+  if(is.null(ncores)) {
+    num_cores <- as.integer(parallel::detectCores()) - 1
+  } else {
+    num_cores <- ncores
   }
 
-  clpm.matrix <- matrix(unlist(clpms), n, n)
+  if(num_cores > 1){
+    cl <- parallel::makeCluster(num_cores)
+    doParallel::registerDoParallel(cl)
+  }
+
+  matrices <- list()
+
+  i <- 1:n
+
+  matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table"))%dopar%{
+    if(is.numeric(target)){
+      clpms <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
+
+      cupms <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
+
+      dlpms <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]))
+
+      dupms <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = target[i], target.y = target[b]))
+
+    } else {
+      clpms <- sapply(1 : n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+      cupms <- sapply(1 : n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+      dlpms <- sapply(1 : n, function(b) D.LPM(x = variable[ , i], y = variable[ , b], degree.x = UPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+
+      dupms <- sapply(1 : n, function(b) D.UPM(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = UPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+    }
+
+    matrices$clpm <- unlist(clpms)
+    matrices$cupm <- unlist(cupms)
+    matrices$dlpm <- unlist(dlpms)
+    matrices$dupm <- unlist(dupms)
+    return(matrices)
+  }
+
+  if(num_cores > 1){
+    parallel::stopCluster(cl)
+    registerDoSEQ()
+  }
+
+
+  clpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 1))
+  cupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 2))
+  dlpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 3))
+  dupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 4))
+
   colnames(clpm.matrix) <- colnames(variable)
   rownames(clpm.matrix) <- colnames(variable)
 
-  cupm.matrix <- matrix(unlist(cupms), n, n)
   colnames(cupm.matrix) <- colnames(variable)
   rownames(cupm.matrix) <- colnames(variable)
 
-  dlpm.matrix <- matrix(unlist(dlpms), n, n)
   diag(dlpm.matrix) <- 0
   colnames(dlpm.matrix) <- colnames(variable)
   rownames(dlpm.matrix) <- colnames(variable)
 
-  dupm.matrix <- matrix(unlist(dupms), n, n)
   diag(dupm.matrix) <- 0
   colnames(dupm.matrix) <- colnames(variable)
   rownames(dupm.matrix) <- colnames(variable)

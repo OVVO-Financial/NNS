@@ -6,6 +6,7 @@
 #' @param continuous logical; \code{TRUE} (default) Generates a continuous measure using degree 1 \link{PM.matrix}, while discrete \code{FALSE} uses degree 0 \link{PM.matrix}.
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
 #' @return Returns a multivariate dependence value [0,1].
 #'
@@ -15,14 +16,15 @@
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 #' A <- data.frame(x, y, z)
-#' NNS.copula(A, plot = TRUE, independence.overlay = TRUE)
+#' NNS.copula(A, plot = TRUE, independence.overlay = TRUE, ncores = 1)
 #' @export
 
 
 NNS.copula <- function (X,
                         continuous = TRUE,
                         plot = FALSE,
-                        independence.overlay = FALSE){
+                        independence.overlay = FALSE,
+                        ncores = NULL){
 
     if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
 
@@ -42,7 +44,7 @@ NNS.copula <- function (X,
     if(continuous) degree <- 1 else degree <- 0
 
     # Generate partial moment matrices
-    pm_cov <- PM.matrix(degree, degree, variable = X, pop.adj = TRUE)
+    pm_cov <- PM.matrix(degree, degree, variable = X, pop.adj = TRUE, ncores = ncores)
 
     # Isolate the upper triangles from each of the partial moment matrices
     Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
