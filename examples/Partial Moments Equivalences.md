@@ -54,11 +54,6 @@ A sum of the squared upside area and the squared downside area.
 ```
 ### Covariance Elements and Covariance Matrix
 ```r
-> cov(cbind(x,y))
-            x           y
-x  0.83323283 -0.04372107
-y -0.04372107  0.93506310
-
 > cov.mtx=PM.matrix(LPM.degree = 1, UPM.degree = 1, target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
 > cov.mtx
 $cupm
@@ -68,13 +63,13 @@ y 0.1033601 0.5411626
 
 $dupm
           x         y
-x 0.0000000 0.1560924
-y 0.1469182 0.0000000
+x 0.0000000 0.1469182
+y 0.1560924 0.0000000
 
 $dlpm
           x         y
-x 0.0000000 0.1469182
-y 0.1560924 0.0000000
+x 0.0000000 0.1560924
+y 0.1469182 0.0000000
 
 $clpm
           x         y
@@ -85,7 +80,15 @@ $cov.matrix
             x           y
 x  0.83323283 -0.04372107
 y -0.04372107  0.93506310
+
+# Standard Covariance Matrix
+> cov(cbind(x,y))
+            x           y
+x  0.83323283 -0.04372107
+y -0.04372107  0.93506310
 ```
+
+
 ### Pearson Correlation
 ```r
 > cor(x,y)
