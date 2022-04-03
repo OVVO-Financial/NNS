@@ -4,7 +4,14 @@
 \alias{PM.matrix}
 \title{Partial Moment Matrix}
 \usage{
-PM.matrix(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE)
+PM.matrix(
+  LPM.degree,
+  UPM.degree,
+  target = NULL,
+  variable,
+  pop.adj = FALSE,
+  ncores = NULL
+)
 }
 \arguments{
 \item{LPM.degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
@@ -16,6 +23,8 @@ PM.matrix(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE)
 \item{variable}{a numeric matrix or data.frame.}
 
 \item{pop.adj}{logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.}
+
+\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
@@ -30,13 +39,13 @@ For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 A <- cbind(x,y,z)
-PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
+PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A, ncores = 1)
 
 ## Use of vectorized numeric targets (target_x, target_y, target_z)
-PM.matrix(LPM.degree = 1, UPM.degree = 1, target = c(0, 0.15, .25), variable = A)
+PM.matrix(LPM.degree = 1, UPM.degree = 1, target = c(0, 0.15, .25), variable = A, ncores = 1)
 
 ## Calling Individual Partial Moment Quadrants
-cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A)
+cov.mtx <- PM.matrix(LPM.degree = 1, UPM.degree = 1, variable = A, ncores = 1)
 cov.mtx$cupm
 
 ## Full covariance matrix
