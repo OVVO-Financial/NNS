@@ -26,7 +26,7 @@ require(meboot)
 # Forecasting
 The underlying assumptions of traditional autoregressive models are well known.  The resulting complexity with these models leads to observations such as,
 
-_``We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.''_ [Source](https://research.fb.com/prophet-forecasting-at-scale/)
+_``We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.''_ 
 
 `NNS` simplifies the forecasting process.  Below are some examples demonstrating **`NNS.ARMA`** and its **assumption free, minimal parameter** forecasting method.
 
@@ -113,8 +113,8 @@ NNS also offers a wrapper function **`NNS.ARMA.optim()`** to test a given vector
 Given our monthly dataset, we will try multiple years by setting `seasonal.factor = seq(12, 24, 6)` every 6 months.
 
 ```{r best optim,fig.width=5,fig.height=3,fig.align = "center"}
-nns.optimal = NNS.ARMA.optim(AirPassengers[1:100], 
-                             training.set = 88, 
+nns.optimal = NNS.ARMA.optim(AirPassengers, 
+                             training.set = 100, 
                              seasonal.factor = seq(12, 24, 6),
                              obj.fn = expression( sqrt(mean((predicted - actual)^2)) ), 
                              objective = "min",
@@ -130,7 +130,8 @@ nns = NNS.ARMA(AirPassengers,
                h = 44, 
                seasonal.factor = nns.optimal$periods, 
                weights = nns.optimal$weights, 
-               method = nns.optimal$method, 
+               method = nns.optimal$method,
+               shrink = nns.optimal$shrink,
                plot = TRUE, seasonal.plot = FALSE, ncores = 1)
 
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))

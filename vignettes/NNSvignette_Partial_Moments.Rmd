@@ -55,8 +55,11 @@ cov(x, y)
 ```
 
 ## Covariance Elements and Covariance Matrix
-```{r cov_dec}
-PM.matrix(LPM.degree = 1, UPM.degree = 1,target = 'mean', variable = cbind(x, y), pop.adj = TRUE)
+```{r cov_dec, warning=FALSE}
+PM.matrix(LPM.degree = 1, UPM.degree = 1,target = 'mean', variable = cbind(x, y), pop.adj = TRUE, ncores = 1)
+
+# Standard Covariance Matrix
+cov(cbind(x, y))
 ```
 
 ## Pearson Correlation
