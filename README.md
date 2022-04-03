@@ -20,9 +20,7 @@ Companion R-package and datasets to:
 #### Viole, F. and Nawrocki, D. (2013) ["*Nonlinear Nonparametric Statistics: Using Partial Moments*"]( https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
 ## Current Version
-[![NNS](https://img.shields.io/badge/NNS%3E%3D-0.8.6-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![doParallel](https://img.shields.io/badge/doParallel%3E%3D-1.0.14-6666ff.svg)](https://cran.r-project.org/package=doParallel) architecture with notable performance enhancements.
-
-[![NNS](https://img.shields.io/badge/NNS%3E%3D-0.3.0-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![data.table](https://img.shields.io/badge/data.table%3E%3D-1.10.4-6666ff.svg)](https://cran.r-project.org/package=data.table) architecture with notable performance enhancements.
+[![NNS](https://img.shields.io/badge/NNS%3E%3D-0.8.6-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![data.table](https://img.shields.io/badge/data.table%3E%3D-1.10.4-6666ff.svg)](https://cran.r-project.org/package=data.table) and [![doParallel](https://img.shields.io/badge/doParallel%3E%3D-1.0.14-6666ff.svg)](https://cran.r-project.org/package=doParallel) architecture with notable performance enhancements.
 
 *Current [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) CRAN version is  [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NNS)](https://cran.r-project.org/package=NNS)
 
