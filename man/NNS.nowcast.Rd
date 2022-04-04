@@ -62,7 +62,7 @@ Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Au
 \url{https://www.ssrn.com/abstract=3489550}
 
 Viole, F. (2020) "NOWCASTING with NNS"
-\url{https://www.ssrn.com/abstract=3586658}
+\url{https://www.ssrn.com/abstract=3589816}
 }
 \author{
 Fred Viole, OVVO Financial Systems

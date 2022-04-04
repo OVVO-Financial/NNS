@@ -23,7 +23,7 @@ x <- rnorm(100) ; y <- rnorm(100)
 NNS.SSD.uni(x, y)
 }
 \references{
-Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. \url{https://www.scirp.org/Journal/PaperInformation.aspx?PaperID=63817}.
+Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \url{10.4236/jmf.2016.61012}.
 }
 \author{
 Fred Viole, OVVO Financial Systems
