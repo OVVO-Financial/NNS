@@ -34,7 +34,7 @@
 #' \url{https://www.ssrn.com/abstract=3489550}
 #'
 #' Viole, F. (2020) "NOWCASTING with NNS"
-#' \url{https://www.ssrn.com/abstract=3586658}
+#' \url{https://www.ssrn.com/abstract=3589816}
 #'
 #'
 #' @examples
