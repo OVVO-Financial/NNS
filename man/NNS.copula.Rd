@@ -6,6 +6,7 @@
 \usage{
 NNS.copula(
   X,
+  target = NULL,
   continuous = TRUE,
   plot = FALSE,
   independence.overlay = FALSE,
@@ -14,6 +15,8 @@ NNS.copula(
 }
 \arguments{
 \item{X}{a numeric matrix or data frame.}
+
+\item{target}{numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.}
 
 \item{continuous}{logical; \code{TRUE} (default) Generates a continuous measure using degree 1 \link{PM.matrix}, while discrete \code{FALSE} uses degree 0 \link{PM.matrix}.}
 
@@ -34,6 +37,9 @@ set.seed(123)
 x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 A <- data.frame(x, y, z)
 NNS.copula(A, plot = TRUE, independence.overlay = TRUE, ncores = 1)
+
+### Target 0
+NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE, ncores = 1)
 }
 \references{
 Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.
