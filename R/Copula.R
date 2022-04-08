@@ -91,8 +91,16 @@ NNS.copula <- function (X,
 
     if(Co_pm == D_pm) return(0)
     if(Co_pm==0 || D_pm==0) return(1)
-    if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
-    if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
 
+    if(ncol(X)==2){
+        if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
+        if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
+    } else {
+        pairwise_deps <- NNS.dep(X)$Dependence
+        avg_pairwise_deps <- mean(pairwise_deps[upper.tri(pairwise_deps, diag = FALSE)])
+
+        if(Co_pm < D_pm) return(mean(c((1 - Co_pm/D_pm), avg_pairwise_deps)))
+        if(Co_pm > D_pm) return(mean(c((1 - D_pm/Co_pm), avg_pairwise_deps)))
+    }
 
 }
