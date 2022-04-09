@@ -31,76 +31,69 @@ NNS.copula <- function (X,
                         independence.overlay = FALSE,
                         ncores = NULL){
 
-    if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
+  if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
 
-    n <- ncol(X)
-    l <- dim(X)[1]
+  n <- ncol(X)
+  l <- dim(X)[1]
 
-    if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
+  if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
 
-    if(is.null(colnames(X))){
-        colnames.list <- list()
-        for(i in 1 : n){
-            colnames.list[i] <- paste0("Var ", i)
-        }
-        colnames(X) <- c(colnames.list)
+  if(is.null(colnames(X))){
+    colnames.list <- list()
+    for(i in 1 : n){
+      colnames.list[i] <- paste0("Var ", i)
+    }
+    colnames(X) <- c(colnames.list)
+  }
+
+  if(continuous) degree <- 1 else degree <- 0
+
+  # Generate partial moment matrices
+  pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop.adj = TRUE, ncores = ncores)
+
+  # Isolate the upper triangles from each of the partial moment matrices
+  Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
+  D_pm <- sum(pm_cov$dupm[upper.tri(pm_cov$dupm, diag = FALSE)]) + sum(pm_cov$dlpm[upper.tri(pm_cov$dlpm, diag = FALSE)])
+
+  if(plot && n == 3){
+
+    rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
+                col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
+                           ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
+                                  'steelblue')), xlab = colnames(X)[1], ylab = colnames(X)[2], zlab = colnames(X)[3])
+
+    if(independence.overlay == TRUE){
+      clpm.box <- rgl::cube3d(color = "red", alpha = 0.25)
+      cupm.box <- rgl::cube3d(color = "green", alpha = 0.25)
+
+      clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == -1, min(X[ , 1]))
+      clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == -1, min(X[ , 2]))
+      clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == -1, min(X[ , 3]))
+      clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == 1, mean(X[, 1]))
+      clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == 1, mean(X[, 2]))
+      clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == 1, mean(X[, 3]))
+
+      cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == 1, max(X[ , 1]))
+      cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == 1, max(X[ , 2]))
+      cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == 1, max(X[ , 3]))
+      cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == -1, mean(X[, 1]))
+      cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == -1, mean(X[, 2]))
+      cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == -1, mean(X[, 3]))
+
+      rgl::shade3d(clpm.box)
+      rgl::shade3d(cupm.box)
     }
 
-    if(continuous) degree <- 1 else degree <- 0
+  }
 
-    # Generate partial moment matrices
-    pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop.adj = TRUE, ncores = ncores)
+  if(is.na(Co_pm) || is.null(Co_pm)) Co_pm <- 0
+  if(is.na(D_pm)|| is.null(D_pm)) D_pm <- 0
 
-    # Isolate the upper triangles from each of the partial moment matrices
-    Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
-    D_pm <- sum(pm_cov$dupm[upper.tri(pm_cov$dupm, diag = FALSE)]) + sum(pm_cov$dlpm[upper.tri(pm_cov$dlpm, diag = FALSE)])
+  if(Co_pm == D_pm) return(0)
+  if(Co_pm==0 || D_pm==0) return(1)
 
-    if(plot && n == 3){
+  if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
+  if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
 
-        rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
-           col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
-                      ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
-                      'steelblue')), xlab = colnames(X)[1], ylab = colnames(X)[2], zlab = colnames(X)[3])
-
-        if(independence.overlay == TRUE){
-            clpm.box <- rgl::cube3d(color = "red", alpha = 0.25)
-            cupm.box <- rgl::cube3d(color = "green", alpha = 0.25)
-
-            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == -1, min(X[ , 1]))
-            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == -1, min(X[ , 2]))
-            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == -1, min(X[ , 3]))
-            clpm.box$vb[1, ] <- replace(clpm.box$vb[1, ], clpm.box$vb[1, ] == 1, mean(X[, 1]))
-            clpm.box$vb[2, ] <- replace(clpm.box$vb[2, ], clpm.box$vb[2, ] == 1, mean(X[, 2]))
-            clpm.box$vb[3, ] <- replace(clpm.box$vb[3, ], clpm.box$vb[3, ] == 1, mean(X[, 3]))
-
-            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == 1, max(X[ , 1]))
-            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == 1, max(X[ , 2]))
-            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == 1, max(X[ , 3]))
-            cupm.box$vb[1, ] <- replace(cupm.box$vb[1, ], cupm.box$vb[1, ] == -1, mean(X[, 1]))
-            cupm.box$vb[2, ] <- replace(cupm.box$vb[2, ], cupm.box$vb[2, ] == -1, mean(X[, 2]))
-            cupm.box$vb[3, ] <- replace(cupm.box$vb[3, ], cupm.box$vb[3, ] == -1, mean(X[, 3]))
-
-            rgl::shade3d(clpm.box)
-            rgl::shade3d(cupm.box)
-        }
-
-    }
-
-    if(is.na(Co_pm) || is.null(Co_pm)) Co_pm <- 0
-    if(is.na(D_pm)|| is.null(D_pm)) D_pm <- 0
-
-    if(Co_pm == D_pm) return(0)
-    if(Co_pm==0 || D_pm==0) return(1)
-
-    if(ncol(X)==2){
-        if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
-        if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
-    } else {
-        pairwise_deps <- NNS.dep(X)$Dependence
-        avg_pairwise_deps <- mean(pairwise_deps[upper.tri(pairwise_deps, diag = FALSE)])
-
-        if(Co_pm < D_pm) return(mean(c((1 - Co_pm/D_pm), avg_pairwise_deps)))
-        if(Co_pm > D_pm) return(mean(c((1 - D_pm/Co_pm), avg_pairwise_deps)))
-    }
 
 }

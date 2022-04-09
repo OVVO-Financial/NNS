@@ -11,24 +11,35 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   if(dim(x)[1] < 20 ) order <- 2
 
-  raw.rhos_lower <- list()
-  raw.deps_lower <- list()
-  raw.both_lower <- list()
-  raw.rhos_upper <- list()
-  raw.deps_upper <- list()
-  raw.both_upper <- list()
-
-  for(i in 1 : (n-1)){
-    raw.both_lower[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , i], x[ , b], print.map = FALSE, asym = asym))
-    raw.both_upper[[i]] <- sapply((i + 1) : n, function(b) NNS.dep(x[ , b], x[ , i], print.map = FALSE, asym = asym))
-
-    raw.rhos_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Correlation"])
-    raw.deps_upper[[i]] <- unlist(raw.both_upper[[i]][row.names(raw.both_upper[[i]])=="Dependence"])
-
-    raw.rhos_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Correlation"])
-    raw.deps_lower[[i]] <- unlist(raw.both_lower[[i]][row.names(raw.both_lower[[i]])=="Dependence"])
+  upper_lower <- function(x, y, asym){
+    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
+    if(asym){
+      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym)
+      return(list("Upper_cor" = basic_dep$Correlation,
+                  "Upper_dep" = basic_dep$Dependence,
+                  "Lower_cor" = asym_dep$Correlation,
+                  "Lower_dep" = asym_dep$Dependence))
+    } else {
+      return(list("Upper_cor" = basic_dep$Correlation,
+                  "Upper_dep" = basic_dep$Dependence,
+                  "Lower_cor" = basic_dep$Correlation,
+                  "Lower_dep" = basic_dep$Dependence))
+    }
   }
 
+  raw.both <- list((n-1))
+
+  for(i in 1 : (n-1)){
+    raw.both[[i]] <-  sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym))
+  }
+
+  raw.both <- unlist(raw.both)
+  l <- length(raw.both)
+
+  raw.rhos_upper <- raw.both[seq(1, l, 4)]
+  raw.deps_upper <- raw.both[seq(2, l, 4)]
+  raw.rhos_lower <- raw.both[seq(3, l, 4)]
+  raw.deps_lower <- raw.both[seq(4, l, 4)]
 
   rhos <- matrix(, n, n)
   deps <- matrix(0, n, n)
