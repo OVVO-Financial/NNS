@@ -1,4 +1,4 @@
-NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
+NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE, ncores = NULL){
 
   n <- ncol(x)
   if(is.null(n)){
@@ -29,8 +29,27 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   raw.both <- list((n-1))
 
-  for(i in 1 : (n-1)){
+  if(is.null(ncores)) {
+    num_cores <- as.integer(parallel::detectCores()) - 1
+  } else {
+    num_cores <- ncores
+  }
+
+  if(num_cores>1){
+    cl <- parallel::makeCluster(num_cores)
+    doParallel::registerDoParallel(cl)
+  }
+
+
+  i <- 1:(n-1)
+
+  raw.both <- foreach(i = 1 : (n-1), .packages = c("NNS", "data.table"))%dopar%{
     raw.both[[i]] <-  sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym))
+  }
+
+  if(num_cores>1){
+    parallel::stopCluster(cl)
+    registerDoSEQ()
   }
 
   raw.both <- unlist(raw.both)
@@ -41,7 +60,7 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
   raw.rhos_lower <- raw.both[seq(3, l, 4)]
   raw.deps_lower <- raw.both[seq(4, l, 4)]
 
-  rhos <- matrix(, n, n)
+  rhos <- matrix(0, n, n)
   deps <- matrix(0, n, n)
 
   if(!asym){

@@ -7,6 +7,7 @@
 #' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
 #' @param p.value logical; \code{FALSE} (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
 #' @note
@@ -32,9 +33,12 @@ NNS.dep = function(x,
                    y = NULL,
                    asym = FALSE,
                    p.value = FALSE,
-                   print.map = FALSE){
+                   print.map = FALSE,
+                   ncores = NULL){
 
-  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+
+
+  if(any(class(x)%in%c("tbl","data.table")) && !is.null(y)) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
@@ -151,7 +155,7 @@ NNS.dep = function(x,
                   "Dependence p.value" = min(LPM(0, deps[2], deps[-c(1,2)]),
                                              UPM(0, deps[2], deps[-c(1,2)])),
                   "Dependence 95% CIs" = c(dep_lower_CI, dep_upper_CI)))
-    } else return(NNS.dep.matrix(x, asym = asym))
+    } else return(NNS.dep.matrix(x, asym = asym, ncores = ncores))
   }
 
 }
