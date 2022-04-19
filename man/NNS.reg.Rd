@@ -150,14 +150,14 @@ NNS.reg(x, y, point.est = c(.25, .5, .75))
 
 ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
 x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
-NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
+NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor", ncores = 1)
 
 ## IRIS dataset examples:
 # Dimension Reduction:
-NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5, ncores = 1)
 
 # Dimension Reduction using causal weights:
-NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)
+NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5, ncores = 1)
 
 # Multiple Regression:
 NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
