@@ -39,7 +39,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ```{r res1}
 cor(x, y)
-NNS.dep(x, y)
+NNS.dep(x, y, ncores = 1)
 ```
 
 ## Nonlinear Relationship
@@ -54,7 +54,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ```{r res2a}
 cor(x, y)
-NNS.dep(x, y)
+NNS.dep(x, y, ncores = 1)
 ```
 
 
@@ -70,7 +70,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3, obs.req = 0)
 
 ```{r res2_sin}
 cor(x, y)
-NNS.dep(x, y)
+NNS.dep(x, y, ncores = 1)
 ```
 
 ## Dependence
@@ -86,7 +86,7 @@ NNS.part(df$x, df$y, Voronoi = TRUE, order = 3, obs.req = 0)
 ```
 
 ```{r res3}
-NNS.dep(df$x, df$y)
+NNS.dep(df$x, df$y, ncores = 1)
 ```
 
 
@@ -107,7 +107,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 ```
 
 ```{r permutattions_res,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
+NNS.dep(x, y, p.value = TRUE, print.map = TRUE, ncores = 1)
 ```
 
 # Multivariate Dependence `NNS.copula()`
@@ -115,7 +115,7 @@ These partial moment insights permit us to extend the analysis to multivariate
 instances and deliver a dependence measure $(D)$ such that $D \in [0,1]$. This level of analysis is simply impossible with Pearson or other rank
 based correlation methods, which are restricted to bivariate cases.
 
-```{r multi}
+```{r multi, warning=FALSE}
 set.seed(123)
 x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE, ncores = 1)
