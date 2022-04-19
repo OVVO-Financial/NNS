@@ -12,9 +12,9 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE, ncores 
   if(dim(x)[1] < 20 ) order <- 2
 
   upper_lower <- function(x, y, asym){
-    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
+    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym, ncores = 1)
     if(asym){
-      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym)
+      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym, ncores = 1)
       return(list("Upper_cor" = basic_dep$Correlation,
                   "Upper_dep" = basic_dep$Dependence,
                   "Lower_cor" = asym_dep$Correlation,

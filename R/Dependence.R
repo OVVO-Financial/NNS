@@ -121,7 +121,7 @@ NNS.dep = function(x,
     if(p.value){
       original.par <- par(no.readonly = TRUE)
 
-      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g))
+      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g, ncores = ncores))
 
       ## Store results
       cors <- unlist(lapply(nns.mc, "[[", 1))

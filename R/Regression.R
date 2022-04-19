@@ -101,14 +101,14 @@
 #'
 #' ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
 #' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
-#' NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor")
+#' NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor", ncores = 1)
 #'
 #' ## IRIS dataset examples:
 #' # Dimension Reduction:
-#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5)
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5, ncores = 1)
 #'
 #' # Dimension Reduction using causal weights:
-#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5)
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5, ncores = 1)
 #'
 #' # Multiple Regression:
 #' NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
@@ -293,6 +293,16 @@ NNS.reg = function (x, y,
                          ncores = ncores))
 
       } else { # Multivariate dim.red == FALSE
+
+        if(is.null(ncores)) {
+          num_cores <- as.integer(parallel::detectCores()) - 1
+        } else {
+          num_cores <- ncores
+        }
+
+        cl <- parallel::makeCluster(num_cores)
+        doParallel::registerDoParallel(cl)
+
         if(is.null(original.names)){
           colnames.list <- list()
           for(i in 1 : ncol(x)){
@@ -311,13 +321,25 @@ NNS.reg = function (x, y,
 
           if(!is.numeric(dim.red.method) && dim.red.method!="cor" && dim.red.method!="equal"){
             if(!is.null(type)) fact <- TRUE else fact <- FALSE
-            x.star.dep <- numeric()
-            for(i in 1:dim(x)[2]) x.star.dep[i] <- NNS.dep(x[,i], y, print.map = FALSE, asym = TRUE)$Dependence
+            x.star.dep <- list()
+
+            x.star.dep <- foreach(i = 1:dim(x)[2], .packages = c("NNS", "data.table"))%dopar%{
+                return(NNS.dep(x[,i], y, print.map = FALSE, asym = TRUE, ncores = 1)$Dependence)
+            }
+
+            x.star.dep <- unlist(x.star.dep)
+
             x.star.dep[is.na(x.star.dep)] <- 0
           }
 
-          x.star.cor <- numeric()
-          for(i in 1:dim(x)[2]) x.star.cor[i] <- cor(x[,i],y, method = "spearman")
+          x.star.cor <- list()
+
+          x.star.cor <- foreach(i = 1:dim(x)[2], .packages = c("stats"))%dopar%{
+            return(cor(x[,i], y, method = "spearman"))
+          }
+
+          x.star.cor <- unlist(x.star.cor)
+
           x.star.cor[is.na(x.star.cor)] <- 0
 
           if(!is.numeric(dim.red.method) && dim.red.method == "nns.dep"){
@@ -336,9 +358,16 @@ NNS.reg = function (x, y,
             }
             x.star.coef <- numeric()
 
-            cause <- numeric()
-            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y, x[,i], tau = tau, plot = FALSE)
+            cause <- list()
+
+            cause <- foreach(i = 1:dim(x)[2], .packages = c("NNS", "data.table"))%dopar%{
+              return(Uni.caus(y, x[,i], tau = tau, plot = FALSE))
+            }
+
+            cause <- unlist(cause)
+
             cause[is.na(cause)] <- 0
+
             x.star.coef <- cause
           }
 
@@ -347,11 +376,11 @@ NNS.reg = function (x, y,
 
             x.star.coef.1 <- numeric()
 
+            cause <- foreach(i = 1:dim(x)[2], .packages = c("NNS", "data.table"))%dopar%{
+              return(Uni.caus(y, x[,i], tau = tau, plot = FALSE))
+            }
 
-            cause <- numeric()
-            for(i in 1:dim(x)[2]) cause[i] <- Uni.caus(y, x[,i], tau = tau, plot = FALSE)
-            cause[is.na(cause)] <- 0
-            x.star.coef.1 <- cause
+            x.star.coef.1 <- unlist(cause)
 
             x.star.coef.3 <- x.star.cor
             x.star.coef.3[is.na(x.star.coef.3)] <- 0
@@ -413,6 +442,13 @@ NNS.reg = function (x, y,
           x.star <- data.table::data.table(x.star = x)
 
         }
+
+
+        if(num_cores>1){
+          parallel::stopCluster(cl)
+          registerDoSEQ()
+        }
+
 
       } # Multivariate Not NULL type
 
