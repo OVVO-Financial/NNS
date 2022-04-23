@@ -300,8 +300,10 @@ NNS.reg = function (x, y,
           num_cores <- ncores
         }
 
-        cl <- parallel::makeCluster(num_cores)
-        doParallel::registerDoParallel(cl)
+        if(num_cores > 1){
+          cl <- parallel::makeCluster(num_cores)
+          doParallel::registerDoParallel(cl)
+        }
 
         if(is.null(original.names)){
           colnames.list <- list()

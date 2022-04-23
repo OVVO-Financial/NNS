@@ -216,10 +216,10 @@ NNS.stack <- function(IVs.train,
         var.cutoffs_1 <- abs(round(cor(data.matrix(cbind(DV.train, IVs.train)))[-1,1], digits = 2))
         var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)))[-1,1], digits = 2))
       } else {
-        var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+        var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores,
                                            type = type, inference = inference, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
 
-        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = 1,
+        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores,
                                            type = type, inference = inference, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
       }
 
@@ -245,7 +245,7 @@ NNS.stack <- function(IVs.train,
           message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
         }
 
-        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = 1,
+        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = ncores,
                              type = NULL, inference = inference, dist = dist, point.only = TRUE)$Point.est)
 
         predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
@@ -284,7 +284,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         nns.ord.threshold <- as.numeric(names(sort(table(unlist(THRESHOLDS)), decreasing = TRUE)[1]))
 
-        nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = 1,
+        nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
                                 type = NULL, inference = inference, point.only = TRUE))
 
         actual <- DV.train
@@ -357,7 +357,7 @@ NNS.stack <- function(IVs.train,
 
         if(index==1){
           setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
-                           type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, ncores = 1, point.only = TRUE))
+                           type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = TRUE))
 
           nns.id <- setup$Fitted.xy$NNS.ID
           original.DV <- setup$Fitted.xy$y
@@ -385,13 +385,13 @@ NNS.stack <- function(IVs.train,
 
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {
-              predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+              predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
                                     type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
             }
 
             rm(CV.IVs.test.new)
           } else {
-            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = 1,
+            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
                                   type = type, inference = inference, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
           }
           predicted <- unlist(predicted)
