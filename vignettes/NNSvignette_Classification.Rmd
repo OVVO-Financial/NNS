@@ -47,7 +47,7 @@ Through resampling of the training set and letting each iterated set of data spe
 
 Once a `threshold` is obtained, **`NNS.boost`** will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
 
-Let's have a look and see how it works.  We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set.
+Let's have a look and see how it works.  We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set.  For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
 
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
 
@@ -58,9 +58,9 @@ test.set = sample(150,10)
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
-              epochs = 100, learner.trials = 100, 
+              epochs = 10, learner.trials = 10, 
               status = FALSE, balance = TRUE,
-              type = "CLASS")
+              type = "CLASS", folds = 1)
 
 a$results
 
@@ -74,6 +74,8 @@ A perfect classification.
 # Cross-Validation Classification Using `NNS.stack()`
 The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
 
+For brevity, we set `folds = 1`.
+
 
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
@@ -82,7 +84,7 @@ b = NNS.stack(IVs.train = iris[-test.set, 1:4],
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
               type = "CLASS", balance = TRUE,
-              ncores = 1)
+              ncores = 1, folds = 1)
 
 b
 
