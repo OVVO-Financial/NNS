@@ -399,7 +399,7 @@ NNS.boost <- function(IVs.train,
                              order = depth, dim.red.method = "cor",
                              ncores = 1,
                              stack = FALSE, status = status,
-                             type = type, inference = inference, dist = dist, folds = 5)$stack
+                             type = type, inference = inference, dist = dist, folds = folds)$stack
 
       estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
 

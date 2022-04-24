@@ -378,7 +378,7 @@ NNS.ARMA.optim <- function(variable,
 
 
 
-  model.results <- NNS.ARMA(variable, h = h_final, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = nns.shrink) - bias
+  model.results <- NNS.ARMA(variable, training.set = training.set, h = h_final, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = nns.shrink) - bias
   if(!negative.values) model.results <- pmax(0, model.results)
 
   return(list(periods = nns.periods,
