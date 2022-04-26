@@ -48,20 +48,20 @@ UPM <- function(degree, target, variable) {
     .Call('_NNS_UPM_CPv', PACKAGE = 'NNS', degree, target, variable)
 }
 
-CoUPM_C <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call('_NNS_CoUPM_C', PACKAGE = 'NNS', degree_x, degree_y, x, y, target_x, target_y)
+CoUPM_C <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Call('_NNS_CoUPM_C', PACKAGE = 'NNS', degree.x, degree.y, x, y, target.x, target.y)
 }
 
-CoLPM_C <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call('_NNS_CoLPM_C', PACKAGE = 'NNS', degree_x, degree_y, x, y, target_x, target_y)
+CoLPM_C <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Call('_NNS_CoLPM_C', PACKAGE = 'NNS', degree.x, degree.y, x, y, target.x, target.y)
 }
 
-DLPM_C <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call('_NNS_DLPM_C', PACKAGE = 'NNS', degree_x, degree_y, x, y, target_x, target_y)
+DLPM_C <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Call('_NNS_DLPM_C', PACKAGE = 'NNS', degree.x, degree.y, x, y, target.x, target.y)
 }
 
-DUPM_C <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call('_NNS_DUPM_C', PACKAGE = 'NNS', degree_x, degree_y, x, y, target_x, target_y)
+DUPM_C <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Call('_NNS_DUPM_C', PACKAGE = 'NNS', degree.x, degree.y, x, y, target.x, target.y)
 }
 
 #' Co-Lower Partial Moment
@@ -129,7 +129,7 @@ Co.UPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' D.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
-D.LPM <- function(degree_x, degree_y, x, y, target.x, target.y) {
+D.LPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
     .Call('_NNS_DLPM_CPv', PACKAGE = 'NNS', degree.x, degree.y, x, y, target.x, target.y)
 }
 
