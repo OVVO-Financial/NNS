@@ -4,3 +4,8 @@
 /src/RcppExports.cpp
 /src/init.o
 /src/init.c
+/.Rproj.user
+/.RData
+/.Rhistory
+/src-i386
+/src-x64

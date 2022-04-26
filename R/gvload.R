@@ -23,7 +23,7 @@
 #' @import Rcpp
 #' @import RcppParallel
 #' @import RcppThread
-#' @useDynLib NNS
+#' @useDynLib NNS, .registration = TRUE
 
 
 

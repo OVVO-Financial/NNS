@@ -1,3 +1,101 @@
+#' Co-Upper Partial Moment
+#' (Upper Right Quadrant 1)
+#'
+#' This function generates a co-upper partial moment between two equal length variables for any degree or target.
+#' @param degree.x integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.
+#' @param degree.y integer; Degree for variable Y.  \code{(degree.y = 0)} is frequency, \code{(degree.y = 1)} is area.
+#' @param x a numeric vector.
+#' @param y a numeric vector of equal length to \code{x}.
+#' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @return Co-UPM of two variables
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' Co.UPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+Co.UPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Co.UPM_rcpp(degree.x, degree.y, x, y, target.x, target.y)
+}
+
+
+#' Divergent-Upper Partial Moment
+#' (Upper Left Quadrant 2)
+#'
+#' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
+#' @param degree.x integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.
+#' @param degree.y integer; Degree for variable Y.  \code{(degree.y = 0)} is frequency, \code{(degree.y = 1)} is area.
+#' @param x a numeric vector.
+#' @param y a numeric vector of equal length to \code{x}.
+#' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @return Divergent UPM of two variables
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' D.UPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.UPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .D.UPM_rcpp(degree.x, degree.y, x, y, target.x, target.y)
+}
+
+
+
+#' Co-Lower Partial Moment
+#' (Lower Left Quadrant 4)
+#'
+#' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
+#' @param degree.x integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.
+#' @param degree.y integer; Degree for variable Y.  \code{(degree.y = 0)} is frequency, \code{(degree.y = 1)} is area.
+#' @param x a numeric vector.
+#' @param y a numeric vector of equal length to \code{x}.
+#' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @return Co-LPM of two variables
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' Co.LPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+# [[Rcpp::export("Co.LPM_rcpp", rng = false)]]
+Co.LPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .Co.LPM_rcpp(degree.x, degree.y, x, y, target.x, target.y)
+}
+
+#' Divergent-Lower Partial Moment
+#' (Lower Right Quadrant 3)
+#'
+#' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
+#' @param degree.x integer; Degree for variable X.  \code{(degree.x = 0)} is frequency, \code{(degree.x = 1)} is area.
+#' @param degree.y integer; Degree for variable Y.  \code{(degree.y = 0)} is frequency, \code{(degree.y = 1)} is area.
+#' @param x a numeric vector.
+#' @param y a numeric vector of equal length to \code{x}.
+#' @param target.x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @param target.y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be. (Vectorized)
+#' @return Divergent LPM of two variables
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' D.LPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.LPM <- function(degree.x, degree.y, x, y, target.x, target.y) {
+    .D.LPM_rcpp(degree.x, degree.y, x, y, target.x, target.y)
+}
+
+
+
 #' Partial Moment Matrix
 #'
 #'
