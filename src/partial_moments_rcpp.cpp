@@ -4,7 +4,7 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double LPM_C(const double degree, const double target, const NumericVector variable) {
   size_t n = variable.size();
   double out=0;
@@ -15,7 +15,7 @@ double LPM_C(const double degree, const double target, const NumericVector varia
   out /= n;
   return(out);
 }
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double UPM_C(const double degree, const double target, const NumericVector variable) {
   size_t n = variable.size();
   double out=0;
@@ -47,7 +47,7 @@ struct UPM_Worker : public Worker
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = UPM_C(degree, target[i], variable); }
 };
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector LPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
@@ -55,7 +55,7 @@ NumericVector LPM_CPv(const double degree, const NumericVector target, const Num
   parallelFor(0, target_size, tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector UPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
@@ -68,7 +68,7 @@ NumericVector UPM_CPv(const double degree, const NumericVector target, const Num
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double CoUPM_C(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -94,7 +94,7 @@ double CoUPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double CoLPM_C(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -121,7 +121,7 @@ double CoLPM_C(
 }
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double DLPM_C(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -147,7 +147,7 @@ double DLPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 double DUPM_C(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -198,10 +198,7 @@ struct CoLPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = CoLPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = CoLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -227,10 +224,7 @@ struct CoUPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = CoUPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = CoUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -255,10 +249,7 @@ struct DLPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = DLPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = DLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -282,15 +273,11 @@ struct DUPM_Worker : public Worker
   n_tx(target_x.size()), n_ty(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
-    for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = DUPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
-    }
+    for (size_t i = begin; i < end; i++)
+      output[i] = DUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
   }
 };
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector CoLPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -304,7 +291,7 @@ NumericVector CoLPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector CoUPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -318,7 +305,7 @@ NumericVector CoUPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector DLPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -332,7 +319,7 @@ NumericVector DLPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = false)]]
 NumericVector DUPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 

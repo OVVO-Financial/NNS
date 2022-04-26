@@ -14,5 +14,5 @@ Imports: caret, data.table, dtw, dynlm, meboot, Quandl, Rcpp, RcppParallel, Rfas
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 LinkingTo: 
-    Rcpp
+    Rcpp, RcppParallel
 SystemRequirements: GNU make
