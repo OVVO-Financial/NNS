@@ -22,8 +22,7 @@
 #' @import Quandl
 #' @import Rcpp
 #' @import RcppParallel
-#' @import RcppThread
-#' @useDynLib NNS
+#' @useDynLib NNS, .registration = TRUE
 
 
 
@@ -54,9 +53,8 @@
   requireNamespace("Rfast")
   requireNamespace("dynlm")
   requireNamespace("Quandl")
-  requireNamespace("Rcpp")
-  requireNamespace("RcppParallel")
-  requireNamespace("RcppThread")
+  #requireNamespace("Rcpp")
+  #requireNamespace("RcppParallel")
 
 
   .datatable.aware = TRUE

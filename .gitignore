@@ -1,0 +1,11 @@
+/src/NNS.dll
+/src/partial_moments_rcpp.o
+/src/RcppExports.o
+/src/RcppExports.cpp
+/src/init.o
+/src/init.c
+/.Rproj.user
+/.RData
+/.Rhistory
+/src-i386
+/src-x64

@@ -4,8 +4,8 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// [[Rcpp::export]]
-double LPM_C(const double degree, const double target, const NumericVector variable) {
+
+double LPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
   for (size_t i = 0; i < n; i++) {
@@ -15,8 +15,8 @@ double LPM_C(const double degree, const double target, const NumericVector varia
   out /= n;
   return(out);
 }
-// [[Rcpp::export]]
-double UPM_C(const double degree, const double target, const NumericVector variable) {
+
+double UPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
   for (size_t i = 0; i < n; i++) {
@@ -30,9 +30,9 @@ double UPM_C(const double degree, const double target, const NumericVector varia
 struct LPM_Worker : public Worker
 {
   const double degree;
-  const NumericVector target;
-  const NumericVector variable;
-  NumericVector output;
+  const RVector<double> target;
+  const RVector<double> variable;
+  RVector<double> output;
   LPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output): degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = LPM_C(degree, target[i], variable); }
 };
@@ -40,14 +40,31 @@ struct LPM_Worker : public Worker
 struct UPM_Worker : public Worker
 {
   const double degree;
-  const NumericVector target;
-  const NumericVector variable;
-  NumericVector output;
+  const RVector<double> target;
+  const RVector<double> variable;
+  RVector<double> output;
   UPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output) : degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = UPM_C(degree, target[i], variable); }
 };
 
-// [[Rcpp::export]]
+
+//' Lower Partial Moment
+//'
+//' This function generates a univariate lower partial moment for any degree or target.
+//'
+//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+//' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+//' @param variable a numeric vector.
+//' @return LPM of variable
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100)
+//' LPM(0, mean(x), x)
+//' @export
+// [[Rcpp::export("LPM", rng = false)]]
 NumericVector LPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
@@ -55,7 +72,24 @@ NumericVector LPM_CPv(const double degree, const NumericVector target, const Num
   parallelFor(0, target_size, tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+
+
+//' Upper Partial Moment
+//'
+//' This function generates a univariate upper partial moment for any degree or target.
+//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+//' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+//' @param variable a numeric vector.
+//' @return UPM of variable
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100)
+//' UPM(0, mean(x), x)
+//' @export
+// [[Rcpp::export("UPM", rng = false)]]
 NumericVector UPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
@@ -68,10 +102,9 @@ NumericVector UPM_CPv(const double degree, const NumericVector target, const Num
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// [[Rcpp::export]]
 double CoUPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -94,10 +127,9 @@ double CoUPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export]]
 double CoLPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -121,10 +153,9 @@ double CoLPM_C(
 }
 
 
-// [[Rcpp::export]]
 double DLPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -147,10 +178,10 @@ double DLPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export]]
+
 double DUPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -181,13 +212,13 @@ struct CoLPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   CoLPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -198,10 +229,7 @@ struct CoLPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = CoLPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = CoLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -210,13 +238,13 @@ struct CoUPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   CoUPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -227,10 +255,7 @@ struct CoUPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = CoUPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = CoUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -238,13 +263,13 @@ struct DLPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   DLPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -255,10 +280,7 @@ struct DLPM_Worker : public Worker
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = DLPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
+      output[i] = DLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
     }
   }
 };
@@ -266,13 +288,13 @@ struct DUPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   DUPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -282,15 +304,33 @@ struct DUPM_Worker : public Worker
   n_tx(target_x.size()), n_ty(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
-    for (size_t i = begin; i < end; i++) {
-      if(i>n_tx || i>n_ty)
-        output[i] = 0;
-      else
-        output[i] = DUPM_C(degree_x, degree_y, x, y, target_x[i], target_y[i]); 
-    }
+    for (size_t i = begin; i < end; i++){
+      output[i] = DUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
+	}
   }
 };
-// [[Rcpp::export]]
+
+
+//' Co-Lower Partial Moment
+//' (Lower Left Quadrant 4)
+//'
+//' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
+//' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
+//' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+//' @param x a numeric vector.
+//' @param y a numeric vector of equal length to \code{x}.
+//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @return Co-LPM of two variables
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100) ; y <- rnorm(100)
+//' Co.LPM(0, 0, x, y, mean(x), mean(y))
+//' @export
+// [[Rcpp::export("Co.LPM", rng = false)]]
 NumericVector CoLPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -304,7 +344,28 @@ NumericVector CoLPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+
+
+//' Co-Upper Partial Moment
+//' (Upper Right Quadrant 1)
+//'
+//' This function generates a co-upper partial moment between two equal length variables for any degree or target.
+//' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
+//' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+//' @param x a numeric vector.
+//' @param y a numeric vector of equal length to \code{x}.
+//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @return Co-UPM of two variables
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100) ; y <- rnorm(100)
+//' Co.UPM(0, 0, x, y, mean(x), mean(y))
+//' @export
+// [[Rcpp::export("Co.UPM", rng = false)]]
 NumericVector CoUPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -318,7 +379,28 @@ NumericVector CoUPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+
+
+//' Divergent-Lower Partial Moment
+//' (Lower Right Quadrant 3)
+//'
+//' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
+//' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
+//' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+//' @param x a numeric vector.
+//' @param y a numeric vector of equal length to \code{x}.
+//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @return Divergent LPM of two variables
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100) ; y <- rnorm(100)
+//' D.LPM(0, 0, x, y, mean(x), mean(y))
+//' @export
+// [[Rcpp::export("D.LPM", rng = false)]]
 NumericVector DLPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -332,7 +414,28 @@ NumericVector DLPM_CPv(
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
-// [[Rcpp::export]]
+
+
+//' Divergent-Upper Partial Moment
+//' (Upper Left Quadrant 2)
+//'
+//' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
+//' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
+//' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+//' @param x a numeric vector.
+//' @param y a numeric vector of equal length to \code{x}.
+//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @return Divergent UPM of two variables
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100) ; y <- rnorm(100)
+//' D.UPM(0, 0, x, y, mean(x), mean(y))
+//' @export
+// [[Rcpp::export("D.UPM", rng = false)]]
 NumericVector DUPM_CPv(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
