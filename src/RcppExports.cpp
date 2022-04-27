@@ -94,3 +94,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
+    {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
+    {"_NNS_CoLPM_CPv", (DL_FUNC) &_NNS_CoLPM_CPv, 6},
+    {"_NNS_CoUPM_CPv", (DL_FUNC) &_NNS_CoUPM_CPv, 6},
+    {"_NNS_DLPM_CPv", (DL_FUNC) &_NNS_DLPM_CPv, 6},
+    {"_NNS_DUPM_CPv", (DL_FUNC) &_NNS_DUPM_CPv, 6},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_NNS(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}
