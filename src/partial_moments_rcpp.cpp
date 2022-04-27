@@ -4,8 +4,8 @@
 using namespace Rcpp;
 using namespace RcppParallel;
 
-// [[Rcpp::export(rng = false)]]
-double LPM_C(const double degree, const double target, const NumericVector variable) {
+
+double LPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
   for (size_t i = 0; i < n; i++) {
@@ -15,8 +15,8 @@ double LPM_C(const double degree, const double target, const NumericVector varia
   out /= n;
   return(out);
 }
-// [[Rcpp::export(rng = false)]]
-double UPM_C(const double degree, const double target, const NumericVector variable) {
+
+double UPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
   for (size_t i = 0; i < n; i++) {
@@ -30,9 +30,9 @@ double UPM_C(const double degree, const double target, const NumericVector varia
 struct LPM_Worker : public Worker
 {
   const double degree;
-  const NumericVector target;
-  const NumericVector variable;
-  NumericVector output;
+  const RVector<double> target;
+  const RVector<double> variable;
+  RVector<double> output;
   LPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output): degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = LPM_C(degree, target[i], variable); }
 };
@@ -40,9 +40,9 @@ struct LPM_Worker : public Worker
 struct UPM_Worker : public Worker
 {
   const double degree;
-  const NumericVector target;
-  const NumericVector variable;
-  NumericVector output;
+  const RVector<double> target;
+  const RVector<double> variable;
+  RVector<double> output;
   UPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output) : degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = UPM_C(degree, target[i], variable); }
 };
@@ -102,10 +102,9 @@ NumericVector UPM_CPv(const double degree, const NumericVector target, const Num
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// [[Rcpp::export(rng = false)]]
 double CoUPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -128,10 +127,9 @@ double CoUPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export(rng = false)]]
 double CoLPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -155,10 +153,9 @@ double CoLPM_C(
 }
 
 
-// [[Rcpp::export(rng = false)]]
 double DLPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -181,10 +178,10 @@ double DLPM_C(
   return out/max_size;
 }
 
-// [[Rcpp::export(rng = false)]]
+
 double DUPM_C(
     const double degree_x, const double degree_y, 
-    const NumericVector x, const NumericVector y, 
+    const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -215,13 +212,13 @@ struct CoLPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   CoLPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -241,13 +238,13 @@ struct CoUPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   CoUPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -266,13 +263,13 @@ struct DLPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   DLPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
@@ -291,13 +288,13 @@ struct DUPM_Worker : public Worker
 {
   const double degree_x;
   const double degree_y;
-  const NumericVector x;
-  const NumericVector y;
-  const NumericVector target_x;
-  const NumericVector target_y;
+  const RVector<double> x;
+  const RVector<double> y;
+  const RVector<double> target_x;
+  const RVector<double> target_y;
   const size_t n_tx;
   const size_t n_ty;
-  NumericVector output;
+  RVector<double> output;
   DUPM_Worker(
     const double degree_x, const double degree_y, 
     const NumericVector x, const NumericVector y, 
