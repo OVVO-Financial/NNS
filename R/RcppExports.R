@@ -56,7 +56,7 @@ UPM <- function(degree, target, variable) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.LPM(0, 0, x, y, mean(x), mean(y))
+#' Co.LPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
     .Call(`_NNS_CoLPM_CPv`, degree_lpm, x, y, target_x, target_y)
@@ -79,7 +79,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.UPM(0, 0, x, y, mean(x), mean(y))
+#' Co.UPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_CoUPM_CPv`, degree_upm, x, y, target_x, target_y)
