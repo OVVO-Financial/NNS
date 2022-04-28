@@ -8,9 +8,15 @@ using namespace RcppParallel;
 double LPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
-  for (size_t i = 0; i < n; i++) {
-    if (variable[i] <= target) 
-      out += std::pow(target-variable[i], degree);
+  if (degree==0){
+    for (size_t i = 0; i < n; i++)
+      if (variable[i] <= target)
+        out += variable[i];
+  }else{
+    for (size_t i = 0; i < n; i++) {
+      if (variable[i] <= target)
+        out += std::pow(target-variable[i], degree);
+    }
   }
   out /= n;
   return(out);
@@ -19,9 +25,15 @@ double LPM_C(const double degree, const double target, const RVector<double> var
 double UPM_C(const double degree, const double target, const RVector<double> variable) {
   size_t n = variable.size();
   double out=0;
-  for (size_t i = 0; i < n; i++) {
-    if (variable[i] > target) 
-      out += std::pow(variable[i]-target, degree);
+  if (degree==0){
+    for (size_t i = 0; i < n; i++)
+      if (variable[i] > target)
+        out += variable[i];
+  }else{
+    for (size_t i = 0; i < n; i++) {
+      if (variable[i] > target)
+        out += std::pow(variable[i]-target, degree);
+    }
   }
   out /= n;
   return(out);
@@ -68,7 +80,7 @@ struct UPM_Worker : public Worker
 NumericVector LPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
-  LPM_Worker tmp_func(degree,target,variable,output);
+  LPM_Worker tmp_func(degree, target, variable, output);
   parallelFor(0, target_size, tmp_func);
   return(output);
 }
@@ -93,7 +105,7 @@ NumericVector LPM_CPv(const double degree, const NumericVector target, const Num
 NumericVector UPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
-  UPM_Worker tmp_func(degree,target,variable,output);
+  UPM_Worker tmp_func(degree, target, variable,output);
   parallelFor(0, target_size, tmp_func);
   return(output);
 }
