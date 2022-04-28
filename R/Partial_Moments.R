@@ -35,7 +35,7 @@
 
 PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
 
-  if(is.null(target)) target <- "mean"
+  if(is.null(target)) target <- mean(variable)
 
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
 
@@ -48,7 +48,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
   dupms <- list()
 
   if(is.null(ncores)) {
-    num_cores <- as.integer(parallel::detectCores()) - 1
+    if(length(variable)<1000){
+      num_cores <- 1
+    }else{
+      num_cores <- as.integer(parallel::detectCores()) - 1
+    }
   } else {
     num_cores <- ncores
   }
