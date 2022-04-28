@@ -8,7 +8,7 @@
 Co.UPM(degree_upm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_upm}{integer; Degree for variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.}
+\item{degree_upm}{integer; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.}
 
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
