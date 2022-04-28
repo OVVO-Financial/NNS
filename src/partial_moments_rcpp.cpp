@@ -138,7 +138,7 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool d_upm_1=(degree_upm==1),
+  bool dont_use_pow=(degree_upm==1 || degree_upm==0),
     d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
@@ -147,10 +147,12 @@ double CoUPM_C(
     double y1=(y[i]-target_y);
     if (y1<=0) continue;
     
-    if(d_upm_0) x1=(x1==0?0:1);
-    if(d_upm_0) y1=(y1==0?0:1);
+    if(d_upm_0){
+		x1=(x1==0?0:1);
+		y1=(y1==0?0:1);
+	}
     
-    if(d_upm_1)
+    if(dont_use_pow)
       out += x1 * y1;
     else
       out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
@@ -171,7 +173,7 @@ double CoLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_lpm_1=(degree_lpm==1),
+  bool dont_use_pow=(degree_lpm==1 || degree_lpm==0),
     d_lpm_0=(degree_lpm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
@@ -180,10 +182,12 @@ double CoLPM_C(
     double y1=(target_y-y[i]);
     if (y1<=0) continue;
     
-    if(d_lpm_0) x1=(x1==0?0:1);
-    if(d_lpm_0) y1=(y1==0?0:1);
+    if(d_lpm_0){
+		x1=(x1==0?0:1);
+		y1=(y1==0?0:1);
+	}
     
-    if(d_lpm_1)
+    if(dont_use_pow)
       out += x1 * y1;
     else
       out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
@@ -205,7 +209,7 @@ double DLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_lpm_1=(degree_lpm==1), d_upm_1=(degree_upm==1),
+  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0), dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
     d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
@@ -217,11 +221,11 @@ double DLPM_C(
     if(d_lpm_0) x1=(x1==0?0:1);
     if(d_upm_0) y1=(y1==0?0:1);
     
-    if(d_lpm_1 && d_upm_1)
+    if(dont_use_pow_lpm && dont_use_pow_upm)
       out += x1 * y1;
-    else if(d_upm_1)
-      out += x1 * std::pow(y1, degree_lpm);
-    else if(d_lpm_1)
+    else if(dont_use_pow_lpm)
+      out += x1 * std::pow(y1, degree_upm);
+    else if(dont_use_pow_upm)
       out += std::pow(x1, degree_lpm) * y1;
     else
       out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
@@ -243,7 +247,7 @@ double DUPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_lpm_1=(degree_lpm==1), d_upm_1=(degree_upm==1),
+  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0), dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
     d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
@@ -255,11 +259,11 @@ double DUPM_C(
     if(d_lpm_0) x1=(x1==0?0:1);
     if(d_upm_0) y1=(y1==0?0:1);
     
-    if(d_lpm_1 && d_upm_1)
+    if(dont_use_pow_lpm && dont_use_pow_upm)
       out += x1 * y1;
-    else if(d_lpm_1)
+    else if(dont_use_pow_lpm)
       out += x1 * std::pow(y1, degree_upm);
-    else if(d_upm_1)
+    else if(dont_use_pow_upm)
       out += std::pow(x1, degree_lpm) * y1;
     else
       out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
