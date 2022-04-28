@@ -125,9 +125,9 @@ NumericVector UPM_CPv(const double degree, const NumericVector target, const Num
 
 ////////////////////////////////////////////////////////////////////////////////
 double CoUPM_C(
-    const double degree_x, const double degree_y, 
+    const double degree_upm, 
     const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y
+    const double target_x, const double target_y 
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -138,34 +138,30 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
-       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
+  bool d_upm_1=(degree_upm==1),
+    d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
-    double x1=(x[i] - target_x);
+    double x1=(x[i]-target_x);
     if (x1<=0) continue;
     
-    double y1=(y[i] - target_y);
+    double y1=(y[i]-target_y);
     if (y1<=0) continue;
     
-	if(d_x_0) x1=(x1==0?0:1);
-	if(d_y_0) y1=(y1==0?0:1);
-	
-    if(d_x_1 && d_y_1)
+    if(d_upm_0) x1=(x1==0?0:1);
+    if(d_upm_0) y1=(y1==0?0:1);
+    
+    if(d_upm_1)
       out += x1 * y1;
-    else if(d_x_1)
-      out += x1 * std::pow(y1, degree_y);
-    else if(d_y_1)
-      out += std::pow(x1, degree_x) * y1;
     else
-      out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
+      out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
 }
 
 double CoLPM_C(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, 
     const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y
+    const double target_x, const double target_y 
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -175,8 +171,8 @@ double CoLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
-       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
+  bool d_lpm_1=(degree_lpm==1),
+    d_lpm_0=(degree_lpm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     if (x1<=0) continue;
@@ -184,24 +180,20 @@ double CoLPM_C(
     double y1=(target_y-y[i]);
     if (y1<=0) continue;
     
-	if(d_x_0) x1=(x1==0?0:1);
-	if(d_y_0) y1=(y1==0?0:1);
-	
-    if(d_x_1 && d_y_1)
+    if(d_lpm_0) x1=(x1==0?0:1);
+    if(d_lpm_0) y1=(y1==0?0:1);
+    
+    if(d_lpm_1)
       out += x1 * y1;
-    else if(d_x_1)
-      out += x1 * std::pow(y1, degree_y);
-    else if(d_y_1)
-      out += std::pow(x1, degree_x) * y1;
     else
-      out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
+      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
   }
   return out/max_size;
 }
 
 
 double DLPM_C(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
@@ -213,8 +205,8 @@ double DLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
-       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
+  bool d_lpm_1=(degree_lpm==1), d_upm_1=(degree_upm==1),
+    d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     if (x1<=0) continue;
@@ -222,24 +214,24 @@ double DLPM_C(
     double y1=(target_y-y[i]);
     if (y1<=0) continue;
     
-	if(d_x_0) x1=(x1==0?0:1);
-	if(d_y_0) y1=(y1==0?0:1);
-	
-    if(d_x_1 && d_y_1)
+    if(d_lpm_0) x1=(x1==0?0:1);
+    if(d_upm_0) y1=(y1==0?0:1);
+    
+    if(d_lpm_1 && d_upm_1)
       out += x1 * y1;
-    else if(d_x_1)
-      out += x1 * std::pow(y1, degree_y);
-    else if(d_y_1)
-      out += std::pow(x1, degree_x) * y1;
+    else if(d_upm_1)
+      out += x1 * std::pow(y1, degree_lpm);
+    else if(d_lpm_1)
+      out += std::pow(x1, degree_lpm) * y1;
     else
-      out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
+      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
 }
 
 
 double DUPM_C(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const RVector<double> x, const RVector<double> y, 
     const double target_x, const double target_y
 ){
@@ -251,8 +243,8 @@ double DUPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
-       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
+  bool d_lpm_1=(degree_lpm==1), d_upm_1=(degree_upm==1),
+    d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     if (x1<=0) continue;
@@ -260,17 +252,17 @@ double DUPM_C(
     double y1=(y[i]-target_y);
     if (y1<=0) continue;
     
-	if(d_x_0) x1=(x1==0?0:1);
-	if(d_y_0) y1=(y1==0?0:1);
-	
-    if(d_x_1 && d_y_1)
+    if(d_lpm_0) x1=(x1==0?0:1);
+    if(d_upm_0) y1=(y1==0?0:1);
+    
+    if(d_lpm_1 && d_upm_1)
       out += x1 * y1;
-    else if(d_x_1)
-      out += x1 * std::pow(y1, degree_y);
-    else if(d_y_1)
-      out += std::pow(x1, degree_x) * y1;
+    else if(d_lpm_1)
+      out += x1 * std::pow(y1, degree_upm);
+    else if(d_upm_1)
+      out += std::pow(x1, degree_lpm) * y1;
     else
-      out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
+      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
 }
@@ -281,102 +273,102 @@ double DUPM_C(
 
 struct CoLPM_Worker : public Worker
 {
-  const double degree_x;
-  const double degree_y;
+  const double degree_lpm;
   const RVector<double> x;
   const RVector<double> y;
   const RVector<double> target_x;
   const RVector<double> target_y;
-  const size_t n_tx;
-  const size_t n_ty;
+  const size_t n_t_x;
+  const size_t n_t_y;
   RVector<double> output;
   CoLPM_Worker(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y,
     NumericVector output
-  ): degree_x(degree_x), degree_y(degree_y), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_tx(target_x.size()), n_ty(target_y.size()), output(output)
+  ): degree_lpm(degree_lpm), x(x), y(y), target_x(target_x), target_y(target_y),
+  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      output[i] = CoLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
+      output[i] = CoLPM_C(degree_lpm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); 
     }
   }
 };
 
 struct CoUPM_Worker : public Worker
 {
-  const double degree_x;
-  const double degree_y;
+  const double degree_upm;
   const RVector<double> x;
   const RVector<double> y;
   const RVector<double> target_x;
   const RVector<double> target_y;
-  const size_t n_tx;
-  const size_t n_ty;
+  const size_t n_t_x;
+  const size_t n_t_y;
   RVector<double> output;
   CoUPM_Worker(
-    const double degree_x, const double degree_y, 
+    const double degree_upm,
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y,
     NumericVector output
-  ): degree_x(degree_x), degree_y(degree_y), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_tx(target_x.size()), n_ty(target_y.size()), output(output)
+  ): degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y),
+  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      output[i] = CoUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
+      output[i] = CoUPM_C(degree_upm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); 
     }
   }
 };
+
 struct DLPM_Worker : public Worker
 {
-  const double degree_x;
-  const double degree_y;
+  const double degree_lpm;
+  const double degree_upm;
   const RVector<double> x;
   const RVector<double> y;
   const RVector<double> target_x;
   const RVector<double> target_y;
-  const size_t n_tx;
-  const size_t n_ty;
+  const size_t n_t_x;
+  const size_t n_t_y;
   RVector<double> output;
   DLPM_Worker(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y,
     NumericVector output
-  ): degree_x(degree_x), degree_y(degree_y), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_tx(target_x.size()), n_ty(target_y.size()), output(output)
+  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
+  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
-      output[i] = DLPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
+      output[i] = DLPM_C(degree_lpm, degree_upm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); 
     }
   }
 };
+
 struct DUPM_Worker : public Worker
 {
-  const double degree_x;
-  const double degree_y;
+  const double degree_lpm;
+  const double degree_upm;
   const RVector<double> x;
   const RVector<double> y;
   const RVector<double> target_x;
   const RVector<double> target_y;
-  const size_t n_tx;
-  const size_t n_ty;
+  const size_t n_t_lpm;
+  const size_t n_t_upm;
   RVector<double> output;
   DUPM_Worker(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y,
     NumericVector output
-  ): degree_x(degree_x), degree_y(degree_y), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_tx(target_x.size()), n_ty(target_y.size()), output(output)
+  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_lpm(target_lpm), target_upm(target_upm), 
+  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++){
-      output[i] = DUPM_C(degree_x, degree_y, x, y, target_x[i%n_tx], target_y[i%n_ty]); 
+      output[i] = DUPM_C(degree_lpm, degree_upm, x, y, target_lpm[i%n_t_lpm], target_upm[i%n_t_upm]); 
     }
   }
 };
@@ -386,12 +378,11 @@ struct DUPM_Worker : public Worker
 //' (Lower Left Quadrant 4)
 //'
 //' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-//' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
-//' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+//' @param degree_lpm integer; Degree for lower deviations.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 //' @return Co-LPM of two variables
 //' @author Fred Viole, OVVO Financial Systems
 //' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -403,7 +394,8 @@ struct DUPM_Worker : public Worker
 //' @export
 // [[Rcpp::export("Co.LPM", rng = false)]]
 NumericVector CoLPM_CPv(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, 
+    const NumericVector x, const NumericVector y, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y
 ) {
@@ -411,7 +403,7 @@ NumericVector CoLPM_CPv(
   size_t target_y_size=target_y.size();
   size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size);
   NumericVector output = NumericVector(max_target_size);
-  CoLPM_Worker tmp_func(degree_x, degree_y, x, y, target_x, target_y, output);
+  CoLPM_Worker tmp_func(degree_lpm, x, y, target_x, target_y, output);
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
@@ -425,8 +417,8 @@ NumericVector CoLPM_CPv(
 //' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Target for upside deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 //' @return Co-UPM of two variables
 //' @author Fred Viole, OVVO Financial Systems
 //' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -438,15 +430,15 @@ NumericVector CoLPM_CPv(
 //' @export
 // [[Rcpp::export("Co.UPM", rng = false)]]
 NumericVector CoUPM_CPv(
-    const double degree_x, const double degree_y, 
+    const double degree_upm, 
     const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y
+    const NumericVector target_x, const NumericVector target_y 
 ) {
   size_t target_x_size=target_x.size();
   size_t target_y_size=target_y.size();
   size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size);
   NumericVector output = NumericVector(max_target_size);
-  CoUPM_Worker tmp_func(degree_x, degree_y, x, y, target_x, target_y, output);
+  CoUPM_Worker tmp_func(degree_upm, x, y, target_x, target_y, output);
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
@@ -460,8 +452,8 @@ NumericVector CoUPM_CPv(
 //' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 //' @return Divergent LPM of two variables
 //' @author Fred Viole, OVVO Financial Systems
 //' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -473,7 +465,7 @@ NumericVector CoUPM_CPv(
 //' @export
 // [[Rcpp::export("D.LPM", rng = false)]]
 NumericVector DLPM_CPv(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y
 ) {
@@ -481,7 +473,7 @@ NumericVector DLPM_CPv(
   size_t target_y_size=target_y.size();
   size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size);
   NumericVector output = NumericVector(max_target_size);
-  DLPM_Worker tmp_func(degree_x, degree_y, x, y, target_x, target_y, output);
+  DLPM_Worker tmp_func(degree_lpm, degree_upm, x, y, target_x, target_y, output);
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
@@ -495,8 +487,8 @@ NumericVector DLPM_CPv(
 //' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-//' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-//' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+//' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+//' @param target_y numeric; Target for upper deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 //' @return Divergent UPM of two variables
 //' @author Fred Viole, OVVO Financial Systems
 //' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -508,7 +500,7 @@ NumericVector DLPM_CPv(
 //' @export
 // [[Rcpp::export("D.UPM", rng = false)]]
 NumericVector DUPM_CPv(
-    const double degree_x, const double degree_y, 
+    const double degree_lpm, const double degree_upm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y
 ) {
@@ -516,7 +508,7 @@ NumericVector DUPM_CPv(
   size_t target_y_size=target_y.size();
   size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size);
   NumericVector output = NumericVector(max_target_size);
-  DUPM_Worker tmp_func(degree_x, degree_y, x, y, target_x, target_y, output);
+  DUPM_Worker tmp_func(degree_lpm, degree_upm, x, y, target_x, target_y, output);
   parallelFor(0, output.size(), tmp_func);
   return(output);
 }
