@@ -31,22 +31,18 @@
 #' ## Full covariance matrix
 #' cov.mtx$cov.matrix
 #' @export
-
-
 PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
-
-  if(is.null(target)) target <- mean(variable)
-
-  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
-
+  if(any(class(variable)%in%c("tbl","data.table"))) {
+    variable <- as.data.frame(variable)
+  }
+  
   n <- ncol(variable)
-  if(is.null(n)){stop("supply a matrix-like 'variable'")}
-
-  clpms <- list()
-  cupms <- list()
-  dlpms <- list()
-  dupms <- list()
-
+  if(is.null(n)){
+    stop("supply a matrix-like 'variable'")
+  }
+  if(is.null(target) | !is.numeric(target)) {
+    target <- colMeans(variable)
+  }
   if(is.null(ncores)) {
     if(length(variable)<1000){
       num_cores <- 1
@@ -56,73 +52,66 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
   } else {
     num_cores <- ncores
   }
-
   if(num_cores > 1){
+    # multthread foreach
+    clpms <- list()
+    cupms <- list()
+    dlpms <- list()
+    dupms <- list()
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
-  }
-
-  matrices <- list()
-
-  i <- 1:n
-
-  all_quadrants <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-    return(list(Co.LPM(degree.x, degree.y, x, y, target.x, target.y),
-                Co.UPM(degree.x, degree.y, x, y, target.x, target.y),
-                D.LPM(degree.x, degree.y, x, y, target.x, target.y),
-                D.UPM(degree.x, degree.y, x, y, target.x, target.y)))
-  }
-
-  matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table"))%dopar%{
-    if(is.numeric(target)){
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]) )
-
-      clpms <- lapply(all_pms, `[[`, 1)
-      cupms <- lapply(all_pms, `[[`, 2)
-      dlpms <- lapply(all_pms, `[[`, 3)
-      dupms <- lapply(all_pms, `[[`, 4)
-    } else {
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-
-      clpms <- lapply(all_pms, `[[`, 1)
-      cupms <- lapply(all_pms, `[[`, 2)
-      dlpms <- lapply(all_pms, `[[`, 3)
-      dupms <- lapply(all_pms, `[[`, 4)
+    matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table")) %dopar% {
+      clpms <- sapply(1:n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree_x = LPM.degree, degree_y = LPM.degree, target_x = target[i], target_y = target[b]))
+      cupms <- sapply(1:n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree_x = UPM.degree, degree_y = UPM.degree, target_x = target[i], target_y = target[b]))
+      dlpms <- sapply(1:n, function(b) D.LPM( x = variable[ , i], y = variable[ , b], degree_x = LPM.degree, degree_y = LPM.degree, target_x = target[i], target_y = target[b]))
+      dupms <- sapply(1:n, function(b) D.UPM( x = variable[ , i], y = variable[ , b], degree_x = UPM.degree, degree_y = UPM.degree, target_x = target[i], target_y = target[b]))
+      matrices <- list()
+      matrices$clpm <- unlist(clpms)
+      matrices$cupm <- unlist(cupms)
+      matrices$dlpm <- unlist(dlpms)
+      matrices$dupm <- unlist(dupms)
+      return(matrices)
     }
-
-    matrices$clpm <- unlist(clpms)
-    matrices$cupm <- unlist(cupms)
-    matrices$dlpm <- unlist(dlpms)
-    matrices$dupm <- unlist(dupms)
-    return(matrices)
-  }
-
-  if(num_cores > 1){
     parallel::stopCluster(cl)
     registerDoSEQ()
+    clpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 1))
+    cupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 2))
+    dlpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 3))
+    dupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 4))
+  }else{
+    # singlethread
+    clpms.matrix <- list()
+    cupms.matrix <- list()
+    dlpms.matrix <- list()
+    dupms.matrix <- list()
+    for(i in 1 : n){
+      clpms.matrix[[i]] <- sapply(1:n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree_x = LPM.degree, degree_y = LPM.degree, target_x = target[i], target_y = target[b]))
+      cupms.matrix[[i]] <- sapply(1:n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree_x = UPM.degree, degree_y = UPM.degree, target_x = target[i], target_y = target[b]))
+      dlpms.matrix[[i]] <- sapply(1:n, function(b) D.LPM( x = variable[ , i], y = variable[ , b], degree_x = LPM.degree, degree_y = LPM.degree, target_x = target[i], target_y = target[b]))
+      dupms.matrix[[i]] <- sapply(1:n, function(b) D.UPM( x = variable[ , i], y = variable[ , b], degree_x = UPM.degree, degree_y = UPM.degree, target_x = target[i], target_y = target[b]))
+    }
+    clpm.matrix <- matrix(unlist(clpms.matrix), n, n)
+    cupm.matrix <- matrix(unlist(cupms.matrix), n, n)
+    dlpm.matrix <- matrix(unlist(dlpms.matrix), n, n)
+    dupm.matrix <- matrix(unlist(dupms.matrix), n, n)
   }
-
-
-  clpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 1))
-  cupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 2))
-  dlpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 3))
-  dupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 4))
-
+  
+  
   colnames(clpm.matrix) <- colnames(variable)
   rownames(clpm.matrix) <- colnames(variable)
-
+  
   colnames(cupm.matrix) <- colnames(variable)
   rownames(cupm.matrix) <- colnames(variable)
-
+  
   diag(dlpm.matrix) <- 0
   colnames(dlpm.matrix) <- colnames(variable)
   rownames(dlpm.matrix) <- colnames(variable)
-
+  
   diag(dupm.matrix) <- 0
   colnames(dupm.matrix) <- colnames(variable)
   rownames(dupm.matrix) <- colnames(variable)
-
-
+  
+  
   if(pop.adj){
     adjustment <- length(variable[ , 1]) / (length(variable[ , 1]) - 1)
     clpm.matrix <- clpm.matrix*adjustment
@@ -130,9 +119,9 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
     dlpm.matrix <- dlpm.matrix*adjustment
     dupm.matrix <- dupm.matrix*adjustment
   }
-
+  
   cov.matrix <- cupm.matrix + clpm.matrix - dupm.matrix - dlpm.matrix
-
+  
   return(list(cupm = cupm.matrix,
               dupm = dupm.matrix,
               dlpm = dlpm.matrix,
