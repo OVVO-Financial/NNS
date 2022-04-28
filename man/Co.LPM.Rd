@@ -12,9 +12,9 @@ Co.LPM(degree_x, degree_y, x, y, target_x, target_y)
 
 \item{degree_y}{integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.}
 
-\item{x}{a numeric vector.}
+\item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
-\item{y}{a numeric vector of equal length to \code{x}.}
+\item{y}{a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.}
 
 \item{target_x}{numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
 
