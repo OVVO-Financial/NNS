@@ -116,11 +116,11 @@ double CoUPM_C(
     return 0;
   double out=0;
   for(size_t i=0; i<min_size; i++){
-    double x1=(x[i] - target_x);
-    if (x1<=0) continue;
+    double x1=(target_x-x[i]);
+    if (x1>0) continue;
     
-    double y1=(y[i] - target_y);
-    if (y1<=0) continue;
+    double y1=(target_y-y[i]);
+    if (y1>0) continue;
     
     out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
   }
@@ -141,11 +141,11 @@ double CoLPM_C(
     return 0;
   double out=0;
   for(size_t i=0; i<min_size; i++){
-    double x1=(target_x-x[i]);
-    if (x1<=0) continue;
+    double x1=(x[i]-target_x);
+    if (x1>0) continue;
     
-    double y1=(target_y-y[i]);
-    if (y1<=0) continue;
+    double y1=(y[i]-target_y);
+    if (y1>0) continue;
     
     out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
   }
@@ -167,11 +167,11 @@ double DLPM_C(
     return 0;
   double out=0;
   for(size_t i=0; i<min_size; i++){
-    double x1=(x[i]-target_x);
-    if (x1<=0) continue;
+    double x1=(target_x-x[i]);
+    if (x1>0) continue;
     
-    double y1=(target_y-y[i]);
-    if (y1<=0) continue;
+    double y1=(y[-i]-target_y);
+    if (y1>0) continue;
     
     out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
   }
@@ -193,11 +193,11 @@ double DUPM_C(
     return 0;
   double out=0;
   for(size_t i=0; i<min_size; i++){
-    double x1=(target_x-x[i]);
-    if (x1<=0) continue;
+    double x1=(x[i]-target_x);
+    if (x1>0) continue;
     
-    double y1=(y[i]-target_y);
-    if (y1<=0) continue;
+    double y1=(target_y-y[i]);
+    if (y1>0) continue;
     
     out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
   }
