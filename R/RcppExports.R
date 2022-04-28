@@ -44,7 +44,7 @@ UPM <- function(degree, target, variable) {
 #' (Lower Left Quadrant 4)
 #'
 #' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-#' @param degree_lpm integer; Degree for lower deviations.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
+#' @param degree_lpm integer; Degree for variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -66,8 +66,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' (Upper Right Quadrant 1)
 #'
 #' This function generates a co-upper partial moment between two equal length variables for any degree or target.
-#' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
-#' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+#' @param degree_upm integer; Degree for variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -89,8 +88,8 @@ Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
 #' (Lower Right Quadrant 3)
 #'
 #' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
-#' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
-#' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+#' @param degree_lpm integer; Degree for variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+#' @param degree_upm integer; Degree for variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -112,8 +111,8 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' (Upper Left Quadrant 2)
 #'
 #' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
-#' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
-#' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+#' @param degree_lpm integer; Degree for variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+#' @param degree_upm integer; Degree for variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.

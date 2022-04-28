@@ -8,7 +8,7 @@
 Co.LPM(degree_lpm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_lpm}{integer; Degree for lower deviations.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
+\item{degree_lpm}{integer; Degree for variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.}
 
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 

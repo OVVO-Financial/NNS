@@ -8,6 +8,10 @@
 D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 \arguments{
+\item{degree_lpm}{integer; Degree for variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.}
+
+\item{degree_upm}{integer; Degree for variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.}
+
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
 \item{y}{a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.}
@@ -15,10 +19,6 @@ D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 \item{target_x}{numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
 
 \item{target_y}{numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
-
-\item{degree_x}{integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
-
-\item{degree_y}{integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.}
 }
 \value{
 Divergent LPM of two variables
