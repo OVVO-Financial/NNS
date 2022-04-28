@@ -27,7 +27,7 @@ UPM.ratio(0, mean(x), x)
 ## Joint Upper CDF
 \dontrun{
 x <- rnorm(5000) ; y <- rnorm(5000)
-plot3d(x, y, Co.UPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 zlab = "Probability", box = FALSE)
 }
 }

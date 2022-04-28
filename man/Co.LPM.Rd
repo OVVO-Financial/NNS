@@ -5,20 +5,18 @@
 \title{Co-Lower Partial Moment
 (Lower Left Quadrant 4)}
 \usage{
-Co.LPM(degree_x, degree_y, x, y, target_x, target_y)
+Co.LPM(degree_lpm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_x}{integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
-
-\item{degree_y}{integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.}
+\item{degree_lpm}{integer; Degree for lower deviations.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
 
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
 \item{y}{a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.}
 
-\item{target_x}{numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
+\item{target_x}{numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
 
-\item{target_y}{numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
+\item{target_y}{numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
 }
 \value{
 Co-LPM of two variables
@@ -29,7 +27,7 @@ This function generates a co-lower partial moment for between two equal length v
 \examples{
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
-Co.LPM(0, 0, x, y, mean(x), mean(y))
+Co.LPM(0, x, y, mean(x), mean(y))
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
