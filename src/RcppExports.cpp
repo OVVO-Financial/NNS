@@ -35,62 +35,60 @@ BEGIN_RCPP
 END_RCPP
 }
 // CoLPM_CPv
-NumericVector CoLPM_CPv(const double degree_x, const double degree_y, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
-RcppExport SEXP _NNS_CoLPM_CPv(SEXP degree_xSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector CoLPM_CPv(const double degree_lpm, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
+RcppExport SEXP _NNS_CoLPM_CPv(SEXP degree_lpmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const double >::type degree_x(degree_xSEXP);
-    Rcpp::traits::input_parameter< const double >::type degree_y(degree_ySEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_lpm(degree_lpmSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(CoLPM_CPv(degree_x, degree_y, x, y, target_x, target_y));
+    rcpp_result_gen = Rcpp::wrap(CoLPM_CPv(degree_lpm, x, y, target_x, target_y));
     return rcpp_result_gen;
 END_RCPP
 }
 // CoUPM_CPv
-NumericVector CoUPM_CPv(const double degree_x, const double degree_y, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
-RcppExport SEXP _NNS_CoUPM_CPv(SEXP degree_xSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector CoUPM_CPv(const double degree_upm, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
+RcppExport SEXP _NNS_CoUPM_CPv(SEXP degree_upmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const double >::type degree_x(degree_xSEXP);
-    Rcpp::traits::input_parameter< const double >::type degree_y(degree_ySEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_upm(degree_upmSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(CoUPM_CPv(degree_x, degree_y, x, y, target_x, target_y));
+    rcpp_result_gen = Rcpp::wrap(CoUPM_CPv(degree_upm, x, y, target_x, target_y));
     return rcpp_result_gen;
 END_RCPP
 }
 // DLPM_CPv
-NumericVector DLPM_CPv(const double degree_x, const double degree_y, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
-RcppExport SEXP _NNS_DLPM_CPv(SEXP degree_xSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector DLPM_CPv(const double degree_lpm, const double degree_upm, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
+RcppExport SEXP _NNS_DLPM_CPv(SEXP degree_lpmSEXP, SEXP degree_upmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const double >::type degree_x(degree_xSEXP);
-    Rcpp::traits::input_parameter< const double >::type degree_y(degree_ySEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_lpm(degree_lpmSEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_upm(degree_upmSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(DLPM_CPv(degree_x, degree_y, x, y, target_x, target_y));
+    rcpp_result_gen = Rcpp::wrap(DLPM_CPv(degree_lpm, degree_upm, x, y, target_x, target_y));
     return rcpp_result_gen;
 END_RCPP
 }
 // DUPM_CPv
-NumericVector DUPM_CPv(const double degree_x, const double degree_y, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
-RcppExport SEXP _NNS_DUPM_CPv(SEXP degree_xSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector DUPM_CPv(const double degree_lpm, const double degree_upm, const NumericVector x, const NumericVector y, const NumericVector target_x, const NumericVector target_y);
+RcppExport SEXP _NNS_DUPM_CPv(SEXP degree_lpmSEXP, SEXP degree_upmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const double >::type degree_x(degree_xSEXP);
-    Rcpp::traits::input_parameter< const double >::type degree_y(degree_ySEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_lpm(degree_lpmSEXP);
+    Rcpp::traits::input_parameter< const double >::type degree_upm(degree_upmSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const NumericVector >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(DUPM_CPv(degree_x, degree_y, x, y, target_x, target_y));
+    rcpp_result_gen = Rcpp::wrap(DUPM_CPv(degree_lpm, degree_upm, x, y, target_x, target_y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -98,8 +96,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
     {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
-    {"_NNS_CoLPM_CPv", (DL_FUNC) &_NNS_CoLPM_CPv, 6},
-    {"_NNS_CoUPM_CPv", (DL_FUNC) &_NNS_CoUPM_CPv, 6},
+    {"_NNS_CoLPM_CPv", (DL_FUNC) &_NNS_CoLPM_CPv, 5},
+    {"_NNS_CoUPM_CPv", (DL_FUNC) &_NNS_CoUPM_CPv, 5},
     {"_NNS_DLPM_CPv", (DL_FUNC) &_NNS_DLPM_CPv, 6},
     {"_NNS_DUPM_CPv", (DL_FUNC) &_NNS_DUPM_CPv, 6},
     {NULL, NULL, 0}

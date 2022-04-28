@@ -11,7 +11,11 @@ BugReports: https://github.com/OVVO-Financial/NNS/issues
 RoxygenNote: 7.1.2
 Depends: R (>= 3.5.0), doParallel
 Imports: caret, data.table, dtw, dynlm, meboot, Quandl, Rcpp, RcppParallel, RcppThread, Rfast, rgl, stringr, tdigest, tseries, zoo
-Suggests: knitr, rmarkdown
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 LinkingTo: Rcpp, RcppParallel
 SystemRequirements: GNU make
+Config/testthat/edition: 3
