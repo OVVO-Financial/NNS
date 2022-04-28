@@ -5,20 +5,20 @@
 \title{Divergent-Upper Partial Moment
 (Upper Left Quadrant 2)}
 \usage{
-D.UPM(degree_x, degree_y, x, y, target_x, target_y)
+D.UPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_x}{integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
-
-\item{degree_y}{integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.}
-
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
 \item{y}{a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.}
 
-\item{target_x}{numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
+\item{target_x}{numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
 
-\item{target_y}{numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
+\item{target_y}{numeric; Target for upper deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
+
+\item{degree_x}{integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.}
+
+\item{degree_y}{integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.}
 }
 \value{
 Divergent UPM of two variables

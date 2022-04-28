@@ -35,7 +35,7 @@ plot(sort(x), lpm_cdf_1)
 
 ## Joint CDF
 x <- rnorm(5000) ; y <- rnorm(5000)
-plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 zlab = "Probability", box = FALSE)
 }
 }
