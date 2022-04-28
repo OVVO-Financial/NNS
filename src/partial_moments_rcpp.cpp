@@ -138,7 +138,8 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool d_x_1=(degree_x==1), d_y_1=(degree_y==1);
+  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
+       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i] - target_x);
     if (x1<=0) continue;
@@ -146,6 +147,9 @@ double CoUPM_C(
     double y1=(y[i] - target_y);
     if (y1<=0) continue;
     
+	if(d_x_0) x1=(x1==0?0:1);
+	if(d_y_0) y1=(y1==0?0:1);
+	
     if(d_x_1 && d_y_1)
       out += x1 * y1;
     else if(d_x_1)
@@ -171,7 +175,8 @@ double CoLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1), d_y_1=(degree_y==1);
+  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
+       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     if (x1<=0) continue;
@@ -179,12 +184,15 @@ double CoLPM_C(
     double y1=(target_y-y[i]);
     if (y1<=0) continue;
     
+	if(d_x_0) x1=(x1==0?0:1);
+	if(d_y_0) y1=(y1==0?0:1);
+	
     if(d_x_1 && d_y_1)
       out += x1 * y1;
     else if(d_x_1)
       out += x1 * std::pow(y1, degree_y);
     else if(d_y_1)
-      out += x1 * std::pow(y1, degree_y);
+      out += std::pow(x1, degree_x) * y1;
     else
       out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
   }
@@ -205,7 +213,8 @@ double DLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1), d_y_1=(degree_y==1);
+  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
+       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     if (x1<=0) continue;
@@ -213,6 +222,9 @@ double DLPM_C(
     double y1=(target_y-y[i]);
     if (y1<=0) continue;
     
+	if(d_x_0) x1=(x1==0?0:1);
+	if(d_y_0) y1=(y1==0?0:1);
+	
     if(d_x_1 && d_y_1)
       out += x1 * y1;
     else if(d_x_1)
@@ -239,7 +251,8 @@ double DUPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool d_x_1=(degree_x==1), d_y_1=(degree_y==1);
+  bool d_x_1=(degree_x==1 || degree_x==0), d_y_1=(degree_y==1 || degree_y==0),
+       d_x_0=(degree_x==0), d_y_0=(degree_y==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     if (x1<=0) continue;
@@ -247,6 +260,9 @@ double DUPM_C(
     double y1=(y[i]-target_y);
     if (y1<=0) continue;
     
+	if(d_x_0) x1=(x1==0?0:1);
+	if(d_y_0) y1=(y1==0?0:1);
+	
     if(d_x_1 && d_y_1)
       out += x1 * y1;
     else if(d_x_1)
