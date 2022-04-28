@@ -11,7 +11,7 @@ UPM(degree, target, variable)
 
 \item{target}{numeric; Typically set to mean, but does not have to be. (Vectorized)}
 
-\item{variable}{a numeric vector.}
+\item{variable}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 }
 \value{
 UPM of variable
