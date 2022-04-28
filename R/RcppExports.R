@@ -44,12 +44,11 @@ UPM <- function(degree, target, variable) {
 #' (Lower Left Quadrant 4)
 #'
 #' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-#' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
-#' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
+#' @param degree_lpm integer; Degree for lower deviations.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+#' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+#' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -57,10 +56,10 @@ UPM <- function(degree, target, variable) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.LPM(0, 0, x, y, mean(x), mean(y))
+#' Co.LPM(0, x, y, mean(x), mean(y))
 #' @export
-Co.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call(`_NNS_CoLPM_CPv`, degree_x, degree_y, x, y, target_x, target_y)
+Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
+    .Call(`_NNS_CoLPM_CPv`, degree_lpm, x, y, target_x, target_y)
 }
 
 #' Co-Upper Partial Moment
@@ -71,8 +70,8 @@ Co.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+#' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+#' @param target_y numeric; Target for upside deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -80,10 +79,10 @@ Co.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.UPM(0, 0, x, y, mean(x), mean(y))
+#' Co.UPM(0, x, y, mean(x), mean(y))
 #' @export
-Co.UPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call(`_NNS_CoUPM_CPv`, degree_x, degree_y, x, y, target_x, target_y)
+Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_CoUPM_CPv`, degree_upm, x, y, target_x, target_y)
 }
 
 #' Divergent-Lower Partial Moment
@@ -94,8 +93,8 @@ Co.UPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+#' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+#' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -105,8 +104,8 @@ Co.UPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' D.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
-D.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call(`_NNS_DLPM_CPv`, degree_x, degree_y, x, y, target_x, target_y)
+D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_DLPM_CPv`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
 #' Divergent-Upper Partial Moment
@@ -117,8 +116,8 @@ D.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
+#' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
+#' @param target_y numeric; Target for upper deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -128,7 +127,7 @@ D.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' D.UPM(0, 0, x, y, mean(x), mean(y))
 #' @export
-D.UPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
-    .Call(`_NNS_DUPM_CPv`, degree_x, degree_y, x, y, target_x, target_y)
+D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_DUPM_CPv`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
