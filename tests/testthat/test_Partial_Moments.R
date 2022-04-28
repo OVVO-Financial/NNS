@@ -87,11 +87,10 @@ T1 <- matrix(c(1.3333333, 0.6666667, 0.6666667, 0.3333333), ncol=2)
 T2 <- matrix(c(0.8888889, 0.4444444, 0.4444444, 0.2222222), ncol=2)
 
 
-# TODO - check nns return not ok
 R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = TRUE,  ncores=1)$cov.matrix
 R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = FALSE, ncores=1)$cov.matrix
 test_that(
-	"NNS::PM.matrix", {
+	"NNS::PM.matrix - one thread", {
 		expect_equal(T1, cov(A), tolerance=1e-5)
 		expect_equal(R1, T1, tolerance=1e-5)
 		expect_equal(R2, T2, tolerance=1e-5)
@@ -101,7 +100,7 @@ test_that(
 R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = TRUE,  ncores=2)$cov.matrix
 R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = FALSE, ncores=2)$cov.matrix
 test_that(
-	"NNS::PM.matrix", {
+	"NNS::PM.matrix - two threads", {
 		expect_equal(T1, cov(A), tolerance=1e-5)
 		expect_equal(R1, T1, tolerance=1e-5)
 		expect_equal(R2, T2, tolerance=1e-5)
