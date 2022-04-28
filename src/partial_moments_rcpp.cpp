@@ -390,7 +390,7 @@ struct DUPM_Worker : public Worker
 //' @examples
 //' set.seed(123)
 //' x <- rnorm(100) ; y <- rnorm(100)
-//' Co.LPM(0, 0, x, y, mean(x), mean(y))
+//' Co.LPM(0, x, y, mean(x), mean(y))
 //' @export
 // [[Rcpp::export("Co.LPM", rng = false)]]
 NumericVector CoLPM_CPv(
@@ -425,7 +425,7 @@ NumericVector CoLPM_CPv(
 //' @examples
 //' set.seed(123)
 //' x <- rnorm(100) ; y <- rnorm(100)
-//' Co.UPM(0, 0, x, y, mean(x), mean(y))
+//' Co.UPM(0, x, y, mean(x), mean(y))
 //' @export
 // [[Rcpp::export("Co.UPM", rng = false)]]
 NumericVector CoUPM_CPv(
