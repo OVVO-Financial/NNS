@@ -36,7 +36,7 @@
 PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
   
   if(is.null(target)) target <- mean(variable)
-  
+
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
   
   n <- ncol(variable)
@@ -66,23 +66,23 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
   
   i <- 1:n
   
-  all_quadrants <- function(degree.lpm, degree.upm, x, y, target.x = mean(x), target.y = mean(y)){
-    return(list(Co.LPM(degree.lpm, x, y, target.x, target.y),
-                Co.UPM(degree.upm, x, y, target.x, target.y),
-                D.LPM(degree.lpm, degree.upm, x, y, target.x, target.y),
-                D.UPM(degree.lpm, degree.upm, x, y, target.x, target.y)))
+  all_quadrants <- function(degree_lpm, degree_upm, x, y, target_x = mean(x), target_y = mean(y)){
+    return(list(Co.LPM(degree_lpm = degree_lpm, x = x, y = y, target_x = target_x, target_y = target_y),
+                Co.UPM(degree_upm = degree_upm, x = x, y = y, target_x = target_x, target_y = target_y),
+                D.LPM(degree_lpm = degree_lpm, degree_upm = degree_upm, x = x, y = y, target_x = target_x, target_y = target_y),
+                D.UPM(degree_lpm = degree_lpm, degree_upm = degree_upm, x = x, y = y, target_x = target_x, target_y = target_y)))
   }
   
   matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table"))%dopar%{
     if(is.numeric(target)){
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.lpm = LPM.degree, degree.upm = LPM.degree, target.x = target[i], target.y = target[b]) )
+      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = target[i], target_y = target[b]) )
       
       clpms <- lapply(all_pms, `[[`, 1)
       cupms <- lapply(all_pms, `[[`, 2)
       dlpms <- lapply(all_pms, `[[`, 3)
       dupms <- lapply(all_pms, `[[`, 4)
     } else {
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.lpm = LPM.degree, degree.upm = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = mean(variable[ , i]), target_y = mean(variable[ , b])))
       
       clpms <- lapply(all_pms, `[[`, 1)
       cupms <- lapply(all_pms, `[[`, 2)
@@ -170,7 +170,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
 #'
 #' ## Joint CDF
 #' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 #' zlab = "Probability", box = FALSE)
 #' }
 #' @export
@@ -206,7 +206,7 @@ LPM.ratio <- function(degree, target, variable){
 #' ## Joint Upper CDF
 #' \dontrun{
 #' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.UPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 #' zlab = "Probability", box = FALSE)
 #' }
 #' @export
