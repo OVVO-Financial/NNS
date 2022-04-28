@@ -355,20 +355,20 @@ struct DUPM_Worker : public Worker
   const RVector<double> y;
   const RVector<double> target_x;
   const RVector<double> target_y;
-  const size_t n_t_lpm;
-  const size_t n_t_upm;
+  const size_t n_t_x;
+  const size_t n_t_y;
   RVector<double> output;
   DUPM_Worker(
     const double degree_lpm, const double degree_upm, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y,
     NumericVector output
-  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_lpm(target_lpm), target_upm(target_upm), 
+  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
   n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++){
-      output[i] = DUPM_C(degree_lpm, degree_upm, x, y, target_lpm[i%n_t_lpm], target_upm[i%n_t_upm]); 
+      output[i] = DUPM_C(degree_lpm, degree_upm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); 
     }
   }
 };
@@ -395,7 +395,6 @@ struct DUPM_Worker : public Worker
 // [[Rcpp::export("Co.LPM", rng = false)]]
 NumericVector CoLPM_CPv(
     const double degree_lpm, 
-    const NumericVector x, const NumericVector y, 
     const NumericVector x, const NumericVector y, 
     const NumericVector target_x, const NumericVector target_y
 ) {
