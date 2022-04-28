@@ -34,19 +34,19 @@
 
 
 PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
-
+  
   if(is.null(target)) target <- mean(variable)
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
-
+  
   n <- ncol(variable)
   if(is.null(n)){stop("supply a matrix-like 'variable'")}
-
+  
   clpms <- list()
   cupms <- list()
   dlpms <- list()
   dupms <- list()
-
+  
   if(is.null(ncores)) {
     if(length(variable)<1000){
       num_cores <- 1
@@ -56,73 +56,73 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
   } else {
     num_cores <- ncores
   }
-
+  
   if(num_cores > 1){
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
   }
-
+  
   matrices <- list()
-
+  
   i <- 1:n
-
-  all_quadrants <- function(degree.x, degree.y, x, y, target.x = mean(x), target.y = mean(y)){
-    return(list(Co.LPM(degree.x, degree.y, x, y, target.x, target.y),
-                Co.UPM(degree.x, degree.y, x, y, target.x, target.y),
-                D.LPM(degree.x, degree.y, x, y, target.x, target.y),
-                D.UPM(degree.x, degree.y, x, y, target.x, target.y)))
+  
+  all_quadrants <- function(degree.lpm, degree.upm, x, y, target.x = mean(x), target.y = mean(y)){
+    return(list(Co.LPM(degree.lpm, x, y, target.x, target.y),
+                Co.UPM(degree.upm, x, y, target.x, target.y),
+                D.LPM(degree.lpm, degree.upm, x, y, target.x, target.y),
+                D.UPM(degree.lpm, degree.upm, x, y, target.x, target.y)))
   }
-
+  
   matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table"))%dopar%{
     if(is.numeric(target)){
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = target[i], target.y = target[b]) )
-
+      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.lpm = LPM.degree, degree.upm = LPM.degree, target.x = target[i], target.y = target[b]) )
+      
       clpms <- lapply(all_pms, `[[`, 1)
       cupms <- lapply(all_pms, `[[`, 2)
       dlpms <- lapply(all_pms, `[[`, 3)
       dupms <- lapply(all_pms, `[[`, 4)
     } else {
-      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.x = LPM.degree, degree.y = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
-
+      all_pms <- lapply(1 : n, function(b) all_quadrants(x = variable[ , i], y = variable[ , b], degree.lpm = LPM.degree, degree.upm = LPM.degree, target.x = mean(variable[ , i]), target.y = mean(variable[ , b])))
+      
       clpms <- lapply(all_pms, `[[`, 1)
       cupms <- lapply(all_pms, `[[`, 2)
       dlpms <- lapply(all_pms, `[[`, 3)
       dupms <- lapply(all_pms, `[[`, 4)
     }
-
+    
     matrices$clpm <- unlist(clpms)
     matrices$cupm <- unlist(cupms)
     matrices$dlpm <- unlist(dlpms)
     matrices$dupm <- unlist(dupms)
     return(matrices)
   }
-
+  
   if(num_cores > 1){
     parallel::stopCluster(cl)
     registerDoSEQ()
   }
-
-
+  
+  
   clpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 1))
   cupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 2))
   dlpm.matrix <- do.call(rbind,lapply(matrices, `[[`, 3))
   dupm.matrix <- do.call(rbind,lapply(matrices, `[[`, 4))
-
+  
   colnames(clpm.matrix) <- colnames(variable)
   rownames(clpm.matrix) <- colnames(variable)
-
+  
   colnames(cupm.matrix) <- colnames(variable)
   rownames(cupm.matrix) <- colnames(variable)
-
+  
   diag(dlpm.matrix) <- 0
   colnames(dlpm.matrix) <- colnames(variable)
   rownames(dlpm.matrix) <- colnames(variable)
-
+  
   diag(dupm.matrix) <- 0
   colnames(dupm.matrix) <- colnames(variable)
   rownames(dupm.matrix) <- colnames(variable)
-
-
+  
+  
   if(pop.adj){
     adjustment <- length(variable[ , 1]) / (length(variable[ , 1]) - 1)
     clpm.matrix <- clpm.matrix*adjustment
@@ -130,9 +130,9 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
     dlpm.matrix <- dlpm.matrix*adjustment
     dupm.matrix <- dupm.matrix*adjustment
   }
-
+  
   cov.matrix <- cupm.matrix + clpm.matrix - dupm.matrix - dlpm.matrix
-
+  
   return(list(cupm = cupm.matrix,
               dupm = dupm.matrix,
               dlpm = dlpm.matrix,
@@ -176,13 +176,13 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
 #' @export
 
 LPM.ratio <- function(degree, target, variable){
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-
+  
   lpm <- LPM(degree, target, variable)
-
+  
   if(degree>0) area <- lpm + UPM(degree, target, variable) else area <- 1
-
+  
   return(lpm / area)
 }
 
@@ -213,13 +213,13 @@ LPM.ratio <- function(degree, target, variable){
 
 
 UPM.ratio <- function(degree, target, variable){
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-
+  
   upm <- UPM(degree, target, variable)
-
+  
   if(degree>0) area <- LPM(degree, target, variable) + upm else area <- 1
-
+  
   return(upm / area)
 }
 
@@ -251,11 +251,11 @@ UPM.ratio <- function(degree, target, variable){
 
 
 NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TRUE){
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-
+  
   if(is.null(target)) target <- sort(variable)
-
+  
   # d/dx approximation
   if(is.null(bins)){
     bins <- density(variable)$bw
@@ -264,14 +264,14 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
     d.dx <- (abs(max(target)) + abs(min(target))) / bins
     tgt <- seq(min(target), max(target), d.dx)
   }
-
-
-
+  
+  
+  
   CDF <- NNS.CDF(variable, plot = FALSE, degree = degree)$Function
   PDF <- pmax(dy.dx(unlist(CDF[,1]), unlist(CDF[,2]), eval.point = tgt, deriv.method = "FD")$First, 0)
-
+  
   if(plot){plot(tgt, PDF, col = 'steelblue', type = 'l', lwd = 3, xlab = "X", ylab = "Density")}
-
+  
   return(data.table::data.table(cbind("Intervals" = tgt, PDF)))
 }
 
@@ -322,10 +322,10 @@ NNS.PDF <- function(variable, degree = 1, target = NULL, bins = NULL , plot = TR
 
 
 NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
-
+  
   if(any(class(variable)%in%c("tbl","data.table")) && dim(variable)[2]==1) variable <- as.vector(unlist(variable))
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.data.frame(variable)
-
+  
   if(!is.null(target)){
     if(is.null(dim(variable)) || dim(variable)[2]==1){
       if(target<min(variable) || target>max(variable))   stop("Please make sure target is within the observed values of variable.")
@@ -334,67 +334,67 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
       if(target[2]<min(variable[,2]) || target[2]>max(variable[,2])) stop("Please make sure target 2 is within the observed values of variable 2.")
     }
   }
-
+  
   type <- tolower(type)
-
+  
   if(!(type%in%c("cdf","survival", "hazard", "cumulative hazard"))) stop(paste("Please select a type from: ", "`CDF`, ", "`survival`, ",  "`hazard`, ", "`cumulative hazard`"))
-
+  
   if(is.null(dim(variable)) || dim(variable)[2] == 1){
-
+    
     overall_target <- sort(variable)
     x <- overall_target
-
+    
     if(degree > 0){
       CDF <- LPM.ratio(degree, overall_target, variable)
     } else {
       cdf_fun <- ecdf(x)
       CDF <- cdf_fun(overall_target)
     }
-
-
+    
+    
     values <- cbind.data.frame(sort(variable), CDF)
     colnames(values) <- c(deparse(substitute(variable)), "CDF")
-
+    
     if(!is.null(target)){
       P <- LPM.ratio(degree, target, variable)
     } else {
       P <- NULL
     }
-
+    
     ylabel <- "Probability"
-
+    
     if(type == "survival"){
       CDF <- 1 - CDF
       P <- 1 - P
     }
-
-
+    
+    
     if(type == "hazard"){
       CDF <- exp(log(density(x, n = length(x))$y)-log(1-CDF))
-
+      
       ylabel <- "h(x)"
       P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
       CDF[is.infinite(CDF)] <- P[1]
       P <- P[-1]
     }
-
-
+    
+    
     if(type == "cumulative hazard"){
       CDF <- -log((1 - CDF))
-
+      
       ylabel <- "H(x)"
       P <- NNS.reg(x[-length(x)], CDF[-length(x)], order = "max", point.est = c(x[length(x)], target), plot = FALSE)$Point.est
-
+      
       CDF[is.infinite(CDF)] <- P[1]
       P <- P[-1]
     }
-
-
+    
+    
     if(plot){
       plot(x, CDF, pch = 19, col = 'steelblue', xlab = deparse(substitute(variable)), ylab = ylabel, main = toupper(type), type = "s", lwd = 2)
       points(x, CDF, pch = 19, col = 'steelblue')
       lines(x, CDF, lty=2, col = 'steelblue')
-
+      
       if(!is.null(target)){
         segments(target,0,target,P, col = "red", lwd = 2, lty = 2)
         segments(min(variable), P, target, P, col = "red", lwd = 2, lty = 2)
@@ -403,58 +403,58 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
         mtext(text = round(target,4), col = "red", side = 1, at = target,  las = 1)
       }
     }
-
+    
     values <- data.table::data.table(cbind.data.frame(x, CDF))
     colnames(values) <- c(deparse(substitute(variable)), ylabel)
-
-
+    
+    
     return(list("Function" = values ,
                 "target.value" = P))
-
+    
   } else {
     overall_target_1 <- (variable[,1])
     overall_target_2 <- (variable[,2])
-
-    CDF <- Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) /
+    
+    CDF <- Co.LPM(degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) /
       (
-        Co.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
-          Co.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+        Co.LPM(degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
+          Co.UPM(degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
           D.UPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2) +
           D.LPM(degree,degree, sort(variable[,1]), sort(variable[,2]), overall_target_1, overall_target_2)
       )
-
+    
     if(type == "survival"){
       CDF <- 1 - CDF
     }
-
+    
     if(type == "hazard"){
       CDF <- sort(variable) / (1 - CDF)
     }
-
+    
     if(type == "cumulative hazard"){
       CDF <- -log((1 - CDF))
     }
-
-
+    
+    
     if(!is.null(target)){
-      P <- Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) /
+      P <- Co.LPM(degree, variable[,1], variable[,2], target[1], target[2]) /
         (
-          Co.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
-            Co.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
+          Co.LPM(degree, variable[,1], variable[,2], target[1], target[2]) +
+            Co.UPM(degree, variable[,1], variable[,2], target[1], target[2]) +
             D.LPM(degree,degree, variable[,1], variable[,2], target[1], target[2]) +
             D.UPM(degree,degree, variable[,1], variable[,2], target[1], target[2])
         )
-
-
+      
+      
     } else {
       P <- NULL
     }
-
+    
     if(plot){
       plot3d(variable[,1], variable[,2], CDF, col = "steelblue",
              xlab = deparse(substitute(variable[,1])), ylab = deparse(substitute(variable[,2])),
              zlab = "Probability", box = FALSE, pch = 19)
-
+      
       if(!is.null(target)){
         points3d(target[1], target[2], P, col = "green", pch = 19)
         points3d(target[1], target[2], 0, col = "red", pch = 15, cex = 2)
@@ -468,13 +468,13 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
                 col = "red", lwd = 1, lty=3)
         text3d(max(variable[,1]), max(variable[,2]), P, texts = paste0("P = ", round(P,4)), pos = 4, col = "red")
       }
-
+      
     }
-
+    
   }
-
+  
   return(list("CDF" = data.table::data.table(cbind((variable), CDF = CDF)),
               "P" = P))
-
-
+  
+  
 }
