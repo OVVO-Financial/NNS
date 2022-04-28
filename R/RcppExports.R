@@ -7,7 +7,7 @@
 #'
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.
+#' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -26,7 +26,7 @@ LPM <- function(degree, target, variable) {
 #' This function generates a univariate upper partial moment for any degree or target.
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.
+#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -46,8 +46,8 @@ UPM <- function(degree, target, variable) {
 #' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
 #' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
-#' @param x a numeric vector.
-#' @param y a numeric vector of equal length to \code{x}.
+#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
 #' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-LPM of two variables
@@ -69,8 +69,8 @@ Co.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' This function generates a co-upper partial moment between two equal length variables for any degree or target.
 #' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
-#' @param x a numeric vector.
-#' @param y a numeric vector of equal length to \code{x}.
+#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
 #' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-UPM of two variables
@@ -92,8 +92,8 @@ Co.UPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
 #' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
-#' @param x a numeric vector.
-#' @param y a numeric vector of equal length to \code{x}.
+#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
 #' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent LPM of two variables
@@ -115,8 +115,8 @@ D.LPM <- function(degree_x, degree_y, x, y, target_x, target_y) {
 #' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
 #' @param degree_x integer; Degree for variable X.  \code{(degree_x = 0)} is frequency, \code{(degree_x = 1)} is area.
 #' @param degree_y integer; Degree for variable Y.  \code{(degree_y = 0)} is frequency, \code{(degree_y = 1)} is area.
-#' @param x a numeric vector.
-#' @param y a numeric vector of equal length to \code{x}.
+#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
 #' @param target_y numeric; Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent UPM of two variables
