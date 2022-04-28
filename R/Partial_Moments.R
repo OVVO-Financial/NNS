@@ -57,15 +57,11 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     matrices <- foreach(i = 1 : n, .packages = c("NNS", "data.table")) %dopar% {
-      clpms <- sapply(1:n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, target_x = target[i], target_y = target[b]))
-      cupms <- sapply(1:n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree_upm = UPM.degree, target_x = target[i], target_y = target[b]))
-      dlpms <- sapply(1:n, function(b) D.LPM( x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = target[i], target_y = target[b]))
-      dupms <- sapply(1:n, function(b) D.UPM( x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = target[i], target_y = target[b]))
       return(list(
-        clpm = unlist(clpms),
-        cupm = unlist(cupms),
-        dlpm = unlist(dlpms),
-        dupm = unlist(dupms)
+        clpm=unlist(sapply(1:n, function(b) Co.LPM(x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, target_x = target[i], target_y = target[b]))),
+        cupm=unlist(sapply(1:n, function(b) Co.UPM(x = variable[ , i], y = variable[ , b], degree_upm = UPM.degree, target_x = target[i], target_y = target[b]))),
+        dlpm=unlist(sapply(1:n, function(b) D.LPM( x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = target[i], target_y = target[b]))),
+        dupm=unlist(sapply(1:n, function(b) D.UPM( x = variable[ , i], y = variable[ , b], degree_lpm = LPM.degree, degree_upm = UPM.degree, target_x = target[i], target_y = target[b])))
       ))
     }
     parallel::stopCluster(cl)
