@@ -30,7 +30,7 @@
 #'
 #' ## Full covariance matrix
 #' cov.mtx$cov.matrix
-#' @export
+#' @
 PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj = FALSE, ncores = NULL){
   if(any(class(variable)%in%c("tbl","data.table"))) {
     variable <- as.data.frame(variable)
@@ -130,7 +130,6 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
   ))
 }
 
-
 #' Lower Partial Moment RATIO
 #'
 #' This function generates a standardized univariate lower partial moment for any degree or target.
@@ -159,7 +158,7 @@ PM.matrix <- function(LPM.degree, UPM.degree, target = NULL, variable, pop.adj =
 #'
 #' ## Joint CDF
 #' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.LPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 #' zlab = "Probability", box = FALSE)
 #' }
 #' @export
@@ -196,7 +195,7 @@ LPM.ratio <- function(degree, target, variable){
 #' ## Joint Upper CDF
 #' \dontrun{
 #' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.UPM(0, 0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
 #' zlab = "Probability", box = FALSE)
 #' }
 #' @export
