@@ -170,7 +170,7 @@ double DLPM_C(
     double x1=(target_x-x[i]);
     if (x1>0) continue;
     
-    double y1=(y[-i]-target_y);
+    double y1=(y[i]-target_y);
     if (y1>0) continue;
     
     out += std::pow(x1, degree_x) * std::pow(y1, degree_y);
