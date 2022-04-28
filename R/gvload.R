@@ -57,6 +57,8 @@
 
 
   .datatable.aware = TRUE
+  
+  options(datatable.verbose=FALSE)
 
   invisible(data.table::setDTthreads(1))
 
