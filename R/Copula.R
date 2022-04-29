@@ -16,7 +16,7 @@
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 #' A <- data.frame(x, y, z)
-#' NNS.copula(A, plot = TRUE, independence.overlay = TRUE)
+#' NNS.copula(A, target = colMeans(A), plot = TRUE, independence.overlay = TRUE)
 #'
 #' ### Target 0
 #' NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE)
