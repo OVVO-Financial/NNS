@@ -1009,8 +1009,10 @@ NumericVector LPM_ratio(const double &degree, const RObject &target, const RObje
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
     variable_vec=as<NumericVector>(variable);
-  else
+  else if (is<DataFrame>(variable))
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
+  else
+	Rcpp::stop("variable should be numeric vector, or data table");
   if (is<NumericVector>(target) && !target.isNULL()){
 	target_vec = as<NumericVector>(target);
   }else{
@@ -1058,8 +1060,10 @@ NumericVector UPM_ratio(const double &degree, const RObject &target, const RObje
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
     variable_vec=as<NumericVector>(variable);
-  else
+  else if (is<DataFrame>(variable))
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
+  else
+	Rcpp::stop("variable should be numeric vector, or data table");
   if (is<NumericVector>(target) && !target.isNULL()){
 	target_vec = as<NumericVector>(target);
   }else{
