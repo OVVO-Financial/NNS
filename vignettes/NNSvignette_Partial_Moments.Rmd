@@ -56,7 +56,7 @@ cov(x, y)
 
 ## Covariance Elements and Covariance Matrix
 ```{r cov_dec, warning=FALSE}
-PM.matrix(LPM.degree = 1, UPM.degree = 1,target = 'mean', variable = cbind(x, y), pop.adj = TRUE, ncores = 1)
+PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
 
 # Standard Covariance Matrix
 cov(cbind(x, y))
