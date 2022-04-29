@@ -525,7 +525,7 @@ NumericVector DUPM_CPv(
 
 
 
-void PMMatrix_CPv(
+void PMMatrix_Cv(
   const double &degree_lpm, 
   const double &degree_upm, 
   const RMatrix<double>::Column &x, 
@@ -555,10 +555,10 @@ void PMMatrix_CPv(
   //double x_less_target_upm, target_less_x_upm, y_less_target_upm, target_less_y_upm;
   double x_less_target_upm, y_less_target_upm, target_less_y_upm;
   for(size_t i = 0; i < rows; i++){
-    double x_less_target_lpm = (target_x - x[i]),
-           target_less_x_lpm = (x[i] - target_x),
-           y_less_target_lpm = (target_y - y[i]),
-           target_less_y_lpm = (y[i] - target_y);
+    double x_less_target_lpm = (x[i] - target_x),
+           target_less_x_lpm = (target_x - x[i]),
+           y_less_target_lpm = (y[i] - target_y),
+           target_less_y_lpm = (target_y - y[i]);
     bool   less_equal_zero_target_less_x = (target_less_x_lpm <= 0),
            less_equal_zero_target_less_y = (target_less_y_lpm <= 0),
            less_equal_zero_x_less_target = (x_less_target_lpm <= 0),
@@ -571,7 +571,7 @@ void PMMatrix_CPv(
 	)	// nothing to do with this row
         continue;
     // UPM values
-	if(d_upm_0){ // pow(0,0) == 0, pow(x,0) == 1
+	if(d_upm_0){ // pow(0,0) == 0, pow(!=0,0) == 1
         x_less_target_upm=(x_less_target_lpm==0?0:1);
         //target_less_x_upm=(target_less_x_lpm==0?0:1);
         y_less_target_upm=(y_less_target_lpm==0?0:1);
@@ -583,7 +583,7 @@ void PMMatrix_CPv(
         target_less_y_upm=target_less_y_lpm;
     }
 	// LPM values
-    if(d_lpm_0){ // pow(0,0) == 0, pow(x,0) == 1
+    if(d_lpm_0){ // pow(0,0) == 0, pow(!=0,0) == 1
         x_less_target_lpm=(x_less_target_lpm==0?0:1);
         target_less_x_lpm=(target_less_x_lpm==0?0:1);
         y_less_target_lpm=(y_less_target_lpm==0?0:1);
@@ -662,7 +662,7 @@ void PMMatrix_CPv(
     dLpm*=adjust;
     dUpm*=adjust;
   }
-  covMat=coUpm+coLpm-dUpm-dLpm;
+  covMat = coUpm + coLpm - dUpm - dLpm;
 }
 
 struct PMMatrix_Worker : public Worker
@@ -703,7 +703,7 @@ struct PMMatrix_Worker : public Worker
   void operator()(std::size_t begin, std::size_t end) {
     for (size_t i = begin; i < end; i++){
       for (size_t l = 0; l < variable_cols; l++){
-        PMMatrix_CPv(
+        PMMatrix_Cv(
           degree_lpm,
           degree_upm,
           variable.column(i),
