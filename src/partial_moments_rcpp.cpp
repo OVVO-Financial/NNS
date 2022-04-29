@@ -537,12 +537,14 @@ void PMMatrix_CPv(
   double &coLpm,
   double &coUpm,   
   double &dLpm, 
-  double &dUpm
+  double &dUpm,
+  double &covMat
 ){
   coLpm=0;
   coUpm=0;
   dLpm=0;
   dUpm=0; 
+  covMat=0;
   if(rows == 0)
     return;
   bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0),
@@ -660,6 +662,7 @@ void PMMatrix_CPv(
     dLpm*=adjust;
     dUpm*=adjust;
   }
+  covMat=coUpm+coLpm-dUpm-dLpm;
 }
 
 struct PMMatrix_Worker : public Worker
@@ -676,20 +679,23 @@ struct PMMatrix_Worker : public Worker
   RMatrix<double> coUpm;
   RMatrix<double> dLpm;
   RMatrix<double> dUpm;
+  RMatrix<double> covMat;
   PMMatrix_Worker(
     const double &degree_lpm, const double &degree_upm, 
     const NumericMatrix &variable, 
     const NumericVector &target,
     const bool &pop_adj,
     NumericMatrix &coLpm, NumericMatrix &coUpm,
-    NumericMatrix &dLpm,  NumericMatrix &dUpm
+    NumericMatrix &dLpm,  NumericMatrix &dUpm,
+    NumericMatrix &covMat
   ): 
     degree_lpm(degree_lpm), degree_upm(degree_upm), 
     variable(variable), target(target),
     variable_cols(variable.cols()), variable_rows(variable.rows()), target_length(target.size()), 
 	pop_adj(pop_adj),
     coLpm(coLpm), coUpm(coUpm), 
-    dLpm(dLpm), dUpm(dUpm)
+    dLpm(dLpm), dUpm(dUpm),
+	covMat(covMat)
   {
     if(variable_cols != target_length)
       Rcpp::stop("varible matrix cols != target vector length");
@@ -709,7 +715,8 @@ struct PMMatrix_Worker : public Worker
           coLpm(i,l),
           coUpm(i,l),
           dLpm(i,l),
-          dUpm(i,l)
+          dUpm(i,l),
+          covMat(i,l)
         );
       }
     }
@@ -765,14 +772,16 @@ List PMMatrix_CPv(
   NumericMatrix coUpm(variable_cols, variable_cols);
   NumericMatrix dLpm(variable_cols, variable_cols);
   NumericMatrix dUpm(variable_cols, variable_cols);
-  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm);
+  NumericMatrix covMat(variable_cols, variable_cols);
+  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
   parallelFor(0, variable_cols, tmp_func);
   return(
     List::create(
       Named("cupm") = coUpm,
       Named("dupm") = dUpm,
       Named("dlpm") = dLpm,
-      Named("clpm") = coLpm
+      Named("clpm") = coLpm,
+      Named("cov.matrix") = covMat
     )
   );
 }
