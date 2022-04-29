@@ -130,3 +130,36 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DUPM_CPv`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
+#' Partial Moment Matrix - Internal Use, without covariance and pop_adjust
+#'
+#'
+#' This function generates a co-partial moment matrix for the specified co-partial moment.
+#' @param LPM_degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.
+#' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
+#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
+#' @param variable a numeric matrix or data.frame.
+#' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM)
+#' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
+#' \url{https://www.ssrn.com/abstract=3457377}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+#' A <- cbind(x,y,z)
+#' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+#'
+#' ## Use of vectorized numeric targets (target_x, target_y, target_z)
+#' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+#'
+#' ## Calling Individual Partial Moment Quadrants
+#' cov.mtx <- PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+#' cov.mtx$cupm
+#'
+#' @export
+PMMatrix_CPv <- function(LPM_degree, UPM_degree, target, variable) {
+    .Call(`_NNS_PMMatrix_CPv`, LPM_degree, UPM_degree, target, variable)
+}
+

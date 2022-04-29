@@ -5,7 +5,7 @@ using namespace Rcpp;
 using namespace RcppParallel;
 
 
-double LPM_C(const double degree, const double target, const RVector<double> variable) {
+double LPM_C(const double &degree, const double &target, const RVector<double> &variable) {
   size_t n = variable.size();
   double out=0;
   if (degree==0){
@@ -27,7 +27,7 @@ double LPM_C(const double degree, const double target, const RVector<double> var
   return(out);
 }
 
-double UPM_C(const double degree, const double target, const RVector<double> variable) {
+double UPM_C(const double &degree, const double &target, const RVector<double> &variable) {
   size_t n = variable.size();
   double out=0;
   if (degree==0){
@@ -55,7 +55,8 @@ struct LPM_Worker : public Worker
   const RVector<double> target;
   const RVector<double> variable;
   RVector<double> output;
-  LPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output): degree(degree), target(target), variable(variable), output(output) {}
+  LPM_Worker(const double degree, const NumericVector &target, const NumericVector &variable, NumericVector &output): 
+    degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = LPM_C(degree, target[i], variable); }
 };
 
@@ -65,7 +66,8 @@ struct UPM_Worker : public Worker
   const RVector<double> target;
   const RVector<double> variable;
   RVector<double> output;
-  UPM_Worker(const double degree, const NumericVector target, const NumericVector variable, NumericVector output) : degree(degree), target(target), variable(variable), output(output) {}
+  UPM_Worker(const double degree, const NumericVector &target, const NumericVector &variable, NumericVector &output): 
+    degree(degree), target(target), variable(variable), output(output) {}
   void operator()(std::size_t begin, std::size_t end) { for (size_t i = begin; i < end; i++) output[i] = UPM_C(degree, target[i], variable); }
 };
 
@@ -87,7 +89,7 @@ struct UPM_Worker : public Worker
 //' LPM(0, mean(x), x)
 //' @export
 // [[Rcpp::export("LPM", rng = false)]]
-NumericVector LPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
+NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
   LPM_Worker tmp_func(degree, target, variable, output);
@@ -112,7 +114,7 @@ NumericVector LPM_CPv(const double degree, const NumericVector target, const Num
 //' UPM(0, mean(x), x)
 //' @export
 // [[Rcpp::export("UPM", rng = false)]]
-NumericVector UPM_CPv(const double degree, const NumericVector target, const NumericVector variable) {
+NumericVector UPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   size_t target_size=target.size();
   NumericVector output = NumericVector(target_size);
   UPM_Worker tmp_func(degree, target, variable,output);
@@ -125,9 +127,9 @@ NumericVector UPM_CPv(const double degree, const NumericVector target, const Num
 
 ////////////////////////////////////////////////////////////////////////////////
 double CoUPM_C(
-    const double degree_upm, 
-    const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y 
+    const double &degree_upm, 
+    const RVector<double> &x, const RVector<double> &y, 
+    const double &target_x, const double &target_y 
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -148,9 +150,9 @@ double CoUPM_C(
     if (y1<=0) continue;
     
     if(d_upm_0){
-		x1=(x1==0?0:1);
-		y1=(y1==0?0:1);
-	}
+        x1=(x1==0?0:1);
+        y1=(y1==0?0:1);
+    }
     
     if(dont_use_pow)
       out += x1 * y1;
@@ -161,9 +163,9 @@ double CoUPM_C(
 }
 
 double CoLPM_C(
-    const double degree_lpm, 
-    const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y 
+    const double &degree_lpm, 
+    const RVector<double> &x, const RVector<double> &y, 
+    const double &target_x, const double &target_y 
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -183,9 +185,9 @@ double CoLPM_C(
     if (y1<=0) continue;
     
     if(d_lpm_0){
-		x1=(x1==0?0:1);
-		y1=(y1==0?0:1);
-	}
+        x1=(x1==0?0:1);
+        y1=(y1==0?0:1);
+    }
     
     if(dont_use_pow)
       out += x1 * y1;
@@ -197,9 +199,9 @@ double CoLPM_C(
 
 
 double DLPM_C(
-    const double degree_lpm, const double degree_upm, 
-    const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y
+    const double &degree_lpm, const double &degree_upm, 
+    const RVector<double> &x, const RVector<double> &y, 
+    const double &target_x, const double &target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -235,9 +237,9 @@ double DLPM_C(
 
 
 double DUPM_C(
-    const double degree_lpm, const double degree_upm, 
-    const RVector<double> x, const RVector<double> y, 
-    const double target_x, const double target_y
+    const double &degree_lpm, const double &degree_upm, 
+    const RVector<double> &x, const RVector<double> &y, 
+    const double &target_x, const double &target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -273,8 +275,6 @@ double DUPM_C(
 
 
 
-
-
 struct CoLPM_Worker : public Worker
 {
   const double degree_lpm;
@@ -287,11 +287,12 @@ struct CoLPM_Worker : public Worker
   RVector<double> output;
   CoLPM_Worker(
     const double degree_lpm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y,
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y,
     NumericVector output
-  ): degree_lpm(degree_lpm), x(x), y(y), target_x(target_x), target_y(target_y),
-  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
+  ): 
+    degree_lpm(degree_lpm), x(x), y(y), target_x(target_x), target_y(target_y),
+    n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
@@ -311,12 +312,13 @@ struct CoUPM_Worker : public Worker
   const size_t n_t_y;
   RVector<double> output;
   CoUPM_Worker(
-    const double degree_upm,
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y,
-    NumericVector output
-  ): degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y),
-  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
+    const double &degree_upm,
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y,
+    NumericVector &output
+  ): 
+    degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y),
+    n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
@@ -337,12 +339,13 @@ struct DLPM_Worker : public Worker
   const size_t n_t_y;
   RVector<double> output;
   DLPM_Worker(
-    const double degree_lpm, const double degree_upm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y,
-    NumericVector output
-  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
+    const double &degree_lpm, const double &degree_upm, 
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y,
+    NumericVector &output
+  ): 
+    degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
+    n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++) {
@@ -363,12 +366,13 @@ struct DUPM_Worker : public Worker
   const size_t n_t_y;
   RVector<double> output;
   DUPM_Worker(
-    const double degree_lpm, const double degree_upm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y,
-    NumericVector output
-  ): degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
-  n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
+    const double &degree_lpm, const double &degree_upm, 
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y,
+    NumericVector &output
+  ): 
+    degree_lpm(degree_lpm), degree_upm(degree_upm), x(x), y(y), target_x(target_x), target_y(target_y), 
+    n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)
   {}
   void operator()(std::size_t begin, std::size_t end) { 
     for (size_t i = begin; i < end; i++){
@@ -376,6 +380,7 @@ struct DUPM_Worker : public Worker
     }
   }
 };
+
 
 
 //' Co-Lower Partial Moment
@@ -513,4 +518,249 @@ NumericVector DUPM_CPv(
   DUPM_Worker tmp_func(degree_lpm, degree_upm, x, y, target_x, target_y, output);
   parallelFor(0, output.size(), tmp_func);
   return(output);
+}
+
+
+
+
+
+
+void PMMatrix_CPv(
+  const double &degree_lpm, 
+  const double &degree_upm, 
+  const RMatrix<double>::Column &x, 
+  const RMatrix<double>::Column &y, 
+  const double &target_x,
+  const double &target_y, 
+  const size_t &rows, 
+  double &coLpm,
+  double &coUpm,   
+  double &dLpm, 
+  double &dUpm
+){
+  coLpm=0;
+  coUpm=0;
+  dLpm=0;
+  dUpm=0; 
+  if(rows == 0)
+    return;
+  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0),
+       dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
+       d_lpm_0=(degree_lpm==0),
+       d_upm_0=(degree_upm==0);
+  bool dont_use_pow = (dont_use_pow_lpm && dont_use_pow_upm);
+  //double x_less_target_upm, target_less_x_upm, y_less_target_upm, target_less_y_upm;
+  double x_less_target_upm, y_less_target_upm, target_less_y_upm;
+  for(size_t i = 0; i < rows; i++){
+    double x_less_target_lpm = (target_x - x[i]),
+           target_less_x_lpm = (x[i] - target_x),
+           y_less_target_lpm = (target_y - y[i]),
+           target_less_y_lpm = (y[i] - target_y);
+    bool   less_equal_zero_target_less_x = (target_less_x_lpm <= 0),
+           less_equal_zero_target_less_y = (target_less_y_lpm <= 0),
+           less_equal_zero_x_less_target = (x_less_target_lpm <= 0),
+           less_equal_zero_y_less_target = (y_less_target_lpm <= 0);
+    if(
+		less_equal_zero_target_less_x && 
+		less_equal_zero_target_less_y && 
+		less_equal_zero_x_less_target && 
+		less_equal_zero_y_less_target
+	)	// nothing to do with this row
+        continue;
+    // UPM values
+	if(d_upm_0){ // pow(0,0) == 0, pow(x,0) == 1
+        x_less_target_upm=(x_less_target_lpm==0?0:1);
+        //target_less_x_upm=(target_less_x_lpm==0?0:1);
+        y_less_target_upm=(y_less_target_lpm==0?0:1);
+        target_less_y_upm=(target_less_y_lpm==0?0:1);
+    }else{
+        x_less_target_upm=x_less_target_lpm;
+        //target_less_x_upm=target_less_x_lpm;
+        y_less_target_upm=y_less_target_lpm;
+        target_less_y_upm=target_less_y_lpm;
+    }
+	// LPM values
+    if(d_lpm_0){ // pow(0,0) == 0, pow(x,0) == 1
+        x_less_target_lpm=(x_less_target_lpm==0?0:1);
+        target_less_x_lpm=(target_less_x_lpm==0?0:1);
+        y_less_target_lpm=(y_less_target_lpm==0?0:1);
+        target_less_y_lpm=(target_less_y_lpm==0?0:1);
+    }
+
+	/*
+	CoLPM_C
+		double x1=(target_x-x[i]);
+		double y1=(target_y-y[i]);
+		out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
+	*/
+    if(!less_equal_zero_target_less_x && !less_equal_zero_target_less_y){
+        if(dont_use_pow_lpm)
+            coLpm += target_less_x_lpm * target_less_y_lpm;
+        else 
+            coLpm += std::pow(target_less_x_lpm, degree_lpm) * std::pow(target_less_y_lpm, degree_lpm);
+    }
+
+	/*
+	CoUPM_C
+		double x1=(x[i]-target_x);
+		double y1=(y[i]-target_y);
+		out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
+	*/
+    if(!less_equal_zero_x_less_target && !less_equal_zero_y_less_target){
+        if(dont_use_pow_upm)
+            coUpm += x_less_target_upm * y_less_target_upm;
+        else 
+            coUpm += std::pow(x_less_target_upm, degree_upm) * std::pow(y_less_target_upm, degree_upm);
+    }
+
+	/*
+	DLPM_C(
+		double x1=(x[i]-target_x);
+		double y1=(target_y-y[i]);
+		out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
+	*/
+    if(!less_equal_zero_x_less_target && !less_equal_zero_target_less_y){
+        if(dont_use_pow)
+            dLpm += x_less_target_lpm * target_less_y_upm;
+        else if(dont_use_pow_lpm)
+            dLpm += x_less_target_lpm * std::pow(target_less_y_upm, degree_upm);
+        else if(dont_use_pow_upm)
+            dLpm += std::pow(x_less_target_lpm, degree_lpm) * target_less_y_upm;
+        else 
+            dLpm += std::pow(x_less_target_lpm, degree_lpm) * std::pow(target_less_y_upm, degree_upm);
+    }
+
+	/*
+	DUPM_C(
+		double x1=(target_x-x[i]);
+		double y1=(y[i]-target_y);
+		out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
+
+	*/
+    if(!less_equal_zero_target_less_x && !less_equal_zero_y_less_target){
+        if(dont_use_pow)
+            dUpm += target_less_x_lpm * y_less_target_upm;
+        else if(dont_use_pow_lpm)
+            dUpm += target_less_x_lpm * std::pow(y_less_target_upm, degree_upm);
+        else if(dont_use_pow_upm)
+            dUpm += std::pow(target_less_x_lpm, degree_lpm) * y_less_target_upm;
+        else 
+            dUpm += std::pow(target_less_x_lpm, degree_lpm) * std::pow(y_less_target_upm, degree_upm);
+    }
+  }
+  coLpm/=rows;
+  coUpm/=rows;
+  dUpm/=rows;
+  dLpm/=rows;
+}
+
+struct PMMatrix_Worker : public Worker
+{
+  const double degree_lpm;
+  const double degree_upm;
+  const RMatrix<double> variable;
+  const RVector<double> target;
+  const size_t variable_cols;
+  const size_t variable_rows;
+  const size_t target_length;
+  RMatrix<double> coLpm;
+  RMatrix<double> coUpm;
+  RMatrix<double> dLpm;
+  RMatrix<double> dUpm;
+  PMMatrix_Worker(
+    const double &degree_lpm, const double &degree_upm, 
+    const NumericMatrix &variable, 
+    const NumericVector &target,
+    NumericMatrix &coLpm, NumericMatrix &coUpm,
+    NumericMatrix &dLpm,  NumericMatrix &dUpm
+  ): 
+    degree_lpm(degree_lpm), degree_upm(degree_upm), 
+    variable(variable), target(target),
+    variable_cols(variable.cols()), variable_rows(variable.rows()), target_length(target.size()), 
+    coLpm(coLpm), coUpm(coUpm), 
+    dLpm(dLpm), dUpm(dUpm)
+  {
+    if(variable_cols != target_length)
+      Rcpp::stop("varible matrix cols != target vector length");
+  }
+  void operator()(std::size_t begin, std::size_t end) {
+    for (size_t i = begin; i < end; i++){
+      for (size_t l = 0; l < variable_cols; l++){
+		auto var_x = variable.column(i), var_y = variable.column(l);
+		  
+        PMMatrix_CPv(
+          degree_lpm,
+          degree_upm,
+          var_x,
+          var_y,
+          target[i],
+          target[l],
+          variable_rows,
+          coLpm(i,l),
+          coUpm(i,l),
+          dLpm(i,l),
+          dUpm(i,l)
+        );
+      }
+    }
+  }
+};
+
+
+//' Partial Moment Matrix - Internal Use, without covariance and pop_adjust
+//'
+//'
+//' This function generates a co-partial moment matrix for the specified co-partial moment.
+//' @param LPM_degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.
+//' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
+//' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
+//' @param variable a numeric matrix or data.frame.
+//' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM)
+//' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
+//' @author Fred Viole, OVVO Financial Systems
+//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+//' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+//' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
+//' \url{https://www.ssrn.com/abstract=3457377}
+//' @examples
+//' set.seed(123)
+//' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+//' A <- cbind(x,y,z)
+//' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+//'
+//' ## Use of vectorized numeric targets (target_x, target_y, target_z)
+//' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+//'
+//' ## Calling Individual Partial Moment Quadrants
+//' cov.mtx <- PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+//' cov.mtx$cupm
+//'
+//' @export
+// [[Rcpp::export("PMMatrix_CPv", rng = false)]]
+List PMMatrix_CPv(
+    const double LPM_degree, 
+    const double UPM_degree, 
+    const NumericVector target, 
+    const NumericMatrix variable
+) {
+  size_t variable_cols=variable.cols();
+  size_t target_length=target.size();
+  if(variable_cols != target_length){
+    Rcpp::stop("varible matrix cols != target vector length");
+    return List::create();
+  }
+  NumericMatrix coLpm(variable_cols, variable_cols);
+  NumericMatrix coUpm(variable_cols, variable_cols);
+  NumericMatrix dLpm(variable_cols, variable_cols);
+  NumericMatrix dUpm(variable_cols, variable_cols);
+  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, coLpm, coUpm, dLpm, dUpm);
+  parallelFor(0, variable_cols, tmp_func);
+  return(
+    List::create(
+      Named("cupm") = coUpm,
+      Named("dupm") = dUpm,
+      Named("dlpm") = dLpm,
+      Named("clpm") = coLpm
+    )
+  );
 }
