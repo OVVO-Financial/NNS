@@ -18,29 +18,15 @@ R2 <- matrix(c(
 colnames(R2) <- c("x", "y", "z")
 rownames(R2) <- c("x", "y", "z")
 
-if (T){
-	# TODO, not running ?!
-	# 
-	B <- NNS::NNS.ANOVA(data.frame(cbind(x,y,z)))
-	#                                                                                                                          
-	#------------------------------------------------------------------------------------------------------------------------------------------------------
-	#Error (test_ANOVA.R:24:2): (code run outside of `test_that()`)
-	#Error in `is.data.frame(x)`: objeto 'A' n�o encontrado
-	#Backtrace:
-	# 1. NNS::NNS.ANOVA(data.frame(cbind(x, y, z)))
-	#      at test_ANOVA.R:24:8
-	# 3. base::colMeans(A)
-	# 4. base::is.data.frame(x)
- 
-	C <- NNS::NNS.ANOVA(data.frame(cbind(x,y,z)), pairwise=T)
-	test_that(
-	  "NNS.ANOVA", {
-		expect_equal(B, R1, tolerance=1e-5)
-	  }
-	)
-	test_that(
-	  "NNS.ANOVA - pairwise", {
-		expect_equal(C, R2, tolerance=1e-5)
-	  }
-	)
-}
+B <- NNS::NNS.ANOVA(data.frame(cbind(x,y,z)))
+C <- NNS::NNS.ANOVA(data.frame(cbind(x,y,z)), pairwise=T)
+test_that(
+  "NNS.ANOVA", {
+	expect_equal(B, R1, tolerance=1e-5)
+  }
+)
+test_that(
+  "NNS.ANOVA - pairwise", {
+	expect_equal(C, R2, tolerance=1e-5)
+  }
+)
