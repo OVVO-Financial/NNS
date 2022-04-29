@@ -724,7 +724,7 @@ struct PMMatrix_Worker : public Worker
 };
 
 
-//' Partial Moment Matrix - Internal Use, without covariance and pop_adjust
+//' Partial Moment Matrix
 //'
 //'
 //' This function generates a co-partial moment matrix for the specified co-partial moment.
@@ -733,7 +733,7 @@ struct PMMatrix_Worker : public Worker
 //' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
 //' @param variable a numeric matrix or data.frame.
 //' @param pop_adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
-//' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM)
+//' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 //' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -753,6 +753,8 @@ struct PMMatrix_Worker : public Worker
 //' cov.mtx <- PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
 //' cov.mtx$cupm
 //'
+//' ## Full covariance matrix
+//' cov.mtx$cov.matrix
 //' @export
 // [[Rcpp::export("PMMatrix_CPv", rng = false)]]
 List PMMatrix_CPv(
