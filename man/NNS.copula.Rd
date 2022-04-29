@@ -9,8 +9,7 @@ NNS.copula(
   target = NULL,
   continuous = TRUE,
   plot = FALSE,
-  independence.overlay = FALSE,
-  ncores = NULL
+  independence.overlay = FALSE
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ NNS.copula(
 \item{plot}{logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points using \link{plot3d}.}
 
 \item{independence.overlay}{logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns a multivariate dependence value [0,1].
@@ -36,10 +33,10 @@ Determines higher dimension dependence coefficients based on co-partial moment m
 set.seed(123)
 x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 A <- data.frame(x, y, z)
-NNS.copula(A, plot = TRUE, independence.overlay = TRUE, ncores = 1)
+NNS.copula(A, plot = TRUE, independence.overlay = TRUE)
 
 ### Target 0
-NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE, ncores = 1)
+NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE)
 }
 \references{
 Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.
