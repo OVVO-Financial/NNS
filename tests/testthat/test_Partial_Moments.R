@@ -85,14 +85,48 @@ test_that(
 A <- matrix(c(1,1,3,2,2,3), ncol = 2)
 T1 <- matrix(c(1.3333333, 0.6666667, 0.6666667, 0.3333333), ncol=2)
 T2 <- matrix(c(0.8888889, 0.4444444, 0.4444444, 0.2222222), ncol=2)
-
+T1_n <- T1
+T2_n <- T2
+rownames(T1_n) <- c("V1", "V2")
+colnames(T1_n) <- c("V1", "V2")
+rownames(T2_n) <- c("V1", "V2")
+colnames(T2_n) <- c("V1", "V2")
 
 R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = TRUE)$cov.matrix
 R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = FALSE)$cov.matrix
 test_that(
-	"NNS::PM.matrix", {
-		expect_equal(T1, cov(A), tolerance=1e-5)
-		expect_equal(R1, T1, tolerance=1e-5)
-		expect_equal(R2, T2, tolerance=1e-5)
-	}
+  "NNS::PM.matrix - Mean Target", {
+    expect_equal(T1, cov(A), tolerance=1e-5)
+    expect_equal(R1, T1, tolerance=1e-5)
+    expect_equal(R2, T2, tolerance=1e-5)
+  }
+)
+
+R1 <- NNS::PM.matrix(1,1,NULL, A, pop_adj = TRUE)$cov.matrix
+R2 <- NNS::PM.matrix(1,1,NULL, A, pop_adj = FALSE)$cov.matrix
+test_that(
+  "NNS::PM.matrix - NULL Target", {
+    expect_equal(T1, cov(A), tolerance=1e-5)
+    expect_equal(R1, T1, tolerance=1e-5)
+    expect_equal(R2, T2, tolerance=1e-5)
+  }
+)
+
+A <- as.data.frame(A)
+R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = TRUE)$cov.matrix
+R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = FALSE)$cov.matrix
+test_that(
+  "NNS::PM.matrix - Mean Target - DataFrame", {
+    expect_equal(R1, T1_n, tolerance=1e-5)
+    expect_equal(R2, T2_n, tolerance=1e-5)
+  }
+)
+
+R1 <- NNS::PM.matrix(1,1,NULL, A, pop_adj = TRUE)$cov.matrix
+R2 <- NNS::PM.matrix(1,1,NULL, A, pop_adj = FALSE)$cov.matrix
+test_that(
+  "NNS::PM.matrix - NULL Target - DataFrame", {
+    expect_equal(R1, T1_n, tolerance=1e-5)
+    expect_equal(R2, T2_n, tolerance=1e-5)
+  }
 )
