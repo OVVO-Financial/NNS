@@ -884,13 +884,13 @@ struct PMMatrix_Worker : public Worker
 //' set.seed(123)
 //' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 //' A <- cbind(x,y,z)
-//' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+//' PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A)
 //'
 //' ## Use of vectorized numeric targets (target_x, target_y, target_z)
-//' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+//' PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
 //'
 //' ## Calling Individual Partial Moment Quadrants
-//' cov.mtx <- PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+//' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A)
 //' cov.mtx$cupm
 //'
 //' ## Full covariance matrix
