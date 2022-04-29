@@ -753,7 +753,7 @@ List PMMatrix_CPv(
     const double UPM_degree, 
     const NumericVector target, 
     const NumericMatrix variable,
-	const bool pop_adj
+	const bool pop_adj=false
 ) {
   size_t variable_cols=variable.cols();
   size_t target_length=target.size();
