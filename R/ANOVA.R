@@ -60,7 +60,7 @@ NNS.ANOVA <- function(
         stop("Please select tails from 'left', 'right', or 'both'")
     }
     if(!missing(treatment)){
-		# with treatment
+        # with treatment
         if(any(class(control)%in%c("tbl","data.table"))){
             control <- as.vector(unlist(control))
         }
@@ -125,11 +125,11 @@ NNS.ANOVA <- function(
         if(any(class(control) %in% c("tbl","data.table"))){
             A <- as.data.frame(control)
         }else{
-		    A <- control
-		}
-	}else{
-		A <- control
-	}
+            A <- control
+        }
+    }else{
+        A <- control
+    }
     mean.of.means <- mean(colMeans(A))
     if(!pairwise){
         #Continuous CDF for each variable from Mean of Means
