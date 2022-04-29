@@ -654,7 +654,7 @@ void PMMatrix_CPv(
   dLpm/=rows;
   dUpm/=rows;
   if(pop_adj && rows>1){
-    double adjust=rows/(rows-1);
+    double adjust=((double)rows)/((double)rows-1);
     coLpm*=adjust;
     coUpm*=adjust;
     dLpm*=adjust;
