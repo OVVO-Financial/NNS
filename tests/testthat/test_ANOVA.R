@@ -18,8 +18,8 @@ R2 <- matrix(c(
 colnames(R2) <- c("x", "y", "z")
 rownames(R2) <- c("x", "y", "z")
 
-B <- NNS.ANOVA(cbind(x,y,z))
-C <- NNS.ANOVA(cbind(x,y,z), pairwise=T)
+B <- NNS.ANOVA(A)
+C <- NNS.ANOVA(A, pairwise=T)
 
 test_that(
   "NNS.ANOVA", {
