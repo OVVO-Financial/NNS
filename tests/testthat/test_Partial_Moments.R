@@ -5,7 +5,7 @@ z <- c(0.19999193561416084,0.6010279101158327,0.9788327513669298,0.8608964619298
 
 test_that(
 	"LPM", {
-		#expect_equal(LPM(0, NULL, x), 0.49, tolerance=1e-5)        # RCPP version don't accept null yet
+		expect_equal(LPM(0, NULL, x), 0.49, tolerance=1e-5)
 		expect_equal(LPM(0, mean(x), x), 0.49, tolerance=1e-5)
 		expect_equal(LPM(1, mean(x), x), 0.1032933, tolerance=1e-5)
 		expect_equal(LPM(2, mean(x), x), 0.02993767, tolerance=1e-5)
@@ -14,7 +14,7 @@ test_that(
 
 test_that(
 	"UPM", {
-		#expect_equal(UPM(0, NULL, x), 0.51, tolerance=1e-5)        # RCPP version don't accept null yet
+		expect_equal(UPM(0, NULL, x), 0.51, tolerance=1e-5)
 		expect_equal(UPM(0, mean(x), x), 0.51, tolerance=1e-5)
 		expect_equal(UPM(1, mean(x), x), 0.1032933, tolerance=1e-5)
 		expect_equal(UPM(2, mean(x), x), 0.03027411, tolerance=1e-5)
@@ -23,7 +23,7 @@ test_that(
 
 test_that(
 	"Co.UPM", {
-		#expect_equal(Co.UPM(0, 0, x, y, NULL, NULL), 0.28, tolerance=1e-5)		# RCPP version don't accept null yet
+	    	expect_equal(Co.UPM(0, x, y, NULL, NULL), 0.28, tolerance=1e-5)
         expect_equal(Co.UPM(0, x, y, mean(x), mean(y)), 0.28, tolerance=1e-5)
         expect_equal(Co.UPM(1, x, y, mean(x), mean(y)), 0.01204606, tolerance=1e-5)
         expect_equal(Co.UPM(2, x, y, mean(x), mean(y)), 0.0009799173, tolerance=1e-5)
@@ -32,7 +32,7 @@ test_that(
 
 test_that(
 	"Co.LPM", {
-        #expect_equal(Co.LPM(0, 0, x, y, NULL, NULL), 0.24, tolerance=1e-5)		# RCPP version don't accept null yet
+        expect_equal(Co.LPM(0, x, y, NULL, NULL), 0.24, tolerance=1e-5)
         expect_equal(Co.LPM(0, x, y, mean(x), mean(y)), 0.24, tolerance=1e-5)
         expect_equal(Co.LPM(1, x, y, mean(x), mean(y)), 0.01058035, tolerance=1e-5)
         expect_equal(Co.LPM(2, x, y, mean(x), mean(y)), 0.0008940764, tolerance=1e-5)
@@ -41,7 +41,7 @@ test_that(
 
 test_that(
 	"D.LPM", {
-        #expect_equal(D.LPM(0, 0, x, y, NULL, NULL), 0.23, tolerance=1e-5)		# RCPP version don't accept null yet
+        expect_equal(D.LPM(0, 0, x, y, NULL, NULL), 0.23, tolerance=1e-5)
         expect_equal(D.LPM(0, 0, x, y, mean(x), mean(y)), 0.23, tolerance=1e-5)
         expect_equal(D.LPM(0, 1, x, y, mean(x), mean(y)), 0.06404049, tolerance=1e-5)
         expect_equal(D.LPM(1, 0, x, y, mean(x), mean(y)), 0.05311669, tolerance=1e-5)
@@ -54,7 +54,7 @@ test_that(
 
 test_that(
 	"D.UPM", {
-        #expect_equal(D.UPM(0, 0, x, y, NULL, NULL), 0.25, tolerance=1e-5)		# RCPP version don't accept null yet
+        expect_equal(D.UPM(0, 0, x, y, NULL, NULL), 0.25, tolerance=1e-5)
         expect_equal(D.UPM(0, 0, x, y, mean(x), mean(y)), 0.25, tolerance=1e-5)
         expect_equal(D.UPM(0, 1, x, y, mean(x), mean(y)), 0.05488706, tolerance=1e-5)
         expect_equal(D.UPM(1, 0, x, y, mean(x), mean(y)), 0.05843498, tolerance=1e-5)
@@ -87,20 +87,10 @@ T1 <- matrix(c(1.3333333, 0.6666667, 0.6666667, 0.3333333), ncol=2)
 T2 <- matrix(c(0.8888889, 0.4444444, 0.4444444, 0.2222222), ncol=2)
 
 
-R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = TRUE,  ncores=1)$cov.matrix
-R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = FALSE, ncores=1)$cov.matrix
+R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = TRUE)$cov.matrix
+R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop_adj = FALSE)$cov.matrix
 test_that(
-	"NNS::PM.matrix - one thread", {
-		expect_equal(T1, cov(A), tolerance=1e-5)
-		expect_equal(R1, T1, tolerance=1e-5)
-		expect_equal(R2, T2, tolerance=1e-5)
-	}
-)
-
-R1 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = TRUE,  ncores=2)$cov.matrix
-R2 <- NNS::PM.matrix(1,1,colMeans(A), A, pop.adj = FALSE, ncores=2)$cov.matrix
-test_that(
-	"NNS::PM.matrix - two threads", {
+	"NNS::PM.matrix", {
 		expect_equal(T1, cov(A), tolerance=1e-5)
 		expect_equal(R1, T1, tolerance=1e-5)
 		expect_equal(R2, T2, tolerance=1e-5)

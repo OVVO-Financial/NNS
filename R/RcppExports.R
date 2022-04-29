@@ -18,7 +18,7 @@
 #' LPM(0, mean(x), x)
 #' @export
 LPM <- function(degree, target, variable) {
-    .Call(`_NNS_LPM_CPv`, degree, target, variable)
+    .Call(`_NNS_LPM`, degree, target, variable)
 }
 
 #' Upper Partial Moment
@@ -37,7 +37,7 @@ LPM <- function(degree, target, variable) {
 #' UPM(0, mean(x), x)
 #' @export
 UPM <- function(degree, target, variable) {
-    .Call(`_NNS_UPM_CPv`, degree, target, variable)
+    .Call(`_NNS_UPM`, degree, target, variable)
 }
 
 #' Co-Lower Partial Moment
@@ -59,7 +59,7 @@ UPM <- function(degree, target, variable) {
 #' Co.LPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoLPM_CPv`, degree_lpm, x, y, target_x, target_y)
+    .Call(`_NNS_CoLPM`, degree_lpm, x, y, target_x, target_y)
 }
 
 #' Co-Upper Partial Moment
@@ -81,7 +81,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' Co.UPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoUPM_CPv`, degree_upm, x, y, target_x, target_y)
+    .Call(`_NNS_CoUPM`, degree_upm, x, y, target_x, target_y)
 }
 
 #' Divergent-Lower Partial Moment
@@ -104,7 +104,7 @@ Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
 #' D.LPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_DLPM_CPv`, degree_lpm, degree_upm, x, y, target_x, target_y)
+    .Call(`_NNS_DLPM`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
 #' Divergent-Upper Partial Moment
@@ -127,6 +127,104 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' D.UPM(0, 0, x, y, mean(x), mean(y))
 #' @export
 D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_DUPM_CPv`, degree_lpm, degree_upm, x, y, target_x, target_y)
+    .Call(`_NNS_DUPM`, degree_lpm, degree_upm, x, y, target_x, target_y)
+}
+
+#' Partial Moment Matrix
+#'
+#'
+#' This function generates a co-partial moment matrix for the specified co-partial moment.
+#' @param LPM_degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.
+#' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
+#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
+#' @param variable a numeric matrix or data.frame.
+#' @param pop_adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
+#' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
+#' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
+#' \url{https://www.ssrn.com/abstract=3457377}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
+#' A <- cbind(x,y,z)
+#' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+#'
+#' ## Use of vectorized numeric targets (target_x, target_y, target_z)
+#' PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+#'
+#' ## Calling Individual Partial Moment Quadrants
+#' cov.mtx <- PMMatrix_CPv(LPM_degree = 1, UPM_degree = 1, variable = A)
+#' cov.mtx$cupm
+#'
+#' ## Full covariance matrix
+#' cov.mtx$cov.matrix
+#' @export
+PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj = FALSE) {
+    .Call(`_NNS_PMMatrix`, LPM_degree, UPM_degree, target, variable, pop_adj)
+}
+
+#' Lower Partial Moment RATIO
+#'
+#' This function generates a standardized univariate lower partial moment for any degree or target.
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.
+#' @return Standardized LPM of variable
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
+#' \url{https://www.ssrn.com/abstract=3007373}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' LPM.ratio(0, mean(x), x)
+#'
+#' \dontrun{
+#' ## Empirical CDF (degree = 0)
+#' lpm_cdf <- LPM.ratio(0, sort(x), x)
+#' plot(sort(x), lpm_cdf)
+#'
+#' ## Continuous CDF (degree = 1)
+#' lpm_cdf_1 <- LPM.ratio(1, sort(x), x)
+#' plot(sort(x), lpm_cdf_1)
+#'
+#' ## Joint CDF
+#' x <- rnorm(5000) ; y <- rnorm(5000)
+#' plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' zlab = "Probability", box = FALSE)
+#' }
+#' @export
+LPM.ratio <- function(degree, target, variable) {
+    .Call(`_NNS_LPM_ratio`, degree, target, variable)
+}
+
+#' Upper Partial Moment RATIO
+#'
+#' This function generates a standardized univariate upper partial moment for any degree or target.
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.
+#' @return Standardized UPM of variable
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' UPM.ratio(0, mean(x), x)
+#'
+#' ## Joint Upper CDF
+#' \dontrun{
+#' x <- rnorm(5000) ; y <- rnorm(5000)
+#' plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
+#' zlab = "Probability", box = FALSE)
+#' }
+#' @export
+UPM.ratio <- function(degree, target, variable) {
+    .Call(`_NNS_UPM_ratio`, degree, target, variable)
 }
 

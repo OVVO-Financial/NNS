@@ -69,9 +69,11 @@ NNS.dep = function(x,
 
     error_fn = function(x, y){
       max(0, min(1, (Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y)) +
-                                 Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y))) /
-                             (D.UPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)) +
-                                D.LPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)))))
+
+                     Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y))) /
+                    ( D.UPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)) +
+                      D.LPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)))))
+
     }
 
     ll <- expression(max(min(100, .N), 8))
