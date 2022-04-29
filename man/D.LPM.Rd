@@ -8,9 +8,9 @@
 D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_lpm}{integer; Degree for variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.}
+\item{degree_lpm}{integer; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.}
 
-\item{degree_upm}{integer; Degree for variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.}
+\item{degree_upm}{integer; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.}
 
 \item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
 
