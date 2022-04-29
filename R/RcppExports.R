@@ -162,7 +162,7 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' ## Full covariance matrix
 #' cov.mtx$cov.matrix
 #' @export
-PMMatrix_CPv <- function(LPM_degree, UPM_degree, target, variable, pop_adj = FALSE) {
+PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj = FALSE) {
     .Call(`_NNS_PMMatrix_CPv`, LPM_degree, UPM_degree, target, variable, pop_adj)
 }
 

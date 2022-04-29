@@ -404,8 +404,8 @@ struct DUPM_Worker : public Worker
 // [[Rcpp::export("Co.LPM", rng = false)]]
 NumericVector CoLPM_CPv(
     const double degree_lpm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y
 ) {
   size_t target_x_size=target_x.size();
   size_t target_y_size=target_y.size();
@@ -438,8 +438,8 @@ NumericVector CoLPM_CPv(
 // [[Rcpp::export("Co.UPM", rng = false)]]
 NumericVector CoUPM_CPv(
     const double degree_upm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y 
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y 
 ) {
   size_t target_x_size=target_x.size();
   size_t target_y_size=target_y.size();
@@ -473,8 +473,8 @@ NumericVector CoUPM_CPv(
 // [[Rcpp::export("D.LPM", rng = false)]]
 NumericVector DLPM_CPv(
     const double degree_lpm, const double degree_upm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y
 ) {
   size_t target_x_size=target_x.size();
   size_t target_y_size=target_y.size();
@@ -507,9 +507,9 @@ NumericVector DLPM_CPv(
 //' @export
 // [[Rcpp::export("D.UPM", rng = false)]]
 NumericVector DUPM_CPv(
-    const double degree_lpm, const double degree_upm, 
-    const NumericVector x, const NumericVector y, 
-    const NumericVector target_x, const NumericVector target_y
+    const double &degree_lpm, const double &degree_upm, 
+    const NumericVector &x, const NumericVector &y, 
+    const NumericVector &target_x, const NumericVector &target_y
 ) {
   size_t target_x_size=target_x.size();
   size_t target_y_size=target_y.size();
@@ -756,16 +756,22 @@ struct PMMatrix_Worker : public Worker
 //' ## Full covariance matrix
 //' cov.mtx$cov.matrix
 //' @export
-// [[Rcpp::export("PMMatrix_CPv", rng = false)]]
+// [[Rcpp::export("PM.matrix", rng = false)]]
 List PMMatrix_CPv(
-    const double LPM_degree, 
-    const double UPM_degree, 
-    const NumericVector target, 
-    const NumericMatrix variable,
+    const double &LPM_degree,
+    const double &UPM_degree,
+    const RObject &target,
+    const NumericMatrix &variable,
 	const bool pop_adj=false
 ) {
   size_t variable_cols=variable.cols();
-  size_t target_length=target.size();
+  NumericVector tgt;
+  if(is<NumericVector>(target) && !target.isNULL()){
+	  tgt=as<NumericVector>(target);
+  }else{
+	  tgt=colMeans(variable);
+  }
+  size_t target_length=tgt.size();
   if(variable_cols != target_length){
     Rcpp::stop("varible matrix cols != target vector length");
     return List::create();
@@ -775,7 +781,7 @@ List PMMatrix_CPv(
   NumericMatrix dLpm(variable_cols, variable_cols);
   NumericMatrix dUpm(variable_cols, variable_cols);
   NumericMatrix covMat(variable_cols, variable_cols);
-  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
+  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, tgt, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
   parallelFor(0, variable_cols, tmp_func);
   
   rownames(coLpm) = colnames(variable);
