@@ -532,6 +532,7 @@ void PMMatrix_CPv(
   const RMatrix<double>::Column &y, 
   const double &target_x,
   const double &target_y, 
+  const bool &pop_adj, 
   const size_t &rows, 
   double &coLpm,
   double &coUpm,   
@@ -650,8 +651,15 @@ void PMMatrix_CPv(
   }
   coLpm/=rows;
   coUpm/=rows;
-  dUpm/=rows;
   dLpm/=rows;
+  dUpm/=rows;
+  if(pop_adj && rows>1){
+    double adjust=rows/(rows-1);
+    coLpm*=adjust;
+    coUpm*=adjust;
+    dLpm*=adjust;
+    dUpm*=adjust;
+  }
 }
 
 struct PMMatrix_Worker : public Worker
@@ -663,6 +671,7 @@ struct PMMatrix_Worker : public Worker
   const size_t variable_cols;
   const size_t variable_rows;
   const size_t target_length;
+  const bool pop_adj;
   RMatrix<double> coLpm;
   RMatrix<double> coUpm;
   RMatrix<double> dLpm;
@@ -671,12 +680,14 @@ struct PMMatrix_Worker : public Worker
     const double &degree_lpm, const double &degree_upm, 
     const NumericMatrix &variable, 
     const NumericVector &target,
+    const bool &pop_adj,
     NumericMatrix &coLpm, NumericMatrix &coUpm,
     NumericMatrix &dLpm,  NumericMatrix &dUpm
   ): 
     degree_lpm(degree_lpm), degree_upm(degree_upm), 
     variable(variable), target(target),
     variable_cols(variable.cols()), variable_rows(variable.rows()), target_length(target.size()), 
+	pop_adj(pop_adj),
     coLpm(coLpm), coUpm(coUpm), 
     dLpm(dLpm), dUpm(dUpm)
   {
@@ -686,15 +697,14 @@ struct PMMatrix_Worker : public Worker
   void operator()(std::size_t begin, std::size_t end) {
     for (size_t i = begin; i < end; i++){
       for (size_t l = 0; l < variable_cols; l++){
-		auto var_x = variable.column(i), var_y = variable.column(l);
-		  
         PMMatrix_CPv(
           degree_lpm,
           degree_upm,
-          var_x,
-          var_y,
+          variable.column(i),
+          variable.column(l),
           target[i],
           target[l],
+		  pop_adj,
           variable_rows,
           coLpm(i,l),
           coUpm(i,l),
@@ -715,6 +725,7 @@ struct PMMatrix_Worker : public Worker
 //' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
 //' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
 //' @param variable a numeric matrix or data.frame.
+//' @param pop_adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
 //' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM)
 //' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 //' @author Fred Viole, OVVO Financial Systems
@@ -741,7 +752,8 @@ List PMMatrix_CPv(
     const double LPM_degree, 
     const double UPM_degree, 
     const NumericVector target, 
-    const NumericMatrix variable
+    const NumericMatrix variable,
+	const bool pop_adj
 ) {
   size_t variable_cols=variable.cols();
   size_t target_length=target.size();
@@ -753,7 +765,7 @@ List PMMatrix_CPv(
   NumericMatrix coUpm(variable_cols, variable_cols);
   NumericMatrix dLpm(variable_cols, variable_cols);
   NumericMatrix dUpm(variable_cols, variable_cols);
-  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, coLpm, coUpm, dLpm, dUpm);
+  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm);
   parallelFor(0, variable_cols, tmp_func);
   return(
     List::create(
