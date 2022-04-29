@@ -777,6 +777,22 @@ List PMMatrix_CPv(
   NumericMatrix covMat(variable_cols, variable_cols);
   PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
   parallelFor(0, variable_cols, tmp_func);
+  
+  rownames(coLpm) = colnames(variable);
+  colnames(coLpm) = colnames(variable);
+  
+  rownames(coUpm) = colnames(variable);
+  colnames(coUpm) = colnames(variable);
+  
+  rownames(dLpm) = colnames(variable);
+  colnames(dLpm) = colnames(variable);
+  
+  rownames(dUpm) = colnames(variable);
+  colnames(dUpm) = colnames(variable);
+  
+  rownames(covMat) = colnames(variable);
+  colnames(covMat) = colnames(variable);
+  
   return(
     List::create(
       Named("cupm") = coUpm,
