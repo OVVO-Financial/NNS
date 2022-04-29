@@ -49,7 +49,7 @@ NNS.copula <- function (X,
   if(continuous) degree <- 1 else degree <- 0
 
   # Generate partial moment matrices
-  pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop.adj = TRUE, ncores = ncores)
+  pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE)
 
   # Isolate the upper triangles from each of the partial moment matrices
   Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
