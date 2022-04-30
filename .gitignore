@@ -1,8 +1,6 @@
+/src/NNS.so
 /src/NNS.dll
-/src/partial_moments_rcpp.o
-/src/RcppExports.o
-/src/RcppExports.cpp
-/src/init.o
+/src/*.o
 /src/init.c
 /src-i386
 /src-x64
