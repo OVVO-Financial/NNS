@@ -30,8 +30,9 @@ NNS.copula <- function (
   plot = FALSE,
   independence.overlay = FALSE
 ){
-
-  if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
+  if(sum(is.na(X)) > 0){
+	stop("You have some missing values, please address.")
+  }
 
   n <- ncol(X)
   l <- dim(X)[1]
