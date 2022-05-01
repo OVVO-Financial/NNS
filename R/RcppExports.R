@@ -267,7 +267,7 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
 #' DT[ , counts := .N, by = quadrant]
 #' DT
 #' @export
-part_RCPP <- function(x, y, type, order, obs_req, min_obs_stop, noise_reduction) {
-    .Call(`_NNS_NNS_part_RCPP`, x, y, type, order, obs_req, min_obs_stop, noise_reduction)
+part_RCPP <- function(x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction) {
+    .Call(`_NNS_NNS_part_RCPP`, x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction)
 }
 

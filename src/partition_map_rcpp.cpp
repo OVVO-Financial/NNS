@@ -46,6 +46,7 @@ using namespace Rcpp;
 Rcpp::List NNS_part_RCPP(
   const NumericVector &x,
   const NumericVector &y,
+  bool Voronoi,
   Rcpp::Nullable<Rcpp::String> type,
   Rcpp::Nullable<RObject> order,
   Rcpp::Nullable<int> obs_req,
@@ -110,6 +111,7 @@ Rcpp::List NNS_part_RCPP(
 	  obs_req_null,
 	  min_obs_stop,
 	  nr,
+	  Voronoi,
 	  RP_quadrant, 
       RP_prior_quadrant,
       RP_x, 

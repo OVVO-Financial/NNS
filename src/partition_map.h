@@ -24,6 +24,7 @@ size_t NNS_part(
   bool obs_req_null,
   bool min_obs_stop,
   ENUM_NSS_PART_NOISE_REDUCTION noise_reduction,
+  bool Voronoi, 
   CharacterVector &RP_quadrant, 
   CharacterVector &RP_prior_quadrant,
   NumericVector &RP_x, 
