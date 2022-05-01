@@ -207,11 +207,11 @@ size_t NNS_part(
 			  break;
 			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEAN:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
-			  RP_y[ri] = as<double>( mean(y[selected_rows]) );
+			  RP_y[ri] = as<double>( RFunc_mean(y[selected_rows]) );
 			  break;
 			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEDIAN:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
-			  RP_y[ri] = as<double>( median(y[selected_rows]) );
+			  RP_y[ri] = as<double>( RFunc_median(y[selected_rows]) );
 			  break;
 			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
