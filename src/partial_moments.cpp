@@ -1,7 +1,7 @@
 // [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
-#include "partial_moments.hpp"
+#include "partial_moments.h"
 /////////////////
 // UPM / LPM
 // single thread
