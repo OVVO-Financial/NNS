@@ -48,7 +48,7 @@ Rcpp::List NNS_part_RCPP(
   const NumericVector &y,
   Rcpp::Nullable<Rcpp::String> type,
   Rcpp::Nullable<RObject> order,
-  int obs_req,
+  Rcpp::Nullable<int> obs_req,
   bool min_obs_stop,
   Rcpp::String noise_reduction
 ) {
@@ -61,19 +61,27 @@ Rcpp::List NNS_part_RCPP(
   StringVector prior_quadrant(x.size());
   
   bool type_xonly = false;
+  bool obs_req_null = obs_req.isNull();
+  int obs_req_value=0;
   if(type.isNotNull()){
 	Rcpp::String _t(type);
 	type_xonly = (_t=="XONLY");
   }
+  if (obs_req.isNotNull())
+	obs_req_value = as<int>(obs_req);
+  
   int new_order=0;
   bool order_null=false, order_max=false;
   ENUM_NSS_PART_NOISE_REDUCTION nr{};
   if(order.isNull()){
 	  order_null=true;
-  } else if (is<NumericVector>(order) || is<IntegerVector>(order)) {
-	  new_order = as<int>(order);
   } else {
-	  order_max = true;
+	RObject order_nn(order);
+	if (is<String>(order)){
+		order_max = true;
+	}else{
+		new_order = as<int>(order);
+	}
   }
   //noise_reduction = tolower(noise_reduction);   // TODO tolower
   if (noise_reduction=="off")
@@ -98,7 +106,8 @@ Rcpp::List NNS_part_RCPP(
 	  new_order,
 	  order_null,
 	  order_max,
-	  obs_req,
+	  obs_req_value,
+	  obs_req_null,
 	  min_obs_stop,
 	  nr,
 	  RP_quadrant, 

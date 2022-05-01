@@ -131,7 +131,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_part_RCPP
-Rcpp::List NNS_part_RCPP(const NumericVector& x, const NumericVector& y, Rcpp::Nullable<Rcpp::String> type, Rcpp::Nullable<RObject> order, int obs_req, bool min_obs_stop, Rcpp::String noise_reduction);
+Rcpp::List NNS_part_RCPP(const NumericVector& x, const NumericVector& y, Rcpp::Nullable<Rcpp::String> type, Rcpp::Nullable<RObject> order, Rcpp::Nullable<int> obs_req, bool min_obs_stop, Rcpp::String noise_reduction);
 RcppExport SEXP _NNS_NNS_part_RCPP(SEXP xSEXP, SEXP ySEXP, SEXP typeSEXP, SEXP orderSEXP, SEXP obs_reqSEXP, SEXP min_obs_stopSEXP, SEXP noise_reductionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -139,7 +139,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::String> >::type type(typeSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<RObject> >::type order(orderSEXP);
-    Rcpp::traits::input_parameter< int >::type obs_req(obs_reqSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type obs_req(obs_reqSEXP);
     Rcpp::traits::input_parameter< bool >::type min_obs_stop(min_obs_stopSEXP);
     Rcpp::traits::input_parameter< Rcpp::String >::type noise_reduction(noise_reductionSEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_part_RCPP(x, y, type, order, obs_req, min_obs_stop, noise_reduction));

@@ -102,6 +102,8 @@ NNS.part = function(
     obs.req <- obs.req
     hard.stop <- 2*max(ceiling(log(length(x), 2)), 1) + 2
   }
+  #message("order=", order, ", hard.stop=", hard.stop, ", obs.req=", obs.req)
+  
   if(is.null(type)) {
     i <- 0L
     while (i >= 0) {

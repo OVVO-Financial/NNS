@@ -14,6 +14,7 @@ size_t NNS_part(
   bool order_null,
   bool order_max,
   size_t obs_req,
+  bool obs_req_null,
   bool min_obs_stop,
   ENUM_NSS_PART_NOISE_REDUCTION noise_reduction,
   StringVector &RP_quadrant, 
@@ -21,6 +22,7 @@ size_t NNS_part(
   NumericVector &RP_x, 
   NumericVector &RP_y
 ) {
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
 	// noise reduction functions
 	Function RFunc_gravity("gravity"),
 			 RFunc_mean("mean"),
@@ -34,7 +36,6 @@ size_t NNS_part(
 	std::unordered_map<Rcpp::String, size_t> q_counts{}, pq_counts{};
 	size_t max_q_counts=0, max_pq_counts=0, min_q_counts=0, min_pq_counts=0;
 	size_t x_size=x.size(), y_size=y.size();
-	size_t obs_req_2=obs_req/2;
 	StringVector quadrants_gt_obs_req(0), 
 				 prior_quadrants_gt_obs_req(0);
 
@@ -52,12 +53,24 @@ size_t NNS_part(
 	quadrant.fill("q");
 	prior_quadrant.fill("pq");
 	//
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
+	if (obs_req_null)
+		obs_req=8;
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
+	if (!order_null && order == 0 && !order_max){
+		//Rcout << "(!order_null && order == 0 && order_max)" << "\n";
+		order = 1;
+		order_max = false;
+		order_null = false;
+	}
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
 	if (x_size <= 8) {
 		if(order_null){
+			//Rcout << "x_size<=8 order_null" << "\n";
 			order = 1;
 			order_null = false;
 			order_max = false;
-			hard_stop = ceil(log(x_size));
+			hard_stop = ceil(log2(x_size));
 			if(hard_stop<1)
 				hard_stop=1;
 		} else {
@@ -65,29 +78,35 @@ size_t NNS_part(
 			hard_stop = x_size;
 		}
 	}
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
 	if(order_null){
-		order = ceil(log(x_size));
+		//Rcout << "order_null" << "\n";
+		order = ceil(log2(x_size));
 		if(order<1)
 			order=1;
 		order_max = false;
 	}
-	if(!order_max){
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
+	if(order_max){
+		//Rcout << "order_max" << "\n";
 		obs_req = 0;
-		hard_stop = ceil(log(x_size)) + 2;
+		hard_stop = ceil(log2(x_size)) + 2;
 		if(hard_stop<3)
 			hard_stop=3;
 	} else {
-		hard_stop = 2*ceil(log(x_size)) + 2;
+		//Rcout << "order numbered " << order << " x_size=" << x_size << ", log=" << log2(x_size) << ", ceil=" << ceil(log2(x_size)) << "\n";
+		hard_stop = 2*ceil(log2(x_size)) + 2;
 		if(hard_stop<4)
 			hard_stop=4;
 	}
-	obs_req_2 = obs_req/2;
+	//Rcout << "type_xonly=" << type_xonly << ", order=" << order << ", order_null=" << order_null << ", order_max=" << order_max << ", obs_req=" << obs_req << ", obs_req_null=" << obs_req_null << ", min_obs_stop="<< min_obs_stop << ", noise_reduction=" << static_cast<int>(noise_reduction) << "\n";
 	//
+	size_t obs_req_2 = obs_req/2;
 	size_t i=0;
 	std::unordered_map<std::string, size_t> reverse_RP_prior_quadrant{};
-	Rcout << "order=" << order << ", hard_stop="<< hard_stop << ", obs_req=" << obs_req << "\n";
+	//Rcout << "order=" << order << ", hard_stop="<< hard_stop << ", obs_req=" << obs_req << "\n";
 	while (true) {
-		Rcout << i << "\n";
+		//Rcout << i << "\n";
 		if (i == (size_t)order || i == (size_t)hard_stop)
 			break;
 		// START COUNT QUADRANTS
@@ -151,7 +170,8 @@ size_t NNS_part(
 
 		// NOISE REDUCTION
 		StringVector _tmp_slice = quadrant[obs_req_rows];
-		RP_quadrant = Rcpp::unique(_tmp_slice);
+		//RP_quadrant = Rcpp::unique(_tmp_slice);
+		RP_quadrant = Rcpp::sort_unique(_tmp_slice);
 		size_t RP_quadrant_size = RP_quadrant.size();
 		RP_x = NumericVector(RP_quadrant_size);
 		RP_y = NumericVector(RP_quadrant_size);
@@ -195,13 +215,22 @@ size_t NNS_part(
 				   cur_y = y[ri],
 			       cur_rp_x = RP_x[rev_RP],
 			       cur_rp_y = RP_y[rev_RP];
-			int new_q = (
-				type_xonly
-				?(cur_x <= cur_rp_x ? 0 : 1)
-				:(cur_x <= cur_rp_x ? 0 : 1) + (cur_y <= cur_rp_y ? 2 : 3)
-			);
+/*
+	xa) x<=rx -> 1
+	xb) x>rx  -> 0
+	ya) y<=ry -> 1
+	yb) y>ry  -> 0
+
+	xb yb = 1 + 0 + 0 = 1
+	xa yb = 1 + 1 + 0 = 2
+	xb ya = 1 + 0 + 2 = 3
+	xa ya = 1 + 1 + 2 = 4
+*/
+			char new_q = 1 + (cur_x <= cur_rp_x ? 1 : 0) + (type_xonly ? 0 : (cur_y <= cur_rp_y ? 2 : 0));
+//Rcout << "ri=" << ri << ", q=" << old_qs.get_cstring() << ", cur_x=" << cur_x << ", cur_y=" << cur_y << ", cur_rp_x=" << cur_rp_x << ", cur_rp_y=" << cur_rp_y << ", new_q=" << new_q;
 			prior_quadrant[ri] = old_qs;
-			old_qs += (new_q==0?s1:(new_q==1?s2:(new_q==2?s3:s4)));
+			old_qs += (new_q==1?s1:(new_q==2?s2:(new_q==3?s3:s4)));
+//Rcout << ", q=" << old_qs.get_cstring() << "\n";
 			quadrant[ri] = old_qs;
 		}
 		if((min_q_counts <= obs_req) && i >= 1)

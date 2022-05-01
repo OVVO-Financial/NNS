@@ -21,6 +21,7 @@ size_t NNS_part(
   bool order_null,
   bool order_max,
   size_t obs_req,
+  bool obs_req_null,
   bool min_obs_stop,
   ENUM_NSS_PART_NOISE_REDUCTION noise_reduction,
   CharacterVector &RP_quadrant, 
