@@ -6,4 +6,3 @@
 // Load directory header files
 #include "partial_moments_rcpp.h"
 #include "partition_map_rcpp.h"
-

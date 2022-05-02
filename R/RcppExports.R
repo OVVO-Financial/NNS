@@ -212,13 +212,13 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #' A <- cbind(x,y,z)
-#' PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A))
+#' PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
 #'
 #' ## Use of vectorized numeric targets (target_x, target_y, target_z)
-#' PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+#' PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
 #'
 #' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A))
+#' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
 #' cov.mtx$cupm
 #'
 #' ## Full covariance matrix
@@ -239,6 +239,7 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
 #' @param obs_req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
 #' @param min_obs_stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
 #' @param noise_reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
+#' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
 #' @return Returns:
 #'  \itemize{
 #'   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
@@ -254,20 +255,20 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS_part_RCPP(x, y)
+#' NNS_part_RCPP(x, y, voronoi = FALSE)
 #'
 #' ## Data.table of observations and partitions
-#' NNS_part_RCPP(x, y, order = 1)$dt
+#' NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$dt
 #'
 #' ## Regression points
-#' NNS_part_RCPP(x, y, order = 1)$regression.points
+#' NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$regression.points
 #'
 #' ## Examine final counts by quadrant
-#' DT <- NNS_part_RCPP(x, y)$dt
+#' DT <- NNS_part_RCPP(x, y, voronoi = FALSE)$dt
 #' DT[ , counts := .N, by = quadrant]
 #' DT
 #' @export
-part_RCPP <- function(x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction) {
+NNS_part_RCPP <- function(x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction) {
     .Call(`_NNS_NNS_part_RCPP`, x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction)
 }
 
