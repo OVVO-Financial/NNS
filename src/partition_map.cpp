@@ -16,7 +16,7 @@ size_t NNS_part(
   size_t obs_req,
   bool obs_req_null,
   bool min_obs_stop,
-  ENUM_NSS_PART_NOISE_REDUCTION noise_reduction,
+  ENUM_NNS_PART_NOISE_REDUCTION noise_reduction,
   bool Voronoi,
   StringVector &RP_quadrant, 
   StringVector &RP_prior_quadrant,
@@ -201,23 +201,23 @@ size_t NNS_part(
 		  reverse_RP_quadrant[_s]=ri;
 		  LogicalVector selected_rows = in(quadrant, as<Rcpp::StringVector>(RP_quadrant[ri]));
 		  switch (noise_reduction) {
-			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_OFF:
+			case ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_OFF:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
 			  RP_y[ri] = as<double>( RFunc_gravity(y[selected_rows]) );
 			  break;
-			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEAN:
+			case ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEAN:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
 			  RP_y[ri] = as<double>( RFunc_mean(y[selected_rows]) );
 			  break;
-			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEDIAN:
+			case ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEDIAN:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
 			  RP_y[ri] = as<double>( RFunc_median(y[selected_rows]) );
 			  break;
-			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE:
+			case ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE:
 			  RP_x[ri] = as<double>( RFunc_gravity(x[selected_rows]) );
 			  RP_y[ri] = as<double>( RFunc_mode(y[selected_rows]) );
 			  break;
-			case ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE_CLASS:
+			case ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE_CLASS:
 			  RP_x[ri] = as<double>( RFunc_gravity_class(x[selected_rows]) );
 			  RP_y[ri] = as<double>( RFunc_mode_class(y[selected_rows]) );
 			  break;

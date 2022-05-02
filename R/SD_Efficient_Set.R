@@ -43,8 +43,11 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
   all_variables <- colnames(final_ranked)
   current_base <- 1
   for (i in 1:(n-1)) {
-    if(status && (i %% 1000 == 0 || i == 0))
+    if(status) 
       message("Checking ", i, " of ", (n-1), "\r", appendLF=FALSE)
+    if(i == (n-1) & status) 
+      message("                                        ", appendLF=TRUE)
+
     base <- final_ranked[ , tail(current_base, 1)]
     challenger <- final_ranked[ , i + 1]
     if(degree == 1){
@@ -81,8 +84,6 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
       }
     }
   }
-  if(status)
-	message("                                        ", appendLF=TRUE)
   if(length(Dominated_set) > 0){
     return(all_variables[-na.omit(Dominated_set)])
   }

@@ -3,7 +3,7 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
-enum class ENUM_NSS_PART_NOISE_REDUCTION {
+enum class ENUM_NNS_PART_NOISE_REDUCTION {
   NOISE_REDUCTION_OFF, 
   NOISE_REDUCTION_MEAN, 
   NOISE_REDUCTION_MEDIAN, 
@@ -23,7 +23,7 @@ size_t NNS_part(
   size_t obs_req,
   bool obs_req_null,
   bool min_obs_stop,
-  ENUM_NSS_PART_NOISE_REDUCTION noise_reduction,
+  ENUM_NNS_PART_NOISE_REDUCTION noise_reduction,
   bool Voronoi, 
   CharacterVector &RP_quadrant, 
   CharacterVector &RP_prior_quadrant,

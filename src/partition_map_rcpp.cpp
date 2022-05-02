@@ -14,6 +14,7 @@ using namespace Rcpp;
 //' @param obs_req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
 //' @param min_obs_stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
 //' @param noise_reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
+//' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
 //' @return Returns:
 //'  \itemize{
 //'   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
@@ -29,20 +30,20 @@ using namespace Rcpp;
 //' @examples
 //' set.seed(123)
 //' x <- rnorm(100) ; y <- rnorm(100)
-//' NNS_part_RCPP(x, y)
+//' NNS_part_RCPP(x, y, Voronoi = FALSE)
 //'
 //' ## Data.table of observations and partitions
-//' NNS_part_RCPP(x, y, order = 1)$dt
+//' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$dt
 //'
 //' ## Regression points
-//' NNS_part_RCPP(x, y, order = 1)$regression.points
+//' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$regression.points
 //'
 //' ## Examine final counts by quadrant
-//' DT <- NNS_part_RCPP(x, y)$dt
+//' DT <- NNS_part_RCPP(x, y, Voronoi = FALSE)$dt
 //' DT[ , counts := .N, by = quadrant]
 //' DT
 //' @export
-// [[Rcpp::export("part_RCPP", rng = false)]]
+// [[Rcpp::export("NNS_part_RCPP", rng = false)]]
 Rcpp::List NNS_part_RCPP(
   const NumericVector &x,
   const NumericVector &y,
@@ -73,7 +74,7 @@ Rcpp::List NNS_part_RCPP(
   
   int new_order=0;
   bool order_null=false, order_max=false;
-  ENUM_NSS_PART_NOISE_REDUCTION nr{};
+  ENUM_NNS_PART_NOISE_REDUCTION nr{};
   if(order.isNull()){
 	  order_null=true;
   } else {
@@ -86,15 +87,15 @@ Rcpp::List NNS_part_RCPP(
   }
   //noise_reduction = tolower(noise_reduction);   // TODO tolower
   if (noise_reduction=="off")
-	  nr=ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_OFF;
+	  nr=ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_OFF;
   else if (noise_reduction=="mean")
-	  nr=ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEAN;
+	  nr=ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEAN;
   else if (noise_reduction=="median")
-	  nr=ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEDIAN;
+	  nr=ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MEDIAN;
   else if (noise_reduction=="mode")
-	  nr=ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE;
+	  nr=ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE;
   else if (noise_reduction=="mode_class")
-	  nr=ENUM_NSS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE_CLASS;
+	  nr=ENUM_NNS_PART_NOISE_REDUCTION::NOISE_REDUCTION_MODE_CLASS;
   else
 	  Rcpp::stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'");
   

@@ -4,7 +4,7 @@
 \alias{PM.matrix}
 \title{Partial Moment Matrix}
 \usage{
-PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj = FALSE)
+PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)
 }
 \arguments{
 \item{LPM_degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.}
@@ -30,13 +30,13 @@ For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 A <- cbind(x,y,z)
-PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A))
+PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
 
 ## Use of vectorized numeric targets (target_x, target_y, target_z)
-PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A)
+PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
 
 ## Calling Individual Partial Moment Quadrants
-cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A))
+cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
 cov.mtx$cupm
 
 ## Full covariance matrix
