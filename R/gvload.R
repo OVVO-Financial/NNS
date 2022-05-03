@@ -7,7 +7,6 @@
 #' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift transpose
 #' @importFrom dtw dtw
 #' @importFrom meboot meboot
-#' @importFrom tdigest tdigest tquantile
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
 #' @importFrom caret upSample downSample
 #' @importFrom zoo as.yearmon
@@ -16,7 +15,6 @@
 #' @import rgl
 #' @import stringr
 #' @import meboot
-#' @import tdigest
 #' @import data.table
 #' @import dynlm
 #' @import Quandl
@@ -49,7 +47,6 @@
   requireNamespace("doParallel")
   requireNamespace("stringr")
   requireNamespace("meboot")
-  requireNamespace("tdigest")
   requireNamespace("Rfast")
   requireNamespace("dynlm")
   requireNamespace("Quandl")

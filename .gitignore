@@ -1,11 +1,5 @@
-/src/NNS.so
-/src/NNS.dll
-/src/*.o
-/src/init.c
-/src-i386
-/src-x64
-/tests/testthat/*.pdf
-/.Rproj.user
-/.RData
-/.Rhistory
-/NNS.Rproj
+tests/testthat/*.pdf
+.Rproj.user
+.RData
+.Rhistory
+NNS.Rproj

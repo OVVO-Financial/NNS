@@ -161,12 +161,7 @@ NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
   # Generate random numbers from the [0,1] uniform interval
   p <- runif(n, min=0, max=1)
 
-  # Assign quantiles of x from p
-  td <- tdigest::tdigest(x, compression = max(100, log(n,10)*100))
-
-  q <- tryCatch(tdigest::tquantile(td, p) ,
-                error = quantile(x, p))
-
+  q <- quantile(x, p)
 
   ref1 <- which(p <= (1/n))
   if(length(ref1) > 0){

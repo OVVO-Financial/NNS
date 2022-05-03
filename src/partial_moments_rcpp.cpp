@@ -26,6 +26,8 @@ NumericVector LPM_RCPP(const double &degree, const RObject &target, const RObjec
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
     variable_vec=as<NumericVector>(variable);
+  else if (is<IntegerVector>(variable))
+    variable_vec=as<NumericVector>(variable);
   else
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
   if (is<NumericVector>(target) && !target.isNULL()){
@@ -57,6 +59,8 @@ NumericVector LPM_RCPP(const double &degree, const RObject &target, const RObjec
 NumericVector UPM_RCPP(const double &degree, const RObject &target, const RObject &variable) {
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
+    variable_vec=as<NumericVector>(variable);
+  else if (is<IntegerVector>(variable))
     variable_vec=as<NumericVector>(variable);
   else
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
@@ -107,6 +111,8 @@ NumericVector LPM_ratio_RCPP(const double &degree, const RObject &target, const 
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
     variable_vec=as<NumericVector>(variable);
+  else if (is<IntegerVector>(variable))
+    variable_vec=as<NumericVector>(variable);
   else if (is<DataFrame>(variable))
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
   else
@@ -148,6 +154,8 @@ NumericVector UPM_ratio_RCPP(const double &degree, const RObject &target, const 
   NumericVector target_vec, variable_vec;
   if (is<NumericVector>(variable))
     variable_vec=as<NumericVector>(variable);
+  else if (is<IntegerVector>(variable))
+    variable_vec=as<NumericVector>(variable);
   else if (is<DataFrame>(variable))
     variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
   else
@@ -188,10 +196,12 @@ NumericVector CoLPM_RCPP(
 ) {
   NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
   if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
+  else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
   else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
   else                         Rcpp::stop("x should be numeric vector, or data table");
 
   if (is<NumericVector>(y))    y_vec=as<NumericVector>(y);
+  else if (is<IntegerVector>(y))	y_vec=as<NumericVector>(y);
   else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
   else                         Rcpp::stop("y should be numeric vector, or data table");
 
@@ -237,10 +247,12 @@ NumericVector CoUPM_RCPP(
 ) {
   NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
   if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
+  else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
   else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
   else                         Rcpp::stop("x should be numeric vector, or data table");
 
   if (is<NumericVector>(y))    y_vec=as<NumericVector>(y);
+  else if (is<IntegerVector>(y))	y_vec=as<NumericVector>(y);
   else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
   else                         Rcpp::stop("y should be numeric vector, or data table");
 
@@ -287,10 +299,12 @@ NumericVector DLPM_RCPP(
 ) {
   NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
   if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
+  else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
   else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
   else                         Rcpp::stop("x should be numeric vector, or data table");
 
   if (is<NumericVector>(y))    y_vec=as<NumericVector>(y);
+  else if (is<IntegerVector>(y))	y_vec=as<NumericVector>(y);
   else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
   else                         Rcpp::stop("y should be numeric vector, or data table");
 
@@ -337,10 +351,12 @@ NumericVector DUPM_RCPP(
 ) {
   NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
   if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
+  else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
   else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
   else                         Rcpp::stop("x should be numeric vector, or data table");
 
   if (is<NumericVector>(y))    y_vec=as<NumericVector>(y);
+  else if (is<IntegerVector>(y))	y_vec=as<NumericVector>(y);
   else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
   else                         Rcpp::stop("y should be numeric vector, or data table");
 
@@ -405,6 +421,8 @@ List PMMatrix_RCPP(
   }
   NumericMatrix variable_matrix;
   if (is<NumericMatrix>(variable))
+    variable_matrix = as<NumericMatrix>(variable);
+  else if (is<IntegerMatrix>(variable))
     variable_matrix = as<NumericMatrix>(variable);
   else
     variable_matrix = Rcpp::internal::convert_using_rfunction(variable, "as.matrix");
