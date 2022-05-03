@@ -15,3 +15,4 @@ NumericVector DUPM_RCPP(const double &degree_lpm, const double &degree_upm, cons
 List PMMatrix_RCPP(const double &LPM_degree, const double &UPM_degree,const RObject &target, const RObject &variable,const bool pop_adj=false);
 
 #endif // NNS_partial_moments_RCPP_H
+
