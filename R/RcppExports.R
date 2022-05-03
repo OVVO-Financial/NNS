@@ -255,16 +255,16 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS_part_RCPP(x, y, voronoi = FALSE)
+#' NNS_part_RCPP(x, y, Voronoi = FALSE)
 #'
 #' ## Data.table of observations and partitions
-#' NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$dt
+#' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$dt
 #'
 #' ## Regression points
-#' NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$regression.points
+#' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$regression.points
 #'
 #' ## Examine final counts by quadrant
-#' DT <- NNS_part_RCPP(x, y, voronoi = FALSE)$dt
+#' DT <- NNS_part_RCPP(x, y, Voronoi = FALSE)$dt
 #' DT[ , counts := .N, by = quadrant]
 #' DT
 #' @export
