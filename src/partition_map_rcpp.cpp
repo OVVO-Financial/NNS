@@ -30,16 +30,16 @@ using namespace Rcpp;
 //' @examples
 //' set.seed(123)
 //' x <- rnorm(100) ; y <- rnorm(100)
-//' NNS_part_RCPP(x, y, Voronoi = FALSE)
+//' NNS_part_RCPP(x, y, type = NULL, order = NULL, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)
 //'
 //' ## Data.table of observations and partitions
-//' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$dt
+//' NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
 //'
 //' ## Regression points
-//' NNS_part_RCPP(x, y, order = 1, Voronoi = FALSE)$regression.points
+//' NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$regression.points
 //'
 //' ## Examine final counts by quadrant
-//' DT <- NNS_part_RCPP(x, y, Voronoi = FALSE)$dt
+//' DT <- NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
 //' DT[ , counts := .N, by = quadrant]
 //' DT
 //' @export
