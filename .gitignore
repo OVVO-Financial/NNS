@@ -1,7 +1,3 @@
-src/*.so
-src/*.dll
-src/*.o
-
 tests/testthat/*.pdf
 .Rproj.user
 .RData
