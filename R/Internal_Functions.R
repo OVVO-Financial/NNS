@@ -1,9 +1,38 @@
 ### Continuous Mode of a distribution
-mode <- function(x) {
+old_mode <- function(x) {
       if(length(x)==2) return(median(x))
       d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 128, from = min(x), to = max(x)), error = function(e) (median(x) + mean(fivenum(x)[2:4]))/2)
       tryCatch(d$x[which.max(d$y)], error = function(e) d)
+}
+
+
+### Continuous mode if data previously sorted
+mode <- function(x){
+  x <- as.numeric(x)
+  l <- length(x)
+  if(l <= 3) return(median(x))
+  if(length(unique(x))==1) return(x[1])
+  x_s <- x[order(x)]
+  range <- abs(x_s[l]-x_s[1])
+  if(range==0) return(x[1])
+
+  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+
+  if(!is.unsorted(z$counts[3:(126)])){
+    z_ind <- 3:(126)
+    z_ind_inv <- z_ind * (range/128)
+    z_ind_inv <- pmin(l, pmax(1, ifelse(z_ind_inv%%1 <.5, floor(z_ind_inv), ceiling(z_ind_inv))))
+    return(sum(x[z_ind_inv] * z$counts[z_ind])/sum(z$counts[z_ind]))
+  } else {
+    z_c <- which.max(z$counts)
+    
+    z_ind <- max(1, (z_c - 1)):min(l,(z_c + 1))
+    z_ind_inv <- z_ind * (range/128)
+    z_ind_inv <- pmin(l, pmax(1, ifelse(z_ind_inv%%1 <.5, floor(z_ind_inv), ceiling(z_ind_inv))))
+    return(sum(x[z_ind_inv] * z$counts[z_ind])/sum(z$counts[z_ind]))
   }
+}
+
 
 
 ### Classification Mode of a distribution
@@ -15,9 +44,43 @@ mode_class <- function(x){
 
 
 
+
 ### Central Tendency
-gravity <- function(x) (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
-gravity_class <- function(x)  (mean(x) + mean(fivenum(x)[2:4]))/2
+old_gravity <- function(x) (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
+
+gravity <- function(x){
+  l <- length(x)
+  if(l <= 3) return(median(x))
+  if(length(unique(x))==1) return(x[1])
+  x_s <- x[order(x)]
+  range <- abs(x_s[l]-x_s[1])
+
+  if(range == 0) return(x[1])
+  
+  q1 <- sum(x_s[floor(l*.25)]+((l*.25)%%1 * (x_s[ceiling(l*.25)] - x_s[floor(l*.25)])))
+  q2 <- (x_s[floor(l*.5)]+x_s[ceiling(l*.5)])/2
+  q3 <- sum(x_s[floor(l*.75)]+((l*.75)%%1 * (x_s[ceiling(l*.75)] - x_s[floor(l*.75)])))
+
+  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+  if(!is.unsorted(z$counts[3:126])){
+    z_ind <- 3:126
+  } else {
+    z_c <- which.max(z$counts)
+    z_ind <- max(1, (z_c - 1)):min(l,(z_c + 1))
+  }
+  
+  z_ind_inv <- z_ind * (range/128)
+  z_ind_inv <- pmin(l, pmax(1, ifelse(z_ind_inv%%1 <.5, floor(z_ind_inv), ceiling(z_ind_inv))))
+
+  m <- sum(x[z_ind_inv] * z$counts[z_ind] )/sum(z$counts[z_ind])
+  mu <- sum(x)/l
+  
+  res <- (q2 + mu + mean(c(q1, q2, q3)))/3
+  if(is.na(res)) return(q2) else return(res)
+} 
+
+
+gravity_class <- function(x) mode_class(x)
 
 
 
