@@ -168,7 +168,7 @@ dy.d_ <- function(x, y, wrt,
       }
 
 
-      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = ncores)$Point.est
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = 1)$Point.est
 
 
       estimates <- data.table::data.table(cbind(estimates = estimates,
@@ -209,7 +209,7 @@ dy.d_ <- function(x, y, wrt,
       if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r",appendLF=TRUE)
 
 
-      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = ncores)$Point.est
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = 1)$Point.est
 
 
       lower <- head(estimates,n)
@@ -256,7 +256,7 @@ dy.d_ <- function(x, y, wrt,
       }
 
 
-      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, inference = TRUE, point.only = TRUE, ncores = ncores)$Point.est
+      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, inference = TRUE, point.only = TRUE, ncores = 1)$Point.est
 
 
 
