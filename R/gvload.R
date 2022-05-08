@@ -18,6 +18,7 @@
 #' @import data.table
 #' @import dynlm
 #' @import Quandl
+#' @import MESS
 #' @rawNamespace import(Rcpp, except = LdFlags)
 #' @import RcppParallel
 #' @useDynLib NNS, .registration = TRUE
@@ -47,6 +48,7 @@
   requireNamespace("doParallel")
   requireNamespace("stringr")
   requireNamespace("meboot")
+  requireNamespace("MESS")
   requireNamespace("Rfast")
   requireNamespace("dynlm")
   requireNamespace("Quandl")
