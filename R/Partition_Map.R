@@ -191,7 +191,7 @@ NNS.part = function(x, y,
                         }, by = quadrant]
                     }
                 }
-                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity_class, y = mode_class), .SD), by = quadrant,
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mode_class), .SD), by = quadrant,
                            .SDcols = x:y]
             }
 
@@ -262,7 +262,7 @@ NNS.part = function(x, y,
             }
 
             if(noise.reduction == "mode_class") {
-                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity_class, y = mode_class), .SD), by = quadrant,
+                RP <- PART[obs.req.rows, mapply(function(f,z) as.list(f(z)), list(x = gravity, y = mode_class), .SD), by = quadrant,
                            .SDcols=x:y]
             }
 
