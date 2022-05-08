@@ -535,7 +535,7 @@ NNS.reg = function (x, y,
           part.map1 <- part.map
         }
     } else {
-      part.map <- NNS.part(x, y, type =  "XONLY", order = dep.reduced.order, obs.req = 0)
+      part.map <- NNS.part(x, y, type =  "XONLY", order = dep.reduced.order, obs.req = 0, noise.reduction = noise.reduction2)
       part.map1 <- part.map
     }
   } # Dependence < stn
@@ -640,14 +640,12 @@ NNS.reg = function (x, y,
 
 
     ### Endpoints
-    max.rps <- data.table::data.table(t(c(max(x), mean(x.max))))
-
-    min.rps <- data.table::data.table(t(c(min(x), mean(x0))))
+    max.rps <- t(c(max(x), mean(x.max)))
+    min.rps <- t(c(min(x), mean(x0)))
   } else {
     ### Endpoints
-    max.rps <- data.table::data.table(t(c(max(x), y[x == max(x)][1])))
-
-    min.rps <- data.table::data.table(t(c(min(x), y[x == min(x)][1])))
+    max.rps <- t(c(max(x), y[x == max(x)][1]))
+    min.rps <- t(c(min(x), y[x == min(x)][1]))
   }
 
   if(type!="class" || is.null(type)){
@@ -656,12 +654,12 @@ NNS.reg = function (x, y,
 
     ifelse(length(unique(central_rows))>1, central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]]), central_y <- regression.points[central_rows[1],]$y)
     central_x <- mean(central_x)
-    med.rps <- data.table::data.table(t(c(central_x, central_y)))
+    med.rps <- t(c(central_x, central_y))
   } else {
-    med.rps <- data.table::data.table(t(c(NA, NA)))
+    med.rps <- t(c(NA, NA))
   }
 
-  regression.points <- data.table::rbindlist(list(regression.points, min.rps, max.rps, med.rps ), use.names = FALSE)
+  regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(min.rps, max.rps, med.rps )))), use.names = FALSE)
 
 
   regression.points <- regression.points[complete.cases(regression.points),]
@@ -683,9 +681,12 @@ NNS.reg = function (x, y,
       regression.points <- regression.points[, lapply(.SD, median), .SDcols = 2, by = .(x)]
     }
 
-    if(noise.reduction == "mode" || noise.reduction == "mode_class"){
+    if(noise.reduction == "mode"){
       regression.points <- regression.points[, lapply(.SD, mode), .SDcols = 2, by = .(x)]
     }
+    if(noise.reduction == "mode_class"){
+      regression.points <- regression.points[, lapply(.SD, mode_class), .SDcols = 2, by = .(x)]
+    } 
   }
 
 
@@ -765,7 +766,7 @@ NNS.reg = function (x, y,
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    if(type=="class") estimate <- ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))
+    if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
   }
 
   fitted <- data.table::data.table(x = part.map1$dt$x,
@@ -803,6 +804,7 @@ NNS.reg = function (x, y,
     bias_c <- bias[, bias_c := lapply(.SD, data.table::frollmean, n = 3, fill = 0, align = 'center'), .SDcols = 2]$bias_c
 
     bias <- suppressWarnings((bias_r + bias_l + bias_c)/3)
+    bias[is.na(bias)] <- 0
 
     if(!is.null(type)){
       if(type=="class") suppressWarnings(regression.points[, y := ifelse((y + bias)%%1 < 0.5, floor(y + bias), ceiling(y + bias))]) else suppressWarnings(regression.points[, y := y + bias])
@@ -879,13 +881,13 @@ NNS.reg = function (x, y,
     }
 
     if(!is.null(type)){
-      if(type=="class") point.est.y <- ifelse(point.est.y%%1 < 0.5, floor(point.est.y), ceiling(point.est.y))
+      if(type=="class") point.est.y <- pmin(max(y), pmax(min(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
     }
   }
 
   colnames(estimate) <- NULL
   if(!is.null(type)){
-    if(type=="class") estimate <- ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))
+    if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))))
   }
 
   fitted <- data.table::data.table(x = part.map1$dt$x,
