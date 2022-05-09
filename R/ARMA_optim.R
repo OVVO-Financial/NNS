@@ -198,7 +198,6 @@ NNS.ARMA.optim <- function(variable,
         }
       }
 
-      gc()
       nns.estimates.indiv <- unlist(nns.estimates.indiv)
 
       if(objective=='min'){
