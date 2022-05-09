@@ -182,7 +182,7 @@ NNS.ARMA.optim <- function(variable,
       if(j!="lin" && linear.approximation){
 
         # Find the min (obj.fn) for a given seasonals sequence
-        actual <- tail(variable, h_is)
+        actual <- tail(variable, h_eval)
 
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
 
@@ -190,7 +190,7 @@ NNS.ARMA.optim <- function(variable,
 
       } else {
         nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table"))%dopar%{
-          actual <- tail(variable, h_is)
+          actual <- tail(variable, h_eval)
 
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
 
