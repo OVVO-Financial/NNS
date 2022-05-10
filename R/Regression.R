@@ -736,7 +736,7 @@ NNS.reg = function (x, y,
     }
     
     if(!is.null(type)){
-      if(type=="class") point.est.y <- ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))
+      if(type=="class") point.est.y <- pmax(min(y), pmin(max(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
     }
   }
   
