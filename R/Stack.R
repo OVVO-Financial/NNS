@@ -512,7 +512,6 @@ NNS.stack <- function(IVs.train,
     }
   }
 
-  gc()
 
   if(is.null(probability.threshold)) probability.threshold <- .5
 
