@@ -465,7 +465,8 @@ NNS.reg = function (x, y,
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
   dependence <- (dependence^2 + dependence^(.5))/2
-  
+  dependence[is.na(dependence)] <- 0
+                         
   dep.reduced.order <- max(1, ifelse(multivariate.call,
                                      ifelse(is.null(order), floor(dependence*10), order),
                                      floor(dependence*10)))
