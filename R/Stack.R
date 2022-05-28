@@ -484,7 +484,10 @@ NNS.stack <- function(IVs.train,
 
   weights <- pmax(weights, c(0, 0))
   weights[!(c(1, 2) %in% method)] <- 0
-  weights <- weights / sum(weights)
+  weights[is.nan(weights)] <- 0
+  weights[is.infinite(weights)] <- 0
+ 
+  if(sum(weights)>0)  weights <- weights / sum(weights) else weights <- c(.5, .5)
 
   if(!is.null(type)) probability.threshold <-  mean(c(threshold_results_1, threshold_results_2), na.rm = TRUE) else probability.threshold <- .5
 
