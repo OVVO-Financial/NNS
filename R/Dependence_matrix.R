@@ -67,8 +67,8 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE, ncores 
     rhos[lower.tri(rhos, diag = FALSE)] <- (unlist(raw.rhos_upper) + unlist(raw.rhos_lower)) / 2
     deps[lower.tri(deps, diag = FALSE)] <- (unlist(raw.deps_upper) + unlist(raw.deps_lower)) / 2
 
-    rhos <- pmax(rhos, t(rhos), na.rm = TRUE)
-    deps <- pmax(deps, t(deps), na.rm = TRUE)
+    rhos[upper.tri(rhos, diag = FALSE)] <- rhos[lower.tri(rhos, diag = FALSE)]
+    deps[upper.tri(deps, diag = FALSE)] <- deps[lower.tri(deps, diag = FALSE)]
   } else {
     rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
     deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
