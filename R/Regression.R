@@ -463,7 +463,7 @@ NNS.reg = function (x, y,
   if(is.null(x.label)) x.label <- "x"
   
   
-  dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
+  dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE, ncores = 1)$Dependence, error = function(e) .1)
   dependence <- (dependence^2 + dependence^(.5))/2
   dependence[is.na(dependence)] <- 0
   
