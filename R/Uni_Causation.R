@@ -51,7 +51,7 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
 
   ## Correlation of Normalized Variables
-  rho.x.y <- NNS.dep(y.norm.to.x, x.norm.to.y, asym = TRUE)$Dependence
+  rho.x.y <- NNS.dep(y.norm.to.x, x.norm.to.y, asym = TRUE, ncores = 1)$Dependence
 
   Causation.x.given.y <- P.x.given.y * rho.x.y
 
