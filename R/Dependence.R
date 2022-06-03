@@ -69,8 +69,7 @@ NNS.dep = function(x,
 
     error_fn = function(x, y){
       max(0, min(1, (Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y)) +
-
-                     Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y))) /
+                     Co.LPM(1, x, y, target_x = mean(x), target_y = mean(y))) /
                     ( D.UPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)) +
                       D.LPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)))))
 
@@ -123,7 +122,7 @@ NNS.dep = function(x,
     if(p.value){
       original.par <- par(no.readonly = TRUE)
 
-      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g, ncores = ncores))
+      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g, ncores = 1))
 
       ## Store results
       cors <- unlist(lapply(nns.mc, "[[", 1))
