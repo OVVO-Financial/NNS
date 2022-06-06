@@ -323,14 +323,14 @@ NNS.VAR <- function(variables,
                      rel_vars <- names(rel_vars[rel_vars > cor_threshold$NNS.dim.red.threshold])
                      rel_vars <- rel_vars[rel_vars!=i]
                      
+                     rel_vars <- na.omit(rel_vars)
                      relevant_vars <- rel_vars
                      
                      if(any(length(rel_vars)==0 | is.null(relevant_vars))){
-                       rel_vars <- names(lagged_new_values_train)
+                       rel_vars <- colnames(lagged_new_values_train)
                      }
                      
-                     rel_vars <- na.omit(rel_vars)
-                     
+                                          
                      # NNS.stack() cross-validates the parameters of the multivariate NNS.reg() and dimension reduction NNS.reg()
                      if(length(rel_vars)>1){
                        DV_values <- NNS.stack(lagged_new_values_train[, rel_vars],
