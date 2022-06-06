@@ -224,7 +224,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
         last.known.gradient_2 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = mid.points, type = dist, k = n.best, class = type)) / last.known.distance_2
         last.known.gradient_3 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = mid.points_2, type = dist, k = n.best, class = type)) / last.known.distance_3
 
-        last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2 + last.known.gradient_3) / 3
+        last.known.gradient <- (last.known.gradient_1*3 + last.known.gradient_2*2 + last.known.gradient_3) / 6
 
         last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
 
@@ -293,7 +293,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
           last.known.gradient_2 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = mid.points, type = dist, k = n.best, class = type)) / last.known.distance_2
           last.known.gradient_3 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = mid.points_2, type = dist, k = n.best, class = type)) / last.known.distance_3
 
-          last.known.gradient <- (last.known.gradient_1 + last.known.gradient_2 + last.known.gradient_3) / 3
+          last.known.gradient <- (last.known.gradient_1*3 + last.known.gradient_2*2 + last.known.gradient_3) / 6
 
           last.distance <- sqrt(sum((outside.points - boundary.points) ^ 2))
 
