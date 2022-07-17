@@ -146,7 +146,7 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
   
-  if(confidence.interval >= 1) stop("Please set the confidence.interval to less than 1.")
+  if(confidence.interval >= 1 && !is.null(confidence.interval)) stop("Please set the confidence.interval to less than 1.")
   
   if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
   
