@@ -20,7 +20,6 @@ NNS.reg(
   plot = TRUE,
   plot.regions = FALSE,
   residual.plot = TRUE,
-  std.errors = FALSE,
   confidence.interval = NULL,
   threshold = 0,
   n.best = NULL,
@@ -62,9 +61,7 @@ NNS.reg(
 
 \item{residual.plot}{logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.}
 
-\item{std.errors}{logical; \code{FALSE} (default) To provide standard errors of each linear segment in the \code{"Fitted.xy"} output.}
-
-\item{confidence.interval}{numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.}
+\item{confidence.interval}{numeric [0, 1); \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.}
 
 \item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
 

@@ -10,7 +10,7 @@ NNS.dep(
   asym = FALSE,
   p.value = FALSE,
   print.map = FALSE,
-  ncores = NULL
+  ncores = 1
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ NNS.dep(
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.}
 
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
+\item{ncores}{integer 1 (default); value specifying the number of cores to be used in the parallelized  procedure. If NULL, the number of cores to be used is equal to the number of cores of the machine - 1.}
 }
 \value{
 Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.

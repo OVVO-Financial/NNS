@@ -49,16 +49,16 @@ Creates partitions based on partial moment quadrant centroids, iteratively assig
 \examples{
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
-NNS_part_RCPP(x, y, voronoi = FALSE)
+NNS_part_RCPP(x, y, type = NULL, order = NULL, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)
 
 ## Data.table of observations and partitions
-NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$dt
+NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
 
 ## Regression points
-NNS_part_RCPP(x, y, order = 1, voronoi = FALSE)$regression.points
+NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$regression.points
 
 ## Examine final counts by quadrant
-DT <- NNS_part_RCPP(x, y, voronoi = FALSE)$dt
+DT <- NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
 DT[ , counts := .N, by = quadrant]
 DT
 }
