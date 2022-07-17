@@ -3,3 +3,5 @@ tests/testthat/*.pdf
 .RData
 .Rhistory
 NNS.Rproj
+src/*.o
+src/*.dll
