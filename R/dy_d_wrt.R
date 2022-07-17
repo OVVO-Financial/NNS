@@ -123,16 +123,20 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points <- eval.points
 
   h_s <- c(.25, .4, .6, .75, 1)
+  
+  zz <- 1-NNS.dep(cbind(x,y), ncores = 1)$Dependence
+  
+  h_s <- seq(.01, 1, zz[wrt, "y"])
 
   for(h in h_s){
     index <- which(h == h_s)
     if(is.vector(eval.points) || dim(eval.points)[2] == 1){
       eval.points <- unlist(eval.points)
 
-      h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
+      h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
 
       if(h_step==0) h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,wrt]))))
-      if(h_step==0) h_step <- mean(x[,wrt])
+      if(h_step==0) h_step <- abs(mean(x[,wrt]))*.2
 
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
@@ -194,10 +198,10 @@ dy.d_ <- function(x, y, wrt,
       n <- dim(eval.points)[1]
       original.eval.points <- eval.points
 
-      h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
+      h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
 
       if(h_step==0) h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,wrt]))))
-      if(h_step==0) h_step <- abs(mean(x[,wrt]))
+      if(h_step==0) h_step <- abs(mean(x[,wrt]))*.2
 
       original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
       original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]

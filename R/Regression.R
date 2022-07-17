@@ -17,8 +17,7 @@
 #' @param plot  logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
-#' @param std.errors logical; \code{FALSE} (default) To provide standard errors of each linear segment in the \code{"Fitted.xy"} output.
-#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
+#' @param confidence.interval numeric [0, 1); \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
@@ -136,7 +135,7 @@ NNS.reg = function (x, y,
                     location = "top",
                     return.values = TRUE,
                     plot = TRUE, plot.regions = FALSE, residual.plot = TRUE,
-                    std.errors = FALSE, confidence.interval = NULL,
+                    confidence.interval = NULL,
                     threshold = 0,
                     n.best = NULL,
                     noise.reduction = "off",
@@ -147,13 +146,13 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
   
+  if(confidence.interval >= 1) stop("Please set the confidence.interval to less than 1.")
+  
   if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
   
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
   
   dist <- tolower(dist)
-  
-  if(!is.null(confidence.interval) && std.errors == FALSE) std.errors <- TRUE
   
   if(any(class(x)%in%c("tbl","data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
@@ -752,13 +751,11 @@ NNS.reg = function (x, y,
   
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
   
-  fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
+  fitted$y.hat[is.na(fitted$y.hat)] <- gravity(na.omit(fitted$y.hat))
   
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = original.y, Difference = fitted[ , y.hat] - original.y,  Accuracy = abs(round(fitted[ , y.hat]) - original.y))
   
-  deg.fr <- length(y) - 2
-  
-  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
+  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
   
   y.fitted <- fitted[ , y.hat]
   
@@ -877,9 +874,7 @@ NNS.reg = function (x, y,
   
   Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
   
-  deg.fr <- length(y) - 2
-  
-  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / deg.fr )
+  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
   
   y.fitted <- fitted[ , y.hat]
   
@@ -904,11 +899,8 @@ NNS.reg = function (x, y,
   
   
   ###Standard errors estimation
-  if(std.errors){
-    fitted[, `:=`
-           ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 2))) ) ), by = gradient]
+    fitted[, `:=` ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 1))) ) ), by = gradient]
     
-  } # std.errors
   
   ###Plotting and regression equation
   if(plot){
@@ -925,6 +917,9 @@ NNS.reg = function (x, y,
     }
     
     if(is.numeric(confidence.interval)){
+      fitted[, `:=` ( 'conf.int.pos' = abs(UPM.VaR(1 - confidence.interval, degree = 1, y[y>y.hat])) + y.hat ), by = gradient]
+      fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR(1 - confidence.interval, degree = 1, y[y<y.hat]))  ), by = gradient]
+      
       pval <- 1 - confidence.interval
       se.max <- max(na.omit(fitted[ , y.hat + (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
       se.min <- min(na.omit(fitted[, y.hat - (qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]))
@@ -942,9 +937,8 @@ NNS.reg = function (x, y,
            ylab = y.label, mgp = c(2.5, 0.5, 0),
            cex.lab = 1.5, cex.main = 2)
       
-      points(na.omit(fitted[ , .(x,y.hat + qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]), col = 'pink', pch = 19)
-      points(na.omit(fitted[ , .(x,y.hat - qt(p = 1 - (pval / 2), df = max(1, .N - 1) ) * standard.errors)]), col = 'pink', pch = 19)
-      
+      points(na.omit(fitted[ , .(x, conf.int.pos)]), col = 'pink', pch = 19)
+      points(na.omit(fitted[ , .(x, conf.int.neg)]), col = 'pink', pch = 19)
     } else {
       plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
