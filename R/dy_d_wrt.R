@@ -138,7 +138,6 @@ dy.d_ <- function(x, y, wrt,
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
 
-       
       seq_by <- max(.01, 1 - zz[wrt, "y"])
 
       deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
@@ -262,8 +261,6 @@ dy.d_ <- function(x, y, wrt,
       mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, inference = TRUE, point.only = TRUE, ncores = 1)$Point.est
 
 
-
-
       z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
@@ -281,12 +278,12 @@ dy.d_ <- function(x, y, wrt,
   }
 
   if(mixed){
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(x)),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(x)),
-                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))),1,function(x) gravity(x)))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(rep(x, length(x):1))),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(rep(x, length(x):1))),
+                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))),1,function(x) gravity(rep(x, length(x):1))))
   } else {
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(x)),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(x)))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) gravity(rep(x, length(x):1))),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))))
 
   }
   if(messages) message("Done :-)","\r",appendLF=TRUE)
