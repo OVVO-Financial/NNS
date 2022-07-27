@@ -121,12 +121,10 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
+   
+  zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence
 
-  h_s <- c(.25, .4, .6, .75, 1)
-  
-  zz <- 1-NNS.dep(cbind(x,y), ncores = 1)$Dependence
-  
-  h_s <- seq(.01, 1, zz[wrt, "y"])
+  h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
 
   for(h in h_s){
     index <- which(h == h_s)
@@ -135,13 +133,14 @@ dy.d_ <- function(x, y, wrt,
 
       h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
 
-      if(h_step==0) h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,wrt]))))
-      if(h_step==0) h_step <- abs(mean(x[,wrt]))*.2
+      if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
 
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
 
-      seq_by <- .05
+       
+      seq_by <- max(.01, 1 - zz[wrt, "y"])
+
       deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
       sampsize <- length(seq(0, 1, seq_by))
 
@@ -162,6 +161,7 @@ dy.d_ <- function(x, y, wrt,
       colnames(deriv.points) <- colnames(x)
 
       distance_wrt <- 2 * h_step
+
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
       id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
@@ -191,7 +191,8 @@ dy.d_ <- function(x, y, wrt,
       upper <- upper_msd$V1
       upper_msd <- upper_msd$V2
 
-      rise <- upper - lower
+      rise_1 <- upper - two.f.x 
+      rise_2 <- two.f.x - lower
 
     } else {
 
@@ -200,8 +201,7 @@ dy.d_ <- function(x, y, wrt,
 
       h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
 
-      if(h_step==0) h_step <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,wrt]))))
-      if(h_step==0) h_step <- abs(mean(x[,wrt]))*.2
+      if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
 
       original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
       original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
@@ -220,7 +220,8 @@ dy.d_ <- function(x, y, wrt,
       two.f.x <- 2 * estimates[(n+1):(2*n)]
       upper <- tail(estimates,n)
 
-      rise <- upper - lower
+      rise_1 <- upper - two.f.x 
+      rise_2 <- two.f.x - lower
 
       distance_wrt <- 2 * h_step
     }
@@ -234,14 +235,12 @@ dy.d_ <- function(x, y, wrt,
       }
 
       if(!is.null(dim(eval.points))){
-        h_step_1 <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[ ,1]))))
-        if(h_step_1==0) h_step_1 <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,1]))))
-        if(h_step_1==0) h_step_1 <- abs(mean(x[,1]))
+        h_step_1 <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,2]))))
+        if(h_step_1==0) h_step_1 <- abs((max(x[,1]) - min(x[,1])) * h)
 
 
-        h_step_2 <- mean(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[ ,2]))))
-        if(h_step_2==0) h_step_2 <- mean(abs(diff(LPM.VaR(seq(0, 1, .2)[-1], 1, x[,2]))))
-        if(h_step_2==0) h_step_2 <- abs(mean(x[,2]))
+        h_step_2 <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,2]))))
+        if(h_step_2==0) h_step_2 <- abs((max(x[,2]) - min(x[,2])) * h)
 
         mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                        eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
@@ -269,25 +268,25 @@ dy.d_ <- function(x, y, wrt,
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
 
-      results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
-                               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
+      results[[index]] <- list("First" = ((rise_1 / distance_wrt) + (rise_2 / distance_wrt))/2,
+                               "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2),
                                "Mixed" = mixed)
 
     } else {
-      results[[index]] <- list("First" = as.numeric(unlist(rise / distance_wrt)),
-                               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2) )))
+      results[[index]] <- list("First" = ((rise_1 / distance_wrt)+(rise_2 / distance_wrt))/2,
+                               "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2) )
     }
 
 
   }
 
   if(mixed){
-    final_results <- list("First" = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
-                          "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE),
-                          "Mixed" = rowMeans(do.call(cbind, lapply(results, `[[`, 3)), na.rm = TRUE))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(x)),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(x)),
+                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))),1,function(x) gravity(x)))
   } else {
-    final_results <- list("First" = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
-                          "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(x)),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(x)))
 
   }
   if(messages) message("Done :-)","\r",appendLF=TRUE)
