@@ -265,12 +265,12 @@ dy.d_ <- function(x, y, wrt,
       z <- z[,1] + z[,4] - z[,2] - z[,3]
       mixed <- (z / mixed.distances)
 
-      results[[index]] <- list("First" = ((rise_1 / distance_wrt) + (rise_2 / distance_wrt))/2,
+      results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
                                "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2),
                                "Mixed" = mixed)
 
     } else {
-      results[[index]] <- list("First" = ((rise_1 / distance_wrt)+(rise_2 / distance_wrt))/2,
+      results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
                                "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2) )
     }
 
@@ -278,9 +278,9 @@ dy.d_ <- function(x, y, wrt,
   }
 
   if(mixed){
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))),1,function(x) gravity(rep(x, length(x):1))),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))),1,function(x) gravity(rep(x, length(x):1))),
-                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))),1,function(x) gravity(rep(x, length(x):1))))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) gravity(rep(x, length(x):1))),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))),
+                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) gravity(rep(x, length(x):1))))
   } else {
     final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) gravity(rep(x, length(x):1))),
                           "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))))
