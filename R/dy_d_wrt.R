@@ -159,7 +159,7 @@ dy.d_ <- function(x, y, wrt,
 
       colnames(deriv.points) <- colnames(x)
 
-      distance_wrt <- 2 * h_step
+      distance_wrt <- h_step
 
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
@@ -222,7 +222,7 @@ dy.d_ <- function(x, y, wrt,
       rise_1 <- upper - two.f.x 
       rise_2 <- two.f.x - lower
 
-      distance_wrt <- 2 * h_step
+      distance_wrt <- h_step
     }
 
 
