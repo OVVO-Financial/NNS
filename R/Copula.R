@@ -56,7 +56,7 @@ NNS.copula <- function (
   Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
   D_pm <- sum(pm_cov$dupm[upper.tri(pm_cov$dupm, diag = FALSE)]) + sum(pm_cov$dlpm[upper.tri(pm_cov$dlpm, diag = FALSE)])
 
-  if(plot && n == 3){
+  if((plot||independence.overlay) && n == 3){
 
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
                 col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
