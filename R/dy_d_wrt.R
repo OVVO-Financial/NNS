@@ -122,7 +122,7 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
    
-  zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence
+  zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence^2
 
   h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
 
@@ -159,7 +159,7 @@ dy.d_ <- function(x, y, wrt,
 
       colnames(deriv.points) <- colnames(x)
 
-      distance_wrt <- (h_step + h_step/l)/2
+      distance_wrt <- h_step
 
 
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
@@ -222,7 +222,7 @@ dy.d_ <- function(x, y, wrt,
       rise_1 <- upper - two.f.x 
       rise_2 <- two.f.x - lower
 
-      distance_wrt <- (h_step + h_step/l)/2
+      distance_wrt <- h_step
     }
 
 
@@ -246,7 +246,7 @@ dy.d_ <- function(x, y, wrt,
                                        h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
                                        eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
 
-        mixed.distances <- 4 * (h_step_1 + h_step_1/l)/2 * (h_step_2 + h_step_2/l)/2
+        mixed.distances <- 4 * (h_step_1  * h_step_2)
 
       } else {
         mixed.deriv.points <- matrix(c(h_step + eval.points,
@@ -254,7 +254,7 @@ dy.d_ <- function(x, y, wrt,
                                        h_step + eval.points[1], eval.points[2] - h_step,
                                        eval.points - h_step), ncol = 2, byrow = TRUE)
 
-        mixed.distances <- (2 * (h_step + h_step/l)/2) * (2 * (h_step + h_step/l)/2)
+        mixed.distances <- 4 * (h_step^2)
       }
 
 
