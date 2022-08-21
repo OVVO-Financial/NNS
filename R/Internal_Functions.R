@@ -17,9 +17,11 @@ mode <- function(x){
   if(range==0) return(x[1])
 
   z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
-
-  if(!is.unsorted(z$counts[3:(126)])){
-    z_ind <- 3:(126)
+  lz <- length(z$counts)
+  max_z <- z$counts==max(z$counts[3:(lz-2)])
+  
+  if(sum(max_z)>1){
+    z_ind <- 3:(lz-2)
     z_names <- seq(x_s[1], x_s[l], z$width)
     return(sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind]))
   } else {
@@ -60,19 +62,22 @@ gravity <- function(x){
   q3 <- sum(x_s[floor(l*.75)]+((l*.75)%%1 * (x_s[ceiling(l*.75)] - x_s[floor(l*.75)])))
 
   z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
-  if(sum(z$counts==max(z$counts[3:126]))>1){
-    z_ind <- 3:126
+  lz <- length(z$counts)
+  max_z <- z$counts==max(z$counts[3:(lz-2)])
+  
+  if(sum(max_z)>1){
+    z_ind <- 3:(lz-2)
   } else {
     z_c <- which.max(z$counts)
     z_ind <- max(1, (z_c - 1)):min(l,(z_c + 1))
   }
 
   z_names <- seq(x_s[1], x_s[l], z$width)
-  
+
   m <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
   mu <- sum(x)/l
   
-  res <- (q2 + mu + mean(c(q1, q2, q3)))/3
+  res <- (q2 + m + mu + mean(c(q1, q2, q3)))/4
   if(is.na(res)) return(q2) else return(res)
 } 
 

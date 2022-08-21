@@ -40,7 +40,7 @@
       "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
-      "tdigest", "tquantile", "bias", "conf.int.neg",  "conf.int.pos"
+      "bias", "conf.int.neg", "conf.int.pos"
     ))
 
   requireNamespace("data.table")

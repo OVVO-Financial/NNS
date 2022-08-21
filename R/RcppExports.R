@@ -218,7 +218,8 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
 #'
 #' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
+#' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), 
+#'                      pop_adj = TRUE)
 #' cov.mtx$cupm
 #'
 #' ## Full covariance matrix
@@ -226,49 +227,5 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @export
 PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
     .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj)
-}
-
-#' NNS Partition Map - Internal Use
-#'
-#' Creates partitions based on partial moment quadrant centroids, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchial clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
-#'
-#' @param x a numeric vector.
-#' @param y a numeric vector with compatible dimensions to \code{x}.
-#' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type = "XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.
-#' @param order integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.
-#' @param obs_req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
-#' @param min_obs_stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
-#' @param noise_reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
-#' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
-#' @return Returns:
-#'  \itemize{
-#'   \item{\code{"dt"}} a \link{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-#'   \item{\code{"regression.points"}} the \link{data.table} of regression points for that given \code{(order = ...)}.
-#'   \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
-#'   }
-#'
-#' @note \code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
-#'
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS_part_RCPP(x, y, type = NULL, order = NULL, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)
-#'
-#' ## Data.table of observations and partitions
-#' NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
-#'
-#' ## Regression points
-#' NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$regression.points
-#'
-#' ## Examine final counts by quadrant
-#' DT <- NNS_part_RCPP(x, y, type = NULL, order = 1, obs_req = 8, min_obs_stop = TRUE, noise_reduction = "off", Voronoi = FALSE)$dt
-#' DT[ , counts := .N, by = quadrant]
-#' DT
-#' @export
-NNS_part_RCPP <- function(x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction) {
-    .Call(`_NNS_NNS_part_RCPP`, x, y, Voronoi, type, order, obs_req, min_obs_stop, noise_reduction)
 }
 

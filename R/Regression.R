@@ -160,6 +160,9 @@ NNS.reg = function (x, y,
   n <- length(y)
   
   if(n < 2000) ncores <- 1
+  if(!is.null(dim(x))){
+    if(ncol(x) < 5) ncores <- 1
+  }
   
   if(!is.null(dim.red.method)){
     if(is.null(dim(x)) || dim(x)[1]==1){
@@ -463,12 +466,11 @@ NNS.reg = function (x, y,
   
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE, ncores = 1)$Dependence, error = function(e) .1)
-  dependence <- (dependence^2 + dependence^(.5))/2
+  dependence <- dependence^2
   dependence[is.na(dependence)] <- 0
+  rounded_dep <- ifelse(dependence%%1 < .5, floor(dependence*10), ceiling(dependence*10))
   
-  dep.reduced.order <- max(1, ifelse(multivariate.call,
-                                     ifelse(is.null(order), floor(dependence*10), order),
-                                     floor(dependence*10)))
+  dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
   if(!is.null(order)) dep.reduced.order <- order
     
