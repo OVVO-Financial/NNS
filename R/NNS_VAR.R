@@ -136,6 +136,14 @@ NNS.VAR <- function(variables,
     colnames(variables) <- var_names
   }
   
+  if(any(colnames(variables)=="")){
+    var_names <- character()
+    for(i in 1:length(which(colnames(variables)==""))){
+      var_names[i] <- paste0("x",i)
+    }
+    colnames(variables)[which(colnames(variables)=="")] <- var_names
+  }
+  
   colnames(variables) <- gsub(" - ", "...", colnames(variables))
   
   # Parallel process...
