@@ -73,8 +73,6 @@ NNS.part = function(x, y,
     x <- as.numeric(x)
     y <- as.numeric(y)
 
-
-
     PART <- data.table::data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, .N), by = "prior.quadrant"]
 
     if(Voronoi) plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
@@ -98,7 +96,6 @@ NNS.part = function(x, y,
         obs.req <- obs.req
         hard.stop <- 2*max(ceiling(log(length(x), 2)), 1) + 2
     }
-
 
     if(is.null(type)) {
         i <- 0L
@@ -211,7 +208,7 @@ NNS.part = function(x, y,
 
                 new.parts <- length(unique(PART$quadrant))
 
-            if((min(PART$counts) <= obs.req) && i >= 1) break
+            if((min(PART$counts) <= obs.req) && i > 0) break
             i = i + 1L
         }
 
@@ -243,7 +240,7 @@ NNS.part = function(x, y,
 
             old.obs.req.rows <- PART[old.counts > obs.req/2, which = TRUE]
 
-            if(length(obs.req.rows)==0) break
+            if(length(obs.req.rows)==0 && obs.req > 0) break
             if(obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
 
             if(noise.reduction == "off") {
@@ -286,8 +283,7 @@ NNS.part = function(x, y,
 
                 new.parts <- length(unique(PART$quadrant))
 
-
-            if((min(PART$counts) <= obs.req) && i >= 1) break
+            if((min(PART$counts) <= obs.req) && i > 0) break
             i <- i + 1L
         }
 

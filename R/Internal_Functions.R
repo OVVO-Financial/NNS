@@ -7,7 +7,7 @@ old_mode <- function(x) {
 
 
 ### Continuous mode if data previously sorted
-mode <- function(x){
+mode <- function(x, class = FALSE){
   x <- as.numeric(x)
   l <- length(x)
   if(l <= 3) return(median(x))
@@ -18,29 +18,26 @@ mode <- function(x){
 
   z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
   lz <- length(z$counts)
-  max_z <- z$counts==max(z$counts[3:(lz-2)])
+  if(class) max_z <- z$counts==max(z$counts) else max_z <- z$counts==max(z$counts[3:(lz-2)])
   
   if(sum(max_z)>1){
     z_ind <- 3:(lz-2)
-    z_names <- seq(x_s[1], x_s[l], z$width)
-    return(sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind]))
+    if(class) z_ind <- 1:lz
   } else {
     z_c <- which.max(z$counts)
-    
-    z_ind <- max(1, (z_c - 1)):min(l,(z_c + 1))
-    z_names <- seq(x_s[1], x_s[l], z$width)
-    return(sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind]))
+    z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
   }
+  
+  z_names <- seq(x_s[1], x_s[l], z$width)
+  
+  final <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
+  if(class) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
 }
 
 
 
 ### Classification Mode of a distribution
-mode_class <- function(x){
-  x <- na.omit(x)
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
+mode_class <- function(x) mode(x, class = TRUE)
 
 
 
@@ -48,7 +45,7 @@ mode_class <- function(x){
 ### Central Tendency
 old_gravity <- function(x) (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
 
-gravity <- function(x){
+gravity <- function(x, class = FALSE){
   l <- length(x)
   if(l <= 3) return(median(x))
   if(length(unique(x))==1) return(x[1])
@@ -63,13 +60,14 @@ gravity <- function(x){
 
   z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
   lz <- length(z$counts)
-  max_z <- z$counts==max(z$counts[3:(lz-2)])
+  if(class) max_z <- z$counts==max(z$counts) else max_z <- z$counts==max(z$counts[3:(lz-2)])
   
   if(sum(max_z)>1){
     z_ind <- 3:(lz-2)
+    if(class) z_ind <- 1:lz
   } else {
     z_c <- which.max(z$counts)
-    z_ind <- max(1, (z_c - 1)):min(l,(z_c + 1))
+    z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
   }
 
   z_names <- seq(x_s[1], x_s[l], z$width)
@@ -78,11 +76,12 @@ gravity <- function(x){
   mu <- sum(x)/l
   
   res <- (q2 + m + mu + mean(c(q1, q2, q3)))/4
-  if(is.na(res)) return(q2) else return(res)
+  if(is.na(res)) final <- q2 else final <- res
+  if(class) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
 } 
 
 
-gravity_class <- function(x) mode_class(x)
+gravity_class <- function(x) gravity(x, class = TRUE)
 
 
 

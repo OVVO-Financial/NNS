@@ -77,35 +77,35 @@ NNS.ARMA <- function(variable,
                      seasonal.plot = TRUE,
                      conf.intervals = NULL,
                      ncores = NULL){
-
-
+  
+  
   if(is.numeric(seasonal.factor) && dynamic) stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-
+  
   if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
-
+  
   method <- tolower(method)
   if(method == "means") shrink <- FALSE
-
+  
   oldw <- getOption("warn")
   options(warn = -1)
-
-
+  
+  
   if(is.null(ncores)) num_cores <- as.integer(parallel::detectCores()  - 1) else num_cores <- ncores
-
+  
   if(num_cores>1) doParallel::registerDoParallel(num_cores)
-
-
+  
+  
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
-
-
+  
+  
   label <- deparse(substitute(variable))
   variable <- as.numeric(variable)
   OV <- variable
-
+  
   if(min(variable) < 0) negative.values <- TRUE
-
+  
   if(!is.null(training.set)){
     variable <- variable[1 : training.set]
     FV <- variable[1 : training.set]
@@ -114,10 +114,10 @@ NNS.ARMA <- function(variable,
     variable <- variable
     FV <- variable
   }
-
+  
   Estimates <- numeric()
-
-
+  
+  
   if(is.numeric(seasonal.factor)){
     seasonal.plot = FALSE
     M <- matrix(seasonal.factor, ncol=1)
@@ -128,7 +128,7 @@ NNS.ARMA <- function(variable,
       rev.var <- variable[seq(length(variable), 1, -i)]
       output[i] <- abs(sd(rev.var) / mean(rev.var))
     }
-
+    
     if(is.null(weights)){
       Relative.seasonal <- output / abs(sd(variable)/mean(variable))
       Seasonal.weighting <- 1 / Relative.seasonal
@@ -138,7 +138,7 @@ NNS.ARMA <- function(variable,
     } else {
       Weights <- weights
     }
-
+    
   } else {
     M <- NNS.seas(variable, plot=FALSE, modulo = modulo, mod.only = mod.only)
     if(!is.list(M)){
@@ -156,17 +156,17 @@ NNS.ARMA <- function(variable,
         M <- M$all.periods[1 : best.periods, ]
       }
     }
-
+    
     ASW <- ARMA.seas.weighting(seasonal.factor, M)
     lag <- ASW$lag
-
+    
     if(is.null(weights)) Weights <- ASW$Weights else Weights <- weights
-
+    
     if(is.character(weights)) Weights <- rep(1/length(lag), length(lag))
-
+    
   }
-
-
+  
+  
   # Regression for each estimate in h
   for (j in 1 : h){
     ## Regenerate seasonal.factor if dynamic
@@ -185,97 +185,97 @@ NNS.ARMA <- function(variable,
           M <- seas.matrix$all.periods[1 : best.periods, ]
         }
       }
-
+      
       ASW <- ARMA.seas.weighting(seasonal.factor, M)
       lag <- ASW$lag
       Weights <- ASW$Weights
     }
-
+    
     ## Generate vectors for 1:lag
     GV <- generate.vectors(variable,lag)
     Component.index <- GV$Component.index
     Component.series <- GV$Component.series
-
+    
     ## Regression on Component Series
     for(i in 1:length(lag)){
       if(method == 'nonlin' || method == 'both'){
         Regression.Estimates <- list(length(lag))
-
-
-
+        
+        
+        
         x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
-
+        
         ## Skeleton NNS regression for NNS.ARMA
         reg.points <- NNS.reg(x, y, inference = FALSE, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
         reg.points <- reg.points[complete.cases(reg.points),]
-
+        
         xs <- (tail(reg.points$x, 1) - reg.points$x)
         ys <- (tail(reg.points$y, 1) - reg.points$y)
-
+        
         xs <- head(xs, (length(xs)-1))
         ys <- head(ys, (length(ys)-1))
-
+        
         run <- mean(rep(xs, (1:length(xs))^2))
         rise <- mean(rep(ys, (1:length(ys))^2))
-
-
+        
+        
         Regression.Estimates[[i]] <- last.y + (rise / run)
-
-
+        
+        
         Regression.Estimates <- unlist(Regression.Estimates)
-
+        
         NL.Regression.Estimates <- Regression.Estimates
         Nonlin.estimates <- sum(Regression.Estimates * Weights)
-
+        
       }#Linear == F
-
+      
       if(method == "lin" || method == "both" || method == "means") {
-
+        
         Regression.Estimates <- list(length(lag))
-
+        
         if(method != "means"){
           Regression.Estimates <- foreach(i = 1 : length(lag))%dopar%{
             last.x <- tail(Component.index[[i]], 1)
             coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
-
+            
             coefs[1] + (coefs[2] * (last.x + 1))
           }
           Regression.Estimates <- unlist(Regression.Estimates)
         }
-
+        
         if(method == "means" || shrink){
           Regression.Estimates_means <- list(length(lag))
           Regression.Estimates_means[[i]] <- mean(Component.series[[i]])
           if(shrink) Regression.Estimates <- (Regression.Estimates + unlist(Regression.Estimates_means)) / 2 else Regression.Estimates <- unlist(Regression.Estimates_means)
         }
-
+        
         L.Regression.Estimates <- Regression.Estimates
         Lin.estimates <- sum(Regression.Estimates * Weights)
-
+        
       }#Linear == T
-
-
+      
+      
       if(!negative.values) Regression.Estimates <- pmax(0, Regression.Estimates)
-
-
+      
+      
       if(method == 'both'){
         Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
       } else {
         Estimates[j] <- sum(Regression.Estimates * Weights)
       }
-
+      
       variable <- c(variable, Estimates[j])
       FV <- variable
     } # i loop
   } # j loop
-
+  
   if(num_cores>1) registerDoSEQ()
-
-
+  
+  
   if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399)$replicates
-
-
+  
+  
   #### PLOTTING
   if(plot){
     original.par = par(no.readonly = TRUE)
@@ -293,20 +293,20 @@ NNS.ARMA <- function(variable,
         text(1, abs(sd(FV) / mean(FV)), pos = 3, "NO SEASONALITY DETECTED", col = 'red')
       }
     }
-
-
+    
+    
     if(is.null(label)) label <- "Variable"
-
-
+    
+    
     if(!is.null(conf.intervals)){
       plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
            xlim = c(1, max((training.set + h), length(OV))),
            ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
-
+      
       for(i in 1 : 399){
         lines((training.set+1) : (training.set+h), CIs[,i],  col = rgb(0.75,0.75,0.75, 0.05))
       }
-
+      
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
       segments(training.set, FV[training.set], training.set + 1, Estimates[1],lwd = 2,lty = 1,col = 'red')
       legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h, " period(s)")), lty = c(1, 1), col = c('steelblue', 'red'), lwd = 2)
@@ -314,7 +314,7 @@ NNS.ARMA <- function(variable,
       plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
            xlim = c(1, max((training.set + h), length(OV))),
            ylab = label, ylim = c(min(Estimates, OV), max(OV, Estimates)))
-
+      
       if(training.set[1] < length(OV)){
         lines((training.set + 1) : (training.set + h), Estimates, type = 'l',lwd = 2, lty = 3, col = 'red')
         segments(training.set, FV[training.set], training.set + 1, Estimates[1], lwd = 2, lty = 3, col = 'red')
@@ -324,15 +324,15 @@ NNS.ARMA <- function(variable,
         segments(training.set, FV[training.set], training.set + 1, Estimates[1], lwd = 2, lty = 1, col = 'red')
         legend('topleft', bty = 'n', legend = c("Original", paste0("Forecast ", h, " period(s)")),lty = c(1, 1), col = c('steelblue', 'red'), lwd = 2)
       }
-
-
+      
+      
     }
     points(training.set, OV[training.set], col = "green", pch = 18)
     points(training.set + h, tail(FV, 1), col = "green", pch = 18)
-
+    
     par(original.par)
   }
-
+  
   options(warn = oldw)
   if(!is.null(conf.intervals)){
     upper_CIs <- apply(CIs, 1, function(z) UPM.VaR(1-conf.intervals, 0, z))

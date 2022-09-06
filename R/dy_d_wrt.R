@@ -121,7 +121,7 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
-   
+  
   zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence^2
 
   h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
@@ -171,7 +171,7 @@ dy.d_ <- function(x, y, wrt,
       }
 
 
-      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = 1)$Point.est
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
 
 
       estimates <- data.table::data.table(cbind(estimates = estimates,
@@ -212,8 +212,9 @@ dy.d_ <- function(x, y, wrt,
       if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r",appendLF=TRUE)
 
 
-      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, inference = TRUE, ncores = 1)$Point.est
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
 
+      
 
       lower <- head(estimates,n)
       two.f.x <- 2 * estimates[(n+1):(2*n)]

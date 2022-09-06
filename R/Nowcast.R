@@ -88,5 +88,5 @@ NNS.nowcast <- function(h = 12,
 
   colnames(econ_variables) <- variable_list
 
-  NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE)
+  NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE, dim.red.method = "all")
 }

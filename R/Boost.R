@@ -6,7 +6,6 @@
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
-#' @param inference logical; \code{FALSE} (default) For inferential tasks, otherwise \code{inference = FALSE} is faster for predictive tasks.
 #' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
@@ -49,7 +48,6 @@ NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
                       type = NULL,
-                      inference = FALSE,
                       depth = NULL,
                       learner.trials = 100,
                       epochs = NULL,
@@ -135,15 +133,15 @@ NNS.boost <- function(IVs.train,
 
 
 
-  x <- IVs.train
+  x <- data.table::data.table(IVs.train)
   y <- DV.train
   z <- IVs.test
 
 
   ### Representative samples
-      rep.x <- data.table::data.table(x)
+#      rep.x <- data.table::data.table(x)
 
-      rep.x <- rep.x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
+      rep.x <- x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
 
       rep.y <- unlist(rep.x[,1])
       rep.x <- rep.x[,-1]
@@ -189,7 +187,7 @@ NNS.boost <- function(IVs.train,
       new.index <- unlist(new.index)
 
 
-          new.iv.train <- data.table::data.table(x[-new.index,])
+          new.iv.train <- x[-new.index,] #data.table::data.table(x[-new.index,])
           new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
           new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
@@ -217,11 +215,10 @@ NNS.boost <- function(IVs.train,
                            new.dv.train,
                            point.est = new.iv.test[,test.features[[i]]],
                            dim.red.method = "equal",
-                           plot = FALSE, residual.plot = FALSE, order = depth,
-                           factor.2.dummy = FALSE,
-                           ncores = 1, type = type, inference = inference)$Point.est
+                           plot = FALSE, order = depth,
+                           ncores = 1, type = type)$Point.est
 
-      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
+      predicted[is.na(predicted)] <- gravity(na.omit(predicted))
 
       # Do not predict a new unseen class
       if(!is.null(type)){
@@ -296,7 +293,7 @@ NNS.boost <- function(IVs.train,
       new.index <- unlist(new.index)
 
 
-          new.iv.train <- data.table::data.table(x[-new.index, ])
+          new.iv.train <- x[-new.index, ] #data.table::data.table(x[-new.index, ])
           new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
           new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
@@ -327,9 +324,9 @@ NNS.boost <- function(IVs.train,
                            new.dv.train, point.est = new.iv.test[, features],
                            dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
-                           factor.2.dummy = FALSE, ncores = 1, type = type, inference = inference)$Point.est
+                           ncores = 1, type = type)$Point.est
 
-      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
+      predicted[is.na(predicted)] <- gravity(na.omit(predicted))
       # Do not predict a new unseen class
       if(!is.null(type)){
         predicted <- pmin(predicted,max(as.numeric(y)))
@@ -376,11 +373,12 @@ NNS.boost <- function(IVs.train,
 
 
   if(!is.null(rep.y)){
-      x <- rbind(rep.x, data.matrix(x))
+### remove data.matrix(x)
+      x <- rbind(rep.x, (x))
       y <- c(rep.y, y)
-  } else {
-      x <- data.matrix(x)
-  }
+  }# else {
+#      x <- data.matrix(x)
+#  }
 
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
@@ -392,14 +390,14 @@ NNS.boost <- function(IVs.train,
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
-
-      estimates <- NNS.stack(data.matrix(x[, unlist(final_scale)]),
+### data.matrix() removed for IVtrain and IVtest
+      estimates <- NNS.stack(x[, unlist(final_scale)],
                              y,
-                             IVs.test = data.matrix(z[, unlist(final_scale)]),
-                             order = depth, dim.red.method = "cor",
+                             IVs.test = z[, unlist(final_scale)],
+                             order = depth, dim.red.method = "all",
                              ncores = 1,
                              stack = FALSE, status = status,
-                             type = type, inference = inference, dist = dist, folds = folds)$stack
+                             type = type, dist = dist, folds = folds)$stack
 
       estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
 

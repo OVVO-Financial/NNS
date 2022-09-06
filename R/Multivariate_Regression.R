@@ -319,7 +319,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   rhs.partitions <- data.table::data.table(reg.points.matrix)
   fitted.matrix$residuals <-  original.DV - fitted.matrix$y.hat
 
-  R2 <- max(0, min(1, sum((fitted.matrix$y.hat - mean(fitted.matrix$y)) ^ 2) / sum((fitted.matrix$y - mean(fitted.matrix$y)) ^ 2)))
+  if(!is.null(type) && type=="class") R2 <- format(mean(fitted.matrix$y.hat==fitted.matrix$y), digits = 4)  else R2 <- max(0, min(1, sum((fitted.matrix$y.hat - mean(fitted.matrix$y)) ^ 2) / sum((fitted.matrix$y - mean(fitted.matrix$y)) ^ 2)))
 
 
   ### 3d plot
@@ -376,18 +376,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   if(residual.plot){
     resids <- cbind(original.DV, y.hat)
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
+    if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2) 
     matplot(resids, type = 'l', xlab = "Index", ylab = expression(paste("y (black)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
 
     title(main = paste0("NNS Order = multiple"), cex.main = 2)
     legend(location, legend = r2.leg, bty = 'n')
   }
-
-
-
-
-
-
-
 
   ### Return Values
   if(return.values){

@@ -90,11 +90,9 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
 
 
   if(is.null(class)) single.estimate <- rpm$y.hat%*%weights else{
-    ks.mode <-  mode(rep(rpm$y.hat, ceiling(100*weights)))
+    ks.mode <-  gravity(rep(rpm$y.hat, ceiling(100*weights)), class = TRUE)
     single.estimate <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
   }
-
-
 
   return(single.estimate)
 }
