@@ -36,7 +36,8 @@ PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), po
 PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
 
 ## Calling Individual Partial Moment Quadrants
-cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
+cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), 
+                     pop_adj = TRUE)
 cov.mtx$cupm
 
 ## Full covariance matrix

@@ -76,7 +76,7 @@ Wrapper function for optimizing any combination of a given \code{seasonal.factor
 nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
 seasonal.factor = seq(12, 24, 6))
 
-## Then use optimal parameters in NNS.ARMA to predict 12 periods in-sample.
+## To use optimal parameters in NNS.ARMA to predict 12 periods in-sample.
 ## Note the {$bias.shift} usage in the {NNS.ARMA} function:
 nns.estimates <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
 seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$bias.shift
