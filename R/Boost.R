@@ -139,8 +139,6 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-#      rep.x <- data.table::data.table(x)
-
       rep.x <- x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
 
       rep.y <- unlist(rep.x[,1])
@@ -373,12 +371,9 @@ NNS.boost <- function(IVs.train,
 
 
   if(!is.null(rep.y)){
-### remove data.matrix(x)
       x <- rbind(rep.x, (x))
       y <- c(rep.y, y)
-  }# else {
-#      x <- data.matrix(x)
-#  }
+  }
 
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)

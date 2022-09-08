@@ -260,12 +260,12 @@ NNS.VAR <- function(variables,
   
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
-  
+
   nns_IVs_interpolated_extrapolated <- head(new_values, dim(variables)[1])
   
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
-  
+
   # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
   
@@ -286,11 +286,13 @@ NNS.VAR <- function(variables,
 
   nns_DVs <- list()
   relevant_vars <- list()
-
+ 
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
 
-                     if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
+                    
+                    if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
+
                      
                      # Dimension reduction NNS.reg to reduce variables
                      cor_threshold <- NNS.stack(IVs.train = lagged_new_values_train[, -i],
@@ -300,7 +302,6 @@ NNS.VAR <- function(variables,
                                                 folds = 1,
                                                 obj.fn = obj.fn,
                                                 objective = objective,
-                                                inference = TRUE,
                                                 method = c(1,2),
                                                 dim.red.method = dim.red.method,
                                                 order = NULL, ncores = 1, stack = TRUE)
@@ -353,7 +354,6 @@ NNS.VAR <- function(variables,
                      list(nns_DVs, rel_vars, DV_weights)
                    }
   
-
   if(num_cores > 1) {
     stopCluster(cl)  
     registerDoSEQ()

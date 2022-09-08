@@ -259,7 +259,7 @@ dy.d_ <- function(x, y, wrt,
       }
 
 
-      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, inference = TRUE, point.only = TRUE, ncores = 1)$Point.est
+      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
 
 
       z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
