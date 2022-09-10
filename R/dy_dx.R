@@ -38,7 +38,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   order <- NULL
 
-  dep <- NNS.dep(x, y, asym = TRUE)$Dependence
+  dep <- NNS.dep(x, y, asym = TRUE, ncores = 1)$Dependence
 
   h <- mean(abs(diff(LPM.VaR(seq(0, 1, min(.05, max(.01, 1-dep))), 1, x))))
 
@@ -52,7 +52,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
   if(length(eval.point) > 1 && deriv.method == "NNS")  deriv.method <- "FD"
 
   if(is.character(eval.point)){
-    ranges <- NNS.reg(x, y, order = order, plot = FALSE)$derivative
+    ranges <- NNS.reg(x, y, order = order, plot = FALSE, ncores = 1)$derivative
     ranges[ , interval := seq(1 : length(ranges$Coefficient))]
 
     range.weights <- numeric()
@@ -88,7 +88,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
       run[z] <- eval.point.max[z] - eval.point.min[z]
     }
 
-    reg.output <- NNS.reg(x, y, plot = FALSE, point.est = as.vector(deriv.points), type = NULL, point.only = TRUE)
+    reg.output <- NNS.reg(x, y, plot = FALSE, point.est = as.vector(deriv.points), type = NULL, point.only = TRUE, ncores = 1)
 
     estimates.min <- reg.output$Point.est[1:n]
     estimates.max <- reg.output$Point.est[(2*n+1):(3*n)]
@@ -105,7 +105,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
         if((output[ , X.Upper.Range][which(eval.point < output[ , X.Upper.Range]) - ifelse(length(output[, X.Upper.Range])==1,0,1)][1]) < eval.point){
           first.deriv <-  output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1]
         } else {
-          first.deriv <-  mean(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]))
+          first.deriv <-  gravity(c(output[ , Coefficient][which(eval.point < output[ , X.Upper.Range])][1], output[ , X.Lower.Range][which(eval.point < output[ , X.Upper.Range]) - 1][1]))
         }
     }
 
