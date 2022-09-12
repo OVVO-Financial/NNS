@@ -4,6 +4,7 @@
 #'
 #' @param h integer; \code{(h = 12)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
 #' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.
+#' @param specific.regressors integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
 #' @param Quandl.key character; \code{NULL} (default) User provided \link{Quandl} API key WITH QUOTES.  If previously entered in the current environment via \code{Quandl::Quandl.api_key}, no further action required.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
@@ -48,6 +49,7 @@
 
 NNS.nowcast <- function(h = 12,
                         additional.regressors = NULL,
+                        specific.regressors = NULL,
                         start.date = "2000-01-03",
                         Quandl.key = NULL,
                         status = TRUE,
@@ -77,7 +79,7 @@ NNS.nowcast <- function(h = 12,
     variable_list[i] <- paste0("FRED/", variables[i])
   }
 
-  variable_list <- c(variable_list, additional.regressors)
+  if(is.null(specific.regressors)) variable_list <- c(variable_list, additional.regressors) else variable_list <- c(variable_list, additional.regressors)[specific.regressors]
 
   econ_variables <- Quandl::Quandl(variable_list, type = 'ts',order = "asc",
                                    collapse = "monthly", start_date = start.date)
