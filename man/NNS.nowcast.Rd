@@ -7,6 +7,7 @@
 NNS.nowcast(
   h = 12,
   additional.regressors = NULL,
+  specific.regressors = NULL,
   start.date = "2000-01-03",
   Quandl.key = NULL,
   status = TRUE,
@@ -17,6 +18,8 @@ NNS.nowcast(
 \item{h}{integer; \code{(h = 12)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
 \item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.}
+
+\item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.}
 
 \item{start.date}{character; \code{"2000-01-03"} (default) Starting date for all data series download.}
 
