@@ -4,20 +4,19 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt .preformat.ts
 #' @importFrom utils globalVariables head tail combn flush.console
-#' @importFrom data.table data.table %chin% .I .N .SD := as.data.table fwrite is.data.table rbindlist set setcolorder setnames setorder as.IDate as.ITime setkey frollmean shift transpose
 #' @importFrom dtw dtw
-#' @importFrom meboot meboot
 #' @importFrom Rfast colsums colmeans rowsums rowmeans
 #' @importFrom caret upSample downSample
 #' @importFrom zoo as.yearmon
 #' @importFrom tseries adf.test
+#' @importFrom xts to.monthly
+#' @importFrom quantmod getSymbols
 #' @import doParallel
 #' @import rgl
 #' @import stringr
 #' @import meboot
 #' @import data.table
 #' @import dynlm
-#' @import Quandl
 #' @import MESS
 #' @rawNamespace import(Rcpp, except = LdFlags)
 #' @import RcppParallel
@@ -51,7 +50,7 @@
   requireNamespace("MESS")
   requireNamespace("Rfast")
   requireNamespace("dynlm")
-  requireNamespace("Quandl")
+
 
 
 

@@ -6,7 +6,7 @@
 #' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the Quandl exchange format as described in \url{https://docs.data.nasdaq.com/docs/data-organization}.  For example, the 10-year US Treasury yield using the St. Louis Federal Reserve data is \code{"FRED/DGS10"}.
 #' @param specific.regressors integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
-#' @param Quandl.key character; \code{NULL} (default) User provided \link{Quandl} API key WITH QUOTES.  If previously entered in the current environment via \code{Quandl::Quandl.api_key}, no further action required.
+#' @param keep.data logical; \code{FALSE} (default) Keeps downloaded variables in a new environment \code{NNSdata}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
@@ -22,10 +22,6 @@
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
 #'
-#' @note
-#' \itemize{
-#' \item This function requires an API key from Quandl.  Sign up via \url{https://data.nasdaq.com/}.
-#' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -51,20 +47,10 @@ NNS.nowcast <- function(h = 12,
                         additional.regressors = NULL,
                         specific.regressors = NULL,
                         start.date = "2000-01-03",
-                        Quandl.key = NULL,
+                        keep.data = FALSE,
                         status = TRUE,
                         ncores = NULL){
 
-
-  if(getOption("Quandl.api_key")=="" || is.null(getOption("Quandl.api_key"))){
-      if(is.null(Quandl.key)){
-          message("Please enter your Quandl API key WITHOUT QUOTES and press enter:")
-
-          key <- readline(": ")
-          Quandl::Quandl.api_key(key)
-
-        } else Quandl::Quandl.api_key(Quandl.key)
-  } else Quandl::Quandl.api_key(getOption("Quandl.api_key"))
 
   variables <- c("PAYEMS", "JTSJOL",  "CPIAUCSL", "DGORDER", "RSAFS",
                  "UNRATE", "HOUST", "INDPRO", "DSPIC96", "BOPTEXP",
@@ -75,19 +61,20 @@ NNS.nowcast <- function(h = 12,
 
   variable_list <- character()
 
-  for(i in 1:length(variables)){
-    variable_list[i] <- paste0("FRED/", variables[i])
+  if(is.null(specific.regressors)) variable_list <- c(variables, additional.regressors) else variable_list <- c(variables, additional.regressors)[specific.regressors]
+
+  NNSdata <- new.env()
+  quantmod::getSymbols(variable_list, src = "FRED", env = NNSdata)
+
+  if(sum(ls(envir = NNSdata)%in%variable_list) < length(variable_list)){
+    quantmod::getSymbols(variable_list[!variable_list%in%ls(envir = NNSdata)[(ls(envir = NNSdata)%in%variable_list)]], src = "FRED")
   }
-
-  if(is.null(specific.regressors)) variable_list <- c(variable_list, additional.regressors) else variable_list <- c(variable_list, additional.regressors)[specific.regressors]
-
-  econ_variables <- Quandl::Quandl(variable_list, type = 'ts',order = "asc",
-                                   collapse = "monthly", start_date = start.date)
-
-  if(!is.null(attributes(econ_variables)$errors)) return(attributes(econ_variables)$errors)
-
-  econ_variables <- stats::.preformat.ts(econ_variables)
-
+ 
+  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,1])
+  if(!keep.data) rm(list = ls(), envir = NNSdata)
+  
+  econ_variables <- Reduce(function(...) merge(..., all=TRUE), raw_econ_variables)[paste0(start.date,"::")]
+  
   colnames(econ_variables) <- variable_list
 
   NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE)

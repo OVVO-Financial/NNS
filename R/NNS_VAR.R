@@ -120,7 +120,7 @@ NNS.VAR <- function(variables,
   options(warn = -1)
   
   
-  if(nowcast) dates <- zoo::as.yearmon(zoo::as.yearmon(rownames(variables)[1]) + seq(0, (dim(variables)[1] + (h-1)))/12) else dates <- NULL
+  if(nowcast) dates <- c(index(variables), tail(index(variables), h) + h/12) else dates <- NULL
   
   if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
   
@@ -420,7 +420,7 @@ NNS.VAR <- function(variables,
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
   
-  rownames(nns_IVs_interpolated_extrapolated) <- rownames(variables)
+  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
   
   colnames(nns_IVs_results) <- colnames(variables)
