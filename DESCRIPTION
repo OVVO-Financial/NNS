@@ -13,7 +13,7 @@ License: GPL-3
 BugReports: https://github.com/OVVO-Financial/NNS/issues
 RoxygenNote: 7.1.2
 Depends: R (>= 3.5.0), doParallel
-Imports: caret, data.table, dynlm, meboot, MESS, quantmod, Rcpp, RcppParallel, Rfast, rgl, stringr, tseries, xts, zoo
+Imports: caret, data.table, dynlm, meboot, MESS, quantmod, Rcpp, RcppParallel, Rfast, rgl, stringr, xts, zoo
 Suggests: 
     knitr,
     rmarkdown,
