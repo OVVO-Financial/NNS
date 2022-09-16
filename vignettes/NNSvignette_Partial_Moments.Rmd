@@ -55,6 +55,9 @@ cov(x, y)
 ```
 
 ## Covariance Elements and Covariance Matrix
+The covariance matrix $(\Sigma)$ is equal to the sum of the co-partial moments matrices less the divergent partial moments matrices.
+$$ \Sigma = CLPM + CUPM - DLPM - DUPM $$
+
 ```{r cov_dec, warning=FALSE}
 PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
 

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Forecasting</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS: Forecasting</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(rgl)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(meboot)</span></code></pre></div>
+<div id="forecasting" class="section level1">
+<h1>Forecasting</h1>
+<p>The underlying assumptions of traditional autoregressive models are
+well known. The resulting complexity with these models leads to
+observations such as,</p>
+<p><em>``We have found that choosing the wrong model or parameters can
+often yield poor results, and it is unlikely that even experienced
+analysts can choose the correct model and parameters efficiently given
+this array of choices.’’</em></p>
+<p><code>NNS</code> simplifies the forecasting process. Below are some
+examples demonstrating <strong><code>NNS.ARMA</code></strong> and its
+<strong>assumption free, minimal parameter</strong> forecasting
+method.</p>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
+<p><strong><code>NNS.ARMA</code></strong> has the ability to fit a
+linear regression to the relevant component series, yielding very fast
+results. For our running example we will use the
+<code>AirPassengers</code> dataset loaded in base R.</p>
+<p>We will forecast 44 periods <code>h = 44</code> of
+<code>AirPassengers</code> using the first 100 observations
+<code>training.set = 100</code>, returning estimates of the final 44
+observations. We will then test this against our validation set of
+<code>tail(AirPassengers,44)</code>.</p>
+<p>Since this is monthly data, we will try a
+<code>seasonal.factor = 12</code>.</p>
+<p>Below is the linear fit and associated root mean squared error (RMSE)
+using <code>method = &quot;lin&quot;</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nns <span class="ot">=</span> <span class="fu">NNS.ARMA</span>(AirPassengers, </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">h =</span> <span class="dv">44</span>, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">training.set =</span> <span class="dv">100</span>, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;lin&quot;</span>, </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">plot =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">seasonal.factor =</span> <span class="dv">12</span>, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 35.39965</code></pre>
+</div>
+<div id="nonlinear-regression" class="section level2">
+<h2>Nonlinear Regression</h2>
+<p>Now we can try using a nonlinear regression on the relevant component
+series using <code>method = &quot;nonlin&quot;</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nns <span class="ot">=</span> <span class="fu">NNS.ARMA</span>(AirPassengers, </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">h =</span> <span class="dv">44</span>, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">training.set =</span> <span class="dv">100</span>, </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;nonlin&quot;</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">plot =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">seasonal.factor =</span> <span class="dv">12</span>, </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 19.49762</code></pre>
+</div>
+<div id="cross-validation" class="section level2">
+<h2>Cross-Validation</h2>
+<p>We can test a series of <code>seasonal.factors</code> and select the
+best one to fit. The largest period to consider would be
+<code>0.5 * length(variable)</code>, since we need more than 2 points
+for a regression! Remember, we are testing the first 100 observations of
+<code>AirPassengers</code>, not the full 144 observations.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>seas <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">sapply</span>(<span class="dv">1</span> <span class="sc">:</span> <span class="dv">25</span>, <span class="cf">function</span>(i) <span class="fu">c</span>(i, <span class="fu">sqrt</span>( <span class="fu">mean</span>( (<span class="fu">NNS.ARMA</span>(AirPassengers, <span class="at">h =</span> <span class="dv">44</span>, <span class="at">training.set =</span> <span class="dv">100</span>, <span class="at">method =</span> <span class="st">&quot;lin&quot;</span>, <span class="at">seasonal.factor =</span> i, <span class="at">plot=</span><span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>) <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>) ) ) ) )</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(seas) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;Period&quot;</span>, <span class="st">&quot;RMSE&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>seas</span></code></pre></div>
+<pre><code>##       Period      RMSE
+##  [1,]      1  75.67783
+##  [2,]      2  75.71250
+##  [3,]      3  75.87604
+##  [4,]      4  75.16563
+##  [5,]      5  76.07418
+##  [6,]      6  70.43185
+##  [7,]      7  77.98493
+##  [8,]      8  75.48997
+##  [9,]      9  79.16378
+## [10,]     10  81.47260
+## [11,]     11 106.56886
+## [12,]     12  35.39965
+## [13,]     13  90.98265
+## [14,]     14  95.64979
+## [15,]     15  82.05345
+## [16,]     16  74.63052
+## [17,]     17  87.54036
+## [18,]     18  74.90881
+## [19,]     19  96.96011
+## [20,]     20  88.75015
+## [21,]     21 100.21346
+## [22,]     22 108.68674
+## [23,]     23  85.06430
+## [24,]     24  35.49018
+## [25,]     25  75.16192</code></pre>
+<p>Now we know <code>seasonal.factor = 12</code> is our best fit, we can
+see if there’s any benefit from using a nonlinear regression.
+Alternatively, we can define our best fit as the corresponding
+<code>seas$Period</code> entry of the minimum value in our
+<code>seas$RMSE</code> column.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">=</span> seas[<span class="fu">which.min</span>(seas[ , <span class="dv">2</span>]), <span class="dv">1</span>]</span></code></pre></div>
+<p>Below you will notice the use of <code>seasonal.factor = a</code>
+generates the same output.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>nns <span class="ot">=</span> <span class="fu">NNS.ARMA</span>(AirPassengers, </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">h =</span> <span class="dv">44</span>, </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">training.set =</span> <span class="dv">100</span>, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;nonlin&quot;</span>, </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">seasonal.factor =</span> a, </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 19.49762</code></pre>
+<p><strong>Note:</strong> You may experience instances with monthly data
+that report <code>seasonal.factor</code> close to multiples of 3, 4, 6
+or 12. For instance, if the reported
+<code>seasonal.factor = {37, 47, 71, 73}</code> use
+<code>(seasonal.factor = c(36, 48, 72))</code> by setting the
+<code>modulo</code> parameter in
+<strong><code>NNS.seas(..., modulo = 12)</code></strong>. The same
+suggestion holds for daily data and multiples of 7, or any other time
+series with logically inferred cyclical patterns. The nearest periods to
+that <code>modulo</code> will be in the expanded output.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.seas</span>(AirPassengers, <span class="at">modulo =</span> <span class="dv">12</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## $all.periods
+##    Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1:     48                0.4002249                         0.4279947
+## 2:     12                0.4059923                         0.4279947
+## 3:     60                0.4279947                         0.4279947
+## 4:     36                0.4279947                         0.4279947
+## 5:     24                0.4279947                         0.4279947
+## 
+## $best.period
+## Period 
+##     48 
+## 
+## $periods
+## [1] 48 12 60 36 24</code></pre>
+</div>
+<div id="cross-validating-all-combinations-of-seasonal.factor" class="section level2">
+<h2>Cross-Validating All Combinations of
+<code>seasonal.factor</code></h2>
+<p>NNS also offers a wrapper function
+<strong><code>NNS.ARMA.optim()</code></strong> to test a given vector of
+<code>seasonal.factor</code> and returns the optimized objective
+function (in this case RMSE written as
+<code>obj.fn = expression( sqrt(mean((predicted - actual)^2)) )</code>)
+and the corrsponding periods, as well as the
+<strong><code>NNS.ARMA</code></strong> regression method used.</p>
+<p>Given our monthly dataset, we will try multiple years by setting
+<code>seasonal.factor = seq(12, 24, 6)</code> every 6 months.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>nns.optimal <span class="ot">=</span> <span class="fu">NNS.ARMA.optim</span>(AirPassengers, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">training.set =</span> <span class="dv">100</span>, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">seasonal.factor =</span> <span class="fu">seq</span>(<span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">6</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">obj.fn =</span> <span class="fu">expression</span>( <span class="fu">sqrt</span>(<span class="fu">mean</span>((predicted <span class="sc">-</span> actual)<span class="sc">^</span><span class="dv">2</span>)) ), </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">objective =</span> <span class="st">&quot;min&quot;</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 12 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 35.3996540135277&quot;
+## [1] &quot;BEST method = &#39;lin&#39;, seasonal.factor = c( 12 )&quot;
+## [1] &quot;BEST lin OBJECTIVE FUNCTION = 35.3996540135277&quot;
+## [1] &quot;CURRNET METHOD: nonlin&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;nonlin&#39; , seasonal.factor =  c( 12 ) ...)&quot;
+## [1] &quot;CURRENT nonlin OBJECTIVE FUNCTION = 19.4976178189546&quot;
+## [1] &quot;BEST method = &#39;nonlin&#39; PATH MEMBER = c( 12 )&quot;
+## [1] &quot;BEST nonlin OBJECTIVE FUNCTION = 19.4976178189546&quot;
+## [1] &quot;CURRNET METHOD: both&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;both&#39; , seasonal.factor =  c( 12 ) ...)&quot;
+## [1] &quot;CURRENT both OBJECTIVE FUNCTION = 26.6112299452096&quot;
+## [1] &quot;BEST method = &#39;both&#39; PATH MEMBER = c( 12 )&quot;
+## [1] &quot;BEST both OBJECTIVE FUNCTION = 26.6112299452096&quot;</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>nns.optimal</span></code></pre></div>
+<pre><code>## $periods
+## [1] 12
+## 
+## $weights
+## NULL
+## 
+## $obj.fn
+## [1] 19.49762
+## 
+## $method
+## [1] &quot;nonlin&quot;
+## 
+## $shrink
+## [1] FALSE
+## 
+## $bias.shift
+## [1] 0
+## 
+## $errors
+##  [1] -12.0495905 -19.5023885 -18.2981119 -30.4665605 -21.9967015 -16.3628298
+##  [7] -12.6732257  -5.7137170  -2.6001984   2.2792659  17.1994048  24.2420635
+## [13]   6.6919485  -1.2269250  -8.4029057 -34.4569779   6.9539623  -2.5920976
+## [19]   4.8338436  18.5863427   1.8098569  -0.3087157  -1.1892791   2.5325891
+## [25] -22.4687006  -4.9819699 -27.7262972 -52.7041072 -21.5667488 -23.9122298
+## [31] -23.6982624 -23.0856682 -29.9142644 -27.1628466  12.6507957 -35.1714729
+## [37] -46.1877025 -34.0820674 -63.4664903 -63.3893474 -35.6270575 -51.0256013
+## [43] -27.9853043 -23.5848310
+## 
+## $results
+##  [1] 354.2580 421.2452 462.4395 453.0669 395.8280 338.4172 301.1178 338.6083
+##  [9] 347.7440 330.7530 393.0655 383.2619 390.9250 468.8563 511.8161 501.4936
+## [17] 436.7415 370.9154 331.3098 371.0849 380.7716 361.0259 430.2580 418.6685
+## [25] 427.7316 516.8815 561.5732 550.3086 478.0325 403.7194 361.7944 403.9807
+## [33] 413.6136 390.9586 467.3674 453.9804 464.4469 564.6356 611.0813 598.8694
+## [41] 519.0765 436.3233 392.0875 436.6022</code></pre>
+<p>Using our new parameters via the <code>nns.optimal$results</code>
+yields the same results:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns.optimal<span class="sc">$</span>results <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 19.49762</code></pre>
+</div>
+<div id="bias.shift" class="section level2">
+<h2><code>$bias.shift</code></h2>
+<p><strong><code>NNS.ARMA.optim</code></strong> will return a
+<code>$bias.shift</code>, which is to be added to the ultimate
+<strong><code>NNS.ARMA</code></strong> forecast when using the optimum
+parameters from the <strong><code>NNS.ARMA.optim</code></strong>
+call.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns<span class="sc">+</span>nns.optimal<span class="sc">$</span>bias.shift <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 19.49762</code></pre>
+<div id="negative-values-and-bias.shift" class="section level3">
+<h3>Negative values and <code>$bias.shift</code></h3>
+<p>If the variable cannot logically assume negative values, then simply
+limit the <code>NNS</code> estimates.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>nns <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="dv">0</span>, nns<span class="sc">+</span>nns.optimal<span class="sc">$</span>bias.shift)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 19.49762</code></pre>
+</div>
+</div>
+<div id="extension-of-estimates" class="section level2">
+<h2>Extension of Estimates</h2>
+<p>Using our cross-validated parameters (<code>seasonal.factor</code>
+and <code>method</code>) we can forecast another 50 periods
+out-of-sample (<code>h = 50</code>), by dropping the
+<code>training.set</code> parameter while generating the 95% confidence
+intervals.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.ARMA</span>(AirPassengers, </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">h =</span> <span class="dv">50</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">conf.intervals =</span> .<span class="dv">95</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">seasonal.factor =</span> nns.optimal<span class="sc">$</span>periods, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">method  =</span> nns.optimal<span class="sc">$</span>method, </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">weights =</span> nns.optimal<span class="sc">$</span>weights, </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>) <span class="sc">+</span> nns.optimal<span class="sc">$</span>bias.shift</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+</div>
+<div id="brief-notes-on-other-parameters" class="section level2">
+<h2>Brief Notes on Other Parameters</h2>
+<ul>
+<li><code>seasonal.factor = c(1, 2, ...)</code></li>
+</ul>
+<p>We included the ability to use any number of specified seasonal
+periods simultaneously, weighted by their strength of seasonality.
+Computationally expensive when used with nonlinear regressions and large
+numbers of relevant periods.</p>
+<ul>
+<li><code>weights</code></li>
+</ul>
+<p>Instead of weighting by the <code>seasonal.factor</code> strength of
+seasonality, we offer the ability to weight each per any defined
+compatible vector summing to 1.<br />
+Equal weighting would be <code>weights = &quot;equal&quot;</code>.</p>
+<ul>
+<li><code>conf.intervals</code></li>
+</ul>
+<p>Provides the values for the specified confidence intervals within
+[0,1] for each forecasted point and plots the bootstrapped replicates
+for the forecasted points.</p>
+<ul>
+<li><code>seasonal.factor = FALSE</code></li>
+</ul>
+<p>We also included the ability to use all detected seasonal periods
+simultaneously, weighted by their strength of seasonality.
+Computationally expensive when used with nonlinear regressions and large
+numbers of relevant periods.</p>
+<ul>
+<li><code>best.periods</code></li>
+</ul>
+<p>This parameter restricts the number of detected seasonal periods to
+use, again, weighted by their strength. To be used in conjunction with
+<code>seasonal.factor = FALSE</code>.</p>
+<ul>
+<li><code>modulo</code></li>
+</ul>
+<p>To be used in conjunction with <code>seasonal.factor = FALSE</code>.
+This parameter will ensure logical seasonal patterns (i.e.,
+<code>modulo = 7</code> for daily data) are included along with the
+results.</p>
+<ul>
+<li><code>mod.only</code></li>
+</ul>
+<p>To be used in conjunction with
+<code>seasonal.factor = FALSE &amp; modulo != NULL</code>. This
+parameter will ensure empirical patterns are kept along with the logical
+seasonal patterns.</p>
+<ul>
+<li><code>dynamic = TRUE</code></li>
+</ul>
+<p>This setting generates a new seasonal period(s) using the estimated
+values as continuations of the variable, either with or without a
+<code>training.set</code>. Also computationally expensive due to the
+recalculation of seasonal periods for each estimated value.</p>
+<ul>
+<li><code>plot</code> , <code>seasonal.plot</code></li>
+</ul>
+<p>These are the plotting arguments, easily enabled or disabled with
+<code>TRUE</code> or <code>FALSE</code>.
+<code>seasonal.plot = TRUE</code> will not plot without
+<code>plot = TRUE</code>. If a seasonal analysis is all that is desired,
+<code>NNS.seas</code> is the function specifically suited for that
+task.</p>
+</div>
+</div>
+<div id="multivariate-time-series-forecasting" class="section level1">
+<h1>Multivariate Time Series Forecasting</h1>
+<p>The extension to a generalized multivariate instance is provided in
+the following documentation of the
+<strong><code>NNS.VAR()</code></strong> function:</p>
+<ul>
+<li><a href="https://www.ssrn.com/abstract=3489550">Multivariate Time
+Series Forecasting: Nonparametric Vector Autoregression Using
+NNS</a></li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments and proofs are
+provided within the following:</p>
+<ul>
+<li><p><a href="https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=3382300">Forecasting Using
+NNS</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

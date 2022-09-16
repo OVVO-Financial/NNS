@@ -17,7 +17,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(dtw)
 require(meboot)
 ```
 

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Classification</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS:
+Classification</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(rgl)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(meboot)</span></code></pre></div>
+<div id="classification" class="section level1">
+<h1>Classification</h1>
+<p><strong><code>NNS.reg</code></strong> is a very robust regression
+technique capable of nonlinear regressions of continuous variables and
+classification tasks in machine learning problems.</p>
+<p>We have extended the <strong><code>NNS.reg</code></strong>
+applications per the use of an ensemble method of classification in
+<strong><code>NNS.boost</code></strong>.</p>
+<p><strong><em>One major advantage <code>NNS.boost</code> has over tree
+based methods is the ability to seamlessly extrapolate beyond the
+current range of observations.</em></strong></p>
+<div id="splits-vs.-partitions" class="section level2">
+<h2>Splits vs. Partitions</h2>
+<p>Popular boosting algorithms take a series of weak learning decision
+tree models, and aggregate their outputs. <code>NNS</code> is also a
+decision tree of sorts, by partitioning each regressor with respect to
+the dependent variable. We can directly control the number of “splits”
+with the <strong><code>NNS.reg(..., order = , ...)</code></strong>
+parameter.</p>
+<div id="nns-partitions" class="section level3">
+<h3>NNS Partitions</h3>
+<p>We can see how <code>NNS</code> partitions each regressor by calling
+the <code>$rhs.partitions</code> output. You will notice that each
+partition is not an equal interval, nor of equal length, which
+differentiates <code>NNS</code> from other bandwidth or tree-based
+techniques.</p>
+<p>Higher dependence between a regressor and the dependent variable will
+allow for a larger number of partitions. This is determined internally
+with the <strong><code>NNS.dep</code></strong> measure.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
+<pre><code>##    Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1:          4.3         2.0          1.0         0.1
+## 2:          5.0         3.0          2.0         1.0
+## 3:          6.0         4.0          3.0         2.0
+## 4:          7.0         4.4          4.0         2.5
+## 5:          7.9          NA          5.0          NA
+## 6:           NA          NA          6.0          NA
+## 7:           NA          NA          6.9          NA</code></pre>
+</div>
+</div>
+</div>
+<div id="nns.boost" class="section level1">
+<h1><code>NNS.boost()</code></h1>
+<p>Through resampling of the training set and letting each iterated set
+of data speak for themselves (while paying extra attention to the
+residuals throughout), we can test various regressor combinations in
+these dynamic decision trees…only keeping those combinations that add
+predictive value. From there we simply aggregate the predictions.</p>
+<p><strong><code>NNS.boost</code></strong> will automatically search for
+an accuracy <code>threshold</code> from the training set, reporting
+iterations remaining and level obtained in the console. A plot of the
+frequency of the learning accuracy on the training set is also
+provided.</p>
+<p>Once a <code>threshold</code> is obtained,
+<strong><code>NNS.boost</code></strong> will test various feature
+combinations against different splits of the training set and report
+back the frequency of each regressor used in the final estimate.</p>
+<p>Let’s have a look and see how it works. We use 140 random
+<code>iris</code> observations as our training set with the 10 holdout
+observations as our test set. For brevity, we set
+<code>epochs = 10, learner.trials = 10, folds = 1</code>.</p>
+<p><strong>NOTE: Base category of response variable should be 1, not 0
+for classification problems when using
+<code>NNS.boost(..., type = &quot;CLASS&quot;)</code></strong>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">150</span>,<span class="dv">10</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnAAAAMACAMAAACTmKrkAAAA/FBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrY6AAA6ADo6AGY6OgA6Ojo6OmY6OpA6ZpA6ZrY6kLY6kNtGgrRmAABmADpmOgBmOjpmZmZmkJBmkLZmkNtmtrZmtttmtv+QOgCQZgCQZjqQkDqQkGaQkLaQtpCQttuQtv+Q27aQ29uQ2/+2ZgC2Zjq2ZpC2kGa2tma225C227a229u22/+2/7a2/9u2///bkDrbkGbbtmbbtpDb27bb29vb2//b/7bb/9vb////AAD/ADr/AGb/OgD/OpD/ZgD/Zrb/kDr/kGb/kJD/kNv/tmb/tv//25D/27b/2////7b//9v///9YGR9iAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO2dC3sjxZVA22aMPQECOGI2D8YOSyAbiyQbZjMKkE1sCGSyaDSR+v//l61HV3f1Q1JLrbq6Vp/zZWxJXV1969Zx9UOkKssBBMmOHQCMC4QDURAOREE4EAXhQBSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQDkRJJ9wsc5y9/8K8Wd1mF/e1zavfv6xeu63T7Pxl3oUt2q5gI6svrrLsgyKOs7tdY1/PNCu5LA/WiG1drKuv3jW7vff5va+obO3GtvVq/CzEtCaDe1WahuTCGeVuOnL65tl5X+Fc0R3TM7cHvi7iUCLc8lmx45OXeW/h+jV+R+H2yeihEBCus8M77Fon3NqRb+PBy4OmF65Jd1eaTwN2a89W9Su2o3D7ZPRQpBTOteqbZ7Zrij74yzvFOXbqs2Nk+OxZdv5lGOH+9B9Z5k7BPiXLiRmlfNE/F534tSnx1i/vXf1nv/vCDBeRTeXGaeR5TbiV2ePsA2fD13bAee/Ol7BRvKjVWJUMm6tKbgvZauFXFTYbG/KRnT23xa7c2Bu1tigfxZZ/ZfZ963keN76wxIzdN/WyjTZGqWvkqKPSbRk9PMmFs02/uPc5nZV/hqVw7g/+74Vw1V/pOuFm1RAR/qqrVFcb1wlnKgzntHm1dxHFfVxjVHJWHrIgEi4Kv6qw2diwUxHH4qrRWl8+OmLYWGu8N8180ijbbGNduChHXZVuyWgC0gvnXricmiRc3udfhT9w35cXL/K/hms4++Yrd66KszatOsX31SwrkvnkRfHaUd/YeUqd2oHKlLu29b1971+GKGo1ViXLzSWxcGX4UYWtxlrs+yqKl3Fry0vYcETj1of3bya+WGi8P2qZklA2BOK5aQlXtqiz0s0ZTYGIcGd3rnWmcU++LLaWwtm/2pDx4g8xpKQtXHFacb/8vqbOWj+WG7uE8/WVkX3zh3ec3UUUcY1xybC5JBauCr+qsNVYS00PE1HU2iBoecQiOe9/WWv8rGxYox0bhStz1F3pxoymQFI4f9nsrxeCcC7rtbYX3dElXOhZV2QWTn1Fejo2locvXppcVue9T/zLy6pEVGNcsnXXEV/DVeFXFbYaWxy7IVzZ2iBoOGJ801EfjG7KV/WT33rhyhZ1V7oxo0mQFM7cjvs0/XaNcFXb/WbfSVV6Qi7c5UwzPR0by8MXL+dZ3KnZk998M1kjXFSyp3BRha3GxuHluR/cotauiku0KLayyyPh7MflKbcpXPMaLlwNxMJ1VLoxo0lIL5xpWHHWMG/efPpOllXD2ZYRrincAUa4m+rlddi7e4QrT6P9hIsqbDW22Klx09Aa4W6q+rtGOJvR/3SVxNG1Qlwv3DhGuDe3Wb25q19Hlyl14YrbsPIabJ5tvIZrpKfXNVwoPA/XK9edwsVZ7ydcVGGrsUVh91hk9VV4LFK2tjbWVC2Zv/d5XTh3JrUvWk7EIcapi3PUXenGjKZA6MFv6JMP3anGXQH7BxJ14c7DXaq7VbKuhqx13VM10rP2LjVgHwicPc/fTPyAcnHv/xi6hItK9h/hQoWtxoa9Av7BT9na8p4pHNHs+4E7R9/EjfcPNtzQFpWNAwntraeuaFF3pRszmgLRr7a+qK485lnx4LcmXNkd5WVxccXS+dSomZ7Wxnocpq7i+ZVP96abhqjkDtdw8U1D3FhP9dXWizzP1z2Hix+ZXdYbb9+UzzZrdcchxqmr5ai70o0ZTYDsl/f2WXf2nvvAPtJ+0byGK79pyBemd97/k7vVckW/jJ+L/8rX30pPc2Mch++BN59cFUewN5VPPp/F599ajVXJHe5SfYWtxob9bHzZu8/Dl/eNbxqqIxZfCvwqbzS+amxcthlilLp6jror3ZjRw8N/nnR84hvIkwfhjs+btGOKLhDu6EyztF8m6QLhjo292/jg2EHIgXAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiINzBWD4UfLd8eL2x3Os1H8y//Xey6LSAcAdl4ZRBuPUg3EFBuG0g3EEJwv2fObO+zpff/uvhuzx/Zd78aDc++E+LrUYwv8EJZwp9+y8v3OKUvUO4gxKEM79effvv5cP35p15YVz70fx7bR17Hbba16boP51wP3xntxWmLb2gJwnCHZQg3I92PHu99OOXlWf+nf2fI2xd/cNtsF6+djLmP1RD26uH744Rf3oQ7qBE13BLK9zrcGHm9PMOha1eMrfhtZexdg13oidWhDsoXcIVD0te56t/FNdwsXC+2KumcIxw0Ie1I1zgB3cG3TLCcQ0HPekQrv4UJPq0fQ33irtU2I0O4bxGZmRz49e8GuFqd6n+rvWUTStAuIPSJZx7DmdPmfZqzmyvxr01z+FOGoQDURAOREE4EAXh5Hl4OHYERwTh5EE4EAXhQBSEA5CiJtxyYifGm2e9F3oF2JG2cDO/EsDNuj0ABtASrlBtdozVguH0aQm3uHLCzesn1axCMrrdyQ7DsZtxuuw8winvi+xnh0B5Ix8zDeGKpUqK24etO+gD4ZTTTK1x7uzO3KiuncddeV88BuF4Dpd0B1kQTjkIh3CiIBzCiYJwCCcKwiGcKAiHcKIgHMKJgnAIJwrCyQs3ahAO4URBOIQTBeEQThSEQzhREA7hREE4hBMF4eSF4zlc0h1kQTjlIBzCiYJwCCcKwiGcKAiHcKIgHMKJgnAIJwrCIZwoCCcv3KhBOIQTBeEQThSEQzhREA7hREE4hBMF4RBOFISTF47ncE2KeX7776AHhFNOx5SrnnUrNSDcYBCupJhqlREuaYwIV7Gc2NnL28I9mhnlEU45rdROz+4Y4RAuGe3UzrJrhEsaI8LVWVy9hXApQbgGq9sM4RKCcEl3kOUxCDdqEA7hREE4hBMF4RBOFIRDOFEQDuFEQTiEEwXh5IXjOVzSHWRBOOUgHMKJgnAIJwrCIZwoCIdwoiAcwomCcAgnCsIhnCgIJy/cqEE4hBMF4RBOFIRDOFEQDuFEQTiEEwXhEE4UhJMXjudwSXeQBeGUg3AIJwrCIZwoCIdwoiAcwomCcAgnCsIhnChdqZ1n2dndLjsoAuGU00jtNMuuFz+9z5eTdVMSIhwMoZ7a6cW9m1U6z2d2NvPtO6gD4ZTTWBjEjGuLp1a4eX1hEKbN3yOUw3CIUBTREM6uC7L635wR7rRCUUS9PbMwrnn1tu+gDkW9rCgURTTaM/O3p/P105grT4CiXlYUiiJ4DpeslxWFogiES9bLa0N5eJAORREIl6yXEa4LhEvWywjXBcIl62WE6wLhkvUywnWBcMl6GeG6QLhkvYxwXSBcsl5GuC4QLlkvI1wXCJeslxWFogiES9bLikJRBMIl62VFoSgC4ZL1sqJQFIFwyXpZUSiKQLhkvawoFEUgXLJeVhSKIhAuWS/zHK4LhEvWywjXBcIl62WE6wLhkvUywnWBcMl6GeG6QLhkvYxwXSBcsl5GuC4QLlkvI1wXCJeslxGuC4RL1suKQlEEwiXrZUWhKALhkvWyolAUgXDJellRKIpAuGS9rCgURSBcsl5WFIoiGu2ZZZmfi3BWn+N37Q7aUNTLikJRRL09dgLM5eQyR7iUofAcLrC6dZNK317cI1zCUBAuEJYDmV7cz5g2P1koCBfwI5xheskIly4UhCsJmi0nGcIlCwXhKmbFfPmrW4RLFgrCJd1BFoRTDsIl62WE6wLhkvUywnWBcMl6WVEoikC4ZL2sKBRFIFyyXlYUiiIQLlkvKwpFEQiXrJcVhaIIhEvWy4pCUQTCJetlRaEoAuGS9TLP4bpAuGS9jHBdIFyyXka4LhAuWS8jXBcIl6yXEa4LhEvWywjXBcIl62WE6wLhkvUywnWBcMl6GeG6QLhkvawoFEUgXLJeVhSKIhAuWS8rCkURCJeslxWFogiES9bLikJRBMIl62VFoSgC4ZL1sqJQFIFwyXqZ53BdIFyyXka4LhAuWS8jXBcIl6yXEa4LhEvWywjXBcIl62WE6wLhkvUywnWBcMl6GeG6QLhkvYxwXdTas5xUs+Mzx+8JhaKIenvWziW9cZ2G7DAcpj16ellRKIq6qFHH6vZytx3cR5oyqycWRaEoiqVZx7yYN7/3DqpaoyoWRaEoiuUQNw16WqMqFkWhKIoF4ZLFoigURbEgXLJYFIWiKBaESxaLpudwetKCcMliQbjOSA6wg57WqIoF4TojOcAOelqjKhaE64zkADvoaY2qWBCuM5ID7KCnNapiQbjOSA6wg57WqIoF4TojOcAOelqjKhaE64zkADvoaY2qWBCuM5ID7KCnNapiURSKolgQLlksikJRFAvCJYtFUSiKYkG4ZLEoCkVRLAiXLBZFoSiKBeGSxaIoFEWxIFyyWBSFoigWhEsWC8/hOiM5wA56WqMqFoTrjOQAO+hpjapYEK4zkgPsoKc1qmJBuM5IDrCDntaoigXhOiM5wA56WqMqFoTrjOQAO+hpjapYEK4zkgPsoKc1qmJBuM5IDrCDntaoigXhOiM5wA56WqMqFkWhKIoF4ZLFoigURbEgXLJYFIWiKBaESxaLolAUxYJwyWJRFIqiWBp1rG79ZK7rppRGuEcZiqJY6nXMsmv/Yh5ebNlBWWtUxaIoFEWx1OpY3ZaazS7ue+ygrTWqYuE5XGck8ZvlpJxRel4/qW6cOv1Ac7KPhoeHY0ewL4cWrs8IB4N5eDh2BEekeQ1XDHHrr+FgMAhXERY/YnxLCMKBKAgHoiAciIJwQ+uAneCxiII6TrAWRaEoqkVLHSdYi6JQFNWipY4TrEVRKIpq0VLHCdaiKBRFtWip4wRriSuZPzx8++/w5lX05ofvJUJRVIuWOk6wlqiSuRFsHiR79V1evpk/INxx6jjBWqpKVv/40fz84Z/uzfLhR/vJP/1rhDtSHSdYS1XJ4uF17ke2QCHcq+85pR6pjhOsJRLOnUDnkXCv3Cfmc4Q7Uh0nWEtVib9iKy/i7C2EPcfaMy3CweFpCmdd+96eUHvcpZ4aCCdA+5Rq7XOfIhwcnvZNg/3o1YPn9bHCOgoIJ0DtsYi3Lwx3jHCQgNqDX+uYVzBHOEhD8W2Wf/z2Q3QeRTiAlCAciIJwIArCgSgIB6IgHIiCcCDK7sLNs+zsLryZVW8WP7ETfPnJSS73q8XNv3nd2rxvLYNiqV70i2VzJcNCMUzdbC9D0lLWMiiWaueesTTZWbi5Oco8HGl2/jK8WU7cjHKLp72C6KxldWt+zGxrapv3rmVILNWLfrFsqWRQKHaDm15oSFqqWgbFUu7cM5YWuwrnp5Cb+r+P5eTaflL47oSbr58deGstiys7WZhpW23z3rUMiqV80S+WLZUMCsW9tqoMSktZy7BYws49Y2mzq3BVd1aRXbr55Hwos14hrKnFYf5s2pv3qWV4LHV/B1QyNJTZxa+NKkPT4msZFkvYuWcsbXYWzg2p8R/JLIzX7rPpu+EybL9aTA3nL9ub96lleCz2Rb9YtlQyMBTzub36GpiWopZhsYSde8bSZlfh/Gm7OnnPy9jdwZcT16RtzVlfi5t7s7l5v1qGxuJf9ItlSyXDQrGnL6vKsLSEWgbFUu7cM5Y2Q4WzDfHTZUa2bxV/Qy3hnmGPzDZqGRyLe7GfcI1KhoVi51seIFyjlmGxhJ3FhOsYSoujRp/5E/w+tfi5hfc+d9RqGRqLf7HvKbVWyaBQ3KeDTqm1WgbFUu4sdkrtuFgsYo+F23bjva6WYmGSva+Oa7UMjKV4se9NQ62SQaHMisnZeoayrZZBsZQ7i9001G6H/VEL09yv2ic71xImUd/n/r9dy6BYyhd7PBZpVzIsLZbpno9F2rVIpqWDYQ9+qzSUd6k2hK1XpN21LK6uuzbvXcuQWKoXezz4bVcyKJTwZlBaqlqGpSXsLPXgt/ySwz/bmVaDdPE3E32yay3FqO8e0ff73mRLLQNiiV70i2VLJYNCycPV14C0RLVIpqUFX96DKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHooxYuMVVMWtBe56jmPlNvpysmRlhWp+SqINNe4+S8QrnJllaXF1umSttoy7VfGv77D1KRitcMUGanZ8b4QQZrXBharPZxf3i6hdXfqbkq2L2JTeXlX1xac+7F3+bFJMBurnRoymZS+GcWObHcvLxxJ9ha3vnbo5cP0luKDBSxiqcW3nA4mbpt7OVX/mhbla8di9MKauS+VdMWnVxX27P807hrJLFv2pv65t9YZduKDaOlfEKF8+qav2ZufkdvYjz85fByKCMnV3UGVRsdxs7hPMDZXNvPyWgkTsUEG2sJhDuqjpdmhd+Usfyw0oZ+89sLLe7jdNwk1oJ53839/bvnYk3476yG69w0Sn1abFuhhWunMG5mHW5PCmaiz4zoM1rD0I6RrhCuMbeXriogHBz9TBW4eo3Dc0RLq8Gseoq7Px//CAXV7JWOEa4NYxWuEIJ/1jEXcM580oXmldh5sfP3WVc7Eok3HXNpw3XcAg3UuIHv3ZG7uymvEvNp8WtpLk3tep4QaZueZtyu6UUzq7SsrrNqgGsuXd1l4pwYyX6ass+h7uJnsP5hRH9SrTT6klamL07C4scVA9+7cK1H8eXaO29i+dwCAeBMT+ukALhInqulQwDQLiKaY+F4GEgCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKI9ZuFlWcP5yXZHV79du2rmug7C6zS7uNx5+TYnm3uUezdK2yZvqiIodg9MW7s2zvv6cjHCuyduF65+ZA3Pawk17+yMl3LDD9xCuZ5P7Z+bAPG7hzu7KN6svsuzsA5f7r5+ZbnjvzmbVdaFP7nKSXbt9PnuWnb+Iyzfr6iqz+uIqO3vuaoqri4qYvX5n3jzx1Xz1Tpa99dwacmnfzrPsxofplKmXrR++o0TZoJpwsTF/MYc7e/9FaPKfbTkT4eXX75io879cNSsqMtPMggCnIpzJruXJS9e5FrOtUzg/KETlW3V1lDE9XY5AcXVRkTDkuHqm/vV18KIcUIJOUdnG4dslqgatE24WBRcL53knDJ2tzDSzIMDjFq7gxvXoi3xxZbrYdMrb9/5l0c8N4S5e5H+Nyrfr6ihjuury3g4HDeGiImavJy/sT1/8w/s3E1PQbLtxhS/9cUqdyrLNw7dKRA3qPKXeuOrv86+yssmrINy1/TR73qqoykwtCwKciHDFCS782X/zB/NXfblGOHtua5RvCdcs46swPVYXLi7i9zK9Vx539v6XxTm1PKNWOpVlm4fvLFE0aI1wptiTL4uaasKZwv5nKVUtM60sCHAiwpmEVuedT/zLNcK5c1dcvllXR5nQ0c1ruLgav5cby+KbxMLX8L68QruLx70u4aoSVYPWCOdP+G/9sgwxCHcZqvDCNTPTyoIAj1u4MlHzrEydzf6T33wzaQoXTnxun6h8q66OMkGNSDhXXVxNXbhgki13U4wklrXCtW8aotpCg9Zdw7155qP47UbhWplpZUGAExHOXyqFl9chz2uFi8q36uoo0zHCueriataMcFa+TTq1Dt8qETVo7V1q/uZTe2tgNm4QrpWZVhYEOBHhor6bh6uf8tJ4Fu71KuGi8q26usqUp1F3sVZWFxeJJfLF5+997j9/p+bfrsJFDVovnN3x1+WfQ7dwrcy0siDAiQhnEnj2PH9jL5BNQi/u39y6KxVfwt2i2U8q4aLy7bo6yvi71GlW3B2U1UVFYolM8Q/u7RnsprgULG8D9xvhQoM6r+HOX7qbYnteDTuuHeEamWlmQYBTEa54ouSTXV4az11/lNfGkXBV+XZdXWWmZe/mcXVRkZpE0zIEF081GO15DbfppsFU/kV1Keaa/Oe113D1zDSzIMCpCJe/+cR4YJ+1u3uxJ5/PwoP0Jy/yhbmmfv9P8V1qXL5VV1cZ+03Dk8+Ly7equqhIXSL3TcOvXC3zLDpx7SFc1KB1wrnDZe+51tsmf7n+LrWemUYWBHjMwsmz1zeQ1UM4QLjd2Ec4c2l1pO/JVYJwu7C7cO4qSfCbI/Ug3C7sJdzZh2mCeZwgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCAKwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIIoS4TJ4pOzc0yn02Z3sZ/AoQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDUQ4k3HKSZduWd19Obtzv6cX9toPMb8rS68I4duJgPw4j3DyzdkzP7jbt2V84WxLhTpPDCDe9tD9Xt5fbNHKFEW7EHES4mmkzc3K9zvPF08+u3AtjmPnkpku4ouhy8vEk82Nklp19emZ3vPjb5BdX/kOEOyUOdUotjZuZ8+ri6tr8M7a4U60d/uynLeFC0eXEvLBvpuYqcJ6d3fkRrvgQ4U6KA900GL38PcNyYge1+flLa5Jx6uJ++dGd3X7TEq4s6l6YEraQuxL0wvkPEe60ONxjkdWtGZvyuRuTSnv8WzNsZW3hyqJug/kxd8rOg3DRWRjhToaDPoczp8R58f8+vFk8vSukMldq5//dMcKVRYNbM4Q7fQ4iXDjzGVfm4aqrFM5t7DqllkUZ4UbEQe9S3fXYTZDw2svlNJp3nFLLosEt7+0M4U6ZQ92lWonm9hmHu7Gc2oHNXtEZz/zgll1336WGewS3tbpLvUa4E+WQX235U+TMf8m1uArP0WZ2i/fKDYVTf+l2XRat3DKbzv9oPpna53AId4ok+/J+/RONLcy3fCVbhHHsxMF+aBLO7eKfzm0P49iJg/3QJJx/UNJvN4R7pPDfw4EoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIjyaIWDR8rOPZ1CH4B1IByIgnAgCsKBKAgHoiAciIJwIIoS4Y79NCktx86uJpQk46S/aVCSYx0oSQbCjQUlyUC4saAkGQg3FpQkA+HGgpJkINxYUJIMhBsLSpKBcGNBSTIQbiwoSQbCjQUlyUC4saAkGQg3FpQkA+HGgpJkINxYUJIMhBsLSpKBcGNhYzJ2WIncLw8ycyuqrm4vqxUZ7IpII1+CHOEiNiVjl5XI/Upu059b72pT5cdrbW0I49hSpAThIjauJrjDSuR+UYaPPrNrwPmF4AoQDuFiNiRjp5XI3ag2v/j77Y0b7fynM5YgtyBcxOZT6i4rkdv3l+6X+eeX2mIJcgfCRWxMxi4rkc8v7ldmeCt+2U9ZgrwA4SK2JaP3SuTmws1KaH7ZSzj7KQv0FiBcRI9k9FuJ3IxrZnQLv+ynLEFegHARG5Kx20rk+fR6Zi/5ppf2FyNcBMJF9LhL7bcSeT5/+9adbp88K9RiCfIChIvYfJe6w0rk+eLdp/5CzxZ1n85cWZYgR7iI7V9t9VyJ3AyI7tst/yt+Dnc39iXIES5ix2TsvRL5tjCOLUVKEC4C4dKDcBEIlx6Ei1CSDIQbC0qSgXBjQUkyEG4sKEkGwo0FJclAuLGgJBkINxaUJAPhxoKSZCDcWFCSDIQbC0qSgXBjQUkyEG4sKEnGsRYlkuHY2dUEyQBREA5EQTgQBeFAFIQDURAOREE4EEWJcMd+UpaWY2dXE0qSwTcNY0FJMhBuLChJBsKNBSXJQLixoCQZCDcWlCQD4caCkmQg3FhQkgyEGwtKkoFwY0FJMhBuLChJBsKNBSXJQLixoCQZCDcWlCQD4caCkmQg3FhQkgyEGwvrkzH1//FgbXXeeTSldLlupVueYSMsQQ6BDcI5kZaTyKeaNf2FY0VoKNkmXD6PFtVFuL1AuIitwrmVGfwC5Ha9XvNhfe3xSLhimfLl5OOJXx5pyhLkFoSL6DXChQXI/cLizbXHg3BVqWIXliD3IFzE9mu4y2oBcmdOc+3xIFxU6jpaPZolyBEuZutd6nVeLUBerm8frz0ehKuXMj9YoLcA4SK2nlJz55fDq9Rce7wUrlbK/GAJ8gKEi+glXLj0Ktd57jql1koxwkUgXEQf4UpPypXs5x2n1Fop+4MlyAsQLqKPcOUC5PbKv7X2eO0uNdwjuK3VXSpLkENBL+HCAuR2LfH75trj1c1FUapyy2w6/6P5hCXIIZA8Gf5KbmsYx5YiJQgXkTAZ7hrOP53bHsaxpUgJwkWkTIZ7UNJvyXKEGwtKkoFwY0FJMhBuLChJBsKNBSXJQLixoCQZCDcWlCQD4caCkmQg3FhQkgyEGwtKkoFwY0FJMhBuLChJBsKNBSXJEFmB6GgcO7uaIBkgCsKBKAgHoiAciIJwIArCgSgIB6IoEe7YT8rScuzsakJJMvimYSwoSQbCjQUlyUC4saAkGQg3FpQkA+HGgpJkINxYUJIMhBsLSpKBcGNBSTIQbiwoSQbCjQUlyUC4saAkGQg3FpQkA+HGgpJkINxYUJIMhBsLSpKBcGNhazJ6rkTuV3WY2eUa8tXtZbUig10RiSXIIbBduH4rkfuV3KY/t8VqU+XHa21tCOPYUqQE4SJ6Crd1JXK/KMNHnz21q6k+jdbhRTiEi+kr3LaVyN2oNr/4++2NG+38pzOWILcgXNZUF58AAAUDSURBVMQuI9zmlcjt+0v3a3pZFGEJcgfCRfS+htu2Evn84n5lhrfiV7myKkuQI1yNvnepW1ciNxduVkLzy17ClSurskAvwtXoe0rNt61EbsY1M7qFX/ZTliAvQLiIXYTbuBJ5Pr2e2Yd100v7ixEuAuEidhBu80rk+fxte4eaz588u4mcZAlyhKuxg3CbVyLPF+8+9dd4tpQ/69ovGViCHOFidhFu40rk5urNlfS/4udwdyxBDiVKkoFwY0FJMhBuLChJBsKNBSXJQLixoCQZCDcWlCQD4caCkmQg3FhQkgyEGwtKkoFwY0FJMhBuLChJBsKNBSXJQLixoCQZCDcWlCQD4caCkmTIL0ckybGzqwmSAaIgHIiCcCAKwoEoCAeiIByIokS4Yz+4gH3ZuadT6LM7wmHIHo6jDdkhDQg3lqMhHEcTPRrCcTTRoyEcRxM9GsJxNNGjIRxHEz0awnE00aMhHEcTPRrCcTTRoykRDsYCwoEoCAeiIByIgnAgCsKBKAgHoiAciIJwIArCgSgIB6IgHIiCcCDKcYWb2yUJO98kP9xyYv9flZdJj7f4ycuuQyc/WvK2rW4ztyq9Z6e2HVU4u8Z0uc507U36wy2eJu5/2+/nQYH0jYuPlrptq1vTlFkwere2HVO41a39I5lett+kP1yxQHpK5n5x2fahUx8teduKtb79UXZs2zGFq8Vde5P+cPks7dnUGnBddnz6xsVHS982f0g/qu3YtqMK50b+Ik+1N+kPl0/fjS9D0lAJl7xxteol2maOslfHHVM4/ydS/KHU3qQ/3HJiV0qfpu2VshfSNy4+mkjb7Jjqf+/WtrEKV3wkNObICtf59uBHi+8ZHolwRz2l+o/c9UcyjnVK9cdM2rZ5ecp+RKfUo940+I/SPj8QvGnI28KlbNusukR8RDcNx3ws4tMkNeYIPBZp6Z2ybbOsGj0f0WORoz74dRmSummQePAb36UmbtviKq778Tz4tX8p7kuR1e1l9UbqcNMsy5JewRUKSDUuPlrits38bKtnd3u0jS/vQRSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQbghTP+dB6ikjTgmEG8LUTjUJu4BwQ0C4nUG4IZTCLT/61M5aPwuTOdsJhT57erec3Ngpd2/ysGU5+Xjiz8Azt3SHm1hLZtJxJSDcECrh3DzOs7M7P3eaneB7np1VwoUty4ldUqP4t5y4qe5Xt2O6BES4IUTCXRc/7DRtxSyklXDlFvfCbPYfeBkF1sRRBMINYRpuUp1ZfhpIo5Ofi3JRnVLLLeGDcsZnc06djepCEOGGEI1wN271Ie/frCVc2FIKF0Y142bqBRV0gXBDaAgXT1fcMcKFcvEIt/zovz4a0xkV4QZRF879KN/5a7jr6kwalwvXcOaO4d1RnVERbhB14dytZz4t7kEXV3bS5Yv71W12U26p3ba6KZln6RfFUgXCDaEhnHu45q7f7EXbL57euaVyPw7P4cyW+oM5+/xtXPeoCJeQfiotfjqqMyrCpaOfcLNxnVERLh19hFtcjeuWAeFAGIQDURAOREE4EAXhQBSEA1EQDkRBOBAF4UAUhANREA5EQTgQBeFAFIQDURAOREE4EAXhQBSEA1EQDkRBOBDl/wE6OYhlnd1GdQAAAABJRU5ErkJggg==" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>a<span class="sc">$</span>results</span></code></pre></div>
+<pre><code>##  [1] 1 2 3 3 3 3 3 3 2 3</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>a<span class="sc">$</span>feature.weights</span></code></pre></div>
+<pre><code>## Sepal.Length  Petal.Width Petal.Length  Sepal.Width 
+##          0.4          0.2          0.2          0.2</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>A perfect classification.</p>
+</div>
+<div id="cross-validation-classification-using-nns.stack" class="section level1">
+<h1>Cross-Validation Classification Using <code>NNS.stack()</code></h1>
+<p>The <strong><code>NNS.stack()</code></strong> routine cross-validates
+for a given objective function the <code>n.best</code> parameter in the
+multivariate <strong><code>NNS.reg</code></strong> function as well as
+the <code>threshold</code> parameter in the dimension reduction
+<strong><code>NNS.reg</code></strong> version.
+<strong><code>NNS.stack</code></strong> can be used for classification
+via
+<strong><code>NNS.stack(..., type = &quot;CLASS&quot;, ...)</code></strong>.</p>
+<p>For brevity, we set <code>folds = 1</code>.</p>
+<p><strong>NOTE: Base category of response variable should be 1, not 0
+for classification problems when using
+<code>NNS.stack(..., type = &quot;CLASS&quot;)</code></strong>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">=</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>b</span></code></pre></div>
+<pre><code>## $OBJfn.reg
+## [1] 0.9142857
+## 
+## $NNS.reg.n.best
+## [1] 4
+## 
+## $probability.threshold
+## [1] 0.4591667
+## 
+## $OBJfn.dim.red
+## [1] 0.8928571
+## 
+## $NNS.dim.red.threshold
+## [1] 0.6275
+## 
+## $reg
+##  [1] 1 2 3 3 3 3 3 3 2 3
+## 
+## $dim.red
+##  [1] 1 2 3 3 3 3 3 3 2 3
+## 
+## $stack
+##  [1] 1 2 3 3 3 3 3 3 2 3</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>( b<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<div id="brief-notes-on-other-parameters" class="section level2">
+<h2>Brief Notes on Other Parameters</h2>
+<ul>
+<li><p><code>depth = &quot;max&quot;</code> will force all observations to be
+their own partition, forcing a perfect fit of the multivariate
+regression. In essence, this is the basis for a <code>kNN</code> nearest
+neighbor type of classification.</p></li>
+<li><p><code>n.best = 1</code> will use the single nearest neighbor.
+When coupled with <code>depth = &quot;max&quot;</code>, <code>NNS</code> will
+emulate a <code>kNN = 1</code> but as the dimensions increase the
+results diverge demonstrating <code>NNS</code> is less sensitive to the
+curse of dimensionality than <code>kNN</code>.</p></li>
+<li><p><code>extreme</code> will use the maximum or minimum
+<code>threshold</code> obtained, and may result in errors if that
+threshold cannot be eclipsed by subsequent iterations.</p></li>
+</ul>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments further examples are
+provided within the following:</p>
+<ul>
+<li><p><a href="https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2148522">Deriving
+Nonlinear Correlation Coefficients from Partial Moments</a></p></li>
+<li><p><a href="https://link.springer.com/article/10.1007/s10614-017-9713-5">Nonparametric
+Regression Using Clusters</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2861339">Clustering and
+Curve Fitting by Line Segments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2864711">Classification
+Using NNS Clustering Analysis</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
