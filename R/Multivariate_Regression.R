@@ -105,6 +105,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   } else {
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
+    invisible(data.table::setDTthreads(1))
     NNS.ID <- foreach(j = 1:n)%dopar%{
       sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
       return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
@@ -243,6 +244,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
         
         parallel::stopCluster(cl)
         registerDoSEQ()
+        invisible(data.table::setDTthreads(0, throttle = NULL))
       } else {
         distances <- data.table::data.table(point.est)
         distances <- distances[, DISTANCES :=  NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
@@ -263,13 +265,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
           last.known.distance_2 <- sqrt(sum((boundary.points - mid.points) ^ 2))
           last.known.distance_3 <- sqrt(sum((boundary.points - mid.points_2) ^ 2))
           
-          if(dist=="dtw") dist <- "l2"
-          
-          
           boundary.estimates <- NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS,
                                                   dist.estimate = boundary.points,
                                                   type = dist, k = n.best, class = type)
-          
           
           last.known.gradient_1 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = central.points, type = dist, k = n.best, class = type)) / last.known.distance_1
           last.known.gradient_2 <- (boundary.estimates - NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = mid.points, type = dist, k = n.best, class = type)) / last.known.distance_2

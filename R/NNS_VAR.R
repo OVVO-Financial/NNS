@@ -157,6 +157,7 @@ NNS.VAR <- function(variables,
   if(num_cores > 1){
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
+    invisible(data.table::setDTthreads(1))
   }
   
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
@@ -357,6 +358,7 @@ NNS.VAR <- function(variables,
   if(num_cores > 1) {
     stopCluster(cl)  
     registerDoSEQ()
+    invisible(data.table::setDTthreads(0, throttle = NULL))
   }
   
   nns_DVs <- lists[[1]]

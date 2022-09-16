@@ -137,6 +137,7 @@ NNS.ARMA.optim <- function(variable,
   if(num_cores > 1){
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
+    invisible(data.table::setDTthreads(1))
   }
 
   for(j in methods){
@@ -268,6 +269,7 @@ NNS.ARMA.optim <- function(variable,
   if(num_cores > 1){
     stopCluster(cl)
     registerDoSEQ()
+    invisible(data.table::setDTthreads(0, throttle = NULL))
   }
 
 

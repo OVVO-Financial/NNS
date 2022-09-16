@@ -9,7 +9,7 @@
 #' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
-#' @param CV.size numeric [0, 1]; \code{(CV.size = .25)} (default) Sets the cross-validation size.  Defaults to 0.25 for a 25 percent random sampling of the training set.
+#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.125 and 0.375 for a random sampling of the training set.
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
@@ -51,7 +51,7 @@ NNS.boost <- function(IVs.train,
                       depth = NULL,
                       learner.trials = 100,
                       epochs = NULL,
-                      CV.size = .25,
+                      CV.size = NULL,
                       balance = FALSE,
                       ts.test = NULL,
                       folds = 5,
@@ -161,6 +161,7 @@ NNS.boost <- function(IVs.train,
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
     if(!extreme) epochs <- NULL
+    if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
 
     old.threshold <- 1
 
@@ -175,8 +176,8 @@ NNS.boost <- function(IVs.train,
       set.seed(123 + i)
 
       l <- length(y)
-      if(i<=l/4) new.index <- as.integer(seq(i, length(y), length.out = as.integer(CV.size * length(y)))) else {
-          new.index <- sample(l, as.integer(CV.size * l), replace = FALSE)
+      if(i<=l/4) new.index <- as.integer(seq(i, length(y), length.out = as.integer(new.CV.size * length(y)))) else {
+          new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
       }
 
 
@@ -282,9 +283,11 @@ NNS.boost <- function(IVs.train,
     for(j in 1:epochs){
       set.seed(123 * j)
 
+      if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
+      
       l <- length(y)
-      if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(CV.size * length(y)))) else {
-        new.index <- sample(l, as.integer(CV.size * l), replace = FALSE)
+      if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(new.CV.size * length(y)))) else {
+        new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
       }
       if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
 

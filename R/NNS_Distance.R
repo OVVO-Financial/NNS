@@ -4,7 +4,7 @@
 #' @param rpm REGRESSION.POINT.MATRIX from \link{NNS.reg}
 #' @param rpm_class integer \code{rpm}.
 #' @param dist.estimate Vector to generate distances from.
-#' @param type "L1", "L2", "DTW" or "FACTOR"
+#' @param type "L1", "L2" or "FACTOR"
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param class if classification problem.
 #'
@@ -19,7 +19,7 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   y.hat <- rpm$y.hat
   raw.dist.estimate <- unlist(dist.estimate)
   n <- length(raw.dist.estimate)
-
+  parallel <- FALSE
 
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
@@ -31,20 +31,23 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
 
   rpm$y.hat <- y.hat
 
+#### DO THIS ALL IN DATA.TABLE!!!
+  
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums( t((t(rpm[, 1:n]) - dist.estimate)^2) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
+
+    rpm$Sum <- Rfast::rowsums( t((t(rpm[, 1:n]) - dist.estimate)^2) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = parallel)
+#    rpm[, Sum := Reduce(`+`, (.SD - dist.estimate)^2 * ((l - (rpm_class == raw.dist.estimate))/l)), .SDcols = 1:n ]
+
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n]) - dist.estimate)) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = TRUE)
-  }
-
-  if(type=="DTW"){
-    rpm[, "Sum" := ( unlist(lapply(1 : nrow(rpm), function(i) dtw::dtw(as.numeric(rpm[i, 1:n]), as.numeric(dist.estimate))$distance)))]
+    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n]) - dist.estimate)) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = parallel)
+#    rpm[, Sum := Reduce(`+`, (abs(t(t(.SD) - dist.estimate)) * ((l - (rpm_class == raw.dist.estimate))/l))), .SDcols = 1:n ]
   }
 
   if(type=="FACTOR"){
-    rpm$Sum <- (1/l + ( Rfast::rowsums((rpm_class == raw.dist.estimate), parallel = TRUE)))^-1
+    rpm$Sum <- (1/l + ( Rfast::rowsums((rpm_class == raw.dist.estimate), parallel = parallel)))^-1
+#    rpm[, Sum := Reduce(`+`, (1/l + ( (rpm_class == raw.dist.estimate)))^-1)]
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10

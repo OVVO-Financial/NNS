@@ -10,7 +10,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
-#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to 0.25 for a 25 percent random sampling of the training set under \code{(CV.size = NULL)}.
+#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to a random value between 0.125 and 0.375 for a random sampling of the training set.
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
@@ -130,14 +130,6 @@ NNS.stack <- function(IVs.train,
   
   dist <- tolower(dist)
   
-  if(is.null(CV.size)){
-    if(is.null(IVs.test)){
-      CV.size <- 0.25
-    } else {
-      CV.size <- mean(c(.25, min(length(IVs.test[ , 1]) / length(IVs.train[ , 1]), .5)))
-    }
-  }
-  
   THRESHOLDS <- list(folds)
   best.k <- list(folds)
   best.nns.cv <- list(folds)
@@ -165,11 +157,13 @@ NNS.stack <- function(IVs.train,
     if(status) message("Folds Remaining = " , folds-b," ","\r",appendLF=TRUE)
     
     set.seed(123 * b)
-    test.set <- as.integer(seq(b, length(unlist(IVs.train[ , 1])), length.out = as.integer(CV.size * length(unlist(IVs.train[ , 1])))))
+    
+    if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
+    
+    test.set <- as.integer(seq(b, length(unlist(IVs.train[ , 1])), length.out = as.integer(new.CV.size * length(unlist(IVs.train[ , 1])))))
     
     if(!is.null(ts.test)){
       test.set <- 1:(length(DV.train) - ts.test)
-      dist <- "dtw"
     }
     
     test.set <- unlist(test.set)
@@ -236,7 +230,7 @@ NNS.stack <- function(IVs.train,
       
       if(n == 2) var.cutoffs <- c(var.cutoffs, 0)
       
-      if(dist=="FACTOR") var.cutoffs <- var.cutoffs[-1]
+      if(dist=="factor") var.cutoffs <- var.cutoffs[-1]
       if(dim.red.method=="equal") var.cutoffs <- 0
       
       nns.ord <- numeric()

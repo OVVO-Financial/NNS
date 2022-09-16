@@ -21,7 +21,7 @@
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
-#' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} seclects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
+#' @param dist options:("L1", "L2", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param multivariate.call Internal argument for multivariate regressions.
 #' @param point.only Internal argument for abbreviated output.
@@ -304,6 +304,7 @@ NNS.reg = function (x, y,
         if(num_cores > 1){
           cl <- parallel::makeCluster(num_cores)
           doParallel::registerDoParallel(cl)
+          invisible(data.table::setDTthreads(1))
         }
         
         if(is.null(original.names)){
@@ -393,6 +394,13 @@ NNS.reg = function (x, y,
             x.star.coef <- apply(cbind(x.star.coef.1, x.star.coef.2, x.star.coef.3, x.star.coef.4), 1, function(x) mode(x)) 
             x.star.coef[is.na(x.star.coef)] <- 0
           }
+        
+        if(num_cores > 1){    
+          parallel::stopCluster(cl)
+          registerDoSEQ()
+          invisible(data.table::setDTthreads(0, throttle = NULL))
+        }
+          
           
           if(!is.numeric(dim.red.method) && dim.red.method == "equal")  x.star.coef <- rep(1, ncol(x))
           
@@ -413,6 +421,8 @@ NNS.reg = function (x, y,
             x.star.coef[x.star.coef == 0] <- preserved.coef
           }
           
+          xn <- sum( abs( x.star.coef) > 0)
+          
           if(is.numeric(dim.red.method)) DENOMINATOR <- sum(dim.red.method) else DENOMINATOR <- sum( abs( x.star.coef) > 0)
           
           synthetic.x.equation.coef <- data.table::data.table(Variable = colnames.list, Coefficient = x.star.coef)
@@ -428,32 +438,23 @@ NNS.reg = function (x, y,
               points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b))==0, 1, (max(b) - min(b))))
             }
             if(is.null(np) || np==1){
-              new.point.est <- sum(points.norm[1,] * x.star.coef) / sum( abs( x.star.coef) > 0)
+              new.point.est <- sum(points.norm[1,] * x.star.coef) / xn
               
             } else {
               point.est2 <- points.norm[1:np,]
               new.point.est <- apply(point.est2, 1, function(i) as.numeric(as.vector(i)[!is.na(i)|!is.nan(i)] %*% x.star.coef[!is.na(i)|!is.nan(i)])
-                                     / sum( abs( x.star.coef) > 0))
+                                     / xn)
             }
             
             point.est <- new.point.est
             
           }
           
-          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = TRUE)
-          
-          x.star <- data.table::data.table(x.star = x)
+          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = FALSE)
+          x.star <- data.table::data.table(x)
           
         }
-        
-        
-        if(num_cores>1){
-          parallel::stopCluster(cl)
-          registerDoSEQ()
-        }
-        
-        
-      } # Multivariate Not NULL type
+       } # Multivariate Not NULL type
       
     } # Univariate
     
@@ -471,7 +472,7 @@ NNS.reg = function (x, y,
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
   if(!is.null(order)) dep.reduced.order <- order
-  
+
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"
     part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)

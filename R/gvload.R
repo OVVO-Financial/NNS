@@ -1,25 +1,22 @@
 # Import calls and globalvariable calls
 
+#' @importFrom caret upSample downSample
 #' @importFrom grDevices adjustcolor rainbow rgb
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
-#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt .preformat.ts
-#' @importFrom utils globalVariables head tail combn flush.console
-#' @importFrom dtw dtw
-#' @importFrom Rfast colsums colmeans rowsums rowmeans
-#' @importFrom caret upSample downSample
-#' @importFrom zoo as.yearmon
-#' @importFrom tseries adf.test
-#' @importFrom xts to.monthly
+#' @importFrom MESS bin
 #' @importFrom quantmod getSymbols
-#' @import doParallel
-#' @import rgl
-#' @import stringr
-#' @import meboot
+#' @importFrom Rfast colmeans rowmeans rowsums
+#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt .preformat.ts
+#' @importFrom stringr str_count
+#' @importFrom utils globalVariables head tail combn flush.console
+#' @importFrom xts to.monthly
+#' @importFrom zoo as.yearmon
 #' @import data.table
-#' @import dynlm
-#' @import MESS
+#' @import doParallel
+#' @import meboot
 #' @rawNamespace import(Rcpp, except = LdFlags)
 #' @import RcppParallel
+#' @import rgl
 #' @useDynLib NNS, .registration = TRUE
 
 
@@ -43,22 +40,17 @@
     ))
 
   requireNamespace("data.table")
-  requireNamespace("rgl")
   requireNamespace("doParallel")
-  requireNamespace("stringr")
-  requireNamespace("meboot")
-  requireNamespace("MESS")
-  requireNamespace("Rfast")
   requireNamespace("dynlm")
-
-
-
+  requireNamespace("meboot")
+  requireNamespace("Rcpp")
+  requireNamespace("RcppParallel")
+  requireNamespace("rgl")
+  
 
   .datatable.aware = TRUE
   
   options(datatable.verbose=FALSE)
-
-  invisible(data.table::setDTthreads(1))
-
-
+  
+  invisible(data.table::setDTthreads(0, throttle = NULL))
 }

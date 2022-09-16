@@ -170,21 +170,6 @@
       xmax <- xx[n] + dvtrim
     }
 
-    # do this here so that this warnings are printed after
-    # the above warnings (if necessary)
-
-    # if (is.list(trim))
-    # {
-    #   if (!is.null(trim$xmin) && trim$xmin > min(x))
-    #     warning("the lower limit trim$xmin may not be satisfied in the replicates ",
-    #             "since it is higher than the minimum value observed ",
-    #             "in the input series x")
-    #   if (!is.null(trim$xmax) && trim$xmax < max(x))
-    #     warning("the upper limit trim$xmax may not be satisfied in the replicates ",
-    #             "since it is lower than the maximum value observed ",
-    #             "in the input series x")
-    # }
-
 
     # Compute the mean of the maximum entropy density within each
     # interval in such a way that the 'mean preserving constraint'

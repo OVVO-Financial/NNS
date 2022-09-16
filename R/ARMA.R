@@ -94,8 +94,11 @@ NNS.ARMA <- function(variable,
   
   if(is.null(ncores)) num_cores <- as.integer(parallel::detectCores()  - 1) else num_cores <- ncores
   
-  if(num_cores>1) doParallel::registerDoParallel(num_cores)
-  
+  if(num_cores>1){
+      cl <- parallel::makeCluster(num_cores)
+      doParallel::registerDoParallel(cl)
+      invisible(data.table::setDTthreads(1))
+  }
   
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
   
@@ -270,8 +273,11 @@ NNS.ARMA <- function(variable,
     } # i loop
   } # j loop
   
-  if(num_cores>1) registerDoSEQ()
-  
+  if(num_cores>1){
+      parallel::stopCluster(cl)
+      registerDoSEQ()
+      invisible(data.table::setDTthreads(0, throttle = NULL))
+  }
   
   if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399)$replicates
   
