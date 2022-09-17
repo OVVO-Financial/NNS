@@ -120,7 +120,7 @@ NNS.VAR <- function(variables,
   options(warn = -1)
   
   
-  if(nowcast) dates <- c(index(variables), tail(index(variables), h) + h/12) else dates <- NULL
+  if(nowcast) dates <- c(zoo::index(variables), tail(zoo::index(variables), h) + h/12) else dates <- NULL
   
   if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
   

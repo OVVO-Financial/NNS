@@ -10,7 +10,7 @@
 #' @importFrom stringr str_count
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom xts to.monthly
-#' @importFrom zoo as.yearmon
+#' @importFrom zoo as.yearmon index
 #' @import data.table
 #' @import doParallel
 #' @import meboot
