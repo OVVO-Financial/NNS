@@ -158,7 +158,7 @@ NNS.stack <- function(IVs.train,
     
     set.seed(123 * b)
     
-    if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
+    if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, .3),3) else new.CV.size <- CV.size
     
     test.set <- as.integer(seq(b, length(unlist(IVs.train[ , 1])), length.out = as.integer(new.CV.size * length(unlist(IVs.train[ , 1])))))
     
@@ -431,8 +431,7 @@ NNS.stack <- function(IVs.train,
       if(b==folds){
         ks <- table(unlist(best.k))
         
-        ks.mode <-  gravity(as.numeric(rep(names(ks), as.numeric(unlist(ks)))), class = TRUE)
-        best.k <- ifelse(ks.mode%%1 < .5, floor(ks.mode), ceiling(ks.mode))
+        best.k <-  mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         
         nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                                  type = NULL, point.only = FALSE))

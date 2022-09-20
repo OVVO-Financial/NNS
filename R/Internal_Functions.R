@@ -1,51 +1,13 @@
 ### Continuous Mode of a distribution
-old_mode <- function(x) {
-      if(length(x)==2) return(median(x))
-      d <-tryCatch(density(as.numeric(x), na.rm = TRUE, n = 128, from = min(x), to = max(x)), error = function(e) (median(x) + mean(fivenum(x)[2:4]))/2)
-      tryCatch(d$x[which.max(d$y)], error = function(e) d)
-}
-
-
-### Continuous mode if data previously sorted
-mode <- function(x, class = FALSE){
-  x <- as.numeric(x)
-  l <- length(x)
-  if(l <= 3) return(median(x))
-  if(length(unique(x))==1) return(x[1])
-  x_s <- x[order(x)]
-  range <- abs(x_s[l]-x_s[1])
-  if(range==0) return(x[1])
-
-  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
-  lz <- length(z$counts)
-  if(class) max_z <- z$counts==max(z$counts) else max_z <- z$counts==max(z$counts[3:(lz-2)])
-  
-  if(sum(max_z)>1){
-    z_ind <- 3:(lz-2)
-    if(class) z_ind <- 1:lz
-  } else {
-    z_c <- which.max(z$counts)
-    z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
-  }
-  
-  z_names <- seq(x_s[1], x_s[l], z$width)
-  
-  final <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
-  if(class) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
-}
-
+mode <- function(x) NNS.mode(x, discrete = FALSE, multi = FALSE)
 
 
 ### Classification Mode of a distribution
-mode_class <- function(x) mode(x, class = TRUE)
+mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
 
 
-
-
-### Central Tendency
-old_gravity <- function(x) (median(x) + mode(x) + mean(fivenum(x)[2:4]))/3
-
-gravity <- function(x, class = FALSE){
+### Gravity of a distribution
+gravity <- function(x, discrete = FALSE){
   l <- length(x)
   if(l <= 3) return(median(x))
   if(length(unique(x))==1) return(x[1])
@@ -60,11 +22,10 @@ gravity <- function(x, class = FALSE){
 
   z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
   lz <- length(z$counts)
-  if(class) max_z <- z$counts==max(z$counts) else max_z <- z$counts==max(z$counts[3:(lz-2)])
+  max_z <- z$counts==max(z$counts)
   
   if(sum(max_z)>1){
-    z_ind <- 3:(lz-2)
-    if(class) z_ind <- 1:lz
+    z_ind <- 1:lz
   } else {
     z_c <- which.max(z$counts)
     z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
@@ -77,12 +38,11 @@ gravity <- function(x, class = FALSE){
   
   res <- (q2 + m + mu + mean(c(q1, q2, q3)))/4
   if(is.na(res)) final <- q2 else final <- res
-  if(class) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
+  if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
 } 
 
 
-gravity_class <- function(x) gravity(x, class = TRUE)
-
+gravity_class <- function(x) gravity(x, discrete = TRUE)
 
 
 ### Factor to dummy variable
