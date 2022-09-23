@@ -40,7 +40,7 @@ NNS.boost(
 
 \item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
 
-\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.125 and 0.375 for a random sampling of the training set.}
+\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.}
 
 \item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.}
 
