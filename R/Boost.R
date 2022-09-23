@@ -9,7 +9,7 @@
 #' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
-#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.125 and 0.375 for a random sampling of the training set.
+#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
@@ -161,7 +161,7 @@ NNS.boost <- function(IVs.train,
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
     if(!extreme) epochs <- NULL
-    if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
+    if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, 1/3), 3) else new.CV.size <- CV.size
 
     old.threshold <- 1
 
@@ -280,10 +280,11 @@ NNS.boost <- function(IVs.train,
   keeper.features <- list()
 
   if(!is.null(epochs)){
+    
+    if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, 1/3), 3) else new.CV.size <- CV.size
+    
     for(j in 1:epochs){
       set.seed(123 * j)
-
-      if(is.null(CV.size)) new.CV.size <- round(runif(1, .125, .375),3) else new.CV.size <- CV.size
       
       l <- length(y)
       if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(new.CV.size * length(y)))) else {
@@ -388,7 +389,7 @@ NNS.boost <- function(IVs.train,
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
 
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
-### data.matrix() removed for IVtrain and IVtest
+
       estimates <- NNS.stack(x[, unlist(final_scale)],
                              y,
                              IVs.test = z[, unlist(final_scale)],
@@ -428,7 +429,7 @@ NNS.boost <- function(IVs.train,
     par(original.par)
   }
 
-  gc()
+
   if(!is.null(type)) estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
 
   return(list("results" = estimates,

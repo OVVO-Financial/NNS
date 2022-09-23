@@ -398,20 +398,6 @@ NNS.VAR <- function(variables,
   }
 
 
-  multi_weights <- unlist(lapply(lists[[3]], `[[`,1))
-
-  multi_weights[is.na(uni_weights)] <- multi[is.na(uni_weights)]
-  
-  uni_weights[is.na(uni_weights)] <- uni[is.na(uni_weights)]
-  
-  uni_weights <- uni_weights / (uni_weights + multi_weights)
-  uni_weights[is.na(uni_weights)] <- uni[is.na(uni_weights)]
-
-  uni_weights <- (uni_weights + uni)/2
-  
-  uni <- uni_weights
-  multi <- 1 - uni
-
   for(i in 1:length(uni)){
       if(abs(uni[i]) > 1){
           uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
