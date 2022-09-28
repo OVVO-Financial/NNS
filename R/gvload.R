@@ -41,7 +41,6 @@
 
   requireNamespace("data.table")
   requireNamespace("doParallel")
-  requireNamespace("dynlm")
   requireNamespace("meboot")
   requireNamespace("Rcpp")
   requireNamespace("RcppParallel")

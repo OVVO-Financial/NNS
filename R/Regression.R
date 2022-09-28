@@ -467,7 +467,9 @@ NNS.reg = function (x, y,
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE, ncores = 1)$Dependence, error = function(e) .1)
   dependence <- dependence^2
   dependence[is.na(dependence)] <- 0
-  rounded_dep <- ifelse(dependence%%1 < .5, floor(dependence*10), ceiling(dependence*10))
+
+  
+  rounded_dep <- ifelse((dependence*10)%%1 < .5, floor(dependence*10), ceiling(dependence*10))
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
@@ -550,7 +552,7 @@ NNS.reg = function (x, y,
   }
  
   regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(med.rps)))), use.names = FALSE)
-  
+
   regression.points <- regression.points[complete.cases(regression.points),]
   regression.points <- regression.points[ , .(x,y)]
   data.table::setkey(regression.points, x, y)
