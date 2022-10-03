@@ -53,6 +53,11 @@ A sum of the squared upside area and the squared downside area.
 [1] -0.04372107
 ```
 ### Covariance Elements and Covariance Matrix
+The covariance matrix $(\Sigma)$ is equal to the sum of the co-partial moments matrices less the divergent partial moments matrices.
+
+$$\Sigma = CLPM + CUPM - DLPM - DUPM $$
+
+
 ```r
 > cov.mtx=PM.matrix(LPM.degree = 1, UPM.degree = 1, target = 'mean', variable = cbind(x,y), pop.adj = TRUE)
 > cov.mtx
