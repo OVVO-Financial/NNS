@@ -57,7 +57,7 @@ NNS.nowcast <- function(h = 1,
                  "BOPTIMP", "TTLCONS", "IR", "CPILFESL", "PCEPILFE",
                  "PCEPI", "PERMIT", "TCU", "BUSINV", "ULCNFB",
                  "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
-                 "ICSA", "DGS10", "T10Y2Y", "ICSA", "WALCL")
+                 "ICSA", "DGS10", "T10Y2Y", "WALCL")
 
   variable_list <- character()
 
