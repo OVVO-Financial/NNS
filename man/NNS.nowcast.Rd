@@ -5,7 +5,7 @@
 \title{NNS Nowcast}
 \usage{
 NNS.nowcast(
-  h = 12,
+  h = 1,
   additional.regressors = NULL,
   specific.regressors = NULL,
   start.date = "2000-01-03",
@@ -15,9 +15,9 @@ NNS.nowcast(
 )
 }
 \arguments{
-\item{h}{integer; \code{(h = 12)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
+\item{h}{integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
-\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \link{quantmod::getSymbol} format for FRED data.}
+\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data.}
 
 \item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.}
 
