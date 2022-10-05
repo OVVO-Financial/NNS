@@ -96,7 +96,8 @@ NNS.ARMA.optim <- function(variable,
 
   variable <- as.numeric(variable)
 
-  if(!is.null(h)) h_oos <- h_is <- h else {
+  if(!is.null(h) && h > 0) h_oos <- h_is <- h else {
+    h <- 1
     h_is <- length(variable) - training.set
     h_oos <- NULL
   }
@@ -111,7 +112,7 @@ NNS.ARMA.optim <- function(variable,
   } else l <- training.set
  
   if(l <= .5 * n) stop("Please provide a 'training.set' value (integer) less than (2*h) or a smaller (h).")
-  if(training.set==n) stop("Please provide a 'training.set' value (integer) less than the length of the variable.")
+  if(training.set == n) stop("Please provide a 'training.set' value (integer) less than the length of the variable.")
   
   denominator <- min(5, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
 

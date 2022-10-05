@@ -2,7 +2,7 @@
 #'
 #' Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in Viole (2020), \url{https://www.ssrn.com/abstract=3586658}.
 #'
-#' @param h integer; \code{(h = 12)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
+#' @param h integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
 #' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data.
 #' @param specific.regressors integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
@@ -43,7 +43,7 @@
 #' @export
 
 
-NNS.nowcast <- function(h = 12,
+NNS.nowcast <- function(h = 1,
                         additional.regressors = NULL,
                         specific.regressors = NULL,
                         start.date = "2000-01-03",

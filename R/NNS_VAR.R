@@ -163,7 +163,7 @@ NNS.VAR <- function(variables,
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
   
   na_s <- numeric()
-  
+ 
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
@@ -173,6 +173,7 @@ NNS.VAR <- function(variables,
     interpolation_start <- which(!is.na(a[,2]))[1]
     interpolation_point <- tail(which(!is.na(a[,2])), 1)
     a <- a[complete.cases(a),]
+    
     
     if(dim(a)[1]<last_point){
       nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
@@ -185,19 +186,19 @@ NNS.VAR <- function(variables,
       nns_IVs$interpolation <- new_variable
     }
     
-    na_s[i] <- tail(index, 1) - interpolation_point
+    h_int <- na_s[i] <- tail(index, 1) - interpolation_point
     
     periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
     
-    if(na_s[i] > 0){
+    if(h_int > 0){
       multi <- NNS.reg(a[,1], a[,2], order = NULL,
                        point.est = index, plot = FALSE,
                        ncores = 1, point.only = TRUE)$Point.est
       
       
-      ts <- interpolation_point - 2*(h + na_s[i])
-      if(ts < 100) ts <- interpolation_point - (h + na_s[i])
+      ts <- interpolation_point - 2*(h_int)
+      if(ts < 100) ts <- interpolation_point - (h_int)
       
       b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
                           training.set = ts,
@@ -205,7 +206,7 @@ NNS.VAR <- function(variables,
                           objective = objective,
                           print.trace = FALSE,
                           negative.values = min(new_variable)<0,
-                          ncores = 1, h = h)
+                          ncores = 1, h = h_int)
       
       nns_IVs$results <- b$results
       
@@ -213,39 +214,30 @@ NNS.VAR <- function(variables,
       nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
       
       nns_IVs$obj_fn <- b$obj.fn
+      
     } else {
-      ts <- interpolation_point - 2*(h)
-      if(ts < 100) ts <- interpolation_point - (h)
+      nns_IVs$results <- NA
       
-      b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
-                          training.set = ts,
-                          obj.fn = obj.fn,
-                          objective = objective,
-                          print.trace = FALSE,
-                          negative.values = min(new_variable)<0,
-                          ncores = 1, h = h)
-      
-      nns_IVs$results <- b$results
-      
-      nns_IVs$obj_fn <- b$obj.fn
+      nns_IVs$obj_fn <- NA
     }
     
-    return(list(nns_IVs, na.omit(na_s[i]), head(nns_IVs$results, ifelse(na_s[i]==0, h, na_s[i])), uni_of = nns_IVs$obj_fn))
+    return(list(nns_IVs, head(nns_IVs$results, ifelse(na_s[i]==0, h, na_s[i])), uni_of = nns_IVs$obj_fn))
   }
+ 
+  uni_weights <- unlist(lapply(nns_IVs, `[[`, 3))
+  uni_weights[is.na(uni_weights)] <- mean(uni_weights, na.rm = TRUE)
   
-  uni_weights <- unlist(lapply(nns_IVs, `[[`, 4))
-  univariate_extrapolation <- lapply(nns_IVs, `[[`, 3)
-  na_s <- unlist(lapply(nns_IVs, `[[`, 2))
   nns_IVs <- lapply(nns_IVs, `[[`, 1)
   
-  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) head(x, dim(variables)[1]))))
-  
-  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(x, h))))
+  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) head(as.numeric(x), dim(variables)[1]))))
+
+  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(as.numeric(x), ifelse(h==0, length(x), h)))))
   colnames(nns_IVs_results) <- colnames(variables)
   
   
   if(h == 0){
-    colnames(nns_IVs_interpolated_extrapolated) <- as.character(colnames(variables))
+    rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])
+    colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
     return(nns_IVs_interpolated_extrapolated)
   }
   
@@ -261,12 +253,12 @@ NNS.VAR <- function(variables,
   
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
-
+  
   nns_IVs_interpolated_extrapolated <- head(new_values, dim(variables)[1])
   
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
-
+  
   # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
   
@@ -283,17 +275,17 @@ NNS.VAR <- function(variables,
     lapply(seq_along(x),
            function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
   }
- 
-
+  
+  
   nns_DVs <- list()
   relevant_vars <- list()
- 
+  
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
-
-                    
-                    if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
-
+                     
+                     
+                     if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
+                     
                      
                      # Dimension reduction NNS.reg to reduce variables
                      cor_threshold <- NNS.stack(IVs.train = lagged_new_values_train[, -i],
@@ -306,7 +298,7 @@ NNS.VAR <- function(variables,
                                                 method = c(1,2),
                                                 dim.red.method = dim.red.method,
                                                 order = NULL, ncores = 1, stack = TRUE)
-
+                     
                      
                      if(any(dim.red.method == "cor" | dim.red.method == "all")){
                        rel.1 <- abs(cor(cbind(lagged_new_values_train[, i], lagged_new_values_train[, -i]), method = "spearman"))
@@ -327,7 +319,7 @@ NNS.VAR <- function(variables,
                      if(dim.red.method == "nns.caus") rel_vars <- rel.3[1,-1]
                      
                      if(dim.red.method == "all") rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
-                    
+                     
                      rel_vars <- names(rel_vars[rel_vars > cor_threshold$NNS.dim.red.threshold])
                      rel_vars <- rel_vars[rel_vars!=i]
                      rel_vars <- na.omit(rel_vars)
@@ -336,7 +328,7 @@ NNS.VAR <- function(variables,
                        rel_vars <- colnames(lagged_new_values_train)
                      }
                      
-
+                     
                      if(length(rel_vars)>1){
                        DV_values <- cor_threshold
                        
@@ -351,7 +343,7 @@ NNS.VAR <- function(variables,
                      }
                      
                      if(is.null(DV_weights)) DV_weights <- c(.5, .5)
-          
+                     
                      list(nns_DVs, rel_vars, DV_weights)
                    }
   
@@ -382,10 +374,10 @@ NNS.VAR <- function(variables,
     if(length(na.omit(RV[,i]) > 0)){
       given_var <- unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]
       observed_var <- do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]
-
+      
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
-
+      
       if(equal_tau > unequal_tau) uni[i] <-  .5 + .5*((equal_tau)/(equal_tau + unequal_tau)) else uni[i] <-  .5 - .5*((unequal_tau)/(equal_tau + unequal_tau))
       
       if(equal_tau == unequal_tau)uni[i] <- 0.5
@@ -396,15 +388,15 @@ NNS.VAR <- function(variables,
       multi[i] <- 0.5
     }
   }
-
-
+  
+  
   for(i in 1:length(uni)){
-      if(abs(uni[i]) > 1){
-          uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
-          multi[i] <- 1 - uni[i]
-      }
+    if(abs(uni[i]) > 1){
+      uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
+      multi[i] <- 1 - uni[i]
+    }
   }
-
+  
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
   
@@ -420,17 +412,11 @@ NNS.VAR <- function(variables,
   
   options(warn = oldw)
   
-  if(sum(na_s)>0){
-    return( list("interpolated_and_extrapolated" = nns_IVs_interpolated_extrapolated,
-                 "relevant_variables" = data.frame(RV),
-                 univariate = nns_IVs_results,
-                 multivariate = nns_DVs,
-                 ensemble = forecasts) )
-  } else {
-    return( list("relevant_variables" = data.frame(RV),
-                 univariate = nns_IVs_results,
-                 multivariate = nns_DVs,
-                 ensemble = forecasts) )
-    
-  }
+  
+  return( list("interpolated_and_extrapolated" = nns_IVs_interpolated_extrapolated,
+               "relevant_variables" = data.frame(RV),
+               univariate = nns_IVs_results,
+               multivariate = nns_DVs,
+               ensemble = forecasts) )
+  
 }
