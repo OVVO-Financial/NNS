@@ -70,11 +70,12 @@ NNS.nowcast <- function(h = 1,
     quantmod::getSymbols(variable_list[!variable_list%in%ls(envir = NNSdata)[(ls(envir = NNSdata)%in%variable_list)]], src = "FRED")
   }
  
-  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,1])
+  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
+  
   if(!keep.data) rm(list = ls(), envir = NNSdata)
   
   econ_variables <- Reduce(function(...) merge(..., all=TRUE), raw_econ_variables)[paste0(start.date,"::")]
-  
+
   colnames(econ_variables) <- variable_list
 
   NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE)
