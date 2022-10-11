@@ -353,9 +353,9 @@ NNS.ARMA.optim <- function(variable,
       predicted <- predicted - bias
       bias.SSE <- eval(obj.fn)
       if(objective=="min"){
-        if(bias.SSE <= nns.SSE) bias <- 0
-      } else {
         if(bias.SSE >= nns.SSE) bias <- 0
+      } else {
+        if(bias.SSE <= nns.SSE) bias <- 0
       }
     }
   }
