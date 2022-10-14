@@ -288,30 +288,33 @@ NNS.ARMA.optim <- function(variable,
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
         errors <- predicted - actual
-        bias <- gravity(errors)
+        bias <- gravity(na.omit(errors))
+        if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE > weight.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE > weight.SSE) bias <- 0
       } else {
         nns.weights <- NULL
 
         errors <- predicted - actual
-        bias <- gravity(errors)
+        bias <- gravity(na.omit(errors))
+        if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE >= nns.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
       }
     } else {
       nns.weights <- NULL
 
       errors <- predicted - actual
-      bias <- gravity(errors)
+      bias <- gravity(na.omit(errors))
+      if(is.na(bias)) bias <- 0
       predicted <- predicted - bias
       bias.SSE <- eval(obj.fn)
 
-      if(bias.SSE >= nns.SSE) bias <- 0
+      if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
     }
 
   } else {
@@ -328,34 +331,37 @@ NNS.ARMA.optim <- function(variable,
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
 
         errors <- predicted - actual
-        bias <- gravity(errors)
+        bias <- gravity(na.omit(errors))
+        if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE <= weight.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= weight.SSE) bias <- 0
 
       } else {
         nns.weights <- NULL
 
         errors <- predicted - actual
-        bias <- gravity(errors)
+        bias <- gravity(na.omit(errors))
+        if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
 
-        if(bias.SSE <= nns.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= nns.SSE) bias <- 0
       }
     } else {
       nns.weights <- NULL
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1)
 
       errors <- predicted - actual
-      bias <- gravity(errors)
+      bias <- gravity(na.omit(errors))
+      if(is.na(bias)) bias <- 0
       predicted <- predicted - bias
       bias.SSE <- eval(obj.fn)
       if(objective=="min"){
-        if(bias.SSE >= nns.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
       } else {
-        if(bias.SSE <= nns.SSE) bias <- 0
+        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= nns.SSE) bias <- 0
       }
     }
   }

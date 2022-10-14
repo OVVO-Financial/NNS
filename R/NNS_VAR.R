@@ -172,21 +172,20 @@ NNS.VAR <- function(variables,
     interpolation_point <- tail(which(!is.na(a[,2])), 1)
     a <- a[complete.cases(a),]
     
-    
     if(dim(a)[1]<last_point){
-      nns_IVs$interpolation <- NNS.reg(a[,1], a[,2], order = "max",
+      variable_interpolation <- NNS.reg(a[,1], a[,2], order = "max",
                                        point.est = index, plot = FALSE,
                                        ncores = 1, point.only = TRUE)$Point.est
       
-      new_variable <- nns_IVs$interpolation
+      new_variable <- variable_interpolation
     } else {
       new_variable <- variables[,i]
-      nns_IVs$interpolation <- new_variable
+      variable_interpolation <- new_variable
     }
     
     h_int <- na_s <- tail(index, 1) - interpolation_point
-    h_int <- max(h, h_int)
-    
+    h_int <- h_int + h
+  
     periods <- NNS.seas(new_variable, modulo = min(tau[[min(i, length(tau))]]),
                         mod.only = FALSE, plot = FALSE)$periods
     
@@ -209,33 +208,37 @@ NNS.VAR <- function(variables,
                           negative.values = min(new_variable)<0,
                           ncores = 1, h = h_int)
       
-      nns_IVs$results <- b$results
+      extrapolation_results <- b$results
       
-      na_s_extrapolation <- rowMeans(cbind(tail(multi, na_s), head(nns_IVs$results, na_s)))
-      nns_IVs$interpolation <- c(nns_IVs$interpolation, na_s_extrapolation)
+      extrapolation_results <- rowMeans(cbind(tail(multi, h_int), head(extrapolation_results, h_int)))
+
+      if(length(extrapolation_results) > 0) variable_interpolation <- c(as.numeric(variable_interpolation), as.numeric(extrapolation_results))
       
-      nns_IVs$obj_fn <- b$obj.fn
+      objective_fn <- b$obj.fn
       
     } else {
       interpolation_point <- 0
-      nns_IVs$results <- NA
-      nns_IVs$obj_fn <- NA
+      extrapolation_results <- NA
+      objective_fn <- NA
     }
     
-    return(list(nns_IVs, head(nns_IVs$results, ifelse(na_s==0, h, na_s)), uni_of = nns_IVs$obj_fn, na_s, interpolation_point))
+    return(list(variable_interpolation, extrapolation_results, objective_fn, na_s, interpolation_point))
   }
-  
+
   uni_weights <- unlist(lapply(nns_IVs, `[[`, 3))
   uni_weights[is.na(uni_weights)] <- mean(uni_weights, na.rm = TRUE)
   
   incompletes <- unlist(lapply(nns_IVs, `[[`, 4))
   interpolation_points <- unlist(lapply(nns_IVs, `[[`, 5))
   
+  extrapolation_results <- lapply(nns_IVs, `[[`, 2)
+ 
   nns_IVs <- lapply(nns_IVs, `[[`, 1)
   
-  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 1), function(x) head(as.numeric(x), dim(variables)[1]))))
-  
-  nns_IVs_results <- data.frame(do.call(cbind, lapply(lapply(nns_IVs, `[[`, 2), function(x) tail(as.numeric(x), h))))
+  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs, function(x) head(as.numeric(x), dim(variables)[1]))))
+
+  nns_IVs_results <- data.frame(do.call(cbind, lapply(extrapolation_results, function(x) tail(as.numeric(x), h))))
+
   colnames(nns_IVs_results) <- colnames(variables)
   
   # One more pass through regression with updated inter / extrapolations
@@ -256,7 +259,7 @@ NNS.VAR <- function(variables,
   nns_IE <- data.frame(do.call(cbind, nns_IE))
   nns_IVs_interpolated_extrapolated <- (nns_IVs_interpolated_extrapolated + nns_IE) / 2
   
-  
+
   if(h == 0){
     rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])
     colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
@@ -272,7 +275,7 @@ NNS.VAR <- function(variables,
   }
   
   
-  
+ 
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
   
@@ -284,7 +287,7 @@ NNS.VAR <- function(variables,
   # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
   
-  
+ 
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   
   
