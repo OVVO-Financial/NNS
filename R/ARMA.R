@@ -78,13 +78,13 @@ NNS.ARMA <- function(variable,
                      conf.intervals = NULL,
                      ncores = NULL){
   
-  
+
   if(is.numeric(seasonal.factor) && dynamic) stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
-  
+
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
   
   if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
-  
+
   method <- tolower(method)
   if(method == "means") shrink <- FALSE
   
@@ -120,7 +120,7 @@ NNS.ARMA <- function(variable,
   
   Estimates <- numeric()
   
-  
+ 
   if(is.numeric(seasonal.factor)){
     seasonal.plot = FALSE
     M <- matrix(seasonal.factor, ncol=1)
@@ -169,7 +169,7 @@ NNS.ARMA <- function(variable,
     
   }
   
-  
+
   # Regression for each estimate in h
   for (j in 1 : h){
     ## Regenerate seasonal.factor if dynamic
@@ -203,8 +203,6 @@ NNS.ARMA <- function(variable,
     for(i in 1:length(lag)){
       if(method == 'nonlin' || method == 'both'){
         Regression.Estimates <- list(length(lag))
-        
-        
         
         x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
@@ -278,9 +276,9 @@ NNS.ARMA <- function(variable,
       registerDoSEQ()
       invisible(data.table::setDTthreads(0, throttle = NULL))
   }
-  
-  if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399)$replicates
-  
+
+
+  if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399, rho = 1)$replicates
   
   #### PLOTTING
   if(plot){
@@ -339,10 +337,12 @@ NNS.ARMA <- function(variable,
     par(original.par)
   }
   
+  
   options(warn = oldw)
   if(!is.null(conf.intervals)){
-    upper_CIs <- apply(CIs, 1, function(z) UPM.VaR(1-conf.intervals, 0, z))
-    lower_CIs <- apply(CIs, 1, function(z) LPM.VaR(1-conf.intervals, 0, z))
+    upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-conf.intervals)/2, 0, z),LPM.VaR((1-conf.intervals)/2, 0, z))) 
+    upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1))
+    lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2))
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_CIs),  pmax(Estimates, upper_CIs))
     colnames(results) = c("Estimates",
                           paste0("Lower ", round(conf.intervals*100,2), "% CI"),

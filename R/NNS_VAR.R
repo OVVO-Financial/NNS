@@ -77,7 +77,7 @@
 #'  # Create bootstrap replicates using NNS.meboot
 #'  replicates <- NNS.meboot(nns_estimate$ensemble[,1])$replicates
 #'
-#'  # Apply UPM.VaR and LPM.VaR for desired confidence interval
+#'  # Apply UPM.VaR and LPM.VaR for desired confidence interval...95 percent illustrated
 #'  # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions
 #'  upper_CIs <- apply(replicates, 1, function(g) UPM.VaR(.025, 0, g))
 #'  lower_CIs <- apply(replicates, 1, function(g) LPM.VaR(.025, 0, g))
@@ -161,7 +161,7 @@ NNS.VAR <- function(variables,
   }
   
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
-  
+ 
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
@@ -199,7 +199,7 @@ NNS.VAR <- function(variables,
       if(ts < 100) ts <- interpolation_point - (h_int)
       
       ts <- max(ts, .75*interpolation_point)
-      
+
       b <- NNS.ARMA.optim(new_variable, seasonal.factor = periods,
                           training.set = ts,
                           obj.fn = obj.fn,
@@ -224,7 +224,7 @@ NNS.VAR <- function(variables,
     
     return(list(variable_interpolation, extrapolation_results, objective_fn, na_s, interpolation_point))
   }
-
+  
   uni_weights <- unlist(lapply(nns_IVs, `[[`, 3))
   uni_weights[is.na(uni_weights)] <- mean(uni_weights, na.rm = TRUE)
   

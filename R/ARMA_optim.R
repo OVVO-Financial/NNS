@@ -13,6 +13,7 @@
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param lin.only logical; \code{FALSE} (default) Restricts the optimization to linear methods only.
+#' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.
 #'
@@ -26,6 +27,8 @@
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 #' \item{\code{$errors}} a vector of model errors from internal calibration.
 #' \item{\code{$results}} a vector of length \code{h}.
+#' \item{\code{$lower.conf.int}} a vector of lower confidence intervals per forecast point.
+#' \item{\code{$upper.conf.int}} a vector of upper confidence intervals per forecast point.
 #'}
 #' @note
 #' \itemize{
@@ -72,30 +75,31 @@ NNS.ARMA.optim <- function(variable,
                            objective = "max",
                            linear.approximation = TRUE,
                            lin.only = FALSE,
+                           conf.intervals = NULL,
                            print.trace = TRUE,
                            ncores = NULL){
-
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-
+  
   if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
-
+  
   n <- length(variable)
-
+  
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
   objective <- tolower(objective)
-
+  
   if (is.null(ncores)) {
     num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
     num_cores <- ncores
   }
-
+  
   if(is.null(training.set) && is.null(h)) stop("Please use the length of the variable less the desired forecast period as the training.set value, or provide a value for h.")
-
+  
   if(min(variable)<0) negative.values <- TRUE
-
+  
   variable <- as.numeric(variable)
-
+  
   if(!is.null(h) && h > 0) h_oos <- h_is <- h else {
     h <- 1
     h_is <- length(variable) - training.set
@@ -103,52 +107,52 @@ NNS.ARMA.optim <- function(variable,
   }
   
   if(h_is < .1 * n) h_eval <- 2*h_is else h_eval <- h_is
-
+  
   actual <- tail(variable, h_eval)
-
+  
   if(is.null(training.set)){
     l <- n - h_eval 
     training.set <- l
   } else l <- training.set
- 
+  
   if(l <= .5 * n) stop("Please provide a 'training.set' value (integer) less than (2*h) or a smaller (h).")
   if(training.set == n) stop("Please provide a 'training.set' value (integer) less than the length of the variable.")
   
   denominator <- min(5, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
-
+  
   seasonal.factor <- seasonal.factor[seasonal.factor <= (l/denominator)]
   seasonal.factor <- unique(seasonal.factor)
-
+  
   if(length(seasonal.factor)==0) stop(paste0('Please ensure "seasonal.factor" contains elements less than ', l/denominator, ", otherwise use cross-validation of seasonal factors as demonstrated in the vignette >>> Getting Started with NNS: Forecasting"))
   
   oldw <- getOption("warn")
   options(warn = -1)
-
+  
   nns.estimates <- list()
   seasonal.combs <- list()
-
+  
   overall.seasonals <- list()
   overall.estimates <- list()
-
+  
   previous.estimates <- list()
   previous.seasonals <- list()
-
+  
   if(lin.only) methods <- "lin" else methods <- c('lin','nonlin','both')
-
+  
   if(num_cores > 1){
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
   }
-
+  
   for(j in methods){
     current.seasonals <- list()
     current.estimate <- numeric()
     seasonal.combs <- list()
-
+    
     for(i in 1 : length(seasonal.factor)){
       nns.estimates.indiv <- list()
-
+      
       if(i == 1){
         seasonal.combs[[i]] <- t(seasonal.factor)
       } else {
@@ -156,7 +160,7 @@ NNS.ARMA.optim <- function(variable,
         if(sum(remaining.index)==0){ break }
         seasonal.combs[[i]] <- rbind(replicate(length(seasonal.factor[remaining.index]), current.seasonals[[i-1]]), as.integer(seasonal.factor[remaining.index]))
       }
-
+      
       if(i == 1){
         if(linear.approximation  && j!="lin"){
           seasonal.combs[[1]] <- matrix(unlist(overall.seasonals[[1]]), ncol=1)
@@ -171,37 +175,37 @@ NNS.ARMA.optim <- function(variable,
           current.seasonals[[i]] <- as.integer(unlist(current.seasonals[[i-1]]))
         }
       }
-
+      
       if(is.null(ncol(seasonal.combs[[i]])) || dim(seasonal.combs[[i]])[2]==0) break 
-
+      
       if(j!="lin" && linear.approximation){
         # Find the min (obj.fn) for a given seasonals sequence
         actual <- tail(variable, h_eval)
-
+        
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
-
+        
         nns.estimates.indiv <- eval(obj.fn)
       } else {
         nns.estimates.indiv <- foreach(k = 1 : ncol(seasonal.combs[[i]]),.packages = c("NNS", "data.table"))%dopar%{
           actual <- tail(variable, h_eval)
-
+          
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values, ncores = 1)
-
+          
           nns.estimates.indiv <- eval(obj.fn)
         }
       }
-
+      
       nns.estimates.indiv <- unlist(nns.estimates.indiv)
-
+      
       if(objective=='min') nns.estimates.indiv[is.na(nns.estimates.indiv)] <- Inf else nns.estimates.indiv[is.na(nns.estimates.indiv)] <- -Inf
-
+      
       nns.estimates[[i]] <- nns.estimates.indiv
       nns.estimates.indiv <- numeric()
-
+      
       if(objective=='min'){
         current.seasonals[[i]] <- seasonal.combs[[i]][,which.min(nns.estimates[[i]])]
         current.estimate[i] <- min(nns.estimates[[i]])
-
+        
         if(i > 1 && current.estimate[i] > current.estimate[i-1]){
           current.seasonals <- current.seasonals[-length(current.estimate)]
           current.estimate <- current.estimate[-length(current.estimate)]
@@ -216,8 +220,8 @@ NNS.ARMA.optim <- function(variable,
           break
         }
       }
-
-
+      
+      
       if(print.trace){
         if(i == 1){
           print(paste0("CURRNET METHOD: ",j))
@@ -226,12 +230,12 @@ NNS.ARMA.optim <- function(variable,
         print(paste("NNS.ARMA(... method = ", paste0("'",j,"'"), ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[[i]]), collapse = ", ")),") ...)"))
         print(paste0("CURRENT ", j, " OBJECTIVE FUNCTION = ", current.estimate[i]))
       }
-
-
+      
+      
       ### BREAKING PROCEDURE FOR IDENTICAL PERIODS ACROSS METHODS
       if(which(c("lin",'nonlin','both')==j) > 1 ){
         if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
-
+          
           if(objective=='min'){
             if(current.estimate[i] >= previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
           } else {
@@ -239,18 +243,18 @@ NNS.ARMA.optim <- function(variable,
           }
         }
       }
-
+      
       if(j!='lin' && linear.approximation){ break }
-
+      
     } # for i in 1:length(seasonal factor)
-
+    
     previous.seasonals[[which(c("lin",'nonlin','both')==j)]] <- current.seasonals
     previous.estimates[[which(c("lin",'nonlin','both')==j)]] <- current.estimate
-
+    
     overall.seasonals[[which(c("lin",'nonlin','both')==j)]] <- current.seasonals[length(current.estimate)]
     overall.estimates[[which(c("lin",'nonlin','both')==j)]] <- current.estimate[length(current.estimate)]
-
-
+    
+    
     if(print.trace){
       if(i > 1){
         print(paste0("BEST method = ", paste0("'",j,"'"),  ", seasonal.factor = ", paste("c(", paste(unlist(current.seasonals[length(current.estimate)]), collapse = ", "))," )"))
@@ -260,99 +264,99 @@ NNS.ARMA.optim <- function(variable,
         print(paste0("BEST ", j, " OBJECTIVE FUNCTION = ", current.estimate[1]))
       }
     }
-
-
+    
+    
     if(lin.only) predicted <- current.estimate
     if(j!='lin' && lin.only) break
-
+    
   } # for j in c('lin','nonlin','both')
-
+  
   if(num_cores > 1){
     stopCluster(cl)
     registerDoSEQ()
     invisible(data.table::setDTthreads(0, throttle = NULL))
   }
-
-
+  
+  
   if(objective=='min'){
     nns.periods <- unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
     nns.method <- c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
     nns.SSE <- min(unlist(overall.estimates))
-
+    
     if(length(nns.periods)>1){
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
-
+      
       weight.SSE <- eval(obj.fn)
-
+      
       if(weight.SSE < nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
-
+        
         errors <- predicted - actual
         bias <- gravity(na.omit(errors))
         if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
-
+        
         if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE > weight.SSE) bias <- 0
       } else {
         nns.weights <- NULL
-
+        
         errors <- predicted - actual
         bias <- gravity(na.omit(errors))
         if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
-
+        
         if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
       }
     } else {
       nns.weights <- NULL
-
+      
       errors <- predicted - actual
       bias <- gravity(na.omit(errors))
       if(is.na(bias)) bias <- 0
       predicted <- predicted - bias
       bias.SSE <- eval(obj.fn)
-
+      
       if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
     }
-
+    
   } else {
     nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
     nns.method <- c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
     nns.SSE <- max(unlist(overall.estimates))
-
+    
     if(length(nns.periods) > 1){
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = rep((1/length(nns.periods)),length(nns.periods)))
-
+      
       weight.SSE <- eval(obj.fn)
-
+      
       if(weight.SSE > nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
-
+        
         errors <- predicted - actual
         bias <- gravity(na.omit(errors))
         if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
-
+        
         if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= weight.SSE) bias <- 0
-
+        
       } else {
         nns.weights <- NULL
-
+        
         errors <- predicted - actual
         bias <- gravity(na.omit(errors))
         if(is.na(bias)) bias <- 0
         predicted <- predicted - bias
         bias.SSE <- eval(obj.fn)
-
+        
         if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= nns.SSE) bias <- 0
       }
     } else {
       nns.weights <- NULL
       predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1)
-
+      
       errors <- predicted - actual
       bias <- gravity(na.omit(errors))
       if(is.na(bias)) bias <- 0
@@ -365,33 +369,42 @@ NNS.ARMA.optim <- function(variable,
       }
     }
   }
-
+  
   predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = TRUE)
-
+  
   if(objective == "min"){
-      if(eval(obj.fn) < nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
-      if(eval(obj.fn) > 0) warning("Positive objective function with 'min' objective, you may want to try another objective function.")
+    if(eval(obj.fn) < nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
+    if(eval(obj.fn) > 0) warning("Positive objective function with 'min' objective, you may want to try another objective function.")
   }
-        
+  
   if(objective == "max"){
-      if(eval(obj.fn) > nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
-      if(eval(obj.fn) < 0) warning("Negative objective function with 'max' objective, you may want to try another objective function.")
+    if(eval(obj.fn) > nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
+    if(eval(obj.fn) < 0) warning("Negative objective function with 'max' objective, you may want to try another objective function.")
   }
-
+  
   options(warn = oldw)
-
+  
   if(!negative.values) bias <- min(c(bias, variable))
-
-
-
+  
+  
+  
   if(is.null(h_oos)){
     model.results <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = nns.shrink) - bias
   } else {
     model.results <- NNS.ARMA(variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, ncores = 1, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
+  if(!is.null(conf.intervals)){
+      CIs <- NNS.meboot(model.results, reps = 399, rho = 1)$replicates
+      upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-conf.intervals)/2, 0, z),LPM.VaR((1-conf.intervals)/2, 0, z))) 
+      upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1))
+      lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2))
+  } else {
+      upper_CIs <- lower_CIs <- NULL
+  } 
+  
   if(!negative.values) model.results <- pmax(0, model.results)
-
+  
   return(list(periods = nns.periods,
               weights = nns.weights,
               obj.fn = nns.SSE,
@@ -399,5 +412,7 @@ NNS.ARMA.optim <- function(variable,
               shrink = nns.shrink,
               bias.shift = -bias,
               errors = errors,
-              results = model.results))
+              results = model.results,
+              lower.conf.int = lower_CIs,
+              upper.conf.int = upper_CIs))
 }

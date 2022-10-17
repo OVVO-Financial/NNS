@@ -794,6 +794,8 @@ NNS.reg = function (x, y,
     }
   }
   
+  regression.points$x <- pmin(regression.points$x, max(x))
+  regression.points$x <- pmax(regression.points$x, min(x))
   
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))
@@ -926,11 +928,9 @@ NNS.reg = function (x, y,
     }
     
     if(is.numeric(confidence.interval)){
-      fitted[, `:=` ( 'conf.int.pos' = UPM.VaR(1 - confidence.interval, degree = 1, y) ), by = gradient]
-      fitted[, `:=` ( 'conf.int.neg' = LPM.VaR(1 - confidence.interval, degree = 1, y) ), by = gradient]
-      
-      pval <- 1 - confidence.interval
-      
+      fitted[, `:=` ( 'conf.int.pos' = UPM.VaR((1-conf.intervals)/2, degree = 1, y) ), by = gradient]
+      fitted[, `:=` ( 'conf.int.neg' = LPM.VaR((1-conf.intervals)/2, degree = 1, y) ), by = gradient]
+
       plot(x, y, xlim = c(xmin, xmax),
            ylim = c(min(c(fitted$conf.int.neg, ymin)), max(c(fitted$conf.int.pos,ymax))),
            col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
