@@ -87,7 +87,7 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  # Create bootstrap replicates using NNS.meboot
  replicates <- NNS.meboot(nns_estimate$ensemble[,1])$replicates
 
- # Apply UPM.VaR and LPM.VaR for desired confidence interval
+ # Apply UPM.VaR and LPM.VaR for desired confidence interval...95 percent illustrated
  # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions
  upper_CIs <- apply(replicates, 1, function(g) UPM.VaR(.025, 0, g))
  lower_CIs <- apply(replicates, 1, function(g) LPM.VaR(.025, 0, g))
