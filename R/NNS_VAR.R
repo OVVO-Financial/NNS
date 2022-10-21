@@ -169,9 +169,8 @@ NNS.VAR <- function(variables,
     a <- a[complete.cases(a),]
     
     if(dim(a)[1]<last_point){
-      variable_interpolation <- NNS.reg(a[,1], a[,2], order = "max",
-                                       point.est = index, plot = FALSE,
-                                       ncores = 1, point.only = TRUE)$Point.est
+      variable_interpolation <- NNS.reg(a[,1], a[,2], order = "max", ncores = 1,
+                                       point.est = index, plot = FALSE, point.only = TRUE)$Point.est
       
       new_variable <- variable_interpolation
     } else {
@@ -186,9 +185,8 @@ NNS.VAR <- function(variables,
                         mod.only = FALSE, plot = FALSE)$periods
     
     if(h_int > 0){
-      multi <- NNS.reg(a[,1], a[,2], order = NULL,
-                       point.est = index, plot = FALSE,
-                       ncores = 1, point.only = TRUE)$Point.est
+      multi <- NNS.reg(a[,1], a[,2], order = NULL, ncores = 1,
+                       point.est = index, plot = FALSE, point.only = TRUE)$Point.est
       
       
       ts <- interpolation_point - 2*(h_int)
@@ -249,7 +247,7 @@ NNS.VAR <- function(variables,
     }
     return(data)
   }
- 
+
   nns_IE <- data.frame(do.call(cbind, nns_IE))
   nns_IVs_interpolated_extrapolated <- (nns_IVs_interpolated_extrapolated + nns_IE) / 2
   
@@ -268,13 +266,13 @@ NNS.VAR <- function(variables,
   colnames(new_values) <- as.character(colnames(variables))
   
   nns_IVs_interpolated_extrapolated <- head(new_values, dim(variables)[1])
-  
+
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
   
   # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
-  
+ 
  
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   
