@@ -16,8 +16,7 @@ NNS.ARMA.optim(
   linear.approximation = TRUE,
   lin.only = FALSE,
   conf.intervals = NULL,
-  print.trace = TRUE,
-  ncores = NULL
+  print.trace = TRUE
 )
 }
 \arguments{
@@ -41,11 +40,9 @@ NNS.ARMA.optim(
 
 \item{lin.only}{logical; \code{FALSE} (default) Restricts the optimization to linear methods only.}
 
-\item{conf.intervals}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
+\item{conf.intervals}{numeric [0, 1]; \code{NULL} Returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
 
 \item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine.}
 }
 \value{
 Returns a list containing:

@@ -19,8 +19,7 @@ NNS.ARMA(
   shrink = FALSE,
   plot = TRUE,
   seasonal.plot = TRUE,
-  conf.intervals = NULL,
-  ncores = NULL
+  conf.intervals = NULL
 )
 }
 \arguments{
@@ -58,8 +57,6 @@ NNS.ARMA(
 \item{seasonal.plot}{logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.}
 
 \item{conf.intervals}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
-
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to half the number of cores of the machine - 1.}
 }
 \value{
 Returns a vector of forecasts of length \code{(h)} if no \code{conf.intervals} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper confidence intervals per forecast point.
