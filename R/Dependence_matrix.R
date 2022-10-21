@@ -1,4 +1,4 @@
-NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE, ncores = NULL){
+NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   n <- ncol(x)
   if(is.null(n)){
@@ -27,31 +27,13 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE, ncores 
     }
   }
 
-  raw.both <- list((n-1))
 
-  if(is.null(ncores)) {
-    num_cores <- as.integer(parallel::detectCores()) - 1
-  } else {
-    num_cores <- ncores
-  }
-
-  if(num_cores>1){
-    cl <- parallel::makeCluster(num_cores)
-    doParallel::registerDoParallel(cl)
-  }
-
-
+  
   i <- 1:(n-1)
 
-  raw.both <- foreach(i = 1 : (n-1), .packages = c("NNS", "data.table"))%dopar%{
-    raw.both[[i]] <-  sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym))
-  }
+  raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym)))
 
-  if(num_cores>1){
-    parallel::stopCluster(cl)
-    registerDoSEQ()
-  }
-
+  
   raw.both <- unlist(raw.both)
   l <- length(raw.both)
 

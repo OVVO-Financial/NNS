@@ -130,10 +130,12 @@ NNS.ANOVA <- function(
     }else{
         A <- control
     }
-    mean.of.means <- mean(colMeans(A))
+    
+    mean.of.means <- mean(Rfast::colmeans(as.matrix(A)))
+    
     if(!pairwise){
         #Continuous CDF for each variable from Mean of Means
-        LPM_ratio        <-      sapply(1:n, function(b) LPM.ratio(1, mean.of.means, A[ , b]))
+        LPM_ratio        <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, A[ , b]))
         lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, A[,i])))
         upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, A[,i])))
         lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, A[,i])))
@@ -180,6 +182,7 @@ NNS.ANOVA <- function(
         function(b) NNS.ANOVA.bin(A[ , i],A[ , b], plot = FALSE)$Certainty
       )
     }
+    
     certainties <- matrix(NA, n, n)
     certainties[lower.tri(certainties, diag = FALSE)] <- unlist(raw.certainties)
     diag(certainties) <- 1

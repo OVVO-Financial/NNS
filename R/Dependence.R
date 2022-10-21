@@ -156,7 +156,7 @@ NNS.dep = function(x,
                   "Dependence p.value" = min(LPM(0, deps[2], deps[-c(1,2)]),
                                              UPM(0, deps[2], deps[-c(1,2)])),
                   "Dependence 95% CIs" = c(dep_lower_CI, dep_upper_CI)))
-    } else return(NNS.dep.matrix(x, asym = asym, ncores = ncores))
+    } else return(NNS.dep.matrix(x, asym = asym))
   }
 
 }

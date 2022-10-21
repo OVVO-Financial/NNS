@@ -59,9 +59,8 @@ NNS.nowcast <- function(h = 1,
                  "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
                  "ICSA", "DGS10", "T10Y2Y", "WALCL")
 
-  variable_list <- character()
 
-  if(is.null(specific.regressors)) variable_list <- c(variables, additional.regressors) else variable_list <- c(variables, additional.regressors)[specific.regressors]
+  if(is.null(specific.regressors)) variable_list <- as.character(c(variables, additional.regressors)) else variable_list <- as.character(c(variables, additional.regressors)[specific.regressors])
 
   NNSdata <- new.env()
   quantmod::getSymbols(variable_list, src = "FRED", env = NNSdata)
@@ -72,7 +71,13 @@ NNS.nowcast <- function(h = 1,
  
   raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
   
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
   if(!keep.data) rm(list = ls(), envir = NNSdata)
+  
+  options(warn = oldw)
+  
   
   econ_variables <- Reduce(function(...) merge(..., all=TRUE), raw_econ_variables)[paste0(start.date,"::")]
 

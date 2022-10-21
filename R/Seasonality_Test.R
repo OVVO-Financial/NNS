@@ -42,8 +42,8 @@ NNS.seas <- function(variable,
   variable_2 <- variable_1[1 : (length(variable_1) - 1)]
 
 
-  output <- numeric() ; output_1 = numeric() ; output_2 = numeric()
-  instances <- numeric() ; instances_1 = numeric() ; instances_2 = numeric()
+  output_2 <- output_1 <- output <- numeric(floor(length(variable) / 2)) 
+  instances_2 <- instances_1 <- instances <- numeric(floor(length(variable) / 2)) 
 
   if(mean(variable) != 0){
     var.cov <- abs(sd(variable) / mean(variable))
@@ -51,7 +51,7 @@ NNS.seas <- function(variable,
     var.cov <- abs(acf(variable, lag.max = 1, plot = FALSE)$acf[2])^-1
   }
 
-  for(i in 1 : (length(variable) / 2)){
+  for(i in 1 : floor(length(variable) / 2)){
     reverse.var <- variable[seq(length(variable), 1, -i)]
     reverse.var_1 <- variable_1[seq(length(variable_1), 1, -i)]
     reverse.var_2 <- variable_2[seq(length(variable_2), 1, -i)]
@@ -92,7 +92,7 @@ NNS.seas <- function(variable,
   }
 
   ref.output <- cbind(instances, output, output_1, output_2, output * output_1 * output_2 > 0)
-  output <- rowMeans(ref.output[ , 2 : 4]) * ref.output[ , 5]
+  output <- Rfast::rowmeans(ref.output[ , 2 : 4]) * ref.output[ , 5]
 
   instances <- ref.output[ , 1] * ref.output[ , 5]
 

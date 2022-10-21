@@ -73,9 +73,8 @@ factor_2_dummy_FR <- function(x){
 
 ### Generator for 1:length(lag) vectors in NNS.ARMA
 generate.vectors <- function(x, l){
-  Component.series <- list()
-  Component.index <- list()
-
+  Component.index <- Component.series <- list()
+ 
   for (i in 1:length(l)){
     CS <- rev(x[seq(length(x)+1, 1, -l[i])])
     CS <- CS[!is.na(CS)]
@@ -134,7 +133,7 @@ lag.mtx <- function(x, tau){
     x <- t(t(x))
   }
 
-  j.vectors <- list()
+  j.vectors <- vector(mode = "list", ncol(x))
 
   for(j in 1:ncol(x)){
     if(is.null(colheads)){
@@ -143,7 +142,7 @@ lag.mtx <- function(x, tau){
       colheads <- noquote(as.character(deparse(substitute(colheads))))
     }
 
-    x.vectors <- list()
+    x.vectors <- vector(mode = "list", max_tau+1)
     heads <- paste0(colheads, "_tau_")
     heads <- gsub('"', '' ,heads)
 

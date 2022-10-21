@@ -31,9 +31,8 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
 
   n <- ncol(x)
   max_target <- max(x)
-  LPM_order <- numeric()
-  Dominated_set <- numeric()
-  current_base <- numeric()
+
+  current_base <- Dominated_set <- numeric()
 
   if(is.null(colnames(x))) 
     colnames(x) <- paste0("X_",1:ncol(x))
@@ -84,8 +83,8 @@ NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
       }
     }
   }
-  if(length(Dominated_set) > 0){
-    return(all_variables[-na.omit(Dominated_set)])
-  }
+  
+  if(length(Dominated_set) > 0) return(all_variables[-na.omit(Dominated_set)])
+  
   return(all_variables)
 }

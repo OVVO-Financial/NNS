@@ -130,18 +130,14 @@ NNS.stack <- function(IVs.train,
   
   dist <- tolower(dist)
   
-  THRESHOLDS <- list(folds)
-  best.k <- list(folds)
-  best.nns.cv <- list(folds)
-  best.nns.ord <- list(folds)
+  THRESHOLDS <- vector(mode = "list", folds)
+  best.k <- vector(mode = "list", folds)
+  best.nns.cv <- vector(mode = "list", folds)
+  best.nns.ord <- vector(mode = "list", folds)
   
   if(is.null(colnames(IVs.train))){
-    colnames.list <- list()
-    for(i in 1 : n){
-      colnames.list[i] <- paste0("X", i)
-    }
-    colnames(IVs.train) <- as.character(colnames.list)
-    colnames(IVs.test) <- colnames(IVs.train)
+    colnames.list <- lapply(1 : dim(IVs.train)[2], function(i) paste0("X", i))
+    colnames(IVs.test) <- colnames(IVs.train) <- as.character(colnames.list)
   }
   
   if(2 %in% method && dim(IVs.train)[2]>1){
@@ -207,7 +203,7 @@ NNS.stack <- function(IVs.train,
     
     # Dimension Reduction Regression Output
     if(2 %in% method && dim(IVs.train)[2]>1){
-      threshold_results_2 <- list()
+      
       actual <- CV.DV.test
       if(dim.red.method=="cor"){
         
@@ -233,7 +229,8 @@ NNS.stack <- function(IVs.train,
       if(dist=="factor") var.cutoffs <- var.cutoffs[-1]
       if(dim.red.method=="equal") var.cutoffs <- 0
       
-      nns.ord <- numeric()
+      threshold_results_2 <- vector(mode = "list", length = length(var.cutoffs))
+      nns.ord <- numeric(length(var.cutoffs))
       
       for(i in 1:length(var.cutoffs)){
         if(status){
@@ -328,9 +325,7 @@ NNS.stack <- function(IVs.train,
     
     
     if(1 %in% method){
-      threshold_results_1 <- list()
       actual <- CV.DV.test
-      nns.cv.1 <- numeric()
       
       if(is.character(relevant_vars)) relevant_vars <- relevant_vars!=""
       
@@ -345,6 +340,9 @@ NNS.stack <- function(IVs.train,
       
       if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
       if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
+      
+      threshold_results_1 <- vector(mode = "list", length(c(1:l, length(IVs.train[ , 1]))))
+      nns.cv.1 <- numeric()
       
       for(i in c(1:l, length(IVs.train[ , 1]))){
         index <- which(c(1:l, length(IVs.train[ , 1])) == i)
@@ -371,8 +369,6 @@ NNS.stack <- function(IVs.train,
           RPM_CLASS <- apply(do.call(cbind, lapply(setup$RPM[,1:(dim(setup$RPM)[2]-1)], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
         } else {
           
-          predicted <- list()
-          
           
           if(!is.null(dim(CV.IVs.train))){
             if(dim(CV.IVs.train)[2]>1){
@@ -391,7 +387,6 @@ NNS.stack <- function(IVs.train,
             predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
                                                    type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
           }
-          predicted <- unlist(predicted)
           
           if(!is.null(type)){
             pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))

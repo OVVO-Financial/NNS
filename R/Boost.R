@@ -88,12 +88,8 @@ NNS.boost <- function(IVs.train,
   objective <- tolower(objective)
 
   if(is.null(colnames(IVs.train))){
-    colnames.list <- list()
-    for(i in 1 : dim(IVs.train)[2]){
-      colnames.list[i] <- paste0("X", i)
-    }
-    colnames(IVs.train) <- as.character(colnames.list)
-    colnames(IVs.test) <- colnames(IVs.train)
+    colnames.list <- lapply(1 : dim(IVs.train)[2], function(i) paste0("X", i))
+    colnames(IVs.test) <- colnames(IVs.train) <- as.character(colnames.list)
   }
 
   features <- colnames(IVs.train)
@@ -170,7 +166,7 @@ NNS.boost <- function(IVs.train,
     learner.trials <- min(sum(choose(n, 1:n)), learner.trials)
 
     results <- numeric(learner.trials)
-    test.features <- list(learner.trials)
+    test.features <- vector(mode = "list", learner.trials)
 
     for(i in 1:learner.trials){
       set.seed(123 + i)

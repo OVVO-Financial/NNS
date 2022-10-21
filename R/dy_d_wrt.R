@@ -78,17 +78,12 @@ dy.d_ <- function(x, y, wrt,
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
   
-  results <- list()
-  
   
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r",appendLF=TRUE)
   
   
   if(is.null(colnames(x))){
-    colnames.list <- list()
-    for(i in 1 : l){
-      colnames.list[i] <- paste0("X", i)
-    }
+    colnames.list <- lapply(1 : ncol(x), function(i) paste0("X", i))
     colnames(x) <- as.character(colnames.list)
   }
   
@@ -125,6 +120,8 @@ dy.d_ <- function(x, y, wrt,
   zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence^2
   
   h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
+  
+  results <- vector(mode = "list", length(h_s))
   
   for(h in h_s){
     index <- which(h == h_s)

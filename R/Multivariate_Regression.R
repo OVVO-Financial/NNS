@@ -37,26 +37,24 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  reg.points <- list()
-  sections <- list()
   
   if(is.null(order)) order <- floor(max(1,(NNS.copula(original.matrix)* 10)))
   
   
   ###  Regression Point Matrix
   if(is.numeric(order)){
-    reg.points <- apply(original.IVs, 2, function(b) NNS.reg(b, original.DV, factor.2.dummy = factor.2.dummy, order = order, stn = stn, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
+    reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, stn = stn, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
     
     if(length(unique(sapply(reg.points, length))) != 1){
-      reg.points.matrix <- do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))
+      reg.points.matrix <- do.call(cbind, lapply(reg.points, `length<-`, max(lengths(reg.points))))
     } else {
-      reg.points.matrix <- reg.points
+      reg.points.matrix <- do.call(cbind, reg.points)
     }
   } else {
     reg.points.matrix <- original.IVs
   }
   
-  
+
   ### If regression points are error (not likely)...
   if(length(reg.points.matrix[ , 1]) == 0  || is.null(reg.points.matrix)){
     for(i in 1 : n){
@@ -73,10 +71,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   if(is.null(colnames(original.IVs))){
-    colnames.list <- list()
-    for(i in 1 : n){
-      colnames.list[i] <- paste0("X", i)
-    }
+    colnames.list <- lapply(1 : ncol(original.IVs), function(i) paste0("x", i))
     colnames(reg.points.matrix) <- as.character(colnames.list)
   }
   
@@ -87,31 +82,20 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   if(!is.null(order) && order=="max" && is.null(n.best)) n.best <- 1
   
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
-  NNS.ID <- list()
-  
   ### PARALLEL
   
   if(is.null(ncores)) {
     num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
     num_cores <- ncores
-  }
-  
-  if(num_cores<=1){
-    for(j in 1:n){
-      sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
-      NNS.ID[[j]] <- findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE)
-    }
-  } else {
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
-    NNS.ID <- foreach(j = 1:n)%dopar%{
-      sorted.reg.points <- na.omit(sort(reg.points.matrix[ , j]))
-      return(findInterval(original.IVs[ , j], vec = sorted.reg.points, left.open = FALSE))
-    }
   }
   
+
+  NNS.ID <- lapply(1:n, function(j) findInterval(original.IVs[ , j], vec = na.omit(sort(reg.points.matrix[ , j])), left.open = FALSE))
+
   NNS.ID <- do.call(cbind, NNS.ID)
   
   ### Create unique identifier of each observation's interval
@@ -237,7 +221,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     }
     
     if(!is.null(np)){
-      DISTANCES <- list()
+      DISTANCES <- vector(mode = "list", np)
 
       if(num_cores>1){
         DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])

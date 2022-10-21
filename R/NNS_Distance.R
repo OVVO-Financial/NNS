@@ -31,10 +31,8 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
 
   rpm$y.hat <- y.hat
 
-#### DO THIS ALL IN DATA.TABLE!!!
   
   if(type=="L2"){
-
     rpm$Sum <- Rfast::rowsums( t((t(rpm[, 1:n]) - dist.estimate)^2) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = parallel)
   }
 

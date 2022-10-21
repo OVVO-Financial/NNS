@@ -127,15 +127,11 @@ NNS.VAR <- function(variables,
   dim.red.method <- tolower(dim.red.method)
   if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
   
-  nns_IVs <- list()
-  
   if(is.null(colnames(variables))){
-    var_names <- character()
-    for(i in 1:ncol(variables)){
-      var_names[i] <- paste0("x",i)
-    }
-    colnames(variables) <- var_names
+    colnames.list <- lapply(1 : ncol(variables), function(i) paste0("x", i))
+    colnames(variables) <- as.character(colnames.list)
   }
+  
   
   if(any(colnames(variables)=="")){
     var_names <- character()
@@ -162,7 +158,7 @@ NNS.VAR <- function(variables,
   
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
  
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
     last_point <- tail(index, 1)
@@ -205,12 +201,11 @@ NNS.VAR <- function(variables,
                           obj.fn = obj.fn,
                           objective = objective,
                           print.trace = FALSE,
-                          negative.values = min(new_variable)<0,
-                          ncores = 1, h = h_int)
+                          negative.values = min(new_variable)<0, h = h_int)
       
       extrapolation_results <- b$results
       
-      extrapolation_results <- rowMeans(cbind(tail(multi, h_int), head(extrapolation_results, h_int)))
+      extrapolation_results <- Rfast::rowmeans(cbind(tail(multi, h_int), head(extrapolation_results, h_int)))
 
       if(length(extrapolation_results) > 0) variable_interpolation <- c(as.numeric(variable_interpolation), as.numeric(extrapolation_results))
       
@@ -242,7 +237,6 @@ NNS.VAR <- function(variables,
   colnames(nns_IVs_results) <- colnames(variables)
   
   # One more pass through regression with updated inter / extrapolations
-  nns_IE <- list()
   nns_IE <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     data <- unlist(nns_IVs_interpolated_extrapolated[, i])
     if(incompletes[i] > 0){
@@ -267,15 +261,9 @@ NNS.VAR <- function(variables,
   }
   
   
-  new_values <- list()
-  
   # Combine interpolated / extrapolated / forecasted IVs onto training data.frame
-  for(i in 1:ncol(variables)){
-    new_values[[i]] <- c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i])
-  }
-  
-  
- 
+  new_values <- lapply(1:ncol(variables), function(i) c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i]))
+
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
   
@@ -302,12 +290,8 @@ NNS.VAR <- function(variables,
   }
   
   
-  nns_DVs <- list()
-  relevant_vars <- list()
-  
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
-                     
                      
                      if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
                      
@@ -398,8 +382,8 @@ NNS.VAR <- function(variables,
   RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
   colnames(RV) <- as.character(colnames(variables))
   
-  uni <- numeric()
-  multi <- numeric()
+  uni <- numeric(length(colnames(RV)))
+  multi <- numeric(length(colnames(RV)))
   
   for(i in 1:length(colnames(RV))){
     if(length(na.omit(RV[,i]) > 0)){

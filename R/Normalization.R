@@ -29,7 +29,7 @@ NNS.norm <- function(X,
 
   X <- apply(X, 2, unlist)
 
-  m  <- colMeans(X)
+  m  <- Rfast::colmeans(X)
   m[m==0] <- 1e-10
   RG <- m %o% (1 / m)
 
