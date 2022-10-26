@@ -117,7 +117,7 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
   
-  zz <- NNS.dep(cbind(x,y), ncores = 1)$Dependence^2
+  zz <- NNS.dep(cbind(x,y))$Dependence^2
   
   h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
   

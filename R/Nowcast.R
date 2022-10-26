@@ -76,12 +76,11 @@ NNS.nowcast <- function(h = 1,
   
   if(!keep.data) rm(list = ls(), envir = NNSdata)
   
-  options(warn = oldw)
-  
-  
   econ_variables <- Reduce(function(...) merge(..., all=TRUE), raw_econ_variables)[paste0(start.date,"::")]
 
   colnames(econ_variables) <- variable_list
-
+  
+  options(warn = oldw)
+  
   NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE)
 }

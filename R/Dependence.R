@@ -7,7 +7,6 @@
 #' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
 #' @param p.value logical; \code{FALSE} (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.
-#' @param ncores integer 1 (default); value specifying the number of cores to be used in the parallelized  procedure. If NULL, the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
 #' @note
@@ -33,8 +32,7 @@ NNS.dep = function(x,
                    y = NULL,
                    asym = FALSE,
                    p.value = FALSE,
-                   print.map = FALSE,
-                   ncores = 1){
+                   print.map = FALSE){
 
 
 
@@ -102,14 +100,14 @@ NNS.dep = function(x,
     I_y <- ly > sqrt(l)
     I <- I_x * I_y
 
-    poly_base <- dependence
-
-    if(I == 1) poly_base <- suppressWarnings(tryCatch(summary(lm(abs(y)~poly(x, degree_x), raw = TRUE))$r.squared,
+    if(I == 1){
+      poly_base <- suppressWarnings(tryCatch(summary(lm(abs(y)~poly(x, degree_x), raw = TRUE))$r.squared,
                                                       warning = function(w) dependence,
                                                       error = function(e) dependence))
 
-    dependence <- mean(c(rep(dependence,3), poly_base))
-
+      dependence <- gravity(c(dependence, NNS.copula(cbind(x, y)), poly_base))
+    } else dependence <- mean(c(dependence, NNS.copula(cbind(x, y))))
+    
     corr <- mean(c(sum(res$V1 * weights),
                    sum(res_xy$V1 * weights),
                    sum(res_yx$V1 * weights)))
@@ -122,7 +120,7 @@ NNS.dep = function(x,
     if(p.value){
       original.par <- par(no.readonly = TRUE)
 
-      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g, ncores = 1))
+      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g))
 
       ## Store results
       cors <- unlist(lapply(nns.mc, "[[", 1))

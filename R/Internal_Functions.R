@@ -158,15 +158,14 @@ lag.mtx <- function(x, tau){
   }
   mtx <- as.data.frame(do.call(cbind, j.vectors))
   
-  relevant_lags <- list(length(tau))
+
   if(length(unlist(tau)) > 1){
-    for(i in 1:(length(tau))){
-      relevant_lags[[i]] <- c((i-1)*max_tau + i, (i-1)*max_tau + unlist(tau[[i]]) + i)
-    }
-    
+    relevant_lags <- lapply(1:length(tau), function(i) c((i-1)*max_tau + i, (i-1)*max_tau + unlist(tau[[i]]) + i))
+
     relevant_lags <- sort(unlist(relevant_lags))
     mtx <- mtx[ , relevant_lags]
   }
+  
   vars <- which(grepl("tau_0", colnames(mtx)))
   
   everything_else <- seq_len(dim(mtx)[2])[-vars]

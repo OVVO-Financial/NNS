@@ -38,7 +38,7 @@ dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
 
   order <- NULL
 
-  dep <- NNS.dep(x, y, asym = TRUE, ncores = 1)$Dependence
+  dep <- NNS.dep(x, y, asym = TRUE)$Dependence
 
   h <- mean(abs(diff(LPM.VaR(seq(0, 1, min(.05, max(.01, 1-dep))), 1, x))))
 
