@@ -16,7 +16,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ## ----res1---------------------------------------------------------------------
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 
 ## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center", results='hide'----
 x = seq(0, 3, .01) ; y = x ^ 10
@@ -26,7 +26,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ## ----res2a--------------------------------------------------------------------
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 
 ## ----nonlinear_sin,fig.width=5,fig.height=3,fig.align = "center", results='hide'----
 x = seq(0, 12*pi, pi/100) ; y = sin(x)
@@ -36,7 +36,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3, obs.req = 0)
 
 ## ----res2_sin-----------------------------------------------------------------
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 
 ## ----dependence,fig.width=5,fig.height=3,fig.align = "center"-----------------
 set.seed(123)
@@ -47,7 +47,7 @@ df <- subset(df, (x ^ 2 + y ^ 2 <= 1 & x ^ 2 + y ^ 2 >= 0.95))
 NNS.part(df$x, df$y, Voronoi = TRUE, order = 3, obs.req = 0)
 
 ## ----res3---------------------------------------------------------------------
-NNS.dep(df$x, df$y, ncores = 1)
+NNS.dep(df$x, df$y)
 
 ## ----permutations-------------------------------------------------------------
 ## p-values for [NNS.dep]
@@ -57,7 +57,7 @@ x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ## ----permutattions_res,fig.width=5,fig.height=3,fig.align = "center"----------
-NNS.dep(x, y, p.value = TRUE, print.map = TRUE, ncores = 1)
+NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 
 ## ----multi, warning=FALSE-----------------------------------------------------
 set.seed(123)

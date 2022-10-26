@@ -37,7 +37,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ```{r res1}
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 ```
 
 ## Nonlinear Relationship
@@ -52,7 +52,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 
 ```{r res2a}
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 ```
 
 
@@ -68,7 +68,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3, obs.req = 0)
 
 ```{r res2_sin}
 cor(x, y)
-NNS.dep(x, y, ncores = 1)
+NNS.dep(x, y)
 ```
 
 ## Dependence
@@ -84,7 +84,7 @@ NNS.part(df$x, df$y, Voronoi = TRUE, order = 3, obs.req = 0)
 ```
 
 ```{r res3}
-NNS.dep(df$x, df$y, ncores = 1)
+NNS.dep(df$x, df$y)
 ```
 
 
@@ -105,7 +105,7 @@ NNS.part(x, y, Voronoi = TRUE, order = 3)
 ```
 
 ```{r permutattions_res,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.dep(x, y, p.value = TRUE, print.map = TRUE, ncores = 1)
+NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 ```
 
 # Multivariate Dependence `NNS.copula()`
