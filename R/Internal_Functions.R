@@ -7,42 +7,9 @@ mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
 
 
 ### Gravity of a distribution
-gravity <- function(x, discrete = FALSE){
-  l <- length(x)
-  if(l <= 3) return(median(x))
-  if(length(unique(x))==1) return(x[1])
-  x_s <- x[order(x)]
-  range <- abs(x_s[l]-x_s[1])
+gravity <- function(x) NNS.gravity(x, discrete = FALSE)
 
-  if(range == 0) return(x[1])
-  
-  q1 <- sum(x_s[floor(l*.25)]+((l*.25)%%1 * (x_s[ceiling(l*.25)] - x_s[floor(l*.25)])))
-  q2 <- (x_s[floor(l*.5)]+x_s[ceiling(l*.5)])/2
-  q3 <- sum(x_s[floor(l*.75)]+((l*.75)%%1 * (x_s[ceiling(l*.75)] - x_s[floor(l*.75)])))
-
-  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
-  lz <- length(z$counts)
-  max_z <- z$counts==max(z$counts)
-  
-  if(sum(max_z)>1){
-    z_ind <- 1:lz
-  } else {
-    z_c <- which.max(z$counts)
-    z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
-  }
-
-  z_names <- seq(x_s[1], x_s[l], z$width)
-
-  m <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
-  mu <- sum(x)/l
-  
-  res <- (q2 + m + mu + mean(c(q1, q2, q3)))/4
-  if(is.na(res)) final <- q2 else final <- res
-  if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
-} 
-
-
-gravity_class <- function(x) gravity(x, discrete = TRUE)
+gravity_class <- function(x) NNS.gravity(x, discrete = TRUE)
 
 
 ### Factor to dummy variable

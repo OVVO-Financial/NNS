@@ -367,15 +367,17 @@ NNS.ARMA.optim <- function(variable,
   }
   
   if(!is.null(conf.intervals)){
-      CIs <- NNS.meboot(model.results, reps = 399, rho = 1)$replicates
-      upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-conf.intervals)/2, 0, z),LPM.VaR((1-conf.intervals)/2, 0, z))) 
-      upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1))
-      lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2))
+      lower_CIs <- model.results - UPM.VaR((1-conf.intervals)/2, 0, abs(errors))
+      upper_CIs <- model.results + UPM.VaR((1-conf.intervals)/2, 0, abs(errors))
   } else {
       upper_CIs <- lower_CIs <- NULL
   } 
   
-  if(!negative.values) model.results <- pmax(0, model.results)
+  if(!negative.values){
+      model.results <- pmax(0, model.results)
+      lower_CIs <- pmax(0, lower_CIs)
+      upper_CIs <- pmax(0, upper_CIs)
+  }
   
   return(list(periods = nns.periods,
               weights = nns.weights,

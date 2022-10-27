@@ -884,8 +884,8 @@ NNS.reg = function (x, y,
     }
     
     if(is.numeric(confidence.interval)){
-      fitted[, `:=` ( 'conf.int.pos' = UPM.VaR((1-conf.intervals)/2, degree = 1, y) ), by = gradient]
-      fitted[, `:=` ( 'conf.int.neg' = LPM.VaR((1-conf.intervals)/2, degree = 1, y) ), by = gradient]
+      fitted[, `:=` ( 'conf.int.pos' = UPM.VaR((1-confidence.interval)/2, degree = 1, abs(residuals)) + y.hat ), by = gradient]
+      fitted[, `:=` ( 'conf.int.neg' = y.hat - UPM.VaR((1-confidence.interval)/2, degree = 1, abs(residuals)) ), by = gradient]
 
       plot(x, y, xlim = c(xmin, xmax),
            ylim = c(min(c(fitted$conf.int.neg, ymin)), max(c(fitted$conf.int.pos,ymax))),
