@@ -237,6 +237,52 @@ NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TR
   
   return(list("CDF" = data.table::data.table(cbind((variable), CDF = CDF)),
               "P" = P))
+}
+
+
+#' NNS moments
+#'
+#' This function returns the first 4 moments of the distribution.
+#'
+#' @param x a numeric vector.
+#' @param population logical; \code{TRUE} (default) Performs the population adjustment.  Otherwise returns the sample statistic.
+#' @return Returns:
+#' \itemize{
+#'  \item{\code{"$mean"}} mean of the distribution.
+#'  \item{\code{"$variance"}} variance of the distribution.
+#'  \item{\code{"$skewness"}} skewness of the distribution.
+#'  \item{\code{"$kurtosis"}} excess kurtosis of the distribution.
+#' }
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#'
+#'#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' NNS.moments(x)
+#' 
+#' @export
+
+NNS.moments <- function(x, population = TRUE){
+  n <- length(x)
+  mean <- UPM(1, 0, x) - LPM(1, 0, x)
+  variance <- (UPM(2, mean(x), x) + LPM(2, mean(x), x))
+  skew_base <- (UPM(3,mean(x),x) - LPM(3,mean(x),x))
+  kurt_base <- (UPM(4,mean(x),x) + LPM(4,mean(x),x))
   
   
+  if(population){
+    skewness <- skew_base / variance^(3/2)
+    kurtosis <- (kurt_base / variance^2) - 3
+    variance <- variance * (n / (n - 1))
+  }  else {
+    skewness <- (n / ((n-1)*(n-2))) * ((n*skew_base) / variance^(3/2))
+    kurtosis <- ((n * (n+1)) / ((n-1)*(n-2)*(n-3))) * ((n*kurt_base) / (variance * (n / (n - 1)))^2) - ( (3 * ((n-1)^2)) / ((n-2)*(n-3)))
+  }
+
+  return(list("mean" = mean,
+              "variance" = variance,
+              "skewness" = skewness,
+              "kurtosis" = kurtosis))
 }

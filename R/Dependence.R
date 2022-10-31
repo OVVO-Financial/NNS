@@ -105,8 +105,8 @@ NNS.dep = function(x,
                                                       warning = function(w) dependence,
                                                       error = function(e) dependence))
 
-      dependence <- gravity(c(dependence, NNS.copula(cbind(x, y)), poly_base))
-    } else dependence <- mean(c(dependence, NNS.copula(cbind(x, y))))
+      dependence <- gravity(c(dependence, NNS.copula(cbind(x, y), plot = FALSE), poly_base))
+    } else dependence <- mean(c(dependence, NNS.copula(cbind(x, y), plot = FALSE)))
     
     corr <- mean(c(sum(res$V1 * weights),
                    sum(res_xy$V1 * weights),

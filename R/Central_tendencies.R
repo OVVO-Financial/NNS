@@ -23,7 +23,7 @@ NNS.mode <- function(x, discrete = FALSE, multi = TRUE){
   range <- abs(x_s[l]-x_s[1])
   if(range==0) return(x[1])
   
-  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+  z <- NNS_bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
   lz <- length(z$counts)
   max_z <- z$counts==max(z$counts)
   z_names <- seq(x_s[1], x_s[l], z$width)
@@ -71,7 +71,7 @@ NNS.gravity <- function(x, discrete = FALSE){
   q2 <- (x_s[floor(l*.5)]+x_s[ceiling(l*.5)])/2
   q3 <- sum(x_s[floor(l*.75)]+((l*.75)%%1 * (x_s[ceiling(l*.75)] - x_s[floor(l*.75)])))
   
-  z <- MESS::bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+  z <- NNS_bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
   lz <- length(z$counts)
   max_z <- z$counts==max(z$counts)
   

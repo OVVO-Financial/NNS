@@ -130,6 +130,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NNS_bin
+List NNS_bin(NumericVector x, double width, double origin, bool missinglast);
+RcppExport SEXP _NNS_NNS_bin(SEXP xSEXP, SEXP widthSEXP, SEXP originSEXP, SEXP missinglastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type width(widthSEXP);
+    Rcpp::traits::input_parameter< double >::type origin(originSEXP);
+    Rcpp::traits::input_parameter< bool >::type missinglast(missinglastSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_bin(x, width, origin, missinglast));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 3},
@@ -141,6 +155,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_DLPM_RCPP", (DL_FUNC) &_NNS_DLPM_RCPP, 6},
     {"_NNS_DUPM_RCPP", (DL_FUNC) &_NNS_DUPM_RCPP, 6},
     {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 5},
+    {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
     {NULL, NULL, 0}
 };
 
