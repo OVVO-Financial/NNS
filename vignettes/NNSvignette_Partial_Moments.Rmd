@@ -48,6 +48,15 @@ sd(x)
 ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 ```
 
+
+## First 4 Moments
+The first 4 moments are returned with the function `NNS.moments`.  For sample statistics, set `population = FALSE`.
+```{r moments}
+NNS.moments(x)
+
+NNS.moments(x, population = FALSE)
+```
+
 ## Covariance
 ```{r covariance}
 cov(x, y)

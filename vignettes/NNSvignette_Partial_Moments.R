@@ -24,6 +24,11 @@ UPM(2, mean(x), x) + LPM(2, mean(x), x)
 sd(x)
 ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 
+## ----moments------------------------------------------------------------------
+NNS.moments(x)
+
+NNS.moments(x, population = FALSE)
+
 ## ----covariance---------------------------------------------------------------
 cov(x, y)
 (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
