@@ -38,6 +38,36 @@ A sum of the squared upside area and the squared downside area.
 > (Co.LPM(1,1,x,x,mean(x),mean(x))+Co.UPM(1,1,x,x,mean(x),mean(x))-D.LPM(1,1,x,x,mean(x),mean(x))-D.UPM(1,1,x,x,mean(x),mean(x)))*(length(x)/(length(x)-1))
 [1] 0.8332328
 ```
+
+### The first 4 moments are returned with the function `NNS.moments`. For sample statistics, set `population = FALSE`.
+```r
+> NNS.moments(x)
+$mean
+[1] 0.09040591
+
+$variance
+[1] 0.8332328
+
+$skewness
+[1] 0.06049948
+ 
+$kurtosis
+[1] -0.161053
+
+> NNS.moments(x, population = FALSE)
+$mean
+[1] 0.09040591
+
+$variance
+[1] 0.8249005
+ 
+$skewness
+[1] 0.06235774
+
+$kurtosis
+[1] -0.1069186
+```
+
 ### Standard Deviation
 ```r
 > sd(x)
