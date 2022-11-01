@@ -491,7 +491,7 @@ List NNS_bin(NumericVector x, double width, double origin = 0, bool missinglast=
       //     Rcout << val << "  " << bin << std::endl;
       
       // Make sure there\'s enough space
-      if (bin >= out.size()) {
+      if ((long long unsigned) bin >= out.size()) {
         out.resize(bin + 1);
       }
       ++out[bin];
