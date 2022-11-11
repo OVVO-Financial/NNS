@@ -1,4 +1,4 @@
-NNS.caus.matrix<- function(x, tau = tau){
+NNS.caus.matrix <- function(x, tau = tau){
 
 n <- ncol(x)
     if(is.null(n)){

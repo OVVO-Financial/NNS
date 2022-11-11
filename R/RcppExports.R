@@ -240,13 +240,12 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
 #' @param origin The starting point for the bins. Any number smaller than origin will be disregarded
 #' @param missinglast Boolean. Should the missing observations be added as a separate element at the end of the returned count vector.
 #' @return An list with elements counts (the frequencies), origin (the origin), width (the width), missing (the number of missings), and last_bin_is_missing (boolean) telling whether the missinglast is true or not.
-#' @author Hadley Wickham (from SO: https://stackoverflow.com/questions/13661065/superimpose-histogram-fits-in-one-plot-ggplot) and Claus Ekstrøm from \code{MESS} package.
 #' @examples
-#'
+#' \dontrun{
 #' set.seed(1)
 #' x <- sample(10, 20, replace = TRUE)
 #' NNS_bin(x, 15)
-#' 
+#' }
 #' @export
 NNS_bin <- function(x, width, origin = 0, missinglast = FALSE) {
     .Call(`_NNS_NNS_bin`, x, width, origin, missinglast)

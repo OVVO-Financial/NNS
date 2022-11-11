@@ -88,11 +88,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     num_cores <- as.integer(parallel::detectCores()) - 1
   } else {
     num_cores <- ncores
+  }
+  
+  if(num_cores > 1){
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
   }
-  
 
   NNS.ID <- lapply(1:n, function(j) findInterval(original.IVs[ , j], vec = na.omit(sort(reg.points.matrix[ , j])), left.open = FALSE))
 
@@ -166,11 +168,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   if(n.best > 1 && !point.only){
     if(num_cores > 1){
-      fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
+      fitted.matrix$y.hat <- parallel::parApply(cl, original.IVs, 1, function(z) NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
     } else {
       fits <- data.table::data.table(original.IVs)
       
-      fits <- fits[, DISTANCES :=  NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(original.IVs)]
+      fits <- fits[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(original.IVs)]
       
       fitted.matrix$y.hat <- as.numeric(unlist(fits$DISTANCES))
     }
@@ -224,14 +226,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       DISTANCES <- vector(mode = "list", np)
 
       if(num_cores>1){
-        DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
+        DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
         
         parallel::stopCluster(cl)
         registerDoSEQ()
         invisible(data.table::setDTthreads(0, throttle = NULL))
       } else {
         distances <- data.table::data.table(point.est)
-        distances <- distances[, DISTANCES :=  NNS::NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
+        distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
         
         DISTANCES <- as.numeric(unlist(distances$DISTANCES))
       }

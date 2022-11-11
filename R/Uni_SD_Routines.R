@@ -11,10 +11,13 @@
 #'
 #' Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://www.ssrn.com/abstract=3002675}.
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.FSD.uni(x, y)
+#' }
 #' @export
+
 NNS.FSD.uni <- function(x, y, type = "discrete"){
     if(any(class(x)%in%c("tbl","data.table"))) { 
       x <- as.vector(unlist(x))
@@ -62,10 +65,13 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \doi{10.4236/jmf.2016.61012}.
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.SSD.uni(x, y)
+#' }
 #' @export
+
 NNS.SSD.uni <- function(x, y){
     if(any(class(x) %in% c("tbl","data.table"))){
 	  x <- as.vector(unlist(x))
@@ -104,10 +110,13 @@ NNS.SSD.uni <- function(x, y){
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \doi{10.4236/jmf.2016.61012}.
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.TSD.uni(x, y)
+#' }
 #' @export
+
 NNS.TSD.uni <- function(x, y){
     if(any(class(x)%in%c("tbl","data.table"))){
 	  x <- as.vector(unlist(x))

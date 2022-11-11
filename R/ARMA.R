@@ -53,8 +53,8 @@
 #' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = c(12, 24, 36), method = "lin")
 #'
 #' ## Nonlinear NNS.ARMA using AirPassengers monthly data and 2 best periods lag
-#' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = FALSE, best.periods = 2)}
-#'
+#' NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = FALSE, best.periods = 2)
+#' }
 #' @export
 
 

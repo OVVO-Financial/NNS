@@ -61,8 +61,8 @@
 #'  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
 #'
 #'  ## Selecting NNS.reg and dimension reduction techniques.
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")}
-#'
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")
+#'  }
 #' @export
 
 NNS.stack <- function(IVs.train,
@@ -374,7 +374,7 @@ NNS.stack <- function(IVs.train,
             if(dim(CV.IVs.train)[2]>1){
               CV.IVs.test.new <- data.table::data.table(do.call(cbind, lapply(data.frame(CV.IVs.test), factor_2_dummy_FR)))
               
-              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS::NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
+              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
               
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
             } else {

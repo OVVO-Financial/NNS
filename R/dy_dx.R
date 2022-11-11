@@ -26,7 +26,8 @@
 #' dy.dx(x, y, eval.point = 1.75)
 #'
 #' # Vector of derivatives
-#' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")}
+#' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")
+#' }
 #' @export
 
 dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){

@@ -13,6 +13,7 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 #' A <- data.frame(x, y, z)
@@ -20,6 +21,7 @@
 #'
 #' ### Target 0
 #' NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE)
+#' }
 #' @export
 
 

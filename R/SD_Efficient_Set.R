@@ -12,10 +12,12 @@
 #'
 #' Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://www.ssrn.com/abstract=3002675}.
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100) ; y<-rnorm(100) ; z<-rnorm(100)
 #' A <- cbind(x, y, z)
 #' NNS.SD.efficient.set(A, 1)
+#' }
 #' @export
 
 

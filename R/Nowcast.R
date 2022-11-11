@@ -68,11 +68,13 @@ NNS.nowcast <- function(h = 1,
   if(sum(ls(envir = NNSdata)%in%variable_list) < length(variable_list)){
     quantmod::getSymbols(variable_list[!variable_list%in%ls(envir = NNSdata)[(ls(envir = NNSdata)%in%variable_list)]], src = "FRED")
   }
- 
-  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
   
   oldw <- getOption("warn")
   options(warn = -1)
+  
+  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
+  
+  
   
   if(!keep.data) rm(list = ls(), envir = NNSdata)
   

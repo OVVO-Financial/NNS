@@ -119,8 +119,8 @@
 #' NNS.reg(x, y)$Fitted
 #'
 #' ## To call partial derivative (univariate regression only):
-#' NNS.reg(x, y)$derivative}
-#'
+#' NNS.reg(x, y)$derivative
+#' }
 #' @export
 
 
@@ -291,8 +291,7 @@ NNS.reg = function (x, y,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
-                         point.only = point.only,
-                         ncores = ncores))
+                         point.only = point.only, ncores = ncores))
         
       } else { # Multivariate dim.red == FALSE
         if(is.null(original.names)){
@@ -855,8 +854,8 @@ NNS.reg = function (x, y,
     Prediction.Accuracy <- NULL
   }
 
-  R2num <- sum((y.fitted - mean(original.y))*(original.y - mean(original.y)))^ 2
-  R2den <- sum((y.fitted - mean(original.y)) ^ 2 )* sum((original.y - mean(original.y)) ^ 2)
+  R2num <- sum((fitted$y.hat - mean(original.y))*(original.y - mean(original.y)))^ 2
+  R2den <- sum((fitted$y.hat - mean(original.y)) ^ 2 )* sum((original.y - mean(original.y)) ^ 2)
 
   if(R2den == 0){
     R2 <- 1

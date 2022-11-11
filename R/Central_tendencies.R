@@ -8,9 +8,11 @@
 #' @return Returns a numeric value representing the mode of the distribution.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100)
 #' NNS.mode(x)
+#' }
 #' @export
 
 
@@ -53,9 +55,11 @@ NNS.mode <- function(x, discrete = FALSE, multi = TRUE){
 #' @return Returns a numeric value representing the central tendency of the distribution.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
+#' \dontrun{
 #' set.seed(123)
 #' x <- rnorm(100)
 #' NNS.gravity(x)
+#' }
 #' @export
 
 NNS.gravity <- function(x, discrete = FALSE){

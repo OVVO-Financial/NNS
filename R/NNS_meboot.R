@@ -70,8 +70,7 @@
 #'
 #' # Plot ensemble
 #' lines(boots$ensemble, lwd = 3)
-#'}
-#'
+#' }
 #' @export
 
  NNS.meboot <- function(x,

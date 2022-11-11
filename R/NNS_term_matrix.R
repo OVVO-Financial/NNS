@@ -9,6 +9,7 @@
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
+#' \dontrun{
 #' x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))
 #' NNS.term.matrix(x)
 #'
@@ -17,16 +18,15 @@
 #' x <- data.frame(cbind(paste(x[ , 1], x[ , 2], sep = " "), as.numeric(as.character(x[ , 3]))))
 #' NNS.term.matrix(x)
 #'
-#'
 #' ### NYT Example
-#' \dontrun{
 #' require(RTextTools)
 #' data(NYTimes)
 #'
 #' ### Concatenate Columns 3 and 4 containing text, with column 5 as DV
 #' NYT <- data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
 #'                      as.numeric(as.character(NYTimes[ , 5]))))
-#' NNS.term.matrix(NYT)}
+#' NNS.term.matrix(NYT)
+#' }
 #' @export
 
 
