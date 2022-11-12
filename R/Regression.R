@@ -719,8 +719,6 @@ NNS.reg = function (x, y,
   
   SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
   
-  y.fitted <- fitted[ , y.hat]
-  
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
 
   fitted <- cbind(fitted, gradient)
@@ -833,7 +831,7 @@ NNS.reg = function (x, y,
                                    y.hat = estimate,
                                    NNS.ID = part.map$dt$quadrant)
   
-  colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
+  colnames(fitted) <- gsub(".V1", "", colnames(fitted))
   
   fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
   
@@ -841,15 +839,13 @@ NNS.reg = function (x, y,
   
   SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
   
-  y.fitted <- fitted[ , y.hat]
-  
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
   
   fitted <- cbind(fitted, gradient)
   fitted$residuals <-  original.y - fitted$y.hat
   
   if(!is.null(type)){
-    if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(y.fitted) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
+    if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
   } else {
     Prediction.Accuracy <- NULL
   }
