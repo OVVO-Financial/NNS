@@ -23,6 +23,7 @@
 #' \item{\code{$obj.fn}} the objective function value
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
+#' \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 #' \item{\code{$errors}} a vector of model errors from internal calibration.
 #' \item{\code{$results}} a vector of length \code{h}.
@@ -354,6 +355,28 @@ NNS.ARMA.optim <- function(variable,
     if(eval(obj.fn) > nns.SSE) nns.shrink = TRUE else nns.shrink = FALSE
   }
   
+  
+  regressed_variable <- NNS.reg(1:length(variable), variable, plot = FALSE)$Fitted.xy$y.hat
+  
+  predicted <- NNS.ARMA(regressed_variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
+  
+  nns.regress <- FALSE
+  
+  if(objective == "min"){
+    if(eval(obj.fn) < nns.SSE){
+      variable <- regressed_variable
+      nns.regress <- TRUE
+    }
+  }
+  
+  if(objective == "max"){
+    if(eval(obj.fn) > nns.SSE){
+      variable <- regressed_variable
+      nns.regress <- TRUE
+    }
+  }
+  
+  
   options(warn = oldw)
   
   if(!negative.values) bias <- min(c(bias, variable))
@@ -384,6 +407,7 @@ NNS.ARMA.optim <- function(variable,
               obj.fn = nns.SSE,
               method = nns.method,
               shrink = nns.shrink,
+              nns.regress = nns.regress,
               bias.shift = -bias,
               errors = errors,
               results = model.results,
