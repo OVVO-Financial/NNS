@@ -22,10 +22,12 @@ Returns set of stochastic dominant variable names.
 Determines the set of stochastic dominant variables for various degrees.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y<-rnorm(100) ; z<-rnorm(100)
 A <- cbind(x, y, z)
 NNS.SD.efficient.set(A, 1)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \doi{10.4236/jmf.2016.61012}.

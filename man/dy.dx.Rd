@@ -34,7 +34,8 @@ x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # Vector of derivatives
-dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")}
+dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

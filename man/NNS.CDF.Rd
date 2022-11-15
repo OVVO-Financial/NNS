@@ -28,11 +28,11 @@ Returns:
 This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 NNS.CDF(x)
 
-\dontrun{
 ## Empirical CDF (degree = 0)
 NNS.CDF(x)
 

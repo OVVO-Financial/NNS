@@ -25,12 +25,9 @@ Fast binning of numeric vector into equidistant bins
 Missing values (NA, Inf, NaN) are added at the end of the vector as the last bin returned if missinglast is set to TRUE
 }
 \examples{
-
+\dontrun{
 set.seed(1)
 x <- sample(10, 20, replace = TRUE)
 NNS_bin(x, 15)
-
 }
-\author{
-Hadley Wickham (from SO: https://stackoverflow.com/questions/13661065/superimpose-histogram-fits-in-one-plot-ggplot) and Claus Ekstrøm from \code{MESS} package.
 }

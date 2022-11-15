@@ -20,9 +20,11 @@ Returns a numeric value representing the mode of the distribution.
 Mode of a distribution, either continuous or discrete.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 NNS.mode(x)
+}
 }
 \author{
 Fred Viole, OVVO Financial Systems

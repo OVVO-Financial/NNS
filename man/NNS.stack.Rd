@@ -103,8 +103,8 @@ reduce the \code{CV.size}.
  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
 
  ## Selecting NNS.reg and dimension reduction techniques.
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")}
-
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")
+ }
 }
 \references{
 Viole, F. (2016) "Classification Using NNS Clustering Analysis"

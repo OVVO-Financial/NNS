@@ -164,8 +164,8 @@ x <- rnorm(100) ; y <- rnorm(100)
 NNS.reg(x, y)$Fitted
 
 ## To call partial derivative (univariate regression only):
-NNS.reg(x, y)$derivative}
-
+NNS.reg(x, y)$derivative
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

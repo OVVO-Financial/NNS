@@ -20,11 +20,13 @@ Returns a numeric value representing the point at which \code{"percentile"} of t
 Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 
 ## For 5th percentile, left-tail
 LPM.VaR(0.05, 0, x)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

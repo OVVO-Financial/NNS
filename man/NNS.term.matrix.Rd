@@ -20,6 +20,7 @@ Returns the text as independent variables \code{"IV"} and the classification as 
 Generates a term matrix for text classification use in \link{NNS.reg}.
 }
 \examples{
+\dontrun{
 x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))
 NNS.term.matrix(x)
 
@@ -28,16 +29,15 @@ x <- data.frame(cbind(c("sunny", "rainy"), c("windy", "cloudy"), c(1, -1)))
 x <- data.frame(cbind(paste(x[ , 1], x[ , 2], sep = " "), as.numeric(as.character(x[ , 3]))))
 NNS.term.matrix(x)
 
-
 ### NYT Example
-\dontrun{
 require(RTextTools)
 data(NYTimes)
 
 ### Concatenate Columns 3 and 4 containing text, with column 5 as DV
 NYT <- data.frame(cbind(paste(NYTimes[ , 3], NYTimes[ , 4], sep = " "),
                      as.numeric(as.character(NYTimes[ , 5]))))
-NNS.term.matrix(NYT)}
+NNS.term.matrix(NYT)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

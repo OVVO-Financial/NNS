@@ -23,14 +23,16 @@ Returns:
 \description{
 This function returns the first 4 moments of the distribution.
 }
-\references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
-
-#' @examples
+\examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 NNS.moments(x)
+}
+}
+\references{
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 }
 \author{
 Fred Viole, OVVO Financial Systems

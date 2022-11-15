@@ -46,6 +46,7 @@ Returns the following:
 Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
 }
 \examples{
+ \dontrun{
 ### Binary analysis and effect size
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
@@ -60,6 +61,7 @@ set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 A <- cbind(x, y, z)
 NNS.ANOVA(A)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

@@ -26,9 +26,10 @@ Returns a matrix of values, intercepts, derivatives, inferred step sizes for mul
 Determines numerical derivative of a given univariate function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
 }
 \examples{
+\dontrun{
 f <- function(x) sin(x) / x
 NNS.diff(f, 4.1)
-
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

@@ -22,6 +22,7 @@ Returns a matrix of all periods exhibiting less coefficient of variation than th
 Seasonality test based on the coefficient of variation for the variable and lagged component series.  A result of 1 signifies no seasonality present.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 
@@ -30,6 +31,7 @@ NNS.seas(x, plot = FALSE)$best.period
 
 ## Using modulos for logical seasonal inference:
 NNS.seas(x, modulo = c(2,3,5,7), plot = FALSE)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

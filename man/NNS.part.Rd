@@ -47,6 +47,7 @@ Creates partitions based on partial moment quadrant centroids, iteratively assig
 \code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
 NNS.part(x, y)
@@ -64,6 +65,7 @@ NNS.part(x, y, Voronoi = TRUE)
 DT <- NNS.part(x, y)$dt
 DT[ , counts := .N, by = quadrant]
 DT
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

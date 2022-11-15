@@ -23,10 +23,12 @@ Returns a \link{data.frame} of normalized values.
 Normalizes a matrix of variables based on nonlinear scaling normalization method.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y<-rnorm(100)
 A <- cbind(x, y)
 NNS.norm(A)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"

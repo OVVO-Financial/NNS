@@ -30,6 +30,7 @@ Returns a multivariate dependence value [0,1].
 Determines higher dimension dependence coefficients based on co-partial moment matrices ratios.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(1000) ; y <- rnorm(1000) ; z <- rnorm(1000)
 A <- data.frame(x, y, z)
@@ -37,6 +38,7 @@ NNS.copula(A, target = colMeans(A), plot = TRUE, independence.overlay = TRUE)
 
 ### Target 0
 NNS.copula(A, target = rep(0, ncol(A)), plot = TRUE, independence.overlay = TRUE)
+}
 }
 \references{
 Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \url{https://www.ssrn.com/abstract=2745308}.

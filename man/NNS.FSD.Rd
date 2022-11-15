@@ -22,9 +22,11 @@ Returns one of the following FSD results: \code{"X FSD Y"}, \code{"Y FSD X"}, or
 Bi-directional test of first degree stochastic dominance using lower partial moments.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
 NNS.FSD(x, y)
+}
 }
 \references{
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \doi{10.4236/jmf.2016.61012}.

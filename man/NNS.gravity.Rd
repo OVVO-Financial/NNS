@@ -18,9 +18,11 @@ Returns a numeric value representing the central tendency of the distribution.
 Alternative central tendency measure more robust to outliers.
 }
 \examples{
+\dontrun{
 set.seed(123)
 x <- rnorm(100)
 NNS.gravity(x)
+}
 }
 \author{
 Fred Viole, OVVO Financial Systems

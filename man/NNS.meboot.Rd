@@ -54,7 +54,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 \item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.}
 
-\item{sym}{logical; If \code{TRUE} an adjustment is peformed to ensure that the ME density is symmetric.}
+\item{sym}{logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.}
 
 \item{elaps}{logical; If \code{TRUE} elapsed time during computations is displayed.}
 
@@ -103,7 +103,6 @@ matplot(boots$replicates, type = 'l')
 # Plot ensemble
 lines(boots$ensemble, lwd = 3)
 }
-
 }
 \references{
 \itemize{
