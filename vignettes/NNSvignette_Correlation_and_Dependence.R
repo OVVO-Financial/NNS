@@ -71,7 +71,7 @@ original.data <- cbind(x, y, z, x)
 # Determine dependence structure
 dep.structure <- apply(original.data, 2, function(x) LPM.ratio(1, x, x))
   
-# Generate new data of equal dimensions to original data with different mean and sd (or distribution)
+# Generate new data with different mean and sd (or distribution type or dimensions)
 new.data <- sapply(1:ncol(original.data), function(x) rnorm(dim(original.data)[1], mean = 10, sd = 20))
 
 # Apply dependence structure to new data

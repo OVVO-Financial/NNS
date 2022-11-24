@@ -51,7 +51,7 @@ Let's have a look and see how it works.  We use 140 random `iris` observations a
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
 set.seed(1234)
-test.set = sample(150,10)
+test.set = sample(150, 10)
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
@@ -77,7 +77,7 @@ For brevity, we set `folds = 1`.
 
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
-```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE}
+```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE, eval=FALSE}
 b = NNS.stack(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
@@ -85,8 +85,40 @@ b = NNS.stack(IVs.train = iris[-test.set, 1:4],
               ncores = 1, folds = 1)
 
 b
+```
 
+```{r stackeval, eval = FALSE}
+$OBJfn.reg
+[1] 1
+
+$NNS.reg.n.best
+[1] 1
+
+$probability.threshold
+[1] 0.44625
+
+$OBJfn.dim.red
+[1] 0.9477124
+
+$NNS.dim.red.threshold
+[1] 0.495
+
+$reg
+ [1] 1 2 3 3 3 3 3 3 2 3
+
+$dim.red
+ [1] 1 2 3 3 3 3 3 3 2 3
+
+$stack
+ [1] 1 2 3 3 3 3 3 3 2 3
+```
+
+```{r stackevalres, eval = FALSE}
 mean( b$stack == as.numeric(iris[test.set, 5]) )
+```
+
+```{r stackreseval, eval = FALSE}
+[1] 1
 ```
 
 ## Brief Notes on Other Parameters
