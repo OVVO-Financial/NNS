@@ -157,6 +157,7 @@ NNS.ARMA <- function(variable,
     
   }
 
+  lin.resid <- list()
 
   # Regression for each estimate in h
   for (j in 1 : h){
@@ -225,11 +226,15 @@ NNS.ARMA <- function(variable,
         if(method != "means"){
           Regression.Estimates <- lapply(1 : length(lag), function(i) {
             last.x <- tail(Component.index[[i]], 1)
-            coefs <- coef(lm(Component.series[[i]] ~ Component.index[[i]]))
-            coefs[1] + (coefs[2] * (last.x + 1))
+            lin.reg <- lm(Component.series[[i]] ~ Component.index[[i]])
+            coefs <- coef(lin.reg)
+            list("est" = as.numeric(coefs[1] + (coefs[2] * (last.x + 1))), "resid" = mean(abs(resid(lin.reg))))
           })
-
-          Regression.Estimates <- unlist(Regression.Estimates)
+          
+          
+          lin.resid <- mean(abs(unlist(lapply(Regression.Estimates, function(z) z$resid))))
+          Regression.Estimates <- unlist(lapply(Regression.Estimates, function(z) z$est))
+          
         }
         
         if(method == "means" || shrink){
@@ -257,9 +262,13 @@ NNS.ARMA <- function(variable,
       FV <- variable
     } # i loop
   } # j loop
-    
 
-  if(!is.null(conf.intervals)) CIs <- NNS.meboot(Estimates, reps=399, rho = 1)$replicates
+
+  if(!is.null(conf.intervals)){
+    CIs <- NNS.meboot(Estimates, reps=399, rho = 1)$replicates
+    lin.resid <- mean(unlist(lin.resid))
+    lin.resid[is.na(lin.resid)] <- 0
+  } else lin.resid <- 0
   
   #### PLOTTING
   if(plot){
@@ -289,7 +298,8 @@ NNS.ARMA <- function(variable,
            ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
       
       for(i in 1 : 399){
-        lines((training.set+1) : (training.set+h), CIs[,i],  col = rgb(0.75,0.75,0.75, 0.05))
+        lines((training.set+1) : (training.set+h), CIs[,i] + lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
+        lines((training.set+1) : (training.set+h), CIs[,i] - lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
       }
       
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
@@ -322,8 +332,8 @@ NNS.ARMA <- function(variable,
   options(warn = oldw)
   if(!is.null(conf.intervals)){
     upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-conf.intervals)/2, 0, z),LPM.VaR((1-conf.intervals)/2, 0, z))) 
-    upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1))
-    lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2))
+    upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
+    lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_CIs),  pmax(Estimates, upper_CIs))
     colnames(results) = c("Estimates",
                           paste0("Lower ", round(conf.intervals*100,2), "% CI"),

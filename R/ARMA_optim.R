@@ -390,8 +390,8 @@ NNS.ARMA.optim <- function(variable,
   }
   
   if(!is.null(conf.intervals)){
-      lower_CIs <- model.results - UPM.VaR((1-conf.intervals)/2, 0, abs(errors))
-      upper_CIs <- model.results + UPM.VaR((1-conf.intervals)/2, 0, abs(errors))
+      lower_CIs <- model.results - UPM.VaR((1-conf.intervals)/2, 0, abs(errors)) - abs(bias)
+      upper_CIs <- model.results + UPM.VaR((1-conf.intervals)/2, 0, abs(errors)) + abs(bias)
   } else {
       upper_CIs <- lower_CIs <- NULL
   } 
