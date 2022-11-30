@@ -111,7 +111,7 @@ NNS.ARMA.optim <- function(variable,
   if(l <= .5 * n) stop("Please provide a 'training.set' value (integer) less than (2*h) or a smaller (h).")
   if(training.set == n) stop("Please provide a 'training.set' value (integer) less than the length of the variable.")
   
-  denominator <- min(5, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
+  denominator <- min(4, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
   
   seasonal.factor <- seasonal.factor[seasonal.factor <= (l/denominator)]
   seasonal.factor <- unique(seasonal.factor)
