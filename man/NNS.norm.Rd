@@ -7,7 +7,7 @@
 NNS.norm(X, linear = FALSE, chart.type = NULL, location = "topleft")
 }
 \arguments{
-\item{X}{a numeric matrix or data frame.}
+\item{X}{a numeric matrix or data frame, or a list.}
 
 \item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
 
@@ -21,6 +21,9 @@ Returns a \link{data.frame} of normalized values.
 }
 \description{
 Normalizes a matrix of variables based on nonlinear scaling normalization method.
+}
+\note{
+Unequal vectors provided in a list will only generate linear normalized values.
 }
 \examples{
 \dontrun{
