@@ -23,7 +23,7 @@ Returns a \link{data.frame} of normalized values.
 Normalizes a matrix of variables based on nonlinear scaling normalization method.
 }
 \note{
-Unequal vectors provided in a list will only generate linear normalized values.
+Unequal vectors provided in a list will only generate \code{linear=TRUE} normalized values.
 }
 \examples{
 \dontrun{
