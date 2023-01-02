@@ -2,7 +2,7 @@ Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
 Version: 0.9.5
-Date: 2022-12-16
+Date: 2023-01-02
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.financial.systems@gmail.com"),
   person("Roberto", "Spadim", role=c("ctb"))
@@ -21,5 +21,5 @@ VignetteBuilder: knitr
 LinkingTo: Rcpp, RcppParallel
 SystemRequirements: GNU make
 Config/testthat/edition: 3
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Encoding: UTF-8
