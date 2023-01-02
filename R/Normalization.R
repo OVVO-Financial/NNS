@@ -8,7 +8,7 @@
 #' \code{(chart.type = "b")} for boxplot.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @return Returns a \link{data.frame} of normalized values.
-#' @note Unequal vectors provided in a list will only generate linear normalized values.
+#' @note Unequal vectors provided in a list will only generate \code{linear=TRUE} normalized values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}

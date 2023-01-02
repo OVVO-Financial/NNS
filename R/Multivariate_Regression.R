@@ -85,7 +85,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   ### PARALLEL
   
   if(is.null(ncores)) {
-    num_cores <- as.integer(parallel::detectCores()) - 1
+    num_cores <- as.integer(max(2L, parallel::detectCores(), na.rm = TRUE)) - 1
   } else {
     num_cores <- ncores
   }

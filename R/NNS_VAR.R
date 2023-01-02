@@ -145,7 +145,7 @@ NNS.VAR <- function(variables,
   
   # Parallel process...
   if (is.null(ncores)) {
-    num_cores <- as.integer(parallel::detectCores()) - 1
+    num_cores <- as.integer(max(2L, parallel::detectCores(), na.rm = TRUE)) - 1
   } else {
     num_cores <- ncores
   }
