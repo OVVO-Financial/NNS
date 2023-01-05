@@ -181,8 +181,7 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-
-          new.iv.train <- x[-new.index,] #data.table::data.table(x[-new.index,])
+          new.iv.train <- x[-new.index,] 
           new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
           new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
@@ -359,7 +358,7 @@ NNS.boost <- function(IVs.train,
 
   names(plot.table) <- colnames(IVs.train)[eval(as.numeric(names(plot.table)))]
 
-  plot.table <- plot.table[rev(order(plot.table))]
+  if(features.only || feature.importance) plot.table <- plot.table[rev(order(plot.table))]
 
 
   if(features.only){
@@ -404,7 +403,6 @@ NNS.boost <- function(IVs.train,
 
 
   if(feature.importance){
-
     linch <-  max(strwidth(names(plot.table), "inch") + 0.4, na.rm = TRUE)
     par(mai=c(1.0, linch, 0.8, 0.5))
 
