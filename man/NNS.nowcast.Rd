@@ -7,6 +7,7 @@
 NNS.nowcast(
   h = 1,
   additional.regressors = NULL,
+  additional.sources = NULL,
   specific.regressors = NULL,
   start.date = "2000-01-03",
   keep.data = FALSE,
@@ -15,9 +16,11 @@ NNS.nowcast(
 )
 }
 \arguments{
-\item{h}{integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
+\item{h}{integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values up to the current month.}
 
-\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data.}
+\item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data, else specify the source.}
+
+\item{additional.sources}{character; \code{NULL} (default) specify the \code{source} argument per \code{\link[quantmod]{getSymbols}} for each \code{additional.regressors} specified.}
 
 \item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.}
 
@@ -43,12 +46,20 @@ Returns the following matrices of forecasted variables:
  }
 }
 \description{
-Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in Viole (2020), \url{https://www.ssrn.com/abstract=3586658}.
+Wrapper function for NNS nowcasting method using the nonparametric vector autoregression \link{NNS.VAR}, and Federal Reserve Nowcasting variables.
 }
 \examples{
 
  \dontrun{
+ ## Interpolates / Extrapolates all variables to current month
+ NNS.nowcast(h = 0)
+ 
+ ## 12 month forecast
  NNS.nowcast(h = 12)
+ 
+ ## Additional regressors and sources specified
+ NNS.nowcast(h = 0, additional.regressors = c("SPY", "USO"), 
+             additional.sources = c("yahoo", "yahoo"))
  }
 
 }
