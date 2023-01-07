@@ -158,7 +158,7 @@ NNS.VAR <- function(variables,
   
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
  
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("data.table"))%dopar%{
+  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
     last_point <- tail(index, 1)
@@ -234,6 +234,7 @@ NNS.VAR <- function(variables,
 
   colnames(nns_IVs_results) <- colnames(variables)
   
+  
   # One more pass through regression with updated inter / extrapolations
   nns_IE <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     data <- unlist(nns_IVs_interpolated_extrapolated[, i])
@@ -251,6 +252,11 @@ NNS.VAR <- function(variables,
   nns_IE <- data.frame(do.call(cbind, nns_IE))
   nns_IVs_interpolated_extrapolated <- (nns_IVs_interpolated_extrapolated + nns_IE) / 2
   
+  positive_values <- sapply(variables, function(x) min(x, na.rm = TRUE)>0)
+  
+  for(i in 1:ncol(variables)){
+    if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
+  }
 
   if(h == 0){
     rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])

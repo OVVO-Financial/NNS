@@ -1,9 +1,10 @@
 #' NNS Nowcast
 #'
-#' Wrapper function for NNS nowcasting method using \link{NNS.VAR} as detailed in Viole (2020), \url{https://www.ssrn.com/abstract=3586658}.
+#' Wrapper function for NNS nowcasting method using the nonparametric vector autoregression \link{NNS.VAR}, and Federal Reserve Nowcasting variables.
 #'
-#' @param h integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
-#' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data.
+#' @param h integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values up to the current month.
+#' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data, else specify the source.
+#' @param additional.sources character; \code{NULL} (default) specify the \code{source} argument per \code{\link[quantmod]{getSymbols}} for each \code{additional.regressors} specified.
 #' @param specific.regressors integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
 #' @param keep.data logical; \code{FALSE} (default) Keeps downloaded variables in a new environment \code{NNSdata}.
@@ -37,7 +38,15 @@
 #' @examples
 #'
 #'  \dontrun{
+#'  ## Interpolates / Extrapolates all variables to current month
+#'  NNS.nowcast(h = 0)
+#'  
+#'  ## 12 month forecast
 #'  NNS.nowcast(h = 12)
+#'  
+#'  ## Additional regressors and sources specified
+#'  NNS.nowcast(h = 0, additional.regressors = c("SPY", "USO"), 
+#'              additional.sources = c("yahoo", "yahoo"))
 #'  }
 #'
 #' @export
@@ -45,13 +54,15 @@
 
 NNS.nowcast <- function(h = 1,
                         additional.regressors = NULL,
+                        additional.sources = NULL,
                         specific.regressors = NULL,
                         start.date = "2000-01-03",
                         keep.data = FALSE,
                         status = TRUE,
                         ncores = NULL){
 
-
+  if(!is.null(additional.regressors) && length(additional.sources)!=length(additional.regressors)) stop("Please specify the SOURCE for each additional.regressor")
+  
   variables <- c("PAYEMS", "JTSJOL",  "CPIAUCSL", "DGORDER", "RSAFS",
                  "UNRATE", "HOUST", "INDPRO", "DSPIC96", "BOPTEXP",
                  "BOPTIMP", "TTLCONS", "IR", "CPILFESL", "PCEPILFE",
@@ -59,28 +70,45 @@ NNS.nowcast <- function(h = 1,
                  "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
                  "ICSA", "DGS10", "T10Y2Y", "WALCL")
 
+  sources <- c(rep("FRED", length(variables)), additional.sources)
+  
+  variable_list <- data.table::data.table(as.character(c(variables, additional.regressors)), sources)
 
-  if(is.null(specific.regressors)) variable_list <- as.character(c(variables, additional.regressors)) else variable_list <- as.character(c(variables, additional.regressors)[specific.regressors])
+  symbols <- as.character(unlist(variable_list[, 1]))
+  
+  if(!is.null(specific.regressors)) variable_list <- variable_list[symbols%in%specific.regressors, , drop=FALSE]
 
+  symbols <- as.character(unlist(variable_list[, 1]))
+  sources <- as.character(unlist(variable_list[, 2]))
+  
   NNSdata <- new.env()
-  quantmod::getSymbols(variable_list, src = "FRED", env = NNSdata)
-
-  if(sum(ls(envir = NNSdata)%in%variable_list) < length(variable_list)){
-    quantmod::getSymbols(variable_list[!variable_list%in%ls(envir = NNSdata)[(ls(envir = NNSdata)%in%variable_list)]], src = "FRED")
+  
+  for(i in 1:length(symbols)){
+      quantmod::getSymbols(symbols[i], env = NNSdata, src = sources[i])
+  }
+  
+  fetched_symbols <- ls(envir = NNSdata)
+  
+  if(length(fetched_symbols) < length(symbols)){
+    missing_variables <- symbols[!symbols%in%fetched_symbols]
+    missing_sources <- sources[!symbols%in%fetched_symbols]
+    
+    for(i in 1:length(missing_variables)){
+        quantmod::getSymbols(missing_variables[i], src = missing_sources[i])
+    }
   }
   
   oldw <- getOption("warn")
   options(warn = -1)
   
-  raw_econ_variables <- lapply(mget(variable_list, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
-  
+  raw_econ_variables <- lapply(mget(symbols, envir = NNSdata), function(x) xts::to.monthly(x)[,4])
   
   
   if(!keep.data) rm(list = ls(), envir = NNSdata)
   
   econ_variables <- Reduce(function(...) merge(..., all=TRUE), raw_econ_variables)[paste0(start.date,"::")]
 
-  colnames(econ_variables) <- variable_list
+  colnames(econ_variables) <- symbols
   
   options(warn = oldw)
   
