@@ -29,6 +29,13 @@ NNS.moments(x)
 
 NNS.moments(x, population = FALSE)
 
+## ----mode---------------------------------------------------------------------
+# Continuous
+NNS.mode(x)
+
+# Discrete and multiple modes
+NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
+
 ## ----covariance---------------------------------------------------------------
 cov(x, y)
 (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))

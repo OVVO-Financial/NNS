@@ -57,6 +57,19 @@ NNS.moments(x)
 NNS.moments(x, population = FALSE)
 ```
 
+
+## Statistical Mode of a Continuous Distribution
+`NNS.mode` offers support for discrete valued distributions as well as recognizing multiple modes.
+
+```{r mode}
+# Continuous
+NNS.mode(x)
+
+# Discrete and multiple modes
+NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
+```
+
+
 ## Covariance
 ```{r covariance}
 cov(x, y)
