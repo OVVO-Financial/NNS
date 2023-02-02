@@ -101,7 +101,7 @@ NNS.boost <- function(IVs.train,
 
   DV.train <- transform[,1]
 
-  original.par <- par(no.readonly = TRUE)
+  
 
   if(is.null(IVs.test)){
     IVs.test <- IVs.train
@@ -135,7 +135,9 @@ NNS.boost <- function(IVs.train,
 
 
   ### Representative samples
-      rep.x <- x[,lapply(.SD, function(z) fivenum(as.numeric(z))), by = .(y)]
+      yx <- cbind(y, x)
+      rep.x <- yx[,lapply(.SD, function(z) fivenum(as.numeric(z)))]
+      rm(yx)
 
       rep.y <- unlist(rep.x[,1])
       rep.x <- rep.x[,-1]
@@ -181,15 +183,15 @@ NNS.boost <- function(IVs.train,
 
       new.index <- unlist(new.index)
 
-          new.iv.train <- x[-new.index,] 
+          new.iv.train <- cbind(y[-new.index], x[-new.index,]) 
           new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
 
-          new.iv.train <- new.iv.train[,lapply(.SD,function(z) fivenum(as.numeric(z))), by = .(y[-new.index])]
+          new.iv.train <- new.iv.train[,lapply(.SD, function(z) fivenum(as.numeric(z)))]
 
           new.dv.train <- unlist(new.iv.train[,1])
           new.iv.train <- as.data.frame(new.iv.train[,-1])
 
-          new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
+          new.iv.train <- data.table::rbindlist(list(new.iv.train, x[-new.index,]), use.names = FALSE)
           new.dv.train <- c(new.dv.train, y[-new.index])
 
 
@@ -235,6 +237,7 @@ NNS.boost <- function(IVs.train,
   }
 
   if(feature.importance){
+    original.par <- par(no.readonly = TRUE)
     par(mfrow = c(2,1))
     par(mai = c(1.0,.5,0.8,0.5))
     hist(results, main = "Distribution of Learner Trials Objective Function",
@@ -290,7 +293,7 @@ NNS.boost <- function(IVs.train,
       new.index <- unlist(new.index)
 
 
-          new.iv.train <- x[-new.index, ] #data.table::data.table(x[-new.index, ])
+          new.iv.train <- cbind(y[-new.index], x[-new.index, ])
           new.iv.train <- new.iv.train[, lapply(.SD,as.double)]
 
           new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
@@ -298,7 +301,7 @@ NNS.boost <- function(IVs.train,
           new.dv.train <- unlist(new.iv.train[, 1])
           new.iv.train <- as.data.frame(new.iv.train[, -1])
 
-          new.iv.train <- rbind(new.iv.train, data.matrix(x[-new.index,]))
+          new.iv.train <- data.table::rbindlist(list(new.iv.train, data.matrix(x[-new.index,])), use.names = FALSE)
           new.dv.train <- c(new.dv.train, y[-new.index])
 
 
@@ -362,8 +365,6 @@ NNS.boost <- function(IVs.train,
 
 
   if(features.only){
-      par(mfrow=c(1,1))
-      par(original.par)
       return(list("feature.weights" = plot.table/sum(plot.table),
                   "feature.frequency" = plot.table))
   }
