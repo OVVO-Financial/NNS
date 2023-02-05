@@ -359,6 +359,8 @@ NNS.stack <- function(IVs.train,
                                               type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = TRUE))
           }
           
+          if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
+          
           nns.id <- setup$Fitted.xy$NNS.ID
           original.DV <- setup$Fitted.xy$y
           
