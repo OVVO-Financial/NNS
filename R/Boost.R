@@ -205,11 +205,13 @@ NNS.boost <- function(IVs.train,
       }
 
       test.features[[i]] <- sort(sample(n, sample(2:(n-1), 1), replace = FALSE))
+      
+      if(length(test.features[[i]]) == 1) point.est.values <- unlist(new.iv.test[,test.features[[i]]]) else point.est.values <- new.iv.test[,test.features[[i]]]
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[,test.features[[i]]],
                            new.dv.train,
-                           point.est = new.iv.test[,test.features[[i]]],
+                           point.est = point.est.values,
                            dim.red.method = "equal",
                            plot = FALSE, order = depth,
                            ncores = 1, type = type)$Point.est
@@ -318,10 +320,13 @@ NNS.boost <- function(IVs.train,
       }
 
       features <- sort(c(unlist(reduced.test.features), sample(c(1:n), sample(1:n, 1), replace = FALSE)))
+      
+      if(length(features) == 1) point.est.values <- unlist(new.iv.test[, features]) else point.est.values <- new.iv.test[, features]
+      
 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(new.iv.train[, features],
-                           new.dv.train, point.est = new.iv.test[, features],
+                           new.dv.train, point.est = point.est.values,
                            dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
                            ncores = 1, type = type)$Point.est
