@@ -436,11 +436,17 @@ NNS.stack <- function(IVs.train,
         
         best.k <-  mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         
-        nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                 type = NULL, point.only = FALSE))
+        if(length(relevant_vars)>1){
+            nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+                                                     type = NULL, point.only = FALSE))
+        } else {
+            nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = unlist(IVs.test[, relevant_vars]), plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+                                                    type = NULL, point.only = FALSE))
+        }
         
         actual <- nns.method.1$Fitted.xy$y
         predicted <- nns.method.1$Fitted.xy$y.hat
+        
         
         best.nns.cv <- eval(obj.fn)
         
