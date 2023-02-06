@@ -97,7 +97,7 @@ NNS.stack <- function(IVs.train,
   if(any(class(IVs.train)%in%c("tbl","data.table"))) IVs.train <- as.data.frame(IVs.train)
   if(any(class(DV.train)%in%c("tbl","data.table"))) DV.train <- as.vector(unlist(DV.train))
   
-  if(is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
+  if(is.vector(IVs.train) || is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
     IVs.train <- data.frame(IVs.train)
     method <- 1
     order <- NULL
@@ -386,14 +386,13 @@ NNS.stack <- function(IVs.train,
               CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(rpm = setup$RPM, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
               
               predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
+              rm(CV.IVs.test.new)
             } else {
               predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
                                                      type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
             }
-            
-            rm(CV.IVs.test.new)
           } else {
-            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
+            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = unlist(CV.IVs.test), plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
                                                    type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
           }
           
