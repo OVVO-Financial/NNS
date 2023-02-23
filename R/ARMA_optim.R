@@ -379,9 +379,6 @@ NNS.ARMA.optim <- function(variable,
   
   options(warn = oldw)
   
-  if(!negative.values) bias <- min(c(bias, variable))
-  
-  
   
   if(is.null(h_oos)){
     model.results <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
