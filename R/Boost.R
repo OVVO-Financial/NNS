@@ -1,6 +1,6 @@
 #' NNS Boost
 #'
-#' Ensemble method for classification using the predictions of the NNS multivariate regression \link{NNS.reg} collected from uncorrelated feature combinations.
+#' Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.
 #'
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
