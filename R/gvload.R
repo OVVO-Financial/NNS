@@ -4,7 +4,7 @@
 #' @importFrom grDevices adjustcolor rainbow rgb
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth
 #' @importFrom quantmod getSymbols
-#' @importFrom Rfast colmeans rowmeans rowsums
+#' @importFrom Rfast colmeans rowmeans rowsums comb_n
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt .preformat.ts
 #' @importFrom stringr str_count
 #' @importFrom utils globalVariables head tail combn flush.console
