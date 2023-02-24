@@ -461,13 +461,12 @@ using namespace Rcpp;
 //' @param origin The starting point for the bins. Any number smaller than origin will be disregarded
 //' @param missinglast Boolean. Should the missing observations be added as a separate element at the end of the returned count vector.
 //' @return An list with elements counts (the frequencies), origin (the origin), width (the width), missing (the number of missings), and last_bin_is_missing (boolean) telling whether the missinglast is true or not.
-//' @author Hadley Wickham (from SO: https://stackoverflow.com/questions/13661065/superimpose-histogram-fits-in-one-plot-ggplot) and Claus Ekstrøm from \code{MESS} package.
 //' @examples
-//'
+//' \dontrun{
 //' set.seed(1)
 //' x <- sample(10, 20, replace = TRUE)
 //' NNS_bin(x, 15)
-//' 
+//' }
 //' @export
 // [[Rcpp::export]]
 List NNS_bin(NumericVector x, double width, double origin = 0, bool missinglast=false) {
