@@ -14,6 +14,7 @@ NNS offers:
   - Seasonality & Autoregressive Modeling
   - Normalization 
   - Stochastic Dominance
+  - Advanced Monte Carlo Sampling
 
 Companion R-package and datasets to: 
 
