@@ -6,6 +6,7 @@
 #' @param reps numeric; number of replicates to generate, \code{30} default.
 #' @param rho vector \code{c(-1,1)}; The default setting assumes that the user wants to sample from the full correlation spectrum [-1,1].
 #' @param step numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.
+#' @param exp numeric; \code{1} default will exponentially weight maximum rho value if\code{exp > 1}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param xmin numeric; the lower limit for the left tail.
@@ -33,6 +34,7 @@ NNS.MC <- function(x,
                    reps = 30,
                    rho = c(-1, 1),
                    step = .01,
+                   exp = 1,
                    type = "spearman",
                    drift = TRUE,
                    xmin = NULL,
@@ -41,7 +43,10 @@ NNS.MC <- function(x,
 
   NNS.meboot_vec <- Vectorize(NNS.meboot, vectorize.args = "rho")
 
-  samples <- suppressWarnings(NNS.meboot_vec(x = x, reps = reps, rho = seq(rho[1], rho[2], step), type = type, drift = drift,
+  rhos <- 1-seq(rho[1], rho[2], step)^exp
+  
+  
+  samples <- suppressWarnings(NNS.meboot_vec(x = x, reps = reps, rho = rhos, type = type, drift = drift,
                             xmin = xmin, xmax = xmax, ...))
   
   replicates <- samples["replicates",]
@@ -49,8 +54,8 @@ NNS.MC <- function(x,
   rm(samples)
 
   ensemble <- Rfast::rowmeans(do.call(cbind, replicates))
-  
-  names(replicates) <- paste0("rho = ", seq(rho[1], rho[2], step))
+
+  names(replicates) <- paste0("rho = ", rhos)
   
   return(list("ensemble" = ensemble, "replicates" = replicates))
 }

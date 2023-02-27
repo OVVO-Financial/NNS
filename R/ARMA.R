@@ -265,7 +265,7 @@ NNS.ARMA <- function(variable,
 
 
   if(!is.null(conf.intervals)){
-    CIs <- NNS.meboot(Estimates, reps=399, rho = 1)$replicates
+    CIs <- do.call(cbind, NNS.MC(Estimates, rho = c(0,1), exp = 2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
   } else lin.resid <- 0
@@ -297,7 +297,7 @@ NNS.ARMA <- function(variable,
            xlim = c(1, max((training.set + h), length(OV))),
            ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
       
-      for(i in 1 : 399){
+      for(i in 1 : ncol(CIs)){
         lines((training.set+1) : (training.set+h), CIs[,i] + lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
         lines((training.set+1) : (training.set+h), CIs[,i] - lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
       }
