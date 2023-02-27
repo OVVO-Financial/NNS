@@ -483,11 +483,9 @@ variables.</p>
 <ul>
 <li><strong>Generate or supply <code>new data</code>:</strong></li>
 </ul>
-<p><code>new data</code> must be of equal dimensions to
-<code>original data</code>. <code>new data</code> does not have to be of
-the same distribution or dimension as the <code>original data</code>,
-nor does each dimension of <code>new data</code> have to share a
-distribution type.</p>
+<p><code>new data</code> does not have to be of the same distribution or
+dimension as the <code>original data</code>, nor does each dimension of
+<code>new data</code> have to share a distribution type.</p>
 <ul>
 <li><strong>Apply dependence structure to
 <code>new data</code>:</strong></li>
@@ -503,8 +501,8 @@ these transformed values with the same dimensions as
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine dependence structure</span></span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>dep.structure <span class="ot">&lt;-</span> <span class="fu">apply</span>(original.data, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">LPM.ratio</span>(<span class="dv">1</span>, x, x))</span>
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate new data with different mean and sd (or distribution type or dimensions)</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>new.data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(original.data), <span class="cf">function</span>(x) <span class="fu">rnorm</span>(<span class="fu">dim</span>(original.data)[<span class="dv">1</span>], <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">20</span>))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate new data with different mean, sd and length (or distribution type)</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>new.data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(original.data), <span class="cf">function</span>(x) <span class="fu">rnorm</span>(<span class="fu">dim</span>(original.data)[<span class="dv">1</span>]<span class="sc">*</span><span class="dv">2</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">20</span>))</span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply dependence structure to new data</span></span>
 <span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>new.dep.data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(original.data), <span class="cf">function</span>(x) <span class="fu">LPM.VaR</span>(dep.structure[,x], <span class="dv">1</span>, new.data[,x]))</span></code></pre></div>
@@ -513,7 +511,7 @@ these transformed values with the same dimensions as
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span></code></pre></div>
 <pre><code>## [1] 0.4360284</code></pre>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.dep.data)</span></code></pre></div>
-<pre><code>## [1] 0.4390859</code></pre>
+<pre><code>## [1] 0.4393558</code></pre>
 </div>
 </div>
 <div id="references" class="section level1">
