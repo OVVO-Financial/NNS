@@ -224,7 +224,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     
     if(!is.null(np)){
       DISTANCES <- vector(mode = "list", np)
-
+      distances <- data.table::data.table(point.est)
       if(num_cores>1){
         DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
         
@@ -232,7 +232,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
         registerDoSEQ()
         invisible(data.table::setDTthreads(0, throttle = NULL))
       } else {
-        distances <- data.table::data.table(point.est)
         distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
         
         DISTANCES <- as.numeric(unlist(distances$DISTANCES))

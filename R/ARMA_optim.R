@@ -36,7 +36,6 @@
 #'
 #' \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 #'
-#' \item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
 #'}
 #'
 #'
@@ -111,7 +110,7 @@ NNS.ARMA.optim <- function(variable,
   if(l <= .5 * n) stop("Please provide a 'training.set' value (integer) less than (2*h) or a smaller (h).")
   if(training.set == n) stop("Please provide a 'training.set' value (integer) less than the length of the variable.")
   
-  denominator <- min(4, max(2, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
+  denominator <- min(4, max(3, ifelse((l/100)%%1 < .5, floor(l/100), ceiling(l/100))))
   
   seasonal.factor <- seasonal.factor[seasonal.factor <= (l/denominator)]
   seasonal.factor <- unique(seasonal.factor)
