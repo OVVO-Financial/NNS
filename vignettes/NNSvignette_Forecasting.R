@@ -59,10 +59,10 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 ## ----best optim, eval=FALSE---------------------------------------------------
 #  nns.optimal = NNS.ARMA.optim(AirPassengers,
 #                               training.set = 100,
-#                               seasonal.factor = seq(12, 24, 6),
+#                               seasonal.factor = seq(12, 60, 6),
 #                               obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
 #                               objective = "min",
-#                               conf.intervals = .95)
+#                               pred.int = .95)
 #  
 #  nns.optimal
 
@@ -124,7 +124,7 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 #  [33] 413.6136 390.9586 467.3674 453.9804 464.4469 564.6356 611.0813 598.8694
 #  [41] 519.0765 436.3233 392.0875 436.6022
 #  
-#  $lower.conf.int
+#  $lower.pred.int
 #   [1] 291.6700 358.6573 399.8515 390.4789 333.2401 275.8292 238.5299 276.0203
 #   [9] 285.1561 268.1650 330.4775 320.6740 328.3370 406.2684 449.2281 438.9056
 #  [17] 374.1535 308.3275 268.7218 308.4970 318.1836 298.4380 367.6701 356.0805
@@ -132,7 +132,7 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 #  [33] 351.0256 328.3706 404.7794 391.3924 401.8589 502.0477 548.4933 536.2814
 #  [41] 456.4885 373.7353 329.4996 374.0142
 #  
-#  $upper.conf.int
+#  $upper.pred.int
 #   [1] 416.8459 483.8332 525.0274 515.6548 458.4160 401.0052 363.7058 401.1962
 #   [9] 410.3320 393.3409 455.6534 445.8499 453.5129 531.4443 574.4040 564.0815
 #  [17] 499.3294 433.5034 393.8977 433.6729 443.3595 423.6139 492.8460 481.2564
@@ -163,7 +163,7 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ## ----extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=TRUE----
 NNS.ARMA(AirPassengers, 
          h = 50,
-         conf.intervals = .95,
+         pred.int = .95,
          seasonal.factor = nns.optimal$periods, 
          method  = nns.optimal$method, 
          weights = nns.optimal$weights, 
