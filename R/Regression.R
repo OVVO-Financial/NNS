@@ -16,7 +16,7 @@
 #' @param plot logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
-#' @param confidence.interval numeric [0, 1); \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
+#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
@@ -144,8 +144,6 @@ NNS.reg = function (x, y,
   
   oldw <- getOption("warn")
   options(warn = -1)
-  
-  if(confidence.interval >= 1 && !is.null(confidence.interval)) stop("Please set the confidence.interval to less than 1.")
   
   if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
   

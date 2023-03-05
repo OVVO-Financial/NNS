@@ -21,20 +21,13 @@
 #' @param shrink logical; \code{FALSE} (default) Ensembles forecasts with \code{method = "means"}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
-#' @param conf.intervals numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
-#' @return Returns a vector of forecasts of length \code{(h)} if no \code{conf.intervals} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper confidence intervals per forecast point.
+#' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
+#' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper prediction intervals per forecast point.
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
 #' \code{(seasonal.factor = c(36, 48, 72))}.
 #'
 #' \code{(seasonal.factor = FALSE)} can be a very computationally expensive exercise due to the number of seasonal periods detected.
-#'
-#' If error encountered when \code{(seasonal.factor = TRUE)}:
-#'
-#' \code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) :
-#'  wrong sign in 'by' argument"}
-#'
-#' use the combination of \code{(seasonal.factor = FALSE, best.periods = 1)}.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
@@ -74,7 +67,7 @@ NNS.ARMA <- function(variable,
                      shrink = FALSE,
                      plot = TRUE,
                      seasonal.plot = TRUE,
-                     conf.intervals = NULL){
+                     pred.int = NULL){
   
 
   if(is.numeric(seasonal.factor) && dynamic) stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
@@ -264,7 +257,7 @@ NNS.ARMA <- function(variable,
   } # j loop
 
 
-  if(!is.null(conf.intervals)){
+  if(!is.null(pred.int)){
     CIs <- do.call(cbind, NNS.MC(Estimates, rho = c(0,1), exp = 2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
@@ -292,7 +285,7 @@ NNS.ARMA <- function(variable,
     if(is.null(label)) label <- "Variable"
     
     
-    if(!is.null(conf.intervals)){
+    if(!is.null(pred.int)){
       plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
            xlim = c(1, max((training.set + h), length(OV))),
            ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
@@ -330,14 +323,14 @@ NNS.ARMA <- function(variable,
   
   
   options(warn = oldw)
-  if(!is.null(conf.intervals)){
-    upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-conf.intervals)/2, 0, z),LPM.VaR((1-conf.intervals)/2, 0, z))) 
+  if(!is.null(pred.int)){
+    upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z),LPM.VaR((1-pred.int)/2, 0, z))) 
     upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
     lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_CIs),  pmax(Estimates, upper_CIs))
     colnames(results) = c("Estimates",
-                          paste0("Lower ", round(conf.intervals*100,2), "% CI"),
-                          paste0("Upper ", round(conf.intervals*100,2), "% CI"))
+                          paste0("Lower ", round(pred.int*100,2), "% CI"),
+                          paste0("Upper ", round(pred.int*100,2), "% CI"))
     return(data.table::data.table(results))
   } else {
     return(Estimates)

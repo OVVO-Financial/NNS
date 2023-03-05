@@ -13,7 +13,7 @@
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
 #' @param lin.only logical; \code{FALSE} (default) Restricts the optimization to linear methods only.
-#' @param conf.intervals numeric [0, 1]; \code{NULL} Returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
+#' @param pred.int numeric [0, 1]; \code{NULL} Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.
 #' @param print.trace logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #'
 #' @return Returns a list containing:
@@ -27,8 +27,8 @@
 #' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 #' \item{\code{$errors}} a vector of model errors from internal calibration.
 #' \item{\code{$results}} a vector of length \code{h}.
-#' \item{\code{$lower.conf.int}} a vector of lower confidence intervals per forecast point.
-#' \item{\code{$upper.conf.int}} a vector of upper confidence intervals per forecast point.
+#' \item{\code{$lower.pred.int}} a vector of lower prediction intervals per forecast point.
+#' \item{\code{$upper.pred.int}} a vector of upper prediction intervals per forecast point.
 #'}
 #' @note
 #' \itemize{
@@ -74,7 +74,7 @@ NNS.ARMA.optim <- function(variable,
                            objective = "max",
                            linear.approximation = TRUE,
                            lin.only = FALSE,
-                           conf.intervals = NULL,
+                           pred.int = NULL,
                            print.trace = TRUE){
   
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
@@ -385,9 +385,9 @@ NNS.ARMA.optim <- function(variable,
     model.results <- NNS.ARMA(variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
-  if(!is.null(conf.intervals)){
-      lower_CIs <- model.results - UPM.VaR((1-conf.intervals)/2, 0, abs(errors)) - abs(bias)
-      upper_CIs <- model.results + UPM.VaR((1-conf.intervals)/2, 0, abs(errors)) + abs(bias)
+  if(!is.null(pred.int)){
+      lower_CIs <- model.results - UPM.VaR((1-pred.int)/2, 0, abs(errors)) - abs(bias)
+      upper_CIs <- model.results + UPM.VaR((1-pred.int)/2, 0, abs(errors)) + abs(bias)
   } else {
       upper_CIs <- lower_CIs <- NULL
   } 
@@ -407,6 +407,6 @@ NNS.ARMA.optim <- function(variable,
               bias.shift = -bias,
               errors = errors,
               results = model.results,
-              lower.conf.int = lower_CIs,
-              upper.conf.int = upper_CIs))
+              lower.pred.int = lower_CIs,
+              upper.pred.int = upper_CIs))
 }

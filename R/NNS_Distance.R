@@ -16,6 +16,7 @@
 NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   type <- toupper(type)
   l <- nrow(rpm)
+  if(k=="all") k <- l
   y.hat <- rpm$y.hat
   raw.dist.estimate <- unlist(dist.estimate)
   n <- length(raw.dist.estimate)
