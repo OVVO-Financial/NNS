@@ -22,7 +22,7 @@ require(meboot)
 # Classification
 **`NNS.reg`** is a very robust regression technique capable of nonlinear regressions of continuous variables and classification tasks in machine learning problems.
 
-We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**.
+We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**.  In short, **`NNS.reg`** is the base learner instead of trees.
 
 ***One major advantage `NNS.boost` has over tree based methods is the ability to seamlessly extrapolate beyond the current range of observations.***
 
