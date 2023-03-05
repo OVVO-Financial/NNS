@@ -15,7 +15,7 @@ NNS.ARMA.optim(
   objective = "max",
   linear.approximation = TRUE,
   lin.only = FALSE,
-  conf.intervals = NULL,
+  pred.int = NULL,
   print.trace = TRUE
 )
 }
@@ -40,7 +40,7 @@ NNS.ARMA.optim(
 
 \item{lin.only}{logical; \code{FALSE} (default) Restricts the optimization to linear methods only.}
 
-\item{conf.intervals}{numeric [0, 1]; \code{NULL} Returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
+\item{pred.int}{numeric [0, 1]; \code{NULL} Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
 
 \item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 }
@@ -56,8 +56,8 @@ Returns a list containing:
 \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
 \item{\code{$errors}} a vector of model errors from internal calibration.
 \item{\code{$results}} a vector of length \code{h}.
-\item{\code{$lower.conf.int}} a vector of lower confidence intervals per forecast point.
-\item{\code{$upper.conf.int}} a vector of upper confidence intervals per forecast point.
+\item{\code{$lower.pred.int}} a vector of lower prediction intervals per forecast point.
+\item{\code{$upper.pred.int}} a vector of upper prediction intervals per forecast point.
 }
 }
 \description{
@@ -69,7 +69,6 @@ Wrapper function for optimizing any combination of a given \code{seasonal.factor
 
 \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 
-\item{} If variable cannot logically assume negative values, then the \code{$bias.shift} must be limited to 0 via a \code{pmax(0,...)} call.
 }
 }
 \examples{

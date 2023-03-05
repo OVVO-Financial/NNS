@@ -19,7 +19,7 @@ NNS.ARMA(
   shrink = FALSE,
   plot = TRUE,
   seasonal.plot = TRUE,
-  conf.intervals = NULL
+  pred.int = NULL
 )
 }
 \arguments{
@@ -56,10 +56,10 @@ NNS.ARMA(
 
 \item{seasonal.plot}{logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.}
 
-\item{conf.intervals}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated confidence intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
+\item{pred.int}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
 }
 \value{
-Returns a vector of forecasts of length \code{(h)} if no \code{conf.intervals} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper confidence intervals per forecast point.
+Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper prediction intervals per forecast point.
 }
 \description{
 Autoregressive model incorporating nonlinear regressions of component series.
@@ -69,13 +69,6 @@ For monthly data series, increased accuracy may be realized from forcing seasona
 \code{(seasonal.factor = c(36, 48, 72))}.
 
 \code{(seasonal.factor = FALSE)} can be a very computationally expensive exercise due to the number of seasonal periods detected.
-
-If error encountered when \code{(seasonal.factor = TRUE)}:
-
-\code{"NaNs produced Error in seq.default(length(variable)+1, 1, -lag[i]) :
- wrong sign in 'by' argument"}
-
-use the combination of \code{(seasonal.factor = FALSE, best.periods = 1)}.
 }
 \examples{
 
