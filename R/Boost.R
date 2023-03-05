@@ -93,11 +93,12 @@ NNS.boost <- function(IVs.train,
   }
   
   features <- colnames(IVs.train)
+  IVs.train <- IVs.train[ ,sort(features)]
 
   transform <- data.matrix(cbind(DV.train, IVs.train))
   
   IVs.train <- transform[,-1]
-  colnames(IVs.train) <- c(features)
+  colnames(IVs.train) <- sort(features)
   
   DV.train <- transform[,1]
   
@@ -239,7 +240,7 @@ NNS.boost <- function(IVs.train,
     results <- threshold
   } # NULL threshold
   
-  
+
   if(extreme){
     if(objective=="max") threshold <- max(results) else threshold <- min(results)
   } else {
@@ -275,7 +276,7 @@ NNS.boost <- function(IVs.train,
   } else {
     if(objective=="max") reduced.test.features <- test.features[which(results>=threshold)] else reduced.test.features <- test.features[which(results<=threshold)]
   }
-  
+
   rf <- data.table::data.table(table(as.character(reduced.test.features)))
   rf$N <- rf$N / sum(rf$N)
 
