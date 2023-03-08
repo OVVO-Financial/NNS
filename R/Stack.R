@@ -205,18 +205,17 @@ NNS.stack <- function(IVs.train,
     if(2 %in% method && dim(IVs.train)[2]>1){
       
       actual <- CV.DV.test
+      
       if(dim.red.method=="cor"){
-        
         var.cutoffs_2 <- abs(round(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)), method = "spearman")[-1,1], digits = 2))
       } else {
-        
         var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores,
                                                             type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
       }
       
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
       
-      var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs > 0]
+      var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
       
       var.cutoffs[is.na(var.cutoffs)] <- 0
       

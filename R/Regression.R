@@ -359,16 +359,18 @@ NNS.reg = function (x, y,
 
           if(!is.numeric(dim.red.method) && dim.red.method == "equal")  x.star.coef <- rep(1, ncol(x))
           
-          if(is.numeric(dim.red.method)) x.star.coef <- dim.red.method
+          if(is.numeric(dim.red.method)) x.star.coef <- as.numeric(dim.red.method)
           
           preserved.coef <- x.star.coef
           x.star.coef[abs(x.star.coef) < threshold] <- 0
           
           norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
           
-          x.star.matrix <- t( t(norm.x) * x.star.coef)
-          x.star.matrix[is.na(x.star.matrix)] <- 0
+
           
+          x.star.matrix <- Rfast::eachrow(norm.x, x.star.coef, "*") #t( t(norm.x) * x.star.coef)
+          x.star.matrix[is.na(x.star.matrix)] <- 0
+     
           #In case all IVs have 0 correlation to DV
           if(all(x.star.matrix == 0)){
             x.star.matrix <- x
@@ -376,11 +378,11 @@ NNS.reg = function (x, y,
           }
           
           xn <- sum( abs( x.star.coef) > 0)
-          
+      
           if(is.numeric(dim.red.method)) DENOMINATOR <- sum(dim.red.method) else DENOMINATOR <- sum( abs( x.star.coef) > 0)
-          
+        
           synthetic.x.equation.coef <- data.table::data.table(Variable = colnames.list, Coefficient = x.star.coef)
-          
+        
           synthetic.x.equation <- data.table::rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
           
           

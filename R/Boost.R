@@ -165,7 +165,7 @@ NNS.boost <- function(IVs.train,
     combn_vec <- Vectorize(Rfast::comb_n, vectorize.args = "k")
     deterministic.sets <- unlist(lapply(combn_vec(n, 1:n), function(df) as.list(as.data.frame(df))), recursive = FALSE)
   }
-  
+
   # Add test loop for highest threshold ...
   if(is.null(threshold)){
     if(!extreme) epochs <- NULL
@@ -211,16 +211,14 @@ NNS.boost <- function(IVs.train,
       
       if(status) message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
       
-      if(deterministic) test.features[[i]] <- deterministic.sets[i] else test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
-      
-      if(length(test.features[[i]]) == 1) point.est.values <- unlist(new.iv.test[,test.features[[i]]]) else point.est.values <- new.iv.test[,test.features[[i]]]
-      
-      learning.IVs <- new.iv.train[,unlist(test.features[i])]
-     
+      if(deterministic) test.features[[i]] <- deterministic.sets[[i]] else test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
+
+      learning.IVs <- new.iv.train[,.SD, .SDcols = unlist(test.features[i])]
+    
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(learning.IVs,
                            new.dv.train,
-                           point.est = point.est.values,
+                           point.est = new.iv.test[, .SD, .SDcols=unlist(test.features[[i]])],
                            dim.red.method = "equal",
                            plot = FALSE, order = depth,
                            ncores = 1, type = type)$Point.est
@@ -232,7 +230,7 @@ NNS.boost <- function(IVs.train,
         predicted <- pmin(predicted, max(as.numeric(y)))
         predicted <- pmax(predicted, min(as.numeric(y)))
       }
-      
+
       results[i] <- eval(obj.fn)
       
     } # i in learner.trials
@@ -310,7 +308,6 @@ NNS.boost <- function(IVs.train,
       new.iv.train <- new.iv.train[, lapply(.SD, as.double)]
       
       new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-      noise_idx <- which(colnames(new.iv.train)=="NNS_NOISE")
             
       new.dv.train <- unlist(new.iv.train[, 1])
       new.iv.train <- as.data.frame(new.iv.train)
@@ -392,7 +389,7 @@ NNS.boost <- function(IVs.train,
     x <- rbind(rep.x, (x))
     y <- c(rep.y, y)
   }
-  
+
   kf <- data.table::data.table(table(as.character(keeper.features)))
   kf$N <- kf$N / sum(kf$N)
   
@@ -404,14 +401,14 @@ NNS.boost <- function(IVs.train,
   
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
   
-  estimates <- NNS.stack(x[, unlist(final_scale)],
+  estimates <- NNS.stack(x[, keeper.features],
                          y,
-                         IVs.test = z[, unlist(final_scale)],
+                         IVs.test = z[, keeper.features],
                          order = depth, dim.red.method = "all",
                          ncores = 1,
                          stack = FALSE, status = status,
                          type = type, dist = dist, folds = folds)$stack
-  
+
   estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
   
   

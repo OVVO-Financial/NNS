@@ -12,8 +12,7 @@ require(meboot)
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5--------------
-set.seed(1234)
-test.set = sample(150, 10)
+test.set = 141:150
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
@@ -45,19 +44,22 @@ mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 1
 #  
 #  $probability.threshold
-#  [1] 0.44625
+#  [1] 0.451
 #  
 #  $OBJfn.dim.red
-#  [1] 0.9477124
+#  [1] 0.9928571
 #  
 #  $NNS.dim.red.threshold
-#  [1] 0.495
+#  [1] 0.8575
 #  
 #  $reg
-#   [1] 1 2 3 3 3 3 3 3 2 3
+#   [1] 3 3 3 3 3 3 3 3 3 3
 #  
 #  $dim.red
-#   [1] 1 2 3 3 3 3 3 3 2 3
+#   [1] 3 3 3 3 3 3 3 3 3 3
+#  
+#  $stack
+#   [1] 3 3 3 3 3 3 3 3 3 3
 #  
 #  $stack
 #   [1] 1 2 3 3 3 3 3 3 2 3
