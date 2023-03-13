@@ -60,9 +60,6 @@ mean( a$results == as.numeric(iris[test.set, 5]) )
 #  
 #  $stack
 #   [1] 3 3 3 3 3 3 3 3 3 3
-#  
-#  $stack
-#   [1] 1 2 3 3 3 3 3 3 2 3
 
 ## ----stackevalres, eval = FALSE-----------------------------------------------
 #  mean( b$stack == as.numeric(iris[test.set, 5]) )
