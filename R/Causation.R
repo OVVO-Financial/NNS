@@ -46,7 +46,7 @@ NNS.caus <- function(x, y = NULL,
   if(factor.2.dummy){
     if(!is.null(dim(x))){
       if(!is.numeric(x)){
-        x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR))
+        x <- apply(data.frame(x), 2, function(z) factor_2_dummy_FR(z))
       } else {
         x <- apply(x, 2, as.double)
       }

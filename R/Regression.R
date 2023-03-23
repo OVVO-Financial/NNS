@@ -153,7 +153,7 @@ NNS.reg = function (x, y,
   
   if(any(class(x)%in%c("tbl","data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
-  
+ 
   n <- length(y)
   original.x <- x
   
@@ -190,7 +190,7 @@ NNS.reg = function (x, y,
   original.columns <- ncol(x)
   
   if(!is.null(original.columns) & is.null(colnames(x))) x <- data.frame(x)
-  
+ 
   y.label <- deparse(substitute(y))
   if(is.null(y.label)) y.label <- "y"
   
@@ -207,10 +207,10 @@ NNS.reg = function (x, y,
         new_x <- unlist(list(x, point.est))
       }
     }
+ 
     
-    
-    if(!is.null(dim(x)) && dim(x)[2] > 1) x <- do.call(cbind, lapply(data.frame(x), factor_2_dummy_FR)) else x <- factor_2_dummy_FR(x)
-    
+    if(!is.null(dim(x)) && dim(x)[2] > 1) x <- apply(x, 2, function(z) factor_2_dummy_FR(z)) else x <- factor_2_dummy_FR(x)
+       
     
     x <- data.matrix(x)
     
@@ -218,7 +218,7 @@ NNS.reg = function (x, y,
       point.est.y <- numeric()
       
       if(!is.null(dim(x)) && dim(x)[2]>1){
-        new_x <- do.call(cbind, lapply(data.frame(new_x), factor_2_dummy_FR))
+        new_x <- apply(new_x, 2, function(z) factor_2_dummy_FR(z))
       } else {
         new_x <- factor_2_dummy_FR(new_x)
       }
@@ -274,7 +274,6 @@ NNS.reg = function (x, y,
   if(!is.null(type) && type == "class" ){
     if(is.null(n.best)) n.best <- 1
   }
-  
   
   
   if(!is.null(ncol(original.variable))){
