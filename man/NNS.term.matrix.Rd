@@ -4,14 +4,12 @@
 \alias{NNS.term.matrix}
 \title{NNS Term Matrix}
 \usage{
-NNS.term.matrix(x, oos = NULL, names = FALSE)
+NNS.term.matrix(x, oos = NULL)
 }
 \arguments{
 \item{x}{mixed data.frame; character/numeric; A two column dataset should be used.  Concatenate text from original sources to comply with format.  Also note the possibility of factors in \code{"DV"}, so \code{"as.numeric(as.character(...))"} is used to avoid issues.}
 
 \item{oos}{mixed data.frame; character/numeric; Out-of-sample text dataset to be classified.}
-
-\item{names}{logical; Column names for \code{"IV"} and \code{"oos"}.  Defaults to FALSE.}
 }
 \value{
 Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.

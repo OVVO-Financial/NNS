@@ -26,7 +26,7 @@ NNS.MC(
 
 \item{step}{numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.}
 
-\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if\code{exp > 1}.}
+\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
