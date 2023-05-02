@@ -18,6 +18,15 @@
 #' x <- rnorm(100) ; y<-rnorm(100)
 #' A <- cbind(x, y)
 #' NNS.norm(A)
+#' 
+#' ### Normalize list of unequal vector lengths
+#' 
+#' vec1 <- c(1, 2, 3, 4, 5, 6, 7)
+#' vec2 <- c(10, 20, 30, 40, 50, 60)
+#' vec3 <- c(0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3)
+#' 
+#' vec_list <- list(vec1, vec2, vec3)
+#' NNS.norm(vec_list)
 #' }
 #' @export
 
@@ -29,13 +38,13 @@ NNS.norm <- function(X,
   if(sum(is.na(X)) > 0) stop("You have some missing values, please address.")
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
-  
-  if(is.list(X)){
+
+  if(any(class(X)%in%"list")){
     if(sum(diff(sapply(X, length)))>0) linear <- TRUE
     m <- sapply(X, mean)
   } else { 
     X <- apply(X, 2, unlist)
-    m  <- Rfast::colmeans(X)
+    m <- Rfast::colmeans(X)
   }
   
   
@@ -53,14 +62,14 @@ NNS.norm <- function(X,
     scales <- Rfast::colmeans(RG)
   }
   
+
+  if(any(class(X)%in%"list")) X_Normalized <- mapply('*', X, scales) else X_Normalized <- t(t(X) * scales)
   
-  if(is.list(X)) X_Normalized <- mapply('*', X, scales) else X_Normalized <- t(t(X) * scales)
-  
-  if(is.list(X_Normalized)) n <- length(X_Normalized) else n <- ncol(X_Normalized)
+  if(any(class(X_Normalized)%in%"list")) n <- length(X_Normalized) else n <- ncol(X_Normalized)
   
   i <- seq_len(n)
   
-  if(is.list(X)){
+  if(any(class(X)%in%"list")){
     if(is.null(names(X))){
       new.names <- list()
       for(i in 1 : n){
@@ -77,8 +86,8 @@ NNS.norm <- function(X,
       colnames(X) <- unlist(new.names)
     }
   }
-  
-  if(is.list(X_Normalized)){
+     
+  if(any(class(X_Normalized)%in%"list")){
     names(X_Normalized) <- paste0(names(X), " Normalized")
   } else {
     labels <- c(colnames(X), paste0(colnames(X), " Normalized"))
@@ -86,8 +95,8 @@ NNS.norm <- function(X,
     rows <- rownames(X_Normalized)
   }
   
-  
-  if(!is.null(chart.type) && !is.list(X)){
+
+  if(!is.null(chart.type) && !any(class(X)%in%"list")){
     original.par <- par(no.readonly = TRUE)
     if(chart.type == 'b' ){
       par(mar = c(10, 4, 3, 2) + 0.1)

@@ -4,7 +4,6 @@
 #'
 #' @param x mixed data.frame; character/numeric; A two column dataset should be used.  Concatenate text from original sources to comply with format.  Also note the possibility of factors in \code{"DV"}, so \code{"as.numeric(as.character(...))"} is used to avoid issues.
 #' @param oos mixed data.frame; character/numeric; Out-of-sample text dataset to be classified.
-#' @param names logical; Column names for \code{"IV"} and \code{"oos"}.  Defaults to FALSE.
 #' @return Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
 #' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
@@ -30,7 +29,7 @@
 #' @export
 
 
-NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
+NNS.term.matrix <- function(x, oos = NULL){
 
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
 
@@ -80,12 +79,12 @@ NNS.term.matrix <- function(x, oos = NULL, names = FALSE){
 
   NNS.TM <- t(sapply(1 : length(x[ , 1]), function(i) as.integer(tryCatch(stringr::str_count(x[i, 1], unique.vocab), error = function (e) 0))))
 
-  if(names) colnames(NNS.TM) <- c(unique.vocab)
+  colnames(NNS.TM) <- c(unique.vocab)
 
   if(!is.null(oos)){
       OOS.TM <- t(sapply(1 : length(oos), function(i) stringr::str_count(oos[i], unique.vocab)))
 
-      if(names) colnames(OOS.TM) <- c(unique.vocab)
+      colnames(OOS.TM) <- c(unique.vocab)
 
       return(list("IV" = NNS.TM,
                   "DV" = as.integer(as.character(x[ , 2])),

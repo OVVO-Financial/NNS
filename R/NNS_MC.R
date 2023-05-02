@@ -6,7 +6,7 @@
 #' @param reps numeric; number of replicates to generate, \code{30} default.
 #' @param rho vector \code{c(-1,1)}; The default setting assumes that the user wants to sample from the full correlation spectrum [-1,1].
 #' @param step numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.
-#' @param exp numeric; \code{1} default will exponentially weight maximum rho value if\code{exp > 1}.
+#' @param exp numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param xmin numeric; the lower limit for the left tail.
