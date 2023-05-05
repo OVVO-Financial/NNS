@@ -48,18 +48,32 @@ NNS.copula <- function (
     }
     colnames(X) <- c(colnames.list)
   }
+  
+  discrete_pm_cov <- PM.matrix(0, 0, target = target, variable = X, pop_adj = TRUE)
 
-  if(continuous) degree <- 1 else degree <- 0
+  if(continuous){
+    degree <- 1
+    continuous_pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE)
+  } else {
+    degree <- 0
+    continuous_pm_cov <- discrete_pm_cov
+  }
 
-  # Generate partial moment matrices
-  pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE)
+  
 
   # Isolate the upper triangles from each of the partial moment matrices
-  Co_pm <- sum(pm_cov$cupm[upper.tri(pm_cov$cupm, diag = FALSE)]) + sum(pm_cov$clpm[upper.tri(pm_cov$clpm, diag = FALSE)])
-  D_pm <- sum(pm_cov$dupm[upper.tri(pm_cov$dupm, diag = FALSE)]) + sum(pm_cov$dlpm[upper.tri(pm_cov$dlpm, diag = FALSE)])
+  continuous_Co_pm <- sum(continuous_pm_cov$cupm[upper.tri(continuous_pm_cov$cupm, diag = FALSE)]) + sum(continuous_pm_cov$clpm[upper.tri(continuous_pm_cov$clpm, diag = FALSE)])
+  continuous_D_pm <- sum(continuous_pm_cov$dupm[upper.tri(continuous_pm_cov$dupm, diag = FALSE)]) + sum(continuous_pm_cov$dlpm[upper.tri(continuous_pm_cov$dlpm, diag = FALSE)])
 
+  discrete_Co_pm <- sum(discrete_pm_cov$cupm[upper.tri(discrete_pm_cov$cupm, diag = FALSE)]) + sum(discrete_pm_cov$clpm[upper.tri(discrete_pm_cov$clpm, diag = FALSE)])
+  discrete_D_pm <- sum(discrete_pm_cov$dupm[upper.tri(discrete_pm_cov$dupm, diag = FALSE)]) + sum(discrete_pm_cov$dlpm[upper.tri(discrete_pm_cov$dlpm, diag = FALSE)])
+  
+  indep_Co_pm <- .5 * n
+  
+  if(discrete_Co_pm < indep_Co_pm) discrete_dep <- (1 - (discrete_Co_pm/indep_Co_pm)) else discrete_dep <- (1 - (indep_Co_pm/discrete_Co_pm))
+  
+  
   if((plot||independence.overlay) && n == 3){
-
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
                 col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
                            ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
@@ -89,14 +103,14 @@ NNS.copula <- function (
 
   }
 
-  if(is.na(Co_pm) || is.null(Co_pm)) Co_pm <- 0
-  if(is.na(D_pm)|| is.null(D_pm)) D_pm <- 0
+  if(is.na(continuous_Co_pm) || is.null(continuous_Co_pm)) continuous_Co_pm <- 0
+  if(is.na(continuous_D_pm)|| is.null(continuous_D_pm)) continuous_D_pm <- 0
 
-  if(Co_pm == D_pm) return(0)
-  if(Co_pm==0 || D_pm==0) return(1)
+  if(continuous_Co_pm == continuous_D_pm) return(mean(c(0, discrete_dep)))
+  if(continuous_Co_pm==0 || continuous_D_pm==0) return(mean(c(1, discrete_dep)))
 
-  if(Co_pm < D_pm) return(1 - Co_pm/D_pm)
-  if(Co_pm > D_pm) return(1 - D_pm/Co_pm)
+  if(continuous_Co_pm < continuous_D_pm) return(mean(c(1 - (continuous_Co_pm/continuous_D_pm), discrete_dep)))
+  if(continuous_Co_pm > continuous_D_pm) return(mean(c(1 - (continuous_D_pm/continuous_Co_pm), discrete_dep)))
 
 
 }
