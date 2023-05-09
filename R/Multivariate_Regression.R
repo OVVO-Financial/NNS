@@ -38,7 +38,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   maximums <- apply(original.IVs, 2, max)
   
   
-  if(is.null(order)) order <- floor(max(1,(NNS.copula(original.matrix)* 10)))
+  if(is.null(order)) order <- ceiling(max(1,(NNS.copula(original.matrix)*10)))
   
   
   ###  Regression Point Matrix
@@ -75,9 +75,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     colnames(reg.points.matrix) <- as.character(colnames.list)
   }
   
-  if(is.numeric(order) || is.null(order)){
-    reg.points.matrix <- unique(reg.points.matrix)
-  }
+  if(is.numeric(order) || is.null(order)) reg.points.matrix <- unique(reg.points.matrix)
+
   
   if(!is.null(order) && order=="max" && is.null(n.best)) n.best <- 1
   
@@ -139,9 +138,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   y.hat <- unlist(mean.by.id.matrix[ , .(y.hat)])
   
-  if(!is.null(type)){
-    y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
-  }
+  if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
   
   
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
