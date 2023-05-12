@@ -78,58 +78,53 @@ NNS.ANOVA.bin<- function(control, treatment,
     } else {
 
         #Upper end of CDF confidence interval for control mean
-        if(tails == "both"){
-            CI <- confidence.interval+(1-confidence.interval)/2
-        }
-        if(tails == "left" | tails == "right") {
-            CI <- confidence.interval
-        }
+        if(tails == "both") CI <- confidence.interval+(1-confidence.interval)/2
+        
+        if(tails == "left" | tails == "right") CI <- confidence.interval
+        
+            # Resample control means
+            y_p <- replicate(1000, sample.int(length(control), replace = TRUE))
+            control_means <- Rfast::colmeans(matrix(control[y_p], ncol = ncol(y_p), byrow = T))
 
-
-            a <- UPM.VaR(1 - CI, 1, control)
-            b <- mean(control)
+            a <- UPM.VaR(1 - CI, 0, control_means)
+            b <- mean(control_means)
+            
             if(plot){
                 if(tails == "both" | tails == "right"){
                     abline(v = max(a, b), col = "green", lwd = 4, lty = 3)
-                    text(max(a, b), pos = 2, 0.75, "mu+", col = "green")
-                    text(max(a, b), pos = 4, 0.75, paste0((1 - CI) * 100, "% --->"), col = "green")}
+                    text(max(a, b), pos = 4, 0.5, paste0("<--- ", "ctl mu+ ", (1 - CI) * 100, "%" ), col = "green")
+                }
             }
 
             #Lower end of CDF confidence interval for control mean
-            c <- LPM.VaR(1 - CI, 1, control)
-            d <- mean(control)
+            c <- LPM.VaR(1 - CI, 0, control_means)
+            d <- mean(control_means)
 
             if(plot){
                 if(tails == "both" | tails == "left"){
                     abline(v = min(c, d), col = "blue", lwd = 4, lty = 3)
-                    text(min(c, d), pos = 4, 0.75, "mu-", col = "blue")
-                    text(min(c, d), pos=2, 0.75, paste0( "<--- ", (1 - CI) * 100, "%"), col = 'blue')}
+                    text(min(c, d), pos = 2, 0.5, paste0("ctl mu- ", paste0((1 - CI) * 100, "% --->")) , col = "blue")
+                }
 
                 par(original.par)
             }
 
             #Effect Size Lower Bound
-            if(tails == "both"){
-                Lower.Bound.Effect <- mean(treatment) - max(a, b)
-            }
-            if(tails == "left"){
-                Lower.Bound.Effect <- mean(treatment) - max(c, d)
-            }
-            if(tails == "right"){
-                Lower.Bound.Effect <- mean(treatment) - max(a, b)
-            }
+            if(tails == "both") Lower.Bound.Effect <- mean(treatment) - max(a, b)
+            
+            if(tails == "left") Lower.Bound.Effect <- mean(treatment) - max(c, d)
+            
+            if(tails == "right") Lower.Bound.Effect <- mean(treatment) - max(a, b)
+            
 
 
-  #Effect Size Upper Bound
-            if(tails == "both"){
-                Upper.Bound.Effect <- mean(treatment) - min(c, d)
-            }
-            if(tails == "left"){
-                Upper.Bound.Effect <- mean(treatment) - min(c, d)
-            }
-            if(tails == "right"){
-                Upper.Bound.Effect <- mean(treatment) - min(a, b)
-            }
+            #Effect Size Upper Bound
+            if(tails == "both") Upper.Bound.Effect <- mean(treatment) - min(c, d)
+            
+            if(tails == "left") Upper.Bound.Effect <- mean(treatment) - min(c, d)
+            
+            if(tails == "right") Upper.Bound.Effect <- mean(treatment) - min(a, b)
+            
 
 
 

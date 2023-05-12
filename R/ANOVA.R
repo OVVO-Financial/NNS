@@ -63,12 +63,10 @@ NNS.ANOVA <- function(
     }
     if(!missing(treatment)){
         # with treatment
-        if(any(class(control)%in%c("tbl","data.table"))){
-            control <- as.vector(unlist(control))
-        }
-        if(any(class(treatment)%in%c("tbl","data.table"))){
-            treatment <- as.vector(unlist(treatment))
-        }
+        if(any(class(control)%in%c("tbl","data.table"))) control <- as.vector(unlist(control))
+        
+        if(any(class(treatment)%in%c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
+        
         if(robust){
             treatment_p <- replicate(100, sample.int(length(treatment), replace = TRUE))
             treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
@@ -80,8 +78,10 @@ NNS.ANOVA <- function(
                 1:ncol(control_matrix), 
                 function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], plot = FALSE)$Certainty
             )
+            
             cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties[-1])
             cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties[-1])
+            
             robust_estimate <- gravity(nns.certainties)
             original.par <- par(no.readonly = TRUE)
             par(mfrow = c(1, 2))
@@ -115,14 +115,13 @@ NNS.ANOVA <- function(
             )
         )
     }
+    
     # without treatment
     n <- ncol(control)
-    if(is.null(n)){
-        stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
-    }
-    if(n == 1){
-        stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
-    }
+    if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+    
+    if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+    
     if(n >= 2){
         if(any(class(control) %in% c("tbl","data.table"))){
             A <- as.data.frame(control)
@@ -158,8 +157,10 @@ NNS.ANOVA <- function(
             )$Certainty
           )
         }
+        
         #Certainty associated with samples
         NNS.ANOVA.rho <- mean(unlist(raw.certainties))
+        
         #Graphs
         if(plot){
             boxplot(
@@ -177,6 +178,7 @@ NNS.ANOVA <- function(
         }
         return(c("Certainty" = NNS.ANOVA.rho))
     }
+    
     raw.certainties <- list(n - 1)
     for(i in 1:(n - 1)){
       raw.certainties[[i]] <- sapply(
@@ -189,8 +191,8 @@ NNS.ANOVA <- function(
     certainties[lower.tri(certainties, diag = FALSE)] <- unlist(raw.certainties)
     diag(certainties) <- 1
     certainties <- pmax(certainties, t(certainties), na.rm = TRUE)
-    colnames(certainties) <- colnames(A)
-    rownames(certainties) <- colnames(A)
+    colnames(certainties) <- rownames(certainties) <- colnames(A)
+
     if(plot){
       boxplot(
         A, 

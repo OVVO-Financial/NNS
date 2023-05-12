@@ -131,6 +131,7 @@ NNS.dep = function(x,
       cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1,2)])
       dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1,2)])
       dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1,2)])
+      
       if(print.map){
         par(mfrow = c(1, 2))
         hist(cors[-c(1,2)], main = "NNS Correlation", xlab = NULL, xlim = c(min(cors), max(cors[-1])))
