@@ -36,7 +36,9 @@
 #'  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 #'
 #'  \item{\code{"Point.est"}} for the predicted value generated;
-#'
+#'  
+#'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
+#'  
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 #'
 #'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
@@ -56,6 +58,8 @@
 #'  \item{\code{"RPM"}} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 #'
 #'  \item{\code{"Point.est"}} returns the predicted value generated;
+#'  
+#'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 #'
 #'  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 #' }
@@ -288,7 +292,7 @@ NNS.reg = function (x, y,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
-                         point.only = point.only, ncores = ncores))
+                         point.only = point.only, ncores = ncores, confidence.interval = confidence.interval))
         
       } else { # Multivariate dim.red == FALSE
         if(is.null(original.names)){
@@ -863,6 +867,20 @@ NNS.reg = function (x, y,
   fitted[, `:=` ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 1))) ) ), by = gradient]
   
   
+  ###Confidence and prediction intervals
+  pred.int = NULL
+  if(is.numeric(confidence.interval)){
+    fitted[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat) , by = gradient]
+    fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
+  
+    if(!is.null(point.est)){
+      lower.pred.int = point.est.y - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals))
+      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals)) + point.est.y
+    
+      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
+    }
+  }
+  
   ###Plotting and regression equation
   if(plot){
     if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", format(Prediction.Accuracy, digits = 4)) else  r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
@@ -878,9 +896,6 @@ NNS.reg = function (x, y,
     }
     
     if(is.numeric(confidence.interval)){
-      fitted[, `:=` ( 'conf.int.pos' = UPM.VaR((1-confidence.interval)/2, degree = 1, abs(residuals)) + y.hat ), by = gradient]
-      fitted[, `:=` ( 'conf.int.neg' = y.hat - UPM.VaR((1-confidence.interval)/2, degree = 1, abs(residuals)) ), by = gradient]
-
       plot(x, y, xlim = c(xmin, xmax),
            ylim = c(min(c(fitted$conf.int.neg, ymin)), max(c(fitted$conf.int.pos,ymax))),
            col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
@@ -944,6 +959,7 @@ NNS.reg = function (x, y,
                 "x.star" = x.star,
                 "derivative" = Regression.Coefficients[],
                 "Point.est" = point.est.y,
+                "pred.int" = pred.int,
                 "regression.points" = regression.points[, .(x,y)],
                 "Fitted.xy" = fitted))
   } else {
@@ -954,6 +970,7 @@ NNS.reg = function (x, y,
                    "x.star" = x.star,
                    "derivative" = Regression.Coefficients[],
                    "Point.est" = point.est.y,
+                   "pred.int" = pred.int,
                    "regression.points" = regression.points[ ,.(x,y)],
                    "Fitted.xy" = fitted))
   }

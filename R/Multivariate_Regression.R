@@ -1,6 +1,6 @@
 NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, n.best = NULL, type = NULL, point.est = NULL, point.only = FALSE,
                        plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2",
-                       return.values = FALSE, plot.regions = FALSE, ncores = NULL){
+                       return.values = FALSE, plot.regions = FALSE, ncores = NULL, confidence.interval = NULL){
   
   dist <- tolower(dist)
   
@@ -350,18 +350,37 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     legend(location, legend = r2.leg, bty = 'n')
   }
   
+  lower.pred.int = NULL
+  upper.pred.int = NULL
+  pred.int = NULL
+  
+  if(is.numeric(confidence.interval)){
+    fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]
+    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
+    
+    if(!is.null(point.est)){
+      lower.pred.int = predict.fit - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
+      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals)) + predict.fit
+    
+      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
+    }
+  }
+  
+  
   ### Return Values
   if(return.values){
     return(list(R2 = R2,
                 rhs.partitions = rhs.partitions,
                 RPM = REGRESSION.POINT.MATRIX[] ,
                 Point.est = predict.fit,
+                pred.int = pred.int,
                 Fitted.xy = fitted.matrix[]))
   } else {
     invisible(list(R2 = R2,
                    rhs.partitions = rhs.partitions,
                    RPM = REGRESSION.POINT.MATRIX[],
                    Point.est = predict.fit,
+                   pred.int = pred.int,
                    Fitted.xy = fitted.matrix[]))
   }
   
