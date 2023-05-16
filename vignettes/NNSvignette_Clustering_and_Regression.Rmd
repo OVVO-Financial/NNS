@@ -154,13 +154,13 @@ $NNS.reg.n.best
 [1] 1
 
 $probability.threshold
-[1] 0.43875
+[1] 0.445
 
 $OBJfn.dim.red
-[1] 0.96
+[1] 0.9133333
 
 $NNS.dim.red.threshold
-[1] 0.935
+[1] 0.79
 
 $reg
  [1] 1 1 1 1 1 1 1 1 1 1

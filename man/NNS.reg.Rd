@@ -87,7 +87,9 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 
  \item{\code{"Point.est"}} for the predicted value generated;
-
+ 
+ \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
+ 
  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 
  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
@@ -107,6 +109,8 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
  \item{\code{"RPM"}} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
 
  \item{\code{"Point.est"}} returns the predicted value generated;
+ 
+ \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 
  \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 }
