@@ -16,7 +16,7 @@
 #' @param plot logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
-#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.
+#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.  Also applies the same level for the prediction intervals.
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
@@ -874,10 +874,11 @@ NNS.reg = function (x, y,
     fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
   
     if(!is.null(point.est)){
-      lower.pred.int = point.est.y - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals))
-      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals)) + point.est.y
+      lower.pred.int <- point.est.y - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals))
+      upper.pred.int <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals)) + point.est.y
     
-      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
+      pred.int <- data.table::data.table(lower.pred.int, upper.pred.int)
+      if(type=="class") pred.int <- data.table::data.table(apply(pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
     }
   }
   

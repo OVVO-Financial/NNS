@@ -19,6 +19,7 @@
 #' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, which will reduce the dimension first, then find the optimal \code{n.best}.
 #' @param stack logical; \code{TRUE} (default) Uses dimension reduction output in \code{n.best} optimization, otherwise performs both analyses independently.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} (default) uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param pred.int numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals with each \code{method}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
@@ -30,8 +31,11 @@
 #' \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
+#' \item{\code{"reg.pred.int"}} returns the prediction intervals for the regression output.
 #' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
+#' \item{\code{"dim.red.pred.int"}} returns the prediction intervals for the dimension reduction regression output.
 #' \item{\code{"stack"}} returns the output of the stacked model.
+#' \item{\code{"pred.int"}} returns the prediction intervals for the stacked model.
 #' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
@@ -82,6 +86,7 @@ NNS.stack <- function(IVs.train,
                       method = c(1, 2),
                       stack = TRUE,
                       dim.red.method = "cor",
+                      pred.int = NULL,
                       status = TRUE,
                       ncores = NULL){
   
@@ -278,10 +283,11 @@ NNS.stack <- function(IVs.train,
         nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table==max(threshold.table)])))
         
         nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
-                                                 type = NULL, point.only = TRUE))
+                                                 type = NULL, point.only = TRUE, confidence.interval = pred.int))
         
         actual <- nns.method.2$Fitted.xy$y
         predicted <- nns.method.2$Fitted.xy$y.hat
+        pred.int.2 <- nns.method.2$pred.int
         
         best.nns.ord <- eval(obj.fn)
         
@@ -437,18 +443,18 @@ NNS.stack <- function(IVs.train,
         
         if(length(relevant_vars)>1){
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                     type = NULL, point.only = FALSE))
+                                                     type = NULL, point.only = FALSE, confidence.interval = pred.int))
         } else {
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = unlist(IVs.test[, relevant_vars]), plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                    type = NULL, point.only = FALSE))
+                                                    type = NULL, point.only = FALSE, confidence.interval = pred.int))
         }
         
         actual <- nns.method.1$Fitted.xy$y
         predicted <- nns.method.1$Fitted.xy$y.hat
         
-        
         best.nns.cv <- eval(obj.fn)
         
+        pred.int.1 <- nns.method.1$pred.int
         nns.method.1 <- nns.method.1$Point.est
         
         if(!is.null(type) && !is.null(nns.method.1)){
@@ -457,7 +463,6 @@ NNS.stack <- function(IVs.train,
           nns.method.1 <- pmin(nns.method.1, max(as.numeric(DV.train)))
           nns.method.1 <- pmax(nns.method.1, min(as.numeric(DV.train)))
         }
-        
       }
       
       
@@ -506,10 +511,14 @@ NNS.stack <- function(IVs.train,
     }
     
     estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
+    if(!is.null(pred.int)) stacked.pred.int <- (weights[1] * pred.int.1 + weights[2] * pred.int.2) else stacked.pred.int <- NULL
+
     if(!is.null(type)){
       estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
       estimates <- pmin(estimates, max(as.numeric(DV.train)))
       estimates <- pmax(estimates, min(as.numeric(DV.train)))
+      
+      if(!is.null(pred.int)) stacked.pred.int <- data.table::data.table(apply(stacked.pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
     }
   } else {
     if(method==1){
@@ -528,7 +537,10 @@ NNS.stack <- function(IVs.train,
               OBJfn.dim.red = best.nns.ord,
               NNS.dim.red.threshold = nns.ord.threshold,
               reg = nns.method.1,
+              reg.pred.int = pred.int.1,
               dim.red = nns.method.2,
-              stack = estimates))
+              dim.red.pred.int = pred.int.2,
+              stack = estimates,
+              pred.int = stacked.pred.int))
   
 }

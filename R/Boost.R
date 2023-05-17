@@ -20,9 +20,10 @@
 #' @param extreme logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.
 #' @param features.only logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.
 #' @param feature.importance logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.
+#' @param pred.int numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
 #'
 #' @note Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
 #'
@@ -61,6 +62,7 @@ NNS.boost <- function(IVs.train,
                       extreme = FALSE,
                       features.only = FALSE,
                       feature.importance = TRUE,
+                      pred.int = NULL,
                       status = TRUE){
   
   if(sum(is.na(cbind(IVs.train,DV.train))) > 0) stop("You have some missing values, please address.")
@@ -401,14 +403,17 @@ NNS.boost <- function(IVs.train,
   
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
   
-  estimates <- NNS.stack(x[, keeper.features],
-                         y,
-                         IVs.test = z[, keeper.features],
-                         order = depth, dim.red.method = "all",
-                         ncores = 1,
-                         stack = FALSE, status = status,
-                         type = type, dist = dist, folds = folds)$stack
+  model <- NNS.stack(x[, keeper.features],
+                     y,
+                     IVs.test = z[, keeper.features],
+                     order = depth, dim.red.method = "all",
+                     ncores = 1,
+                     stack = FALSE, status = status,
+                     type = type, dist = dist, folds = folds,
+                     pred.int = pred.int)
 
+  estimates <- model$stack
+  
   estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
   
   
@@ -443,6 +448,7 @@ NNS.boost <- function(IVs.train,
   if(!is.null(type)) estimates <- ifelse(estimates%%1 < .5, floor(estimates), ceiling(estimates))
   
   return(list("results" = estimates,
+              "pred.int" = model$pred.int,
               "feature.weights" = plot.table/sum(plot.table),
               "feature.frequency" = plot.table))
   

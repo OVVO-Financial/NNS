@@ -386,16 +386,16 @@ NNS.ARMA.optim <- function(variable,
   }
   
   if(!is.null(pred.int)){
-      lower_CIs <- model.results - UPM.VaR((1-pred.int)/2, 0, abs(errors)) - abs(bias)
-      upper_CIs <- model.results + UPM.VaR((1-pred.int)/2, 0, abs(errors)) + abs(bias)
+      lower_PIs <- model.results - abs(LPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
+      upper_PIs <- model.results + abs(UPM.VaR((1-pred.int)/2, 0, errors)) + abs(bias)
   } else {
-      upper_CIs <- lower_CIs <- NULL
+      upper_PIs <- lower_PIs <- NULL
   } 
   
   if(!negative.values){
       model.results <- pmax(0, model.results)
-      lower_CIs <- pmax(0, lower_CIs)
-      upper_CIs <- pmax(0, upper_CIs)
+      lower_PIs <- pmax(0, lower_PIs)
+      upper_PIs <- pmax(0, upper_PIs)
   }
   
   return(list(periods = nns.periods,
@@ -407,6 +407,6 @@ NNS.ARMA.optim <- function(variable,
               bias.shift = -bias,
               errors = errors,
               results = model.results,
-              lower.pred.int = lower_CIs,
-              upper.pred.int = upper_CIs))
+              lower.pred.int = lower_PIs,
+              upper.pred.int = upper_PIs))
 }

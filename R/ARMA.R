@@ -258,7 +258,7 @@ NNS.ARMA <- function(variable,
 
 
   if(!is.null(pred.int)){
-    CIs <- do.call(cbind, NNS.MC(Estimates, rho = c(0,1), exp = 2)$replicates)
+    PIs <- do.call(cbind, NNS.MC(Estimates, rho = c(0,1), exp = 2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
   } else lin.resid <- 0
@@ -288,11 +288,11 @@ NNS.ARMA <- function(variable,
     if(!is.null(pred.int)){
       plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
            xlim = c(1, max((training.set + h), length(OV))),
-           ylab = label, ylim = c(min(Estimates, OV,  unlist(CIs) ), max(OV, Estimates, unlist(CIs) )) )
+           ylab = label, ylim = c(min(Estimates, OV,  unlist(PIs) ), max(OV, Estimates, unlist(PIs) )) )
       
-      for(i in 1 : ncol(CIs)){
-        lines((training.set+1) : (training.set+h), CIs[,i] + lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
-        lines((training.set+1) : (training.set+h), CIs[,i] - lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
+      for(i in 1 : ncol(PIs)){
+        lines((training.set+1) : (training.set+h), PIs[,i] + lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
+        lines((training.set+1) : (training.set+h), PIs[,i] - lin.resid,  col = rgb(0.75,0.75,0.75, 0.05))
       }
       
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
@@ -324,13 +324,13 @@ NNS.ARMA <- function(variable,
   
   options(warn = oldw)
   if(!is.null(pred.int)){
-    upper_lower <- apply(CIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z),LPM.VaR((1-pred.int)/2, 0, z))) 
-    upper_CIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
-    lower_CIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
-    results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_CIs),  pmax(Estimates, upper_CIs))
+    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), abs(LPM.VaR((1-pred.int)/2, 0, z)))) 
+    upper_PIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
+    lower_PIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
+    results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_PIs),  pmax(Estimates, upper_PIs))
     colnames(results) = c("Estimates",
-                          paste0("Lower ", round(pred.int*100,2), "% CI"),
-                          paste0("Upper ", round(pred.int*100,2), "% CI"))
+                          paste0("Lower ", round(pred.int*100,2), "% pred.int"),
+                          paste0("Upper ", round(pred.int*100,2), "% pred.int"))
     return(data.table::data.table(results))
   } else {
     return(Estimates)

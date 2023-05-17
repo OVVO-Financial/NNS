@@ -289,6 +289,23 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     R2 <- max(0, min(1, R2num / R2den ))
   }
   
+  
+  lower.pred.int = NULL
+  upper.pred.int = NULL
+  pred.int = NULL
+  
+  if(is.numeric(confidence.interval)){
+    fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]
+    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
+    
+    if(!is.null(point.est)){
+      lower.pred.int = predict.fit - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
+      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals)) + predict.fit
+      
+      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
+    }
+  }
+  
   ### 3d plot
   if(plot && n == 2){
     region.1 <- mean.by.id.matrix[[1]]
@@ -344,27 +361,19 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     resids <- cbind(original.DV, y.hat)
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2) 
-    matplot(resids, type = 'l', xlab = "Index", ylab = expression(paste("y (black)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
+    plot(seq_along(original.DV), original.DV, type = "l", lwd = 3, col = "steelblue",xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
+    lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 2)
+    
+    if(is.numeric(confidence.interval)){
+      lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.pos), col = 'pink')
+      lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.neg), col = 'pink')
+    }
     
     title(main = paste0("NNS Order = multiple"), cex.main = 2)
     legend(location, legend = r2.leg, bty = 'n')
   }
   
-  lower.pred.int = NULL
-  upper.pred.int = NULL
-  pred.int = NULL
   
-  if(is.numeric(confidence.interval)){
-    fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]
-    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
-    
-    if(!is.null(point.est)){
-      lower.pred.int = predict.fit - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
-      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals)) + predict.fit
-    
-      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
-    }
-  }
   
   
   ### Return Values

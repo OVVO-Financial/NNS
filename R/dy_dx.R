@@ -25,11 +25,11 @@
 #' dy.dx(x, y, eval.point = 1.75)
 #'
 #' # Vector of derivatives
-#' dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")
+#' dy.dx(x, y, eval.point = c(1.75, 2.5))
 #' }
 #' @export
 
-dy.dx <- function(x, y, eval.point = median(x), deriv.method = "FD"){
+dy.dx <- function(x, y, eval.point = median(x)){
   
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
