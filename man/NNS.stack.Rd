@@ -22,6 +22,7 @@ NNS.stack(
   method = c(1, 2),
   stack = TRUE,
   dim.red.method = "cor",
+  pred.int = NULL,
   status = TRUE,
   ncores = NULL
 )
@@ -61,6 +62,8 @@ NNS.stack(
 
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} (default) uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
+\item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals with each \code{method}.}
+
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
@@ -74,8 +77,11 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
 \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
+\item{\code{"reg.pred.int"}} returns the prediction intervals for the regression output.
 \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
+\item{\code{"dim.red.pred.int"}} returns the prediction intervals for the dimension reduction regression output.
 \item{\code{"stack"}} returns the output of the stacked model.
+\item{\code{"pred.int"}} returns the prediction intervals for the stacked model.
 }
 }
 \description{

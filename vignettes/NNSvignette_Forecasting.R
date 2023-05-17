@@ -160,13 +160,13 @@ sqrt(mean((nns+nns.optimal$bias.shift - tail(AirPassengers, 44)) ^ 2))
 nns <- pmax(0, nns + nns.optimal$bias.shift)
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 
-## ----extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=TRUE----
-NNS.ARMA(AirPassengers, 
-         h = 50,
-         pred.int = .95,
-         seasonal.factor = nns.optimal$periods, 
-         method  = nns.optimal$method, 
-         weights = nns.optimal$weights, 
-         shrink = nns.optimal$shrink,
-         plot = TRUE, seasonal.plot = FALSE) + nns.optimal$bias.shift
+## ----extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=FALSE----
+#  NNS.ARMA(AirPassengers,
+#           h = 50,
+#           pred.int = .95,
+#           seasonal.factor = nns.optimal$periods,
+#           method  = nns.optimal$method,
+#           weights = nns.optimal$weights,
+#           shrink = nns.optimal$shrink,
+#           plot = TRUE, seasonal.plot = FALSE) + nns.optimal$bias.shift
 

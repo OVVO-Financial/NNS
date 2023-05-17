@@ -4,7 +4,7 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(x, y, eval.point = median(x), deriv.method = "FD")
+dy.dx(x, y, eval.point = median(x))
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -32,7 +32,7 @@ x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # Vector of derivatives
-dy.dx(x, y, eval.point = c(1.75, 2.5), deriv.method = "FD")
+dy.dx(x, y, eval.point = c(1.75, 2.5))
 }
 }
 \references{

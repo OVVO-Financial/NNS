@@ -60,8 +60,7 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 
 ## ----stackevalres, eval = FALSE-----------------------------------------------
 #  Folds Remaining = 0
-#  Current NNS.reg(... , threshold = 0.935 ) MAX Iterations Remaining = 2
-#  Current NNS.reg(... , threshold = 0.795 ) MAX Iterations Remaining = 1
+#  Current NNS.reg(... , threshold = 0.79 ) MAX Iterations Remaining = 1
 #  Current NNS.reg(... , threshold = 0.44 ) MAX Iterations Remaining = 0
 #  Current NNS.reg(... , n.best = 1 ) MAX Iterations Remaining = 12
 #  Current NNS.reg(... , n.best = 2 ) MAX Iterations Remaining = 11
@@ -83,13 +82,22 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 #  [1] 0.79
 #  
 #  $reg
-#   [1] 1 1 1 1 1 1 1 1 1 1
+#  [1] 1 1 1 1 1 1 1 1 1 1
+#  
+#  $reg.pred.int
+#  NULL
 #  
 #  $dim.red
-#   [1] 1 1 1 1 1 1 1 1 1 1
+#  [1] 1 1 1 1 1 1 1 1 1 1
+#  
+#  $dim.red.pred.int
+#  NULL
 #  
 #  $stack
-#   [1] 1 1 1 1 1 1 1 1 1 1
+#  [1] 1 1 1 1 1 1 1 1 1 1
+#  
+#  $pred.int
+#  NULL
 
 ## ----stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide', eval = FALSE----
 #  set.seed(123)

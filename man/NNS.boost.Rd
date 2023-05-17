@@ -22,6 +22,7 @@ NNS.boost(
   extreme = FALSE,
   features.only = FALSE,
   feature.importance = TRUE,
+  pred.int = NULL,
   status = TRUE
 )
 }
@@ -61,10 +62,12 @@ NNS.boost(
 
 \item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
 
+\item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.}
+
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set \code{$results}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
+Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
 }
 \description{
 Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.

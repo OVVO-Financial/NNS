@@ -21,22 +21,24 @@ require(rgl)
 require(meboot)
 ```
 
-
 # Forecasting
-The underlying assumptions of traditional autoregressive models are well known.  The resulting complexity with these models leads to observations such as,
 
-_``We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.''_ 
+The underlying assumptions of traditional autoregressive models are well known. The resulting complexity with these models leads to observations such as,
 
-`NNS` simplifies the forecasting process.  Below are some examples demonstrating **`NNS.ARMA`** and its **assumption free, minimal parameter** forecasting method.
+*\`\`We have found that choosing the wrong model or parameters can often yield poor results, and it is unlikely that even experienced analysts can choose the correct model and parameters efficiently given this array of choices.''*
+
+`NNS` simplifies the forecasting process. Below are some examples demonstrating **`NNS.ARMA`** and its **assumption free, minimal parameter** forecasting method.
 
 ## Linear Regression
-**`NNS.ARMA`** has the ability to fit a linear regression to the relevant component series, yielding very fast results.  For our running example we will use the `AirPassengers` dataset loaded in base R.
 
-We will forecast 44 periods `h = 44` of `AirPassengers` using the first 100 observations `training.set = 100`, returning estimates of the final 44 observations.  We will then test this against our validation set of `tail(AirPassengers,44)`.
+**`NNS.ARMA`** has the ability to fit a linear regression to the relevant component series, yielding very fast results. For our running example we will use the `AirPassengers` dataset loaded in base R.
+
+We will forecast 44 periods `h = 44` of `AirPassengers` using the first 100 observations `training.set = 100`, returning estimates of the final 44 observations. We will then test this against our validation set of `tail(AirPassengers,44)`.
 
 Since this is monthly data, we will try a `seasonal.factor = 12`.
 
 Below is the linear fit and associated root mean squared error (RMSE) using `method = "lin"`.
+
 ```{r linear,fig.width=5,fig.height=3,fig.align = "center", warning=FALSE}
 nns = NNS.ARMA(AirPassengers, 
                h = 44, 
@@ -50,7 +52,9 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
 ## Nonlinear Regression
+
 Now we can try using a nonlinear regression on the relevant component series using `method = "nonlin"`.
+
 ```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center", eval = FALSE}
 nns = NNS.ARMA(AirPassengers, 
                h = 44, 
@@ -62,13 +66,14 @@ nns = NNS.ARMA(AirPassengers,
 
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
+
 ```{r nonlinearres, eval = FALSE}
 [1] 19.49762
 ```
 
-
 ## Cross-Validation
-We can test a series of `seasonal.factors` and select the best one to fit.  The largest period to consider would be `0.5 * length(variable)`, since we need more than 2 points for a regression!  Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
+
+We can test a series of `seasonal.factors` and select the best one to fit. The largest period to consider would be `0.5 * length(variable)`, since we need more than 2 points for a regression! Remember, we are testing the first 100 observations of `AirPassengers`, not the full 144 observations.
 
 ```{r seasonal test, eval=TRUE}
 seas = t(sapply(1 : 25, function(i) c(i, sqrt( mean( (NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", seasonal.factor = i, plot=FALSE) - tail(AirPassengers, 44)) ^ 2) ) ) ) )
@@ -77,14 +82,14 @@ colnames(seas) = c("Period", "RMSE")
 seas
 ```
 
-
-Now we know `seasonal.factor = 12` is our best fit, we can see if there's any benefit from using a nonlinear regression.  Alternatively, we can define our best fit as the corresponding `seas$Period` entry of the minimum value in our `seas$RMSE` column.
+Now we know `seasonal.factor = 12` is our best fit, we can see if there's any benefit from using a nonlinear regression. Alternatively, we can define our best fit as the corresponding `seas$Period` entry of the minimum value in our `seas$RMSE` column.
 
 ```{r best fit, eval=TRUE}
 a = seas[which.min(seas[ , 2]), 1]
 ```
 
 Below you will notice the use of `seasonal.factor = a` generates the same output.
+
 ```{r best nonlinear,fig.width=5,fig.height=3,fig.align = "center", eval=TRUE}
 nns = NNS.ARMA(AirPassengers, 
                h = 44, 
@@ -96,21 +101,17 @@ nns = NNS.ARMA(AirPassengers,
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
-
-**Note:** You may experience instances with monthly data that report `seasonal.factor` close to multiples of 3, 4, 6 or 12.  For instance, if the reported `seasonal.factor = {37, 47, 71, 73}`  use  `(seasonal.factor = c(36, 48, 72))` by setting the `modulo` parameter in **`NNS.seas(..., modulo = 12)`**.  The same suggestion holds for daily data and multiples of 7, or any other time series with logically inferred cyclical patterns.  The nearest periods to that `modulo` will be in the expanded output.
+**Note:** You may experience instances with monthly data that report `seasonal.factor` close to multiples of 3, 4, 6 or 12. For instance, if the reported `seasonal.factor = {37, 47, 71, 73}` use `(seasonal.factor = c(36, 48, 72))` by setting the `modulo` parameter in **`NNS.seas(..., modulo = 12)`**. The same suggestion holds for daily data and multiples of 7, or any other time series with logically inferred cyclical patterns. The nearest periods to that `modulo` will be in the expanded output.
 
 ```{r modulo, eval=TRUE}
 NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 ```
 
-
-
 ## Cross-Validating All Combinations of `seasonal.factor`
+
 NNS also offers a wrapper function **`NNS.ARMA.optim()`** to test a given vector of `seasonal.factor` and returns the optimized objective function (in this case RMSE written as `obj.fn = expression( sqrt(mean((predicted - actual)^2)) )`) and the corresponding periods, as well as the **`NNS.ARMA`** regression method used.
 
 Given our monthly dataset, we will try multiple years by setting `seasonal.factor = seq(12, 36, 6)` every 6 months based on our **NNS.seas()** insights above.
-
-
 
 ```{r best optim, eval=FALSE}
 nns.optimal = NNS.ARMA.optim(AirPassengers, 
@@ -210,28 +211,33 @@ nns.optimal$bias.shift = 0
 ```
 
 Using our new parameters via the `nns.optimal$results` yields the same results:
+
 ```{r best optim2, eval=TRUE}
 sqrt(mean((nns.optimal$results - tail(AirPassengers, 44)) ^ 2))
 ```
 
-
 ## `$bias.shift`
+
 **`NNS.ARMA.optim`** will return a `$bias.shift`, which is to be added to the ultimate **`NNS.ARMA`** forecast when using the optimum parameters from the **`NNS.ARMA.optim`** call.
+
 ```{r best optim3, eval=TRUE}
 sqrt(mean((nns+nns.optimal$bias.shift - tail(AirPassengers, 44)) ^ 2))
 ```
 
 ### Negative values and `$bias.shift`
+
 If the variable cannot logically assume negative values, then simply limit the `NNS` estimates.
+
 ```{r neg, eval=TRUE}
 nns <- pmax(0, nns + nns.optimal$bias.shift)
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
 ## Extension of Estimates
+
 Using our cross-validated parameters (`seasonal.factor` and `method`) we can forecast another 50 periods out-of-sample (`h = 50`), by dropping the `training.set` parameter while generating the 95% confidence intervals.
 
-```{r extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=TRUE}
+```{r extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=FALSE}
 NNS.ARMA(AirPassengers, 
          h = 50,
          pred.int = .95,
@@ -242,55 +248,61 @@ NNS.ARMA(AirPassengers,
          plot = TRUE, seasonal.plot = FALSE) + nns.optimal$bias.shift
 ```
 
+<center>
+
+![](images/ARMA_ex.png){width="480" height="288"}
+
+</center>
 
 ## Brief Notes on Other Parameters
-* `seasonal.factor = c(1, 2, ...)`
 
-We included the ability to use any number of specified seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+-   `seasonal.factor = c(1, 2, ...)`
 
-* `weights`
+We included the ability to use any number of specified seasonal periods simultaneously, weighted by their strength of seasonality. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
 
-Instead of weighting by the `seasonal.factor` strength of seasonality, we offer the ability to weight each per any defined compatible vector summing to 1.  
+-   `weights`
+
+Instead of weighting by the `seasonal.factor` strength of seasonality, we offer the ability to weight each per any defined compatible vector summing to 1.\
 Equal weighting would be `weights = "equal"`.
 
-* `pred.int`
+-   `pred.int`
 
 Provides the values for the specified prediction intervals within [0,1] for each forecasted point and plots the bootstrapped replicates for the forecasted points.
 
-* `seasonal.factor = FALSE`
+-   `seasonal.factor = FALSE`
 
-We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength of seasonality.  Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
+We also included the ability to use all detected seasonal periods simultaneously, weighted by their strength of seasonality. Computationally expensive when used with nonlinear regressions and large numbers of relevant periods.
 
+-   `best.periods`
 
-* `best.periods`
+This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength. To be used in conjunction with `seasonal.factor = FALSE`.
 
-This parameter restricts the number of detected seasonal periods to use, again, weighted by their strength.  To be used in conjunction with  `seasonal.factor = FALSE`.
+-   `modulo`
 
-* `modulo`
+To be used in conjunction with `seasonal.factor = FALSE`. This parameter will ensure logical seasonal patterns (i.e., `modulo = 7` for daily data) are included along with the results.
 
-To be used in conjunction with `seasonal.factor = FALSE`.  This parameter will ensure logical seasonal patterns (i.e., `modulo = 7` for daily data) are included along with the results.
+-   `mod.only`
 
-* `mod.only`
+To be used in conjunction with `seasonal.factor = FALSE & modulo != NULL`. This parameter will ensure empirical patterns are kept along with the logical seasonal patterns.
 
-To be used in conjunction with `seasonal.factor = FALSE & modulo != NULL`.  This parameter will ensure empirical patterns are kept along with the logical seasonal patterns.
+-   `dynamic = TRUE`
 
-* `dynamic = TRUE`
+This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`. Also computationally expensive due to the recalculation of seasonal periods for each estimated value.
 
-This setting generates a new seasonal period(s) using the estimated values as continuations of the variable, either with or without a `training.set`.  Also computationally expensive due to the recalculation of seasonal periods for each estimated value.
+-   `plot` , `seasonal.plot`
 
-* `plot` , `seasonal.plot` 
-
-These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`.  `seasonal.plot = TRUE` will not plot without `plot = TRUE`.  If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.  
+These are the plotting arguments, easily enabled or disabled with `TRUE` or `FALSE`. `seasonal.plot = TRUE` will not plot without `plot = TRUE`. If a seasonal analysis is all that is desired, `NNS.seas` is the function specifically suited for that task.
 
 # Multivariate Time Series Forecasting
+
 The extension to a generalized multivariate instance is provided in the following documentation of the **`NNS.VAR()`** function:
 
-* [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://www.ssrn.com/abstract=3489550)
-
+-   [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://www.ssrn.com/abstract=3489550)
 
 # References
+
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
-* [Forecasting Using NNS](https://www.ssrn.com/abstract=3382300)
+-   [Forecasting Using NNS](https://www.ssrn.com/abstract=3382300)
