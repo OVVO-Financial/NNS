@@ -523,8 +523,14 @@ NNS.stack <- function(IVs.train,
   } else {
     if(method==1){
       estimates <- nns.method.1
+      pred.int.2 <- NULL
+      stacked.pred.int <- pred.int.1
     } else {
-      if(method==2) estimates <- nns.method.2
+      if(method==2){
+        estimates <- nns.method.2
+        pred.int.1 <- NULL
+        stacked.pred.int <- pred.int.2
+      }
     }
   }
   

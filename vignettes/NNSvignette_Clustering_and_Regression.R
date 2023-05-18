@@ -119,5 +119,5 @@ NNS.reg(cbind(x, x), y,
         n.best = nns.params$NNS.reg.n.best,
         point.est = cbind(x, x), 
         residual.plot = TRUE,  
-        ncores = 1)
+        ncores = 1, confidence.interval = .95)
 

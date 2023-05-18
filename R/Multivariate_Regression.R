@@ -4,6 +4,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   dist <- tolower(dist)
   
+  
   ### For Multiple regressions
   ###  Turn each column into numeric values
   original.IVs <- X_n
@@ -40,7 +41,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   if(is.null(order)) order <- ceiling(max(1,(NNS.copula(original.matrix)*10)))
   
-  
+
   ###  Regression Point Matrix
   if(is.numeric(order)){
     reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, stn = stn, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
@@ -162,6 +163,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   RPM_CLASS <- apply(do.call(cbind, lapply(REGRESSION.POINT.MATRIX[ ,1:n], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
   
   if(is.null(n.best)) n.best <- floor(sqrt(n))
+
   
   if(n.best > 1 && !point.only){
     if(num_cores > 1){
@@ -282,7 +284,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   fitted.matrix$residuals <-  original.DV - fitted.matrix$y.hat
   
   if(!is.null(type) && type=="class"){
-    R2 <- format(mean(fitted.matrix$y.hat==original.DV), digits = 4) 
+    R2 <- as.numeric(format(mean(fitted.matrix$y.hat==original.DV), digits = 4))
   } else {
     R2num <- sum((fitted.matrix$y.hat - mean(original.DV))*(original.DV - mean(original.DV)))^ 2
     R2den <- sum((fitted.matrix$y.hat - mean(original.DV)) ^ 2) * sum((original.DV - mean(original.DV)) ^ 2)
@@ -355,18 +357,23 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       }
     }
   }
-  
+
   ### Residual plot
   if(residual.plot){
     resids <- cbind(original.DV, y.hat)
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2) 
-    plot(seq_along(original.DV), original.DV, type = "l", lwd = 3, col = "steelblue",xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
+    plot(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue", xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
     lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 2)
     
     if(is.numeric(confidence.interval)){
       lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.pos), col = 'pink')
       lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.neg), col = 'pink')
+      
+      polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))), col = "pink", border = NA)
+    
+      points(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue")
+      lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 2)
     }
     
     title(main = paste0("NNS Order = multiple"), cex.main = 2)

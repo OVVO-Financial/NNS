@@ -78,32 +78,32 @@ NNS.ANOVA.bin<- function(control, treatment,
     } else {
 
         #Upper end of CDF confidence interval for control mean
-        if(tails == "both") CI <- confidence.interval+(1-confidence.interval)/2
+        if(tails == "both") CI <- (1-confidence.interval)/2
         
-        if(tails == "left" | tails == "right") CI <- confidence.interval
+        if(tails == "left" || tails == "right") CI <- 1 - confidence.interval
         
             # Resample control means
             y_p <- replicate(1000, sample.int(length(control), replace = TRUE))
             control_means <- Rfast::colmeans(matrix(control[y_p], ncol = ncol(y_p), byrow = T))
 
-            a <- UPM.VaR(1 - CI, 0, control_means)
+            a <- UPM.VaR(CI, 0, control_means)
             b <- mean(control_means)
             
             if(plot){
                 if(tails == "both" | tails == "right"){
                     abline(v = max(a, b), col = "green", lwd = 4, lty = 3)
-                    text(max(a, b), pos = 4, 0.5, paste0("<--- ", "ctl mu+ ", (1 - CI) * 100, "%" ), col = "green")
+                    text(max(a, b), pos = 4, 0.5, paste0("<--- ", "ctl mu+ ", CI * 100, "%" ), col = "green")
                 }
             }
 
             #Lower end of CDF confidence interval for control mean
-            c <- LPM.VaR(1 - CI, 0, control_means)
+            c <- LPM.VaR(CI, 0, control_means)
             d <- mean(control_means)
 
             if(plot){
                 if(tails == "both" | tails == "left"){
                     abline(v = min(c, d), col = "blue", lwd = 4, lty = 3)
-                    text(min(c, d), pos = 2, 0.5, paste0("ctl mu- ", paste0((1 - CI) * 100, "% --->")) , col = "blue")
+                    text(min(c, d), pos = 2, 0.5, paste0("ctl mu- ", paste0(CI * 100, "% --->")) , col = "blue")
                 }
 
                 par(original.par)

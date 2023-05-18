@@ -897,7 +897,7 @@ NNS.reg = function (x, y,
     }
     
     if(is.numeric(confidence.interval)){
-      plot(x, y, xlim = c(xmin, xmax),
+      plot(x, y, xlim = c(xmin, xmax), pch = 1, lwd = 2,
            ylim = c(min(c(fitted$conf.int.neg, ymin)), max(c(fitted$conf.int.pos,ymax))),
            col ='steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
@@ -909,11 +909,12 @@ NNS.reg = function (x, y,
            },
            ylab = y.label, mgp = c(2.5, 0.5, 0),
            cex.lab = 1.5, cex.main = 2)
-      
-      points(fitted$x, na.omit(fitted$conf.int.pos), col = 'pink', pch = 19)
-      points(fitted$x, na.omit(fitted$conf.int.neg), col = 'pink', pch = 19)
+
+      idx <- order(fitted$x)
+      polygon(c(x[idx], x[rev(idx)]), c(na.omit(fitted$conf.int.pos[idx]), (na.omit(fitted$conf.int.neg[rev(idx)]))), col = "pink", border = NA)
+      points(x[idx], y[idx], pch = 1, lwd = 2, col = "steelblue")
     } else {
-      plot(x, y, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
+      plot(x, y, pch = 1, lwd = 2, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
              if(original.columns > 1){
                "Synthetic X*"
@@ -938,11 +939,11 @@ NNS.reg = function (x, y,
     }
     
     if(!is.null(point.est)){
-      if(sum(point.est > max(x)) > 0){
+      if(any(point.est > max(x))){
         segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[.N, y], col = "green", lty = 2)
       }
       
-      if(sum(point.est < min(x)) > 0){
+      if(any(point.est < min(x))){
         segments(point.est[point.est < min(x)], point.est.y[point.est < min(x)], regression.points[1, x], regression.points[1, y], col = "green", lty = 2)
       }
     }
