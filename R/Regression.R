@@ -852,16 +852,10 @@ NNS.reg = function (x, y,
   } else {
     Prediction.Accuracy <- NULL
   }
-
-  R2num <- sum((fitted$y.hat - mean(original.y))*(original.y - mean(original.y)))^ 2
-  R2den <- sum((fitted$y.hat - mean(original.y)) ^ 2 )* sum((original.y - mean(original.y)) ^ 2)
-
-  if(R2den == 0){
-    R2 <- 1
-  } else {
-    R2 <- max(0, min(1, R2num / R2den ))
-  }
   
+  y.mean <- mean(y)
+  R2 <- (sum((fitted$y - y.mean)*(fitted$y.hat - y.mean))^2)/(sum((fitted$y - y.mean)^2)*sum((fitted$y.hat - y.mean)^2))
+
   
   ###Standard errors estimation
   fitted[, `:=` ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 1))) ) ), by = gradient]

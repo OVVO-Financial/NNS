@@ -284,11 +284,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   fitted.matrix$residuals <-  original.DV - fitted.matrix$y.hat
   
   if(!is.null(type) && type=="class"){
-    R2 <- as.numeric(format(mean(fitted.matrix$y.hat==original.DV), digits = 4))
+    R2 <- as.numeric(format(mean(fitted.matrix$y.hat==fitted.matrix$y), digits = 4))
   } else {
-    R2num <- sum((fitted.matrix$y.hat - mean(original.DV))*(original.DV - mean(original.DV)))^ 2
-    R2den <- sum((fitted.matrix$y.hat - mean(original.DV)) ^ 2) * sum((original.DV - mean(original.DV)) ^ 2)
-    R2 <- max(0, min(1, R2num / R2den ))
+    y.mean <- mean(fitted.matrix$y)
+    R2 <- (sum((fitted.matrix$y - y.mean)*(fitted.matrix$y.hat - y.mean))^2)/(sum((fitted.matrix$y - y.mean)^2)*sum((fitted.matrix$y.hat - y.mean)^2))
+    
   }
   
   
