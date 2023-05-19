@@ -872,7 +872,7 @@ NNS.reg = function (x, y,
       upper.pred.int <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals)) + point.est.y
     
       pred.int <- data.table::data.table(lower.pred.int, upper.pred.int)
-      if(type=="class") pred.int <- data.table::data.table(apply(pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
+      if(!is.null(type)&&type=="class") pred.int <- data.table::data.table(apply(pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
     }
   }
   
