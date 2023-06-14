@@ -144,7 +144,7 @@ lag.mtx <- function(x, tau){
 
 
 
-### Refactored meboot::meboot.part function using tdigest
+### Refactored meboot::meboot.part function
 NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd)
 {
   # Generate random numbers from the [0,1] uniform interval
@@ -207,5 +207,7 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv=5){
 }
 
 
-is.discrete <- function(x) is.factor(x) || is.character(x) || is.logical(x)
+is.fcl <- function(x) is.factor(x) || is.character(x) || is.logical(x)
+
+is.discrete <- function(x) sum(as.numeric(x)%%1)==0
 

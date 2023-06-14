@@ -364,7 +364,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2) 
     plot(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue", xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
-    lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 2)
+    lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 1)
     
     if(is.numeric(confidence.interval)){
       lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.pos), col = 'pink')
@@ -373,7 +373,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))), col = "pink", border = NA)
     
       points(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue")
-      lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 2)
+      lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 1)
     }
     
     title(main = paste0("NNS Order = multiple"), cex.main = 2)

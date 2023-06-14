@@ -180,7 +180,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode_class"
   }
   
-  if(sum((as.numeric(y)%%1)==0)==length(y) && length(unique(y)) < sqrt(length(y))){
+  if(is.discrete(y) && length(unique(y)) < sqrt(length(y))){
     type <- "class"
     noise.reduction <- "mode_class"
   }
@@ -678,7 +678,7 @@ NNS.reg = function (x, y,
   reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
 
   
-  if(is.discrete(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))){
+  if(is.fcl(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))){
     estimate <- y
   } else {
     estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
@@ -923,7 +923,7 @@ NNS.reg = function (x, y,
     ### Plot Regression points and fitted values and legend
     points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
     lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
-    
+  
     
     if(!is.null(point.est)){
       points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)

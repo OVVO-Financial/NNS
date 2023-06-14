@@ -95,3 +95,28 @@ NNS.gravity <- function(x, discrete = FALSE){
   if(is.na(res)) final <- q2 else final <- res
   if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(final)
 } 
+
+
+#' NNS rescale
+#'
+#' Rescale min-max scaling output between two numbers.
+#'
+#' @param x vector of data.
+#' @param a numeric; lower limit.
+#' @param b numeric; upper limit.
+#' @return Returns a rescaled distribution within provided limits.
+#' @author Fred Viole, OVVO Financial Systems
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' x <- rnorm(100)
+#' NNS.rescale(x, 5, 10)
+#' }
+#' @export
+
+
+NNS.rescale <- function (x, a, b) {
+  x <- as.numeric(x)
+  output <- a + (b - a) * (x - min(x))/(max(x) - min(x))
+  return(output)
+}

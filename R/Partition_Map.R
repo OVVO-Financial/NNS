@@ -296,7 +296,7 @@ NNS.part = function(x, y,
 
         RP <- data.table::setorder(RP[], quadrant)[]
 
-        if(sum(x%%1)==0) RP$x <- ifelse(RP$x%%1 < .5, floor(RP$x), ceiling(RP$x))
+        if(is.discrete(x)) RP$x <- ifelse(RP$x%%1 < .5, floor(RP$x), ceiling(RP$x))
 
         if(Voronoi) {
             abline(v = c(PART[ ,min(x), by=prior.quadrant]$V1,max(x)), lty = 3)
