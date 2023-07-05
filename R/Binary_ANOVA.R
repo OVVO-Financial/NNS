@@ -1,4 +1,5 @@
 NNS.ANOVA.bin<- function(control, treatment,
+                         means.only = FALSE,
                          mean.of.means = NULL,
                          upper.25.target = NULL,
                          lower.25.target = NULL,
@@ -46,6 +47,8 @@ NNS.ANOVA.bin<- function(control, treatment,
 
 
   #Certainty associated with samples
+        if(means.only) NNS.ANOVA.rho <- ((.5 - MAD.CDF)^2) / .25 
+        else {
         NNS.ANOVA.rho <- sum(c( ((.5 - MAD.CDF)^2) / .25 ,
                                 .5 * (( (.25 - upper.25.CDF)^2) / .25^2),
                                 .5 * (( (.25 - lower.25.CDF)^2) / .25^2),
@@ -53,6 +56,7 @@ NNS.ANOVA.bin<- function(control, treatment,
                                 .25 * (( (.125 - lower.125.CDF)^2) / .125^2)
                              )) / 2.5
 
+        }
         pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
   #Graphs
@@ -60,7 +64,7 @@ NNS.ANOVA.bin<- function(control, treatment,
         if(plot){
             if(is.null(par)) original.par <- par(no.readonly = TRUE) else original.par <- par
 
-            boxplot(list(control, treatment), las = 2, names = c("Control", "Treatment"), xlab = "Means", horizontal = TRUE, main = "NNS ANOVA and Effect Size", col = c("grey", "white"), cex.axis = 0.75)
+            boxplot(list(control, treatment), las = 2, names = c("Control", "Treatment"), horizontal = TRUE, main = "NNS ANOVA and Effect Size", col = c("grey", "white"), cex.axis = 0.75)
 
             #For ANOVA Visualization
             abline(v = mean.of.means, col = "red", lwd = 4)

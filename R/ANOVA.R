@@ -1,9 +1,10 @@
 #' NNS ANOVA
 #'
-#' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
+#' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables, evaluated at multiple quantiles (or means only).  Returns a degree of certainty to whether the population distributions (or sample means) are identical, not a p-value.
 #'
 #' @param control a numeric vector, matrix or data frame.
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
+#' @param means.only logical; \code{FALSE} (default) test whether difference in sample means only is zero.
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
 #' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
@@ -51,6 +52,7 @@
 NNS.ANOVA <- function(
     control,
     treatment,
+    means.only = FALSE,
     confidence.interval = 0.95,
     tails = "Both",
     pairwise = FALSE,
@@ -68,33 +70,38 @@ NNS.ANOVA <- function(
         if(any(class(treatment)%in%c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
         
         if(robust){
-            treatment_p <- replicate(100, sample.int(length(treatment), replace = TRUE))
+            l <- min(length(treatment), length(control))
+            treatment_p <- replicate(100, sample.int(l, replace = TRUE))
             treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
-            treatment_matrix <- cbind(treatment, treatment_matrix[, rev(seq_len(ncol(treatment_matrix)))])
+            treatment_matrix <- cbind(treatment[treatment_p[,1]], treatment_matrix[, rev(seq_len(ncol(treatment_matrix)))])
             control_matrix <- matrix(control[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
-            full_matrix <- cbind(control, control_matrix, treatment, treatment_matrix)
+            full_matrix <- cbind(control[treatment_p[,1]], control_matrix, treatment[treatment_p[,1]], treatment_matrix)
 
             nns.certainties <- sapply(
                 1:ncol(control_matrix), 
-                function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], plot = FALSE)$Certainty
+                function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], means.only = means.only, plot = FALSE)$Certainty
             )
             
             cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties[-1])
             cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties[-1])
             
             robust_estimate <- gravity(nns.certainties)
-            original.par <- par(no.readonly = TRUE)
-            par(mfrow = c(1, 2))
-            hist(nns.certainties, main = "NNS Certainty")
-            abline(v = robust_estimate, col = 'red', lwd = 3)
-            mtext("Robust Certainty Estimate", side = 3, col = "red", at = robust_estimate)
-            abline(v =  cer_lower_CI, col = "red", lwd = 2, lty = 3)
-            abline(v =  cer_upper_CI , col = "red", lwd = 2, lty = 3)
+            
+            if(plot){
+              original.par <- par(no.readonly = TRUE)
+              par(mfrow = c(1, 2))
+              hist(nns.certainties, main = "NNS Certainty")
+              abline(v = robust_estimate, col = 'red', lwd = 3)
+              mtext("Robust Certainty Estimate", side = 3, col = "red", at = robust_estimate)
+              abline(v =  cer_lower_CI, col = "red", lwd = 2, lty = 3)
+              abline(v =  cer_upper_CI , col = "red", lwd = 2, lty = 3)
+            }
             return(
                 list(
                     NNS.ANOVA.bin(
                         control, 
-                        treatment, 
+                        treatment,
+                        means.only = means.only,
                         confidence.interval = confidence.interval, 
                         plot = plot, 
                         tails = tails, 
@@ -109,6 +116,7 @@ NNS.ANOVA <- function(
             NNS.ANOVA.bin(
                 control, 
                 treatment, 
+                means.only = means.only,
                 confidence.interval = confidence.interval, 
                 plot = plot, 
                 tails = tails
@@ -148,6 +156,7 @@ NNS.ANOVA <- function(
             function(b) NNS.ANOVA.bin(
                 A[ , i],
                 A[ , b],
+                means.only = means.only,
                 mean.of.means = mean.of.means,
                 upper.25.target = upper.25.target,
                 lower.25.target = lower.25.target,
@@ -165,8 +174,7 @@ NNS.ANOVA <- function(
         if(plot){
             boxplot(
                 A, 
-                las = 2, 
-                xlab = "Means", 
+                las = 2,  
                 ylab = "Variable", 
                 horizontal = TRUE, 
                 main = "NNS ANOVA", 
@@ -183,7 +191,7 @@ NNS.ANOVA <- function(
     for(i in 1:(n - 1)){
       raw.certainties[[i]] <- sapply(
         (i + 1) : n, 
-        function(b) NNS.ANOVA.bin(A[ , i],A[ , b], plot = FALSE)$Certainty
+        function(b) NNS.ANOVA.bin(A[ , i],A[ , b], means.only = means.only, plot = FALSE)$Certainty
       )
     }
     
@@ -197,7 +205,6 @@ NNS.ANOVA <- function(
       boxplot(
         A, 
         las = 2, 
-        xlab = "Means", 
         ylab = "Variable", 
         horizontal = TRUE, 
         main = "ANOVA", 

@@ -35,8 +35,8 @@ NNS.TSD <- function(x, y, plot = TRUE){
     plot(LPM_x_sort, type = "l", lwd = 3, col = "red", main = "TSD", ylab = "Area of Cumulative Distribution",
        ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
 
-    lines(LPM_y_sort, type = "l", lwd =3,col = "blue")
-    legend("topleft", c("X","Y"), lwd = 10, col=c("red","blue"))
+    lines(LPM_y_sort, type = "l", lwd =3,col = "steelblue")
+    legend("topleft", c("X","Y"), lwd = 10, col=c("red","steelblue"))
 
     ifelse (!x.tsd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
             "X TSD Y",
