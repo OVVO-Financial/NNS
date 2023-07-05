@@ -7,6 +7,7 @@
 NNS.ANOVA(
   control,
   treatment,
+  means.only = FALSE,
   confidence.interval = 0.95,
   tails = "Both",
   pairwise = FALSE,
@@ -18,6 +19,8 @@ NNS.ANOVA(
 \item{control}{a numeric vector, matrix or data frame.}
 
 \item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
+
+\item{means.only}{logical; \code{FALSE} (default) test whether difference in sample means only is zero.}
 
 \item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.}
 
@@ -43,7 +46,7 @@ Returns the following:
 }
 }
 \description{
-Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables.  Returns a degree of certainty the difference in sample means is zero, not a p-value.
+Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables, evaluated at multiple quantiles (or means only).  Returns a degree of certainty to whether the population distributions (or sample means) are identical, not a p-value.
 }
 \examples{
  \dontrun{
