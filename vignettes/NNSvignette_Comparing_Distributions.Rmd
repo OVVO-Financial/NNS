@@ -25,7 +25,7 @@ require(meboot)
 
 **`NNS`** offers a multitude of ways to test if distributions came from the same population, or if they share the same mean.  The underlying function for these tests is **`NNS.ANOVA()`**.
 
-The output from **`NNS.ANOVA()`** is a `Certainty` statistic, which compares CDFs of distributions from several shared quantiles and normalizes the similarity of these points to be within the interval $[0,1]$, with 1 representing identical distributions.  For a complete analysis of `Certainty` to common p-values and the role of power, please see the **References**.
+The output from **`NNS.ANOVA()`** is a `Certainty` statistic, which compares CDFs of distributions from several shared quantiles and normalizes the similarity of these points to be within the interval $[0,1]$, with 1 representing identical distributions.  For a complete analysis of `Certainty` to common p-values and the role of power, please see the [References](#References).
 
 ## Test if Same Population
 Below we run the analysis to whether automatic transmissions and manual transmissions have significantly different `mpg` distributions per the `mtcars` dataset.
