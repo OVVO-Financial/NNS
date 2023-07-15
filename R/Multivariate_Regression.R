@@ -94,6 +94,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
+  } else {
+    foreach::registerDoSEQ()
+    invisible(data.table::setDTthreads(0, throttle = NULL))
   }
 
   NNS.ID <- lapply(1:n, function(j) findInterval(original.IVs[ , j], vec = na.omit(sort(reg.points.matrix[ , j])), left.open = FALSE))
@@ -224,11 +227,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     if(!is.null(np)){
       DISTANCES <- vector(mode = "list", np)
       distances <- data.table::data.table(point.est)
-      if(num_cores>1){
+      if(num_cores > 1){
         DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = z, type = dist, k = n.best, class = type)[1])
         
         parallel::stopCluster(cl)
-        registerDoSEQ()
+        rm(cl)
+        foreach::registerDoSEQ()
         invisible(data.table::setDTthreads(0, throttle = NULL))
       } else {
         distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, rpm_class = RPM_CLASS, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
@@ -236,7 +240,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
         DISTANCES <- as.numeric(unlist(distances$DISTANCES))
       }
 
-      if(any(outsiders>0)){
+      if(any(outsiders > 0)){
         outsiders <- rowSums(outsiders)
         outside.index <- as.numeric(which(outsiders>0))
         
@@ -292,9 +296,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   
-  lower.pred.int = NULL
-  upper.pred.int = NULL
-  pred.int = NULL
+  lower.pred.int <- NULL
+  upper.pred.int <- NULL
+  pred.int <- NULL
   
   if(is.numeric(confidence.interval)){
     fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]

@@ -27,7 +27,7 @@
 #'
 #' @note
 #' \itemize{
-#' \item \code{dim.red.method = "cor"} is significantly faster than the other methods, but comes at the expense of ignoring possible nonlinear relationships between lagged variables.
+#' \item \code{"Error in { : task xx failed -}"} should be re-run with \code{NNS.VAR(..., ncores = 1)}.
 #' \item Not recommended for factor variables, even after transformed to numeric.  \link{NNS.reg} is better suited for factor or binary regressor extrapolation.
 #' }
 #'
@@ -154,11 +154,15 @@ NNS.VAR <- function(variables,
     cl <- parallel::makeCluster(num_cores)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
+  } else {
+    foreach::registerDoSEQ()
+    invisible(data.table::setDTthreads(0, throttle = NULL))
   }
-  
+
   if(status) message("Currently generating univariate estimates...","\r", appendLF=TRUE)
  
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
+
     # For Interpolation / Extrapolation of all missing values
     index <- seq_len(dim(variables)[1])
     last_point <- tail(index, 1)
@@ -188,7 +192,7 @@ NNS.VAR <- function(variables,
       multi <- NNS.reg(a[,1], a[,2], order = NULL, ncores = 1,
                        point.est = index, plot = FALSE, point.only = TRUE)$Point.est
       
-      
+    
       ts <- interpolation_point - 2*(h_int)
       if(ts < 100) ts <- interpolation_point - (h_int)
       
@@ -283,7 +287,7 @@ NNS.VAR <- function(variables,
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   
   
-  if(num_cores>1){
+  if(num_cores > 1){
     if(status) message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     status <- FALSE
   }
@@ -292,7 +296,6 @@ NNS.VAR <- function(variables,
     lapply(seq_along(x),
            function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
   }
-  
   
   lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
                    .multicombine = TRUE)%dopar%{
@@ -304,8 +307,7 @@ NNS.VAR <- function(variables,
                      
                      ts <- 2*h
                      ts <- max(ts, .25*length(DV))
-                     
-                     
+
                      # Dimension reduction NNS.reg to reduce variables
                      cor_threshold <- NNS.stack(IVs.train = IV,
                                                 DV.train = DV,
@@ -317,7 +319,8 @@ NNS.VAR <- function(variables,
                                                 method = c(1,2),
                                                 dim.red.method = dim.red.method,
                                                 order = NULL, ncores = 1, stack = TRUE)
-                     
+
+                   
                      
                      if(any(dim.red.method == "cor" | dim.red.method == "all")){
                        rel.1 <- abs(cor(cbind(DV, IV), method = "spearman"))
@@ -365,10 +368,11 @@ NNS.VAR <- function(variables,
                      
                      list(nns_DVs, rel_vars, DV_weights)
                    }
-  
+ 
   if(num_cores > 1) {
-    stopCluster(cl)  
-    registerDoSEQ()
+    parallel::stopCluster(cl)
+    remove(cl)
+    foreach::registerDoSEQ()
     invisible(data.table::setDTthreads(0, throttle = NULL))
   }
   
@@ -399,20 +403,22 @@ NNS.VAR <- function(variables,
       
       if(equal_tau > unequal_tau) uni[i] <-  .5 + .5*((equal_tau)/(equal_tau + unequal_tau)) else uni[i] <-  .5 - .5*((unequal_tau)/(equal_tau + unequal_tau))
       
-      if(equal_tau == unequal_tau)uni[i] <- 0.5
+      if(equal_tau == unequal_tau) uni[i] <- 0.5
       
       multi[i] <- 1 - uni[i]
     } else {
       uni[i] <- 0.5
       multi[i] <- 0.5
     }
-  }
-  
-  
-  for(i in 1:length(uni)){
+    
     if(abs(uni[i]) > 1){
       uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
       multi[i] <- 1 - uni[i]
+    }
+    
+    if(all((diff(nns_DVs[,i])/nns_DVs[-1,i])<1e-4)){
+      uni[i] <- 1
+      multi[i] <- 0
     }
   }
   

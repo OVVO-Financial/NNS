@@ -42,7 +42,7 @@ Returns the following:
 \item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
 \item{\code{"Certainty"}} the certainty of the same population statistic.
 \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
-\item{\code{"Robust Certainty Estimate"}} and \code{"95 CI"} are the robust certainty estimate and its 95 percent confidence interval after permutations if \code{robust = TRUE}.
+\item{\code{"Robust Certainty Estimate"}} and \code{"Lower 95 CI"}, \code{"Upper 95 CI"} are the robust certainty estimate and its 95 percent confidence interval after permutations if \code{robust = TRUE}.
 }
 }
 \description{

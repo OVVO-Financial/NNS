@@ -12,7 +12,6 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r setup2,message=FALSE,warning = FALSE}
 library(NNS)
 library(data.table)
@@ -23,14 +22,15 @@ require(meboot)
 
 # Comparing Distributions
 
-**`NNS`** offers a multitude of ways to test if distributions came from the same population, or if they share the same mean.  The underlying function for these tests is **`NNS.ANOVA()`**.
+**`NNS`** offers a multitude of ways to test if distributions came from the same population, or if they share the same mean. The underlying function for these tests is **`NNS.ANOVA()`**.
 
-The output from **`NNS.ANOVA()`** is a `Certainty` statistic, which compares CDFs of distributions from several shared quantiles and normalizes the similarity of these points to be within the interval $[0,1]$, with 1 representing identical distributions.  For a complete analysis of `Certainty` to common p-values and the role of power, please see the [References](#References).
+The output from **`NNS.ANOVA()`** is a `Certainty` statistic, which compares CDFs of distributions from several shared quantiles and normalizes the similarity of these points to be within the interval $[0,1]$, with 1 representing identical distributions. For a complete analysis of `Certainty` to common p-values and the role of power, please see the [References](#References).
 
 ## Test if Same Population
+
 Below we run the analysis to whether automatic transmissions and manual transmissions have significantly different `mpg` distributions per the `mtcars` dataset.
 
-The plot on the left shows the robust `Certainty` estimate, reflecting the distribution of `Certainty` estimates over 100 random permutations of both variables.  The plot on the right illustrates the control and treatment variables, along with the grand mean among variables, and the confidence interval associated with the control mean.
+The plot on the left shows the robust `Certainty` estimate, reflecting the distribution of `Certainty` estimates over 100 random permutations of both variables. The plot on the right illustrates the control and treatment variables, along with the grand mean among variables, and the confidence interval associated with the control mean.
 
 ```{r cars, fig.width=7, fig.align='center'}
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
@@ -39,13 +39,14 @@ mpg_man_trans = mtcars[mtcars$am==0, "mpg"]
 NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
 ```
 
-The `Certainty` shows that these two distributions clearly do not come from the same population.  This is verified with the Mann-Whitney-Wilcoxon test, which also does not assume a normality to the underlying data as a nonparametric test.
+The `Certainty` shows that these two distributions clearly do not come from the same population. This is verified with the Mann-Whitney-Wilcoxon test, which also does not assume a normality to the underlying data as a nonparametric test of identical distributions.
 
 ```{r cars2, warning=FALSE}
 wilcox.test(mpg ~ am, data=mtcars) 
 ```
 
 ## Test if means are Equal
+
 Here we provide the output from **`NNS.ANOVA()`** and `t.test()` functions on two Normal distribution samples, where we are pretty certain these two means are equal.
 
 ```{r equalmeans, echo=TRUE, fig.width=7, fig.align='center'}
@@ -60,6 +61,7 @@ t.test(x,y)
 ```
 
 ## Test if means are Unequal
+
 By altering the mean of the `y` variable, we can start to see the sensitivity of the results from the two methods, where both firmly reject the null hypothesis of identical means.
 
 ```{r unequalmeans, echo=TRUE, fig.width=7, fig.align='center'}
@@ -75,9 +77,15 @@ t.test(x,y)
 
 The effect size from **`NNS.ANOVA()`** is calculated from the confidence interval of the control mean and the specified `y` shift of 1 is within the provided lower and upper effect boundaries.
 
-
 # Stochastic Dominance
-Another method of comparing distributions involves a test for stochastic dominance.  The first, second, and third degree stochastic dominance tests are available in **`NNS`** via **`NNS.FSD(), NNS.SSD(), NNS.TSD()`** respectively.
+
+Another method of comparing distributions involves a test for stochastic dominance. The first, second, and third degree stochastic dominance tests are available in **`NNS`** via:
+
+-   **`NNS.FSD()`**
+
+-   **`NNS.SSD()`**
+
+-   **`NNS.TSD()`**
 
 ```{r stochdom, fig.width=7, fig.align='center'}
 NNS.FSD(x, y)
@@ -86,9 +94,10 @@ NNS.FSD(x, y)
 **`NNS.FSD()`** correctly identifies the shift in the `y` variable we specified when testing for unequal means.
 
 ## Stochastic Dominant Efficient Sets
+
 **`NNS`** also offers the ability to isolate a set of variables that do not have any dominated constituents with the **`NNS.SD.efficient.set()`** function.
 
-`x2, x4, x6, x8` all dominate their preceding distributions yet do not dominate one another, and are thus included in the first degree stochastic dominance efficient set. 
+`x2, x4, x6, x8` all dominate their preceding distributions yet do not dominate one another, and are thus included in the first degree stochastic dominance efficient set.
 
 ```{r stochdomset}
 set.seed(123)
@@ -104,12 +113,12 @@ x8 = x7 + 1
 NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status = FALSE)
 ```
 
+# References {#references}
 
-# References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Continuous CDFs and ANOVA with NNS](https://www.ssrn.com/abstract=3007373)
+-   [Continuous CDFs and ANOVA with NNS](https://www.ssrn.com/abstract=3007373)
 
-* [A Note on Stochastic Dominance](https://ssrn.com/abstract=3002675)
+-   [A Note on Stochastic Dominance](https://ssrn.com/abstract=3002675)
 
-* [LPM Density Functions for the Computation of the SD Efficient Set](https://www.scirp.org/journal/paperinformation.aspx?paperid=63817)
+-   [LPM Density Functions for the Computation of the SD Efficient Set](https://www.scirp.org/journal/paperinformation.aspx?paperid=63817)

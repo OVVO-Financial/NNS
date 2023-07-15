@@ -12,6 +12,7 @@
 #' @importFrom zoo as.yearmon index
 #' @import data.table
 #' @import doParallel
+#' @import foreach
 #' @import meboot
 #' @rawNamespace import(Rcpp, except = LdFlags)
 #' @import RcppParallel
@@ -40,6 +41,7 @@
 
   requireNamespace("data.table")
   requireNamespace("doParallel")
+  requireNamespace("foreach")
   requireNamespace("meboot")
   requireNamespace("Rcpp")
   requireNamespace("RcppParallel")

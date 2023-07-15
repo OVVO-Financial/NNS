@@ -357,27 +357,31 @@ NNS.stack <- function(IVs.train,
         
         if(index==1){
           setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
-                                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = TRUE))
+                                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE))
           
           if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
           
           if(is.null(dim(setup$RPM))  && is.null(setup$regression.points)){
             setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = "max",
-                                              type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = TRUE))
+                                              type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE))
           }
           
           if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
           
           nns.id <- setup$Fitted.xy$NNS.ID
           original.DV <- setup$Fitted.xy$y
-          
+         
           predicted <- setup$Point.est
-          
+         
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
-          pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
-          
+          if(length(unique(predicted))==1){
+            pred_matrix <- matrix(replicate(100, predicted), nrow = length(predicted))
+          } else {
+            pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+          }
+            
           threshold_results_1[index] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
-          
+
           predicted <- ifelse(predicted%%1 < threshold_results_1[index], floor(predicted), ceiling(predicted))
           
           RPM_CLASS <- apply(do.call(cbind, lapply(setup$RPM[,1:(dim(setup$RPM)[2]-1)], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
@@ -402,7 +406,12 @@ NNS.stack <- function(IVs.train,
           }
           
           if(!is.null(type)){
-            pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+            if(length(unique(predicted))==1){
+              pred_matrix <- matrix(replicate(100, predicted), nrow = length(predicted))
+            } else {
+              pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+            }
+            
             z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
             threshold_results_1[[index]] <- seq(.01,.99, .01)[as.integer(median(which(z==max(z))))]
             

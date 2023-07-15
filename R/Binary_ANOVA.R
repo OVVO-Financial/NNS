@@ -95,7 +95,7 @@ NNS.ANOVA.bin<- function(control, treatment,
             
             if(plot){
                 if(tails == "both" | tails == "right"){
-                    abline(v = max(a, b), col = "green", lwd = 4, lty = 3)
+                    abline(v = max(a, b), col = "green", lwd = 2, lty = 3)
                     text(max(a, b), pos = 4, 0.5, paste0("<--- ", "ctl mu+ ", CI * 100, "%" ), col = "green")
                 }
             }
@@ -106,7 +106,7 @@ NNS.ANOVA.bin<- function(control, treatment,
 
             if(plot){
                 if(tails == "both" | tails == "left"){
-                    abline(v = min(c, d), col = "blue", lwd = 4, lty = 3)
+                    abline(v = min(c, d), col = "blue", lwd = 2, lty = 3)
                     text(min(c, d), pos = 2, 0.5, paste0("ctl mu- ", paste0(CI * 100, "% --->")) , col = "blue")
                 }
 
