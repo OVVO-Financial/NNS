@@ -424,14 +424,14 @@ NNS.reg = function (x, y,
   if(is.null(x.label)) x.label <- "x"
    
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-  dependence <- dependence^2
+  dependence <- (dependence + NNS.copula(cbind(x, x, y)))/2
+
   dependence[is.na(dependence)] <- 0
   
   rounded_dep <- ifelse((dependence*10)%%1 < .5, floor(dependence*10), ceiling(dependence*10))
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
-  if(!is.null(order)) dep.reduced.order <- order
 
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"

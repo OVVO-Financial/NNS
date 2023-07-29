@@ -4,7 +4,7 @@
 #'
 #' @param x vector of data.
 #' @param reps numeric; number of replicates to generate.
-#' @param rho numeric [0,1]; The default setting \code{rho = NULL} assumes that
+#' @param rho numeric [-1,1]; The default setting \code{rho = NULL} assumes that
 #' the user does not want to generate replicates that are perfectly dependent on original time series, \code{rho=1} recovers the original \code{meboot(...)} settings.
 #' \code{rho < 1} admits less perfect (more realistic for some purposes) dependence.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.

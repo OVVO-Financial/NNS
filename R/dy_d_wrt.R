@@ -72,8 +72,8 @@ dy.d_ <- function(x, y, wrt,
   
   
   
-  n <- dim(x)[1]
-  l <- dim(x)[2]
+  n <- nrow(x)
+  l <- ncol(x)
   
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
@@ -117,10 +117,10 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
   
-  zz <- NNS.dep(cbind(x,y))$Dependence^2
+  zz <- (NNS.dep(x[,wrt],y)$Dependence + NNS.copula(cbind(x,y)))/2
   
-  h_s <- seq(.01, 1, length.out = max(5, ifelse(round(zz[wrt, "y"]*10)>.5, ceiling(round(zz[wrt, "y"]*10)), floor(round(zz[wrt, "y"]*10)))))
-  
+  h_s <- seq(.01, 1, length.out = max(5, ifelse((zz*10)%%1>.5, ceiling(zz*10), floor(zz*10))))
+
   results <- vector(mode = "list", length(h_s))
   
   for(h in h_s){
@@ -135,7 +135,7 @@ dy.d_ <- function(x, y, wrt,
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
       
-      seq_by <- max(.01, 1 - zz[wrt, "y"])
+      seq_by <- max(.01, (1 - zz)/2)
       
       deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
       sampsize <- length(seq(0, 1, seq_by))
@@ -284,7 +284,7 @@ dy.d_ <- function(x, y, wrt,
                           "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))))
     
   }
-  if(messages) message("Done :-)","\r",appendLF=TRUE)
+  if(messages) message("Done :-)","\r", appendLF=TRUE)
   return(final_results)
   
 }

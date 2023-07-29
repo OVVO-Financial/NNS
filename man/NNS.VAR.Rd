@@ -56,7 +56,7 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 }
 \note{
 \itemize{
-\item \code{dim.red.method = "cor"} is significantly faster than the other methods, but comes at the expense of ignoring possible nonlinear relationships between lagged variables.
+\item \code{"Error in { : task xx failed -}"} should be re-run with \code{NNS.VAR(..., ncores = 1)}.
 \item Not recommended for factor variables, even after transformed to numeric.  \link{NNS.reg} is better suited for factor or binary regressor extrapolation.
 }
 }
