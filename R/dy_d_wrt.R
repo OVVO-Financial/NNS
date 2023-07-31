@@ -116,16 +116,16 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
-  
-  zz <- (NNS.dep(x[,wrt],y)$Dependence + NNS.copula(cbind(x,y)))/2
-  
+ 
+  zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)))
+ 
   h_s <- seq(.01, 1, length.out = max(5, ifelse((zz*10)%%1>.5, ceiling(zz*10), floor(zz*10))))
 
   results <- vector(mode = "list", length(h_s))
   
   for(h in h_s){
     index <- which(h == h_s)
-    if(is.vector(eval.points) || dim(eval.points)[2] == 1){
+    if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
       
       h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
@@ -140,7 +140,7 @@ dy.d_ <- function(x, y, wrt,
       deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
       sampsize <- length(seq(0, 1, seq_by))
       
-      if(dim(deriv.points)[2]!=dim(x)[2]){
+      if(ncol(deriv.points)!=ncol(x)){
         deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
       }
       
@@ -151,7 +151,7 @@ dy.d_ <- function(x, y, wrt,
       data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
                                                                                             eval.points,
                                                                                             original.eval.points.max))
-                                                                               , each = sampsize, length.out = dim(deriv.points)[1] ))
+                                                                               , each = sampsize, length.out = nrow(deriv.points) ))
       
       
       colnames(deriv.points) <- colnames(x)
@@ -159,12 +159,12 @@ dy.d_ <- function(x, y, wrt,
       distance_wrt <- h_step
       
       
-      position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = dim(deriv.points)[1])
-      id <- rep(1:length(eval.points), each = 3*sampsize, length.out = dim(deriv.points)[1])
+      position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = nrow(deriv.points))
+      id <- rep(1:length(eval.points), each = 3*sampsize, length.out = nrow(deriv.points))
       
       
       if(messages){
-        message(paste("Currently evaluating the ", dim(deriv.points)[1], " required points"  ),"\r",appendLF=TRUE)
+        message(paste("Currently evaluating the ", nrow(deriv.points), " required points"  ),"\r",appendLF=TRUE)
       }
       
       
@@ -192,7 +192,7 @@ dy.d_ <- function(x, y, wrt,
       
     } else {
       
-      n <- dim(eval.points)[1]
+      n <- nrow(eval.points)
       original.eval.points <- eval.points
       
       h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))

@@ -38,7 +38,7 @@ dy.dx <- function(x, y, eval.point = median(x)){
   
   order <- NULL
   
-  dep <- NNS.dep(x, y, asym = TRUE)$Dependence
+  dep <- (NNS.dep(x, y, asym = TRUE)$Dependence + NNS.copula(cbind(x,y)))/2
   
   h <- mean(abs(diff(LPM.VaR(seq(0, 1, min(.05, max(.01, 1-dep))), 1, x))))
   
@@ -63,7 +63,7 @@ dy.dx <- function(x, y, eval.point = median(x)){
     
     deriv.points <- cbind(eval.point.min, eval.point, eval.point.max)
     
-    n <- dim(deriv.points)[1]
+    n <- nrow(deriv.points)
     
     run <- eval.point.max - eval.point.min
     

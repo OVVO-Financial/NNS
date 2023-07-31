@@ -424,8 +424,9 @@ NNS.reg = function (x, y,
   if(is.null(x.label)) x.label <- "x"
    
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-  dependence <- (dependence + NNS.copula(cbind(x, x, y)))/2
 
+  dependence <- max(dependence, NNS.copula(cbind(x, x, y))) 
+ 
   dependence[is.na(dependence)] <- 0
   
   rounded_dep <- ifelse((dependence*10)%%1 < .5, floor(dependence*10), ceiling(dependence*10))

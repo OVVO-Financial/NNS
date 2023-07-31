@@ -73,28 +73,28 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 #  [1] 1
 #  
 #  $probability.threshold
-#  [1] 0.445
+#  [1] 0.43875
 #  
 #  $OBJfn.dim.red
-#  [1] 0.9133333
+#  [1] 0.9603175
 #  
 #  $NNS.dim.red.threshold
-#  [1] 0.79
+#  [1] 0.615
 #  
 #  $reg
-#  [1] 1 1 1 1 1 1 1 1 1 1
+#   [1] 1 1 1 1 1 1 1 1 1 1
 #  
 #  $reg.pred.int
 #  NULL
 #  
 #  $dim.red
-#  [1] 1 1 1 1 1 1 1 1 1 1
+#   [1] 1 1 1 1 1 1 1 1 1 1
 #  
 #  $dim.red.pred.int
 #  NULL
 #  
 #  $stack
-#  [1] 1 1 1 1 1 1 1 1 1 1
+#   [1] 1 1 1 1 1 1 1 1 1 1
 #  
 #  $pred.int
 #  NULL

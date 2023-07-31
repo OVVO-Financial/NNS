@@ -40,7 +40,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   
   if(is.null(order)) order <- ceiling(max(1,(NNS.copula(original.matrix)*10)))
-  
+
 
   ###  Regression Point Matrix
   if(is.numeric(order)){

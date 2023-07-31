@@ -44,13 +44,13 @@ mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 1
 #  
 #  $probability.threshold
-#  [1] 0.451
+#  [1] 0.43875
 #  
 #  $OBJfn.dim.red
-#  [1] 0.9714286
+#  [1] 0.9535865
 #  
 #  $NNS.dim.red.threshold
-#  [1] 0.8575
+#  [1] 0.785
 #  
 #  $reg
 #   [1] 3 3 3 3 3 3 3 3 3 3
