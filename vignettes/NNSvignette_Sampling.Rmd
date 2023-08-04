@@ -26,12 +26,12 @@ require(meboot)
 # Sampling
 ## CDFs
 
-Cumulative distribution functions (CDFs) represent the probability a variable $x$ will take a value less than or equal to $x$.
+Cumulative distribution functions (CDFs) represent the probability a variable $X$ will take a value less than or equal to $x$.
 $$F_X(x)=P(\leq x)$$
 
 ### Empirical CDF
 
-The empirical CDF is a simple construct, provided in the base package of R.  We can generate an empirical CDF with the `ecdf` function and create a function `(P)` to return the CDF of a given value of $x$.
+The empirical CDF is a simple construct, provided in the base package of R.  We can generate an empirical CDF with the `ecdf` function and create a function `(P)` to return the CDF of a given value of $X$.
 
 ```{r}
 set.seed(123); x = rnorm(100)
@@ -50,7 +50,7 @@ Using the same targets from our `ecdf` example above (0,1) we can compare **`LPM
 LPM.ratio(degree = 0, target = 0, variable = x); LPM.ratio(degree = 0, target = 1, variable = x)
 ```
 
-Calculating the probability for every value in $x$, we can plot both methods visualizing their identical results.  `ecdf` function in black and **`LPM.ratio`** in red.
+Calculating the probability for every value in $X$, we can plot both methods visualizing their identical results.  `ecdf` function in black and **`LPM.ratio`** in red.
 
 
 ```{r, fig.align='center', fig.width=6, fig.height=6, echo = FALSE}
@@ -151,7 +151,7 @@ hist(LPM.VaR(seq(0,1,length.out = 100), 2, x), border = rainbow(5)[5], add = TRU
 ```
 
 
-Viewing the first 10 samples from each of the `degree`s compared to our original $x$.
+Viewing the first 10 samples from each of the `degree`s compared to our original $X$.
 ```{r}
 degree.0.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0, x = x)
 degree.0.25.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0.25, x = x)
@@ -168,7 +168,7 @@ head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples, degr
 
 The ability to sample from specified correlations ensures the full spectrum of future paths is sampled from.  Typical Monte Carlo samples are restricted to [-0.3, 0.3] correlations to the original data.
 
-We will generate 1 replicate of $x$ for each value of a sequence of $\rho$ values, and then plot the results compared to our original $x$ (black line).
+We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values, and then plot the results compared to our original $X$ (black line).
 
 ```{r, fig.align='center', fig.width=8, fig.height=8}
 rhos = seq(-1, 1, .25)
@@ -238,7 +238,7 @@ head(new.dep.data)
 ## Alternative Using **`NNS.meboot`**
 Alternatively, if we wish to keep the simulated values close to the original data, we can apply the **`NNS.meboot`** procedure to each of the variables.
 
-We will generate 10 replicates of $\rho = 0.95$ to our `original.data` and note the multivariate dependence among our `new.boot.dep.data`.
+We will generate 10 replicates of $\rho = 0.95$ to our `original.data`, use their `ensemble` and note the multivariate dependence among our `new.boot.dep.data`.
 
 
 ```{r}
@@ -251,6 +251,12 @@ boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble
 # Create matrix from vectors
 new.boot.dep.matrix = do.call(cbind, boot.ensemble.vectors)
 ```
+
+Checking `ensemble` correlations with `original.data`:
+```{r}
+for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
+```
+
 
 ### Compare Multivariate Dependence Structures
 Similar dependence with similar values.
