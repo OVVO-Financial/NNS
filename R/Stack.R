@@ -135,6 +135,7 @@ NNS.stack <- function(IVs.train,
   
   dist <- tolower(dist)
   
+  i_s <- numeric()
   THRESHOLDS <- vector(mode = "list", folds)
   best.k <- vector(mode = "list", folds)
   best.nns.cv <- vector(mode = "list", folds)
@@ -207,7 +208,7 @@ NNS.stack <- function(IVs.train,
     
     
     # Dimension Reduction Regression Output
-    if(2 %in% method && dim(IVs.train)[2]>1){
+    if(2 %in% method && ncol(IVs.train)>1){
       
       actual <- CV.DV.test
       
@@ -255,16 +256,18 @@ NNS.stack <- function(IVs.train,
         }
         
         nns.ord[i] <- eval(obj.fn)
+       
+        i_s[i] <- i
         
         if(objective=="min"){
-          best.threshold <- gravity(var.cutoffs[na.omit(nns.ord)==min(na.omit(nns.ord))])
+          best.threshold <- var.cutoffs[mode_class(i_s)-1]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- min(na.omit(nns.ord))
           if(is.na(nns.ord[1])) nns.ord[1] <- Inf
           if(i > 2 && is.na(nns.ord[i])) break
           if(i > 2 && (nns.ord[i] >= nns.ord[i-1]) && (nns.ord[i] >= nns.ord[i-2])) break
         } else {
-          best.threshold <- gravity(var.cutoffs[na.omit(nns.ord)==max(na.omit(nns.ord))])
+          best.threshold <- var.cutoffs[mode_class(i_s)-1]
           THRESHOLDS[[b]] <- best.threshold
           best.nns.ord[[b]] <- max(na.omit(nns.ord))
           if(is.na(nns.ord[1])) nns.ord[1] <- -Inf
@@ -281,6 +284,7 @@ NNS.stack <- function(IVs.train,
         threshold.table <- sort(table(unlist(THRESHOLDS)), decreasing = TRUE)
         
         nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table==max(threshold.table)])))
+        if(is.na(nns.ord.threshold)) nns.ord.threshold <- 0
         
         nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
                                                  type = NULL, point.only = TRUE, confidence.interval = pred.int))

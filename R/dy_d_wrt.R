@@ -116,8 +116,10 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points.min <- eval.points
   original.eval.points.max <- eval.points
   original.eval.points <- eval.points
+  
+  norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
  
-  zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)))
+  zz <- min(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
  
   h_s <- seq(.01, 1, length.out = max(5, ifelse((zz*10)%%1>.5, ceiling(zz*10), floor(zz*10))))
 

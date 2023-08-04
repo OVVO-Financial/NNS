@@ -9,7 +9,7 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
 
   x <- data.matrix(x)
 
-  if(dim(x)[1] < 20 ) order <- 2
+  if(nrow(x) < 20 ) order <- 2
 
   upper_lower <- function(x, y, asym){
     basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)

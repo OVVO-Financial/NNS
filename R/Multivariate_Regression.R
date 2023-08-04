@@ -34,12 +34,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   original.matrix <- cbind.data.frame(original.IVs, original.DV)
+  norm.matrix <- apply(original.matrix[,1:n], 2, function(z) NNS.rescale(z, 0, 1))
   
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
+  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix, original.DV))))
   
-  if(is.null(order)) order <- ceiling(max(1,(NNS.copula(original.matrix)*10)))
+  if(is.null(order)) order <- max(1, ceiling(dependence*10))
 
 
   ###  Regression Point Matrix
@@ -165,7 +167,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   RPM_CLASS <- apply(do.call(cbind, lapply(REGRESSION.POINT.MATRIX[ ,1:n], FUN = function(z) ifelse(z%%1 < .5, floor(z), ceiling(z)))), 2, as.integer)
   
-  if(is.null(n.best)) n.best <- floor(sqrt(n))
+  if(is.null(n.best)) n.best <- max(1, floor((1-dependence)*sqrt(n)))
 
   
   if(n.best > 1 && !point.only){

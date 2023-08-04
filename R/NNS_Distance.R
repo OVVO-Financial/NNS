@@ -61,6 +61,10 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   }
 
   uni_weights <- rep(1/min(k,l), min(k,l))
+  
+  t_weights <- dt(rpm$Sum, df = min(k,l))
+  t_weights <- t_weights/sum(t_weights)
+  if(any(is.na(t_weights))) t_weights <- 0
 
   emp <- rpm$Sum^(-1)
   emp_weights <- emp / sum(emp)
@@ -82,8 +86,8 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   norm_weights <- norm_weights / sum(norm_weights)
   if(any(is.na(norm_weights))) norm_weights <- 0
 
-  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights)/
-    sum(emp_weights + exp_weights +  lnorm_weights + norm_weights + pl_weights)
+  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights)/
+    sum(emp_weights + exp_weights +  lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights)
   
   
   if(is.null(class)) single.estimate <- rpm$y.hat%*%weights else single.estimate <- mode_class(rep(rpm$y.hat, ceiling(100*weights)))

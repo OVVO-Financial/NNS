@@ -4,9 +4,7 @@
 #'
 #' @param x vector of data.
 #' @param reps numeric; number of replicates to generate.
-#' @param rho numeric [-1,1]; The default setting \code{rho = NULL} assumes that
-#' the user does not want to generate replicates that are perfectly dependent on original time series, \code{rho=1} recovers the original \code{meboot(...)} settings.
-#' \code{rho < 1} admits less perfect (more realistic for some purposes) dependence.
+#' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{TRUE} default preserves the drift of the original series.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim=0.1}.
@@ -26,7 +24,7 @@
 #' is not a \code{pdata.frame} object.
 #' @param ... possible argument \code{fiv} to be passed to \code{expand.sd}.
 #'
-#' @return
+#' @return Returns the following row names in a matrix:
 #' \itemize{
 #'   \item{x} original data provided as input.
 #' \item{replicates} maximum entropy bootstrap replicates.
@@ -63,13 +61,13 @@
 #' boots <- NNS.meboot(AirPassengers, reps=100, rho = 0, xmin = 0)
 #'
 #' # Verify correlation of replicates ensemble to original
-#' cor(boots$ensemble, AirPassengers, method = "spearman")
+#' cor(boots["ensemble",], AirPassengers, method = "spearman")
 #'
 #' # Plot all replicates
-#' matplot(boots$replicates, type = 'l')
+#' matplot(boots["replicates",] , type = 'l')
 #'
 #' # Plot ensemble
-#' lines(boots$ensemble, lwd = 3)
+#' lines(boots["ensemble",], lwd = 3)
 #' }
 #' @export
 
@@ -95,8 +93,6 @@
     if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
 
     if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
-
-    if(is.null(rho)) rho <- -99
 
     trim <- list(trim=trim, xmin=xmin, xmax=xmax)
 
@@ -201,13 +197,7 @@
 
     ensemble[ordxx,] <- qseq
 
-    ### Pilot Spearman
-    if(rho==-99){
-      y <- NNS.meboot(x, reps = 30, rho = 1, expand.sd = FALSE)$ensemble
-      pilot <- cbind(x,y)
-      rho <-  fivenum(apply(pilot, 2, function(z) (cor(pilot[,1],z)))[-1])[2]
-    }
-
+  
     ### Fred Viole SUGGESTION  PART 2 of 2
     ### Average two ordxx ensemble matrices
 
@@ -309,6 +299,10 @@
       cat("\n  Elapsed time:", elapsr$elaps,
           paste(elapsr$units, ".", sep=""), "\n")
 
-    list(x=x, replicates=round(ensemble, digits = digits), ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
+    final <- list(x=x, replicates=round(ensemble, digits = digits), ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
          xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
-  }
+
+    return(final)
+ }
+ 
+NNS.meboot <- Vectorize(NNS.meboot, vectorize.args = "rho")

@@ -31,9 +31,7 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{rho}{numeric [-1,1]; The default setting \code{rho = NULL} assumes that
-the user does not want to generate replicates that are perfectly dependent on original time series, \code{rho=1} recovers the original \code{meboot(...)} settings.
-\code{rho < 1} admits less perfect (more realistic for some purposes) dependence.}
+\item{rho}{numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
@@ -70,6 +68,7 @@ is not a \code{pdata.frame} object.}
 \item{...}{possible argument \code{fiv} to be passed to \code{expand.sd}.}
 }
 \value{
+Returns the following row names in a matrix:
 \itemize{
   \item{x} original data provided as input.
 \item{replicates} maximum entropy bootstrap replicates.
@@ -95,13 +94,13 @@ Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r
 boots <- NNS.meboot(AirPassengers, reps=100, rho = 0, xmin = 0)
 
 # Verify correlation of replicates ensemble to original
-cor(boots$ensemble, AirPassengers, method = "spearman")
+cor(boots["ensemble",], AirPassengers, method = "spearman")
 
 # Plot all replicates
-matplot(boots$replicates, type = 'l')
+matplot(boots["replicates",] , type = 'l')
 
 # Plot ensemble
-lines(boots$ensemble, lwd = 3)
+lines(boots["ensemble",], lwd = 3)
 }
 }
 \references{
