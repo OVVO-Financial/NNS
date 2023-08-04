@@ -41,7 +41,12 @@ cov(x, y)
 (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
 
 ## ----cov_dec, warning=FALSE---------------------------------------------------
-PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
+cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
+cov.mtx
+
+# Reassembled Covariance Matrix
+cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
+
 
 # Standard Covariance Matrix
 cov(cbind(x, y))

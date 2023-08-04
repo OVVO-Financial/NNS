@@ -47,10 +47,10 @@ mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 0.43875
 #  
 #  $OBJfn.dim.red
-#  [1] 0.9535865
+#  [1] 0.9798658
 #  
 #  $NNS.dim.red.threshold
-#  [1] 0.785
+#  [1] 0.93
 #  
 #  $reg
 #   [1] 3 3 3 3 3 3 3 3 3 3

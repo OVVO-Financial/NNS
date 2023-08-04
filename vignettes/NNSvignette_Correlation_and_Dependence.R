@@ -64,20 +64,3 @@ set.seed(123)
 x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 
-## ----multisim-----------------------------------------------------------------
-# Add variable x to original data to avoid total independence (example only)
-original.data <- cbind(x, y, z, x)
-
-# Determine dependence structure
-dep.structure <- apply(original.data, 2, function(x) LPM.ratio(1, x, x))
-  
-# Generate new data with different mean, sd and length (or distribution type)
-new.data <- sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
-
-# Apply dependence structure to new data
-new.dep.data <- sapply(1:ncol(original.data), function(x) LPM.VaR(dep.structure[,x], 1, new.data[,x]))
-
-## ----comparison, warning=FALSE------------------------------------------------
-NNS.copula(original.data)
-NNS.copula(new.dep.data)
-

@@ -119,42 +119,6 @@ x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 ```
 
-# Simulating a Multivariate Dependence Structure
-Analogous to an empirical copula transformation, we can generate `new data` from the dependence structure of our `original data` via the following steps:
-
-* **Determine the dependence structure:**
-
-This is accomplished using **`LPM.ratio(1, x, x)`** for continuous variables, and **`LPM.ratio(0, x, x)`** for discrete variables, which are the empirical CDFs of the marginal variables.
-
-* **Generate or supply `new data`:**
-
-`new data` does not have to be of the same distribution or dimension as the `original data`, nor does each dimension of `new data` have to share a distribution type.
-
-* **Apply dependence structure to `new data`:**
-
-We then utilize **`LPM.VaR(...)`** to ascertain `new data` values corresponding to `original data` position mappings, and return a matrix of these transformed values with the same dimensions as `new.data`.  
-
-
-```{r multisim}
-# Add variable x to original data to avoid total independence (example only)
-original.data <- cbind(x, y, z, x)
-
-# Determine dependence structure
-dep.structure <- apply(original.data, 2, function(x) LPM.ratio(1, x, x))
-  
-# Generate new data with different mean, sd and length (or distribution type)
-new.data <- sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
-
-# Apply dependence structure to new data
-new.dep.data <- sapply(1:ncol(original.data), function(x) LPM.VaR(dep.structure[,x], 1, new.data[,x]))
-```
-
-## Compare Multivariate Dependence Structures
-```{r comparison, warning=FALSE}
-NNS.copula(original.data)
-NNS.copula(new.dep.data)
-```
-
 
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:

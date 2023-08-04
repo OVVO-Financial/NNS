@@ -467,53 +467,6 @@ which are restricted to bivariate cases.</p>
 <span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z), <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">independence.overlay =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## [1] 0.05942998</code></pre>
 </div>
-<div id="simulating-a-multivariate-dependence-structure" class="section level1">
-<h1>Simulating a Multivariate Dependence Structure</h1>
-<p>Analogous to an empirical copula transformation, we can generate
-<code>new data</code> from the dependence structure of our
-<code>original data</code> via the following steps:</p>
-<ul>
-<li><strong>Determine the dependence structure:</strong></li>
-</ul>
-<p>This is accomplished using
-<strong><code>LPM.ratio(1, x, x)</code></strong> for continuous
-variables, and <strong><code>LPM.ratio(0, x, x)</code></strong> for
-discrete variables, which are the empirical CDFs of the marginal
-variables.</p>
-<ul>
-<li><strong>Generate or supply <code>new data</code>:</strong></li>
-</ul>
-<p><code>new data</code> does not have to be of the same distribution or
-dimension as the <code>original data</code>, nor does each dimension of
-<code>new data</code> have to share a distribution type.</p>
-<ul>
-<li><strong>Apply dependence structure to
-<code>new data</code>:</strong></li>
-</ul>
-<p>We then utilize <strong><code>LPM.VaR(...)</code></strong> to
-ascertain <code>new data</code> values corresponding to
-<code>original data</code> position mappings, and return a matrix of
-these transformed values with the same dimensions as
-<code>new.data</code>.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Add variable x to original data to avoid total independence (example only)</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>original.data <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x, y, z, x)</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co"># Determine dependence structure</span></span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>dep.structure <span class="ot">&lt;-</span> <span class="fu">apply</span>(original.data, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">LPM.ratio</span>(<span class="dv">1</span>, x, x))</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>  </span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="co"># Generate new data with different mean, sd and length (or distribution type)</span></span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>new.data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(original.data), <span class="cf">function</span>(x) <span class="fu">rnorm</span>(<span class="fu">nrow</span>(original.data)<span class="sc">*</span><span class="dv">2</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">20</span>))</span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="co"># Apply dependence structure to new data</span></span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a>new.dep.data <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(original.data), <span class="cf">function</span>(x) <span class="fu">LPM.VaR</span>(dep.structure[,x], <span class="dv">1</span>, new.data[,x]))</span></code></pre></div>
-<div id="compare-multivariate-dependence-structures" class="section level2">
-<h2>Compare Multivariate Dependence Structures</h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span></code></pre></div>
-<pre><code>## [1] 0.4379469</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.dep.data)</span></code></pre></div>
-<pre><code>## [1] 0.4390599</code></pre>
-</div>
-</div>
 <div id="references" class="section level1">
 <h1>References</h1>
 <p>If the user is so motivated, detailed arguments and proofs are
