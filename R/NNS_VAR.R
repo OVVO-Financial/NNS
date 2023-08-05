@@ -172,7 +172,7 @@ NNS.VAR <- function(variables,
     interpolation_point <- tail(which(!is.na(a[,2])), 1)
     a <- a[complete.cases(a),]
     
-    if(dim(a)[1]<last_point){
+    if(nrow(a)<last_point){
       variable_interpolation <- NNS.reg(a[,1], a[,2], order = "max", ncores = 1,
                                        point.est = index, plot = FALSE, point.only = TRUE)$Point.est
       
@@ -221,7 +221,7 @@ NNS.VAR <- function(variables,
     
     return(list(variable_interpolation, extrapolation_results, objective_fn, na_s, interpolation_point))
   }
-  
+
   uni_weights <- unlist(lapply(nns_IVs, `[[`, 3))
   uni_weights[is.na(uni_weights)] <- mean(uni_weights, na.rm = TRUE)
   
@@ -232,7 +232,7 @@ NNS.VAR <- function(variables,
  
   nns_IVs <- lapply(nns_IVs, `[[`, 1)
   
-  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs, function(x) head(as.numeric(x), dim(variables)[1]))))
+  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, lapply(nns_IVs, function(x) head(as.numeric(x), nrow(variables)))))
 
   nns_IVs_results <- data.frame(do.call(cbind, lapply(extrapolation_results, function(x) tail(as.numeric(x), h))))
 
@@ -256,14 +256,14 @@ NNS.VAR <- function(variables,
   nns_IE <- data.frame(do.call(cbind, nns_IE))
   nns_IVs_interpolated_extrapolated <- (nns_IVs_interpolated_extrapolated + nns_IE) / 2
   
-  positive_values <- sapply(variables, function(x) min(x, na.rm = TRUE)>0)
+  positive_values <- apply(variables, 2, function(x) min(x, na.rm = TRUE)>0)
   
-  for(i in 1:ncol(variables)){
+  for(i in 1:length(positive_values)){
     if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
   }
 
   if(h == 0){
-    rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])
+    rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
     colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
     return(nns_IVs_interpolated_extrapolated)
   }
@@ -275,13 +275,13 @@ NNS.VAR <- function(variables,
   new_values <- data.frame(do.call(cbind, new_values))
   colnames(new_values) <- as.character(colnames(variables))
   
-  nns_IVs_interpolated_extrapolated <- head(new_values, dim(variables)[1])
+  nns_IVs_interpolated_extrapolated <- head(new_values, nrow(variables))
 
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
   
   # Keep original variables as training set
-  lagged_new_values_train <- head(lagged_new_values, dim(lagged_new_values)[1] - h)
+  lagged_new_values_train <- head(lagged_new_values, nrow(lagged_new_values) - h)
  
  
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
@@ -416,7 +416,7 @@ NNS.VAR <- function(variables,
       multi[i] <- 1 - uni[i]
     }
     
-    if(all((diff(nns_DVs[,i])/nns_DVs[-1,i])<1e-4)){
+    if(all((diff(nns_DVs[,i])/nns_DVs[-1,i])<1e-5)){
       uni[i] <- 1
       multi[i] <- 0
     }
