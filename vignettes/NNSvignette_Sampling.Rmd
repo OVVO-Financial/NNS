@@ -27,7 +27,7 @@ require(meboot)
 ## CDFs
 
 Cumulative distribution functions (CDFs) represent the probability a variable $X$ will take a value less than or equal to $x$.
-$$F_X(x)=P(\leq x)$$
+$$F(x) = P(X \leq x)$$
 
 ### Empirical CDF
 
@@ -44,13 +44,18 @@ P(0); P(1)
 \label{LPMCDF}
 The empirical CDF and Lower Partial Moment CDF (**`LPM.ratio`**) are identical when the degree term of the `LPM.ratio` is set to zero.
 
+Degree 0 LPM:
+$$LPM(0,t,X)=\frac{1}{N}\sum_{n=1}^{N}[max(t-X_n),0]^0$$
+`LPM.ratio` is equivalent to the following form for any target $(t)$ and variable $X$:
+$$LPM(0,t,X)=\frac{LPM(0,t,X)}{LPM(0,t,X)+UPM(0,t,X)}$$
+
 
 Using the same targets from our `ecdf` example above (0,1) we can compare **`LPM.ratio`**s.
 ```{r, message=FALSE}
 LPM.ratio(degree = 0, target = 0, variable = x); LPM.ratio(degree = 0, target = 1, variable = x)
 ```
 
-Calculating the probability for every value in $X$, we can plot both methods visualizing their identical results.  `ecdf` function in black and **`LPM.ratio`** in red.
+Calculating the probability for  every `target` value in $X$, we can plot both methods visualizing their identical results.  `ecdf` function in black and **`LPM.ratio`** in red.
 
 
 ```{r, fig.align='center', fig.width=6, fig.height=6, echo = FALSE}
