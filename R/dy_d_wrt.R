@@ -83,7 +83,7 @@ dy.d_ <- function(x, y, wrt,
   
   
   if(is.null(colnames(x))){
-    colnames.list <- lapply(1 : ncol(x), function(i) paste0("X", i))
+    colnames.list <- lapply(1 : l, function(i) paste0("X", i))
     colnames(x) <- as.character(colnames.list)
   }
   
@@ -119,9 +119,9 @@ dy.d_ <- function(x, y, wrt,
   
   norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
  
-  zz <- min(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
+  zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
  
-  h_s <- seq(.01, 1, length.out = max(5, ifelse((zz*10)%%1>.5, ceiling(zz*10), floor(zz*10))))
+  h_s <- 1:min(n, 30)
 
   results <- vector(mode = "list", length(h_s))
   
@@ -129,8 +129,8 @@ dy.d_ <- function(x, y, wrt,
     index <- which(h == h_s)
     if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
-      
-      h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
+
+      h_step <- gravity(abs(diff(x[,wrt]))) * index
       
       if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
       
@@ -166,7 +166,7 @@ dy.d_ <- function(x, y, wrt,
       
       
       if(messages){
-        message(paste("Currently evaluating the ", nrow(deriv.points), " required points"  ),"\r",appendLF=TRUE)
+        message(paste("Currently evaluating the ", nrow(deriv.points), " required points "  ), index, " of ", length(h_s),"\r",appendLF=TRUE)
       }
       
       
@@ -196,8 +196,8 @@ dy.d_ <- function(x, y, wrt,
       
       n <- nrow(eval.points)
       original.eval.points <- eval.points
-      
-      h_step <- gravity(abs(diff(LPM.VaR(seq(0, 1, h), 1, x[,wrt]))))
+
+      h_step <- gravity(abs(diff(x[,wrt]))) * index
       
       if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
       

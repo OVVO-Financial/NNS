@@ -119,8 +119,7 @@ NNS.VAR <- function(variables,
   oldw <- getOption("warn")
   options(warn = -1)
   
-  
-  if(nowcast) dates <- c(zoo::index(variables), tail(zoo::index(variables), h) + h/12) else dates <- NULL
+  if(nowcast) dates <- c(zoo::as.yearmon(zoo::index(variables), '%Y%m'), tail(zoo::as.yearmon(zoo::index(variables), '%Y%m'), h) + h/12) else dates <- NULL
   
   if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
   
@@ -262,13 +261,12 @@ NNS.VAR <- function(variables,
     if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
   }
 
-  if(h == 0){
-    rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
-    colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
-    return(nns_IVs_interpolated_extrapolated)
-  }
   
+  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
+  colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
   
+  if(h == 0) return(nns_IVs_interpolated_extrapolated)
+
   # Combine interpolated / extrapolated / forecasted IVs onto training data.frame
   new_values <- lapply(1:ncol(variables), function(i) c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i]))
 
@@ -425,8 +423,7 @@ NNS.VAR <- function(variables,
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
   
-  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, dim(variables)[1])
-  colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
+  
   
   colnames(nns_IVs_results) <- colnames(variables)
   rownames(nns_IVs_results) <- tail(dates, h)
