@@ -121,7 +121,7 @@ dy.d_ <- function(x, y, wrt,
  
   zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
  
-  h_s <- na.omit(c(1:5, seq(7, 15, 2), 20, 25, 30)[1:min(n,13)])
+  h_s <- na.omit(c(1:5, seq(7, 15, 2), 20, 25)[1:min(n,12)])
 
   results <- vector(mode = "list", length(h_s))
   
@@ -207,7 +207,7 @@ dy.d_ <- function(x, y, wrt,
                             original.eval.points,
                             original.eval.points.max)
       
-      if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r",appendLF=TRUE)
+      if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r" ,appendLF=FALSE)
       
       
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
@@ -285,7 +285,7 @@ dy.d_ <- function(x, y, wrt,
                           "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))))
     
   }
-  if(messages) message("Done :-)","\r", appendLF=TRUE)
+  if(messages) message("","\r", appendLF=TRUE)
   return(final_results)
   
 }
