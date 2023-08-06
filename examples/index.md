@@ -20,7 +20,7 @@ See the following for NNS detailed examples and specific applications:
    
    1.2 [Bayes' Theorem](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bayes'%20Theorem%20From%20Partial%20Moments.pdf)
 
-   1.3 [CDFs and ANOVA](https://ssrn.com/abstract=3007373)
+   1.3 [CDFs and ANOVA](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Continuous_CDFs_and_ANOVA_with_NNS.pdf)
    
    1.4 [Bias and Confidence Intervals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bias_and_CI.html)
 
