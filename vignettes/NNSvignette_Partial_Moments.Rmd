@@ -131,10 +131,6 @@ NNS.CDF(x, 1, type = "survival")
 ```
 
 
-## PDFs
-```{r pdfs,fig.align="center",fig.width=5,fig.height=3, rows.print = 10, results='hide'}
-NNS.PDF(x)
-```
 
 ## Numerical Integration
 Partial moments are asymptotic area approximations of $f(x)$ akin to the familiar Trapezoidal and Simpson's rules.  More observations, more accuracy...

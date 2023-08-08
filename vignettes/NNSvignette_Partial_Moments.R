@@ -85,9 +85,6 @@ NNS.CDF(x, 1, target = mean(x))
 # Survival Function:
 NNS.CDF(x, 1, type = "survival")
 
-## ----pdfs,fig.align="center",fig.width=5,fig.height=3, rows.print = 10, results='hide'----
-NNS.PDF(x)
-
 ## ----numerical integration----------------------------------------------------
 x = seq(0, 1, .001) ; y = x ^ 2
 (UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)

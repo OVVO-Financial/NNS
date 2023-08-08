@@ -154,6 +154,9 @@ boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble
 new.boot.dep.matrix = do.call(cbind, boot.ensemble.vectors)
 
 ## -----------------------------------------------------------------------------
+for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
+
+## -----------------------------------------------------------------------------
 NNS.copula(original.data)
 NNS.copula(new.boot.dep.matrix)
 
