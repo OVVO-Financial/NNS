@@ -39,14 +39,12 @@ NNS.MC <- function(x,
                    drift = TRUE,
                    xmin = NULL,
                    xmax = NULL, ...){
-                       
 
-  NNS.meboot_vec <- Vectorize(NNS.meboot, vectorize.args = "rho")
 
   rhos <- 1-seq(rho[1], rho[2], step)^exp
   
   
-  samples <- suppressWarnings(NNS.meboot_vec(x = x, reps = reps, rho = rhos, type = type, drift = drift,
+  samples <- suppressWarnings(NNS.meboot(x = x, reps = reps, rho = rhos, type = type, drift = drift,
                             xmin = xmin, xmax = xmax, ...))
   
   replicates <- samples["replicates",]

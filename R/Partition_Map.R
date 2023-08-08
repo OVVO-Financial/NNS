@@ -102,7 +102,7 @@ NNS.part = function(x, y,
     if(is.null(type)) {
         i <- 0L
         while (i >= 0) {
-            if(i == order || i == hard.stop) break
+            if(i == order || i == floor(log(length(x), 2))) break
 
             PART[counts >= obs.req, `:=`(counts, .N), by = quadrant]
             PART[old.counts >= obs.req, `:=`(old.counts, .N), by = prior.quadrant]
@@ -211,6 +211,7 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
 
             if((min(PART$counts) <= obs.req) && i > 0) break
+            if(nrow(PART) > length(x)) break
             i = i + 1L
         }
 
@@ -233,7 +234,7 @@ NNS.part = function(x, y,
     if(!is.null(type)) {
         i <- 0L
         while (i >= 0) {
-            if(i == order || i == hard.stop) break
+            if(i == order || i == floor(log(length(x), 2))) break
 
             PART[counts > obs.req/2, `:=`(counts, .N), by = quadrant]
             PART[old.counts > obs.req/2, `:=`(old.counts, .N), by = prior.quadrant]
@@ -286,6 +287,7 @@ NNS.part = function(x, y,
                 new.parts <- length(unique(PART$quadrant))
 
             if((min(PART$counts) <= obs.req) && i > 0) break
+            if(nrow(PART) > length(x)) break
             i <- i + 1L
         }
 

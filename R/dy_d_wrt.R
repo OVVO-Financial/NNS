@@ -121,7 +121,7 @@ dy.d_ <- function(x, y, wrt,
  
   zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
  
-  h_s <- na.omit(c(1:5, seq(7, 15, 2), 20, 25)[1:min(n,12)])
+  h_s <- c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]
 
   results <- vector(mode = "list", length(h_s))
   
@@ -130,9 +130,9 @@ dy.d_ <- function(x, y, wrt,
     if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
 
-      h_step <- gravity(abs(diff(x[,wrt]))) * index
+      h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
       
-      if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
+      if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
       
       original.eval.points.min <- original.eval.points.min - h_step
       original.eval.points.max <- h_step + original.eval.points.max
@@ -140,6 +140,7 @@ dy.d_ <- function(x, y, wrt,
       seq_by <- max(.01, (1 - zz)/2)
       
       deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
+      
       sampsize <- length(seq(0, 1, seq_by))
       
       if(ncol(deriv.points)!=ncol(x)){
@@ -149,7 +150,7 @@ dy.d_ <- function(x, y, wrt,
       
       
       deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
-      
+     
       data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
                                                                                             eval.points,
                                                                                             original.eval.points.max))
@@ -196,9 +197,9 @@ dy.d_ <- function(x, y, wrt,
       n <- nrow(eval.points)
       original.eval.points <- eval.points
 
-      h_step <- gravity(abs(diff(x[,wrt]))) * index
+      h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
       
-      if(h_step==0) h_step <- abs((max(x[,wrt]) - min(x[,wrt])) * h)
+      if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
       
       original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
       original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
@@ -233,12 +234,12 @@ dy.d_ <- function(x, y, wrt,
       }
       
       if(!is.null(dim(eval.points))){
-        h_step_1 <- gravity(abs(diff(x[,1]))) * index
-        if(h_step_1==0) h_step_1 <- abs((max(x[,1]) - min(x[,1])) * h)
+        h_step_1 <- gravity(abs(diff(x[,1]))) * h_s[index]
+        if(h_step_1==0) h_step_1 <- ((abs((max(x[,1]) - min(x[,1])) ))/length(x[,1])) * h_s[index]
         
         
-        h_step_2 <- gravity(abs(diff(x[,2]))) * index
-        if(h_step_2==0) h_step_2 <- abs((max(x[,2]) - min(x[,2])) * h)
+        h_step_2 <- gravity(abs(diff(x[,2]))) * h_s[index]
+        if(h_step_2==0) h_step_2 <- ((abs((max(x[,2]) - min(x[,2])) ))/length(x[,2])) * h_s[index]
         
         mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
                                        eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],

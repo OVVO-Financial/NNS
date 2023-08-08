@@ -4,14 +4,16 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(x, y, eval.point = median(x))
+dy.dx(x, y, eval.point = NULL, messages = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector.}
 
 \item{y}{a numeric vector.}
 
-\item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated.  Defaults to \code{(eval.point = median(x))}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
+\item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
+
+\item{messages}{logical; \code{TRUE} (default) Prints status messages.}
 }
 \value{
 Returns a list of both 1st and 2nd derivative:
