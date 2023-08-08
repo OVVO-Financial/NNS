@@ -53,7 +53,7 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
     
     eval.point.idx <- which(eval.point==eval.point)
 
-    h_s <-  c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]  
+    h_s <- c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]  
     
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))

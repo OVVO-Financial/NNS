@@ -108,16 +108,14 @@ degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2,
 head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples, degree.0.25.samples, degree.0.5.samples, degree.1.samples, degree.2.samples)), 10)
 
 ## ---- fig.align='center', fig.width=8, fig.height=8---------------------------
-rhos = seq(-1, 1, .25)
-
-boots = NNS.meboot(x, reps = 1, rho = rhos)
-reps = do.call(cbind, boots["replicates",])
+boots = NNS.MC(x, reps = 1, rho = c(-1, 1), step = .25)$replicates
+reps = do.call(cbind, boots)
 
 plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
-matplot(reps, type = "l", col = rainbow(length(rhos)), add = TRUE)
+matplot(reps, type = "l", col = rainbow(length(seq(-1, 1, .25))), add = TRUE)
 
 ## -----------------------------------------------------------------------------
-sapply(boots["replicates",], function(r) cor(r, x, method = "spearman"))
+sapply(boots, function(r) cor(r, x, method = "spearman"))
 
 ## ----multisim-----------------------------------------------------------------
 set.seed(123)

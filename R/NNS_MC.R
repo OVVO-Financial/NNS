@@ -41,10 +41,16 @@ NNS.MC <- function(x,
                    xmax = NULL, ...){
 
 
-  rhos <- 1-seq(rho[1], rho[2], step)^exp
+  rhos <- seq(rho[1], rho[2], step)
+  l <- length(rhos)
+  
+  neg_rhos <- abs(rhos[rhos<0])
+  pos_rhos <- rhos[rhos>0]
+  
+  exp_rhos <- rev(c((neg_rhos^exp)*-1, pos_rhos^(1/exp)))
   
   
-  samples <- suppressWarnings(NNS.meboot(x = x, reps = reps, rho = rhos, type = type, drift = drift,
+  samples <- suppressWarnings(NNS.meboot(x = x, reps = reps, rho = exp_rhos, type = type, drift = drift,
                             xmin = xmin, xmax = xmax, ...))
   
   replicates <- samples["replicates",]
@@ -53,7 +59,7 @@ NNS.MC <- function(x,
 
   ensemble <- Rfast::rowmeans(do.call(cbind, replicates))
 
-  names(replicates) <- paste0("rho = ", rhos)
+  names(replicates) <- paste0("rho = ", exp_rhos)
   
   return(list("ensemble" = ensemble, "replicates" = replicates))
 }
