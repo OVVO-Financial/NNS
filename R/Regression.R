@@ -155,7 +155,8 @@ NNS.reg = function (x, y,
   
   dist <- tolower(dist)
   
-  if(any(class(x)%in%c("tbl","data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(any(class(x)%in%c("tbl","data.table")) && ncol(x)==1) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table")) && ncol(y)==1) y <- as.vector(unlist(y))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
  
   n <- length(y)

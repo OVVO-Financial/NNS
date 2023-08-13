@@ -176,11 +176,11 @@ The ability to sample from specified correlations ensures the full spectrum of f
 We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values, and then plot the results compared to our original $X$ (black line).  **`NNS.MC`** is a streamlined wrapper function for this functionality of **`NNS.meboot`**.
 
 ```{r, fig.align='center', fig.width=8, fig.height=8}
-boots = NNS.MC(x, reps = 1, rho = c(-1, 1), step = .25)$replicates
+boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .25)$replicates
 reps = do.call(cbind, boots)
 
 plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
-matplot(reps, type = "l", col = rainbow(length(seq(-1, 1, .25))), add = TRUE)
+matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
 ```
 
 Checking our replicate correlations:
