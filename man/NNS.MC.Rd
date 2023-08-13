@@ -7,8 +7,9 @@
 NNS.MC(
   x,
   reps = 30,
-  rho = c(-1, 1),
-  step = 0.01,
+  lower_rho = -1,
+  upper_rho = 1,
+  by = 0.01,
   exp = 1,
   type = "spearman",
   drift = TRUE,
@@ -22,11 +23,13 @@ NNS.MC(
 
 \item{reps}{numeric; number of replicates to generate, \code{30} default.}
 
-\item{rho}{vector \code{c(-1,1)}; The default setting assumes that the user wants to sample from the full correlation spectrum [-1,1].}
+\item{lower_rho}{numeric \code{[-1,1]}; \code{.01} default will set the \code{from} argument in \code{seq(from, to, by)}.}
 
-\item{step}{numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.}
+\item{upper_rho}{numeric \code{[-1,1]}; \code{.01} default will set the \code{to} argument in \code{seq(from, to, by)}.}
 
-\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.}
+\item{by}{numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.}
+
+\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
