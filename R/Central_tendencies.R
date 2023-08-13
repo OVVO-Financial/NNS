@@ -41,7 +41,7 @@ NNS.mode <- function(x, discrete = FALSE, multi = TRUE){
   
   
   final <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
-  if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else return(mean(final))
+  if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else if(multi) return(final) else return(mean(final))
 }
 
 
