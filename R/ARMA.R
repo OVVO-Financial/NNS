@@ -258,7 +258,7 @@ NNS.ARMA <- function(variable,
 
 
   if(!is.null(pred.int)){
-    PIs <- do.call(cbind, NNS.MC(Estimates, rho = c(0,1), exp = 2)$replicates)
+    PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = 0, upper_rho = 1, by = .2, exp = 2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
   } else lin.resid <- 0

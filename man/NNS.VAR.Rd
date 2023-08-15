@@ -80,17 +80,18 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  ### Using lags c(1,2,3) for variables 1 and 3, while using lags c(4,5,6) for variable 2
  NNS.VAR(A, h = 12, tau = list(c(1,2,3), c(4,5,6), c(1,2,3)), status = TRUE)
 
- ### CONFIDENCE INTERVALS FOR PREDICTIONS
+ ### PREDICTION INTERVALS
  # Store NNS.VAR output
  nns_estimate <- NNS.VAR(A, h = 12, tau = 4, status = TRUE)
 
  # Create bootstrap replicates using NNS.meboot
- replicates <- NNS.meboot(nns_estimate$ensemble[,1])$replicates
+ replicates <- NNS.meboot(nns_estimate$ensemble[,1], rho = seq(-1,1,.25))["replicates",]
+ replicates <- do.call(cbind, replicates)
 
  # Apply UPM.VaR and LPM.VaR for desired prediction interval...95 percent illustrated
  # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions
- upper_CIs <- apply(replicates, 1, function(g) UPM.VaR(.025, 0, g))
- lower_CIs <- apply(replicates, 1, function(g) LPM.VaR(.025, 0, g))
+ lower_CIs <- apply(replicates, 1, function(z) LPM.VaR(0.025, 0, z))
+ upper_CIs <- apply(replicates, 1, function(z) UPM.VaR(0.025, 0, z))
 
  # View results
  cbind(nns_estimate$ensemble[,1], lower_CIs, upper_CIs)

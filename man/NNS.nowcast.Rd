@@ -54,12 +54,29 @@ Wrapper function for NNS nowcasting method using the nonparametric vector autore
  ## Interpolates / Extrapolates all variables to current month
  NNS.nowcast(h = 0)
  
- ## 12 month forecast
- NNS.nowcast(h = 12)
- 
  ## Additional regressors and sources specified
  NNS.nowcast(h = 0, additional.regressors = c("SPY", "USO"), 
              additional.sources = c("yahoo", "yahoo"))
+             
+              
+ ### PREDICTION INTERVALS 
+ ## Store NNS.nowcast output
+ nns_estimates <- NNS.nowcast(h = 12)           
+ 
+ # Create bootstrap replicates using NNS.meboot (GDP Variable)
+ gdp_replicates <- NNS.meboot(nns_estimates$ensemble$GDPC1, 
+                              rho = seq(-1,1,.25), 
+                              reps = 100)["replicates",]
+                              
+ replicates = do.call(cbind, gdp_replicates)
+ 
+ # Apply UPM.VaR and LPM.VaR for desired prediction interval...95 percent illustrated
+ # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions
+ lower_GDP_CIs <- apply(replicates, 1, function(z) LPM.VaR(0.025, 0, z))
+ upper_GDP_CIs <- apply(replicates, 1, function(z) UPM.VaR(0.025, 0, z))
+ 
+ # View results
+ cbind(nns_estimates$ensemble$GDPC1, lower_GDP_CIs, upper_GDP_CIs)
  }
 
 }
