@@ -176,7 +176,7 @@ The ability to sample from specified correlations ensures the full spectrum of f
 We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values, and then plot the results compared to our original $X$ (black line).  **`NNS.MC`** is a streamlined wrapper function for this functionality of **`NNS.meboot`**.
 
 ```{r, fig.align='center', fig.width=8, fig.height=8}
-boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .25)$replicates
+boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 reps = do.call(cbind, boots)
 
 plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
@@ -241,12 +241,12 @@ head(new.dep.data)
 ## Alternative Using **`NNS.meboot`**
 Alternatively, if we wish to keep the simulated values close to the original data, we can apply the **`NNS.meboot`** procedure to each of the variables.
 
-We will generate 10 replicates of $\rho = 0.95$ to our `original.data`, use their `ensemble` and note the multivariate dependence among our `new.boot.dep.data`.
+We will generate 1 replicate (for brevity) of $\rho = 0.95$ to our `original.data`, use their `ensemble` and note the multivariate dependence among our `new.boot.dep.data`.
 
 
 ```{r}
 # Apply bootstrap to each variable
-new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 10, rho = .95))
+new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 1, rho = .95))
 
 # Reformat into vectors
 boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble",]))

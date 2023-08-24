@@ -108,7 +108,7 @@ degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2,
 head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples, degree.0.25.samples, degree.0.5.samples, degree.1.samples, degree.2.samples)), 10)
 
 ## ---- fig.align='center', fig.width=8, fig.height=8---------------------------
-boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .25)$replicates
+boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 reps = do.call(cbind, boots)
 
 plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
@@ -143,7 +143,7 @@ head(new.dep.data)
 
 ## -----------------------------------------------------------------------------
 # Apply bootstrap to each variable
-new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 10, rho = .95))
+new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 1, rho = .95))
 
 # Reformat into vectors
 boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble",]))

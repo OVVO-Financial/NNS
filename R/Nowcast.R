@@ -52,10 +52,10 @@
 #'  
 #'  # Create bootstrap replicates using NNS.meboot (GDP Variable)
 #'  gdp_replicates <- NNS.meboot(nns_estimates$ensemble$GDPC1, 
-#'                               rho = seq(-1,1,.25), 
+#'                               rho = seq(0,1,.25), 
 #'                               reps = 100)["replicates",]
 #'                               
-#'  replicates = do.call(cbind, gdp_replicates)
+#'  replicates <- do.call(cbind, gdp_replicates)
 #'  
 #'  # Apply UPM.VaR and LPM.VaR for desired prediction interval...95 percent illustrated
 #'  # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions

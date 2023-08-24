@@ -432,6 +432,7 @@ NNS.VAR <- function(variables,
   rownames(nns_DVs) <- tail(dates, h)
   colnames(forecasts) <- colnames(variables)
   rownames(forecasts) <- tail(dates, h)
+  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(nns_IVs_interpolated_extrapolated))
   
   options(warn = oldw)
   
