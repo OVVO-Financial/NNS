@@ -220,7 +220,6 @@ NNS.VAR <- function(variables,
   }
   
   interpolation_results <- lapply(nns_IVs, `[[`, 1)
-  extrapolation_results <- lapply(nns_IVs, `[[`, 2)
   
   nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, interpolation_results))
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
@@ -237,7 +236,7 @@ NNS.VAR <- function(variables,
   
   if(h == 0) return(nns_IVs_interpolated_extrapolated)
   
-  
+  extrapolation_results <- lapply(nns_IVs, `[[`, 2)
   nns_IVs_results <- data.frame(do.call(cbind, extrapolation_results))
   colnames(nns_IVs_results) <- colnames(variables)
   
@@ -377,6 +376,8 @@ NNS.VAR <- function(variables,
       
       if(equal_tau == unequal_tau) uni[i] <- 0.5
       
+      uni[i] <- (uni[i] + 0.5)/2
+      
       multi[i] <- 1 - uni[i]
     } else {
       uni[i] <- 0.5
@@ -385,6 +386,7 @@ NNS.VAR <- function(variables,
     
     if(abs(uni[i]) > 1){
       uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
+      uni[i] <- (uni[i] + 0.5)/2
       multi[i] <- 1 - uni[i]
     }
     
@@ -392,7 +394,11 @@ NNS.VAR <- function(variables,
       uni[i] <- 1
       multi[i] <- 0
     }
+    
+    uni[i] <- multi[i] <- .5
   }
+  
+
   
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
