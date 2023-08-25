@@ -1,5 +1,9 @@
-## ----setup, include=FALSE-----------------------------------------------------
+## ----setup, include=FALSE, message=FALSE--------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(2L)
+options(mc.cores = 1)
 
 ## ----setup2, message=FALSE, warning=FALSE-------------------------------------
 library(NNS)

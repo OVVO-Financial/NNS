@@ -1,5 +1,9 @@
-## ----setup, include=FALSE-----------------------------------------------------
+## ----setup, include=FALSE, message=FALSE--------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(2L)
+options(mc.cores = 1)
 
 ## ----setup2,message=FALSE,warning = FALSE-------------------------------------
 library(NNS)
@@ -40,16 +44,17 @@ t.test(x,y)
 ## ----stochdom, fig.width=7, fig.align='center'--------------------------------
 NNS.FSD(x, y)
 
-## ----stochdomset--------------------------------------------------------------
-set.seed(123)
-x1 = rnorm(1000)
-x2 = x1 + 1
-x3 = rnorm(1000)
-x4 = x3 + 1
-x5 = rnorm(1000)
-x6 = x5 + 1
-x7 = rnorm(1000)
-x8 = x7 + 1
-
-NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status = FALSE)
+## ----stochdomset, eval=FALSE--------------------------------------------------
+#  set.seed(123)
+#  x1 = rnorm(1000)
+#  x2 = x1 + 1
+#  x3 = rnorm(1000)
+#  x4 = x3 + 1
+#  x5 = rnorm(1000)
+#  x6 = x5 + 1
+#  x7 = rnorm(1000)
+#  x8 = x7 + 1
+#  
+#  NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status = FALSE)
+#  [1] "x4" "x2" "x8" "x6"
 

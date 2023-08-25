@@ -7,8 +7,13 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-```{r setup, include=FALSE}
+
+```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(2L)
+options(mc.cores = 1)
 ```
 
 ```{r setup2, message=FALSE, warning = FALSE}
@@ -20,36 +25,40 @@ require(meboot)
 ```
 
 # Classification
+
 **`NNS.reg`** is a very robust regression technique capable of nonlinear regressions of continuous variables and classification tasks in machine learning problems.
 
-We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**.  In short, **`NNS.reg`** is the base learner instead of trees.
+We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**. In short, **`NNS.reg`** is the base learner instead of trees.
 
 ***One major advantage `NNS.boost` has over tree based methods is the ability to seamlessly extrapolate beyond the current range of observations.***
 
 ## Splits vs. Partitions
-Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs.  `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable.  We can directly control the number of "splits" with the **`NNS.reg(..., order = , ...)`** parameter.
+
+Popular boosting algorithms take a series of weak learning decision tree models, and aggregate their outputs. `NNS` is also a decision tree of sorts, by partitioning each regressor with respect to the dependent variable. We can directly control the number of "splits" with the **`NNS.reg(..., order = , ...)`** parameter.
 
 ### NNS Partitions
-We can see how `NNS` partitions each regressor by calling the `$rhs.partitions` output.  You will notice that each partition is not an equal interval, nor of equal length, which differentiates `NNS` from other bandwidth or tree-based techniques.
 
-Higher dependence between a regressor and the dependent variable will allow for a larger number of partitions.  This is determined internally with the **`NNS.dep`** measure.
+We can see how `NNS` partitions each regressor by calling the `$rhs.partitions` output. You will notice that each partition is not an equal interval, nor of equal length, which differentiates `NNS` from other bandwidth or tree-based techniques.
+
+Higher dependence between a regressor and the dependent variable will allow for a larger number of partitions. This is determined internally with the **`NNS.dep`** measure.
 
 ```{r rhs, rows.print=18}
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 ```
 
 # `NNS.boost()`
-Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value.  From there we simply aggregate the predictions.
 
-**`NNS.boost`** will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console.  A plot of the frequency of the learning accuracy on the training set is also provided.
+Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value. From there we simply aggregate the predictions.
+
+**`NNS.boost`** will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console. A plot of the frequency of the learning accuracy on the training set is also provided.
 
 Once a `threshold` is obtained, **`NNS.boost`** will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
 
-Let's have a look and see how it works.  We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set.  For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
+Let's have a look and see how it works. We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set. For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
 
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
 
-```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5}
+```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE}
 test.set = 141:150
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
@@ -60,23 +69,27 @@ a = NNS.boost(IVs.train = iris[-test.set, 1:4],
               type = "CLASS", folds = 1)
 
 a$results
+[1] 3 3 3 3 3 3 3 3 3 3
 
 a$feature.weights
-
+Petal.Width Petal.Length Sepal.Length 
+   0.4285714    0.4285714    0.1428571 
+   
 mean( a$results == as.numeric(iris[test.set, 5]) )
+[1] 1
 ```
 
-A perfect classification, using the features: `r names(a$feature.weights)`, weighted per the output above.
+A perfect classification, using the features weighted per the output above.
 
 # Cross-Validation Classification Using `NNS.stack()`
+
 The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
 
 For brevity, we set `folds = 1`.
 
-
 **NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
-```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE, eval=FALSE}
+```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5, message=FALSE, eval= FALSE}
 b = NNS.stack(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
@@ -130,23 +143,23 @@ mean( b$stack == as.numeric(iris[test.set, 5]) )
 ```
 
 ## Brief Notes on Other Parameters
-* `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression.  In essence, this is the basis for a `kNN` nearest neighbor type of classification.
 
-* `n.best = 1` will use the single nearest neighbor.  When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` but as the dimensions increase the results diverge demonstrating `NNS` is less sensitive to the curse of dimensionality than `kNN`.
+-   `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression. In essence, this is the basis for a `kNN` nearest neighbor type of classification.
 
-* `extreme` will use the maximum or minimum `threshold` obtained, and may result in errors if that threshold cannot be eclipsed by subsequent iterations.
+-   `n.best = 1` will use the single nearest neighbor. When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` but as the dimensions increase the results diverge demonstrating `NNS` is less sensitive to the curse of dimensionality than `kNN`.
 
+-   `extreme` will use the maximum or minimum `threshold` obtained, and may result in errors if that threshold cannot be eclipsed by subsequent iterations.
 
 # References
 
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
-* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://www.ssrn.com/abstract=2148522)
+-   [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://www.ssrn.com/abstract=2148522)
 
-* [Nonparametric Regression Using Clusters](https://link.springer.com/article/10.1007/s10614-017-9713-5)
+-   [Nonparametric Regression Using Clusters](https://link.springer.com/article/10.1007/s10614-017-9713-5)
 
-* [Clustering and Curve Fitting by Line Segments](https://www.ssrn.com/abstract=2861339)
+-   [Clustering and Curve Fitting by Line Segments](https://www.ssrn.com/abstract=2861339)
 
-* [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)
+-   [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)

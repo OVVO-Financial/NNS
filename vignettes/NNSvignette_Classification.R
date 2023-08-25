@@ -1,5 +1,9 @@
-## ----setup, include=FALSE-----------------------------------------------------
+## ----setup, include=FALSE, message=FALSE--------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(2L)
+options(mc.cores = 1)
 
 ## ----setup2, message=FALSE, warning = FALSE-----------------------------------
 library(NNS)
@@ -11,23 +15,27 @@ require(meboot)
 ## ----rhs, rows.print=18-------------------------------------------------------
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
-## ----NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5--------------
-test.set = 141:150
- 
-a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
-              DV.train = iris[-test.set, 5],
-              IVs.test = iris[test.set, 1:4],
-              epochs = 10, learner.trials = 10, 
-              status = FALSE, balance = TRUE,
-              type = "CLASS", folds = 1)
+## ----NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE----
+#  test.set = 141:150
+#  
+#  a = NNS.boost(IVs.train = iris[-test.set, 1:4],
+#                DV.train = iris[-test.set, 5],
+#                IVs.test = iris[test.set, 1:4],
+#                epochs = 10, learner.trials = 10,
+#                status = FALSE, balance = TRUE,
+#                type = "CLASS", folds = 1)
+#  
+#  a$results
+#  [1] 3 3 3 3 3 3 3 3 3 3
+#  
+#  a$feature.weights
+#  Petal.Width Petal.Length Sepal.Length
+#     0.4285714    0.4285714    0.1428571
+#  
+#  mean( a$results == as.numeric(iris[test.set, 5]) )
+#  [1] 1
 
-a$results
-
-a$feature.weights
-
-mean( a$results == as.numeric(iris[test.set, 5]) )
-
-## ----NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5,message=FALSE, eval=FALSE----
+## ----NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5, message=FALSE, eval= FALSE----
 #  b = NNS.stack(IVs.train = iris[-test.set, 1:4],
 #                DV.train = iris[-test.set, 5],
 #                IVs.test = iris[test.set, 1:4],
