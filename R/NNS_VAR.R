@@ -167,7 +167,6 @@ NNS.VAR <- function(variables,
   
   
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
-    #  for(i in 1:ncol(variables)){
     n <- nrow(variables)
     index <- seq_len(n)
     last_point <- n

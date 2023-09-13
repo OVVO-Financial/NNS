@@ -420,8 +420,11 @@ NNS.reg = function (x, y,
           if(is.null(order)) order <- max(1, floor(dependence*10))
           
           if(length(y) < 100) order <- order / 2
-          ifelse(order%%1 <= .5, floor(order), ceiling(order))
-          order <- max(1, order)
+          
+          if(is.numeric(order)){
+            ifelse(order%%1 <= .5, floor(order), ceiling(order))
+            order <- max(1, order)
+          }
           
         }
        } # Multivariate Not NULL type
@@ -824,23 +827,6 @@ NNS.reg = function (x, y,
   
   colnames(fitted) <- gsub(".V1", "", colnames(fitted))
   
-  # fitted <- data.table::data.table(x = x,
-  #                                  y = original.y,
-  #                                  y.hat = estimate,
-  #                                  NNS.ID = part.map$dt$quadrant)
-  # 
-  # 
-  # 
-  # fitted$y.hat[is.na(fitted$y.hat)] <- mode(na.omit(fitted$y.hat))
-  # 
-  # Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = fitted[ , y], Difference = fitted[ , y.hat] - fitted[ , y],  Accuracy = abs(round(fitted[ , y.hat]) - fitted[ , y]))
-  # 
-  # SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
-  # 
-  # gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
-  # 
-  # fitted <- cbind(fitted, gradient)
-  # fitted$residuals <-  original.y - fitted$y.hat
   
   if(!is.null(type)){
     if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
