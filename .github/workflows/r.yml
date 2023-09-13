@@ -35,7 +35,7 @@ jobs:
           r-version: ${{ matrix.r-version }}
       - name: Install dependencies
         run: |
-          install.packages(c("remotes", "rcmdcheck", "Rfast"))
+          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
       - name: Check
