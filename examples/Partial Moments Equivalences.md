@@ -187,9 +187,15 @@ A normalized sum of upside area and downside area.
 # Alternatively via NNS.CDF()
 > NNS.CDF(x)
 ```
-### PDFs
+### Copulas
 ```r
-> NNS.PDF(x)
+# Transform x and y so that they are uniform
+u_x = LPM(0, x, x)
+u_y = LPM(0, y, y)
+
+# Value of copula at c(.5, .5)
+Co.LPM(0, u_x, u_y, .5, .5)
+[1] 0.26
 ```
 ### Numerical Integration - [UPM(1,0,f(x))-LPM(1,0,f(x))]=[F(b)-F(a)]/[b-a]
 ```r
