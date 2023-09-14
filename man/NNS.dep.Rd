@@ -24,7 +24,7 @@ Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlati
 Returns the dependence and nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.
 }
 \note{
-\code{NNS.cor} has been deprecated \code{(NNS >= 0.5.4)} and can be called via \code{NNS.dep}.
+For asymmetrical \code{(asym = TRUE)} matrices, directional dependence is returned as ([column variable] ---> [row variable]).
 }
 \examples{
 \dontrun{
