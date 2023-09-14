@@ -49,7 +49,6 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
       return (0)
     
     x.fsd.y <- any(LPM_x_sort > LPM_y_sort)
-    #if(!x.fsd.y && min(x) >= min(y) && !identical(LPM_x_sort, LPM_y_sort)){
     if(!x.fsd.y){
       return(1)
     }
@@ -92,8 +91,6 @@ NNS.SSD.uni <- function(x, y){
       return (0)
 
 	x.ssd.y <- any(LPM_x_sort > LPM_y_sort)
-
-	#if(!x.ssd.y && min(x) >= min(y) && !identical(LPM_x_sort, LPM_y_sort)){
 	if(!x.ssd.y){
 		return(1)
 	}
@@ -136,7 +133,6 @@ NNS.TSD.uni <- function(x, y){
     if (identical(LPM_x_sort, LPM_y_sort))
       return (0)
 	x.tsd.y <- any(LPM_x_sort > LPM_y_sort)
-	#ifelse(!x.tsd.y && min(x) >= min(y) && !identical(LPM_x_sort, LPM_y_sort),
 	if(!x.tsd.y){
 	  return(1)
 	}
