@@ -190,8 +190,8 @@ A normalized sum of upside area and downside area.
 ### Copulas
 ```r
 # Transform x and y so that they are uniform
-u_x = LPM(0, x, x)
-u_y = LPM(0, y, y)
+u_x = LPM.ratio(0, x, x)
+u_y = LPM.ratio(0, y, y)
 
 # Value of copula at c(.5, .5)
 Co.LPM(0, u_x, u_y, .5, .5)
