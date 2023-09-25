@@ -36,7 +36,7 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 #  sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 
 ## ----nonlinearres, eval = FALSE-----------------------------------------------
-#  [1] 19.49762
+#  [1] 19.1362
 
 ## ----seasonal test, eval=TRUE-------------------------------------------------
 seas = t(sapply(1 : 25, function(i) c(i, sqrt( mean( (NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", seasonal.factor = i, plot=FALSE) - tail(AirPassengers, 44)) ^ 2) ) ) ) )
@@ -80,15 +80,15 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 #  [1] "CURRNET METHOD: nonlin"
 #  [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
 #  [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 12 ) ...)"
-#  [1] "CURRENT nonlin OBJECTIVE FUNCTION = 19.4976178189546"
+#  [1] "CURRENT nonlin OBJECTIVE FUNCTION = 19.1362358134362"
 #  [1] "BEST method = 'nonlin' PATH MEMBER = c( 12 )"
-#  [1] "BEST nonlin OBJECTIVE FUNCTION = 19.4976178189546"
+#  [1] "BEST nonlin OBJECTIVE FUNCTION = 19.1362358134362"
 #  [1] "CURRNET METHOD: both"
 #  [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
 #  [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 12 ) ...)"
-#  [1] "CURRENT both OBJECTIVE FUNCTION = 26.6112299452096"
+#  [1] "CURRENT both OBJECTIVE FUNCTION = 26.9572377070982"
 #  [1] "BEST method = 'both' PATH MEMBER = c( 12 )"
-#  [1] "BEST both OBJECTIVE FUNCTION = 26.6112299452096"
+#  [1] "BEST both OBJECTIVE FUNCTION = 26.9572377070982"
 #  $periods
 #  [1] 12
 #  

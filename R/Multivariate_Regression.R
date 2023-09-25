@@ -33,13 +33,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     }
   }
   
-  original.matrix <- cbind.data.frame(original.IVs, original.DV)
+  original.matrix <- cbind.data.frame(original.DV, original.IVs)
   norm.matrix <- apply(original.matrix[,1:n], 2, function(z) NNS.rescale(z, 0, 1))
   
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix, original.DV))))
+  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix, original.DV)), mean(NNS.dep(original.matrix)$Dependence[-1,1])))
   
   if(is.null(order)) order <- max(1, ceiling(dependence*10))
 
