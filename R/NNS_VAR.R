@@ -151,7 +151,8 @@ NNS.VAR <- function(variables,
   }
   
   if(num_cores > 1){
-    cl <- parallel::makeCluster(num_cores)
+    cl <- tryCatch(parallel::makeForkCluster(num_cores), error = function(e) parallel::makeCluster(num_cores))
+    registerDoParallel(cl)
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
   } else {

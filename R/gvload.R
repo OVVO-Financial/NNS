@@ -32,7 +32,7 @@
       "NNS.ID","max.x1","max.x2","min.x1","min.x2","counts",'old.counts',
       "Period","Coefficient.of.Variation","Variable.Coefficient.of.Variation", "Sum", "j","lpm","upm", "tau",
       "i.x","i.y","q_new","x.x","x.y","standard.errors",
-      "detectCores","makeCluster","registerDoSEQ","clusterExport", "frollmean", "shift",
+      "detectCores","makeCluster", "makeForkCluster", "registerDoSEQ", "clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster",
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
       "bias", "conf.intervals", "conf.int.neg", "conf.int.pos", "pred.int", "lower.pred.int", "upper.pred.int"

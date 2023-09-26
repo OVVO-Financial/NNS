@@ -34,12 +34,12 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   original.matrix <- cbind.data.frame(original.DV, original.IVs)
-  norm.matrix <- apply(original.matrix[,1:n], 2, function(z) NNS.rescale(z, 0, 1))
+  norm.matrix <- apply(original.matrix, 2, function(z) NNS.rescale(z, 0, 1))
   
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix, original.DV)), mean(NNS.dep(original.matrix)$Dependence[-1,1])))
+  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix)), mean(NNS.dep(original.matrix)$Dependence[-1,1])))
   
   if(is.null(order)) order <- max(1, ceiling(dependence*10))
 
@@ -93,7 +93,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   if(num_cores > 1){
-    cl <- parallel::makeCluster(num_cores)
+    cl <- tryCatch(parallel::makeForkCluster(num_cores), error = function(e) parallel::makeCluster(num_cores))
     doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
   } else {
