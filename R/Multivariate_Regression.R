@@ -39,7 +39,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix)), mean(NNS.dep(original.matrix)$Dependence[-1,1])))
+  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix))))
   
   if(is.null(order)) order <- max(1, ceiling(dependence*10))
   if(order >= 9) order <- "max"
