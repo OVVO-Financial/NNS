@@ -151,8 +151,7 @@ NNS.VAR <- function(variables,
   }
   
   if(num_cores > 1){
-    registerDoParallel(num_cores)
-    doParallel::registerDoParallel(cl)
+    doParallel::registerDoParallel(num_cores)
     invisible(data.table::setDTthreads(1))
   } else {
     foreach::registerDoSEQ()
