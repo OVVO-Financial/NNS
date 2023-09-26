@@ -340,8 +340,6 @@ NNS.VAR <- function(variables,
                    }
   
   if(num_cores > 1) {
-    parallel::stopCluster(cl)
-    remove(cl)
     foreach::registerDoSEQ()
     invisible(data.table::setDTthreads(0, throttle = NULL))
   }
