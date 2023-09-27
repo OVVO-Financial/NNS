@@ -367,7 +367,7 @@ NNS.VAR <- function(variables,
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
       
-      uni[i] <-  (.5 + equal_tau/(equal_tau + unequal_tau)) /2 
+      if(equal_tau > unequal_tau) uni[i] <-  (.5 + equal_tau/(equal_tau + unequal_tau)) / 2 else uni[i] <-  abs((.5 - unequal_tau/(equal_tau + unequal_tau)) / 2)
       multi[i] <- 1 - uni[i]
       
     } else {
