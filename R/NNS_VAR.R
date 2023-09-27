@@ -357,8 +357,7 @@ NNS.VAR <- function(variables,
   RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
   colnames(RV) <- as.character(colnames(variables))
   
-  uni <- numeric(length(colnames(RV)))
-  multi <- numeric(length(colnames(RV)))
+  multi <- uni <- numeric(length(colnames(RV)))
   
   for(i in 1:length(colnames(RV))){
     if(length(na.omit(RV[,i]) > 0)){
@@ -368,30 +367,13 @@ NNS.VAR <- function(variables,
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
       
-      if(equal_tau > unequal_tau) uni[i] <-  .5 + .5*((equal_tau)/(equal_tau + unequal_tau)) else uni[i] <-  .5 - .5*((unequal_tau)/(equal_tau + unequal_tau))
-      
-      if(equal_tau == unequal_tau) uni[i] <- 0.5
-      
-      uni[i] <- (uni[i] + 0.5)/2
-      
+      uni[i] <-  (.5 + equal_tau/(equal_tau + unequal_tau)) /2 
       multi[i] <- 1 - uni[i]
+      
     } else {
       uni[i] <- 0.5
       multi[i] <- 0.5
     }
-    
-    if(abs(uni[i]) > 1){
-      uni[i] <- abs(uni[i])/(abs(uni[i]) + abs(multi[i]))
-      uni[i] <- (uni[i] + 0.5)/2
-      multi[i] <- 1 - uni[i]
-    }
-    
-    if(all((diff(nns_DVs[,i])/nns_DVs[-1,i])<1e-5)){
-      uni[i] <- 1
-      multi[i] <- 0
-    }
-    
-    uni[i] <- multi[i] <- .5
   }
   
 
