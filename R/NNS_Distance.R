@@ -59,35 +59,41 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
       return(rpm$y.hat[1])
     }
   }
-
-  uni_weights <- rep(1/min(k,l), min(k,l))
   
-  t_weights <- dt(rpm$Sum, df = min(k,l))
+  ll <- min(k, l)
+
+  uni_weights <- rep(1/ll, ll)
+  
+  t_weights <- dt(rpm$Sum, df = ll)
   t_weights <- t_weights/sum(t_weights)
-  if(any(is.na(t_weights))) t_weights <- 0
+  if(any(is.na(t_weights))) t_weights <- rep(0, ll)
 
   emp <- rpm$Sum^(-1)
   emp_weights <- emp / sum(emp)
-  if(any(is.na(emp_weights))) emp_weights <- 0
+  if(any(is.na(emp_weights))) emp_weights <- rep(0, ll)
 
-  exp <- dexp(1:min(k,l), rate = 1/min(k,l))
+  exp <- dexp(1:ll, rate = 1/ll)
   exp_weights <- exp / sum(exp)
-  if(any(is.na(exp_weights))) exp_weights <- 0
+  if(any(is.na(exp_weights))) exp_weights <- rep(0, ll)
 
-  lnorm <- abs(rev(dlnorm(1:min(k, l), meanlog = 0, sdlog = sd(1:min(k, l)), log = TRUE)))
+  lnorm <- abs(rev(dlnorm(1:ll, meanlog = 0, sdlog = sd(1:ll), log = TRUE)))
   lnorm_weights <- lnorm / sum(lnorm)
-  if(any(is.na(lnorm_weights))) lnorm_weights <- 0
+  if(any(is.na(lnorm_weights))) lnorm_weights <- rep(0, ll)
 
-  pl_weights <- (1:min(k, l)) ^ (-2)
+  pl_weights <- (1:ll) ^ (-2)
   pl_weights <- pl_weights / sum(pl_weights)
-  if(any(is.na(pl_weights))) pl_weights <- 0
+  if(any(is.na(pl_weights))) pl_weights <- rep(0, ll)
 
   norm_weights <- dnorm(rpm$Sum, mean = 0, sd = sd(rpm$Sum))
   norm_weights <- norm_weights / sum(norm_weights)
-  if(any(is.na(norm_weights))) norm_weights <- 0
+  if(any(is.na(norm_weights))) norm_weights <- rep(0, ll)
+  
+  rbf_weights <- exp(- rpm$Sum / (2*var(rpm$Sum)))
+  rbf_weights <- rbf_weights / sum(rbf_weights)
+  if(any(is.na(rbf_weights))) rbf_weights <- rep(0, ll)
 
-  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights)/
-    sum(emp_weights + exp_weights +  lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights)
+  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights + rbf_weights)/
+    sum(emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights + rbf_weights)
   
   
   if(is.null(class)) single.estimate <- rpm$y.hat%*%weights else single.estimate <- mode_class(rep(rpm$y.hat, ceiling(100*weights)))
