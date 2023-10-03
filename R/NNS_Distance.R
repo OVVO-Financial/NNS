@@ -48,8 +48,10 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
   rpm$Sum[rpm$Sum == 0] <- 1e-10
 
   data.table::setkey(rpm, Sum)
+  
+  ll <- min(k, l)
 
-  rpm <- rpm[1:min(k,l),]
+  rpm <- rpm[1:ll,]
 
   if(k==1){
     index <- which(rpm$Sum==min(rpm$Sum))
@@ -60,7 +62,7 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
     }
   }
   
-  ll <- min(k, l)
+  
 
   uni_weights <- rep(1/ll, ll)
   

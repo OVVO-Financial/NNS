@@ -144,6 +144,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   y.hat <- unlist(mean.by.id.matrix[ , .(y.hat)])
   
   if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
+
   
   
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
@@ -280,7 +281,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   if(!is.null(type)){
     fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat %% 1 < 0.5, floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
-    if(!is.null(predict.fit)) predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
+    fitted.matrix$y.hat <- pmin(max(original.DV), pmax(min(original.DV), fitted.matrix$y.hat))
+    if(!is.null(predict.fit)){
+      predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
+      predict.fit <- pmin(max(original.DV), pmax(min(original.DV), predict.fit))
+    }  
   }
   
   rhs.partitions <- data.table::data.table(reg.points.matrix)
