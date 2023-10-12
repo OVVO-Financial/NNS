@@ -17,8 +17,10 @@ NNS offers:
   - Advanced Monte Carlo Sampling
 
 Companion R-package and datasets to: 
-
 #### Viole, F. and Nawrocki, D. (2013) ["*Nonlinear Nonparametric Statistics: Using Partial Moments*"]( https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+
+
+#### For a quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
 
 ## Current Version
 [![NNS](https://img.shields.io/badge/NNS%3E%3D-0.5.5-blue.svg)](https://cran.r-project.org/package=NNS) is built on [![data.table](https://img.shields.io/badge/data.table%3E%3D-1.10.4-6666ff.svg)](https://cran.r-project.org/package=data.table) and [![doParallel](https://img.shields.io/badge/doParallel%3E%3D-1.0.14-6666ff.svg)](https://cran.r-project.org/package=doParallel) architecture 
