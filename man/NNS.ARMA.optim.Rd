@@ -89,6 +89,10 @@ nns.estimates <- pmax(0, nns.estimates)
 
 ## To predict out of sample using best parameters:
 NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6))
+
+## Incorporate any objective function from external packages (such as \code{Metrics::mape})
+NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6),
+obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")
 }
 
 }
