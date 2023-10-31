@@ -25,7 +25,7 @@ for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
 NNS.part(x,y,order = 4, type = "XONLY")
 
 ## ----depreg},results='hide'---------------------------------------------------
-for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE) ; NNS.reg(x, y, order = i, ncores = 1)}
+for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY") ; NNS.reg(x, y, order = i, ncores = 1)}
 
 ## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center"------------------
 NNS.reg(x, y, ncores = 1)
@@ -118,7 +118,7 @@ set.seed(123)
 x = rnorm(100); y = rnorm(100)
 
 nns.params = list()
-nns.params$NNS.reg.n.best = 9
+nns.params$NNS.reg.n.best = 100
 
 ## ----stack2res, fig.width=5,fig.height=3,fig.align = "center",results='hide'----
 NNS.reg(cbind(x, x), y, 
@@ -126,4 +126,7 @@ NNS.reg(cbind(x, x), y,
         point.est = cbind(x, x), 
         residual.plot = TRUE,  
         ncores = 1, confidence.interval = .95)
+
+## ----threads, echo = FALSE----------------------------------------------------
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
 

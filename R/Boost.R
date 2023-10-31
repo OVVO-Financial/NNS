@@ -402,7 +402,7 @@ NNS.boost <- function(IVs.train,
   final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
   
   if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
-  
+
   model <- NNS.stack(x[, keeper.features],
                      y,
                      IVs.test = z[, keeper.features],

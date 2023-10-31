@@ -164,3 +164,7 @@ If the user is so motivated, detailed arguments further examples are provided wi
 -   [Clustering and Curve Fitting by Line Segments](https://www.ssrn.com/abstract=2861339)
 
 -   [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)
+
+```{r threads, echo = FALSE}
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
+```

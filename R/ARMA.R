@@ -291,9 +291,11 @@ NNS.ARMA <- function(variable,
            ylab = label, ylim = c(min(Estimates, OV,  unlist(PIs) ), max(OV, Estimates, unlist(PIs) )) )
       
       for(i in 1 : ncol(PIs)){
-        lines((training.set+1) : (training.set+h), PIs[,i] + lin.resid, col = "pink") #col = rgb(0.75,0.75,0.75, 0.05))
-        lines((training.set+1) : (training.set+h), PIs[,i] - lin.resid, col = "pink") #col = rgb(0.75,0.75,0.75, 0.05))
+        lines((training.set+1) : (training.set+h), PIs[,i] + lin.resid, col = "pink")
+        lines((training.set+1) : (training.set+h), PIs[,i] - lin.resid, col = "pink")
       }
+      
+      lines(OV, type = 'l', lwd = 2, col = 'steelblue')
       
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
       segments(training.set, FV[training.set], training.set + 1, Estimates[1],lwd = 2,lty = 1,col = 'red')

@@ -310,3 +310,7 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 -   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
 
 -   [Forecasting Using NNS](https://www.ssrn.com/abstract=3382300)
+
+```{r threads, echo = FALSE}
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
+```

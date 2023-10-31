@@ -61,6 +61,10 @@
 #'
 #' ## To predict out of sample using best parameters:
 #' NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6))
+#' 
+#' ## Incorporate any objective function from external packages (such as \code{Metrics::mape})
+#' NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6),
+#' obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")
 #' }
 #'
 #' @export
@@ -397,6 +401,13 @@ NNS.ARMA.optim <- function(variable,
       lower_PIs <- pmax(0, lower_PIs)
       upper_PIs <- pmax(0, upper_PIs)
   }
+  
+  
+  
+  
+  
+  
+  
   
   return(list(periods = nns.periods,
               weights = nns.weights,

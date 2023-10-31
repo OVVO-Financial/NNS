@@ -33,17 +33,22 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     }
   }
   
+  
   original.matrix <- cbind.data.frame(original.DV, original.IVs)
   norm.matrix <- apply(original.matrix, 2, function(z) NNS.rescale(z, 0, 1))
   
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  dependence <- max(c(NNS.copula(original.matrix), NNS.copula(cbind(norm.matrix))))
+  dep_a <- tryCatch(NNS.copula(original.matrix), error = function(e) 1)
+  dep_b <- tryCatch(NNS.copula(norm.matrix), error = function(e) 1)
+  dep_c <- tryCatch(mean(unlist(cor(original.matrix)[-1,1])), error = function(e) 1)
+
+  dependence <- stats::fivenum(c(dep_a, dep_b, dep_c))[4]
   
   if(is.null(order)) order <- max(1, ceiling(dependence*10))
   if(order >= 9) order <- "max"
-
+  
   ###  Regression Point Matrix
   if(is.numeric(order)){
     reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, stn = stn, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)

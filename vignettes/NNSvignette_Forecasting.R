@@ -174,3 +174,6 @@ sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 #           shrink = nns.optimal$shrink,
 #           plot = TRUE, seasonal.plot = FALSE) + nns.optimal$bias.shift
 
+## ----threads, echo = FALSE----------------------------------------------------
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
+

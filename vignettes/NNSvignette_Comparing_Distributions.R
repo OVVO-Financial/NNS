@@ -59,3 +59,6 @@ NNS.FSD(x, y)
 #  NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status = FALSE)
 #  [1] "x4" "x2" "x8" "x6"
 
+## ----threads, echo = FALSE----------------------------------------------------
+Sys.setenv("OMP_THREAD_LIMIT" = 0)
+

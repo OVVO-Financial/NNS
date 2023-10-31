@@ -177,3 +177,7 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 * [f(Newton)](https://www.ssrn.com/abstract=2186471)
 
 * [Bayes' Theorem From Partial Moments](https://www.ssrn.com/abstract=3457377)
+
+```{r threads, echo = FALSE}
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
+```

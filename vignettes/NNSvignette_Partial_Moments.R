@@ -102,3 +102,6 @@ NNS.CDF(x, 1, type = "survival")
 x = seq(0, 1, .001) ; y = x ^ 2
 (UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)
 
+## ----threads, echo = FALSE----------------------------------------------------
+Sys.setenv("OMP_THREAD_LIMIT" = 128)
+

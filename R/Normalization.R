@@ -97,16 +97,18 @@ NNS.norm <- function(X,
   
 
   if(!is.null(chart.type) && !any(class(X)%in%"list")){
+    left_label_size <- max(strwidth(cbind(X, X_Normalized), units = "inches"))*3
+    bottom_label_size <- max(strwidth(colnames(X_Normalized), units = "inches"))*8
+    
     original.par <- par(no.readonly = TRUE)
     if(chart.type == 'b' ){
-      par(mar = c(10, 4, 3, 2) + 0.1)
+      par(mar = c(bottom_label_size, left_label_size, 1, 1))
       boxplot(cbind(X, X_Normalized), las = 2, names = labels, col = c(rep("grey", n), rainbow(n)))
     }
     
     if(chart.type == 'l' ){
-      par(mfrow = c(2, 1))
-      par(mar = c(ifelse((class(rows)!="numeric" || !is.null(rows)),5,2), nchar(max(X_Normalized))*1/exp(1), 1, 2))
-      
+      par(mfrow = c(2, 1))   
+      par(mar = c(ifelse((class(rows)!="numeric" || !is.null(rows)),4,2), left_label_size , 1, 1))
       
       matplot(X, type = 'l', col = c('steelblue', rainbow(n)), ylab = '', xaxt = 'n', lwd = 2, las = 1)
       legend(location, inset = c(0,0), c(colnames(X)), lty = 1, col = c('steelblue', rainbow(n)), bty = 'n', ncol = floor(n/sqrt(n)), lwd = 2, cex = n/sqrt(n)^exp(1))
