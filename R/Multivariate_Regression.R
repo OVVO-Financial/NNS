@@ -98,7 +98,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   if(num_cores > 1){
-    doParallel::registerDoParallel(num_cores)
+    cl <- tryCatch(parallel::makeForkCluster(num_cores), error = function(e) parallel::makeCluster(num_cores))
     invisible(data.table::setDTthreads(1))
   } else {
     foreach::registerDoSEQ()
