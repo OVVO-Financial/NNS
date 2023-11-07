@@ -29,24 +29,25 @@ NNS.distance <- function(rpm, rpm_class, dist.estimate, type, k, class){
     dist.estimate <- unlist(rpm[1, ])
     rpm <- rpm[-1,]
   }
-
-  rpm$y.hat <- y.hat
-
+  
+  M <- matrix(rep(dist.estimate, l), byrow = T, ncol = n)
+  M2 <- matrix(rep(raw.dist.estimate, l), byrow = T, ncol = n)
   
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums( t((t(rpm[, 1:n]) - dist.estimate)^2) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = parallel)
+    rpm$Sum <- Rfast::rowsums( ((t(t(rpm[, 1:n])) - M)^2) * ((l - (rpm_class == M2))/l), parallel = parallel)
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n]) - dist.estimate)) * ((l - (rpm_class == raw.dist.estimate))/l), parallel = parallel)
+    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n])) - M) * ((l - (rpm_class == M2))/l), parallel = parallel)
   }
 
   if(type=="FACTOR"){
-    rpm$Sum <- (1/l + ( Rfast::rowsums((rpm_class == raw.dist.estimate), parallel = parallel)))^-1
+    rpm$Sum <- (1/l + ( Rfast::rowsums((rpm_class == M2), parallel = parallel)))^-1
   }
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
-
+  rpm$y.hat <- y.hat
+  
   data.table::setkey(rpm, Sum)
   
   ll <- min(k, l)

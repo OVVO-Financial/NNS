@@ -10,7 +10,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   original.IVs <- X_n
   original.DV <- Y
   n <- ncol(original.IVs)
-  
+ 
   if(is.null(ncol(X_n))) X_n <- t(t(X_n))
   
   if(is.null(names(Y))){
