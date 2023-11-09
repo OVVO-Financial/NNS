@@ -237,7 +237,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
         foreach::registerDoSEQ()
         invisible(data.table::setDTthreads(0, throttle = NULL))
       } else {
-        distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX,  dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
+        distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = .SD, type = dist, k = n.best, class = type)[1], by = 1:nrow(point.est)]
         
         DISTANCES <- as.numeric(unlist(distances$DISTANCES))
       }

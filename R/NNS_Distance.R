@@ -25,8 +25,7 @@ NNS.distance <- function(rpm, dist.estimate, type, k, class){
   
   if(type!="FACTOR"){
     rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
-    rpm <- rpm[, names(rpm) := lapply(.SD, function(b) ((((b - min(b))^2) / max(1e-10, (max(b) - min(b))^2)) + (((b - min(b))) / max(1e-10, (max(b) - min(b)))))/2),
-               .SDcols = 1:n]
+    rpm <- rpm[, names(rpm) := lapply(.SD, function(b) NNS.rescale(b, 0, 1)), .SDcols = 1:n]
     dist.estimate <- unlist(rpm[1, ])
     rpm <- rpm[-1,]
   }
@@ -35,11 +34,11 @@ NNS.distance <- function(rpm, dist.estimate, type, k, class){
   M2 <- matrix(rep(raw.dist.estimate, l), byrow = T, ncol = n)
   
   if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums( ((t(t(rpm[, 1:n])) - M)^2) * ((1 - (raw.rpm == M2))/1), parallel = parallel)
+    rpm$Sum <- Rfast::rowsums( ((t(t(rpm[, 1:n])) - M)^2) * ((1 - (raw.rpm == M2))), parallel = parallel)
   }
 
   if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n])) - M) * ((1 - (raw.rpm == M2))/1), parallel = parallel)
+    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n])) - M) * ((1 - (raw.rpm == M2))), parallel = parallel)
   }
 
   if(type=="FACTOR"){
