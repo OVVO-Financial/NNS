@@ -99,7 +99,7 @@ NNS.part = function(x, y,
         hard.stop <- 2*max(ceiling(log(length(x), 2)), 1) + 2
     }
 
-    if(is.null(type)) {
+    if(is.null(type)){
         i <- 0L
         while (i >= 0) {
             if(i == order || i == floor(log(length(x), 2))) break
@@ -234,6 +234,7 @@ NNS.part = function(x, y,
     if(!is.null(type)) {
         i <- 0L
         while (i >= 0) {
+            if(nrow(PART) > length(x)) break
             if(i == order || i == floor(log(length(x), 2))) break
 
             PART[counts > obs.req/2, `:=`(counts, .N), by = quadrant]

@@ -40,9 +40,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
   
-  dep_a <- tryCatch(NNS.copula(original.matrix), error = function(e) 1)
-  dep_b <- tryCatch(NNS.copula(norm.matrix), error = function(e) 1)
-  dep_c <- tryCatch(mean(unlist(cor(original.matrix)[-1,1])), error = function(e) 1)
+  dep_a <- tryCatch(NNS.copula(original.matrix), error = function(e) .5^n)
+  dep_b <- tryCatch(NNS.copula(norm.matrix), error = function(e) .5^n)
+  dep_c <- tryCatch(mean(unlist(cor(original.matrix)[-1,1])), error = function(e) .5^n)
 
   dependence <- stats::fivenum(c(dep_a, dep_b, dep_c))[4]
   

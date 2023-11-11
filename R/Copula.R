@@ -58,7 +58,6 @@ NNS.copula <- function (
     degree <- 0
     continuous_pm_cov <- discrete_pm_cov
   }
-
   
 
   # Isolate the upper triangles from each of the partial moment matrices
@@ -67,11 +66,12 @@ NNS.copula <- function (
 
   discrete_Co_pm <- sum(discrete_pm_cov$cupm[upper.tri(discrete_pm_cov$cupm, diag = FALSE)]) + sum(discrete_pm_cov$clpm[upper.tri(discrete_pm_cov$clpm, diag = FALSE)])
   discrete_D_pm <- sum(discrete_pm_cov$dupm[upper.tri(discrete_pm_cov$dupm, diag = FALSE)]) + sum(discrete_pm_cov$dlpm[upper.tri(discrete_pm_cov$dlpm, diag = FALSE)])
-  
-  indep_Co_pm <- .5 * n
-  
-  if(discrete_Co_pm < indep_Co_pm) discrete_dep <- (1 - (discrete_Co_pm/indep_Co_pm)) else discrete_dep <- (1 - (indep_Co_pm/discrete_Co_pm))
-  
+
+ 
+  indep_Co_pm <- .25 * (n^2 - n)
+
+  if(discrete_Co_pm > indep_Co_pm) discrete_dep <- (discrete_Co_pm-indep_Co_pm)/indep_Co_pm else discrete_dep <- (indep_Co_pm - discrete_Co_pm)/indep_Co_pm
+  discrete_dep <- min(max(sqrt(discrete_dep), 0), 1)
   
   if((plot||independence.overlay) && n == 3){
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
@@ -108,9 +108,10 @@ NNS.copula <- function (
 
   if(continuous_Co_pm == continuous_D_pm) return(mean(c(0, discrete_dep)))
   if(continuous_Co_pm==0 || continuous_D_pm==0) return(mean(c(1, discrete_dep)))
+  
+ 
 
-  if(continuous_Co_pm < continuous_D_pm) return(mean(c(1 - (continuous_Co_pm/continuous_D_pm), discrete_dep)))
-  if(continuous_Co_pm > continuous_D_pm) return(mean(c(1 - (continuous_D_pm/continuous_Co_pm), discrete_dep)))
-
+  if(continuous_Co_pm < continuous_D_pm) return(mean(c((1 - (continuous_Co_pm/continuous_D_pm)), discrete_dep)))
+  if(continuous_Co_pm > continuous_D_pm) return(mean(c((1 - (continuous_D_pm/continuous_Co_pm)), discrete_dep)))
 
 }

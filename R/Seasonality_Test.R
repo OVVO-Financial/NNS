@@ -4,7 +4,7 @@
 #'
 #' @param variable a numeric vector.
 #' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
-#' @param mod.only logical; code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
+#' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
 #' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 #' @author Fred Viole, OVVO Financial Systems
