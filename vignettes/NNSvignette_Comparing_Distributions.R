@@ -60,5 +60,5 @@ NNS.FSD(x, y)
 #  [1] "x4" "x2" "x8" "x6"
 
 ## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = 0)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 

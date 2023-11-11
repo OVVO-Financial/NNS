@@ -368,6 +368,6 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 -   [Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations](https://www.ssrn.com/abstract=3621614)
 
 ```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = 128)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 ```
 

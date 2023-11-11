@@ -239,5 +239,5 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  ensemble6  1.5592660  1.1800553 -0.5285532  1.5041917
 
 ## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = 128)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 

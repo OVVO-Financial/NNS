@@ -138,5 +138,5 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 
 
 ```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = 128)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 ```

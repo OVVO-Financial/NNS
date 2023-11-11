@@ -128,5 +128,5 @@ NNS.reg(cbind(x, x), y,
         ncores = 1, confidence.interval = .95)
 
 ## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = 128)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 

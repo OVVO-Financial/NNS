@@ -130,7 +130,9 @@ or continuous dependent variables:
 
 **`NNS.stack(..., type = NULL, ...)`**.
 
-Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`.
+Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`, even from external packages such as `Metrics`.
+
+**`NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`**.
 
 
 ```{r stack,fig.width=5,fig.height=3,fig.align = "center", message=FALSE, eval=FALSE}
@@ -231,5 +233,5 @@ If the user is so motivated, detailed arguments further examples are provided wi
 * [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)
 
 ```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = 128)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 ```

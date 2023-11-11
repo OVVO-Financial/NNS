@@ -490,7 +490,10 @@ that <code>modulo</code> will be in the expanded output.</p>
 function (in this case RMSE written as
 <code>obj.fn = expression( sqrt(mean((predicted - actual)^2)) )</code>)
 and the corresponding periods, as well as the
-<strong><code>NNS.ARMA</code></strong> regression method used.</p>
+<strong><code>NNS.ARMA</code></strong> regression method used.
+Alternatively, using external package objective functions work as well
+such as
+<code>obj.fn = expression(Metrics::rmse(actual, predicted))</code>.</p>
 <p>Given our monthly dataset, we will try multiple years by setting
 <code>seasonal.factor = seq(12, 36, 6)</code> every 6 months based on
 our <strong>NNS.seas()</strong> insights above.</p>

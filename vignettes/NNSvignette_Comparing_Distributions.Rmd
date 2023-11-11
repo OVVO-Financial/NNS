@@ -130,5 +130,5 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 *   [LPM Density Functions for the Computation of the SD Efficient Set](https://www.scirp.org/journal/paperinformation.aspx?paperid=63817)
 
 ```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = 0)
+Sys.setenv("OMP_THREAD_LIMIT" = "")
 ```
