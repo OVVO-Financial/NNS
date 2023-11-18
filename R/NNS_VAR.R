@@ -124,7 +124,7 @@ NNS.VAR <- function(variables,
       lin.only = TRUE
       dates <- c(zoo::as.yearmon(zoo::index(variables), '%Y%m'), tail(zoo::as.yearmon(zoo::index(variables), '%Y%m'), h) + h/12)
   }else {
-      lin.only = FALSE
+      lin.only = TRUE
       dates <- NULL
   }
   

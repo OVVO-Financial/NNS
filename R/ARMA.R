@@ -149,12 +149,6 @@ NNS.ARMA <- function(variable,
     if(is.character(weights)) Weights <- rep(1/length(lag), length(lag))
     
   }
-  
-  
-  ## Generate vectors for 1:lag
-  GV <- generate.vectors(variable,lag)
-  Component.index <- GV$Component.index
-  Component.series <- GV$Component.series
 
   lin.resid <- list()
 
@@ -180,14 +174,14 @@ NNS.ARMA <- function(variable,
       ASW <- ARMA.seas.weighting(seasonal.factor, M)
       lag <- ASW$lag
       Weights <- ASW$Weights
-      
-      ## Re-Generate vectors for 1:lag if dynamic
-      GV <- generate.vectors(variable,lag)
-      Component.index <- GV$Component.index
-      Component.series <- GV$Component.series
     }
     
     
+    ## Re-Generate vectors for 1:lag if dynamic
+    GV <- generate.vectors(variable,lag)
+    Component.index <- GV$Component.index
+    Component.series <- GV$Component.series
+ 
    
     ## Regression on Component Series
     for(i in 1:length(lag)){

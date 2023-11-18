@@ -178,9 +178,9 @@ NNS.ARMA.optim <- function(variable,
           return(eval(obj.fn))
         })
       }
-      
+
       nns.estimates.indiv <- unlist(nns.estimates.indiv)
-      
+     
       if(objective=='min') nns.estimates.indiv[is.na(nns.estimates.indiv)] <- Inf else nns.estimates.indiv[is.na(nns.estimates.indiv)] <- -Inf
       
       nns.estimates[[i]] <- nns.estimates.indiv
