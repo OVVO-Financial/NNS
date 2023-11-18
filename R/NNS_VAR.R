@@ -206,7 +206,7 @@ NNS.VAR <- function(variables,
       b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
                           training.set = ts,
                           obj.fn = obj.fn,
-                          objective = objective,
+                          objective = objective, lin.only = TRUE,
                           print.trace = FALSE,
                           negative.values = min(variable_interpolation)<0, h = h)
       
