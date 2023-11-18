@@ -120,7 +120,13 @@ NNS.VAR <- function(variables,
   oldw <- getOption("warn")
   options(warn = -1)
   
-  if(nowcast) dates <- c(zoo::as.yearmon(zoo::index(variables), '%Y%m'), tail(zoo::as.yearmon(zoo::index(variables), '%Y%m'), h) + h/12) else dates <- NULL
+  if(nowcast){
+      lin.only = TRUE
+      dates <- c(zoo::as.yearmon(zoo::index(variables), '%Y%m'), tail(zoo::as.yearmon(zoo::index(variables), '%Y%m'), h) + h/12)
+  }else {
+      lin.only = FALSE
+      dates <- NULL
+  }
   
   if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
   
@@ -206,7 +212,7 @@ NNS.VAR <- function(variables,
       b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
                           training.set = ts,
                           obj.fn = obj.fn,
-                          objective = objective, lin.only = TRUE,
+                          objective = objective, lin.only = lin.only,
                           print.trace = FALSE,
                           negative.values = min(variable_interpolation)<0, h = h)
       
