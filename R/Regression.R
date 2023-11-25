@@ -439,9 +439,9 @@ NNS.reg = function (x, y,
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
   
-  dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y)), NNS.copula(cbind(apply(cbind(x, x), 2, function(z) NNS.rescale(z, 0, 1)), y))))
+  dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y)), NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1))))))
   
-  dependence[is.na(dependence)] <- 0
+  dependence[is.na(dependence)] <- 0.1
   
   rounded_dep <- ceiling(dependence*10)
   if(length(y) < 100) rounded_dep <- rounded_dep / 2
@@ -455,6 +455,7 @@ NNS.reg = function (x, y,
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"
     part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
+    nns.ids <- part.map$dt$quadrant
   } else {
     if(is.null(type)){
       noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
@@ -464,8 +465,10 @@ NNS.reg = function (x, y,
     
     if(dep.reduced.order == "max"){
       part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
+      nns.ids <- part.map$dt$quadrant
     } else {
       part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      nns.ids <- part.map$dt$quadrant
       
       part.map1 <- NNS.part(c(x, part.map$regression.points$x), c(y, part.map$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
       part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
@@ -728,11 +731,11 @@ NNS.reg = function (x, y,
   if(!is.null(type)){
     if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
   }
-  
+
   fitted <- data.table::data.table(x = x,
                                    y = original.y,
                                    y.hat = estimate,
-                                   NNS.ID = part.map$dt$quadrant[1:n])
+                                   NNS.ID = nns.ids)
   
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
   

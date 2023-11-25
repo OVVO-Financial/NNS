@@ -34,12 +34,13 @@ NNS.SSD <- function(x, y, plot = TRUE){
     y.ssd.x <- any(LPM_y_sort > LPM_x_sort)
 
 
-    plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
-         ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
+    if(plot){
+      plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
+            ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
 
-    lines(Combined_sort, LPM_y_sort, type = "l", lwd = 3,col = "steelblue")
-    legend("topleft", c("X", "Y"), lwd = 10, col = c("red", "steelblue"))
-
+      lines(Combined_sort, LPM_y_sort, type = "l", lwd = 3,col = "steelblue")
+      legend("topleft", c("X", "Y"), lwd = 10, col = c("red", "steelblue"))
+    }
 
     ifelse(!x.ssd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
            "X SSD Y",

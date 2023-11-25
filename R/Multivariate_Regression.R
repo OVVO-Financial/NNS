@@ -47,7 +47,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   dependence <- stats::fivenum(c(dep_a, dep_b, dep_c))[4]
   
   if(is.null(order)) order <- max(1, ceiling(dependence*10))
-  if(order >= 9) order <- "max"
+
   
   ###  Regression Point Matrix
   if(is.numeric(order)){
