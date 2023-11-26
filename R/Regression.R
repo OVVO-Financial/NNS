@@ -413,9 +413,9 @@ NNS.reg = function (x, y,
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
           
-          dependence <- mean(c(dependence, dependence, NNS.copula(cbind(x, x, y))))
+          dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y))))
           
-          dependence[is.na(dependence)] <- 0
+          dependence[is.na(dependence)] <- 0.1
           
           if(is.null(order)) order <- max(1, floor(dependence*10))
           

@@ -402,11 +402,7 @@ NNS.ARMA.optim <- function(variable,
       upper_PIs <- pmax(0, upper_PIs)
   }
   
-  
-  
-  
-  
-  
+
   
   
   return(list(periods = nns.periods,
