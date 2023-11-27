@@ -422,7 +422,7 @@ NNS.reg = function (x, y,
           if(length(y) < 100) order <- order / 2
           
           if(is.numeric(order)){
-            ifelse(order%%1 <= .5, floor(order), ceiling(order))
+            order <- ifelse(order%%1 <= .5, floor(order), ceiling(order))
             order <- max(1, order)
           }
           
@@ -442,13 +442,14 @@ NNS.reg = function (x, y,
   dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y)), NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1))))))
   
   dependence[is.na(dependence)] <- 0.1
-  
+ 
   rounded_dep <- ceiling(dependence*10)
   if(length(y) < 100) rounded_dep <- rounded_dep / 2
-  ifelse(rounded_dep%%1 <= .5, floor(rounded_dep), ceiling(rounded_dep))
+
+  rounded_dep <- ifelse(rounded_dep%%1 <= .5, floor(rounded_dep), ceiling(rounded_dep))
   rounded_dep <- max(1, rounded_dep)
   
-  
+ 
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
   

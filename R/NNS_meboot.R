@@ -295,9 +295,9 @@
 
     # Computation time
     ptm2 <- proc.time(); elapsr <- meboot::elapsedtime(ptm1, ptm2)
-    if(elaps)
-      cat("\n  Elapsed time:", elapsr$elaps,
-          paste(elapsr$units, ".", sep=""), "\n")
+    if(elaps) cat("\n  Elapsed time:", elapsr$elaps,
+                  paste(elapsr$units, ".", sep=""), "\n")
+
 
     final <- list(x=x, replicates=round(ensemble, digits = digits), ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
          xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
