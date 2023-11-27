@@ -408,12 +408,14 @@ NNS.reg = function (x, y,
             
           }
           
+          orig.dep <- NNS.copula(cbind(apply(cbind(x, y), 2, function(z) NNS.rescale(z, 0, 1))))
+          
           x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = FALSE)
           x.star <- data.table::data.table(x)
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-          
-          dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y))))
+
+          dependence <- mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))), orig.dep))
           
           dependence[is.na(dependence)] <- 0.1
           
@@ -421,11 +423,9 @@ NNS.reg = function (x, y,
           
           if(length(y) < 100) order <- order / 2
           
-          if(is.numeric(order)){
-            order <- ifelse(order%%1 <= .5, floor(order), ceiling(order))
-            order <- max(1, order)
-          }
+          if(is.numeric(order)) order <- max(1, order)
           
+          order <- ifelse(order%%1 <= .5, floor(order), ceiling(order))
         }
       } # Multivariate Not NULL type
       
