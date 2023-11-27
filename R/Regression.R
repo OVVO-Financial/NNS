@@ -439,7 +439,7 @@ NNS.reg = function (x, y,
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
   
-  dependence <- mean(c(dependence, NNS.copula(cbind(x, x, y)), NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1))))))
+  dependence <- mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1))))))
   
   dependence[is.na(dependence)] <- 0.1
  
