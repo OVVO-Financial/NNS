@@ -14,11 +14,10 @@ gravity_class <- function(x) NNS.gravity(x, discrete = TRUE)
 
 ### Factor to dummy variable
 factor_2_dummy <- function(x){
+  x <- unlist(x)
   if(is.factor(x) && length(unique(x)) > 1){
-    x <- unlist(x)
     output <- model.matrix(~(x) -1, x)[,-1]
   } else {
-    x <- unlist(x)
     output <- as.numeric(x)
   }
   output
@@ -26,16 +25,14 @@ factor_2_dummy <- function(x){
 
 ### Factor to dummy variable FULL RANK
 factor_2_dummy_FR <- function(x){
+  x <- unlist(x)
   if(is.factor(x) && length(unique(x)) > 1){
-    x <- unlist(x)
     output <- model.matrix(~(x) -1, x)
   } else {
-    x <- unlist(x)
     output <- as.numeric(x)
   }
   output
 }
-
 
 
 ### Generator for 1:length(lag) vectors in NNS.ARMA

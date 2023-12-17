@@ -78,6 +78,12 @@ dy.d_ <- function(x, y, wrt,
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
   
+  dummies <- list()
+  for(i in 1:l){
+    dummies[[i]] <- factor_2_dummy_FR(x[,i])
+    if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(colnames(x)[i], "_", colnames(dummies[i][[1]]))
+  }
+  x <- do.call(cbind, dummies)
   
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r", appendLF=TRUE)
   

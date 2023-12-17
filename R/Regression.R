@@ -194,7 +194,7 @@ NNS.reg = function (x, y,
   original.names <- colnames(x)
   original.columns <- ncol(x)
   
-  if(!is.null(original.columns) & is.null(colnames(x))) x <- data.frame(x)
+  if(!is.null(original.columns) & is.null(original.names)) x <- data.frame(x)
   
   y.label <- deparse(substitute(y))
   if(is.null(y.label)) y.label <- "y"
@@ -213,10 +213,16 @@ NNS.reg = function (x, y,
       }
     }
     
-    
-    if(!is.null(dim(x)) && dim(x)[2] > 1) x <- apply(x, 2, function(z) factor_2_dummy_FR(z)) else x <- factor_2_dummy_FR(x)
-    
-    
+
+    if(!is.null(dim(x)) && original.columns > 1){
+      dummies <- list()
+       for(i in 1:original.columns){
+         dummies[[i]] <- factor_2_dummy_FR(x[,i])
+         if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(original.names[i], "_", colnames(dummies[i][[1]])) else names(dummies)[i] <- original.names[i]
+       }
+      x <- do.call(cbind, dummies)
+    }  else x <- factor_2_dummy_FR(x)
+
     x <- data.matrix(x)
     
     if(!is.null(point.est)){
@@ -423,7 +429,7 @@ NNS.reg = function (x, y,
           
           if(length(y) < 100) order <- order / 2
           
-          if(is.numeric(order)) order <- max(1, order)
+          if(is.numeric(order)) order <- max(1, order) else order <- n
           
           order <- ifelse(order%%1 <= .5, floor(order), ceiling(order))
         }
@@ -446,10 +452,10 @@ NNS.reg = function (x, y,
   rounded_dep <- ceiling(dependence*10)
   if(length(y) < 100) rounded_dep <- rounded_dep / 2
 
-  rounded_dep <- ifelse(rounded_dep%%1 <= .5, floor(rounded_dep), ceiling(rounded_dep))
+  rounded_dep <- floor(rounded_dep) #ifelse(rounded_dep%%1 <= .5, floor(rounded_dep), ceiling(rounded_dep))
   rounded_dep <- max(1, rounded_dep)
   
- 
+  
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
   
