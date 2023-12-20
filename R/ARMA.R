@@ -263,6 +263,10 @@ NNS.ARMA <- function(variable,
     PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = 0, upper_rho = 1, by = .2, exp = 2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
+    
+    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), abs(LPM.VaR((1-pred.int)/2, 0, z)))) 
+    upper_PIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
+    lower_PIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
   } else lin.resid <- 0
   
   #### PLOTTING
@@ -292,11 +296,13 @@ NNS.ARMA <- function(variable,
            xlim = c(1, max((training.set + h), length(OV))),
            ylab = label, ylim = c(min(Estimates, OV,  unlist(PIs) ), max(OV, Estimates, unlist(PIs) )) )
       
-      for(i in 1 : ncol(PIs)){
-        lines((training.set+1) : (training.set+h), PIs[,i] + lin.resid, col = "pink")
-        lines((training.set+1) : (training.set+h), PIs[,i] - lin.resid, col = "pink")
-      }
       
+      polygon(c((training.set+1) : (training.set+h), rev((training.set+1) : (training.set+h))),
+              c(lower_PIs, rev(upper_PIs)),
+              col = rgb(1, 192/255, 203/255, alpha = 0.5),
+              border = NA)
+      
+
       lines(OV, type = 'l', lwd = 2, col = 'steelblue')
       
       lines((training.set + 1) : (training.set + h), Estimates, type = 'l', lwd = 2, lty = 1, col = 'red')
@@ -328,9 +334,7 @@ NNS.ARMA <- function(variable,
   
   options(warn = oldw)
   if(!is.null(pred.int)){
-    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), abs(LPM.VaR((1-pred.int)/2, 0, z)))) 
-    upper_PIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
-    lower_PIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
+    
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_PIs),  pmax(Estimates, upper_PIs))
     colnames(results) = c("Estimates",
                           paste0("Lower ", round(pred.int*100,2), "% pred.int"),

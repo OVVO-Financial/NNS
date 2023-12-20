@@ -15,8 +15,9 @@ NNS.ARMA.optim(
   objective = "max",
   linear.approximation = TRUE,
   lin.only = FALSE,
-  pred.int = NULL,
-  print.trace = TRUE
+  pred.int = 0.95,
+  print.trace = TRUE,
+  plot = FALSE
 )
 }
 \arguments{
@@ -32,7 +33,7 @@ NNS.ARMA.optim(
 \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.}
 
 \item{obj.fn}{expression;
-\code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+\code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
@@ -40,9 +41,11 @@ NNS.ARMA.optim(
 
 \item{lin.only}{logical; \code{FALSE} (default) Restricts the optimization to linear methods only.}
 
-\item{pred.int}{numeric [0, 1]; \code{NULL} Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
+\item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
 
-\item{print.trace}{logical; \code{TRUE} (defualt) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
+\item{print.trace}{logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
+
+\item{plot}{logical; \code{FALSE} (default)}
 }
 \value{
 Returns a list containing:

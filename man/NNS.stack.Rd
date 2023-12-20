@@ -89,6 +89,8 @@ Prediction model using the predictions of the NNS base models \link{NNS.reg} as 
 }
 \note{
 \itemize{
+\item Incorporate any objective function from external packages (such as \code{Metrics::mape}) via \code{NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")}
+
 \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for multiple class problems.
 
 \item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
