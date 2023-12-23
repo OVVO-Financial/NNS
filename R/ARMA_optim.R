@@ -400,10 +400,10 @@ NNS.ARMA.optim <- function(variable,
   
   if(is.null(h_oos)){
     if(is.null(h)) h <- h_eval
-    model.results <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- NNS.ARMA(OV, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   } else {
     if(is.null(h)) h <- h_oos
-    model.results <- NNS.ARMA(variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- NNS.ARMA(OV, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
 
@@ -425,10 +425,12 @@ NNS.ARMA.optim <- function(variable,
     
     plot(OV, type = 'l', lwd = 2, main = "NNS.ARMA Forecast", col = 'steelblue',
          xlim = xlim,
+         ylab =  "Variable",
          ylim = c(min(model.results, variable,  unlist(lower_PIs), unlist(upper_PIs) ), 
                   max(model.results, variable,  unlist(lower_PIs), unlist(upper_PIs) )) )
     
-    lfp <- h_eval #length(final.predicted)
+    lfp <- length(final.predicted)
+    
     starting.point <- min(training.set, min(n - lfp))
     
     lines((starting.point + 1) : (starting.point + lfp), final.predicted, col = "red", lwd = 2, lty = 2)
