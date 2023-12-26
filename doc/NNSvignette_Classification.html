@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Classification</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS:
+Classification</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">require</span>(meboot)</span></code></pre></div>
+<div id="classification" class="section level1">
+<h1>Classification</h1>
+<p><strong><code>NNS.reg</code></strong> is a very robust regression
+technique capable of nonlinear regressions of continuous variables and
+classification tasks in machine learning problems.</p>
+<p>We have extended the <strong><code>NNS.reg</code></strong>
+applications per the use of an ensemble method of classification in
+<strong><code>NNS.boost</code></strong>. In short,
+<strong><code>NNS.reg</code></strong> is the base learner instead of
+trees.</p>
+<p><strong><em>One major advantage <code>NNS.boost</code> has over tree
+based methods is the ability to seamlessly extrapolate beyond the
+current range of observations.</em></strong></p>
+<div id="splits-vs.-partitions" class="section level2">
+<h2>Splits vs. Partitions</h2>
+<p>Popular boosting algorithms take a series of weak learning decision
+tree models, and aggregate their outputs. <code>NNS</code> is also a
+decision tree of sorts, by partitioning each regressor with respect to
+the dependent variable. We can directly control the number of “splits”
+with the <strong><code>NNS.reg(..., order = , ...)</code></strong>
+parameter.</p>
+<div id="nns-partitions" class="section level3">
+<h3>NNS Partitions</h3>
+<p>We can see how <code>NNS</code> partitions each regressor by calling
+the <code>$rhs.partitions</code> output. You will notice that each
+partition is not an equal interval, nor of equal length, which
+differentiates <code>NNS</code> from other bandwidth or tree-based
+techniques.</p>
+<p>Higher dependence between a regressor and the dependent variable will
+allow for a larger number of partitions. This is determined internally
+with the <strong><code>NNS.dep</code></strong> measure.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
+<pre><code>##           V1       V2       V3  V4
+##  1: 4.300000 2.000000 1.000000 0.1
+##  2: 4.400643 2.200000 1.045833 0.2
+##  3: 4.500000 2.300000 1.050000 0.3
+##  4: 4.600000 2.400000 1.200000 0.4
+##  5: 4.700000 2.500000 1.300000 0.5
+##  6: 4.800000 2.600000 1.400000 0.6
+##  7: 4.900000 2.700000 1.500000 1.0
+##  8: 5.000000 2.800000 1.600000 1.1
+##  9: 5.100000 2.900000 1.700000 1.2
+## 10: 5.200000 3.000000 1.900000 1.3
+## 11: 5.300000 3.100000 3.000000 1.4
+## 12: 5.400000 3.200000 3.300000 1.5
+## 13: 5.500000 3.300000 3.500000 1.6
+## 14: 5.600000 3.400000 3.600000 1.7
+## 15: 5.700000 3.500000 3.626426 1.8
+## 16: 5.800000 3.600000 3.700000 1.9
+## 17: 5.900000 3.700000 3.800000 2.0
+## 18: 6.000000 3.800000 3.900000 2.1
+## 19: 6.100000 3.900000 4.000000 2.2
+## 20: 6.200000 4.000000 4.100000 2.3
+## 21: 6.300000 4.145833 4.200000 2.4
+## 22: 6.400000 4.150000 4.213849 2.5
+## 23: 6.500000 4.400000 4.300000  NA
+## 24: 6.600000       NA 4.400000  NA
+## 25: 6.700000       NA 4.500000  NA
+## 26: 6.800000       NA 4.600000  NA
+## 27: 6.900000       NA 4.700000  NA
+## 28: 7.000000       NA 4.800000  NA
+## 29: 7.050477       NA 4.900000  NA
+## 30: 7.200000       NA 5.000000  NA
+## 31: 7.200174       NA 5.100000  NA
+## 32: 7.349020       NA 5.200000  NA
+## 33: 7.600000       NA 5.300000  NA
+## 34: 7.700000       NA 5.400000  NA
+## 35: 7.900000       NA 5.500000  NA
+## 36:       NA       NA 5.600000  NA
+## 37:       NA       NA 5.700000  NA
+## 38:       NA       NA 5.800907  NA
+## 39:       NA       NA 5.816250  NA
+## 40:       NA       NA 5.936170  NA
+## 41:       NA       NA 6.091466  NA
+## 42:       NA       NA 6.386299  NA
+## 43:       NA       NA 6.398696  NA
+## 44:       NA       NA 6.700000  NA
+## 45:       NA       NA 6.710561  NA
+## 46:       NA       NA 6.900000  NA
+##           V1       V2       V3  V4</code></pre>
+</div>
+</div>
+</div>
+<div id="nns.boost" class="section level1">
+<h1><code>NNS.boost()</code></h1>
+<p>Through resampling of the training set and letting each iterated set
+of data speak for themselves (while paying extra attention to the
+residuals throughout), we can test various regressor combinations in
+these dynamic decision trees…only keeping those combinations that add
+predictive value. From there we simply aggregate the predictions.</p>
+<p><strong><code>NNS.boost</code></strong> will automatically search for
+an accuracy <code>threshold</code> from the training set, reporting
+iterations remaining and level obtained in the console. A plot of the
+frequency of the learning accuracy on the training set is also
+provided.</p>
+<p>Once a <code>threshold</code> is obtained,
+<strong><code>NNS.boost</code></strong> will test various feature
+combinations against different splits of the training set and report
+back the frequency of each regressor used in the final estimate.</p>
+<p>Let’s have a look and see how it works. We use 140 random
+<code>iris</code> observations as our training set with the 10 holdout
+observations as our test set. For brevity, we set
+<code>epochs = 10, learner.trials = 10, folds = 1</code>.</p>
+<p><strong>NOTE: Base category of response variable should be 1, not 0
+for classification problems when using
+<code>NNS.boost(..., type = &quot;CLASS&quot;)</code></strong>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a> </span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>a<span class="sc">$</span>results</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>a<span class="sc">$</span>feature.weights</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>Petal.Width Petal.Length Sepal.Length </span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>   <span class="fl">0.4285714</span>    <span class="fl">0.4285714</span>    <span class="fl">0.1428571</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>   </span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>a<span class="sc">$</span>feature.frequency</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>           <span class="dv">3</span>            <span class="dv">3</span>            <span class="dv">1</span>   </span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>   </span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<p>A perfect classification, using the features weighted per the output
+above.</p>
+</div>
+<div id="cross-validation-classification-using-nns.stack" class="section level1">
+<h1>Cross-Validation Classification Using <code>NNS.stack()</code></h1>
+<p>The <strong><code>NNS.stack()</code></strong> routine cross-validates
+for a given objective function the <code>n.best</code> parameter in the
+multivariate <strong><code>NNS.reg</code></strong> function as well as
+the <code>threshold</code> parameter in the dimension reduction
+<strong><code>NNS.reg</code></strong> version.
+<strong><code>NNS.stack</code></strong> can be used for classification
+via
+<strong><code>NNS.stack(..., type = &quot;CLASS&quot;, ...)</code></strong>.</p>
+<p>For brevity, we set <code>folds = 1</code>.</p>
+<p><strong>NOTE: Base category of response variable should be 1, not 0
+for classification problems when using
+<code>NNS.stack(..., type = &quot;CLASS&quot;)</code></strong>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>b <span class="ot">=</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>              <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>b</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.43875</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9798658</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.93</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">$</span>reg</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="sc">$</span>dim.red</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="sc">$</span>dim.red.pred.int</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="sc">$</span>stack</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="cn">NULL</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">mean</span>( b<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<div id="brief-notes-on-other-parameters" class="section level2">
+<h2>Brief Notes on Other Parameters</h2>
+<ul>
+<li><p><code>depth = &quot;max&quot;</code> will force all observations to be
+their own partition, forcing a perfect fit of the multivariate
+regression. In essence, this is the basis for a <code>kNN</code> nearest
+neighbor type of classification.</p></li>
+<li><p><code>n.best = 1</code> will use the single nearest neighbor.
+When coupled with <code>depth = &quot;max&quot;</code>, <code>NNS</code> will
+emulate a <code>kNN = 1</code> but as the dimensions increase the
+results diverge demonstrating <code>NNS</code> is less sensitive to the
+curse of dimensionality than <code>kNN</code>.</p></li>
+<li><p><code>extreme</code> will use the maximum or minimum
+<code>threshold</code> obtained, and may result in errors if that
+threshold cannot be eclipsed by subsequent iterations.</p></li>
+</ul>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments further examples are
+provided within the following:</p>
+<ul>
+<li><p><a href="https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2148522">Deriving
+Nonlinear Correlation Coefficients from Partial Moments</a></p></li>
+<li><p><a href="https://link.springer.com/article/10.1007/s10614-017-9713-5">Nonparametric
+Regression Using Clusters</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2861339">Clustering and
+Curve Fitting by Line Segments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2864711">Classification
+Using NNS Clustering Analysis</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

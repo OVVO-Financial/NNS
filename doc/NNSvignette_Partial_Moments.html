@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Partial Moments</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS: Partial
+Moments</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div id="partial-moments" class="section level1">
+<h1>Partial Moments</h1>
+<p>Why is it necessary to parse the variance with partial moments? The
+additional information generated from partial moments permits a level of
+analysis simply not possible with traditional summary statistics.</p>
+<p>Below are some basic equivalences demonstrating partial moments role
+as the elements of variance.</p>
+<div id="mean" class="section level2">
+<h2>Mean</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>) ; x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>) ; y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">mean</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.09040591</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, x) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, x)</span></code></pre></div>
+<pre><code>## [1] 0.09040591</code></pre>
+</div>
+<div id="variance" class="section level2">
+<h2>Variance</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">var</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Sample Variance:</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)</span></code></pre></div>
+<pre><code>## [1] 0.8249005</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Population Variance:</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Variance is also the co-variance of itself:</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>(<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">+</span> <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">-</span> <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">-</span> <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x))) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 0.8332328</code></pre>
+</div>
+<div id="standard-deviation" class="section level2">
+<h2>Standard Deviation</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">sd</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.9128159</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1] 0.9128159</code></pre>
+</div>
+<div id="first-4-moments" class="section level2">
+<h2>First 4 Moments</h2>
+<p>The first 4 moments are returned with the function
+<code>NNS.moments</code>. For sample statistics, set
+<code>population = FALSE</code>.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">NNS.moments</span>(x)</span></code></pre></div>
+<pre><code>## $mean
+## [1] 0.09040591
+## 
+## $variance
+## [1] 0.8332328
+## 
+## $skewness
+## [1] 0.06049948
+## 
+## $kurtosis
+## [1] -0.161053</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">NNS.moments</span>(x, <span class="at">population =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## $mean
+## [1] 0.09040591
+## 
+## $variance
+## [1] 0.8249005
+## 
+## $skewness
+## [1] 0.06235774
+## 
+## $kurtosis
+## [1] -0.1069186</code></pre>
+</div>
+<div id="statistical-mode-of-a-continuous-distribution" class="section level2">
+<h2>Statistical Mode of a Continuous Distribution</h2>
+<p><code>NNS.mode</code> offers support for discrete valued
+distributions as well as recognizing multiple modes.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Continuous</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">NNS.mode</span>(x)</span></code></pre></div>
+<pre><code>## [1] -0.2365625</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Discrete and multiple modes</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">NNS.mode</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="at">discrete =</span> <span class="cn">TRUE</span>, <span class="at">multi =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 2 3 4</code></pre>
+</div>
+<div id="covariance" class="section level2">
+<h2>Covariance</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">cov</span>(x, y)</span></code></pre></div>
+<pre><code>## [1] -0.04372107</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>(<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">+</span> <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span> <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span> <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] -0.04372107</code></pre>
+</div>
+<div id="covariance-elements-and-covariance-matrix" class="section level2">
+<h2>Covariance Elements and Covariance Matrix</h2>
+<p>The covariance matrix <span class="math inline">\((\Sigma)\)</span>
+is equal to the sum of the co-partial moments matrices less the
+divergent partial moments matrices. <span class="math display">\[ \Sigma
+= CLPM + CUPM - DLPM - DUPM \]</span></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>cov.mtx <span class="ot">=</span> <span class="fu">PM.matrix</span>(<span class="at">LPM_degree =</span> <span class="dv">1</span>, <span class="at">UPM_degree =</span> <span class="dv">1</span>,<span class="at">target =</span> <span class="st">&#39;mean&#39;</span>, <span class="at">variable =</span> <span class="fu">cbind</span>(x, y), <span class="at">pop_adj =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>cov.mtx</span></code></pre></div>
+<pre><code>## $cupm
+##           x         y
+## x 0.4299250 0.1033601
+## y 0.1033601 0.5411626
+## 
+## $dupm
+##           x         y
+## x 0.0000000 0.1469182
+## y 0.1560924 0.0000000
+## 
+## $dlpm
+##           x         y
+## x 0.0000000 0.1560924
+## y 0.1469182 0.0000000
+## 
+## $clpm
+##           x         y
+## x 0.4033078 0.1559295
+## y 0.1559295 0.3939005
+## 
+## $cov.matrix
+##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="co"># Reassembled Covariance Matrix</span></span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>cov.mtx<span class="sc">$</span>clpm <span class="sc">+</span> cov.mtx<span class="sc">$</span>cupm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dlpm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dupm</span></code></pre></div>
+<pre><code>##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co"># Standard Covariance Matrix</span></span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="fu">cov</span>(<span class="fu">cbind</span>(x, y))</span></code></pre></div>
+<pre><code>##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+</div>
+<div id="pearson-correlation" class="section level2">
+<h2>Pearson Correlation</h2>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">cor</span>(x, y)</span></code></pre></div>
+<pre><code>## [1] -0.04953215</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>cov.xy <span class="ot">=</span> (<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">+</span> <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span> <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span> <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>sd.x <span class="ot">=</span> ((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>sd.y <span class="ot">=</span> ((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(y), y) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(y) , y)) <span class="sc">*</span> (<span class="fu">length</span>(y) <span class="sc">/</span> (<span class="fu">length</span>(y) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>cov.xy <span class="sc">/</span> (sd.x <span class="sc">*</span> sd.y)</span></code></pre></div>
+<pre><code>## [1] -0.04953215</code></pre>
+</div>
+<div id="cdfs-discrete-and-continuous" class="section level2">
+<h2>CDFs (Discrete and Continuous)</h2>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>P <span class="ot">=</span> <span class="fu">ecdf</span>(x)</span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a><span class="fu">P</span>(<span class="dv">0</span>) ; <span class="fu">P</span>(<span class="dv">1</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="fu">LPM</span>(<span class="dv">0</span>, <span class="dv">0</span>, x) ; <span class="fu">LPM</span>(<span class="dv">0</span>, <span class="dv">1</span>, x)</span>
+<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a><span class="co"># Vectorized targets:</span></span>
+<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a><span class="fu">LPM</span>(<span class="dv">0</span>, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), x)</span>
+<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">ecdf</span>(x))</span>
+<span id="cb39-9"><a href="#cb39-9" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">sort</span>(x), <span class="fu">LPM</span>(<span class="dv">0</span>, <span class="fu">sort</span>(x), x), <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span>
+<span id="cb39-10"><a href="#cb39-10" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;left&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;ecdf&quot;</span>, <span class="st">&quot;LPM.CDF&quot;</span>), <span class="at">fill =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="co"># Joint CDF:</span></span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, x, y, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="co"># Vectorized targets:</span></span>
+<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, x, y, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a><span class="co"># Copula</span></span>
+<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a><span class="co"># Transform x and y so that they are uniform</span></span>
+<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a>u_x <span class="ot">=</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, x, x)</span>
+<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a>u_y <span class="ot">=</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, y, y)</span>
+<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a><span class="co"># Value of copula at c(.5, .5)</span></span>
+<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, u_x, u_y, .<span class="dv">5</span>, .<span class="dv">5</span>)</span>
+<span id="cb40-14"><a href="#cb40-14" tabindex="-1"></a></span>
+<span id="cb40-15"><a href="#cb40-15" tabindex="-1"></a><span class="co"># Continuous CDF:</span></span>
+<span id="cb40-16"><a href="#cb40-16" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>)</span>
+<span id="cb40-17"><a href="#cb40-17" tabindex="-1"></a></span>
+<span id="cb40-18"><a href="#cb40-18" tabindex="-1"></a><span class="co"># CDF with target:</span></span>
+<span id="cb40-19"><a href="#cb40-19" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>, <span class="at">target =</span> <span class="fu">mean</span>(x))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># Survival Function:</span></span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>, <span class="at">type =</span> <span class="st">&quot;survival&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+</div>
+<div id="numerical-integration" class="section level2">
+<h2>Numerical Integration</h2>
+<p>Partial moments are asymptotic area approximations of <span class="math inline">\(f(x)\)</span> akin to the familiar Trapezoidal and
+Simpson’s rules. More observations, more accuracy…</p>
+<p><span class="math display">\[[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}\]</span>
+<span class="math display">\[[UPM(1,0,f(x))-LPM(1,0,f(x))] *[b-a]
+\asymp[F(b)-F(a)]\]</span></p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">001</span>) ; y <span class="ot">=</span> x <span class="sc">^</span> <span class="dv">2</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] 0.3335</code></pre>
+<p><span class="math display">\[0.3333 * [1-0] = \int_{0}^{1} x^2
+dx\]</span> For the total area, not just the definite integral, simply
+sum the partial moments and multiply by <span class="math inline">\([b -
+a]\)</span>: <span class="math display">\[[UPM(1,0,f(x))+LPM(1,0,f(x))]
+*[b-a]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert\]</span></p>
+</div>
+<div id="bayes-theorem" class="section level2">
+<h2>Bayes’ Theorem</h2>
+<p>For example, when ascertaining the probability of an increase in
+<span class="math inline">\(A\)</span> given an increase in <span class="math inline">\(B\)</span>, the
+<code>Co.UPM(degree_x, degree_y, x, y, target_x, target_y)</code> target
+parameters are set to <code>target_x = 0</code> and
+<code>target_y = 0</code> and the
+<code>UPM(degree, target, variable)</code> target parameter is also set
+to <code>target = 0</code>.</p>
+<p><span class="math display">\[P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}\]</span></p>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments and proofs are
+provided within the following:</p>
+<ul>
+<li><p><a href="https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2148482">Cumulative
+Distribution Functions and UPM/LPM Analysis</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=3007373">Continuous CDFs
+and ANOVA with NNS</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=2186471">f(Newton)</a></p></li>
+<li><p><a href="https://www.ssrn.com/abstract=3457377">Bayes’ Theorem
+From Partial Moments</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

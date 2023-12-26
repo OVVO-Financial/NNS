@@ -1,0 +1,183 @@
+---
+title: "Getting Started with NNS: Partial Moments"
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with NNS: Partial Moments}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(2L)
+options(mc.cores = 1)
+Sys.setenv("OMP_THREAD_LIMIT" = 2)
+```
+
+# Partial Moments
+
+Why is it necessary to parse the variance with partial moments?  The additional information generated from partial moments permits a level of analysis simply not possible with traditional summary statistics.
+
+Below are some basic equivalences demonstrating partial moments role as the elements of variance.
+
+## Mean
+```{r mean, message=FALSE}
+library(NNS)
+set.seed(123) ; x = rnorm(100) ; y = rnorm(100)
+
+mean(x)
+UPM(1, 0, x) - LPM(1, 0, x)
+```
+
+## Variance
+```{r variance}
+var(x)
+
+# Sample Variance:
+UPM(2, mean(x), x) + LPM(2, mean(x), x)
+
+# Population Variance:
+(UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))
+
+# Variance is also the co-variance of itself:
+(Co.LPM(1, x, x, mean(x), mean(x)) + Co.UPM(1, x, x, mean(x), mean(x)) - D.LPM(1, 1, x, x, mean(x), mean(x)) - D.UPM(1, 1, x, x, mean(x), mean(x))) * (length(x) / (length(x) - 1))
+```
+
+
+## Standard Deviation
+```{r stdev}
+sd(x)
+((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
+```
+
+
+## First 4 Moments
+The first 4 moments are returned with the function `NNS.moments`.  For sample statistics, set `population = FALSE`.
+```{r moments}
+NNS.moments(x)
+
+NNS.moments(x, population = FALSE)
+```
+
+
+## Statistical Mode of a Continuous Distribution
+`NNS.mode` offers support for discrete valued distributions as well as recognizing multiple modes.
+
+```{r mode}
+# Continuous
+NNS.mode(x)
+
+# Discrete and multiple modes
+NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
+```
+
+
+## Covariance
+```{r covariance}
+cov(x, y)
+(Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
+```
+
+## Covariance Elements and Covariance Matrix
+The covariance matrix $(\Sigma)$ is equal to the sum of the co-partial moments matrices less the divergent partial moments matrices.
+$$ \Sigma = CLPM + CUPM - DLPM - DUPM $$
+
+```{r cov_dec, warning=FALSE}
+cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
+cov.mtx
+
+# Reassembled Covariance Matrix
+cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
+
+
+# Standard Covariance Matrix
+cov(cbind(x, y))
+```
+
+## Pearson Correlation
+```{r pearson}
+cor(x, y)
+cov.xy = (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
+sd.x = ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
+sd.y = ((UPM(2, mean(y), y) + LPM(2, mean(y) , y)) * (length(y) / (length(y) - 1))) ^ .5
+cov.xy / (sd.x * sd.y)
+```
+
+## CDFs (Discrete and Continuous)
+```{r cdfs,fig.align="center",fig.width=5,fig.height=3, results='hide'}
+P = ecdf(x)
+P(0) ; P(1)
+LPM(0, 0, x) ; LPM(0, 1, x)
+
+# Vectorized targets:
+LPM(0, c(0, 1), x)
+
+plot(ecdf(x))
+points(sort(x), LPM(0, sort(x), x), col = "red")
+legend("left", legend = c("ecdf", "LPM.CDF"), fill = c("black", "red"), border = NA, bty = "n")
+
+# Joint CDF:
+Co.LPM(0, x, y, 0, 0)
+
+# Vectorized targets:
+Co.LPM(0, x, y, c(0, 1), c(0, 1))
+
+# Copula
+# Transform x and y so that they are uniform
+u_x = LPM.ratio(0, x, x)
+u_y = LPM.ratio(0, y, y)
+
+# Value of copula at c(.5, .5)
+Co.LPM(0, u_x, u_y, .5, .5)
+
+# Continuous CDF:
+NNS.CDF(x, 1)
+
+# CDF with target:
+NNS.CDF(x, 1, target = mean(x))
+
+# Survival Function:
+NNS.CDF(x, 1, type = "survival")
+```
+
+
+
+## Numerical Integration
+Partial moments are asymptotic area approximations of $f(x)$ akin to the familiar Trapezoidal and Simpson's rules.  More observations, more accuracy...
+
+$$[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}$$
+$$[UPM(1,0,f(x))-LPM(1,0,f(x))] *[b-a] \asymp[F(b)-F(a)]$$
+
+```{r numerical integration}
+x = seq(0, 1, .001) ; y = x ^ 2
+(UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)
+```
+
+$$0.3333 * [1-0] = \int_{0}^{1} x^2 dx$$
+For the total area, not just the definite integral, simply sum the partial moments and multiply by $[b - a]$:
+$$[UPM(1,0,f(x))+LPM(1,0,f(x))] *[b-a]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert$$
+
+## Bayes' Theorem
+For example, when ascertaining the probability of an increase in $A$ given an increase in $B$, the `Co.UPM(degree_x, degree_y, x, y, target_x, target_y)` target parameters are set to `target_x = 0` and `target_y = 0` and the `UPM(degree, target, variable)` target parameter is also set to `target = 0`.
+
+$$P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}$$
+
+# References
+If the user is so motivated, detailed arguments and proofs are provided within the following:
+
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+
+* [Cumulative Distribution Functions and UPM/LPM Analysis](https://www.ssrn.com/abstract=2148482)
+
+* [Continuous CDFs and ANOVA with NNS](https://www.ssrn.com/abstract=3007373)
+
+* [f(Newton)](https://www.ssrn.com/abstract=2186471)
+
+* [Bayes' Theorem From Partial Moments](https://www.ssrn.com/abstract=3457377)
+
+```{r threads, echo = FALSE}
+Sys.setenv("OMP_THREAD_LIMIT" = "")
+```
