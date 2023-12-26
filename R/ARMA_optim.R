@@ -443,6 +443,9 @@ NNS.ARMA.optim <- function(variable,
     lines(OV, lwd = 2, col = "steelblue")
     lines((starting.point + 1) : (starting.point + lfp), final.predicted, col = "red", lwd = 2, lty = 2)
     
+    legend("topleft", legend = c("Variable", "Internal Validation"), 
+           col = c("steelblue", "red"), lty = c(1, 2), bty = "n", lwd = 2)
+    
     if(!is.null(h_oos)){
       lines((n + 1) : (n + h), model.results, col = "red", lwd = 2)
       
@@ -450,12 +453,14 @@ NNS.ARMA.optim <- function(variable,
               c(lower_PIs, rev(upper_PIs)),
               col = rgb(1, 192/255, 203/255, alpha = 0.5),
               border = NA)
+      
+      legend("topleft", legend = c("Variable", "Internal Validation", "Forecast"), 
+             col = c("steelblue", "red", "red"), lty = c(1, 2, 1), bty = "n", lwd = 2)
     } 
       
     
     
-    legend("topleft", legend = c("Variable", "Internal Validation", "Forecast"), 
-           col = c("steelblue", "red", "red"), lty = c(1, 2, 1), bty = "n", lwd = 2)
+    
   }
   
   
