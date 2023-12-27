@@ -376,13 +376,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
     lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 1)
     
     if(is.numeric(confidence.interval)){
-      lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.pos), col = 'pink')
-      lines(seq_along(y.hat), na.omit(fitted.matrix$conf.int.neg), col = 'pink')
-      
-      polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))), col = "pink", border = NA)
-    
-      points(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue")
-      lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 1)
+      polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))), 
+              col = rgb(1, 192/255, 203/255, alpha = 0.375), 
+              border = NA)
     }
     
     title(main = paste0("NNS Order = multiple"), cex.main = 2)

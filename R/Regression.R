@@ -194,6 +194,8 @@ NNS.reg = function (x, y,
   original.names <- colnames(x)
   original.columns <- ncol(x)
   
+  
+  
   if(!is.null(original.columns) & is.null(original.names)) x <- data.frame(x)
   
   y.label <- deparse(substitute(y))
@@ -205,53 +207,52 @@ NNS.reg = function (x, y,
     
     
     if(!is.null(point.est)){
-      if(!is.null(dim(x)) && dim(x)[2]>1){
+      if(!is.null(dim(x)) && original.columns > 1){
         if(is.null(dim(point.est))) point.est <- data.frame(t(point.est)) else point.est <- data.frame(point.est)
         new_x <- data.table::rbindlist(list(data.frame(x), point.est), use.names = FALSE)
       } else {
         new_x <- unlist(list(x, point.est))
       }
-    }
-    
+    } else new_x <- x
 
     if(!is.null(dim(x)) && original.columns > 1){
+      new_x <- data.table::data.table(new_x)
       dummies <- list()
        for(i in 1:original.columns){
-         dummies[[i]] <- factor_2_dummy_FR(x[,i])
+         dummies[[i]] <- factor_2_dummy_FR(new_x[,.SD, .SDcols = i])
          if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(original.names[i], "_", colnames(dummies[i][[1]])) else names(dummies)[i] <- original.names[i]
        }
       x <- do.call(cbind, dummies)
-    }  else x <- factor_2_dummy_FR(x)
-
-    x <- data.matrix(x)
+    }  else x <- factor_2_dummy_FR(new_x)
     
     if(!is.null(point.est)){
       point.est.y <- numeric()
-      
-      if(!is.null(dim(x)) && dim(x)[2]>1){
-        new_x <- apply(new_x, 2, function(z) factor_2_dummy_FR(z))
-      } else {
-        new_x <- factor_2_dummy_FR(new_x)
-      }
+
+      if(is.null(dim(x))) lx <- length(x) else lx <- nrow(x)
       
       if(is.null(dim(point.est))) l_point.est <- length(point.est) else l_point.est <- nrow(point.est)
       
+      point.est <- tail(x, l_point.est)
       
-      point.est <- tail(new_x, l_point.est)
-      
+      x <- head(x, lx - l_point.est)
+    
       if(is.null(dim(point.est)) || ncol(point.est)==1) point.est <- as.vector(unlist(point.est))
       
     } else { # is.null(point.est)
       point.est.y <- NULL
     }
+    
+    x <- data.matrix(x)
+    
   } #if(factor.2.dummy)
   
   # Variable names
   original.names <- colnames(x)
   original.columns <- ncol(x)
-  
+
   y <- as.numeric(y)
   original.y <- y
+  
   
   
   if(!factor.2.dummy){
@@ -278,6 +279,7 @@ NNS.reg = function (x, y,
       }
     }
   } # !factor to dummy
+  
   original.variable <- x
   
   np <- nrow(point.est)
@@ -287,14 +289,14 @@ NNS.reg = function (x, y,
   }
   
   
-  if(!is.null(ncol(original.variable))){
-    if(ncol(original.variable) == 1){
+  if(!is.null(original.columns)){
+    if(original.columns == 1){
       x <- original.variable
     } else {
       if(is.null(dim.red.method)){
-        
+        if(is.null(colnames(x))) colnames(x) <- rep("x", ncol(x))        
         colnames(x) <- make.unique(colnames(x), sep = "_")
-        
+
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
@@ -399,9 +401,9 @@ NNS.reg = function (x, y,
             points.norm <- rbind(point.est, x)
             
             if(dist!="FACTOR"){
-              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b))==0, 1, (max(b) - min(b))))
+              points.norm <- apply(points.norm, 2, function(b) (b - min(b)) / ifelse((max(b) - min(b)) == 0, 1, (max(b) - min(b))))
             }
-            if(is.null(np) || np==1){
+            if(is.null(np) || np == 1){
               new.point.est <- sum(points.norm[1,] * x.star.coef) / xn
               
             } else {
@@ -449,10 +451,13 @@ NNS.reg = function (x, y,
   
   dependence[is.na(dependence)] <- 0.1
  
-  rounded_dep <- ceiling(dependence*10)
-  if(length(y) < 100) rounded_dep <- rounded_dep / 2
-
-  rounded_dep <- floor(rounded_dep) #ifelse(rounded_dep%%1 <= .5, floor(rounded_dep), ceiling(rounded_dep))
+  rounded_dep <- floor(dependence*10)
+  
+  if(length(y) < 100){
+    rounded_dep <- rounded_dep / 2
+    rounded_dep <- floor(rounded_dep)
+  }
+   
   rounded_dep <- max(1, rounded_dep)
   
   
@@ -860,8 +865,18 @@ NNS.reg = function (x, y,
     fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
     
     if(!is.null(point.est)){
-      lower.pred.int <- point.est.y - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals))
-      upper.pred.int <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals)) + point.est.y
+      
+  
+      fitted[, `:=` ( 'pred.int.pos' = (UPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
+      fitted[, `:=` ( 'pred.int.neg' = (LPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
+      
+      pi_idx <- (findInterval(point.est, fitted[ , x], left.open = FALSE, rightmost.closed = TRUE))
+      
+      lower.pred.int <- fitted[pi_idx, 'pred.int.neg']   
+      upper.pred.int <- fitted[pi_idx, 'pred.int.pos']  
+      
+      fitted[,'pred.int.neg' := NULL]
+      fitted[,'pred.int.pos' := NULL]
       
       pred.int <- data.table::data.table(lower.pred.int, upper.pred.int)
       if(!is.null(type)&&type=="class") pred.int <- data.table::data.table(apply(pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
@@ -897,8 +912,9 @@ NNS.reg = function (x, y,
            cex.lab = 1.5, cex.main = 2)
       
       idx <- order(fitted$x)
-      polygon(c(x[idx], x[rev(idx)]), c(na.omit(fitted$conf.int.pos[idx]), (na.omit(fitted$conf.int.neg[rev(idx)]))), col = "pink", border = NA)
-      points(x[idx], y[idx], pch = 1, lwd = 2, col = "steelblue")
+      polygon(c(x[idx], x[rev(idx)]), c(na.omit(fitted$conf.int.pos[idx]), (na.omit(fitted$conf.int.neg[rev(idx)]))), 
+              col = rgb(1, 192/255, 203/255, alpha = 0.375), 
+              border = NA)
     } else {
       plot(x, y, pch = 1, lwd = 2, xlim = c(xmin, xmax), ylim = c(ymin, ymax),col = 'steelblue', main = paste(paste0("NNS Order = ", plot.order), sep = "\n"),
            xlab = if(!is.null(original.columns)){
