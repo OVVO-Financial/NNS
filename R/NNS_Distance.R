@@ -3,7 +3,6 @@
 #' Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.
 #' @param rpm REGRESSION.POINT.MATRIX from \link{NNS.reg}
 #' @param dist.estimate Vector to generate distances from.
-#' @param type "L1", "L2" or "FACTOR"
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param class if classification problem.
 #'
@@ -12,8 +11,7 @@
 #'
 #' @export
 
-NNS.distance <- function(rpm, dist.estimate, type, k, class){
-  type <- toupper(type)
+NNS.distance <- function(rpm, dist.estimate, k, class){
   l <- nrow(rpm)
   if(k=="all") k <- l
   y.hat <- rpm$y.hat
@@ -23,27 +21,14 @@ NNS.distance <- function(rpm, dist.estimate, type, k, class){
   parallel <- FALSE
 
   
-  if(type!="FACTOR"){
-    rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
-    rpm <- rpm[, names(rpm) := lapply(.SD, function(b) NNS.rescale(b, 0, 1)), .SDcols = 1:n]
-    dist.estimate <- unlist(rpm[1, ])
-    rpm <- rpm[-1,]
-  }
+  rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
+  rpm <- rpm[, names(rpm) := lapply(.SD, function(b) NNS.rescale(b, 0, 1)), .SDcols = 1:n]
+  dist.estimate <- unlist(rpm[1, ])
+  rpm <- rpm[-1,]
   
   M <- matrix(rep(dist.estimate, l), byrow = T, ncol = n)
-  M2 <- matrix(rep(raw.dist.estimate, l), byrow = T, ncol = n)
-  
-  if(type=="L2"){
-    rpm$Sum <- Rfast::rowsums( ((t(t(rpm[, 1:n])) - M)^2) * ((1 - (raw.rpm == M2))), parallel = parallel)
-  }
 
-  if(type=="L1"){
-    rpm$Sum <- Rfast::rowsums(abs(t(t(rpm[, 1:n])) - M) * ((1 - (raw.rpm == M2))), parallel = parallel)
-  }
-
-  if(type=="FACTOR"){
-    rpm$Sum <- (1/l + ( Rfast::rowsums((raw.rpm == M2), parallel = parallel)))^-1
-  }
+  rpm$Sum <- Rfast::rowsums( ((t(t(rpm)) - M)^2) + abs(t(t(rpm)) - M), parallel = parallel)
 
   rpm$Sum[rpm$Sum == 0] <- 1e-10
   rpm$y.hat <- y.hat

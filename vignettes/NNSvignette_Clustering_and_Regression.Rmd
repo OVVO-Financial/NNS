@@ -158,7 +158,7 @@ $OBJfn.reg
 [1] 1
 
 $NNS.reg.n.best
-[1] 1
+[1] 4
 
 $probability.threshold
 [1] 0.43875

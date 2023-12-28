@@ -427,13 +427,13 @@ NNS.reg = function (x, y,
           
           dependence[is.na(dependence)] <- 0.1
           
-          if(is.null(order)) order <- max(1, floor(dependence*10))
+          if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
           
           if(length(y) < 100) order <- order / 2
           
           if(is.numeric(order)) order <- max(1, order) else order <- n
           
-          order <- ifelse(order%%1 <= .5, floor(order), ceiling(order))
+          order <- ifelse(order%%1 < .5, floor(order), ceiling(order))
         }
       } # Multivariate Not NULL type
       
@@ -451,7 +451,7 @@ NNS.reg = function (x, y,
   
   dependence[is.na(dependence)] <- 0.1
  
-  rounded_dep <- floor(dependence*10)
+  rounded_dep <- ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10))
   
   if(length(y) < 100){
     rounded_dep <- rounded_dep / 2

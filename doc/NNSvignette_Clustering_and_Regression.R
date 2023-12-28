@@ -76,7 +76,7 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 #  [1] 1
 #  
 #  $NNS.reg.n.best
-#  [1] 1
+#  [1] 4
 #  
 #  $probability.threshold
 #  [1] 0.43875
