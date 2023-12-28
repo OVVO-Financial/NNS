@@ -4,14 +4,12 @@
 \alias{NNS.distance}
 \title{NNS Distance}
 \usage{
-NNS.distance(rpm, dist.estimate, type, k, class)
+NNS.distance(rpm, dist.estimate, k, class)
 }
 \arguments{
 \item{rpm}{REGRESSION.POINT.MATRIX from \link{NNS.reg}}
 
 \item{dist.estimate}{Vector to generate distances from.}
-
-\item{type}{"L1", "L2" or "FACTOR"}
 
 \item{k}{\code{n.best} from \link{NNS.reg}}
 
