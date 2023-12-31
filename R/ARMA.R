@@ -153,21 +153,21 @@ NNS.ARMA <- function(variable,
   lin.resid <- list()
 
   # Regression for each estimate in h
-  for (j in 1 : h){
-    ## Regenerate seasonal.factor if dynamic
-    if(dynamic){
+  for (j in 1:h) {
+    # Regenerate seasonal.factor if dynamic
+    if (dynamic) {
       seas.matrix <- NNS.seas(variable, plot = FALSE)
-      if(!is.list(seas.matrix)){
+      if (!is.list(seas.matrix)) {
         M <- t(1)
       } else {
-        if(is.null(best.periods)){
+        if (is.null(best.periods)) {
           M <- seas.matrix$all.periods
           best.periods <- length(M$all.periods$Period)
         } else {
-          if(length(M$all.periods$Period) < best.periods){
+          if (length(M$all.periods$Period) < best.periods) {
             best.periods <- length(M$all.periods$Period)
           }
-          M <- seas.matrix$all.periods[1 : best.periods, ]
+          M <- seas.matrix$all.periods[1:best.periods, ]
         }
       }
       
@@ -176,86 +176,71 @@ NNS.ARMA <- function(variable,
       Weights <- ASW$Weights
     }
     
-    
-    ## Re-Generate vectors for 1:lag if dynamic
-    GV <- generate.vectors(variable,lag)
+    # Re-Generate vectors for 1:lag if dynamic
+    GV <- generate.vectors(variable, lag)
     Component.index <- GV$Component.index
     Component.series <- GV$Component.series
- 
-   
+    
+    # Regression on Component Series
     ## Regression on Component Series
-    for(i in 1:length(lag)){
-      if(method == 'nonlin' || method == 'both'){
-        Regression.Estimates <- vector(mode = "list", length(lag))
+    if (method %in% c("nonlin", "both")) {
+      Regression.Estimates <- sapply(seq_along(lag), function(i) {
+        x <- Component.index[[i]]
+        y <- Component.series[[i]]
         
-        x <- Component.index[[i]] ; y <- Component.series[[i]]
         last.y <- tail(y, 1)
         
-        ## Skeleton NNS regression for NNS.ARMA
-        reg.points <- NNS.reg(x, y, return.values = FALSE , plot = FALSE, multivariate.call = TRUE)
-        reg.points <- reg.points[complete.cases(reg.points),]
+        reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
+        reg.points <- reg.points[complete.cases(reg.points), ]
         
-        xs <- (tail(reg.points$x, 1) - reg.points$x)
-        ys <- (tail(reg.points$y, 1) - reg.points$y)
+        xs <- tail(reg.points$x, 1) - reg.points$x
+        ys <- tail(reg.points$y, 1) - reg.points$y
         
-        xs <- head(xs, (length(xs)-1))
-        ys <- head(ys, (length(ys)-1))
+        xs <- head(xs, -1)
+        ys <- head(ys, -1)
         
         run <- mean(rep(xs, (1:length(xs))^2))
         rise <- mean(rep(ys, (1:length(ys))^2))
         
-        
-        Regression.Estimates[[i]] <- last.y + (rise / run)
-        
-        
-        Regression.Estimates <- unlist(Regression.Estimates)
-        
-        NL.Regression.Estimates <- Regression.Estimates
-        Nonlin.estimates <- sum(Regression.Estimates * Weights)
-        
-      }#Linear == F
+        last.y + (rise / run)
+      })
       
-      if(method == "lin" || method == "both" || method == "means") {
-        Regression.Estimates <- vector(mode = "list", length(lag))
-        
-        if(method != "means"){
-          Regression.Estimates <- lapply(1 : length(lag), function(i) {
-            last.x <- tail(Component.index[[i]], 1)
-            lin.reg <- lm(Component.series[[i]] ~ Component.index[[i]])
-            coefs <- coef(lin.reg)
-            list("est" = as.numeric(coefs[1] + (coefs[2] * (last.x + 1))), "resid" = mean(abs(resid(lin.reg))))
-          })
-          
-          
-          lin.resid <- mean(abs(unlist(lapply(Regression.Estimates, function(z) z$resid))))
-          Regression.Estimates <- unlist(lapply(Regression.Estimates, function(z) z$est))
-          
-        }
-        
-        if(method == "means" || shrink){
-          Regression.Estimates_means <- list(length(lag))
-          Regression.Estimates_means[[i]] <- mean(Component.series[[i]])
-          if(shrink) Regression.Estimates <- (Regression.Estimates + unlist(Regression.Estimates_means)) / 2 else Regression.Estimates <- unlist(Regression.Estimates_means)
-        }
-        
-        L.Regression.Estimates <- Regression.Estimates
-        Lin.estimates <- sum(Regression.Estimates * Weights)
-        
-      }#Linear == T
+      Regression.Estimates <- pmax(0, Regression.Estimates)
+      Nonlin.estimates <- sum(Regression.Estimates * Weights)
+    }
+    
+    if (method %in% c("lin", "both", "means")) {
+      Lin.Regression.Estimates <- sapply(seq_along(lag), function(i) {
+        last.x <- tail(Component.index[[i]], 1)
+        lin.reg <- lm(Component.series[[i]] ~ Component.index[[i]])
+        coefs <- coef(lin.reg)
+        as.numeric(coefs[1] + coefs[2] * (last.x + 1))
+      })
       
-        
-      if(!negative.values) Regression.Estimates <- pmax(0, Regression.Estimates)
-      
-      
-      if(method == 'both'){
-        Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
-      } else {
-        Estimates[j] <- sum(Regression.Estimates * Weights)
+      if (method != "means") {
+        lin.resid <- mean(abs(unlist(lapply(Lin.Regression.Estimates, function(est) resid(lm(est ~ 1))))))
+        Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
       }
       
-      variable <- c(variable, Estimates[j])
-      FV <- variable
-    } # i loop
+      if (method %in% c("means", "shrink")) {
+        Regression.Estimates_means <- sapply(Component.series, mean)
+        if (shrink) Lin.Regression.Estimates <- (Lin.Regression.Estimates + Regression.Estimates_means) / 2 else Lin.Regression.Estimates <- Regression.Estimates_means
+      }
+      
+      Lin.estimates <- sum(Lin.Regression.Estimates * Weights)
+      if(!negative.values)  Lin.estimates <- pmax(0, Lin.estimates)
+    }
+    
+    
+    if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
+    
+    if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
+  
+    if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
+  
+    
+    variable <- c(variable, Estimates[j])
+    FV <- variable
   } # j loop
 
 

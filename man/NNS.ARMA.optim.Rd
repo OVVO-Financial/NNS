@@ -10,11 +10,11 @@ NNS.ARMA.optim(
   training.set = NULL,
   seasonal.factor,
   negative.values = FALSE,
-  obj.fn = expression(cor(predicted, actual, method = "spearman")/sum((predicted -
-    actual)^2)),
-  objective = "max",
+  obj.fn = expression(mean((predicted - actual)^2)/(NNS::Co.LPM(1, predicted, actual,
+    target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted,
+    actual, target_x = mean(predicted), target_y = mean(actual)))),
+  objective = "min",
   linear.approximation = TRUE,
-  lin.only = FALSE,
   pred.int = 0.95,
   print.trace = TRUE,
   plot = FALSE
@@ -38,8 +38,6 @@ NNS.ARMA.optim(
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
-
-\item{lin.only}{logical; \code{FALSE} (default) Restricts the optimization to linear methods only.}
 
 \item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{meboot} on the final estimates.}
 
@@ -68,7 +66,7 @@ Wrapper function for optimizing any combination of a given \code{seasonal.factor
 }
 \note{
 \itemize{
-\item{} Typically, \code{(training.set = length(variable) - 2 * length(forecast horizon))} is used for optimization.  Smaller samples would use \code{(training.set = length(variable) - length(forecast horizon))} in order to preserve information.
+\item{} Typically, \code{(training.set = 0.8 * length(variable)} is used for optimization.  Smaller samples could use \code{(training.set = 0.9 * length(variable))} (or larger) in order to preserve information.
 
 \item{} The number of combinations will grow prohibitively large, they should be kept as small as possible.  \code{seasonal.factor} containing an element too large will result in an error.  Please reduce the maximum \code{seasonal.factor}.
 
@@ -80,15 +78,6 @@ Wrapper function for optimizing any combination of a given \code{seasonal.factor
 \dontrun{
 nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,
 seasonal.factor = seq(12, 24, 6))
-
-## To use optimal parameters in NNS.ARMA to predict 12 periods in-sample.
-## Note the {$bias.shift} usage in the {NNS.ARMA} function:
-nns.estimates <- NNS.ARMA(AirPassengers, h = 12, training.set = 132,
-seasonal.factor = nns.optims$periods, method = nns.optims$method) + nns.optims$bias.shift
-
-## If variable cannot logically assume negative values
-nns.estimates <- pmax(0, nns.estimates)
-
 
 ## To predict out of sample using best parameters:
 NNS.ARMA.optim(AirPassengers[1:132], h = 12, seasonal.factor = seq(12, 24, 6))
