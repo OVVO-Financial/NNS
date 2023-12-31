@@ -202,13 +202,7 @@ NNS.VAR <- function(variables,
       periods <- NNS.seas(variable_interpolation, modulo = min(tau[[min(i, length(tau))]]),
                           mod.only = FALSE, plot = FALSE)$periods
       
-      ts <- interpolation_point - 2*(h)
-      if(ts < 100) ts <- interpolation_point - (h)
-      
-      ts <- max(ts, .75*interpolation_point)
-      
       b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
-                          training.set = ts,
                           obj.fn = obj.fn,
                           objective = objective,
                           print.trace = FALSE,
@@ -279,7 +273,7 @@ NNS.VAR <- function(variables,
                      DV <- lagged_new_values_train[, i]
                      
                      ts <- 2*h
-                     ts <- max(ts, .25*length(DV))
+                     ts <- max(ts, .2*length(DV))
                      
                      # Dimension reduction NNS.reg to reduce variables
                      cor_threshold <- NNS.stack(IVs.train = IV,
