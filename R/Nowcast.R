@@ -5,6 +5,7 @@
 #' @param h integer; \code{(h = 1)} (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values up to the current month.
 #' @param additional.regressors character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data, else specify the source.
 #' @param additional.sources character; \code{NULL} (default) specify the \code{source} argument per \code{\link[quantmod]{getSymbols}} for each \code{additional.regressors} specified.
+#' @param naive.weights logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected. 
 #' @param specific.regressors integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.
 #' @param start.date character; \code{"2000-01-03"} (default) Starting date for all data series download.
 #' @param keep.data logical; \code{FALSE} (default) Keeps downloaded variables in a new environment \code{NNSdata}.
@@ -72,6 +73,7 @@
 NNS.nowcast <- function(h = 1,
                         additional.regressors = NULL,
                         additional.sources = NULL,
+                        naive.weights = TRUE,
                         specific.regressors = NULL,
                         start.date = "2000-01-03",
                         keep.data = FALSE,
@@ -129,5 +131,5 @@ NNS.nowcast <- function(h = 1,
   
   options(warn = oldw)
   
-  NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE)
+  NNS.VAR(econ_variables, h = h, tau = 12, status = status, ncores = ncores, nowcast = TRUE, naive.weights = naive.weights)
 }

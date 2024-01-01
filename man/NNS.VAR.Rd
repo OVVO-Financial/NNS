@@ -9,6 +9,7 @@ NNS.VAR(
   h,
   tau = 1,
   dim.red.method = "cor",
+  naive.weights = TRUE,
   obj.fn = expression(mean((predicted - actual)^2)/(NNS::Co.LPM(1, predicted, actual,
     target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted,
     actual, target_x = mean(predicted), target_y = mean(actual)))),
@@ -27,8 +28,10 @@ NNS.VAR(
 
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
+\item{naive.weights}{logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.}
+
 \item{obj.fn}{expression;
-\code{expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)} (default) MSE / co-movements is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.}
+\code{expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)} (default) MSE / co-movements is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 

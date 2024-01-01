@@ -280,7 +280,7 @@ NNS.stack <- function(IVs.train,
       
       
       relevant_vars <- colnames(IVs.train)
-      if(is.null(relevant_vars)) relevant_vars <- 1:dim(IVs.train)[2]
+      if(is.null(relevant_vars)) relevant_vars <- 1:n
       
       if(b==folds){
         threshold.table <- sort(table(unlist(THRESHOLDS)), decreasing = TRUE)
@@ -300,15 +300,14 @@ NNS.stack <- function(IVs.train,
         rel_vars <- nns.method.2$equation
         
         rel_vars <- which(rel_vars$Coefficient>0)
-        rel_vars <- rel_vars[rel_vars <= dim(IVs.train)[2]]
+        rel_vars <- rel_vars[rel_vars <= n]
         
-        if(is.null(rel_vars) || length(rel_vars)==0) rel_vars <- 1:dim(IVs.train)[2]
+        if(is.null(rel_vars) || length(rel_vars)==0) rel_vars <- 1:n
         
-        if(!stack) relevant_vars <- 1:dim(IVs.train)[2]
+        if(!stack) relevant_vars <- 1:n else relevant_vars <- rel_vars
         
-        if(all(relevant_vars=="FALSE")){
-          relevant_vars <- 1:dim(IVs.train)[2]
-        }
+        if(all(relevant_vars=="FALSE")) relevant_vars <- 1:n
+
         
         if(!is.null(type) && !is.null(nns.method.2$Point.est)){
           threshold_results_2 <- mean(unlist(threshold_results_2))
@@ -346,17 +345,19 @@ NNS.stack <- function(IVs.train,
       }
       
       
-      if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
-      if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
+      if(dim(CV.IVs.train)[2]!=n) CV.IVs.train <- t(CV.IVs.train)
+      if(dim(CV.IVs.train)[2]!=n) CV.IVs.train <- t(CV.IVs.train)
       
-      if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
-      if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
+      if(dim(CV.IVs.test)[2]!=n) CV.IVs.test <- t(CV.IVs.test)
+      if(dim(CV.IVs.test)[2]!=n) CV.IVs.test <- t(CV.IVs.test)
       
       threshold_results_1 <- vector(mode = "list", length(c(1:l, length(IVs.train[ , 1]))))
       nns.cv.1 <- numeric()
       
-      for(i in c(1:l, length(IVs.train[ , 1]))){
-        index <- which(c(1:l, length(IVs.train[ , 1])) == i)
+      q <- length(IVs.train[ , 1])
+      
+      for(i in c(1:l, q)){
+        index <- which(c(1:l, q) == i)
         if(status){
           message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-index+1," ","\r",appendLF=TRUE)
         }
@@ -394,7 +395,7 @@ NNS.stack <- function(IVs.train,
           
           
           if(!is.null(dim(CV.IVs.train))){
-            if(dim(CV.IVs.train)[2]>1){
+            if(ncol(CV.IVs.train)>1){
               CV.IVs.test.new <- data.table::data.table(apply(data.frame(CV.IVs.test), 2, function(z) factor_2_dummy_FR(z)))
               
               CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(rpm = setup$RPM, dist.estimate = .SD, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
@@ -436,7 +437,7 @@ NNS.stack <- function(IVs.train,
       }
       
       
-      ks <- c(1:l, length(IVs.train[ , 1]))[!is.na(nns.cv.1)]
+      ks <- c(1:l, q)[!is.na(nns.cv.1)]
       
       if(objective=='min'){
         k <- ks[which.min(na.omit(nns.cv.1))]

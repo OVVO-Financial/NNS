@@ -8,6 +8,7 @@ NNS.nowcast(
   h = 1,
   additional.regressors = NULL,
   additional.sources = NULL,
+  naive.weights = TRUE,
   specific.regressors = NULL,
   start.date = "2000-01-03",
   keep.data = FALSE,
@@ -21,6 +22,8 @@ NNS.nowcast(
 \item{additional.regressors}{character; \code{NULL} (default) add more regressors to the base model.  The format must utilize the \code{\link[quantmod]{getSymbols}} format for FRED data, else specify the source.}
 
 \item{additional.sources}{character; \code{NULL} (default) specify the \code{source} argument per \code{\link[quantmod]{getSymbols}} for each \code{additional.regressors} specified.}
+
+\item{naive.weights}{logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.}
 
 \item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.}
 
