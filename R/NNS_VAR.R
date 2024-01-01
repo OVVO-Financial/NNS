@@ -367,7 +367,7 @@ NNS.VAR <- function(variables,
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
       
-      if(!naive.weights) uni[i] <- mean(c(.5, equal_tau/(equal_tau + unequal_tau))) else uni[i] <- 0.5
+      if(naive.weights) uni[i] <- 0.5 else uni[i] <- mean(c(.5, equal_tau/(equal_tau + unequal_tau))) 
       multi[i] <- 1 - uni[i]
     } else {
       uni[i] <- 0.5
