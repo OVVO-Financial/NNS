@@ -168,9 +168,7 @@ NNS.VAR <- function(variables,
   
   nns_IVs <- variable_interpolation <- variable_interpolation_and_extrapolation <- list(ncol(variables))
   
-  
-  
-  
+
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     n <- nrow(variables)
     index <- seq_len(n)
@@ -203,7 +201,7 @@ NNS.VAR <- function(variables,
     if(h > 0){
       periods <- NNS.seas(variable_interpolation, modulo = min(tau[[min(i, length(tau))]]),
                           mod.only = FALSE, plot = FALSE)$periods
-      
+ 
       b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
                           obj.fn = obj.fn,
                           objective = objective,
@@ -319,23 +317,10 @@ NNS.VAR <- function(variables,
                        rel_vars <- colnames(lagged_new_values_train)
                      }
                      
+                     nns_DVs <- cor_threshold$stack
+                     nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
                      
-                     if(length(rel_vars)>1){
-                       DV_values <- cor_threshold
-                       
-                       DV_weights <- c(DV_values$OBJfn.dim.red, DV_values$OBJfn.reg)
-                       DV_weights <- DV_weights/sum(DV_weights)
-                       
-                       nns_DVs <- DV_values$stack
-                       nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
-                     } else {
-                       DV_weights <- c(.5, .5)
-                       nns_DVs <- nns_IVs_results[,i]
-                     }
-                     
-                     if(is.null(DV_weights)) DV_weights <- c(.5, .5)
-                     
-                     list(nns_DVs, rel_vars, DV_weights)
+                     list(nns_DVs, rel_vars)
                    }
   
   if(num_cores > 1) {
