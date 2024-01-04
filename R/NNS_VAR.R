@@ -259,14 +259,8 @@ NNS.VAR <- function(variables,
     status <- FALSE
   }
   
-  comb <- function(x, ...) {
-    lapply(seq_along(x),
-           function(i) c(x[[i]], lapply(list(...), function(y) y[[i]])))
-  }
-  
-  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"), .combine = 'comb', .init = list(list(), list(), list()),
-                   .multicombine = TRUE)%dopar%{
-                     
+
+  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{                   
                      if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
                      
                      IV <- lagged_new_values_train[, -i]
@@ -287,7 +281,7 @@ NNS.VAR <- function(variables,
                                                 dim.red.method = dim.red.method,
                                                 order = NULL, ncores = 1, stack = TRUE)
                      
-                     
+                    
                      
                      if(any(dim.red.method == "cor" | dim.red.method == "all")){
                        rel.1 <- abs(cor(cbind(DV, IV), method = "spearman"))
@@ -319,7 +313,7 @@ NNS.VAR <- function(variables,
                      
                      nns_DVs <- cor_threshold$stack
                      nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
-                     
+                    
                      list(nns_DVs, rel_vars)
                    }
   
@@ -327,10 +321,10 @@ NNS.VAR <- function(variables,
     foreach::registerDoSEQ()
     invisible(data.table::setDTthreads(0, throttle = NULL))
   }
-  
-  nns_DVs <- lists[[1]]
-  relevant_vars <- lists[[2]]
-  
+ 
+  nns_DVs <- lapply(lists, `[[`, 1)
+  relevant_vars <- lapply(lists, `[[`, 2)
+
   
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
   nns_DVs <- head(nns_DVs, h)
@@ -352,7 +346,7 @@ NNS.VAR <- function(variables,
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
       
-      if(naive.weights) uni[i] <- 0.5 else uni[i] <- mean(c(.5, equal_tau/(equal_tau + unequal_tau))) 
+      if(naive.weights) uni[i] <- 0.5 else uni[i] <- equal_tau/(equal_tau + unequal_tau)
       multi[i] <- 1 - uni[i]
     } else {
       uni[i] <- 0.5
