@@ -201,7 +201,8 @@ Co.LPM(0, u_x, u_y, .5, .5)
 ```r
 # x is uniform sample over interval [a,b]; y = f(x)
 > x = seq(0,1,.001); y = x^2
-> UPM(1,0,y)-LPM(1,0,y)
+# [F(b)-F(a)] = [UPM(1,0,f(x))-LPM(1,0,f(x))] * [b-a] 
+> (UPM(1,0,y)-LPM(1,0,y)) * (1-0)
 [1] 0.3335
 ```
 
