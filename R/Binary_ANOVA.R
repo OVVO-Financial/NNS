@@ -49,7 +49,7 @@ NNS.ANOVA.bin<- function(control, treatment,
   #Certainty associated with samples
         if(means.only) NNS.ANOVA.rho <- ((.5 - MAD.CDF)^2) / .25 
         else {
-        NNS.ANOVA.rho <- sum(c( ((.5 - MAD.CDF)^2) / .25 ,
+        NNS.ANOVA.rho <- sum(c( ((.5 - MAD.CDF)^2) / .25,
                                 .5 * (( (.25 - upper.25.CDF)^2) / .25^2),
                                 .5 * (( (.25 - lower.25.CDF)^2) / .25^2),
                                 .25 * (( (.125 - upper.125.CDF)^2) / .125^2),
@@ -57,6 +57,11 @@ NNS.ANOVA.bin<- function(control, treatment,
                              )) / 2.5
 
         }
+        
+    
+        
+        
+        
         pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
   #Graphs

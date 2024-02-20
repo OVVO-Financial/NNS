@@ -49,7 +49,7 @@ NNS.copula <- function (
     colnames(X) <- c(colnames.list)
   }
   
-  discrete_pm_cov <- PM.matrix(0, 0, target = target, variable = X, pop_adj = TRUE)
+  discrete_pm_cov <- PM.matrix(0, 0, target = target, variable = X, pop_adj = FALSE)
 
   if(continuous){
     degree <- 1

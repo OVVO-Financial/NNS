@@ -90,7 +90,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   ### Find intervals in regression points for each variable, use left.open T and F for endpoints.
   ### PARALLEL
   
-  if(is.null(ncores)) {
+  if(is.null(ncores)){
     num_cores <- as.integer(max(2L, parallel::detectCores(), na.rm = TRUE)) - 1
   } else {
     num_cores <- ncores
@@ -98,6 +98,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   if(num_cores > 1){
     cl <- tryCatch(parallel::makeForkCluster(num_cores), error = function(e) parallel::makeCluster(num_cores))
+    doParallel::registerDoParallel(cl)
     invisible(data.table::setDTthreads(1))
   } else {
     foreach::registerDoSEQ()
@@ -233,8 +234,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
       if(num_cores > 1){
         DISTANCES <- parallel::parApply(cl, distances, 1, function(z) NNS.distance(rpm = REGRESSION.POINT.MATRIX,  dist.estimate = z,  k = n.best, class = type)[1])
         
+        doParallel::stopImplicitCluster()
         foreach::registerDoSEQ()
         invisible(data.table::setDTthreads(0, throttle = NULL))
+        invisible(gc(verbose = FALSE))
       } else {
         distances <- distances[, DISTANCES :=  NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = .SD,  k = n.best, class = type)[1], by = 1:nrow(point.est)]
         

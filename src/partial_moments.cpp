@@ -104,15 +104,17 @@ double CoUPM_C(
        d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
-    if (x1<=0) continue;
     
     double y1=(y[i]-target_y);
-    if (y1<=0) continue;
     
     if(d_upm_0){
-        x1=(x1==0?0:1);
-        y1=(y1==0?0:1);
+        x1 = (x1 > 0 ? 1 : x1);
+        y1 = (y1 > 0 ? 1 : y1);
     }
+    
+    x1 = (x1 < 0 ? 0 : x1);
+    y1 = (y1 < 0 ? 0 : y1);
+    
     if(dont_use_pow)
       out += x1 * y1;
     else
@@ -138,16 +140,17 @@ double CoLPM_C(
        d_lpm_0=(degree_lpm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
-    if (x1<=0) continue;
     
     double y1=(target_y-y[i]);
-    if (y1<=0) continue;
     
     if(d_lpm_0){
-        x1=(x1==0?0:1);
-        y1=(y1==0?0:1);
+      x1 = (x1 >= 0 ? 1 : x1);
+      y1 = (y1 >= 0 ? 1 : y1);
     }
     
+    x1 = (x1 < 0 ? 0 : x1);
+    y1 = (y1 < 0 ? 0 : y1);
+
     if(dont_use_pow)
       out += x1 * y1;
     else
@@ -175,22 +178,23 @@ double DLPM_C(
        d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
-    if (x1<=0) continue;
     
     double y1=(target_y-y[i]);
-    if (y1<=0) continue;
     
-    if(d_lpm_0) x1=(x1==0?0:1);
-    if(d_upm_0) y1=(y1==0?0:1);
+    if(d_upm_0) x1 = (x1 > 0 ? 1 : x1);
+    if(d_lpm_0) y1 = (y1 >= 0 ? 1 : y1);
+    
+    x1 = (x1 < 0 ? 0 : x1);
+    y1 = (y1 < 0 ? 0 : y1);
     
     if(dont_use_pow_lpm && dont_use_pow_upm)
       out += x1 * y1;
     else if(dont_use_pow_lpm)
-      out += x1 * std::pow(y1, degree_upm);
+      out += std::pow(x1, degree_upm) * y1;
     else if(dont_use_pow_upm)
-      out += std::pow(x1, degree_lpm) * y1;
+      out += x1 * std::pow(y1, degree_lpm);
     else
-      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
+      out += std::pow(x1, degree_upm) * std::pow(y1, degree_lpm);
   }
   return out/max_size;
 }
@@ -214,13 +218,14 @@ double DUPM_C(
        d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
-    if (x1<=0) continue;
     
     double y1=(y[i]-target_y);
-    if (y1<=0) continue;
     
-    if(d_lpm_0) x1=(x1==0?0:1);
-    if(d_upm_0) y1=(y1==0?0:1);
+    if(d_lpm_0) x1 = (x1 >= 0 ? 1 : x1);
+    if(d_upm_0) y1 = (y1 > 0 ? 1 : y1);
+    
+    x1 = (x1 < 0 ? 0 : x1);
+    y1 = (y1 < 0 ? 0 : y1);
     
     if(dont_use_pow_lpm && dont_use_pow_upm)
       out += x1 * y1;
@@ -302,104 +307,55 @@ void PMMatrix_Cv(
        d_lpm_0=(degree_lpm==0),
        d_upm_0=(degree_upm==0);
   bool dont_use_pow = (dont_use_pow_lpm && dont_use_pow_upm);
-  //double x_less_target_upm, target_less_x_upm, y_less_target_upm, target_less_y_upm;
-  double x_less_target_upm, y_less_target_upm, target_less_y_upm;
   for(size_t i = 0; i < rows; i++){
-    double x_less_target_lpm = (x[i] - target_x),
-           target_less_x_lpm = (target_x - x[i]),
-           y_less_target_lpm = (y[i] - target_y),
-           target_less_y_lpm = (target_y - y[i]);
-    bool   less_equal_zero_target_less_x = (target_less_x_lpm <= 0),
-           less_equal_zero_target_less_y = (target_less_y_lpm <= 0),
-           less_equal_zero_x_less_target = (x_less_target_lpm <= 0),
-           less_equal_zero_y_less_target = (y_less_target_lpm <= 0);
-    if(
-        less_equal_zero_target_less_x && 
-        less_equal_zero_target_less_y && 
-        less_equal_zero_x_less_target && 
-        less_equal_zero_y_less_target
-    )   // nothing to do with this row
-        continue;
+    double x_less_target = (x[i] - target_x); 
+    double target_less_x = (target_x - x[i]);
+    double y_less_target = (y[i] - target_y); 
+    double target_less_y = (target_y - y[i]); 
+
+    
     // UPM values
-    if(d_upm_0){ // pow(0,0) == 0, pow(!=0,0) == 1
-        x_less_target_upm=(x_less_target_lpm==0?0:1);
-        //target_less_x_upm=(target_less_x_lpm==0?0:1);
-        y_less_target_upm=(y_less_target_lpm==0?0:1);
-        target_less_y_upm=(target_less_y_lpm==0?0:1);
-    }else{
-        x_less_target_upm=x_less_target_lpm;
-        //target_less_x_upm=target_less_x_lpm;
-        y_less_target_upm=y_less_target_lpm;
-        target_less_y_upm=target_less_y_lpm;
+    if(d_upm_0){
+        x_less_target=(x_less_target>0?1:x_less_target);
+        y_less_target=(y_less_target>0?1:y_less_target);
     }
+    
     // LPM values
-    if(d_lpm_0){ // pow(0,0) == 0, pow(!=0,0) == 1
-        x_less_target_lpm=(x_less_target_lpm==0?0:1);
-        target_less_x_lpm=(target_less_x_lpm==0?0:1);
-        y_less_target_lpm=(y_less_target_lpm==0?0:1);
-        target_less_y_lpm=(target_less_y_lpm==0?0:1);
+    if(d_lpm_0){ 
+        target_less_x=(target_less_x>=0?1:target_less_x);
+        target_less_y=(target_less_y>=0?1:target_less_y);
     }
 
-    /*
-    CoLPM_C
-        double x1=(target_x-x[i]);
-        double y1=(target_y-y[i]);
-        out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
-    */
-    if(!less_equal_zero_target_less_x && !less_equal_zero_target_less_y){
+    x_less_target = (x_less_target <0 ? 0 : x_less_target);
+    target_less_x = (target_less_x <0 ? 0 : target_less_x);
+    y_less_target = (y_less_target <0 ? 0 : y_less_target);
+    target_less_y = (target_less_y <0 ? 0 : target_less_y);
+
         if(dont_use_pow_lpm)
-            coLpm += target_less_x_lpm * target_less_y_lpm;
+            coLpm += target_less_x * target_less_y;
         else 
-            coLpm += std::pow(target_less_x_lpm, degree_lpm) * std::pow(target_less_y_lpm, degree_lpm);
-    }
+            coLpm += std::pow(target_less_x, degree_lpm) * std::pow(target_less_y, degree_lpm);
 
-    /*
-    CoUPM_C
-        double x1=(x[i]-target_x);
-        double y1=(y[i]-target_y);
-        out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
-    */
-    if(!less_equal_zero_x_less_target && !less_equal_zero_y_less_target){
         if(dont_use_pow_upm)
-            coUpm += x_less_target_upm * y_less_target_upm;
+            coUpm += x_less_target * y_less_target;
         else 
-            coUpm += std::pow(x_less_target_upm, degree_upm) * std::pow(y_less_target_upm, degree_upm);
-    }
+            coUpm += std::pow(x_less_target, degree_upm) * std::pow(y_less_target, degree_upm);
 
-    /*
-    DLPM_C(
-        double x1=(x[i]-target_x);
-        double y1=(target_y-y[i]);
-        out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
-    */
-    if(!less_equal_zero_x_less_target && !less_equal_zero_target_less_y){
-        if(dont_use_pow)
-            dLpm += x_less_target_lpm * target_less_y_upm;
-        else if(dont_use_pow_lpm)
-            dLpm += x_less_target_lpm * std::pow(target_less_y_upm, degree_upm);
-        else if(dont_use_pow_upm)
-            dLpm += std::pow(x_less_target_lpm, degree_lpm) * target_less_y_upm;
-        else 
-            dLpm += std::pow(x_less_target_lpm, degree_lpm) * std::pow(target_less_y_upm, degree_upm);
-    }
+        if(dont_use_pow){
+            dLpm += x_less_target * target_less_y;
+            dUpm += target_less_x * y_less_target;
+        } else if(dont_use_pow_lpm){
+            dLpm += std::pow(x_less_target, degree_upm) * target_less_y;
+            dUpm += target_less_x * std::pow(y_less_target, degree_upm);
+        } else if(dont_use_pow_upm){
+            dLpm += x_less_target * std::pow(target_less_y, degree_lpm);
+            dUpm += std::pow(target_less_x, degree_lpm) * y_less_target;
+        } else {
+            dLpm += std::pow(x_less_target, degree_upm) * std::pow(target_less_y, degree_lpm);
+            dUpm += std::pow(target_less_x, degree_lpm) * std::pow(y_less_target, degree_upm);
+        }
+            
 
-    /*
-    DUPM_C(
-        double x1=(target_x-x[i]);
-        double y1=(y[i]-target_y);
-        out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
-
-    */
-    if(!less_equal_zero_target_less_x && !less_equal_zero_y_less_target){
-        if(dont_use_pow)
-            dUpm += target_less_x_lpm * y_less_target_upm;
-        else if(dont_use_pow_lpm)
-            dUpm += target_less_x_lpm * std::pow(y_less_target_upm, degree_upm);
-        else if(dont_use_pow_upm)
-            dUpm += std::pow(target_less_x_lpm, degree_lpm) * y_less_target_upm;
-        else 
-            dUpm += std::pow(target_less_x_lpm, degree_lpm) * std::pow(y_less_target_upm, degree_upm);
-    }
   }
   coLpm/=rows;
   coUpm/=rows;

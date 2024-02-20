@@ -200,7 +200,7 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
 #' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
 #' @param variable a numeric matrix or data.frame.
-#' @param pop_adj logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.
+#' @param pop_adj logical; \code{TRUE} Adjusts the sample co-partial moment matrices for population statistics.  Use \code{FALSE} for degree 0 frequency matrices.  Must be provided by user.
 #' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
@@ -229,8 +229,6 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
     .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj)
 }
 
-#' Fast binning of numeric vector into equidistant bins
-#' 
 #' Fast binning of numeric vector into equidistant bins
 #'
 #' Missing values (NA, Inf, NaN) are added at the end of the vector as the last bin returned if missinglast is set to TRUE
