@@ -36,7 +36,7 @@ sqrt(mean((nns_lin - tail(AirPassengers, 44)) ^ 2))
 #  sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
 
 ## ----nonlinearres, eval = FALSE-----------------------------------------------
-#  [1] 19.1362
+#  [1] 18.77889
 
 ## ----seasonal test, eval=TRUE-------------------------------------------------
 seas = t(sapply(1 : 25, function(i) c(i, sqrt( mean( (NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", seasonal.factor = i, plot=FALSE) - tail(AirPassengers, 44)) ^ 2) ) ) ) )

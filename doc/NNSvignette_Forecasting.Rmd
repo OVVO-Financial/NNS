@@ -72,7 +72,7 @@ sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
 ```
 
 ```{r nonlinearres, eval = FALSE}
-[1] 19.1362
+[1] 18.77889
 ```
 
 ## Cross-Validation
@@ -117,7 +117,7 @@ NNS also offers a wrapper function **`NNS.ARMA.optim()`** to test a given vector
 
 **`NNS.ARMA.optim()`** will also test whether to regress the underlying data first, `shrink` the estimates to their subset mean values, include a `bias.shift` based on its internal validation errors, and compare different `weights` of both linear and nonlinear estimates.
 
-Given our monthly dataset, we will try multiple years by setting `seasonal.factor = seq(12, 36, 6)` every 6 months based on our **NNS.seas()** insights above.
+Given our monthly dataset, we will try multiple years by setting `seasonal.factor = seq(12, 60, 6)` every 6 months based on our **NNS.seas()** insights above.
 
 ```{r best optim, eval=FALSE}
 nns.optimal = NNS.ARMA.optim(AirPassengers, 

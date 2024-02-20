@@ -399,7 +399,7 @@ series using <code>method = &quot;nonlin&quot;</code>.</p>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>               <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((nns_nonlin <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>)) <span class="sc">^</span> <span class="dv">2</span>))</span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">19.1362</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">18.77889</span></span></code></pre></div>
 </div>
 <div id="cross-validation" class="section level2">
 <h2>Cross-Validation</h2>
@@ -500,7 +500,7 @@ to their subset mean values, include a <code>bias.shift</code> based on
 its internal validation errors, and compare different
 <code>weights</code> of both linear and nonlinear estimates.</p>
 <p>Given our monthly dataset, we will try multiple years by setting
-<code>seasonal.factor = seq(12, 36, 6)</code> every 6 months based on
+<code>seasonal.factor = seq(12, 60, 6)</code> every 6 months based on
 our <strong>NNS.seas()</strong> insights above.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>nns.optimal <span class="ot">=</span> <span class="fu">NNS.ARMA.optim</span>(AirPassengers, </span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>                             <span class="at">training.set =</span> <span class="dv">100</span>, </span>
