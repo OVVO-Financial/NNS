@@ -15,7 +15,7 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)
 
 \item{variable}{a numeric matrix or data.frame.}
 
-\item{pop_adj}{logical; \code{FALSE} (default) Adjusts the sample co-partial moment matrices for population statistics.}
+\item{pop_adj}{logical; \code{TRUE} Adjusts the sample co-partial moment matrices for population statistics.  Use \code{FALSE} for degree 0 frequency matrices.  Must be provided by user.}
 }
 \value{
 Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.

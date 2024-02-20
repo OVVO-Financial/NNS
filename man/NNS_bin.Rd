@@ -19,9 +19,6 @@ NNS_bin(x, width, origin = 0, missinglast = FALSE)
 An list with elements counts (the frequencies), origin (the origin), width (the width), missing (the number of missings), and last_bin_is_missing (boolean) telling whether the missinglast is true or not.
 }
 \description{
-Fast binning of numeric vector into equidistant bins
-}
-\details{
 Missing values (NA, Inf, NaN) are added at the end of the vector as the last bin returned if missinglast is set to TRUE
 }
 \examples{

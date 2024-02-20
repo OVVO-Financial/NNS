@@ -8,7 +8,7 @@ NNS.nowcast(
   h = 1,
   additional.regressors = NULL,
   additional.sources = NULL,
-  naive.weights = TRUE,
+  naive.weights = FALSE,
   specific.regressors = NULL,
   start.date = "2000-01-03",
   keep.data = FALSE,
@@ -23,9 +23,9 @@ NNS.nowcast(
 
 \item{additional.sources}{character; \code{NULL} (default) specify the \code{source} argument per \code{\link[quantmod]{getSymbols}} for each \code{additional.regressors} specified.}
 
-\item{naive.weights}{logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.}
+\item{naive.weights}{logical; \code{TRUE} Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} (default) will apply weights based on the number of relevant variables detected.}
 
-\item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the References.}
+\item{specific.regressors}{integer; \code{NULL} (default) Select individual regressors from the base model per Viole (2020) listed in the \code{Note} below.}
 
 \item{start.date}{character; \code{"2000-01-03"} (default) Starting date for all data series download.}
 
@@ -50,6 +50,42 @@ Returns the following matrices of forecasted variables:
 }
 \description{
 Wrapper function for NNS nowcasting method using the nonparametric vector autoregression \link{NNS.VAR}, and Federal Reserve Nowcasting variables.
+}
+\note{
+Specific regressors include:
+\enumerate{
+  \item \code{PAYEMS} -- Payroll Employment
+  \item \code{JTSJOL} -- Job Openings
+  \item \code{CPIAUCSL} -- Consumer Price Index
+  \item \code{DGORDER} -- Durable Goods Orders
+  \item \code{RSAFS} -- Retail Sales
+  \item \code{UNRATE} -- Unemployment Rate
+  \item \code{HOUST} -- Housing Starts
+  \item \code{INDPRO} -- Industrial Production
+  \item \code{DSPIC96} -- Personal Income
+  \item \code{BOPTEXP} -- Exports
+  \item \code{BOPTIMP} -- Imports
+  \item \code{TTLCONS} -- Construction Spending
+  \item \code{IR} -- Import Price Index
+  \item \code{CPILFESL} -- Core Consumer Price Index
+  \item \code{PCEPILFE} -- Core PCE Price Index
+  \item \code{PCEPI} -- PCE Price Index
+  \item \code{PERMIT} -- Building Permits
+  \item \code{TCU} -- Capacity Utilization Rate
+  \item \code{BUSINV} -- Business Inventories
+  \item \code{ULCNFB} -- Unit Labor Cost
+  \item \code{IQ} -- Export Price Index
+  \item \code{GACDISA066MSFRBNY} -- Empire State Mfg Index
+  \item \code{GACDFSA066MSFRBPHI} -- Philadelphia Fed Mfg Index
+  \item \code{PCEC96} -- Real Consumption Spending
+  \item \code{GDPC1} -- Real Gross Domestic Product
+  \item \code{ICSA} -- Weekly Unemployment Claims
+  \item \code{DGS10} -- 10-year Treasury rates
+  \item \code{T10Y2Y} -- 2-10 year Treasury rate spread
+  \item \code{WALCL} -- Total Assets
+  \item \code{PALLFNFINDEXM} -- Global Price Index of All Commodities
+  \item \code{FEDFUNDS} -- Federal Funds Effective Rate
+ }
 }
 \examples{
 
