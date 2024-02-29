@@ -45,6 +45,7 @@
 #'   \item \code{WALCL} -- Total Assets
 #'   \item \code{PALLFNFINDEXM} -- Global Price Index of All Commodities
 #'   \item \code{FEDFUNDS} -- Federal Funds Effective Rate
+#'   \item \code{PPIACO} -- Producer Price Index All Commodities
 #'  }
 #' 
 #' @return Returns the following matrices of forecasted variables:
@@ -123,7 +124,7 @@ NNS.nowcast <- function(h = 1,
                  "PCEPI", "PERMIT", "TCU", "BUSINV", "ULCNFB",
                  "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
                  "ICSA",
-                  "DGS10", "T10Y2Y", "WALCL", "PALLFNFINDEXM", "FEDFUNDS")
+                  "DGS10", "T10Y2Y", "WALCL", "PALLFNFINDEXM", "FEDFUNDS", "PPIACO", "CIVPART")
 
   sources <- c(rep("FRED", length(variables)), additional.sources)
   

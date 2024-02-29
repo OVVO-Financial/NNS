@@ -75,24 +75,27 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
     
       n <- nrow(deriv.points)
 
-      run <- gravity(deriv.points[,3]) - gravity(deriv.points[,1])
+      run_1 <- mean(deriv.points[,3]) - mean(deriv.points[,2])
+      run_2 <- mean(deriv.points[,2]) - mean(deriv.points[,1])
      
-      if(any(run == 0)) {
-        z <- which(run == 0)
-        eval.point.max[z] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z]
-        eval.point.max[z] <- eval.point[z] - ((abs((max(x) - min(x)) ))/length(x)) * index
-        run[z] <- eval.point.max[z] - eval.point.min[z]
+      if(any(run_1 == 0)||any(run_2 == 0)) {
+        z_1 <- which(run_1 == 0); z_2 <- which(run_2 == 0)
+        eval.point.max[z_1] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_1]; eval.point.max[z_2] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_2]
+        eval.point.max[z_1] <- eval.point[z_1] - ((abs((max(x) - min(x)) ))/length(x)) * index; eval.point.max[z_2] <- eval.point[z_2] - ((abs((max(x) - min(x)) ))/length(x)) * index
+        run_1[z_1] <- eval.point.max[z_1] - eval.point[z_1]; run_2[z_2] <- eval.point[z_2] - eval.point.min[z_2]
       }
-      
+     
       reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1)
 
-      estimates.min <- gravity(reg.output$Point.est[1:n])
-      estimates.max <- gravity(reg.output$Point.est[(2*n+1):(3*n)])
-      estimates <- gravity(reg.output$Point.est[(n+1):(2*n)])
-      
-      rise <- estimates.max - estimates.min
 
-      first.deriv <-  rise / run
+      estimates.min <- mean(reg.output$Point.est[1:n])
+      estimates.max <- mean(reg.output$Point.est[(2*n+1):(3*n)])
+      estimates <- mean(reg.output$Point.est[(n+1):(2*n)])
+      
+      rise_1 <- estimates.max - estimates
+      rise_2 <- estimates - estimates.min
+
+      first.deriv <-  (rise_1 + rise_2) / (run_1 + run_2)
       
       
       ## Second derivative form:
@@ -103,7 +106,7 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
       
       f.x_h <- estimates.max
       
-      second.deriv <- (f.x_h - two_f.x + f.x__h) / (h_step ^ 2)
+      second.deriv <- (f.x_h - two_f.x + f.x__h) / ((run_1 + run_2) ^ 2)
   }
 
   bandwidths <- list("First" = first.deriv, "Second" = second.deriv)

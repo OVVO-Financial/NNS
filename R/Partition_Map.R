@@ -105,14 +105,14 @@ NNS.part = function(x, y,
             if(i == order || i == floor(log(length(x), 2))) break
 
             PART[counts >= obs.req, `:=`(counts, .N), by = quadrant]
-            PART[old.counts >= obs.req, `:=`(old.counts, .N), by = prior.quadrant]
-            l.PART <- max(PART$counts)
-
             obs.req.rows <- PART[counts >= obs.req, which = TRUE]
-            old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
-
             if(length(obs.req.rows)==0) break
+            
+            PART[old.counts >= obs.req, `:=`(old.counts, .N), by = prior.quadrant]
+            old.obs.req.rows <- PART[old.counts >= obs.req, which = TRUE]
             if(min.obs.stop && obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
+            
+            l.PART <- max(PART$counts)
 
             if(noise.reduction == "off") {
                 if(Voronoi) {
@@ -198,8 +198,6 @@ NNS.part = function(x, y,
 
                 PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
 
-                old.parts <- length(unique(PART$quadrant))
-
                 PART[RP, on = .(quadrant), `:=`(q_new, {
                     lox = x.x <= i.x
                     loy = x.y <= i.y
@@ -207,8 +205,6 @@ NNS.part = function(x, y,
                 })]
 
                 PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
-
-                new.parts <- length(unique(PART$quadrant))
 
             if((min(PART$counts) <= obs.req) && i > 0) break
             if(nrow(PART) > length(x)) break
@@ -238,13 +234,11 @@ NNS.part = function(x, y,
             if(i == order || i == floor(log(length(x), 2))) break
 
             PART[counts > obs.req/2, `:=`(counts, .N), by = quadrant]
-            PART[old.counts > obs.req/2, `:=`(old.counts, .N), by = prior.quadrant]
-
             obs.req.rows <- PART[counts > obs.req/2, which = TRUE]
-
-            old.obs.req.rows <- PART[old.counts > obs.req/2, which = TRUE]
-
             if(length(obs.req.rows)==0 && obs.req > 0) break
+            
+            PART[old.counts > obs.req/2, `:=`(old.counts, .N), by = prior.quadrant]
+            old.obs.req.rows <- PART[old.counts > obs.req/2, which = TRUE]
             if(obs.req > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
 
             if(noise.reduction == "off") {
@@ -276,8 +270,6 @@ NNS.part = function(x, y,
 
                 PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
 
-                old.parts <- length(unique(PART$quadrant))
-
                 PART[RP, on = .(quadrant), `:=`(q_new, {
                     lox = x.x > i.x
                     1L + lox
@@ -285,7 +277,6 @@ NNS.part = function(x, y,
 
                 PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
 
-                new.parts <- length(unique(PART$quadrant))
 
             if((min(PART$counts) <= obs.req) && i > 0) break
             if(nrow(PART) > length(x)) break

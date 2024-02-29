@@ -82,8 +82,12 @@ NNS.dep = function(x,
     # Compare each asymmetry
     res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
                                         error = function(e) error_fn(x, y)))
+
+   
     res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
                                         error = function(e) error_fn(x, y)))
+
+    
 
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- error_fn(x, y)
     if(sum(is.na(res_yx))>0) res_yx[is.na(res_yx)] <- error_fn(x, y)

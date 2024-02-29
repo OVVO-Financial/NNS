@@ -282,7 +282,7 @@ NNS.VAR <- function(variables,
                                                 dim.red.method = dim.red.method,
                                                 order = NULL, ncores = 1, stack = TRUE)
                      
-                    
+                     
                      
                      if(any(dim.red.method == "cor" | dim.red.method == "all")){
                        rel.1 <- abs(cor(cbind(DV, IV), method = "spearman"))
@@ -317,7 +317,7 @@ NNS.VAR <- function(variables,
                     
                      list(nns_DVs, rel_vars)
                    }
-  
+
   if(num_cores > 1) {
     doParallel::stopImplicitCluster()
     foreach::registerDoSEQ()

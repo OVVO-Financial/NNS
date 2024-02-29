@@ -10,6 +10,18 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// fast_lm
+List fast_lm(NumericVector x, NumericVector y);
+RcppExport SEXP _NNS_fast_lm(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_lm(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // LPM_RCPP
 NumericVector LPM_RCPP(const double& degree, const RObject& target, const RObject& variable);
 RcppExport SEXP _NNS_LPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
@@ -146,6 +158,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 3},
     {"_NNS_UPM_RCPP", (DL_FUNC) &_NNS_UPM_RCPP, 3},
     {"_NNS_LPM_ratio_RCPP", (DL_FUNC) &_NNS_LPM_ratio_RCPP, 3},

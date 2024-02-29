@@ -65,7 +65,6 @@ NNS.ARMA.optim <- function(variable,
                            training.set = NULL,
                            seasonal.factor,
                            negative.values = FALSE,
-                          # obj.fn = expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2)),
                            obj.fn =  expression( mean((predicted - actual)^2) / (NNS::Co.LPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) )  ),
                            objective = "min",
                            linear.approximation = TRUE,
@@ -151,23 +150,38 @@ NNS.ARMA.optim <- function(variable,
       
       if(is.null(ncol(seasonal.combs[[i]])) || dim(seasonal.combs[[i]])[2]==0) break 
       
-      if(j!="lin" && linear.approximation){
-        # Find the min (obj.fn) for a given seasonals sequence
-        actual <- tail(variable, h_eval)
-        
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values)
-        
-        nns.estimates.indiv <- eval(obj.fn)
-      } else {
+      if(j=="lin"){
+
         nns.estimates.indiv <- lapply(1 : ncol(seasonal.combs[[i]]), function(k) {
           actual <- tail(variable, h_eval)
-          
-          predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor =  seasonal.combs[[i]][ , k], method = j, plot = FALSE, negative.values = negative.values)
+          message("Testing seasonal.factor ", paste(unlist(seasonal.combs[[i]][ , k]), ","), "\r", appendLF = FALSE)
+          predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor =  seasonal.combs[[i]][ , k], method = "lin", plot = FALSE, negative.values = negative.values)
           
           return(eval(obj.fn))
         })
       }
       
+      if(j=="nonlin" && linear.approximation){
+        # Find the min (obj.fn) for a given seasonals sequence
+        actual <- tail(variable, h_eval)
+        
+        predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values)
+        nonlin.predicted <- predicted
+        
+        nns.estimates.indiv <- eval(obj.fn)
+      }
+      
+      if(j=="both" && linear.approximation){
+        # Find the min (obj.fn) for a given seasonals sequence
+        actual <- tail(variable, h_eval)
+       
+        lin.predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = "lin", plot = FALSE, negative.values = negative.values)
+        predicted <- both.predicted <- (lin.predicted + nonlin.predicted) / 2
+
+        nns.estimates.indiv <- eval(obj.fn)
+      }
+      
+
       nns.estimates.indiv <- unlist(nns.estimates.indiv)
       
       if(objective=='min') nns.estimates.indiv[is.na(nns.estimates.indiv)] <- Inf else nns.estimates.indiv[is.na(nns.estimates.indiv)] <- -Inf
@@ -206,13 +220,13 @@ NNS.ARMA.optim <- function(variable,
       
       
       ### BREAKING PROCEDURE FOR IDENTICAL PERIODS ACROSS METHODS
-      if(which(c("lin",'nonlin','both')==j) > 1 ){
-        if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin",'nonlin','both')==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
+      if(which(c("lin","nonlin","both")==j) > 1 ){
+        if(sum(as.numeric(unlist(current.seasonals[[i]]))%in%as.numeric(unlist(previous.seasonals[[which(c("lin","nonlin","both")==j)-1]][i])))==length(as.numeric(unlist(current.seasonals[[i]])))){
           
           if(objective=='min'){
-            if(current.estimate[i] >= previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
+            if(current.estimate[i] >= previous.estimates[[which(c("lin","nonlin","both")==j)-1]][i]) break
           } else {
-            if(current.estimate[i] <= previous.estimates[[which(c("lin",'nonlin','both')==j)-1]][i]) break
+            if(current.estimate[i] <= previous.estimates[[which(c("lin","nonlin","both")==j)-1]][i]) break
           }
         }
       }

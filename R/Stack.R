@@ -104,12 +104,11 @@ NNS.stack <- function(IVs.train,
   if(any(class(IVs.train)%in%c("tbl","data.table"))) IVs.train <- as.data.frame(IVs.train)
   if(any(class(DV.train)%in%c("tbl","data.table"))) DV.train <- as.vector(unlist(DV.train))
   
-  if(is.vector(IVs.train) || is.null(dim(IVs.train)) || dim(IVs.train)[2]==1){
+  if(is.vector(IVs.train) || is.null(dim(IVs.train)) || ncol(IVs.train)==1){
     IVs.train <- data.frame(IVs.train)
     method <- 1
     order <- NULL
   }
-  
   
   if(!is.null(type)){
     type <- tolower(type)
@@ -152,7 +151,7 @@ NNS.stack <- function(IVs.train,
     if(dim.red.method=="cor"){
       var.cutoffs_1 <- abs(round(cor(data.matrix(cbind(DV.train, IVs.train)), method = "spearman")[-1,1], digits = 2))
     } else {
-      var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores,
+      var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order = order, ncores = ncores,
                                                           type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
     }
   }
@@ -211,13 +210,12 @@ NNS.stack <- function(IVs.train,
     
     # Dimension Reduction Regression Output
     if(2 %in% method && ncol(IVs.train)>1){
-      
       actual <- CV.DV.test
       
       if(dim.red.method=="cor"){
         var.cutoffs_2 <- abs(round(suppressWarnings(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)), method = "spearman"))[-1,1], digits = 2))
       } else {
-        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order=order, ncores = ncores,
+        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order = order, ncores = ncores,
                                                             type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
       }
       
@@ -241,10 +239,10 @@ NNS.stack <- function(IVs.train,
       
       for(i in 1:length(var.cutoffs)){
         if(status){
-          message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " ,length(var.cutoffs)-i," ","\r",appendLF=TRUE)
+          message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " , length(var.cutoffs)-i," ","\r",appendLF=TRUE)
         }
         
-        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = NULL, ncores = ncores,
+        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = order, ncores = ncores,
                                               type = NULL, dist = dist, point.only = TRUE)$Point.est)
         
         predicted[is.na(predicted)] <- gravity(na.omit(predicted))
@@ -281,16 +279,16 @@ NNS.stack <- function(IVs.train,
       
       relevant_vars <- colnames(IVs.train)
       if(is.null(relevant_vars)) relevant_vars <- 1:n
-      
+    
       if(b==folds){
         threshold.table <- sort(table(unlist(THRESHOLDS)), decreasing = TRUE)
         
         nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table==max(threshold.table)])))
         if(is.na(nns.ord.threshold)) nns.ord.threshold <- 0
-        
-        nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
+
+        nns.method.2 <- (NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
                                                  type = NULL, point.only = TRUE, confidence.interval = pred.int))
-        
+  
         actual <- nns.method.2$Fitted.xy$y
         predicted <- nns.method.2$Fitted.xy$y.hat
         pred.int.2 <- nns.method.2$pred.int
@@ -329,11 +327,11 @@ NNS.stack <- function(IVs.train,
       if(objective=='min'){best.nns.ord <- Inf} else {best.nns.ord <- -Inf}
       nns.ord.threshold <- NA
       threshold_results_2 <- NA
-      relevant_vars <- 1:dim(IVs.train)[2]
+      relevant_vars <- 1:n
     } # 2 %in% method
     
     
-    
+      
     if(1 %in% method){
       actual <- CV.DV.test
       
@@ -455,7 +453,7 @@ NNS.stack <- function(IVs.train,
         ks <- table(unlist(best.k))
         
         best.k <-  mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
-        
+
         if(length(relevant_vars)>1){
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                                      type = NULL, point.only = FALSE, confidence.interval = pred.int))

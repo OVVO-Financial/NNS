@@ -212,16 +212,15 @@ NNS.ARMA <- function(variable,
     if (method %in% c("lin", "both", "means")) {
       Lin.Regression.Estimates <- sapply(seq_along(lag), function(i) {
         last.x <- tail(Component.index[[i]], 1)
-        lin.reg <- lm(Component.series[[i]] ~ Component.index[[i]])
-        coefs <- coef(lin.reg)
-        as.numeric(coefs[1] + coefs[2] * (last.x + 1))
+        lin.reg <- fast_lm(Component.index[[i]], Component.series[[i]])
+        coefs <- lin.reg$coef
+        return(as.numeric(coefs[1] + coefs[2] * (last.x + 1)))
       })
       
-      if (method != "means") {
-        lin.resid <- mean(abs(unlist(lapply(Lin.Regression.Estimates, function(est) resid(lm(est ~ 1))))))
-        Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
-      }
+      Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
       
+      if (method != "means") lin.resid <- mean(abs(Lin.Regression.Estimates - mean(Lin.Regression.Estimates)))
+ 
       if (method %in% c("means", "shrink")) {
         Regression.Estimates_means <- sapply(Component.series, mean)
         if (shrink) Lin.Regression.Estimates <- (Lin.Regression.Estimates + Regression.Estimates_means) / 2 else Lin.Regression.Estimates <- Regression.Estimates_means
@@ -231,10 +230,9 @@ NNS.ARMA <- function(variable,
       if(!negative.values)  Lin.estimates <- pmax(0, Lin.estimates)
     }
     
+    if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
     
     if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
-    
-    if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
   
     if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
   

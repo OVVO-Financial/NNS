@@ -154,7 +154,7 @@ NNS.reg = function (x, y,
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
   
   dist <- tolower(dist)
-  
+ 
   if(any(class(x)%in%c("tbl","data.table")) && ncol(x)==1) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table")) && ncol(y)==1) y <- as.vector(unlist(y))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
@@ -194,13 +194,14 @@ NNS.reg = function (x, y,
   original.names <- colnames(x)
   original.columns <- ncol(x)
   
-  
+
   
   if(!is.null(original.columns) & is.null(original.names)) x <- data.frame(x)
   
   y.label <- deparse(substitute(y))
   if(is.null(y.label)) y.label <- "y"
   
+  if(factor.2.dummy && any(sapply(x, is.factor))) factor.2.dummy <- TRUE else factor.2.dummy <- FALSE
   
   if(factor.2.dummy){
     if(is.list(x) & !is.data.frame(x)) x <- do.call(cbind, x)
@@ -254,8 +255,7 @@ NNS.reg = function (x, y,
   original.y <- y
   
   
-  
-  if(!factor.2.dummy){
+  if(!factor.2.dummy){ 
     if(is.null(ncol(x))){
       x <- as.double(x)
       if(!is.null(point.est)){
@@ -312,7 +312,7 @@ NNS.reg = function (x, y,
         
         x <- apply(data.matrix(x), 2, as.numeric)
         y <- as.numeric(y)
-        
+
         if(!is.null(dim.red.method) & !is.null(dim(x))){
           if(!is.numeric(dim.red.method)) dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
@@ -430,7 +430,7 @@ NNS.reg = function (x, y,
           if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
           
           if(length(y) < 100) order <- order / 2
-          
+        
           if(is.numeric(order)) order <- max(1, order) else order <- n
           
           order <- ifelse(order%%1 < .5, floor(order), ceiling(order))
@@ -467,7 +467,6 @@ NNS.reg = function (x, y,
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"
     part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
-    nns.ids <- part.map$dt$quadrant
   } else {
     if(is.null(type)){
       noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
@@ -477,43 +476,16 @@ NNS.reg = function (x, y,
     
     if(dep.reduced.order == "max"){
       part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
-      nns.ids <- part.map$dt$quadrant
     } else {
       part.map <- NNS.part(x, y, noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
-      nns.ids <- part.map$dt$quadrant
-      
-      part.map1 <- NNS.part(c(x, part.map$regression.points$x), c(y, part.map$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
-      part.map2 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y), noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
-      part.map3 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type =  "XONLY", obs.req = 0)
-      part.map4 <- NNS.part(c(x, part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x), c(y, part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y), noise.reduction = noise.reduction2, order =  dep.reduced.order, type =  "XONLY", obs.req = 0)
-      
-      if(Reduce(identical, lapply(list(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x), length)) &&
-         Reduce(identical, lapply(list(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y), length))){
-        
-        part.map$regression.points$x <- apply(cbind(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x)),1, function(x) gravity(x))
-        part.map$regression.points$y <- apply(cbind(c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y)),1, function(x) gravity(x))
-      } else {
-        part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
-                             c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
-                             noise.reduction = noise.reduction2, order = dep.reduced.order, type = "XONLY", obs.req = 0)
-      }
-      
-      if(length(part.map$regression.points$x) > length(y)){
-        i <- 0
-        while(length(part.map$regression.points$x) > length(y)){
-          part.map <- NNS.part(c(part.map$regression.points$x, part.map1$regression.points$x, part.map2$regression.points$x, part.map3$regression.points$x, part.map4$regression.points$x),
-                               c(part.map$regression.points$y, part.map1$regression.points$y, part.map2$regression.points$y, part.map3$regression.points$y, part.map4$regression.points$y),
-                               noise.reduction = noise.reduction2, order =  max(c(1, (dep.reduced.order - i))), type = "XONLY", obs.req = 0)
-          if(i==9) break
-          i <- i + 1
-        }
-      }
-      
       if(length(part.map$regression.points$x) == 0){
         part.map <- NNS.part(x, y, type =  "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0)
       }
     }
+   
   }
+  
+  nns.ids <- part.map$dt$quadrant
   
   if(length(part.map$dt$y) > length(y)){
     part.map$dt$x <- pmax(min(x), pmin(part.map$dt$x, max(x)))
@@ -594,8 +566,8 @@ NNS.reg = function (x, y,
           if(type=="class") x0 <- mode_class(y.min) else x0 <- unique(gravity(y[x == min(x)]))
         } else {
           if(l_y.min>1 && l_y.mid.min>1){
-            x0 <- sum(lm((y[which(x <= min.range)]) ~  (x[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
-                      lm((y[which(x <= mid.min.range)]) ~  (x[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
+            x0 <- sum(fast_lm((x[which(x <= min.range)]), (y[which(x <= min.range)]))$fitted.values[which.min(x[which(x <= min.range)])]*l_y.min,
+                      fast_lm((x[which(x <= mid.min.range)]), (y[which(x <= mid.min.range)]))$fitted.values[which.min(x[which(x <= mid.min.range)])]*l_y.mid.min) /
               sum(l_y.min, l_y.mid.min)
           } else {
             x0 <- y.min
@@ -623,8 +595,8 @@ NNS.reg = function (x, y,
           if(type=="class") x.max <- mode_class(y.max) else x.max <- unique(gravity(y[x == max(x)]))
         } else {
           if(l_y.max > 1 && l_y.mid.max > 1){
-            x.max <- sum(lm(y[which(x >= max.range)] ~ x[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
-                         lm(y[which(x >= mid.max.range)] ~ x[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
+            x.max <- sum(fast_lm(x[which(x >= max.range)], y[which(x >= max.range)])$fitted.values[which.max(x[which(x >= max.range)])]*l_y.max,
+                         fast_lm(x[which(x >= mid.max.range)], y[which(x >= mid.max.range)])$fitted.values[which.max(x[which(x >= mid.max.range)])]*l_y.mid.max) /
               sum(l_y.max, l_y.mid.max)
           } else{
             x.max <- y.max
