@@ -97,7 +97,6 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
 
       first.deriv <-  (rise_1 + rise_2) / (run_1 + run_2)
       
-      
       ## Second derivative form:
       # [f(x+h) - 2(f(x)) + f(x-h)] / h^2
       f.x__h <- estimates.min
@@ -106,7 +105,7 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
       
       f.x_h <- estimates.max
       
-      second.deriv <- (f.x_h - two_f.x + f.x__h) / ((run_1 + run_2) ^ 2)
+      second.deriv <- (((f.x_h - estimates) / run_1) - ((estimates - f.x__h) / run_2)) / (run_1 + run_2)
   }
 
   bandwidths <- list("First" = first.deriv, "Second" = second.deriv)
