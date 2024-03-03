@@ -5,12 +5,7 @@
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param eval.point numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
-#' @param messages logical; \code{TRUE} (default) Prints status messages.
-#' @return Returns a list of both 1st and 2nd derivative:
-#' \itemize{
-#' \item{\code{dy.dx(...)$First}} the 1st derivative.
-#' \item{\code{dy.dx(...)$Second}} the 2nd derivative.
-#' }
+#' @return Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative.
 #'
 #' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 #' @author Fred Viole, OVVO Financial Systems
@@ -24,13 +19,19 @@
 #' \dontrun{
 #' x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 #' dy.dx(x, y, eval.point = 1.75)
-#'
+#' 
+#' # First derivative
+#' dy.dx(x, y, eval.point = 1.75)[ , first.derivative]
+#' 
+#' # Second derivative
+#' dy.dx(x, y, eval.point = 1.75)[ , second.derivative]
+#' 
 #' # Vector of derivatives
 #' dy.dx(x, y, eval.point = c(1.75, 2.5))
 #' }
 #' @export
 
-dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
+dy.dx <- function(x, y, eval.point = NULL){
 
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
@@ -72,11 +73,12 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
     }
 
     deriv.points <- do.call(rbind.data.frame, deriv.points)
+    deriv.points <- data.table::data.table(deriv.points, key = "eval.point")
     
       n <- nrow(deriv.points)
 
-      run_1 <- mean(deriv.points[,3]) - mean(deriv.points[,2])
-      run_2 <- mean(deriv.points[,2]) - mean(deriv.points[,1])
+      run_1 <- deriv.points[,3] - deriv.points[,2]
+      run_2 <- deriv.points[,2] - deriv.points[,1]
      
       if(any(run_1 == 0)||any(run_2 == 0)) {
         z_1 <- which(run_1 == 0); z_2 <- which(run_2 == 0)
@@ -84,34 +86,50 @@ dy.dx <- function(x, y, eval.point = NULL, messages = TRUE){
         eval.point.max[z_1] <- eval.point[z_1] - ((abs((max(x) - min(x)) ))/length(x)) * index; eval.point.max[z_2] <- eval.point[z_2] - ((abs((max(x) - min(x)) ))/length(x)) * index
         run_1[z_1] <- eval.point.max[z_1] - eval.point[z_1]; run_2[z_2] <- eval.point[z_2] - eval.point.min[z_2]
       }
-     
+    
       reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1)
-
-
-      estimates.min <- mean(reg.output$Point.est[1:n])
-      estimates.max <- mean(reg.output$Point.est[(2*n+1):(3*n)])
-      estimates <- mean(reg.output$Point.est[(n+1):(2*n)])
       
-      rise_1 <- estimates.max - estimates
-      rise_2 <- estimates - estimates.min
-
-      first.deriv <-  (rise_1 + rise_2) / (run_1 + run_2)
+      combined.matrices <- cbind(deriv.points, matrix(unlist(reg.output$Point.est), ncol = 3, byrow = F))
+      colnames(combined.matrices) <- c(colnames(deriv.points), "estimates.min", "estimates", "estimates.max")
       
-      ## Second derivative form:
-      # [f(x+h) - 2(f(x)) + f(x-h)] / h^2
-      f.x__h <- estimates.min
+      combined.matrices[, `:=` (
+        run_1 = eval.point.max - eval.point,
+        run_2 = eval.point - eval.point.min,
+        rise_1 = estimates.max - estimates,
+        rise_2 = estimates - estimates.min
+      )]
       
-      two_f.x <- 2 * estimates
       
-      f.x_h <- estimates.max
       
-      second.deriv <- (((f.x_h - estimates) / run_1) - ((estimates - f.x__h) / run_2)) / (run_1 + run_2)
+      naive_first_gradient <- function(x){
+        idx <- max(1, findInterval(x, reg.output$derivative$X.Lower.Range))
+        return(reg.output$derivative[idx, "Coefficient"])
+      }
+      
+      naive_second_gradient <- function(x){
+        idx <- max(1, findInterval(x, reg.output$derivative$X.Lower.Range)-1)
+        d <- reg.output$derivative[-1, ] - reg.output$derivative[-nrow(reg.output$derivative), ]
+        return(d[idx, "Coefficient"]/d[idx, "X.Lower.Range"])
+      }
+      
+      combined.matrices$naive.first.grad <- naive_first_gradient(combined.matrices$eval.point)
+      combined.matrices$naive.second.grad <- naive_second_gradient(combined.matrices$eval.point)
+      
+      combined.matrices[, `:=` (
+        first.deriv = (rise_1 + rise_2) / (run_1 + run_2),
+        second.deriv = (rise_1 / run_1 - rise_2 / run_2) / mean(c(run_1, run_2))
+      )]
+      
+      first.deriv <- tryCatch(combined.matrices[ , mean(c(first.deriv, naive.first.grad)), by = eval.point],
+                              error = function(e) combined.matrices[ , mean(first.deriv), by = eval.point])
+      second.deriv <- tryCatch(combined.matrices[ , mean(c(second.deriv, naive.second.grad)), by = eval.point], 
+                               error = function(e) combined.matrices[ , mean(second.deriv), by = eval.point])
   }
 
-  bandwidths <- list("First" = first.deriv, "Second" = second.deriv)
-
-  return(bandwidths)
+  colnames(first.deriv) <- c("eval.point", "first.derivative")
+  colnames(second.deriv) <- c("eval.point", "second.derivative")
   
+  return(merge(first.deriv, second.deriv, by = "eval.point"))
 }
 
-dy.dx <- Vectorize(dy.dx, vectorize.args = "eval.point")
+

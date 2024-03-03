@@ -276,24 +276,38 @@ NumericVector DUPM_CPv(
   NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(DUPM_Worker, degree_lpm, degree_upm);
 }
 
+
+//////////
+inline double fastPow(double a, double b) {
+  union {
+  double d;
+  int x[2];
+} u = { a };
+  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+  return u.d;
+}
+
+
+
 /////////////////
 // PM MATRIX
 // single thread
 void PMMatrix_Cv(
-  const double &degree_lpm, 
-  const double &degree_upm, 
-  const RMatrix<double>::Column &x, 
-  const RMatrix<double>::Column &y, 
-  const double &target_x,
-  const double &target_y, 
-  const bool &pop_adj, 
-  const double &adjust,
-  const size_t &rows, 
-  double &coLpm,
-  double &coUpm,   
-  double &dLpm, 
-  double &dUpm,
-  double &covMat
+    const double &degree_lpm, 
+    const double &degree_upm, 
+    const RMatrix<double>::Column &x, 
+    const RMatrix<double>::Column &y, 
+    const double &target_x,
+    const double &target_y, 
+    const bool &pop_adj, 
+    const double &adjust,
+    const size_t &rows, 
+    double &coLpm,
+    double &coUpm,   
+    double &dLpm, 
+    double &dUpm,
+    double &covMat
 ){
   coLpm=0;
   coUpm=0;
@@ -302,73 +316,116 @@ void PMMatrix_Cv(
   covMat=0;
   if(rows == 0)
     return;
-  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0),
-       dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
-       d_lpm_0=(degree_lpm==0),
-       d_upm_0=(degree_upm==0);
+  bool dont_use_pow_lpm=(degree_lpm==0 || degree_lpm==1 || degree_lpm==2 || degree_lpm==3),
+    dont_use_pow_upm=(degree_upm==0 || degree_upm==1 || degree_upm==2 || degree_upm==3),
+    d_lpm_0=(degree_lpm==0),
+    d_upm_0=(degree_upm==0);
   bool dont_use_pow = (dont_use_pow_lpm && dont_use_pow_upm);
   for(size_t i = 0; i < rows; i++){
     double x_less_target = (x[i] - target_x); 
     double target_less_x = (target_x - x[i]);
     double y_less_target = (y[i] - target_y); 
     double target_less_y = (target_y - y[i]); 
-
+    
     
     // UPM values
     if(d_upm_0){
-        x_less_target=(x_less_target>0?1:x_less_target);
-        y_less_target=(y_less_target>0?1:y_less_target);
+      x_less_target=(x_less_target>0?1:x_less_target);
+      y_less_target=(y_less_target>0?1:y_less_target);
     }
     
     // LPM values
     if(d_lpm_0){ 
-        target_less_x=(target_less_x>=0?1:target_less_x);
-        target_less_y=(target_less_y>=0?1:target_less_y);
+      target_less_x=(target_less_x>=0?1:target_less_x);
+      target_less_y=(target_less_y>=0?1:target_less_y);
     }
-
+    
     x_less_target = (x_less_target <0 ? 0 : x_less_target);
     target_less_x = (target_less_x <0 ? 0 : target_less_x);
     y_less_target = (y_less_target <0 ? 0 : y_less_target);
     target_less_y = (target_less_y <0 ? 0 : target_less_y);
-
-        if(dont_use_pow_lpm)
-            coLpm += target_less_x * target_less_y;
-        else 
-            coLpm += std::pow(target_less_x, degree_lpm) * std::pow(target_less_y, degree_lpm);
-
-        if(dont_use_pow_upm)
-            coUpm += x_less_target * y_less_target;
-        else 
-            coUpm += std::pow(x_less_target, degree_upm) * std::pow(y_less_target, degree_upm);
-
-        if(dont_use_pow){
-            dLpm += x_less_target * target_less_y;
-            dUpm += target_less_x * y_less_target;
-        } else if(dont_use_pow_lpm){
-            dLpm += std::pow(x_less_target, degree_upm) * target_less_y;
-            dUpm += target_less_x * std::pow(y_less_target, degree_upm);
-        } else if(dont_use_pow_upm){
-            dLpm += x_less_target * std::pow(target_less_y, degree_lpm);
-            dUpm += std::pow(target_less_x, degree_lpm) * y_less_target;
-        } else {
-            dLpm += std::pow(x_less_target, degree_upm) * std::pow(target_less_y, degree_lpm);
-            dUpm += std::pow(target_less_x, degree_lpm) * std::pow(y_less_target, degree_upm);
-        }
-            
-
+    
+    if (degree_lpm == 0 || degree_lpm == 1) {
+      coLpm += target_less_x * target_less_y;
+    } else if (degree_lpm == 2) {
+      coLpm += (target_less_x * target_less_x) * (target_less_y * target_less_y);
+    } else if (degree_lpm == 3) {
+      coLpm += (target_less_x * target_less_x * target_less_x) * (target_less_y * target_less_y * target_less_y);
+    } else {
+      // For higher degrees or floats, you can use fastPow function
+        coLpm += fastPow(target_less_x, degree_lpm) * fastPow(target_less_y, degree_lpm);
+    }
+    
+    if (degree_upm == 0 || degree_upm == 1) {
+      coUpm += x_less_target * y_less_target;
+    } else if (degree_upm == 2) {
+      coUpm += (x_less_target * x_less_target) * (y_less_target * y_less_target);
+    } else if (degree_upm == 3) {
+      coUpm += (x_less_target * x_less_target * x_less_target) * (y_less_target * y_less_target * y_less_target);
+    } else {
+      // For higher degrees or floats, you can use fastPow function
+        coUpm += fastPow(x_less_target, degree_upm) * fastPow(y_less_target, degree_upm);
+    }
+    
+    if (dont_use_pow){
+      if ((degree_upm == 0 || degree_upm == 1) && (degree_lpm == 0 || degree_lpm == 1)) {
+        dLpm += x_less_target * target_less_y;
+        dUpm += target_less_x * y_less_target;
+      }
+      if ((degree_upm == 0 || degree_upm == 1) && degree_lpm == 2){
+        dLpm += x_less_target * (target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x) * y_less_target;
+      }
+      if ((degree_upm == 0 || degree_upm == 1) && degree_lpm == 3){
+        dLpm += x_less_target * (target_less_y * target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x * target_less_x) * y_less_target;
+      }
+      if (degree_upm == 2  && degree_lpm == 2){
+        dLpm += (x_less_target * x_less_target) * (target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x) * (y_less_target * y_less_target);
+      }
+      if (degree_upm == 2  && degree_lpm == 3){
+        dLpm += (x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target);
+      }
+      if (degree_upm == 3  && degree_lpm == 2){
+        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
+      }
+      if (degree_upm == 3  && degree_lpm == 3){
+        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
+      }
+      if ((degree_lpm == 0 || degree_lpm == 1)  && degree_upm == 3){
+        dLpm += (x_less_target * x_less_target * x_less_target) * target_less_y;
+        dUpm += target_less_x * (y_less_target * y_less_target * y_less_target);
+      }
+      if ((degree_lpm == 0 || degree_lpm == 1)  && degree_upm == 2){
+        dLpm += (x_less_target * x_less_target ) * target_less_y;
+        dUpm += target_less_x * (y_less_target * y_less_target);
+      }
+      if (degree_lpm == 2  && degree_lpm == 3){
+        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
+        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
+      }
+    } else {
+        dLpm += fastPow(x_less_target, degree_upm) * fastPow(target_less_y, degree_lpm);
+        dUpm += fastPow(target_less_x, degree_lpm) * fastPow(y_less_target, degree_upm);
+    }
   }
-  coLpm/=rows;
-  coUpm/=rows;
-  dLpm /=rows;
-  dUpm /=rows;
-  if(pop_adj && rows>1){
-    coLpm*=adjust;
-    coUpm*=adjust;
-    dLpm *=adjust;
-    dUpm *=adjust;
+  coLpm /= rows;
+  coUpm /= rows;
+  dLpm /= rows;
+  dUpm /= rows;
+  if(pop_adj && rows > 1){
+    coLpm *= adjust;
+    coUpm *= adjust;
+    dLpm *= adjust;
+    dUpm *= adjust;
   }
   covMat = coUpm + coLpm - dUpm - dLpm;
 }
+
 
 // parallelFor
 List PMMatrix_CPv(

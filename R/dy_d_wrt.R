@@ -178,7 +178,6 @@ dy.d_ <- function(x, y, wrt,
       
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
       
-      
       estimates <- data.table::data.table(cbind(estimates = estimates,
                                                 position = position,
                                                 id = id))
@@ -188,15 +187,15 @@ dy.d_ <- function(x, y, wrt,
       lower_sd <- lower_msd$V2
       
       fx_msd <- estimates[position=="m", sapply(.SD, function(x) list(mean=gravity(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-      two.f.x <- 2* fx_msd$V1
-      two.f.x_sd <- fx_msd$V2
+      f.x <- fx_msd$V1
+      f.x_sd <- fx_msd$V2
       
       upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=gravity(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
       upper <- upper_msd$V1
       upper_msd <- upper_msd$V2
       
-      rise_1 <- upper - two.f.x 
-      rise_2 <- two.f.x - lower
+      rise_1 <- upper - f.x 
+      rise_2 <- f.x - lower
       
     } else {
       
@@ -218,15 +217,13 @@ dy.d_ <- function(x, y, wrt,
       
       
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
-      
-      
-      
+
       lower <- head(estimates,n)
-      two.f.x <- 2 * estimates[(n+1):(2*n)]
+      f.x <- estimates[(n+1):(2*n)]
       upper <- tail(estimates,n)
       
-      rise_1 <- upper - two.f.x 
-      rise_2 <- two.f.x - lower
+      rise_1 <- upper - f.x 
+      rise_2 <- f.x - lower
       
       distance_wrt <- h_step
     }
@@ -272,24 +269,24 @@ dy.d_ <- function(x, y, wrt,
       mixed <- (z / mixed.distances)
       
       results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
-                               "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2),
+                               "Second" = (upper - f.x + lower) / ((distance_wrt) ^ 2),
                                "Mixed" = mixed)
       
     } else {
       results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
-                               "Second" = (upper - two.f.x + lower) / ((distance_wrt) ^ 2) )
+                               "Second" = (upper - f.x + lower) / ((distance_wrt) ^ 2) )
     }
     
     
   }
-  
+
   if(mixed){
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) gravity(rep(x, length(x):1))),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))),
-                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) gravity(rep(x, length(x):1))))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) mean(rep(x, length(x):1))),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))),
+                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) mean(rep(x, length(x):1))))
   } else {
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) gravity(rep(x, length(x):1))),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) gravity(rep(x, length(x):1))))
+    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) mean(rep(x, length(x):1))),
+                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))))
     
   }
   if(messages) message("","\r", appendLF=TRUE)

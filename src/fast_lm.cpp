@@ -42,4 +42,3 @@ List fast_lm(NumericVector x, NumericVector y) {
 }
 
 
-
