@@ -4,7 +4,7 @@
 \alias{dy.dx}
 \title{Partial Derivative dy/dx}
 \usage{
-dy.dx(x, y, eval.point = NULL, messages = TRUE)
+dy.dx(x, y, eval.point = NULL)
 }
 \arguments{
 \item{x}{a numeric vector.}
@@ -12,15 +12,9 @@ dy.dx(x, y, eval.point = NULL, messages = TRUE)
 \item{y}{a numeric vector.}
 
 \item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
-
-\item{messages}{logical; \code{TRUE} (default) Prints status messages.}
 }
 \value{
-Returns a list of both 1st and 2nd derivative:
-\itemize{
-\item{\code{dy.dx(...)$First}} the 1st derivative.
-\item{\code{dy.dx(...)$Second}} the 2nd derivative.
-}
+Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative.
 }
 \description{
 Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
@@ -32,6 +26,12 @@ If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 \dontrun{
 x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
+
+# First derivative
+dy.dx(x, y, eval.point = 1.75)[ , first.derivative]
+
+# Second derivative
+dy.dx(x, y, eval.point = 1.75)[ , second.derivative]
 
 # Vector of derivatives
 dy.dx(x, y, eval.point = c(1.75, 2.5))
