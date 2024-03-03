@@ -2,59 +2,98 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include "partial_moments.h"
+
+
+
+double repeatMultiplication(double value, int n) {
+  double result = 1.0;
+  for (int i = 0; i < n; ++i) {
+    result *= value;
+  }
+  return result;
+}
+
+double fastPow(double a, double b) {
+  union {
+  double d;
+  int x[2];
+} u = { a };
+  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+  return u.d;
+}
+
+// Function to check if a value is an integer
+inline bool isInteger(double value) {
+  return value == static_cast<int>(value);
+}
+
+
+
 /////////////////
 // UPM / LPM
 // single thread
 double LPM_C(const double &degree, const double &target, const RVector<double> &variable) {
   size_t n = variable.size();
-  double out=0;
-  if (degree==0){
-    for (size_t i = 0; i < n; i++)
-      if (variable[i] <= target)
-        out += 1;
-  }else if(degree==1){
-    for (size_t i = 0; i < n; i++) {
-      if (variable[i] <= target)
-        out += target-variable[i];
-    }
-  }else{
-    for (size_t i = 0; i < n; i++) {
-      if (variable[i] <= target)
-        out += std::pow(target-variable[i], degree);
-    }
+  double out = 0;
+  double value;
+  
+  for (size_t i = 0; i < n; i++) {
+    value = target - variable[i];
+    if (value >= 0) {
+      if (isInteger(degree)) {
+        if (degree == 0) {
+          out += 1;
+        } else if (degree == 1) {
+          out += value;
+        } else {
+          // Use repeatMultiplication function for integer degrees
+          out += repeatMultiplication(value, static_cast<int>(degree));
+        }
+      } else {
+        // Use fastPow for non-integer degrees
+        out += fastPow(value, degree);
+      }
+    } else out+= 0;
   }
   out /= n;
-  return(out);
+  return out;
 }
+
 double UPM_C(const double &degree, const double &target, const RVector<double> &variable) {
   size_t n = variable.size();
-  double out=0;
-  if (degree==0){
-    for (size_t i = 0; i < n; i++)
-      if (variable[i] > target)
-        out += 1;
-  }else if(degree==1){
-    for (size_t i = 0; i < n; i++) {
-      if (variable[i] > target)
-        out += variable[i]-target;
-    }
-  }else{
-    for (size_t i = 0; i < n; i++) {
-      if (variable[i] > target)
-        out += std::pow(variable[i]-target, degree);
-    }
+  double out = 0;
+  double value;
+  
+  for (size_t i = 0; i < n; i++) {
+    value = variable[i] - target;
+    if (value > 0) {
+      if (isInteger(degree)) {
+        if (degree == 0) {
+          out += 1;
+        } else if (degree == 1) {
+          out += value;
+        } else {
+          // Use repeatMultiplication function for integer degrees
+          out += repeatMultiplication(value, static_cast<int>(degree));
+        }
+      } else {
+        // Use fastPow for non-integer degrees
+        out += fastPow(value, degree);
+      }
+    } else out+= 0;
   }
   out /= n;
-  return(out);
+  return out;
 }
 
 // parallelFor
-#define NNS_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS) \
-  size_t target_size=target.size(); \
-  NumericVector output = NumericVector(target_size); \
-  WORKER_CLASS tmp_func(degree, target, variable, output); \
-  parallelFor(0, target_size, tmp_func); \
-  return(output);
+#define NNS_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS)      \
+size_t target_size=target.size();                        \
+NumericVector output = NumericVector(target_size);       \
+WORKER_CLASS tmp_func(degree, target, variable, output); \
+parallelFor(0, target_size, tmp_func);                   \
+return(output);
 NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(LPM_Worker);
 }
@@ -100,25 +139,26 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool dont_use_pow=(degree_upm==1 || degree_upm==0), 
-       d_upm_0=(degree_upm==0);
+  bool d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     
     double y1=(y[i]-target_y);
     
     if(d_upm_0){
-        x1 = (x1 > 0 ? 1 : x1);
-        y1 = (y1 > 0 ? 1 : y1);
+      x1 = (x1 > 0 ? 1 : x1);
+      y1 = (y1 > 0 ? 1 : y1);
     }
     
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
     
-    if(dont_use_pow)
-      out += x1 * y1;
-    else
-      out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
+    if(isInteger(degree_upm)){
+      if(d_upm_0) out += x1 * y1; 
+      else
+        // Use repeatMultiplication function for integer degrees
+        out += repeatMultiplication(x1, static_cast<int>(degree_upm)) * repeatMultiplication(y1, static_cast<int>(degree_upm));
+    } else out += fastPow(x1, degree_upm) * fastPow(y1, degree_upm);
   }
   return out/max_size;
 }
@@ -136,8 +176,7 @@ double CoLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool dont_use_pow=(degree_lpm==1 || degree_lpm==0),
-       d_lpm_0=(degree_lpm==0);
+  bool d_lpm_0=(degree_lpm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     
@@ -150,14 +189,17 @@ double CoLPM_C(
     
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
-
-    if(dont_use_pow)
-      out += x1 * y1;
-    else
-      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
+    
+    if(isInteger(degree_lpm)){
+      if(d_lpm_0) out += x1 * y1;
+      else
+        // Use repeatMultiplication function for integer degrees
+        out += repeatMultiplication(x1, static_cast<int>(degree_lpm)) * repeatMultiplication(y1, static_cast<int>(degree_lpm));
+    } else out += fastPow(x1, degree_lpm) * fastPow(y1, degree_lpm);
   }
   return out/max_size;
 }
+
 
 
 double DLPM_C(
@@ -173,9 +215,9 @@ double DLPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0), 
-       dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
-       d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
+  bool dont_use_pow_lpm=isInteger(degree_lpm), 
+    dont_use_pow_upm=isInteger(degree_upm),
+    d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     
@@ -187,17 +229,22 @@ double DLPM_C(
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
     
-    if(dont_use_pow_lpm && dont_use_pow_upm)
+    
+    if(dont_use_pow_lpm && dont_use_pow_upm){
+      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_upm));
+      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_lpm));
       out += x1 * y1;
-    else if(dont_use_pow_lpm)
-      out += std::pow(x1, degree_upm) * y1;
-    else if(dont_use_pow_upm)
-      out += x1 * std::pow(y1, degree_lpm);
-    else
-      out += std::pow(x1, degree_upm) * std::pow(y1, degree_lpm);
+    } else if(dont_use_pow_lpm && !dont_use_pow_upm){
+      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_lpm));
+      out += fastPow(x1, degree_upm) * y1;
+    } else if(dont_use_pow_upm && !dont_use_pow_lpm){
+      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_upm));
+      out += x1 * fastPow(y1, degree_lpm);
+    } else out += fastPow(x1, degree_upm) * fastPow(y1, degree_lpm);
   }
   return out/max_size;
 }
+
 
 
 double DUPM_C(
@@ -213,9 +260,9 @@ double DUPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
-  bool dont_use_pow_lpm=(degree_lpm==1 || degree_lpm==0), 
-       dont_use_pow_upm=(degree_upm==1 || degree_upm==0),
-       d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
+  bool dont_use_pow_lpm=(isInteger(degree_lpm)), 
+    dont_use_pow_upm=(isInteger(degree_upm)),
+    d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     
@@ -227,26 +274,30 @@ double DUPM_C(
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
     
-    if(dont_use_pow_lpm && dont_use_pow_upm)
+    if(dont_use_pow_lpm && dont_use_pow_upm){
+      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
+      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
       out += x1 * y1;
-    else if(dont_use_pow_lpm)
-      out += x1 * std::pow(y1, degree_upm);
-    else if(dont_use_pow_upm)
-      out += std::pow(x1, degree_lpm) * y1;
-    else
-      out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
+    } else if(dont_use_pow_lpm && !dont_use_pow_upm){
+      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
+      out += fastPow(x1, degree_lpm) * y1;
+    } else if(dont_use_pow_upm && !dont_use_pow_lpm){
+      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
+      out += x1 * fastPow(y1, degree_upm);
+    } else out += fastPow(x1, degree_lpm) * fastPow(y1, degree_upm);
   }
   return out/max_size;
 }
+
 // parallelFor
 #define NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS, LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE) \
-  size_t target_x_size=target_x.size(); \
-  size_t target_y_size=target_y.size(); \
-  size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size); \
-  NumericVector output = NumericVector(max_target_size); \
-  WORKER_CLASS tmp_func(LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE, x, y, target_x, target_y, output); \
-  parallelFor(0, output.size(), tmp_func); \
-  return(output);
+size_t target_x_size=target_x.size();                                                               \
+size_t target_y_size=target_y.size();                                                               \
+size_t max_target_size=(target_x_size>target_y_size?target_x_size:target_y_size);                   \
+NumericVector output = NumericVector(max_target_size);                                              \
+WORKER_CLASS tmp_func(LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE, x, y, target_x, target_y, output);  \
+parallelFor(0, output.size(), tmp_func);                                                            \
+return(output);
 NumericVector CoLPM_CPv(
     const double &degree_lpm, 
     const NumericVector &x, const NumericVector &y, 
@@ -277,18 +328,6 @@ NumericVector DUPM_CPv(
 }
 
 
-//////////
-inline double fastPow(double a, double b) {
-  union {
-  double d;
-  int x[2];
-} u = { a };
-  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
-  u.x[0] = 0;
-  return u.d;
-}
-
-
 
 /////////////////
 // PM MATRIX
@@ -309,114 +348,19 @@ void PMMatrix_Cv(
     double &dUpm,
     double &covMat
 ){
-  coLpm=0;
-  coUpm=0;
-  dLpm=0;
-  dUpm=0; 
+  
+  // Convert RMatrix<double>::Column to RVector<double>
+  RVector<double> x_rvec(x);
+  RVector<double> y_rvec(y);
+  
+  coLpm=CoLPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
+  coUpm=CoUPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
+  dLpm=DLPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
+  dUpm=DUPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
   covMat=0;
   if(rows == 0)
     return;
-  bool dont_use_pow_lpm=(degree_lpm==0 || degree_lpm==1 || degree_lpm==2 || degree_lpm==3),
-    dont_use_pow_upm=(degree_upm==0 || degree_upm==1 || degree_upm==2 || degree_upm==3),
-    d_lpm_0=(degree_lpm==0),
-    d_upm_0=(degree_upm==0);
-  bool dont_use_pow = (dont_use_pow_lpm && dont_use_pow_upm);
-  for(size_t i = 0; i < rows; i++){
-    double x_less_target = (x[i] - target_x); 
-    double target_less_x = (target_x - x[i]);
-    double y_less_target = (y[i] - target_y); 
-    double target_less_y = (target_y - y[i]); 
-    
-    
-    // UPM values
-    if(d_upm_0){
-      x_less_target=(x_less_target>0?1:x_less_target);
-      y_less_target=(y_less_target>0?1:y_less_target);
-    }
-    
-    // LPM values
-    if(d_lpm_0){ 
-      target_less_x=(target_less_x>=0?1:target_less_x);
-      target_less_y=(target_less_y>=0?1:target_less_y);
-    }
-    
-    x_less_target = (x_less_target <0 ? 0 : x_less_target);
-    target_less_x = (target_less_x <0 ? 0 : target_less_x);
-    y_less_target = (y_less_target <0 ? 0 : y_less_target);
-    target_less_y = (target_less_y <0 ? 0 : target_less_y);
-    
-    if (degree_lpm == 0 || degree_lpm == 1) {
-      coLpm += target_less_x * target_less_y;
-    } else if (degree_lpm == 2) {
-      coLpm += (target_less_x * target_less_x) * (target_less_y * target_less_y);
-    } else if (degree_lpm == 3) {
-      coLpm += (target_less_x * target_less_x * target_less_x) * (target_less_y * target_less_y * target_less_y);
-    } else {
-      // For higher degrees or floats, you can use fastPow function
-        coLpm += fastPow(target_less_x, degree_lpm) * fastPow(target_less_y, degree_lpm);
-    }
-    
-    if (degree_upm == 0 || degree_upm == 1) {
-      coUpm += x_less_target * y_less_target;
-    } else if (degree_upm == 2) {
-      coUpm += (x_less_target * x_less_target) * (y_less_target * y_less_target);
-    } else if (degree_upm == 3) {
-      coUpm += (x_less_target * x_less_target * x_less_target) * (y_less_target * y_less_target * y_less_target);
-    } else {
-      // For higher degrees or floats, you can use fastPow function
-        coUpm += fastPow(x_less_target, degree_upm) * fastPow(y_less_target, degree_upm);
-    }
-    
-    if (dont_use_pow){
-      if ((degree_upm == 0 || degree_upm == 1) && (degree_lpm == 0 || degree_lpm == 1)) {
-        dLpm += x_less_target * target_less_y;
-        dUpm += target_less_x * y_less_target;
-      }
-      if ((degree_upm == 0 || degree_upm == 1) && degree_lpm == 2){
-        dLpm += x_less_target * (target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x) * y_less_target;
-      }
-      if ((degree_upm == 0 || degree_upm == 1) && degree_lpm == 3){
-        dLpm += x_less_target * (target_less_y * target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x * target_less_x) * y_less_target;
-      }
-      if (degree_upm == 2  && degree_lpm == 2){
-        dLpm += (x_less_target * x_less_target) * (target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x) * (y_less_target * y_less_target);
-      }
-      if (degree_upm == 2  && degree_lpm == 3){
-        dLpm += (x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target);
-      }
-      if (degree_upm == 3  && degree_lpm == 2){
-        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
-      }
-      if (degree_upm == 3  && degree_lpm == 3){
-        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
-      }
-      if ((degree_lpm == 0 || degree_lpm == 1)  && degree_upm == 3){
-        dLpm += (x_less_target * x_less_target * x_less_target) * target_less_y;
-        dUpm += target_less_x * (y_less_target * y_less_target * y_less_target);
-      }
-      if ((degree_lpm == 0 || degree_lpm == 1)  && degree_upm == 2){
-        dLpm += (x_less_target * x_less_target ) * target_less_y;
-        dUpm += target_less_x * (y_less_target * y_less_target);
-      }
-      if (degree_lpm == 2  && degree_lpm == 3){
-        dLpm += (x_less_target * x_less_target * x_less_target) * (target_less_y * target_less_y * target_less_y);
-        dUpm += (target_less_x * target_less_x * target_less_x) * (y_less_target * y_less_target * y_less_target);
-      }
-    } else {
-        dLpm += fastPow(x_less_target, degree_upm) * fastPow(target_less_y, degree_lpm);
-        dUpm += fastPow(target_less_x, degree_lpm) * fastPow(y_less_target, degree_upm);
-    }
-  }
-  coLpm /= rows;
-  coUpm /= rows;
-  dLpm /= rows;
-  dUpm /= rows;
+  
   if(pop_adj && rows > 1){
     coLpm *= adjust;
     coUpm *= adjust;
@@ -475,5 +419,4 @@ List PMMatrix_CPv(
     )
   );
 }
-
 
