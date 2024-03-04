@@ -137,7 +137,7 @@ double CoUPM_C(
     Rcpp::warning("x vector length != y vector length");
   if (min_size<=0)   // if len = 0, return 0
     return 0;
-  
+
   double out=0;
   bool d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
@@ -152,7 +152,7 @@ double CoUPM_C(
     
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
-    
+
     if(isInteger(degree_upm)){
       if(d_upm_0) out += x1 * y1; 
       else
@@ -260,6 +260,7 @@ double DUPM_C(
   if (min_size<=0)   // if len = 0, return 0
     return 0;
   double out=0;
+
   bool dont_use_pow_lpm=(isInteger(degree_lpm)), 
     dont_use_pow_upm=(isInteger(degree_upm)),
     d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
@@ -267,22 +268,22 @@ double DUPM_C(
     double x1=(target_x-x[i]);
     
     double y1=(y[i]-target_y);
-    
+   
     if(d_lpm_0) x1 = (x1 >= 0 ? 1 : x1);
     if(d_upm_0) y1 = (y1 > 0 ? 1 : y1);
     
     x1 = (x1 < 0 ? 0 : x1);
     y1 = (y1 < 0 ? 0 : y1);
-    
+      
     if(dont_use_pow_lpm && dont_use_pow_upm){
-      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
-      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
+      if(!d_lpm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
+      if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
       out += x1 * y1;
     } else if(dont_use_pow_lpm && !dont_use_pow_upm){
-      if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
+      if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
       out += fastPow(x1, degree_lpm) * y1;
     } else if(dont_use_pow_upm && !dont_use_pow_lpm){
-      if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
+      if(!d_lpm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
       out += x1 * fastPow(y1, degree_upm);
     } else out += fastPow(x1, degree_lpm) * fastPow(y1, degree_upm);
   }
