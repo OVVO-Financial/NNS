@@ -34,7 +34,6 @@ factor_2_dummy_FR <- function(x){
   output
 }
 
-
 ### Generator for 1:length(lag) vectors in NNS.ARMA
 generate.vectors <- function(x, l){
   Component.index <- Component.series <- list()
