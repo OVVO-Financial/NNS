@@ -5,6 +5,10 @@ fast_lm <- function(x, y) {
     .Call(`_NNS_fast_lm`, x, y)
 }
 
+fast_lm_mult <- function(x, y) {
+    .Call(`_NNS_fast_lm_mult`, x, y)
+}
+
 #' Lower Partial Moment
 #'
 #' This function generates a univariate lower partial moment for any degree or target.

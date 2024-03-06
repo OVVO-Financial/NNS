@@ -259,7 +259,7 @@ NNS.reg = function (x, y,
     if(is.null(ncol(x))){
       x <- as.double(x)
       if(!is.null(point.est)){
-        point.est <- as.double(point.est)
+        point.est <- as.double(unlist(point.est))
         point.est.y <- numeric()
       } else {
         point.est.y <- NULL

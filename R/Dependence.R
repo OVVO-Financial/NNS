@@ -74,47 +74,50 @@ NNS.dep = function(x,
     }
 
     ll <- expression(max(min(100, .N), 8))
-    res <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*summary(lm(y[1:eval(ll)]~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
+    
+    res <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), y[1:eval(ll)]))$r.squared, by = prior.quadrant],
                                      error = function(e) error_fn(x, y)))
 
     if(sum(is.na(res))>0) res[is.na(res)] <- error_fn(x, y)
+    if(is.null(ncol(res))) res <- cbind(res, res)
 
     # Compare each asymmetry
-    res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],(y[1:eval(ll)])))*summary(lm(abs(y[1:eval(ll)])~poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
-                                        error = function(e) error_fn(x, y)))
+    res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), abs(y[1:eval(ll)])))$r.squared, by = prior.quadrant],
+                                     error = function(e) error_fn(x, y)))
 
-   
-    res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(y[1:eval(ll)],(x[1:eval(ll)])))*summary(lm(abs(x[1:eval(ll)])~poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1)), raw = TRUE)))$r.squared, by = prior.quadrant],
-                                        error = function(e) error_fn(x, y)))
 
+    res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), abs(x[1:eval(ll)])))$r.squared, by = prior.quadrant],
+                                        error = function(e) error_fn(x, y)))
     
 
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- error_fn(x, y)
     if(sum(is.na(res_yx))>0) res_yx[is.na(res_yx)] <- error_fn(x, y)
+    if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
+    if(is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
 
-    if(asym) dependence <- sum(abs(res_xy$V1) * weights) else dependence <- max(sum(abs(res$V1) * weights),
-                                                                                sum(abs(res_xy$V1) * weights),
-                                                                                sum(abs(res_yx$V1) * weights))
+    if(asym) dependence <- sum(abs(res_xy[,2]) * weights) else dependence <- max(sum(abs(res[,2]) * weights),
+                                                                                sum(abs(res_xy[,2]) * weights),
+                                                                                sum(abs(res_yx[,2]) * weights))
 
     lx <- PART[, length(unique(x))]
     ly <- PART[, length(unique(y))]
     degree_x <- min(10, max(1,lx-1), max(1,ly-1))
 
-    I_x <- lx > sqrt(l)
-    I_y <- ly > sqrt(l)
+    I_x <- lx < sqrt(l)
+    I_y <- ly < sqrt(l)
     I <- I_x * I_y
 
     if(I == 1){
-      poly_base <- suppressWarnings(tryCatch(summary(lm(abs(y)~poly(x, degree_x), raw = TRUE))$r.squared,
-                                                      warning = function(w) dependence,
-                                                      error = function(e) dependence))
+      poly_base <- suppressWarnings(tryCatch(fast_lm_mult(poly(x, degree_x), abs(y))$r.squared,
+                                             warning = function(w) dependence,
+                                             error = function(e) dependence))
 
       dependence <- gravity(c(dependence, NNS.copula(cbind(x, y), plot = FALSE), poly_base))
-    } else dependence <- mean(c(dependence, NNS.copula(cbind(x, y), plot = FALSE)))
-    
-    corr <- mean(c(sum(res$V1 * weights),
-                   sum(res_xy$V1 * weights),
-                   sum(res_yx$V1 * weights)))
+    }
+   
+    corr <- mean(c(sum(res[,2] * weights),
+                   sum(res_xy[,2] * weights),
+                   sum(res_yx[,2] * weights)))
 
 
     return(list("Correlation" = corr,

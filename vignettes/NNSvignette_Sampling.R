@@ -19,17 +19,17 @@ ecdf(x)
 P = ecdf(x)
 P(0); P(1)
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 LPM.ratio(degree = 0, target = 0, variable = x); LPM.ratio(degree = 0, target = 1, variable = x)
 
-## ---- fig.align='center', fig.width=6, fig.height=6, echo = FALSE-------------
+## ----fig.align='center', fig.width=6, fig.height=6, echo = FALSE--------------
 LPM.CDF = LPM.ratio(degree = 0, target = sort(x), variable = x)
 
 plot(ecdf(x))
 points(sort(x), LPM.CDF, col='red')
 legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA, bty='n')
 
-## ---- fig.align='center', fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, message = FALSE, eval=FALSE----
+## ----fig.align='center', fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, message = FALSE, eval=FALSE----
 #  zzz= rnorm(length(x), mean = 0, sd = 1)
 #  norm_approx = pnorm(sort(zzz), mean=0, sd=1) #pnorm(sort(x),mean=-mean(x),sd=sd(x))
 #  
@@ -48,7 +48,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  legend("topleft",c("LPM.ratio(degree = 0)","LPM.ratio(degree = 0.25)","LPM.ratio(degree = 0.5)","LPM.ratio(degree = 1)","LPM.ratio(degree = 2)", "N(0,1) approximation"),
 #         col = c(rainbow(5)[1:5], "black"), lwd = 3, lty = c(rep(1, 5), 3))
 
-## ---- fig.align='center', echo=FALSE, fig.width=10, fig.height=8, message=FALSE, warning=FALSE, eval=FALSE----
+## ----fig.align='center', echo=FALSE, fig.width=10, fig.height=8, message=FALSE, warning=FALSE, eval=FALSE----
 #  layout(matrix(c(1, 1, 1,1,1,
 #                  2, 3, 4,5,6,
 #                  2, 3, 4,5,6), nrow=5, byrow=FALSE),widths = c(2,rep(1,5)))
@@ -103,7 +103,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #       ,type="s",col="black",lwd = 3, ylim = c(0,50), main = "Inverse CDF via LPM.VaR(degree 2)", breaks = 15, xlab = "x", ylab = "freq")
 #  hist(LPM.VaR(seq(0,1,length.out = 100), 2, x), border = rainbow(5)[5], add = TRUE, col =  rainbow(5, alpha = .5)[5], breaks = 15)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  degree.0.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0, x = x)
 #  degree.0.25.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0.25, x = x)
 #  degree.0.5.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0.5, x = x)
@@ -139,14 +139,14 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #    9:       -0.7556644       -0.5765608
 #   10:       -0.7069835       -0.5403318
 
-## ---- fig.align='center', fig.width=8, fig.height=8, eval=FALSE---------------
+## ----fig.align='center', fig.width=8, fig.height=8, eval=FALSE----------------
 #  boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 #  reps = do.call(cbind, boots)
 #  
 #  plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
 #  matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  sapply(boots, function(r) cor(r, x, method = "spearman"))
 #  
 #     rho = 1  rho = 0.5 rho = -0.5   rho = -1
@@ -175,7 +175,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  [1] 0.4379469
 #  [1] 0.4390599
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)
 #  head(new.dep.data)
 #  
@@ -194,7 +194,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  [5,] 11.866922 -47.955235 14.3111350 12.064633
 #  [6,] 42.665726  29.639640 -2.4141874 43.797025
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  # Apply bootstrap to each variable
 #  new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 1, rho = .95))
 #  
@@ -204,7 +204,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  # Create matrix from vectors
 #  new.boot.dep.matrix = do.call(cbind, boot.ensemble.vectors)
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
 #  
 #  [1] 0.9453275
@@ -212,14 +212,14 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  [1] 0.9498499
 #  [1] 0.9524516
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  NNS.copula(original.data)
 #  NNS.copula(new.boot.dep.matrix)
 #  
 #  [1] 0.4379469
 #  [1] 0.4302545
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)
 #  head(new.boot.dep.matrix)
 #  

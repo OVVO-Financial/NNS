@@ -5,7 +5,7 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth polygon
 #' @importFrom quantmod getSymbols
 #' @importFrom Rfast colmeans rowmeans rowsums comb_n
-#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt t.test wilcox.test .preformat.ts var
+#' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt t.test wilcox.test .preformat.ts var poly
 #' @importFrom stringr str_count
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom xts to.monthly
@@ -35,7 +35,8 @@
       "detectCores","makeCluster", "makeForkCluster", "registerDoSEQ", "clusterExport", "frollmean", "shift",
       "%dopar%","foreach","stopCluster", "cl",
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
-      "bias", "conf.intervals", "conf.int.neg", "conf.int.pos", "pred.int", "lower.pred.int", "upper.pred.int"
+      "bias", "conf.intervals", "conf.int.neg", "conf.int.pos", "pred.int", "lower.pred.int", "upper.pred.int",
+      "estimates", "estimates.max", "estimates.min", "naive.first.grad", "naive.second.grad", "poly", "rise_1", "rise_2"
     ))
 
   requireNamespace("data.table")

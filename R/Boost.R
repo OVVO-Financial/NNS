@@ -220,7 +220,7 @@ NNS.boost <- function(IVs.train,
       if(deterministic) test.features[[i]] <- deterministic.sets[[i]] else test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
 
       learning.IVs <- new.iv.train[,.SD, .SDcols = unlist(test.features[i])]
-    
+ 
       #If estimate is > threshold, store 'features'
       predicted <- NNS.reg(learning.IVs,
                            new.dv.train,
