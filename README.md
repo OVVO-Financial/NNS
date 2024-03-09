@@ -58,4 +58,4 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
 ```
 
 ## Thank you for your interest in NNS!
-![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/NNS)
+ ![CRAN downloads](https://cranlogs.r-pkg.org/badges/NNS) ![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/NNS)
