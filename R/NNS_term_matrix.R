@@ -77,12 +77,12 @@ NNS.term.matrix <- function(x, oos = NULL){
       }
   }
 
-  NNS.TM <- t(sapply(1 : length(x[ , 1]), function(i) as.integer(tryCatch(stringr::str_count(x[i, 1], unique.vocab), error = function (e) 0))))
+  NNS.TM <- t(sapply(1 : length(x[ , 1]), function(i) as.integer(tryCatch(as.numeric(unique.vocab%in%x[i,1]), error = function (e) 0))))
 
   colnames(NNS.TM) <- c(unique.vocab)
 
   if(!is.null(oos)){
-      OOS.TM <- t(sapply(1 : length(oos), function(i) stringr::str_count(oos[i], unique.vocab)))
+      OOS.TM <- t(sapply(1 : length(oos), function(i) as.numeric(unique.vocab%in%oos[i])))
 
       colnames(OOS.TM) <- c(unique.vocab)
 

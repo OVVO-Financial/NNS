@@ -11,7 +11,7 @@
 #' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
 #' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.
-#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
+#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
 #' @param order options: (integer, "max", NULL); \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent, which is suggested for mixed continuous and discrete (unordered, ordered) data.
@@ -194,8 +194,8 @@ NNS.stack <- function(IVs.train,
       CV.DV.test <- DV.train[c(test.set)]
       
       y_train <- as.factor(CV.DV.train)
-      training_1 <- do.call(cbind, caret::downSample(CV.IVs.train, y_train, list = TRUE))
-      training_2 <- do.call(cbind, caret::upSample(CV.IVs.train, y_train, list = TRUE))
+      training_1 <- do.call(cbind, downSample(CV.IVs.train, y_train, list = TRUE))
+      training_2 <- do.call(cbind, upSample(CV.IVs.train, y_train, list = TRUE))
       
       training <- rbind.data.frame(training_1, training_2)
       

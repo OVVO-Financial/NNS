@@ -10,7 +10,7 @@
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.
-#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling from \code{caret} to balance the classes.  \code{type="CLASS"} required.
+#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param folds integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
@@ -123,8 +123,8 @@ NNS.boost <- function(IVs.train,
     
     y_train <- as.factor(as.character(DV.train))
     
-    training_1 <- do.call(cbind, caret::downSample(IVs.train, y_train, list = TRUE))
-    training_2 <- do.call(cbind, caret::upSample(IVs.train, y_train, list = TRUE))
+    training_1 <- do.call(cbind, downSample(IVs.train, y_train, list = TRUE))
+    training_2 <- do.call(cbind, upSample(IVs.train, y_train, list = TRUE))
     
     training <- rbind.data.frame(training_1, training_2)
     
