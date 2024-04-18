@@ -11,7 +11,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(meboot)
 
 ## -----------------------------------------------------------------------------
 set.seed(123); x = rnorm(100)

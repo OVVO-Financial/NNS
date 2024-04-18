@@ -11,7 +11,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(meboot)
 
 ## ----linear,fig.width=5,fig.height=3,fig.align = "center", warning=FALSE------
 nns_lin = NNS.ARMA(AirPassengers, 

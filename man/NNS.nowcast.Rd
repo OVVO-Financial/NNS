@@ -86,6 +86,7 @@ Specific regressors include:
   \item \code{PALLFNFINDEXM} -- Global Price Index of All Commodities
   \item \code{FEDFUNDS} -- Federal Funds Effective Rate
   \item \code{PPIACO} -- Producer Price Index All Commodities
+  \item \code{CIVPART} -- Labor Force Participation Rate
  }
 }
 \examples{

@@ -22,7 +22,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(meboot)
 ```
 
 `NNS` offers several novel sampling methods from any distribution, as well as simulating variables while maintaining their dependence.

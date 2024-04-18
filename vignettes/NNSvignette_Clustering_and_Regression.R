@@ -11,7 +11,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(meboot)
 
 ## ----linear-------------------------------------------------------------------
 x = seq(-5, 5, .05); y = x ^ 3

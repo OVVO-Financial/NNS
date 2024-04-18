@@ -11,7 +11,6 @@ library(NNS)
 library(data.table)
 require(knitr)
 require(rgl)
-require(meboot)
 
 ## ----cars, fig.width=7, fig.align='center'------------------------------------
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
