@@ -59,7 +59,7 @@ NNS.ARMA(
 \item{pred.int}{numeric [0, 1]; \code{NULL} (default) Plots and returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{NNS.meboot} on the final estimates.}
 }
 \value{
-Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \link{data.table} with the forecasts as well as lower and upper prediction intervals per forecast point.
+Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as lower and upper prediction intervals per forecast point.
 }
 \description{
 Autoregressive model incorporating nonlinear regressions of component series.

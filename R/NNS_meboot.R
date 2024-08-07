@@ -12,8 +12,8 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.
-#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in meboot::meboot.
+#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in meboot::meboot.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
@@ -98,9 +98,6 @@
 
     trimval <- if (is.null(trim$trim)) 0.1 else trim$trim
 
-
-    ptm1 <- proc.time()
-
     n <- length(x)
 
     # Sort the original data in increasing order and
@@ -158,8 +155,8 @@
         {
           expand.sd <- FALSE
           force.clt <- FALSE
-          warning("expand.sd and force.clt were set to FALSE in order to ",
-                  "enforce the limits xmin/xmax.")
+          # warning("expand.sd and force.clt were set to FALSE in order to ",
+          #         "enforce the limits xmin/xmax.")
         }
       }
     } else {
@@ -261,7 +258,7 @@
 
     if(expand.sd) ensemble <- NNS.meboot.expand.sd(x=x, ensemble=ensemble, ...)
 
-    if(force.clt && reps > 1) ensemble <- meboot::force.clt(x=x, ensemble=ensemble)
+    if(force.clt && reps > 1) ensemble <- force.clt(x=x, ensemble=ensemble)
 
     # scale adjustment
 
@@ -293,14 +290,8 @@
     }
 
 
-    # Computation time
-    ptm2 <- proc.time(); elapsr <- meboot::elapsedtime(ptm1, ptm2)
-    if(elaps) cat("\n  Elapsed time:", elapsr$elaps,
-                  paste(elapsr$units, ".", sep=""), "\n")
-
-
     final <- list(x=x, replicates=round(ensemble, digits = digits), ensemble=Rfast::rowmeans(ensemble), xx=xx, z=z, dv=dv, dvtrim=dvtrim, xmin=xmin,
-         xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa, elaps=elapsr)
+         xmax=xmax, desintxb=desintxb, ordxx=ordxx, kappa = kappa)
 
     return(final)
  }

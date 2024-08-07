@@ -38,9 +38,11 @@ NNS.distance <- function(rpm, dist.estimate, k, class){
   ll <- min(k, l)
 
   rpm <- rpm[1:ll,]
+  
+  SUM = rpm$Sum
 
   if(k==1){
-    index <- which(rpm$Sum==min(rpm$Sum))
+    index <- which(SUM==min(SUM))
     if(length(index)>1){
       return(mode(rpm$y.hat[index]))
     }  else {
@@ -52,11 +54,12 @@ NNS.distance <- function(rpm, dist.estimate, k, class){
 
   uni_weights <- rep(1/ll, ll)
   
-  t_weights <- dt(rpm$Sum, df = ll)
+  
+  t_weights <- dt(SUM, df = ll)
   t_weights <- t_weights/sum(t_weights)
   if(any(is.na(t_weights))) t_weights <- rep(0, ll)
 
-  emp <- rpm$Sum^(-1)
+  emp <- SUM^(-1)
   emp_weights <- emp / sum(emp)
   if(any(is.na(emp_weights))) emp_weights <- rep(0, ll)
 
@@ -72,11 +75,11 @@ NNS.distance <- function(rpm, dist.estimate, k, class){
   pl_weights <- pl_weights / sum(pl_weights)
   if(any(is.na(pl_weights))) pl_weights <- rep(0, ll)
 
-  norm_weights <- dnorm(rpm$Sum, mean = 0, sd = sd(rpm$Sum))
+  norm_weights <- dnorm(SUM, mean = 0, sd = sd(SUM))
   norm_weights <- norm_weights / sum(norm_weights)
   if(any(is.na(norm_weights))) norm_weights <- rep(0, ll)
   
-  rbf_weights <- exp(- rpm$Sum / (2*var(rpm$Sum)))
+  rbf_weights <- exp(- SUM / (2*var(SUM)))
   rbf_weights <- rbf_weights / sum(rbf_weights)
   if(any(is.na(rbf_weights))) rbf_weights <- rep(0, ll)
 

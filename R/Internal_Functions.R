@@ -203,6 +203,51 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv=5){
 }
 
 
+# Refactored force.clt function from meboot
+force.clt <- function(x, ensemble)
+{
+  n <- nrow(ensemble)
+  bigj <- ncol(ensemble)
+  
+  gm <- mean(x)  # desired grand mean
+  
+  s <- if (is.null(ncol(x)))
+    sd(x) else apply(x, 2, sd)
+  smean <- s/sqrt(bigj)  # desired standard deviation of means by CLT
+  xbar <- apply(ensemble, 2, mean)
+  sortxbar <- sort(xbar)  
+  oo <- order(xbar)
+  
+  # now spread out the means as if they were from normal density
+  # smallest mean should equal the normal quantile at prob=1/bigj+1
+  # smallest second mean= the normal quantile at prob=2/bigj+1
+  # . . .
+  # LAST mean= the normal quantile at prob=bigj/(bigj+1)
+  
+  newbar <- gm + qnorm(1:bigj/(bigj+1))*smean
+  
+  # the above adjustement of means will change their sd
+  # CLT says that their sd should be s / sqrt(n)
+  # so we have recenter and rescale these revised means called newbar
+  
+  scn <- scale(newbar)  # first scale them to have zero mean and unit sd
+  newm <- scn*smean+gm  # this forces the mean to be gm and sd=s / sqrt(n)
+  
+  meanfix <- as.numeric(newm - sortxbar)
+  
+  # we have lost the original order in sorting, need to go back 
+  out <- ensemble
+  for(i in 1:bigj)
+    out[,oo[i]] <- ensemble[,oo[i]] + meanfix[i]
+  
+  if(any(is.ts(ensemble))){
+    out <- ts(out, frequency=frequency(ensemble), start=start(ensemble))
+    dimnames(out)[[2]] <- dimnames(ensemble)[[2]]
+  }
+  out
+}
+
+
 is.fcl <- function(x) is.factor(x) || is.character(x) || is.logical(x)
 
 is.discrete <- function(x) sum(as.numeric(x)%%1)==0
@@ -210,9 +255,11 @@ is.discrete <- function(x) sum(as.numeric(x)%%1)==0
 
 ### upSample / downSample to avoid dependencies
 downSample <- function(x, y, list = FALSE, yname = "Class") {
+  # Ensure x is a data frame
   if (!is.data.frame(x)) {
     x <- as.data.frame(x, stringsAsFactors = TRUE)
   }
+  # Ensure y is a factor
   if (!is.factor(y)) {
     warning(
       "Down-sampling requires a factor variable as the response. The original data was returned."
@@ -220,32 +267,45 @@ downSample <- function(x, y, list = FALSE, yname = "Class") {
     return(list(x = x, y = y))
   }
   
+  # Determine the minimum class size
   minClass <- min(table(y))
-  x$.outcome <- y
   
-  x <- plyr::ddply(x, .(y),
-             function(dat, n)
-               dat[sample(seq(along = dat$.outcome), n), , drop = FALSE],
-             n = minClass)
-  y <- x$.outcome
-  x <- x[, !(colnames(x) %in% c("y", ".outcome")), drop = FALSE]
+  # Create an empty list to store sampled data
+  sampled_data <- vector("list", length(unique(y)))
+  names(sampled_data) <- unique(y)
+  
+  # Down-sample each class
+  for (class in names(sampled_data)) {
+    class_indices <- which(y == class)
+    sampled_indices <- sample(class_indices, minClass)
+    sampled_data[[class]] <- x[sampled_indices, , drop = FALSE]
+  }
+  
+  # Combine the down-sampled data
+  x <- do.call(rbind, sampled_data)
+  
+  # Extract the outcome and remove it from x
+  y <- factor(rep(names(sampled_data), each = minClass))
+  
+  # Prepare the output
   if (list) {
-    if (inherits(x, "matrix")) {
-      x <- as.matrix(x)
-    }
     out <- list(x = x, y = y)
   } else {
     out <- cbind(x, y)
     colnames(out)[ncol(out)] <- yname
   }
-  out
+  
+  return(out)
 }
 
 
+
 upSample <- function(x, y, list = FALSE, yname = "Class") {
+  # Ensure x is a data frame
   if (!is.data.frame(x)) {
     x <- as.data.frame(x, stringsAsFactors = TRUE)
   }
+  # Ensure y is a factor
   if (!is.factor(y)) {
     warning(
       "Up-sampling requires a factor variable as the response. The original data was returned."
@@ -253,30 +313,38 @@ upSample <- function(x, y, list = FALSE, yname = "Class") {
     return(list(x = x, y = y))
   }
   
+  # Determine the maximum class size
   maxClass <- max(table(y))
-  x$.outcome <- y
   
-  x <- plyr::ddply(x, .(y),
-             function(x, top = maxClass) {
-               if (nrow(x) < top) {
-                 ind <- sample(1:nrow(x),
-                               size = top - nrow(x),
-                               replace = TRUE)
-                 ind <- c(1:nrow(x), ind)
-                 x <- x[ind, , drop = FALSE]
-               }
-               x
-             })
-  y <- x$.outcome
-  x <- x[,!(colnames(x) %in% c("y", ".outcome")), drop = FALSE]
-  if (list) {
-    if (inherits(x, "matrix")) {
-      x <- as.matrix(x)
+  # Create an empty list to store sampled data
+  sampled_data <- vector("list", length(unique(y)))
+  names(sampled_data) <- unique(y)
+  
+  # Up-sample each class
+  for (class in names(sampled_data)) {
+    class_indices <- which(y == class)
+    class_data <- x[class_indices, , drop = FALSE]
+    if (nrow(class_data) < maxClass) {
+      extra_indices <- sample(seq_len(nrow(class_data)), size = maxClass - nrow(class_data), replace = TRUE)
+      sampled_data[[class]] <- rbind(class_data, class_data[extra_indices, , drop = FALSE])
+    } else {
+      sampled_data[[class]] <- class_data
     }
+  }
+  
+  # Combine the up-sampled data
+  x <- do.call(rbind, sampled_data)
+  
+  # Extract the outcome and remove it from x
+  y <- factor(rep(names(sampled_data), each = maxClass))
+  
+  # Prepare the output
+  if (list) {
     out <- list(x = x, y = y)
   } else {
     out <- cbind(x, y)
     colnames(out)[ncol(out)] <- yname
   }
-  out
+  
+  return(out)
 }

@@ -65,29 +65,30 @@ NNS.dep = function(x,
     PART[, weights := .N/l, by = prior.quadrant]
     weights <- PART[, weights[1], by = prior.quadrant]$V1
 
+    ll <- expression(max(.N, 8))
+    
+    
     error_fn = function(x, y){
-      max(0, min(1, (Co.UPM(1, x, y, target_x = mean(x), target_y = mean(y)) +
-                     Co.LPM(1, x, y, target_x = mean(x), target_y = mean(y))) /
-                    ( D.UPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)) +
-                      D.LPM(1, 1, x, y, target_x = mean(x), target_y = mean(y)))))
-
+      NNS.copula(cbind(x, y)) * sign(cor(x,y))
     }
-
-    ll <- expression(max(min(100, .N), 8))
+    
     
     res <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), y[1:eval(ll)]))$r.squared, by = prior.quadrant],
                                      error = function(e) error_fn(x, y)))
+    
+    
 
     if(sum(is.na(res))>0) res[is.na(res)] <- error_fn(x, y)
     if(is.null(ncol(res))) res <- cbind(res, res)
 
     # Compare each asymmetry
     res_xy <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(x[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), abs(y[1:eval(ll)])))$r.squared, by = prior.quadrant],
-                                     error = function(e) error_fn(x, y)))
-
+                                        error = function(e) error_fn(x, y)))
+     
 
     res_yx <- suppressWarnings(tryCatch(PART[,  sign(cor(x[1:eval(ll)],y[1:eval(ll)]))*(fast_lm_mult(poly(y[1:eval(ll)], max(1, min(10, as.integer(sqrt(.N))-1))), abs(x[1:eval(ll)])))$r.squared, by = prior.quadrant],
                                         error = function(e) error_fn(x, y)))
+    
     
 
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- error_fn(x, y)

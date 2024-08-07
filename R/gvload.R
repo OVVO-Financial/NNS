@@ -2,7 +2,6 @@
 
 #' @importFrom grDevices adjustcolor rainbow rgb
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth polygon
-#' @importFrom plyr ddply
 #' @importFrom quantmod getSymbols
 #' @importFrom Rfast colmeans rowmeans rowsums comb_n
 #' @importFrom stats coef cor lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt t.test wilcox.test .preformat.ts var poly

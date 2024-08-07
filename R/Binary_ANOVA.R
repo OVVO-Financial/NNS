@@ -1,4 +1,4 @@
-NNS.ANOVA.bin<- function(control, treatment,
+NNS.ANOVA.bin <- function(control, treatment,
                          means.only = FALSE,
                          mean.of.means = NULL,
                          upper.25.target = NULL,

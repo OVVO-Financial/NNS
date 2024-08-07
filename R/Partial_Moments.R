@@ -227,7 +227,7 @@ NNS.moments <- function(x, population = TRUE){
     skewness <- skew_base / variance^(3/2)
     kurtosis <- (kurt_base / variance^2) - 3
     variance <- variance * (n / (n - 1))
-  }  else {
+  } else {
     skewness <- (n / ((n-1)*(n-2))) * ((n*skew_base) / variance^(3/2))
     kurtosis <- ((n * (n+1)) / ((n-1)*(n-2)*(n-3))) * ((n*kurt_base) / (variance * (n / (n - 1)))^2) - ( (3 * ((n-1)^2)) / ((n-2)*(n-3)))
   }

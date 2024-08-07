@@ -92,7 +92,7 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
  
  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 
- \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
+ \item{\code{"Fitted.xy"}} returns a \code{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
 }
 
 
@@ -100,7 +100,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 \itemize{
  \item{\code{"R2"}} provides the goodness of fit;
 
- \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \link{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} data.table.
+ \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} \code{data.table}.
 
  \item{\code{"x.star"}} returns the synthetic X* as a vector;
 
@@ -112,7 +112,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
  
  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 
- \item{\code{"Fitted.xy"}} returns a \link{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
+ \item{\code{"Fitted.xy"}} returns a \code{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 }
 }
 \description{

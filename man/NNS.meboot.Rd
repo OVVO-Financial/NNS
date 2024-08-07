@@ -46,9 +46,9 @@ NNS.meboot(
 \item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
 
-\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.}
+\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in meboot::meboot.}
 
-\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.}
+\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in meboot::meboot.}
 
 \item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.}
 

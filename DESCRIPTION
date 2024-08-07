@@ -1,8 +1,8 @@
 Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
-Version: 10.8
-Date: 2024-04-18
+Version: 10.9
+Date: 2024-05-12
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.financial.systems@gmail.com"),
   person("Roberto", "Spadim", role=c("ctb"))
@@ -12,7 +12,7 @@ Description: Nonlinear nonparametric statistics using partial moments.  Partial 
 License: GPL-3
 BugReports: https://github.com/OVVO-Financial/NNS/issues
 Depends: R (>= 3.6.0), doParallel
-Imports: data.table, foreach, plyr, quantmod, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
+Imports: data.table, foreach, quantmod, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
 Suggests: 
     knitr,
     rmarkdown,
