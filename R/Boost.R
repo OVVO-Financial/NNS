@@ -123,8 +123,8 @@ NNS.boost <- function(IVs.train,
     
     y_train <- as.factor(as.character(DV.train))
     
-    training_1 <- do.call(cbind, caret::downSample(IVs.train, y_train, list = TRUE))
-    training_2 <- do.call(cbind, caret::upSample(IVs.train, y_train, list = TRUE))
+    training_1 <- do.call(cbind, downSample(IVs.train, y_train, list = TRUE))
+    training_2 <- do.call(cbind, upSample(IVs.train, y_train, list = TRUE))
 
     training <- rbind.data.frame(training_1, training_2)
     
