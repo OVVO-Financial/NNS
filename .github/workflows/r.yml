@@ -33,9 +33,14 @@ jobs:
         uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
         with:
           r-version: ${{ matrix.r-version }}
-      - name: Install dependencies
+      - name: Install system dependencies for rgl
+        run: |
+          brew install freetype
+          brew install pkg-config
+      - name: Install R packages
         run: |
           install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
+          remotes::install_cran("rgl")
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
       - name: Check
