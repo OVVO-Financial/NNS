@@ -40,8 +40,7 @@ jobs:
           brew install xquartz
       - name: Install R packages
         run: |
-          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
-          remotes::install_cran("rgl")
+          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes", "rgl"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
       - name: Check
