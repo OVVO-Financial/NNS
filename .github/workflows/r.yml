@@ -6,10 +6,6 @@
 # See https://github.com/r-lib/actions/tree/master/examples#readme for
 # additional example workflows available for the R community.
 
-name: R
-
-env:
-  RGL_USE_NULL: true
 
 on:
   push:
@@ -17,27 +13,47 @@ on:
   pull_request:
     branches: [ "NNS-Beta-Version" ]
 
-permissions:
-  contents: read
+  workflow_dispatch:
+
+name: R-CMD-check
 
 jobs:
-  build:
-    runs-on: macos-latest
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
     strategy:
+      fail-fast: false
       matrix:
-        r-version: ['4.1.1']
+        config:
+          - {os: windows-latest, r: 'release'}
+          - {os: windows-latest, r: 'devel'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: macos-latest, r: 'devel'}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      _R_CHECK_FORCE_SUGGESTS_: false
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RGL_USE_NULL: true
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up R ${{ matrix.r-version }}
-        uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
-        with:
-          r-version: ${{ matrix.r-version }}
+      - uses: actions/checkout@v4
+      
       - name: Install dependencies on MacOS
         if: runner.os == 'macOS'
         run: |
           brew install xquartz
           brew install fribidi
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+          
       - name: Install CRAN libjpeg on MacOS
         if: runner.os == 'macOS'
         run: |
@@ -46,11 +62,12 @@ jobs:
           sudo Rscript -e 'dep="jpeg"; source("https://mac.R-project.org/bin/install.R"); install.libs(dep)'
           if ! echo $PATH | grep /opt/R/$ARCH/bin >/dev/null; then echo /opt/R/$ARCH/bin > newPATH; cat $GITHUB_PATH >> newPATH; cat newPATH > $GITHUB_PATH; fi
         shell: bash
-      - name: Install R packages
-        run: |
-          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes", "rgl"))
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), error_on = "error")
-        shell: Rscript {0}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
