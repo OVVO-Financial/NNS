@@ -68,6 +68,13 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
+      - name: Install R packages
+        run: |
+          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
+          remotes::install_cran("rgl")
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+        
+      - name: Check
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), error_on = "error")
+        shell: Rscript {0}
