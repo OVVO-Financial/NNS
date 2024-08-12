@@ -33,11 +33,19 @@ jobs:
         uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
         with:
           r-version: ${{ matrix.r-version }}
-      - name: Install system dependencies for rgl
+      - name: Install dependencies on MacOS
+        if: runner.os == 'macOS'
         run: |
-          brew install freetype
-          brew install pkg-config
           brew install xquartz
+          brew install fribidi
+      - name: Install CRAN libjpeg on MacOS
+        if: runner.os == 'macOS'
+        run: |
+          ARCH=`uname -m`
+          if [ ! -e /opt/R/$ARCH ]; then sudo mkdir -p /opt/R/$ARCH; sudo chown -R $USER /opt/R; fi
+          sudo Rscript -e 'dep="jpeg"; source("https://mac.R-project.org/bin/install.R"); install.libs(dep)'
+          if ! echo $PATH | grep /opt/R/$ARCH/bin >/dev/null; then echo /opt/R/$ARCH/bin > newPATH; cat $GITHUB_PATH >> newPATH; cat newPATH > $GITHUB_PATH; fi
+        shell: bash
       - name: Install R packages
         run: |
           install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes", "rgl"))
