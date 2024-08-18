@@ -362,7 +362,7 @@ void PMMatrix_Cv(
   if(rows == 0)
     return;
   
-  if(pop_adj && rows > 1){
+  if(pop_adj && rows > 1 && degree_lpm > 0 && degree_upm > 0){
     coLpm *= adjust;
     coUpm *= adjust;
     dLpm *= adjust;
