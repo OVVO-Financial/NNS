@@ -29,7 +29,7 @@
 #' @author Fred Viole, OVVO Financial Systems
 #'
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #'
 #' Vinod, H. and Viole, F. (2020) "Comparing Old and New Partial Derivative Estimates from Nonlinear Nonparametric Regressions"
 #' \url{https://www.ssrn.com/abstract=3681104}

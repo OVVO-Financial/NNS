@@ -6,7 +6,7 @@
 #' @param oos mixed data.frame; character/numeric; Out-of-sample text dataset to be classified.
 #' @return Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' \dontrun{
 #' x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))

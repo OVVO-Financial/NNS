@@ -19,7 +19,7 @@ fast_lm_mult <- function(x, y) {
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -38,7 +38,7 @@ LPM <- function(degree, target, variable) {
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -57,7 +57,7 @@ UPM <- function(degree, target, variable) {
 #' @return Standardized LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
 #' \url{https://www.ssrn.com/abstract=3007373}
 #' @examples
@@ -93,7 +93,7 @@ LPM.ratio <- function(degree, target, variable) {
 #' @return Standardized UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -122,7 +122,7 @@ UPM.ratio <- function(degree, target, variable) {
 #' @return Co-LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -144,7 +144,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' @return Co-UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -167,7 +167,7 @@ Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
 #' @return Divergent LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -190,7 +190,7 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @return Divergent UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -213,7 +213,7 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
 #' \url{https://www.ssrn.com/abstract=3457377}
 #' @examples

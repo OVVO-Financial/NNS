@@ -75,7 +75,7 @@
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' \url{https://www.amazon.com/dp/1490523995}
 #'
 #' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 #' \url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
@@ -842,10 +842,13 @@ NNS.reg = function (x, y,
       fitted[, `:=` ( 'pred.int.pos' = (UPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
       fitted[, `:=` ( 'pred.int.neg' = (LPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
       
-      pi_idx <- (findInterval(point.est, fitted[ , x], left.open = FALSE, rightmost.closed = TRUE))
+      reduced_fitted <- fitted[, c("x", "pred.int.neg", "pred.int.pos")]
+      data.table::setkey(reduced_fitted, "x")
       
-      lower.pred.int <- fitted[pi_idx, 'pred.int.neg']   
-      upper.pred.int <- fitted[pi_idx, 'pred.int.pos']  
+      pi_idx <- (findInterval(point.est, reduced_fitted[ , x], left.open = FALSE, rightmost.closed = TRUE))
+      
+      lower.pred.int <- reduced_fitted[pi_idx, 'pred.int.neg']   
+      upper.pred.int <- reduced_fitted[pi_idx, 'pred.int.pos']  
       
       fitted[,'pred.int.neg' := NULL]
       fitted[,'pred.int.pos' := NULL]
