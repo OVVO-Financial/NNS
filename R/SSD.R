@@ -7,7 +7,7 @@
 #' @param plot logical; \code{TRUE} (default) plots the SSD test.
 #' @return Returns one of the following SSD results: \code{"X SSD Y"}, \code{"Y SSD X"}, or \code{"NO SSD EXISTS"}.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126. DOI: \doi{10.4236/jmf.2016.61012}.
+#' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  \doi{10.4236/jmf.2016.61012}.
 #' @examples
 #' \dontrun{
 #' set.seed(123)

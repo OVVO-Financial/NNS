@@ -32,8 +32,7 @@
 #' \item{} Incorporate any objective function from external packages (such as \code{Metrics::mape}) via \code{NNS.boost(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")}
 #'}
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-#' \url{https://www.ssrn.com/abstract=2864711}
+#' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{

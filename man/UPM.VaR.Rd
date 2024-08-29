@@ -26,3 +26,9 @@ x <- rnorm(100)
 ## For 5th percentile, right-tail
 UPM.VaR(0.05, 0, x)
 }
+\references{
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+}
+\author{
+Fred Viole, OVVO Financial Systems
+}

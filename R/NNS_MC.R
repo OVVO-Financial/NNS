@@ -20,8 +20,7 @@
 #'   \item{replicates} maximum entropy bootstrap replicates as a list for each \code{rho}.
 #' }
 #'
-#' @references Vinod, H.D. and Viole, F. (2020) Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations
-#' \href{https://www.ssrn.com/abstract=3621614}{https://www.ssrn.com/abstract=3621614}
+#' @references Vinod, H.D. and Viole, F. (2020) Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations.  \doi{10.2139/ssrn.3621614}
 #'
 #' @examples
 #' \dontrun{

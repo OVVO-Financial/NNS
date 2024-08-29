@@ -93,8 +93,7 @@ Ensemble method for classification using the NNS multivariate regression \link{N
 
 }
 \references{
-Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-\url{https://www.ssrn.com/abstract=2864711}
+Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 }
 \author{
 Fred Viole, OVVO Financial Systems

@@ -118,23 +118,17 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
 
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 
-Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression Using NNS"
-\url{https://www.ssrn.com/abstract=3489550}
+Viole, F. (2019) "Multi-variate Time-Series Forecasting: Nonparametric Vector Autoregression Using NNS"  \doi{10.2139/ssrn.3489550}
 
-Viole, F. (2020) "NOWCASTING with NNS"
-\url{https://www.ssrn.com/abstract=3589816}
+Viole, F. (2020) "NOWCASTING with NNS"  \doi{10.2139/ssrn.3589816}
 
-Viole, F. (2019) "Forecasting Using NNS"
-\url{https://www.ssrn.com/abstract=3382300}
+Viole, F. (2019) "Forecasting Using NNS"  \doi{10.2139/ssrn.3382300}
 
-Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
-\url{https://link.springer.com/article/10.1007/s10614-017-9713-5}
+Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"  \doi{10.1007/s10614-017-9713-5}
 
-Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"
-\url{https://www.preprints.org/manuscript/201801.0090/v1}
+Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"  \doi{10.20944/preprints201801.0090.v1}
 }
 \author{
 Fred Viole, OVVO Financial Systems

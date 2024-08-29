@@ -84,11 +84,9 @@ NNS.ARMA(AirPassengers, h = 45, training.set = 120, seasonal.factor = FALSE, bes
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 
-Viole, F. (2019) "Forecasting Using NNS"
-\url{https://www.ssrn.com/abstract=3382300}
+Viole, F. (2019) "Forecasting Using NNS"  \doi{10.2139/ssrn.3382300}
 }
 \author{
 Fred Viole, OVVO Financial Systems

@@ -16,7 +16,7 @@ NNS.ANOVA(
 )
 }
 \arguments{
-\item{control}{a numeric vector, matrix or data frame.}
+\item{control}{a numeric vector, matrix or data frame, or list if unequal vector lengths.}
 
 \item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
 
@@ -30,7 +30,7 @@ NNS.ANOVA(
 
 \item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.}
 
-\item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results.}
+\item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.}
 }
 \value{
 Returns the following:
@@ -64,14 +64,17 @@ set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 A <- cbind(x, y, z)
 NNS.ANOVA(A)
+
+### Different length vectors used in a list
+x <- rnorm(30) ; y <- rnorm(40) ; z <- rnorm(50)
+A <- list(x, y, z)
+NNS.ANOVA(A)
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 
-Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
-\url{https://www.ssrn.com/abstract=3007373}
+Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"  \doi{10.2139/ssrn.3007373}
 }
 \author{
 Fred Viole, OVVO Financial Systems

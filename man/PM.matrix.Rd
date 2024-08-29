@@ -44,11 +44,9 @@ cov.mtx$cupm
 cov.mtx$cov.matrix
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 
-Viole, F. (2017) "Bayes' Theorem From Partial Moments"
-\url{https://www.ssrn.com/abstract=3457377}
+Viole, F. (2017) "Bayes' Theorem From Partial Moments"  \doi{10.2139/ssrn.3457377}
 }
 \author{
 Fred Viole, OVVO Financial Systems

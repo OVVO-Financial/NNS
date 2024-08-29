@@ -5,8 +5,7 @@
 #' @param x mixed data.frame; character/numeric; A two column dataset should be used.  Concatenate text from original sources to comply with format.  Also note the possibility of factors in \code{"DV"}, so \code{"as.numeric(as.character(...))"} is used to avoid issues.
 #' @param oos mixed data.frame; character/numeric; Out-of-sample text dataset to be classified.
 #' @return Returns the text as independent variables \code{"IV"} and the classification as the dependent variable \code{"DV"}.  Out-of-sample independent variables are returned with \code{"OOS"}.
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995}
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 #' @examples
 #' \dontrun{
 #' x <- data.frame(cbind(c("sunny", "rainy"), c(1, -1)))

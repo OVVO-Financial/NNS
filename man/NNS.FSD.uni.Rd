@@ -27,9 +27,9 @@ NNS.FSD.uni(x, y)
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  DOI: \doi{10.4236/jmf.2016.61012}.
+Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  \doi{10.4236/jmf.2016.61012}
 
-Viole, F. (2017) "A Note on Stochastic Dominance." \url{https://www.ssrn.com/abstract=3002675}.
+Viole, F. (2017) "A Note on Stochastic Dominance."  \doi{10.2139/ssrn.3002675}
 }
 \author{
 Fred Viole, OVVO Financial Systems

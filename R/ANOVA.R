@@ -2,13 +2,13 @@
 #'
 #' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables, evaluated at multiple quantiles (or means only).  Returns a degree of certainty to whether the population distributions (or sample means) are identical, not a p-value.
 #'
-#' @param control a numeric vector, matrix or data frame.
+#' @param control a numeric vector, matrix or data frame, or list if unequal vector lengths.
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
 #' @param means.only logical; \code{FALSE} (default) test whether difference in sample means only is zero.
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
 #' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
-#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results.
+#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.
 #' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.
 #' @return Returns the following:
 #' \itemize{
@@ -23,11 +23,9 @@
 #' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-#' \url{https://www.amazon.com/dp/1490523995}
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 #'
-#' Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
-#' \url{https://www.ssrn.com/abstract=3007373}
+#' Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"  \doi{10.2139/ssrn.3007373}
 #'
 #' @examples
 #'  \dontrun{
@@ -44,6 +42,11 @@
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
 #' A <- cbind(x, y, z)
+#' NNS.ANOVA(A)
+#' 
+#' ### Different length vectors used in a list
+#' x <- rnorm(30) ; y <- rnorm(40) ; z <- rnorm(50)
+#' A <- list(x, y, z)
 #' NNS.ANOVA(A)
 #' }
 #' @export
@@ -127,37 +130,38 @@ NNS.ANOVA <- function(
   }
   
   # without treatment
-  n <- ncol(control)
-  if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+  if(is.list(control)) n <- length(control) else n <- ncol(control)
   
-  if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control'")
+  if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
+  
+  if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
   
   if(n >= 2){
     if(any(class(control) %in% c("tbl","data.table"))){
       A <- as.data.frame(control)
-    }else{
-      A <- control
+    } else {
+      if(any(class(control) %in% "list")) A <- do.call(cbind, lapply(control, `length<-`, max(lengths(control)))) else A <- control
     }
-  }else{
+  } else {
     A <- control
   }
   
-  mean.of.means <- mean(Rfast::colmeans(as.matrix(A)))
-  
+  mean.of.means <- mean(colMeans(A, na.rm = T))
+ 
   if(!pairwise){
     #Continuous CDF for each variable from Mean of Means
-    LPM_ratio        <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, A[ , b]))
-    lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, A[,i])))
-    upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, A[,i])))
-    lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, A[,i])))
-    upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, A[,i])))
+    LPM_ratio        <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[ , b]))))
+    lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
+    upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
+    lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
+    upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
     raw.certainties <- list(n - 1)
     for(i in 1:(n - 1)){
       raw.certainties[[i]] <- sapply(
         (i + 1) : n, 
         function(b) NNS.ANOVA.bin(
-          A[ , i],
-          A[ , b],
+          na.omit(unlist(A[ , i])),
+          na.omit(unlist(A[ , b])),
           means.only = means.only,
           mean.of.means = mean.of.means,
           upper.25.target = upper.25.target,
@@ -193,7 +197,7 @@ NNS.ANOVA <- function(
   for(i in 1:(n - 1)){
     raw.certainties[[i]] <- sapply(
       (i + 1) : n, 
-      function(b) NNS.ANOVA.bin(A[ , i],A[ , b], means.only = means.only, plot = FALSE)$Certainty
+      function(b) NNS.ANOVA.bin(na.omit(unlist(A[ , i])), na.omit(unlist(A[ , b])), means.only = means.only, plot = FALSE)$Certainty
     )
   }
   

@@ -34,8 +34,7 @@ NNS.seas(x, modulo = c(2,3,5,7), plot = FALSE)
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
-\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 }
 \author{
 Fred Viole, OVVO Financial Systems

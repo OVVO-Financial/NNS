@@ -1,8 +1,8 @@
-[![packageversion](https://img.shields.io/badge/NNS%20version-10.9.1-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![packageversion](https://img.shields.io/badge/NNS%20version-10.9.2-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
 # NNS
-Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://www.ssrn.com/abstract=2186471).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
+Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://doi.org/10.2139/ssrn.2186471).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
 
 NNS offers: 
   - Numerical Integration & Numerical Differentiation
@@ -18,11 +18,13 @@ NNS offers:
 
 
 Companion R-package and datasets to: 
-#### Viole, F. and Nawrocki, D. (2013) ["*Nonlinear Nonparametric Statistics: Using Partial Moments*"]( https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+#### Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" (ISBN: 1490523995)
 
 
 #### For a quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
 
+
+#### For more hands-on examples, see [NNS Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 
 
 ## Current Version
@@ -49,7 +51,7 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 10.9.1},
+    note = {R package version 10.9.2},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```

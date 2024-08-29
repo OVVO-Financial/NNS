@@ -43,11 +43,9 @@
 #'
 #' @references
 #' \itemize{
-#' \item Vinod, H.D. and Viole, F. (2020) Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations
-#' \href{https://www.ssrn.com/abstract=3621614}{https://www.ssrn.com/abstract=3621614}
+#' \item Vinod, H.D. and Viole, F. (2020) Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations.  \doi{10.2139/ssrn.3621614}
 #'
-#' \item Vinod, H.D. (2013), Maximum Entropy Bootstrap Algorithm Enhancements.
-#' \href{https://www.ssrn.com/abstract=2285041}{https://www.ssrn.com/abstract=2285041}.
+#' \item Vinod, H.D. (2013), Maximum Entropy Bootstrap Algorithm Enhancements.  \doi{10.2139/ssrn.2285041}
 #'
 #' \item Vinod, H.D. (2006), Maximum Entropy Ensembles for Time Series Inference in Economics,
 #' \emph{Journal of Asian Economics}, \bold{17}(6), pp. 955-978.
