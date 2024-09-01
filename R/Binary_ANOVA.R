@@ -1,5 +1,6 @@
 NNS.ANOVA.bin <- function(control, treatment,
                          means.only = FALSE,
+                         medians = FALSE,
                          mean.of.means = NULL,
                          upper.25.target = NULL,
                          lower.25.target = NULL,
@@ -8,7 +9,7 @@ NNS.ANOVA.bin <- function(control, treatment,
                          confidence.interval = NULL, tails = NULL, plot = TRUE, par = NULL){
 
   if(is.null(upper.25.target) && is.null(lower.25.target)){
-        mean.of.means <- mean(c(mean(control), mean(treatment)))
+        if(medians) mean.of.means <- mean(c(median(control), median(treatment))) else mean.of.means <- mean(c(mean(control), mean(treatment)))
         upper.25.target <- mean(c(UPM.VaR(.25, 1, control), UPM.VaR(.25, 1, treatment)))
         lower.25.target <- mean(c(LPM.VaR(.25, 1, control), LPM.VaR(.25, 1, treatment)))
         upper.125.target <- mean(c(UPM.VaR(.125, 1, control), UPM.VaR(.125, 1, treatment)))
@@ -18,9 +19,14 @@ NNS.ANOVA.bin <- function(control, treatment,
 
 
   #Continuous CDF for each variable from Mean of Means
-        LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
-        LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)
-
+        if(medians){
+          LPM_ratio.1 <- LPM.ratio(0, mean.of.means, control)
+          LPM_ratio.2 <- LPM.ratio(0, mean.of.means, treatment)
+        } else {
+          LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
+          LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)  
+        }
+        
         Upper_25_ratio.1 <- UPM.ratio(1, upper.25.target, control)
         Upper_25_ratio.2 <- UPM.ratio(1, upper.25.target, treatment)
         Upper_25_ratio <- mean(c(Upper_25_ratio.1, Upper_25_ratio.2))
@@ -59,13 +65,9 @@ NNS.ANOVA.bin <- function(control, treatment,
         }
         
     
-        
-        
-        
         pop.adjustment <- ((length(control) + length(treatment) - 2) / (length(control)  + length(treatment) )) ^ 2
 
   #Graphs
-
         if(plot){
             if(is.null(par)) original.par <- par(no.readonly = TRUE) else original.par <- par
 
@@ -73,17 +75,26 @@ NNS.ANOVA.bin <- function(control, treatment,
 
             #For ANOVA Visualization
             abline(v = mean.of.means, col = "red", lwd = 4)
-            mtext("Grand Mean", side = 3, col = "red", at = mean.of.means)
+            if(medians) mtext("Grand Median", side = 3, col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3, col = "red", at = mean.of.means)
         }
 
     if(is.null(confidence.interval)){
 
+      if(medians){
+        return(list("Control Median" = median(control),
+                    "Treatment Median" = median(treatment),
+                    "Grand Median" = mean.of.means,
+                    "Control CDF" = LPM_ratio.1,
+                    "Treatment CDF" = LPM_ratio.2,
+                    "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment)))
+      } else {
           return(list("Control Mean" = mean(control),
                 "Treatment Mean" = mean(treatment),
                 "Grand Mean" = mean.of.means,
                 "Control CDF" = LPM_ratio.1,
                 "Treatment CDF" = LPM_ratio.2,
                 "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment)))
+      }
     } else {
 
         #Upper end of CDF confidence interval for control mean
@@ -93,15 +104,18 @@ NNS.ANOVA.bin <- function(control, treatment,
         
             # Resample control means
             y_p <- replicate(1000, sample.int(length(control), replace = TRUE))
-            control_means <- Rfast::colmeans(matrix(control[y_p], ncol = ncol(y_p), byrow = T))
-
+            if(medians){
+              control_means <- apply(matrix(control[y_p], ncol = ncol(y_p), byrow = T), 1, function(i) median(i, na.rm = T))
+            } else {
+              control_means <- apply(matrix(control[y_p], ncol = ncol(y_p), byrow = T), 1, function(i) mean(i, na.rm = T))
+            }
             a <- UPM.VaR(CI, 0, control_means)
             b <- mean(control_means)
             
             if(plot){
                 if(tails == "both" | tails == "right"){
                     abline(v = max(a, b), col = "green", lwd = 2, lty = 3)
-                    text(max(a, b), pos = 4, 0.5, paste0("<--- ", "ctl mu+ ", CI * 100, "%" ), col = "green")
+                    text(max(a, b), pos = 4, 0.5, paste0("<--- ", ifelse(medians, "ctl med+ " , "ctl mu+ "), CI * 100, "%" ), col = "green")
                 }
             }
 
@@ -112,39 +126,48 @@ NNS.ANOVA.bin <- function(control, treatment,
             if(plot){
                 if(tails == "both" | tails == "left"){
                     abline(v = min(c, d), col = "blue", lwd = 2, lty = 3)
-                    text(min(c, d), pos = 2, 0.5, paste0("ctl mu- ", paste0(CI * 100, "% --->")) , col = "blue")
+                    text(min(c, d), pos = 2, 0.5, paste0(ifelse(medians, "ctl med- ", "ctl mu- "), paste0(CI * 100, "% --->")) , col = "blue")
                 }
 
                 par(original.par)
             }
 
             #Effect Size Lower Bound
-            if(tails == "both") Lower.Bound.Effect <- mean(treatment) - max(a, b)
-            
-            if(tails == "left") Lower.Bound.Effect <- mean(treatment) - max(c, d)
-            
-            if(tails == "right") Lower.Bound.Effect <- mean(treatment) - max(a, b)
+            if(tails == "both") if(medians) Lower.Bound.Effect <- median(treatment) - max(a, b) else Lower.Bound.Effect <- mean(treatment) - max(a, b)
+            if(tails == "left") if(medians) Lower.Bound.Effect <- median(treatment) - max(c, d) else Lower.Bound.Effect <- mean(treatment) - max(c, d)
+            if(tails == "right") if(medians) Lower.Bound.Effect <- mean(treatment) - max(a, b) else Lower.Bound.Effect <- mean(treatment) - max(a, b)
             
 
 
             #Effect Size Upper Bound
-            if(tails == "both") Upper.Bound.Effect <- mean(treatment) - min(c, d)
-            
-            if(tails == "left") Upper.Bound.Effect <- mean(treatment) - min(c, d)
-            
-            if(tails == "right") Upper.Bound.Effect <- mean(treatment) - min(a, b)
+            if(tails == "both") if(medians) Upper.Bound.Effect <- median(treatment) - min(c, d) else Upper.Bound.Effect <- mean(treatment) - min(c, d)
+            if(tails == "left") if(medians) Upper.Bound.Effect <- median(treatment) - min(c, d) else Upper.Bound.Effect <- mean(treatment) - min(c, d)
+            if(tails == "right") if(medians) Upper.Bound.Effect <- median(treatment) - min(a, b) else Upper.Bound.Effect <- mean(treatment) - min(a, b)
             
 
 
 
         #Certainty Statistic and Effect Size Given Confidence Interval
-        return(list("Control Mean" = mean(control),
-                    "Treatment Mean" = mean(treatment),
-                    "Grand Mean" = mean.of.means,
-                    "Control CDF" = LPM_ratio.1,
-                    "Treatment CDF" = LPM_ratio.2,
-                    "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment),
-                    "Lower Bound Effect" = Lower.Bound.Effect,
-                    "Upper Bound Effect" = Upper.Bound.Effect))
+            if(medians){
+              return(list("Control Median" = median(control),
+                          "Treatment Median" = median(treatment),
+                          "Grand Median" = mean.of.means,
+                          "Control CDF" = LPM_ratio.1,
+                          "Treatment CDF" = LPM_ratio.2,
+                          "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment),
+                          "Lower Bound Effect" = Lower.Bound.Effect,
+                          "Upper Bound Effect" = Upper.Bound.Effect))
+            } else {
+              return(list("Control Mean" = mean(control),
+                          "Treatment Mean" = mean(treatment),
+                          "Grand Mean" = mean.of.means,
+                          "Control CDF" = LPM_ratio.1,
+                          "Treatment CDF" = LPM_ratio.2,
+                          "Certainty" = min(1, NNS.ANOVA.rho * pop.adjustment),
+                          "Lower Bound Effect" = Lower.Bound.Effect,
+                          "Upper Bound Effect" = Upper.Bound.Effect))      
+              
+            }
+        
   }
 }

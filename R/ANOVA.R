@@ -5,6 +5,7 @@
 #' @param control a numeric vector, matrix or data frame, or list if unequal vector lengths.
 #' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
 #' @param means.only logical; \code{FALSE} (default) test whether difference in sample means only is zero.
+#' @param medians logical; \code{FALSE} (default) test whether difference in sample medians only is zero.  Requires \code{means.only = TRUE}. 
 #' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
 #' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
@@ -37,6 +38,9 @@
 #' ### Two variable analysis with no control variable
 #' A <- cbind(x, y)
 #' NNS.ANOVA(A)
+#' 
+#' ### Medians test
+#' NNS.ANOVA(A, means.only = TRUE, medians = TRUE)
 #'
 #' ### Multiple variable analysis with no control variable
 #' set.seed(123)
@@ -56,6 +60,7 @@ NNS.ANOVA <- function(
     control,
     treatment,
     means.only = FALSE,
+    medians = FALSE,
     confidence.interval = 0.95,
     tails = "Both",
     pairwise = FALSE,
@@ -82,7 +87,7 @@ NNS.ANOVA <- function(
       
       nns.certainties <- sapply(
         1:ncol(control_matrix), 
-        function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], means.only = means.only, plot = FALSE)$Certainty
+        function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], means.only = means.only, medians = medians, plot = FALSE)$Certainty
       )
       
       cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties[-1])
@@ -105,6 +110,7 @@ NNS.ANOVA <- function(
             control, 
             treatment,
             means.only = means.only,
+            medians = medians,
             confidence.interval = confidence.interval, 
             plot = plot, 
             tails = tails, 
@@ -121,6 +127,7 @@ NNS.ANOVA <- function(
           control, 
           treatment, 
           means.only = means.only,
+          medians = medians,
           confidence.interval = confidence.interval, 
           plot = plot, 
           tails = tails
@@ -146,15 +153,21 @@ NNS.ANOVA <- function(
     A <- control
   }
   
-  mean.of.means <- mean(colMeans(A, na.rm = T))
+  if(medians) mean.of.means <- mean(apply(A, 2, function(i) median(i, na.rm = TRUE))) else mean.of.means <- mean(colMeans(A, na.rm = T))
  
   if(!pairwise){
     #Continuous CDF for each variable from Mean of Means
-    LPM_ratio        <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[ , b]))))
+    if(medians){
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, na.omit(unlist(A[ , b]))))
+    } else {
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[ , b]))))
+    }
+    
     lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
     upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
     lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
     upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
+
     raw.certainties <- list(n - 1)
     for(i in 1:(n - 1)){
       raw.certainties[[i]] <- sapply(
@@ -163,6 +176,7 @@ NNS.ANOVA <- function(
           na.omit(unlist(A[ , i])),
           na.omit(unlist(A[ , b])),
           means.only = means.only,
+          medians = medians,
           mean.of.means = mean.of.means,
           upper.25.target = upper.25.target,
           lower.25.target = lower.25.target,
@@ -188,7 +202,7 @@ NNS.ANOVA <- function(
       )
       #For ANOVA Visualization
       abline(v = mean.of.means, col = "red", lwd = 4)
-      mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+      if(medians) mtext("Grand Median", side = 3,col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
     }
     return(c("Certainty" = NNS.ANOVA.rho))
   }
@@ -197,7 +211,7 @@ NNS.ANOVA <- function(
   for(i in 1:(n - 1)){
     raw.certainties[[i]] <- sapply(
       (i + 1) : n, 
-      function(b) NNS.ANOVA.bin(na.omit(unlist(A[ , i])), na.omit(unlist(A[ , b])), means.only = means.only, plot = FALSE)$Certainty
+      function(b) NNS.ANOVA.bin(na.omit(unlist(A[ , i])), na.omit(unlist(A[ , b])), means.only = means.only, medians = medians, plot = FALSE)$Certainty
     )
   }
   
@@ -217,7 +231,7 @@ NNS.ANOVA <- function(
       col = c('steelblue', rainbow(n - 1))
     )
     abline(v = mean.of.means, col = "red", lwd = 4)
-    mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+    if(medians) mtext("Grand Median", side = 3,col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
   }
   return(certainties)
 }

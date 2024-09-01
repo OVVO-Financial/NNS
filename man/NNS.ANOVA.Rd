@@ -8,6 +8,7 @@ NNS.ANOVA(
   control,
   treatment,
   means.only = FALSE,
+  medians = FALSE,
   confidence.interval = 0.95,
   tails = "Both",
   pairwise = FALSE,
@@ -21,6 +22,8 @@ NNS.ANOVA(
 \item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
 
 \item{means.only}{logical; \code{FALSE} (default) test whether difference in sample means only is zero.}
+
+\item{medians}{logical; \code{FALSE} (default) test whether difference in sample medians only is zero.  Requires \code{means.only = TRUE}.}
 
 \item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.}
 
@@ -58,6 +61,9 @@ NNS.ANOVA(control = x, treatment = y)
 ### Two variable analysis with no control variable
 A <- cbind(x, y)
 NNS.ANOVA(A)
+
+### Medians test
+NNS.ANOVA(A, means.only = TRUE, medians = TRUE)
 
 ### Multiple variable analysis with no control variable
 set.seed(123)
