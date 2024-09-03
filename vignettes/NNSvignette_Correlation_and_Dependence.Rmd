@@ -127,13 +127,13 @@ NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 
-* [Nonlinear Correlation and Dependence Using NNS](https://www.ssrn.com/abstract=3010414)
+* [Nonlinear Correlation and Dependence Using NNS](https://doi.org/10.2139/ssrn.3010414)
 
-* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://www.ssrn.com/abstract=2148522)
+* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 
-* [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://www.ssrn.com/abstract=2745308)
+* [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://doi.org/10.2139/ssrn.2745308)
 
 
 ```{r threads, echo = FALSE}

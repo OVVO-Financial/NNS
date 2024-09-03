@@ -26,7 +26,7 @@ require(rgl)
 
 # Comparing Distributions
 
-**`NNS`** offers a multitude of ways to test if distributions came from the same population, or if they share the same mean. The underlying function for these tests is **`NNS.ANOVA()`**.
+**`NNS`** offers a multitude of ways to test if distributions came from the same population, or if they share the same mean or median. The underlying function for these tests is **`NNS.ANOVA()`**.
 
 The output from **`NNS.ANOVA()`** is a `Certainty` statistic, which compares CDFs of distributions from several shared quantiles and normalizes the similarity of these points to be within the interval $[0,1]$, with 1 representing identical distributions. For a complete analysis of `Certainty` to common p-values and the role of power, please see the [References](#References).
 
@@ -81,6 +81,16 @@ t.test(x,y)
 
 The effect size from **`NNS.ANOVA()`** is calculated from the confidence interval of the control mean and the specified `y` shift of 1 is within the provided lower and upper effect boundaries.
 
+
+## Medians
+
+In order to test medians instead of means, simply set both `means.only = TRUE` and `medians = TRUE` in **`NNS.ANOVA()`**.
+
+```{r unequalmedians, echo=TRUE, fig.width=7, fig.align='center'}
+NNS.ANOVA(control = x, treatment = y,
+          means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
+```
+
 # Stochastic Dominance
 
 Another method of comparing distributions involves a test for stochastic dominance. The first, second, and third degree stochastic dominance tests are available in **`NNS`** via:
@@ -122,11 +132,11 @@ NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status =
 
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-*   [Continuous CDFs and ANOVA with NNS](https://www.ssrn.com/abstract=3007373)
+*   [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
 
-*   [A Note on Stochastic Dominance](https://www.ssrn.com/abstract=3002675)
+*   [A Note on Stochastic Dominance](https://doi.org/10.2139/ssrn.3002675)
 
-*   [LPM Density Functions for the Computation of the SD Efficient Set](https://www.scirp.org/journal/paperinformation.aspx?paperid=63817)
+*   [LPM Density Functions for the Computation of the SD Efficient Set](http://dx.doi.org/10.4236/jmf.2016.61012)
 
 ```{r threads, echo = FALSE}
 Sys.setenv("OMP_THREAD_LIMIT" = "")

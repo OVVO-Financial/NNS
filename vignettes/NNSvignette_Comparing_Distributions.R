@@ -41,6 +41,10 @@ NNS.ANOVA(control = x, treatment = y,
 
 t.test(x,y)
 
+## ----unequalmedians, echo=TRUE, fig.width=7, fig.align='center'---------------
+NNS.ANOVA(control = x, treatment = y,
+          means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
+
 ## ----stochdom, fig.width=7, fig.align='center'--------------------------------
 NNS.FSD(x, y)
 

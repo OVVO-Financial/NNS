@@ -158,15 +158,15 @@ mean( b$stack == as.numeric(iris[test.set, 5]) )
 
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
--   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 
--   [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://www.ssrn.com/abstract=2148522)
+-   [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 
--   [Nonparametric Regression Using Clusters](https://link.springer.com/article/10.1007/s10614-017-9713-5)
+-   [Nonparametric Regression Using Clusters](https://doi.org/10.1007/s10614-017-9713-5)
 
--   [Clustering and Curve Fitting by Line Segments](https://www.ssrn.com/abstract=2861339)
+-   [Clustering and Curve Fitting by Line Segments](https://doi.org/10.2139/ssrn.2861339)
 
--   [Classification Using NNS Clustering Analysis](https://www.ssrn.com/abstract=2864711)
+-   [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
 
 ```{r threads, echo = FALSE}
 Sys.setenv("OMP_THREAD_LIMIT" = "")

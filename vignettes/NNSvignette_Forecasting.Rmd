@@ -273,15 +273,15 @@ These are the plotting arguments, easily enabled or disabled with `TRUE` or `FAL
 
 The extension to a generalized multivariate instance is provided in the following documentation of the **`NNS.VAR()`** function:
 
--   [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://www.ssrn.com/abstract=3489550)
+-   [Multivariate Time Series Forecasting: Nonparametric Vector Autoregression Using NNS](https://doi.org/10.2139/ssrn.3489550)
 
 # References
 
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
--   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 
--   [Forecasting Using NNS](https://www.ssrn.com/abstract=3382300)
+-   [Forecasting Using NNS](https://doi.org/10.2139/ssrn.3382300)
 
 ```{r threads, echo = FALSE}
 Sys.setenv("OMP_THREAD_LIMIT" = "")
