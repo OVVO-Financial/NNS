@@ -33,7 +33,7 @@ NNS.copula <- function (
   independence.overlay = FALSE
 ){
   if(sum(is.na(X)) > 0){
-	stop("You have some missing values, please address.")
+	  stop("You have some missing values, please address.")
   }
 
   n <- ncol(X)
