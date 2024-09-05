@@ -84,8 +84,8 @@ NNS.dep = function(x,
     res_xy <- suppressWarnings(tryCatch(PART_xy[1:eval(ll),  dep_fn(x, y), by = prior.quadrant],
                                      error = function(e) dep_fn(x, y)))
     
-    res_yx <- suppressWarnings(tryCatch(PART_yx[1:eval(ll),  dep_fn(x, y), by = prior.quadrant],
-                                        error = function(e) dep_fn(x, y)))
+    res_yx <- suppressWarnings(tryCatch(PART_yx[1:eval(ll),  dep_fn(y, x), by = prior.quadrant],
+                                        error = function(e) dep_fn(y, x)))
 
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)

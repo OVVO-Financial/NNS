@@ -414,14 +414,13 @@ NNS.reg = function (x, y,
             
           }
           
-          orig.dep <- NNS.copula(cbind(apply(cbind(x, y), 2, function(z) NNS.rescale(z, 0, 1))))
           
           x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = FALSE)
           x.star <- data.table::data.table(x)
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
 
-          dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))), orig.dep)), error = function(e) dependence)
+          dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
           
           dependence[is.na(dependence)] <- 0.1
           

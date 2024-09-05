@@ -250,7 +250,6 @@ NNS.boost <- function(IVs.train,
   }
   
   if(feature.importance){
-    original.par <- par(no.readonly = TRUE)
     par(mfrow = c(2,1))
     par(mai = c(1.0,.5,0.8,0.5))
     hist(results, main = "Distribution of Learner Trials Objective Function",
@@ -443,7 +442,6 @@ NNS.boost <- function(IVs.train,
               xlab = "Frequency", las = 1)
     }
     par(mfrow=c(1,1))
-    par(original.par)
   }
   
   

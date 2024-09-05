@@ -38,10 +38,18 @@ NNS.mode <- function(x, discrete = FALSE, multi = TRUE){
     z_ind <- max(1, (z_c - 1)):min(lz,(z_c + 1))
   }
   
-  
-  
   final <- sum(z_names[z_ind] * z$counts[z_ind] )/sum(z$counts[z_ind])
-  if(discrete) return(ifelse(final%%1 < .5, floor(final), ceiling(final))) else if(multi) return(final) else return(mean(final))
+  
+  if(discrete){
+    final <- ifelse(final%%1 < .5, floor(final), ceiling(final))
+    return(final)
+  } else {
+    if(multi){ 
+      return(final) 
+    } else {
+        return(mean(final))
+    }
+  }
 }
 
 
