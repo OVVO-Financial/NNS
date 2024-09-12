@@ -80,6 +80,8 @@
 #'
 #' Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"  \doi{10.20944/preprints201801.0090.v1}
 #' 
+#' Viole, F. (2020) "Partitional Estimation Using Partial Moments" \doi{10.2139/ssrn.3592491}
+#' 
 #' @examples
 #' \dontrun{
 #' set.seed(123)

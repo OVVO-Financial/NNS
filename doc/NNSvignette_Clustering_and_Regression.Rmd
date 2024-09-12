@@ -231,6 +231,8 @@ If the user is so motivated, detailed arguments further examples are provided wi
 
 * [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
 
+* [Partitional Estimation Using Partial Moments](https://doi.org/10.2139/ssrn.3592491)
+
 ```{r threads, echo = FALSE}
 Sys.setenv("OMP_THREAD_LIMIT" = "")
 ```

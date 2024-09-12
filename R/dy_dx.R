@@ -52,7 +52,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     
     eval.point.idx <- which(eval.point==eval.point)
 
-    h_s <- c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]  
+    h_s <- c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]  * floor(sqrt(length(x)))
+#    h_s <- seq(1, 9, 2)
     
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
@@ -96,31 +97,16 @@ dy.dx <- function(x, y, eval.point = NULL){
         rise_1 = estimates.max - estimates,
         rise_2 = estimates - estimates.min
       )]
-      
-      
-      
-      naive_first_gradient <- function(x){
-        idx <- max(1, findInterval(x, reg.output$derivative$X.Lower.Range))
-        return(reg.output$derivative[idx, "Coefficient"])
-      }
-      
-      naive_second_gradient <- function(x){
-        idx <- max(1, findInterval(x, reg.output$derivative$X.Lower.Range)-1)
-        d <- reg.output$derivative[-1, ] - reg.output$derivative[-nrow(reg.output$derivative), ]
-        return(d[idx, "Coefficient"]/d[idx, "X.Lower.Range"])
-      }
-      
-      combined.matrices$naive.first.grad <- naive_first_gradient(combined.matrices$eval.point)
-      combined.matrices$naive.second.grad <- naive_second_gradient(combined.matrices$eval.point)
+
       
       combined.matrices[, `:=` (
         first.deriv = (rise_1 + rise_2) / (run_1 + run_2),
         second.deriv = (rise_1 / run_1 - rise_2 / run_2) / mean(c(run_1, run_2))
       )]
       
-      first.deriv <- tryCatch(combined.matrices[ , mean(c(first.deriv, naive.first.grad)), by = eval.point],
+      first.deriv <- tryCatch(combined.matrices[ , mean((first.deriv)), by = eval.point],
                               error = function(e) combined.matrices[ , mean(first.deriv), by = eval.point])
-      second.deriv <- tryCatch(combined.matrices[ , mean(c(second.deriv, naive.second.grad)), by = eval.point], 
+      second.deriv <- tryCatch(combined.matrices[ , mean((second.deriv)), by = eval.point], 
                                error = function(e) combined.matrices[ , mean(second.deriv), by = eval.point])
   }
 
