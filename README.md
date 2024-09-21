@@ -1,4 +1,13 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+<img src="vignettes/images/NNS_hex_sticker.png" align="right" width="150"/>
+
+
 [![packageversion](https://img.shields.io/badge/NNS%20version-10.9.3-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
 
 
 # NNS
