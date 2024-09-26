@@ -154,7 +154,7 @@ NNS.ARMA.optim <- function(variable,
 
         nns.estimates.indiv <- lapply(1 : ncol(seasonal.combs[[i]]), function(k) {
           actual <- tail(variable, h_eval)
-          message("Testing seasonal.factor ", paste(unlist(seasonal.combs[[i]][ , k]), ","), "\r", appendLF = FALSE)
+          if(print.trace) message("Testing seasonal.factor ", paste(unlist(seasonal.combs[[i]][ , k]), ","), "\r", appendLF = FALSE)
           predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor =  seasonal.combs[[i]][ , k], method = "lin", plot = FALSE, negative.values = negative.values)
           
           return(eval(obj.fn))
