@@ -55,6 +55,7 @@ NNS.dep(df$x, df$y)
 
 ## ----permutations-------------------------------------------------------------
 ## p-values for [NNS.dep]
+set.seed(123)
 x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 
 ## ----perm1,fig.width=5,fig.height=3,fig.align = "center", results='hide', echo=FALSE----

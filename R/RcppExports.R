@@ -18,7 +18,8 @@ fast_lm_mult <- function(x, y) {
 #' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -36,7 +37,8 @@ LPM <- function(degree, target, variable) {
 #' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -54,8 +56,10 @@ UPM <- function(degree, target, variable) {
 #' @param variable a numeric vector.
 #' @return Standardized LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS" \doi{10.2139/ssrn.3007373}
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
+#' \url{https://www.ssrn.com/abstract=3007373}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -88,7 +92,8 @@ LPM.ratio <- function(degree, target, variable) {
 #' @param variable a numeric vector.
 #' @return Standardized UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -116,7 +121,8 @@ UPM.ratio <- function(degree, target, variable) {
 #' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -137,7 +143,8 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' @param target_y numeric; Target for upside deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Co-UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -159,7 +166,8 @@ Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
 #' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent LPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -181,7 +189,8 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @param target_y numeric; Target for upper deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
 #' @return Divergent UPM of two variables
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100)
@@ -203,8 +212,10 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
 #' @note For divergent asymmetical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"  \doi{10.2139/ssrn.3457377}
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+#' \url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
+#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments"
+#' \url{https://www.ssrn.com/abstract=3457377}
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
@@ -226,22 +237,6 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
     .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj)
 }
 
-#' Fast binning of numeric vector into equidistant bins
-#'
-#' Missing values (NA, Inf, NaN) are added at the end of the vector as the last bin returned if missinglast is set to TRUE
-#' 
-#' @param x A matrix of regressor variables. Must have the same number of rows as the length of y.
-#' @param width The width of the bins
-#' @param origin The starting point for the bins. Any number smaller than origin will be disregarded
-#' @param missinglast Boolean. Should the missing observations be added as a separate element at the end of the returned count vector.
-#' @return An list with elements counts (the frequencies), origin (the origin), width (the width), missing (the number of missings), and last_bin_is_missing (boolean) telling whether the missinglast is true or not.
-#' @examples
-#' \dontrun{
-#' set.seed(1)
-#' x <- sample(10, 20, replace = TRUE)
-#' NNS_bin(x, 15)
-#' }
-#' @export
 NNS_bin <- function(x, width, origin = 0, missinglast = FALSE) {
     .Call(`_NNS_NNS_bin`, x, width, origin, missinglast)
 }

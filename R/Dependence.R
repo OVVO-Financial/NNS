@@ -49,23 +49,23 @@ NNS.dep = function(x,
   if(!is.null(y)){
     x <- as.numeric(x)
     l <- length(x)
-
+    
     y <- as.numeric(y)
     obs <- max(10, l/5)
-
+    
     # Define segments
     if(print.map) PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE)) else PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE))
     
     PART_yx <- suppressWarnings(NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE))
-
+    
     if(dim(PART_xy$regression.points)[1]==0) return(list("Correlation" = 0, "Dependence" = 0))
-
+    
     PART_xy <- PART_xy$dt
     PART_xy <- PART_xy[complete.cases(PART_xy),]
-
+    
     PART_xy[, weights_xy := .N/l, by = prior.quadrant]
     weights_xy <- PART_xy[, weights_xy[1], by = prior.quadrant]$V1
-
+    
     PART_yx <- PART_yx$dt
     PART_yx <- PART_yx[complete.cases(PART_yx),]
     
@@ -80,52 +80,51 @@ NNS.dep = function(x,
       NNS::NNS.copula(cbind(x, y)) * sign(cov(x,y))
     }
     
-
+    
     res_xy <- suppressWarnings(tryCatch(PART_xy[1:eval(ll),  dep_fn(x, y), by = prior.quadrant],
-                                     error = function(e) dep_fn(x, y)))
+                                        error = function(e) dep_fn(x, y)))
     
     res_yx <- suppressWarnings(tryCatch(PART_yx[1:eval(ll),  dep_fn(y, x), by = prior.quadrant],
                                         error = function(e) dep_fn(y, x)))
-
+    
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
     
     if(sum(is.na(res_yx))>0) res_yx[is.na(res_yx)] <- dep_fn(x, y)
     if(is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
-
+    
     if(asym){
       dependence <- sum(abs(res_xy[,2]) * weights_xy)
     } else {
       dependence <- max(c(sum(abs(res_yx[,2]) * weights_yx),
-                           sum(abs(res_xy[,2]) * weights_xy)))
+                          sum(abs(res_xy[,2]) * weights_xy)))
     }
-
+    
     lx <- PART_xy[, length(unique(x))]
     ly <- PART_xy[, length(unique(y))]
     degree_x <- min(10, max(1,lx-1), max(1,ly-1))
-
+    
     I_x <- lx < sqrt(l)
     I_y <- ly < sqrt(l)
     I <- I_x * I_y
-
+    
     if(I == 1){
       poly_base <- suppressWarnings(tryCatch(fast_lm_mult(poly(x, degree_x), abs(y))$r.squared,
                                              warning = function(w) dependence,
                                              error = function(e) dependence))
-
+      
       dependence <- gravity(c(dependence, NNS.copula(cbind(x, y), plot = FALSE), poly_base))
     }
-  
+    
     if(asym){
       corr <- sum(res_xy[,2] * weights_xy)
     } else {
       corr <- max(c(sum(res_yx[,2] * weights_yx), sum(res_xy[,2] * weights_xy)))
     }
-
+    
     
     return(list("Correlation" = corr,
                 "Dependence" = dependence))
-
   } else {
     if(p.value){
       original.par <- par(no.readonly = TRUE)

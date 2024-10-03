@@ -101,6 +101,7 @@ Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run 100 permu
 
 ```{r permutations}
 ## p-values for [NNS.dep]
+set.seed(123)
 x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 ```
 
