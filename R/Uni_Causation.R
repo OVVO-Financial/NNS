@@ -51,9 +51,11 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
 
   ## Correlation of Normalized Variables
-  rho.x.y <- NNS.dep(y.norm.to.x, x.norm.to.y, asym = TRUE)$Dependence
+  dep.mtx <- NNS.dep(cbind(y.norm.to.x, x.norm.to.y), asym = TRUE)$Dependence
+  rho.x.y <- dep.mtx[1, 2]
+  rho.y.x <- dep.mtx[2, 1]
 
-  Causation.x.given.y <- P.x.given.y * rho.x.y
+  Causation.x.given.y <- mean(c(P.x.given.y * rho.x.y, max(0, (rho.x.y - rho.y.x))))
 
 
   if(plot){

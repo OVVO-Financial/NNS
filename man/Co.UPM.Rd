@@ -30,7 +30,8 @@ x <- rnorm(100) ; y <- rnorm(100)
 Co.UPM(0, x, y, mean(x), mean(y))
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments"
+\url{https://www.amazon.com/dp/1490523995/ref=cm_sw_su_dp}
 }
 \author{
 Fred Viole, OVVO Financial Systems

@@ -154,7 +154,7 @@ NNS.reg = function (x, y,
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
   
   dist <- tolower(dist)
- 
+  
   if(any(class(x)%in%c("tbl","data.table")) && ncol(x)==1) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table")) && ncol(y)==1) y <- as.vector(unlist(y))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
@@ -194,7 +194,7 @@ NNS.reg = function (x, y,
   original.names <- colnames(x)
   original.columns <- ncol(x)
   
-
+  
   
   if(!is.null(original.columns) & is.null(original.names)) x <- data.frame(x)
   
@@ -215,20 +215,20 @@ NNS.reg = function (x, y,
         new_x <- unlist(list(x, point.est))
       }
     } else new_x <- x
-
+    
     if(!is.null(dim(x)) && original.columns > 1){
       new_x <- data.table::data.table(new_x)
       dummies <- list()
-       for(i in 1:original.columns){
-         dummies[[i]] <- factor_2_dummy_FR(new_x[,.SD, .SDcols = i])
-         if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(original.names[i], "_", colnames(dummies[i][[1]])) else names(dummies)[i] <- original.names[i]
-       }
+      for(i in 1:original.columns){
+        dummies[[i]] <- factor_2_dummy_FR(new_x[,.SD, .SDcols = i])
+        if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(original.names[i], "_", colnames(dummies[i][[1]])) else names(dummies)[i] <- original.names[i]
+      }
       x <- do.call(cbind, dummies)
     }  else x <- factor_2_dummy_FR(new_x)
     
     if(!is.null(point.est)){
       point.est.y <- numeric()
-
+      
       if(is.null(dim(x))) lx <- length(x) else lx <- nrow(x)
       
       if(is.null(dim(point.est))) l_point.est <- length(point.est) else l_point.est <- nrow(point.est)
@@ -236,7 +236,7 @@ NNS.reg = function (x, y,
       point.est <- tail(x, l_point.est)
       
       x <- head(x, lx - l_point.est)
-    
+      
       if(is.null(dim(point.est)) || ncol(point.est)==1) point.est <- as.vector(unlist(point.est))
       
     } else { # is.null(point.est)
@@ -250,7 +250,7 @@ NNS.reg = function (x, y,
   # Variable names
   original.names <- colnames(x)
   original.columns <- ncol(x)
-
+  
   y <- as.numeric(y)
   original.y <- y
   
@@ -288,7 +288,6 @@ NNS.reg = function (x, y,
     if(is.null(n.best)) n.best <- 1
   }
   
-  
   if(!is.null(original.columns)){
     if(original.columns == 1){
       x <- original.variable
@@ -325,7 +324,7 @@ NNS.reg = function (x, y,
             x.star.dep[is.na(x.star.dep)] <- 0
           }
           
-          x.star.cor <-  sapply(1:dim(x)[2], function(i) cor(x[,i], y, method = "spearman"))
+          x.star.cor <- cor(x, y, method = "spearman")[, 1]
           
           x.star.cor[is.na(x.star.cor)] <- 0
           
@@ -378,7 +377,7 @@ NNS.reg = function (x, y,
           
           norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
           
-          x.star.matrix <- Rfast::eachrow(norm.x, x.star.coef, "*") #t( t(norm.x) * x.star.coef)
+          x.star.matrix <- Rfast::eachrow(norm.x, x.star.coef, "*")
           x.star.matrix[is.na(x.star.matrix)] <- 0
           
           #In case all IVs have 0 correlation to DV

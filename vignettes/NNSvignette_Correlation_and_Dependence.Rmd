@@ -75,6 +75,25 @@ cor(x, y)
 NNS.dep(x, y)
 ```
 
+
+## Asymmetrical Analysis
+The asymmetrical analysis is critical for further determining a causal path between variables which should be identifiable, i.e., it is asymmetrical in causes and effects.
+
+The previous cyclic example visually highlights the asymmetry of dependence between the variables, which can be confirmed using **`NNS.dep(..., asym = TRUE)`**.  
+
+
+```{r asym1}
+cor(x, y)
+NNS.dep(x, y, asym = TRUE)
+```
+
+
+```{r asym2}
+cor(y, x)
+NNS.dep(y, x, asym = TRUE)
+```
+
+
 ## Dependence
 Note the fact that all observations occupy only co- or divergent partial moment quadrants for a given subquadrant.
 ```{r dependence,fig.width=5,fig.height=3,fig.align = "center"}
@@ -101,6 +120,7 @@ Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run 100 permu
 
 ```{r permutations}
 ## p-values for [NNS.dep]
+set.seed(123)
 x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
 ```
 

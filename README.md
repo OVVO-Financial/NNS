@@ -11,6 +11,7 @@
 Nonlinear nonparametric statistics using partial moments. Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://doi.org/10.2139/ssrn.2186471). These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
 
 
+
 NNS offers: 
   - Numerical Integration & Numerical Differentiation
   - Partitional & Hierarchial Clustering
@@ -65,3 +66,4 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
 
 ## Thank you for your interest in NNS!
 ![](https://cranlogs.r-pkg.org/badges/NNS)
+![](https://cranlogs.r-pkg.org/badges/grand-total/NNS)
