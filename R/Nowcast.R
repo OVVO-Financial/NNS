@@ -47,6 +47,7 @@
 #'   \item \code{FEDFUNDS} -- Federal Funds Effective Rate
 #'   \item \code{PPIACO} -- Producer Price Index All Commodities
 #'   \item \code{CIVPART} -- Labor Force Participation Rate
+#'   \item \code{M2NS} -- M2 Money Supply
 #'  }
 #' 
 #' @return Returns the following matrices of forecasted variables:
@@ -122,7 +123,7 @@ NNS.nowcast <- function(h = 1,
                  "PCEPI", "PERMIT", "TCU", "BUSINV", "ULCNFB",
                  "IQ", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI", "PCEC96", "GDPC1",
                  "ICSA",
-                  "DGS10", "T10Y2Y", "WALCL", "PALLFNFINDEXM", "FEDFUNDS", "PPIACO", "CIVPART")
+                  "DGS10", "T10Y2Y", "WALCL", "PALLFNFINDEXM", "FEDFUNDS", "PPIACO", "CIVPART", "M2NS")
 
   sources <- c(rep("FRED", length(variables)), additional.sources)
   

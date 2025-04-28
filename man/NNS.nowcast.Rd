@@ -87,6 +87,7 @@ Specific regressors include:
   \item \code{FEDFUNDS} -- Federal Funds Effective Rate
   \item \code{PPIACO} -- Producer Price Index All Commodities
   \item \code{CIVPART} -- Labor Force Participation Rate
+  \item \code{M2NS} -- M2 Money Supply
  }
 }
 \examples{
