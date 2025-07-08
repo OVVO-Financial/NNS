@@ -8,29 +8,25 @@ z_df <- as.data.frame(z)
 
 test_that(
 	"LPM", {
-	  expect_equal(LPM(0, NULL, x), 0.49, tolerance=1e-5)
 	  expect_equal(LPM(0, mean(x), x), 0.49, tolerance=1e-5)
 	  expect_equal(LPM(1, mean(x), x), 0.1032933, tolerance=1e-5)
 	  expect_equal(LPM(2, mean(x), x), 0.02993767, tolerance=1e-5)
 	
-	  expect_equal(LPM(0, NULL, x_df), 0.49, tolerance=1e-5)
-	  expect_equal(LPM(0, colMeans(x_df), x_df), 0.49, tolerance=1e-5)
-	  expect_equal(LPM(1, colMeans(x_df), x_df), 0.1032933, tolerance=1e-5)
-	  expect_equal(LPM(2, colMeans(x_df), x_df), 0.02993767, tolerance=1e-5)
+	  expect_equal(LPM(0, colMeans(x_df), unlist(x_df)), 0.49, tolerance=1e-5)
+	  expect_equal(LPM(1, colMeans(x_df), unlist(x_df)), 0.1032933, tolerance=1e-5)
+	  expect_equal(LPM(2, colMeans(x_df), unlist(x_df)), 0.02993767, tolerance=1e-5)
 	}
 )
 
 test_that(
 	"UPM", {
-	  expect_equal(UPM(0, NULL, x), 0.51, tolerance=1e-5)
 	  expect_equal(UPM(0, mean(x), x), 0.51, tolerance=1e-5)
 	  expect_equal(UPM(1, mean(x), x), 0.1032933, tolerance=1e-5)
 	  expect_equal(UPM(2, mean(x), x), 0.03027411, tolerance=1e-5)
 	
-	  expect_equal(UPM(0, NULL, x_df), 0.51, tolerance=1e-5)
-	  expect_equal(UPM(0, colMeans(x_df), x_df), 0.51, tolerance=1e-5)
-	  expect_equal(UPM(1, colMeans(x_df), x_df), 0.1032933, tolerance=1e-5)
-	  expect_equal(UPM(2, colMeans(x_df), x_df), 0.03027411, tolerance=1e-5)
+	  expect_equal(UPM(0, colMeans(x_df), unlist(x_df)), 0.51, tolerance=1e-5)
+	  expect_equal(UPM(1, colMeans(x_df), unlist(x_df)), 0.1032933, tolerance=1e-5)
+	  expect_equal(UPM(2, colMeans(x_df), unlist(x_df)), 0.03027411, tolerance=1e-5)
 	}
 )
 

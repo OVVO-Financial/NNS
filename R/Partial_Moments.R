@@ -3,8 +3,8 @@
 #' This function generates a univariate lower partial moment for any degree or target.
 #'
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
+#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param excess_ret Logical; \code{FALSE} (default)
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
@@ -18,7 +18,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
   .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
 }
 
-LPM <- Vectorize(LPM, vectorize.args="target")
+LPM <- Vectorize(LPM, vectorize.args="target", USE.NAMES = FALSE)
 
 
 #' Upper Partial Moment
@@ -26,8 +26,7 @@ LPM <- Vectorize(LPM, vectorize.args="target")
 #' This function generates a univariate upper partial moment for any degree or target.
 #'
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param excess_ret Logical; \code{FALSE} (default)
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
@@ -41,7 +40,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
   .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
 }
 
-UPM <- Vectorize(UPM, vectorize.args="target")
+UPM <- Vectorize(UPM, vectorize.args="target", USE.NAMES = FALSE)
 
 
 #' NNS CDF
