@@ -14,11 +14,27 @@
 #' x <- rnorm(100)
 #' LPM(0, mean(x), x)
 #' @export
+#' 
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
-  .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
+
+if (is.data.frame(variable) || is.matrix(variable)) variable <- unlist(variable, use.names = FALSE)
+
+if (is.data.frame(target) || is.matrix(target)) target <- unlist(target, use.names = FALSE)
+
+if (!excess_ret && length(target) > 1) {
+  return(vapply(target,
+                function(t) LPM(degree, t, variable, FALSE),
+                numeric(1)))
 }
 
-LPM <- Vectorize(LPM, vectorize.args="target", USE.NAMES = FALSE)
+
+res <- .Call(`_NNS_LPM_RCPP`, degree,
+             unname(target), unname(variable), excess_ret)
+
+if (is.list(res) && length(res) == 1) res <- res[[1]]
+names(res) <- NULL
+res
+}
 
 
 #' Upper Partial Moment
@@ -38,10 +54,27 @@ LPM <- Vectorize(LPM, vectorize.args="target", USE.NAMES = FALSE)
 #' UPM(0, mean(x), x)
 #' @export
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
-  .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
-}
 
-UPM <- Vectorize(UPM, vectorize.args="target", USE.NAMES = FALSE)
+  if (is.data.frame(variable) || is.matrix(variable)) variable <- unlist(variable, use.names = FALSE)
+
+  if (is.data.frame(target) || is.matrix(target)) target <- unlist(target, use.names = FALSE)
+  
+
+  if (!excess_ret && length(target) > 1) {
+    return(vapply(target,
+                  function(t) UPM(degree, t, variable, FALSE),
+                  numeric(1)))
+  }
+
+  res <- .Call(`_NNS_UPM_RCPP`, degree,
+               unname(target),
+               unname(variable),
+               excess_ret)
+
+  if (is.list(res) && length(res) == 1) res <- res[[1]]
+  names(res) <- NULL
+  res
+}
 
 
 #' NNS CDF
