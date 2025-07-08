@@ -35,26 +35,28 @@ BEGIN_RCPP
 END_RCPP
 }
 // LPM_RCPP
-NumericVector LPM_RCPP(const double& degree, const RObject& target, const RObject& variable);
-RcppExport SEXP _NNS_LPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
+NumericVector LPM_RCPP(const double& degree, const RObject& target, const RObject& variable, const bool& excess_ret);
+RcppExport SEXP _NNS_LPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP excess_retSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type variable(variableSEXP);
-    rcpp_result_gen = Rcpp::wrap(LPM_RCPP(degree, target, variable));
+    Rcpp::traits::input_parameter< const bool& >::type excess_ret(excess_retSEXP);
+    rcpp_result_gen = Rcpp::wrap(LPM_RCPP(degree, target, variable, excess_ret));
     return rcpp_result_gen;
 END_RCPP
 }
 // UPM_RCPP
-NumericVector UPM_RCPP(const double& degree, const RObject& target, const RObject& variable);
-RcppExport SEXP _NNS_UPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
+NumericVector UPM_RCPP(const double& degree, const RObject& target, const RObject& variable, const bool& excess_ret);
+RcppExport SEXP _NNS_UPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP excess_retSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type variable(variableSEXP);
-    rcpp_result_gen = Rcpp::wrap(UPM_RCPP(degree, target, variable));
+    Rcpp::traits::input_parameter< const bool& >::type excess_ret(excess_retSEXP);
+    rcpp_result_gen = Rcpp::wrap(UPM_RCPP(degree, target, variable, excess_ret));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -172,8 +174,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
-    {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 3},
-    {"_NNS_UPM_RCPP", (DL_FUNC) &_NNS_UPM_RCPP, 3},
+    {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 4},
+    {"_NNS_UPM_RCPP", (DL_FUNC) &_NNS_UPM_RCPP, 4},
     {"_NNS_LPM_ratio_RCPP", (DL_FUNC) &_NNS_LPM_ratio_RCPP, 3},
     {"_NNS_UPM_ratio_RCPP", (DL_FUNC) &_NNS_UPM_ratio_RCPP, 3},
     {"_NNS_CoLPM_RCPP", (DL_FUNC) &_NNS_CoLPM_RCPP, 5},

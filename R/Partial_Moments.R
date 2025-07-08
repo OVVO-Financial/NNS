@@ -1,3 +1,49 @@
+#' Lower Partial Moment
+#'
+#' This function generates a univariate lower partial moment for any degree or target.
+#'
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
+#' @param excess_ret Logical; \code{FALSE} (default)
+#' @return LPM of variable
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' LPM(0, mean(x), x)
+#' @export
+LPM <- function(degree, target, variable, excess_ret = FALSE) {
+  .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
+}
+
+LPM <- Vectorize(LPM, vectorize.args="target")
+
+
+#' Upper Partial Moment
+#'
+#' This function generates a univariate upper partial moment for any degree or target.
+#'
+#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
+#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param excess_ret Logical; \code{FALSE} (default)
+#' @return UPM of variable
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @examples
+#' set.seed(123)
+#' x <- rnorm(100)
+#' UPM(0, mean(x), x)
+#' @export
+UPM <- function(degree, target, variable, excess_ret = FALSE) {
+  .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
+}
+
+UPM <- Vectorize(UPM, vectorize.args="target")
+
+
 #' NNS CDF
 #'
 #' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.

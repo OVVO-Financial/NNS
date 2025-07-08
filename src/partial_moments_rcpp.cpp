@@ -5,72 +5,105 @@
 #include "partial_moments.h"
 using namespace Rcpp;
 
-//' Lower Partial Moment
-//'
-//' This function generates a univariate lower partial moment for any degree or target.
-//'
-//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-//' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-//' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
-//' @return LPM of variable
-//' @author Fred Viole, OVVO Financial Systems
-//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-//' @examples
-//' set.seed(123)
-//' x <- rnorm(100)
-//' LPM(0, mean(x), x)
-//' @export
-// [[Rcpp::export("LPM", rng = false)]]
-NumericVector LPM_RCPP(const double &degree, const RObject &target, const RObject &variable) {
-  NumericVector target_vec, variable_vec;
-  if (is<NumericVector>(variable))
-    variable_vec=as<NumericVector>(variable);
-  else if (is<IntegerVector>(variable))
-    variable_vec=as<NumericVector>(variable);
-  else
-    variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
-  if (is<NumericVector>(target) && !target.isNULL()){
-	target_vec = as<NumericVector>(target);
-  }else{
-	target_vec = NumericVector(1);
-	target_vec[0] = mean(variable_vec);
+
+static inline double repeatMultiplication(double value, int n) {
+  double result = 1.0;
+  for (int i = 0; i < n; ++i) {
+    result *= value;
   }
+  return result;
+}
+
+// “fast” pow for non‐integer exponents (approximate via bit hacks)
+static inline double fastPow(double a, double b) {
+  union { double d; int x[2]; } u = { a };
+  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+  return u.d;
+}
+
+// check if a double is an exact integer
+static inline bool isInteger(double value) {
+  return value == static_cast<int>(value);
+}
+
+
+// [[Rcpp::export(rng = false)]]
+NumericVector LPM_RCPP(const double &degree,
+                       const RObject &target,
+                       const RObject &variable,
+                       const bool &excess_ret) {
+  // coerce variable to numeric vector
+  NumericVector variable_vec = as<NumericVector>(clone(variable));
+  // coerce target to numeric vector or scalar
+  NumericVector target_vec;
+  if (is<NumericVector>(target) && !target.isNULL()) {
+    target_vec = as<NumericVector>(target);
+  } else {
+    target_vec = NumericVector::create(mean(variable_vec));
+  }
+  
+  if (excess_ret) {
+    int n = variable_vec.size();
+    int tlen = target_vec.size();
+    if (!(tlen == 1 || tlen == n))
+      Rcpp::stop("When excess_ret=TRUE, target must be length 1 or same length as variable");
+    NumericVector out(n);
+    for (int i = 0; i < n; ++i) {
+      double t    = (tlen == 1 ? target_vec[0] : target_vec[i]);
+      double diff = t - variable_vec[i];
+      if (diff > 0) {
+        if      (degree == 0)       out[i] = 1;
+        else if (degree == 1)       out[i] = diff;
+        else if (isInteger(degree)) out[i] = repeatMultiplication(diff, (int)degree);
+        else                         out[i] = fastPow(diff, degree);
+      }
+      // else leave out[i] = 0
+    }
+    // return scalar mean
+    return NumericVector::create(mean(out));
+  }
+  
+  // default aggregate path
   return LPM_CPv(degree, target_vec, variable_vec);
 }
 
 
-//' Upper Partial Moment
-//'
-//' This function generates a univariate upper partial moment for any degree or target.
-//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-//' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-//' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-//' @return UPM of variable
-//' @author Fred Viole, OVVO Financial Systems
-//' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-//' @examples
-//' set.seed(123)
-//' x <- rnorm(100)
-//' UPM(0, mean(x), x)
-//' @export
-// [[Rcpp::export("UPM", rng = false)]]
-NumericVector UPM_RCPP(const double &degree, const RObject &target, const RObject &variable) {
-  NumericVector target_vec, variable_vec;
-  if (is<NumericVector>(variable))
-    variable_vec=as<NumericVector>(variable);
-  else if (is<IntegerVector>(variable))
-    variable_vec=as<NumericVector>(variable);
-  else
-    variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
-  if (is<NumericVector>(target) && !target.isNULL()){
-	target_vec = as<NumericVector>(target);
-  }else{
-	target_vec = NumericVector(1);
-	target_vec[0] = mean(variable_vec);
+
+// [[Rcpp::export(rng = false)]]
+NumericVector UPM_RCPP(const double &degree,
+                       const RObject &target,
+                       const RObject &variable,
+                       const bool &excess_ret) {
+  NumericVector variable_vec = as<NumericVector>(clone(variable));
+  NumericVector target_vec;
+  if (is<NumericVector>(target) && !target.isNULL()) {
+    target_vec = as<NumericVector>(target);
+  } else {
+    target_vec = NumericVector::create(mean(variable_vec));
   }
+  
+  if (excess_ret) {
+    int n = variable_vec.size();
+    int tlen = target_vec.size();
+    if (!(tlen == 1 || tlen == n))
+      Rcpp::stop("When excess_ret=TRUE, target must be length 1 or same length as variable");
+    NumericVector out(n);
+    for (int i = 0; i < n; ++i) {
+      double t    = (tlen == 1 ? target_vec[0] : target_vec[i]);
+      double diff = variable_vec[i] - t;
+      if (diff > 0) {
+        if      (degree == 0)       out[i] = 1;
+        else if (degree == 1)       out[i] = diff;
+        else if (isInteger(degree)) out[i] = repeatMultiplication(diff, (int)degree);
+        else                         out[i] = fastPow(diff, degree);
+      }
+    }
+    return NumericVector::create(mean(out));
+  }
+  
   return UPM_CPv(degree, target_vec, variable_vec);
 }
-
 
 //' Lower Partial Moment RATIO
 //'

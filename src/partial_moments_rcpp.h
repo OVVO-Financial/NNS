@@ -4,8 +4,16 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-NumericVector LPM_RCPP(const double &degree, const RObject &target, const RObject &variable);
-NumericVector UPM_RCPP(const double &degree, const RObject &target, const RObject &variable);
+NumericVector LPM_RCPP(const double &degree,
+                       const RObject &target,
+                       const RObject &variable,
+                       const bool &excess_ret = false);
+
+NumericVector UPM_RCPP(const double &degree,
+                       const RObject &target,
+                       const RObject &variable,
+                       const bool &excess_ret = false);
+
 NumericVector LPM_ratio_RCPP(const double &degree, const RObject &target, const RObject &variable);
 NumericVector UPM_ratio_RCPP(const double &degree, const RObject &target, const RObject &variable);
 NumericVector CoLPM_RCPP(const double &degree_lpm, const RObject &x, const RObject &y, const RObject &target_x, const RObject &target_y);

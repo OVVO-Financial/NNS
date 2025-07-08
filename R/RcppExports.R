@@ -9,41 +9,12 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
-#' Lower Partial Moment
-#'
-#' This function generates a univariate lower partial moment for any degree or target.
-#'
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.  \link{data.frame} or \link{list} type objects are not permissible.
-#' @return LPM of variable
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100)
-#' LPM(0, mean(x), x)
-#' @export
-LPM <- function(degree, target, variable) {
-    .Call(`_NNS_LPM_RCPP`, degree, target, variable)
+LPM_RCPP <- function(degree, target, variable, excess_ret) {
+    .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
 }
 
-#' Upper Partial Moment
-#'
-#' This function generates a univariate upper partial moment for any degree or target.
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @return UPM of variable
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100)
-#' UPM(0, mean(x), x)
-#' @export
-UPM <- function(degree, target, variable) {
-    .Call(`_NNS_UPM_RCPP`, degree, target, variable)
+UPM_RCPP <- function(degree, target, variable, excess_ret) {
+    .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
 }
 
 #' Lower Partial Moment RATIO

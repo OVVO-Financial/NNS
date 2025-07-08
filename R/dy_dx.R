@@ -52,8 +52,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     
     eval.point.idx <- which(eval.point==eval.point)
 
-    h_s <- c(1:5, seq(10, 20, 5), 30)[1:min(length(x),9)]  * floor(sqrt(length(x)))
-#    h_s <- seq(1, 9, 2)
+    h_s <- c(1:5, seq(10, 20, 5))[1:min(length(x),8)]/100 
+
     
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
@@ -63,10 +63,10 @@ dy.dx <- function(x, y, eval.point = NULL){
   
     for(h in h_s){
       index <- which(h == h_s)
-      h_step <- gravity(abs(diff(x))) * h_s[index]
+      h_step <- eval.point * h_s[index]
       
-      eval.point.min <- original.eval.point.min - h_step
-      eval.point.max <- h_step + original.eval.point.max
+      eval.point.min <- max(min(x), original.eval.point.min - h_step)
+      eval.point.max <- min(max(x), h_step + original.eval.point.max)
       
       deriv.points[[index]] <- cbind(eval.point.min, eval.point, eval.point.max)
     }
@@ -87,10 +87,10 @@ dy.dx <- function(x, y, eval.point = NULL){
       }
     
       reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1)
-      
+     
       combined.matrices <- cbind(deriv.points, matrix(unlist(reg.output$Point.est), ncol = 3, byrow = F))
       colnames(combined.matrices) <- c(colnames(deriv.points), "estimates.min", "estimates", "estimates.max")
-      
+   
       combined.matrices[, `:=` (
         run_1 = eval.point.max - eval.point,
         run_2 = eval.point - eval.point.min,
