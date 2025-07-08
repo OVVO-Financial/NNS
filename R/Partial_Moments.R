@@ -27,6 +27,7 @@ LPM <- Vectorize(LPM, vectorize.args="target", USE.NAMES = FALSE)
 #'
 #' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
+#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param excess_ret Logical; \code{FALSE} (default)
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
