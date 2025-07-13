@@ -206,14 +206,15 @@ head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples,
 
 The ability to sample from specified correlations ensures the full spectrum of future paths is sampled from. Typical Monte Carlo samples are restricted to [-0.3, 0.3] correlations to the original data.
 
-We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values, and then plot the results compared to our original $X$ (black line). **`NNS.MC`** is a streamlined wrapper function for this functionality of **`NNS.meboot`**.
+We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values (the $ensemble$), and then plot the results compared to our original $X$ (black line). **`NNS.MC`** is a streamlined wrapper function for this functionality of **`NNS.meboot`**.
 
 ```{r, fig.align='center', fig.width=8, fig.height=8, eval=FALSE}
 boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 reps = do.call(cbind, boots)
 
-plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
-matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
+
+matplot(reps, type = "l", col = rainbow(length(boots)))
+lines(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
 ```
 
 ![](images/NNSmc_1.png)
@@ -223,8 +224,8 @@ Checking our replicate correlations:
 ```{r, eval = FALSE}
 sapply(boots, function(r) cor(r, x, method = "spearman"))
 
-   rho = 1  rho = 0.5 rho = -0.5   rho = -1 
- 1.0000000  0.4989619 -0.4984818 -0.9779778
+    rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1 
+ 0.97524152  0.47443144  0.01906991 -0.31301530 -0.96889289
 ```
 
 More replicates and ensembles thereof can be generated for any number of $\rho$ values. 
@@ -236,7 +237,7 @@ We can also specify a target drift in our replicates with the `target_drift` par
 boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
 reps = do.call(cbind, boots)
 
-plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
+plot(x, type = "l", lwd = 3, ylim = c(min(c(x, reps)), max(c(x, reps))))
 matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
 ```
 
@@ -380,6 +381,8 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 -   [Maximum Entropy Bootstrap for Time Series: The meboot R Package](https://doi.org/10.18637/jss.v029.i05)
 
 -   [Arbitrary Spearman's Rank Correlations in Maximum Entropy Bootstrap and Improved Monte Carlo Simulations](https://doi.org/10.2139/ssrn.3621614)
+
+-   [Value-at-Risk (VaR) and Probability Bounds Analysis](https://doi.org/10.2139/ssrn.5310345)
 
 ```{r threads, echo = FALSE}
 Sys.setenv("OMP_THREAD_LIMIT" = "")

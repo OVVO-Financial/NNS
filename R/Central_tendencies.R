@@ -102,7 +102,18 @@ NNS.gravity <- function (x, discrete = FALSE)
     q3 <- sum(x_s[f_l_75]+((l_75)%%1 * (x_s[ceiling(l_75)] - x_s[f_l_75])))
   }
 
-  z <- NNS_bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+  width = 2 * (q3 - q1) * l^(-1/2)
+  
+  z <- tryCatch(
+    {
+      NNS_bin(x_s, width, origin = x_s[1], missinglast = FALSE)
+    },
+    error = function(e) {
+        return(NNS_bin(x_s, range / 128, origin = x_s[1], missinglast = FALSE))
+      } 
+    
+  )
+  
   lz <- length(z$counts)
   max_z <- z$counts == max(z$counts)
   if (sum(max_z) > 1) {

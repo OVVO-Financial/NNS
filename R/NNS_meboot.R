@@ -128,9 +128,8 @@ NNS.meboot <- function(x,
   
   
   if(!is.null(target_drift) || !is.null(target_drift_scale)) drift <- TRUE 
-  
-  
-  if(rho < -0.5) ordxx_2 <- rev(ordxx) else ordxx_2 <- ordxx #order(ordxx)
+
+  ordxx_2 <- rev(ordxx) 
   
   
   # symmetry
@@ -243,8 +242,7 @@ NNS.meboot <- function(x,
     return(error)
   }
   
-  
-  res <- optim(c(.01,.01), func, control=list(abstol = .01))
+  res <- optim(c(.5, .5), func, control=list(abstol = .01))
   
   ensemble <- (res$par[1]*matrix2 + res$par[2]*ensemble) / (sum(abs(res$par)))
   

@@ -142,8 +142,9 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 #  reps = do.call(cbind, boots)
 #  
-#  plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
-#  matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
+#  
+#  matplot(reps, type = "l", col = rainbow(length(boots)))
+#  lines(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  sapply(boots, function(r) cor(r, x, method = "spearman"))
@@ -152,7 +153,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #   1.0000000  0.4989619 -0.4984818 -0.9779778
 
 ## ----tgt_drift, fig.align='center', fig.width=8, fig.height=8, eval=FALSE-----
-#  boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
+#  boots = NNS.MC(x, reps = 10, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
 #  reps = do.call(cbind, boots)
 #  
 #  plot(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))

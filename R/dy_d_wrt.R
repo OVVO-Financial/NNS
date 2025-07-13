@@ -135,6 +135,7 @@ dy.d_ <- function(x, y, wrt,
       eval.points <- unlist(eval.points)
 
       h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
+
       
       if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
       

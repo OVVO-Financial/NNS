@@ -162,7 +162,7 @@ NNS.ARMA <- function(variable,
         last.xs <- tail(GV.lin$Component.index[[i]], 1)
         lin.reg <- fast_lm(GV.lin$Component.index[[i]], GV.lin$Component.series[[i]])
         coefs <- lin.reg$coef
-        
+
         return(as.numeric(coefs[1] + coefs[2] * unlist(GV.lin$forecast.values[[i]])))
       })
       
