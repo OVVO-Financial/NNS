@@ -93,13 +93,18 @@ size_t target_size=target.size();                        \
 NumericVector output = NumericVector(target_size);       \
 WORKER_CLASS tmp_func(degree, target, variable, output); \
 parallelFor(0, target_size, tmp_func);                   \
-return(output);
+return(output);                                         
+
+// [[Rcpp::export]]
 NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(LPM_Worker);
 }
+
+// [[Rcpp::export]]
 NumericVector UPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(UPM_Worker);
 }
+
 
 NumericVector LPM_ratio_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   if (degree>0) {

@@ -34,6 +34,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// LPM_CPv
+NumericVector LPM_CPv(const double& degree, const NumericVector& target, const NumericVector& variable);
+RcppExport SEXP _NNS_LPM_CPv(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type variable(variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(LPM_CPv(degree, target, variable));
+    return rcpp_result_gen;
+END_RCPP
+}
+// UPM_CPv
+NumericVector UPM_CPv(const double& degree, const NumericVector& target, const NumericVector& variable);
+RcppExport SEXP _NNS_UPM_CPv(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type variable(variableSEXP);
+    rcpp_result_gen = Rcpp::wrap(UPM_CPv(degree, target, variable));
+    return rcpp_result_gen;
+END_RCPP
+}
 // LPM_RCPP
 NumericVector LPM_RCPP(const double& degree, const RObject& target, const RObject& variable, const bool& excess_ret);
 RcppExport SEXP _NNS_LPM_RCPP(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP excess_retSEXP) {
@@ -174,6 +200,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
+    {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
+    {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
     {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 4},
     {"_NNS_UPM_RCPP", (DL_FUNC) &_NNS_UPM_RCPP, 4},
     {"_NNS_LPM_ratio_RCPP", (DL_FUNC) &_NNS_LPM_ratio_RCPP, 3},

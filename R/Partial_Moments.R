@@ -16,24 +16,15 @@
 #' @export
 #' 
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
+  target   <- as.numeric(target)
+  variable <- as.numeric(variable)
+  
+  if (!excess_ret && length(target) > 1) {
+    return(.Call("_NNS_LPM_CPv", degree, target, variable))
+  }
+  
+  .Call("_NNS_LPM_RCPP", degree, target, variable, excess_ret)
 
-if (is.data.frame(variable) || is.matrix(variable)) variable <- unlist(variable, use.names = FALSE)
-
-if (is.data.frame(target) || is.matrix(target)) target <- unlist(target, use.names = FALSE)
-
-if (!excess_ret && length(target) > 1) {
-  return(vapply(target,
-                function(t) LPM(degree, t, variable, FALSE),
-                numeric(1)))
-}
-
-
-res <- .Call(`_NNS_LPM_RCPP`, degree,
-             unname(target), unname(variable), excess_ret)
-
-if (is.list(res) && length(res) == 1) res <- res[[1]]
-names(res) <- NULL
-res
 }
 
 
@@ -54,28 +45,16 @@ res
 #' UPM(0, mean(x), x)
 #' @export
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
-
-  if (is.data.frame(variable) || is.matrix(variable)) variable <- unlist(variable, use.names = FALSE)
-
-  if (is.data.frame(target) || is.matrix(target)) target <- unlist(target, use.names = FALSE)
+  target   <- as.numeric(target)
+  variable <- as.numeric(variable)
   
-
   if (!excess_ret && length(target) > 1) {
-    return(vapply(target,
-                  function(t) UPM(degree, t, variable, FALSE),
-                  numeric(1)))
+    return(.Call("_NNS_UPM_CPv", degree, target, variable))
   }
+  
+ .Call("_NNS_UPM_RCPP", degree, target, variable, excess_ret)
 
-  res <- .Call(`_NNS_UPM_RCPP`, degree,
-               unname(target),
-               unname(variable),
-               excess_ret)
-
-  if (is.list(res) && length(res) == 1) res <- res[[1]]
-  names(res) <- NULL
-  res
 }
-
 
 #' NNS CDF
 #'

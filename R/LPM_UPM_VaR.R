@@ -18,23 +18,29 @@
 #' }
 #' @export
 
-LPM.VaR <- function(percentile, degree, x){
-
-    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-
-    percentile <- pmax(pmin(percentile, 1), 0)
-
-    if(degree == 0){
-        return(quantile(x, percentile, na.rm = TRUE))
-    } else {
-        func <- function(b){
-            abs(LPM.ratio(degree, b, x) - percentile)
-        }
-        if(min(x)!=max(x)) return(optimize(func, c(min(x),max(x)))$minimum) else return(min(x))
-    }
+LPM.VaR <- function(percentile, degree, x) {
+  if (inherits(x, c("tbl","data.table"))) x <- as.numeric(unlist(x))
+  percentile <- pmin(pmax(percentile, 0), 1)
+  
+  if (degree == 0) {
+    return(quantile(x, percentile, na.rm = TRUE))
+  }
+  
+  # here we call the C++ ratio directly:
+  func <- function(b) {
+    abs(
+       as.numeric(.Call("_NNS_LPM_ratio_RCPP", degree, b, x)) - percentile
+    )
+  }
+  
+  if (min(x) != max(x)) {
+    optimize(func, c(min(x), max(x)))$minimum
+  } else {
+    min(x)
+  }
 }
-
 LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
+
 
 
 #' UPM VaR
@@ -54,22 +60,25 @@ LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
 #' UPM.VaR(0.05, 0, x)
 #' @export
 
-UPM.VaR <- function(percentile, degree, x){
+UPM.VaR <- function(percentile, degree, x) {
+  if (inherits(x, c("tbl","data.table"))) x <- as.numeric(unlist(x))
+  percentile <- pmin(pmax(percentile, 0), 1)
+  
+  if (degree == 0) {
+    return(quantile(x, 1 - percentile, na.rm = TRUE))
+  }
 
-    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-
-    percentile <- pmax(pmin(percentile, 1), 0)
-
-    if(degree==0){
-        return(quantile(x, 1 - percentile, na.rm = TRUE))
-    } else {
-        func <- function(b){
-            abs(LPM.ratio(degree, b, x) - (1 - percentile))
-        }
-        if(min(x)!=max(x)) return(optimize(func, c(min(x),max(x)))$minimum) else return(min(x))
-    }
-
+  func <- function(b) {
+    abs(
+      as.numeric(.Call("_NNS_UPM_ratio_RCPP", degree, b, x)) - percentile
+    )
+  }
+  
+  if (min(x) != max(x)) {
+    optimize(func, c(min(x), max(x)))$minimum
+  } else {
+    min(x)
+  }
 }
-
 UPM.VaR <- Vectorize(UPM.VaR, vectorize.args = "percentile")
 
