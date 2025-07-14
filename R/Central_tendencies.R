@@ -102,7 +102,7 @@ NNS.gravity <- function (x, discrete = FALSE)
     q3 <- sum(x_s[f_l_75]+((l_75)%%1 * (x_s[ceiling(l_75)] - x_s[f_l_75])))
   }
 
-  width = 2 * (q3 - q1) * l^(-1/2)
+  width = (q3 - q1) * l^(-1/2)
   
   z <- tryCatch(
     {
