@@ -178,7 +178,10 @@ NNS.rescale <- function(x, a, b, method = "minmax", T = NULL, type = "Terminal")
   
   if (method == "minmax") {
     # Original min-max scaling
-    if (max(x) == min(x)) stop("Cannot rescale: max(x) equals min(x)")
+    if (max(x) == min(x)) {
+           warning("All x identical: returning midpoint values")
+           return(rep((a + b) / 2, length(x)))
+    }
     output <- a + (b - a) * (x - min(x)) / (max(x) - min(x))
   } else if (method == "riskneutral") {
     # Risk-neutral scaling
