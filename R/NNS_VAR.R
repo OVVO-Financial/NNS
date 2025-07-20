@@ -275,7 +275,7 @@ NNS.VAR <- function(variables,
                                                 objective = objective,
                                                 method = c(1,2),
                                                 dim.red.method = dim.red.method,
-                                                order = NULL, ncores = 1, stack = TRUE)
+                                                order = NULL, ncores = 1, stack = TRUE, status = FALSE)
                      
                      
                      
