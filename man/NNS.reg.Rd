@@ -22,6 +22,7 @@ NNS.reg(
   confidence.interval = NULL,
   threshold = 0,
   n.best = NULL,
+  smooth = FALSE,
   noise.reduction = "off",
   dist = "L2",
   ncores = NULL,
@@ -64,6 +65,8 @@ NNS.reg(
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.}
+
+\item{smooth}{logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.}
 
 \item{noise.reduction}{the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.}
 

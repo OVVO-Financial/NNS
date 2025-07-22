@@ -119,7 +119,13 @@ NNS.stack <- function(IVs.train,
   
   objective <- tolower(objective)
   
-  if(!is.null(type) && type=="class") DV.train <- as.numeric(factor(DV.train)) else DV.train <- as.numeric(DV.train)
+  if(!is.null(type) && type=="class"){
+    DV.train <- as.numeric(factor(DV.train)) 
+    smoothness <- FALSE
+  } else {
+    smoothness <- TRUE
+    DV.train <- as.numeric(DV.train)
+  }
   
   n <- ncol(IVs.train)
   
@@ -242,7 +248,7 @@ NNS.stack <- function(IVs.train,
         }
         
         predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = order, ncores = ncores,
-                                              type = NULL, dist = dist, point.only = TRUE)$Point.est)
+                                              type = NULL, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
         
         predicted[is.na(predicted)] <- gravity(na.omit(predicted))
         
@@ -284,7 +290,7 @@ NNS.stack <- function(IVs.train,
         if(is.na(nns.ord.threshold)) nns.ord.threshold <- 0
 
         nns.method.2 <- (NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
-                                                 type = NULL, point.only = TRUE, confidence.interval = pred.int))
+                                                 type = type, point.only = TRUE, confidence.interval = pred.int, smooth = smoothness))
   
         actual <- nns.method.2$Fitted.xy$y
         predicted <- nns.method.2$Fitted.xy$y.hat
@@ -453,10 +459,10 @@ NNS.stack <- function(IVs.train,
 
         if(length(relevant_vars)>1){
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                     type = NULL, point.only = FALSE, confidence.interval = pred.int))
+                                                     type = type, point.only = FALSE, confidence.interval = pred.int))
         } else {
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = unlist(IVs.test[, relevant_vars]), plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                    type = NULL, point.only = FALSE, confidence.interval = pred.int))
+                                                    type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness))
         }
         
         actual <- nns.method.1$Fitted.xy$y

@@ -428,7 +428,7 @@ NNS.ARMA.optim <- function(variable,
   }
   
   
-  regressed_variable <- NNS.reg(1:length(variable), variable, plot = FALSE)$Fitted.xy$y.hat
+  regressed_variable <- NNS.reg(1:length(variable), variable, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   
   predicted <- NNS.ARMA(regressed_variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   

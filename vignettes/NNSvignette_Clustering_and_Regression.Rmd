@@ -218,6 +218,14 @@ NNS.reg(cbind(x, x), y,
 ```
 
 
+## Smoothing Option
+Smoothness is not required for curve fitting, but the `NNS.reg` function offers an optional smoothed fit. This feature applies a smoothing spline to regression points generated internally using the partitioning method described earlier.
+
+```{r smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'}
+NNS.reg(x, y, smooth = T)
+```
+
+
 # References
 If the user is so motivated, detailed arguments further examples are provided within the following:
 

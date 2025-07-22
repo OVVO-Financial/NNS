@@ -4,7 +4,7 @@
 #' @importFrom graphics abline boxplot legend lines par plot points segments text matplot title axis mtext barplot hist strwidth polygon
 #' @importFrom quantmod getSymbols
 #' @importFrom Rfast colmeans rowmeans rowsums comb_n
-#' @importFrom stats coef cor cov lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt t.test wilcox.test .preformat.ts var poly hclust as.dist
+#' @importFrom stats coef cor cov lm na.omit sd median complete.cases resid uniroot aggregate density hat qnorm model.matrix fivenum acf qt ecdf time approx embed frequency is.ts runif start ts optim quantile optimize dnorm dlnorm dexp dt t.test wilcox.test .preformat.ts var poly hclust as.dist smooth.spline predict
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @importFrom xts to.monthly
 #' @importFrom zoo as.yearmon index
