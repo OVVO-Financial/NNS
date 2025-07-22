@@ -225,7 +225,7 @@ NNS.boost <- function(IVs.train,
                            point.est = new.iv.test[, .SD, .SDcols=unlist(test.features[[i]])],
                            dim.red.method = "equal",
                            plot = FALSE, order = depth,
-                           ncores = 1, type = type)$Point.est
+                           ncores = 1, type = type, smooth = TRUE)$Point.est
       
       predicted[is.na(predicted)] <- gravity(na.omit(predicted))
       
@@ -342,7 +342,7 @@ NNS.boost <- function(IVs.train,
                            new.dv.train, point.est = point.est.values,
                            dim.red.method = "equal",
                            plot = FALSE, residual.plot = FALSE, order = depth,
-                           ncores = 1, type = type)$Point.est
+                           ncores = 1, type = type, smooth = TRUE)$Point.est
       
       predicted[is.na(predicted)] <- gravity(na.omit(predicted))
       # Do not predict a new unseen class
