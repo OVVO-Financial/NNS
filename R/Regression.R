@@ -746,7 +746,7 @@ NNS.reg = function (x, y,
   gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
   
   fitted <- cbind(fitted, gradient)
-  fitted$residuals <- original.y - fitted$y.hat
+  fitted$residuals <- fitted$y.hat - original.y 
   
   if(!is.numeric(order) && !is.null(order)){
     regression.points <- part.map$dt[, .(x,y)]

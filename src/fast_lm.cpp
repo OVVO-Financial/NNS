@@ -149,7 +149,7 @@ List fast_lm_mult(NumericMatrix x, NumericVector y) {
   }
   
   // Compute residuals
-  NumericVector residuals = y - fitted_values;
+  NumericVector residuals = fitted_values - y;
   
   // Compute R-squared
   double y_mean = mean(y);

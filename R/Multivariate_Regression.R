@@ -153,7 +153,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
   
-  fitted.matrix$residuals <- fitted.matrix$y - fitted.matrix$y.hat
+  fitted.matrix$residuals <- fitted.matrix$y.hat - fitted.matrix$y
   fitted.matrix[, bias := gravity(residuals),  by = NNS.ID]
   fitted.matrix$y.hat <- fitted.matrix$y.hat - fitted.matrix$bias
   fitted.matrix$bias <- NULL
@@ -381,7 +381,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   rhs.partitions <- data.table::data.table(reg.points.matrix)
-  fitted.matrix$residuals <-  original.DV - fitted.matrix$y.hat
+  fitted.matrix$residuals <-  fitted.matrix$y.hat - original.DV
   
   if(!is.null(type) && type=="class"){
     R2 <- as.numeric(format(mean(fitted.matrix$y.hat==fitted.matrix$y), digits = 4))
