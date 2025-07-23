@@ -654,9 +654,9 @@ NNS.reg = function (x, y,
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))
   
-  
+ 
   ### Regression Equation
-  if(multivariate.call)  return(regression.points)
+  if(multivariate.call)  return(regression.points[, c("x","y")])
   
   
   Regression.Coefficients <- regression.points[ , .(rise,run)]
@@ -680,7 +680,7 @@ NNS.reg = function (x, y,
   
   ### Fitted Values
   p <- length(unlist(regression.points[ , 1]))
-  
+
   
   if(is.na(Regression.Coefficients[1, Coefficient])){
     Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
@@ -710,7 +710,7 @@ NNS.reg = function (x, y,
     reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
     coef.point.interval[coef.point.interval == 0] <- 1
     reg.point.interval[reg.point.interval == 0] <- 1
-    point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
+    if(smooth && p >= 4) point.est.y <- predict(spline_fit, point.est)$y else point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
     
     if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
       upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
@@ -734,7 +734,7 @@ NNS.reg = function (x, y,
                                    y = original.y,
                                    y.hat = estimate,
                                    NNS.ID = nns.ids)
-  
+ 
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
   
   fitted$y.hat[is.na(fitted$y.hat)] <- gravity(na.omit(fitted$y.hat))
@@ -753,73 +753,6 @@ NNS.reg = function (x, y,
     data.table::setkey(regression.points, x)
   }
 
-  rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
-  run <- regression.points[ , 'run' := x - data.table::shift(x)]
-  
-  
-  Regression.Coefficients <- regression.points[ , .(rise,run)]
-  
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-  
-  upper.x <- regression.points[(2 : .N), x]
-  
-  Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
-  
-  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
-  
-  
-  Regression.Coefficients <- unique(Regression.Coefficients)
-  Regression.Coefficients$Coefficient[Regression.Coefficients$Coefficient==Inf] <- 1
-  Regression.Coefficients$Coefficient[is.na(Regression.Coefficients$Coefficient)] <- 0
-  
-  
-  ### Fitted Values
-  if(is.na(Regression.Coefficients[1, Coefficient])){
-    Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
-  }
-  if(is.na(Regression.Coefficients[.N, Coefficient])){
-    Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
-  }
-  
-  coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-  reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
-  
-  if(!is.null(order) && is.character(order)){
-    estimate <- y
-  } else{
-    if(smooth && p >= 4 && is.numeric(order)){
-      estimate <- plot_estimate[orig.order]
-    } else estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
-  }
-  
-  if(!is.null(point.est)){
-    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
-    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
-    coef.point.interval[coef.point.interval == 0] <- 1
-    reg.point.interval[reg.point.interval == 0] <- 1
-    if(smooth && p >= 4) point.est.y <- predict(spline_fit, point.est)$y else point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
-    
-    
-    if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est>max(x)] <- (point.est[point.est>max(x)] - max(x)) * upper.slope +  regression.points[.N, y]
-      
-      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
-      point.est.y[point.est<min(x)] <- (point.est[point.est<min(x)] - min(x)) * lower.slope +  regression.points[1, y]
-    }
-    
-    if(!is.null(type)){
-      if(type=="class") point.est.y <- pmin(max(y), pmax(min(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
-    }
-  }
-  
-  colnames(estimate) <- NULL
-  if(!is.null(type)){
-    if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < 0.5, floor(estimate), ceiling(estimate))))
-  }
-  
-  colnames(fitted) <- gsub(".V1", "", colnames(fitted))
-  
   
   if(!is.null(type)){
     if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
@@ -910,7 +843,7 @@ NNS.reg = function (x, y,
     
     ### Plot Regression points and fitted values and legend
     points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
-    if(smooth && p >= 4 && is.numeric(order)) lines(sorted_x$x, plot_estimate, col = "red", lwd = 2) else lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
+    if(smooth && p >= 4 && !is.character(order)) lines(sorted_x$x, plot_estimate, col = "red", lwd = 2) else lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
     
     if(!is.null(point.est)){
       points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)
