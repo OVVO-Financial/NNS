@@ -2,7 +2,7 @@
 % Please edit documentation in R/ANOVA.R
 \name{NNS.ANOVA}
 \alias{NNS.ANOVA}
-\title{NNS ANOVA}
+\title{NNS ANOVA: Nonparametric Analysis of Variance}
 \usage{
 NNS.ANOVA(
   control,
@@ -17,39 +17,40 @@ NNS.ANOVA(
 )
 }
 \arguments{
-\item{control}{a numeric vector, matrix or data frame, or list if unequal vector lengths.}
+\item{control}{Numeric vector of control group observations}
 
-\item{treatment}{\code{NULL} (default) a numeric vector, matrix or data frame.}
+\item{treatment}{Numeric vector of treatment group observations}
 
-\item{means.only}{logical; \code{FALSE} (default) test whether difference in sample means only is zero.}
+\item{means.only}{Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for mean-only comparison}
 
-\item{medians}{logical; \code{FALSE} (default) test whether difference in sample medians only is zero.  Requires \code{means.only = TRUE}.}
+\item{medians}{Logical; \code{FALSE} (default) uses means. Set \code{TRUE} for median-based analysis}
 
-\item{confidence.interval}{numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.}
+\item{confidence.interval}{Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)}
 
-\item{tails}{options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.}
+\item{tails}{Character; specifies CI tail(s): "both", "left", or "right"}
 
 \item{pairwise}{logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.}
 
-\item{plot}{logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.}
+\item{plot}{Logical; \code{TRUE} (default) generates distribution plot}
 
 \item{robust}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.}
 }
 \value{
-Returns the following:
+Returns a list containing:
 \itemize{
-\item{\code{"Control Mean"}} \code{control} mean.
-\item{\code{"Treatment Mean"}} \code{treatment} mean.
-\item{\code{"Grand Mean"}} mean of means.
-\item{\code{"Control CDF"}} CDF of the \code{control} from the grand mean.
-\item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
-\item{\code{"Certainty"}} the certainty of the same population statistic.
-\item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
-\item{\code{"Robust Certainty Estimate"}} and \code{"Lower 95 CI"}, \code{"Upper 95 CI"} are the robust certainty estimate and its 95 percent confidence interval after permutations if \code{robust = TRUE}.
+  \item \code{Control_Statistic}: Mean/median of control group
+  \item \code{Treatment_Statistic}: Mean/median of treatment group
+  \item \code{Grand_Statistic}: Grand mean/median
+  \item \code{Control_CDF}: CDF value at grand statistic (control)
+  \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
+  \item \code{Certainty}: Separation certainty (0-1)
+  \item \code{Effect_Size_LB}: Lower bound of treatment effect (if CI requested)
+  \item \code{Effect_Size_UB}: Upper bound of treatment effect (if CI requested)
+  \item \code{Confidence_Level}: Confidence level used (if CI requested)
 }
 }
 \description{
-Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables, evaluated at multiple quantiles (or means only).  Returns a degree of certainty to whether the population distributions (or sample means) are identical, not a p-value.
+Performs a distribution-free ANOVA using partial moment statistics to evaluate differences between control and treatment groups. Returns a certainty metric (0-1) indicating separation likelihood rather than traditional p-values. Includes bootstrapped effect size bounds.
 }
 \examples{
  \dontrun{

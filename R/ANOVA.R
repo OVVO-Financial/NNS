@@ -1,27 +1,30 @@
-#' NNS ANOVA
-#'
-#' Analysis of variance (ANOVA) based on lower partial moment CDFs for multiple variables, evaluated at multiple quantiles (or means only).  Returns a degree of certainty to whether the population distributions (or sample means) are identical, not a p-value.
-#'
-#' @param control a numeric vector, matrix or data frame, or list if unequal vector lengths.
-#' @param treatment \code{NULL} (default) a numeric vector, matrix or data frame.
-#' @param means.only logical; \code{FALSE} (default) test whether difference in sample means only is zero.
-#' @param medians logical; \code{FALSE} (default) test whether difference in sample medians only is zero.  Requires \code{means.only = TRUE}. 
-#' @param confidence.interval numeric [0, 1]; The confidence interval surrounding the \code{control} mean, defaults to \code{(confidence.interval = 0.95)}.
-#' @param tails options: ("Left", "Right", "Both").  \code{tails = "Both"}(Default) Selects the tail of the distribution to determine effect size.
+#' NNS ANOVA: Nonparametric Analysis of Variance
+#' 
+#' Performs a distribution-free ANOVA using partial moment statistics to evaluate differences between control and treatment groups. Returns a certainty metric (0-1) indicating separation likelihood rather than traditional p-values. Includes bootstrapped effect size bounds.
+#' 
+#' @param control Numeric vector of control group observations
+#' @param treatment Numeric vector of treatment group observations
+#' @param means.only Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for mean-only comparison
+#' @param medians Logical; \code{FALSE} (default) uses means. Set \code{TRUE} for median-based analysis
+#' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
+#' @param tails Character; specifies CI tail(s): "both", "left", or "right"
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
 #' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.
-#' @param plot logical; \code{TRUE} (default) Returns the boxplot of all variables along with grand mean identification and confidence interval thereof.
-#' @return Returns the following:
+#' @param plot Logical; \code{TRUE} (default) generates distribution plot
+#' 
+#' @return Returns a list containing:
 #' \itemize{
-#' \item{\code{"Control Mean"}} \code{control} mean.
-#' \item{\code{"Treatment Mean"}} \code{treatment} mean.
-#' \item{\code{"Grand Mean"}} mean of means.
-#' \item{\code{"Control CDF"}} CDF of the \code{control} from the grand mean.
-#' \item{\code{"Treatment CDF"}} CDF of the \code{treatment} from the grand mean.
-#' \item{\code{"Certainty"}} the certainty of the same population statistic.
-#' \item{\code{"Lower Bound Effect"} and \code{"Upper Bound Effect"}} the effect size of the \code{treatment} for the specified confidence interval.
-#' \item{\code{"Robust Certainty Estimate"}} and \code{"Lower 95 CI"}, \code{"Upper 95 CI"} are the robust certainty estimate and its 95 percent confidence interval after permutations if \code{robust = TRUE}.
+#'   \item \code{Control_Statistic}: Mean/median of control group
+#'   \item \code{Treatment_Statistic}: Mean/median of treatment group
+#'   \item \code{Grand_Statistic}: Grand mean/median
+#'   \item \code{Control_CDF}: CDF value at grand statistic (control)
+#'   \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
+#'   \item \code{Certainty}: Separation certainty (0-1)
+#'   \item \code{Effect_Size_LB}: Lower bound of treatment effect (if CI requested)
+#'   \item \code{Effect_Size_UB}: Upper bound of treatment effect (if CI requested)
+#'   \item \code{Confidence_Level}: Confidence level used (if CI requested)
 #' }
+#' 
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
@@ -154,7 +157,7 @@ NNS.ANOVA <- function(
   }
   
   if(medians) mean.of.means <- mean(apply(A, 2, function(i) median(i, na.rm = TRUE))) else mean.of.means <- mean(colMeans(A, na.rm = T))
- 
+  
   if(!pairwise){
     #Continuous CDF for each variable from Mean of Means
     if(medians){
@@ -167,7 +170,7 @@ NNS.ANOVA <- function(
     upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
     lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
     upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
-
+    
     raw.certainties <- list(n - 1)
     for(i in 1:(n - 1)){
       raw.certainties[[i]] <- sapply(

@@ -36,7 +36,7 @@ Below we run the analysis to whether automatic transmissions and manual transmis
 
 The plot on the left shows the robust `Certainty` estimate, reflecting the distribution of `Certainty` estimates over 100 random permutations of both variables. The plot on the right illustrates the control and treatment variables, along with the grand mean among variables, and the confidence interval associated with the control mean.
 
-```{r cars, fig.width=7, fig.align='center'}
+```{r cars, fig.width=10, fig.align='center'}
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
 mpg_man_trans = mtcars[mtcars$am==0, "mpg"]
 
@@ -53,7 +53,7 @@ wilcox.test(mpg ~ am, data=mtcars)
 
 Here we provide the output from **`NNS.ANOVA()`** and `t.test()` functions on two Normal distribution samples, where we are pretty certain these two means are equal.
 
-```{r equalmeans, echo=TRUE, fig.width=7, fig.align='center'}
+```{r equalmeans, echo=TRUE, fig.width=10, fig.align='center'}
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 0, sd = 2)
@@ -68,7 +68,7 @@ t.test(x,y)
 
 By altering the mean of the `y` variable, we can start to see the sensitivity of the results from the two methods, where both firmly reject the null hypothesis of identical means.
 
-```{r unequalmeans, echo=TRUE, fig.width=7, fig.align='center'}
+```{r unequalmeans, echo=TRUE, fig.width=10, fig.align='center'}
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
@@ -86,7 +86,7 @@ The effect size from **`NNS.ANOVA()`** is calculated from the confidence interva
 
 In order to test medians instead of means, simply set both `means.only = TRUE` and `medians = TRUE` in **`NNS.ANOVA()`**.
 
-```{r unequalmedians, echo=TRUE, fig.width=7, fig.align='center'}
+```{r unequalmedians, echo=TRUE, fig.width=10, fig.align='center'}
 NNS.ANOVA(control = x, treatment = y,
           means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
 ```
