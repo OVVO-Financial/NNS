@@ -155,7 +155,8 @@ lag.mtx <- function(x, tau){
   max_tau <- max(unlist(tau))
   
   if(is.null(dim(x)[2])) {
-    colheads <- noquote(as.character(deparse(substitute(x))))
+    mc <- match.call()
+    colheads <- noquote(as.character(deparse(mc$x)))
     x <- t(t(x))
   }
   

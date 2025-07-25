@@ -195,8 +195,8 @@ NNS.reg = function (x, y,
   
   
   if(!is.null(original.columns) & is.null(original.names)) x <- data.frame(x)
-  
-  y.label <- deparse(substitute(y))
+  mc <- match.call()
+  y.label <- deparse(mc$y)
   if(is.null(y.label)) y.label <- "y"
   
   if(factor.2.dummy && any(sapply(x, is.factor))) factor.2.dummy <- TRUE else factor.2.dummy <- FALSE
@@ -478,7 +478,6 @@ NNS.reg = function (x, y,
         part.map <- NNS.part(x, y, type =  "XONLY", noise.reduction = noise.reduction2, order = min( nchar(part.map$dt$quadrant)), obs.req = 0)
       }
     }
-   
   }
   
   nns.ids <- part.map$dt$quadrant

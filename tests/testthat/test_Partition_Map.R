@@ -25,7 +25,7 @@ T_regression_points <- data.table::data.table(
   "x"=c( 0.6683391, 0.3165146, 0.7102837, 0.3046473),
   "y"=c( 0.7326375, 0.7751977, 0.2473231, 0.3262245)
 )
-R1 <- NNS.part(x,y,Voronoi=FALSE)
+R1 <- NNS.part(x,y,Voronoi=FALSE,min.obs.stop=TRUE)
 
 test_that(
 	"NNS.part", {

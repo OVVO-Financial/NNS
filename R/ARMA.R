@@ -81,8 +81,8 @@ NNS.ARMA <- function(variable,
   options(warn = -1)
   
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
-  
-  label <- deparse(substitute(variable))
+  mc <- match.call()
+  label <- deparse(mc$variable)
   variable <- as.numeric(variable)
   OV <- variable
   

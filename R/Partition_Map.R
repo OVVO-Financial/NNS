@@ -43,138 +43,134 @@
 #' }
 #' @export
 
-
-NNS.part = function (x, y, Voronoi = FALSE, type = NULL, order = NULL, obs.req = 8, 
-                     min.obs.stop = TRUE, noise.reduction = "off") {
-  
+NNS.part = function(x, y, Voronoi = FALSE, type = NULL,
+                    order = NULL, obs.req = 8, min.obs.stop = TRUE,
+                    noise.reduction = "off") {
+  # Validate noise.reduction
   noise.reduction <- tolower(noise.reduction)
-  if (!any(noise.reduction %in% c("mean", "median", "mode", 
-                                  "off", "mode_class"))) {
-    stop("Please ensure noise.reduction is from 'mean', 'median', 'mode' or 'off'")
+  if (!noise.reduction %in% c("mean", "median", "mode",
+                              "mode_class", "off")) {
+    stop("noise.reduction must be one of 'mean','median','mode','mode_class','off'")
   }
-  if (any(class(x) %in% c("tbl", "data.table"))) 
-    x <- as.vector(unlist(x))
-  if (any(class(y) %in% c("tbl", "data.table"))) 
-    y <- as.vector(unlist(y))
-  if (is.null(obs.req)) 
-    obs.req <- 8
-  if (!is.null(order) && order == 0) 
-    order <- 1
+  # Flatten tables
+  if (any(class(x) %in% c("tbl", "data.table")))
+    x <- unlist(x, use.names = FALSE)
+  if (any(class(y) %in% c("tbl", "data.table")))
+    y <- unlist(y, use.names = FALSE)
+  x <- as.numeric(x); y <- as.numeric(y)
+  if (is.null(obs.req)) obs.req <- 8
+  if (!is.null(order) && order == 0) order <- 1
+  
+  # Capture labels for plotting using original argument names
   if (Voronoi) {
-    x.label <- deparse(substitute(x))
-    y.label <- deparse(substitute(y))
-  }
-  x <- as.numeric(x)
-  y <- as.numeric(y)
-  PART <- data.table::data.table(x, y, quadrant = "q", prior.quadrant = "pq")[, 
-                                                                              `:=`(counts, .N), by = "quadrant"][, `:=`(old.counts, 
-                                                                                                                        .N), by = "prior.quadrant"]
-  if (Voronoi) 
-    plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, 
-         ylab = y.label)
-  if (length(x) <= 8) {
-    if (is.null(order)) {
-      order <- 1
-      hard.stop <- max(ceiling(log(length(x), 2)), 1)
-    }
-    else {
-      obs.req <- 0
-      hard.stop <- length(x)
-    }
-  }
-  if (is.null(order)) 
-    order <- max(ceiling(log(length(x), 2)), 1)
-  if (!is.numeric(order)) {
-    obs.req <- 0
-    hard.stop <- max(ceiling(log(length(x), 2)), 1) + 2
-  }
-  else {
-    obs.req <- obs.req
-    hard.stop <- 2 * max(ceiling(log(length(x), 2)), 1) + 
-      2
+    mc <- match.call()
+    x.label <- deparse(mc$x)
+    y.label <- deparse(mc$y)
   }
   
-  if(is.null(type)) OR <- obs.req else OR <- obs.req/2
+  # Initialize partition table
+  PART <- data.table::data.table(
+    x = x, y = y,
+    quadrant = "q", prior.quadrant = "pq"
+  )
+  PART[, counts := .N, by = quadrant]
+  PART[, old.counts := .N, by = prior.quadrant]
+  if (Voronoi) {
+    plot(x, y, col = "steelblue", cex.lab = 1.5,
+         xlab = x.label, ylab = y.label)
+  }
   
+  # Recursion limits
+  n <- length(x)
+  default.order <- max(ceiling(log(n, 2)), 1)
+  if (is.null(order)) order <- default.order
+  OR <- obs.req
+  
+  # Choose noise-reduction function
   noiseFunction <- switch(noise.reduction,
-                          "mean" = mean,
-                          "median" = median,
-                          "mode" = mode,
-                          "mode_class" = mode_class,
-                          "off" = gravity)
+                          mean = mean,
+                          median = median,
+                          mode = mode,
+                          mode_class = mode_class,
+                          off = gravity)
   
-  drawSegments <- function(calcFunc) {
-    if(is.null(type)){
-      PART[obs.req.rows, {
-        segments(min(x), calcFunc(y), max(x), calcFunc(y), lty = 3)
+  # Draw partition lines
+  drawSegments <- function(calcY) {
+    if (is.null(type)) {
+      PART[split.rows, {
+        segments(min(x), calcY(y), max(x), calcY(y), lty = 3)
         segments(gravity(x), min(y), gravity(x), max(y), lty = 3)
       }, by = quadrant]
     } else {
-      abline(v = c(PART[ ,min(x), by = quadrant]$V1,max(x)), lty = 3)
+      bounds <- PART[, .(min = min(x), max = max(x)), by = quadrant]
+      abline(v = bounds$min, lty = 3)
+      abline(v = bounds$max, lty = 3)
     }
   }
   
+  # Reassign observations after splitting
   obs_assignment <- function() {
-    RP[, `:=`(prior.quadrant, (quadrant))]
-    PART[obs.req.rows, `:=`(prior.quadrant, (quadrant))]
-    
-    if(is.null(type)){
-      PART[RP, on = .(quadrant), `:=`(q_new, {
-        lox = x.x <= i.x
-        loy = x.y <= i.y
+    RP[, prior.quadrant := quadrant]
+    PART[split.rows, prior.quadrant := quadrant]
+    if (is.null(type)) {
+      PART[RP, on = .(quadrant), `:=`(q_new = {
+        lox <- x.x <= i.x; loy <- x.y <= i.y;
         1L + lox + loy * 2L
       })]
     } else {
-      PART[RP, on = .(quadrant), `:=`(q_new, {
-        lox = x.x > i.x
-        1L + lox
+      PART[RP, on = .(quadrant), `:=`(q_new = {
+        lox <- x.x > i.x; 1L + lox
       })]
     }
-    PART[obs.req.rows, `:=`(quadrant, paste0(quadrant, q_new))]
+    PART[split.rows, quadrant := paste0(quadrant, q_new)]
   }
   
+  # Recursive partitioning loop
+  i <- 0L
+  while (TRUE) {
+    # Stop if too many cells or max depth reached
+    if (nrow(PART) > n || i >= order || i >= floor(log(n, 2))) break
+    # Recompute counts by current quadrant
+    PART[, counts := .N, by = quadrant]
+    # Identify cells needing split (> obs.req)
+    split.rows <- PART[counts > OR, which = TRUE]
+    if (length(split.rows) == 0) break
+    # Optionally draw lines
+    if (Voronoi) drawSegments(noiseFunction)
+    # Compute new regression points
+    RP <- PART[split.rows, .(
+      x = gravity(x),
+      y = noiseFunction(y)
+    ), by = quadrant]
+    # Split cells
+    obs_assignment()
+    i <- i + 1L
+    # If stopping on min.obs, break once any quadrant too small
+    if (min.obs.stop) {
+      PART[, counts := .N, by = quadrant]
+      if (min(PART$counts) <= OR) break
+    }
+  }
   
-    i <- 0L
-    while (i >= 0) {
-      if (nrow(PART) > length(x)) break
-      if (i == order || i == floor(log(length(x), 2))) break
-      
-      PART[counts > OR, `:=`(counts, .N), by = quadrant]
-      obs.req.rows <- PART[counts > OR, which = TRUE]
-      
-      if (length(obs.req.rows) == 0 && OR > 0) break
-      
-      PART[old.counts > OR, `:=`(old.counts, .N), by = prior.quadrant]
-      old.obs.req.rows <- PART[old.counts > OR, which = TRUE]
-      
-      if (OR > 0 && (length(obs.req.rows) < length(old.obs.req.rows))) break
-      
-      l.PART <- max(PART$counts)
-      
-      if(Voronoi) drawSegments(noiseFunction)
-     
-      RP <- PART[obs.req.rows, .(x = gravity(x), y = noiseFunction(y)), by = quadrant]
-      
-      obs_assignment()
-      
-      if ((min(PART$counts) <= obs.req) && i > 0) break
-      if (nrow(PART) > length(x)) break
-      i = i + 1L
-    }
-    
-    if (!exists("RP")) RP <- PART[, c("quadrant", "x", "y")]
-    if (!is.numeric(order) || is.null(dim(RP))) RP <- PART[, c("quadrant", "x", "y")] else RP[, `:=`(prior.quadrant = NULL)]
-    
-    PART[, `:=`(counts = NULL, old.counts = NULL, q_new = NULL)]
-    RP <- data.table::setorder(RP[], quadrant)[]
-    
-    if (is.discrete(x)) RP$x <- ifelse(RP$x%%1 < 0.5, floor(RP$x), ceiling(RP$x))
-    
-    if (Voronoi) {
-      title(main = paste0("NNS Order = ", i), cex.main = 2)
-      if (min.obs.stop) points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
-    }
-    
-    if (min.obs.stop == FALSE) RP <- NULL
-    return(list(order = i, dt = PART[], regression.points = RP))
+  # Clean up auxiliary columns
+  PART[, c("counts", "old.counts", "q_new") := NULL]
+  
+  # Final regression points by prior.quadrant
+  RP <- PART[, .(
+    x = gravity(x),
+    y = noiseFunction(y)
+  ), by = prior.quadrant]
+  setnames(RP, "prior.quadrant", "quadrant")
+  if (is.discrete(x)) {
+    RP[, x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
+  }
+  RP <- data.table::setorder(RP, quadrant)
+  
+  # Final plotting of points
+  if (Voronoi) {
+    title(main = paste0("NNS Order = ", i), cex.main = 2)
+    points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+  }
+  
+  return(list(order = i, dt = PART[], regression.points = RP))
 }

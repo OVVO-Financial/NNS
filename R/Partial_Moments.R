@@ -99,218 +99,146 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @export
 
 
-NNS.CDF <- function(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE){
-  if(any(class(variable) %in% c("tbl", "data.table")) && dim(variable)[2] == 1){ 
+NNS.CDF <- function(variable,
+                    degree = 0,
+                    target = NULL,
+                    type   = "CDF",
+                    plot   = TRUE) {
+  
+  # — Flatten tibbles/data.tables
+  if (any(class(variable) %in% c("tbl","data.table")) && ncol(variable)==1) {
     variable <- as.vector(unlist(variable))
   }
-  if(any(class(variable) %in% c("tbl", "data.table"))){
+  if (any(class(variable) %in% c("tbl","data.table"))) {
     variable <- as.data.frame(variable)
   }
   
-  if(!is.null(target)){
-    if(is.null(dim(variable)) || dim(variable)[2] == 1){
-      if(target < min(variable) || target > max(variable)){
-        stop("Please make sure target is within the observed values of variable.")
-      }
+  # — Bounds check
+  if (!is.null(target)) {
+    if (is.null(dim(variable))||ncol(variable)==1) {
+      if (target<min(variable)||target>max(variable)) stop("target out of bounds")
     } else {
-      if(target[1] < min(variable[,1]) || target[1] > max(variable[,1])){
-        stop("Please make sure target 1 is within the observed values of variable 1.")
-      }
-      if(target[2] < min(variable[,2]) || target[2] > max(variable[,2])){
-        stop("Please make sure target 2 is within the observed values of variable 2.")
-      }
+      if (target[1]<min(variable[,1])||target[1]>max(variable[,1])||
+          target[2]<min(variable[,2])||target[2]>max(variable[,2])) stop("target out of bounds")
     }
   }
   
+  # — Validate type
   type <- tolower(type)
-  if(!(type %in% c("cdf", "survival", "hazard", "cumulative hazard"))){
-    stop(paste("Please select a type from: ", "`CDF`, ", "`survival`, ",  "`hazard`, ", "`cumulative hazard`"))
+  if (!type%in%c("cdf","survival","hazard","cumulative hazard")) stop("invalid type")
+  
+  # — Axis labels
+  mc <- match.call(); vc <- mc$variable
+  if (is.null(dim(variable))||ncol(variable)==1) {
+    vn <- deparse(vc)
+  } else if (!is.null(colnames(variable))) {
+    xlab <- colnames(variable)[1]; ylab <- colnames(variable)[2]
+  } else {
+    expr <- deparse(vc); xlab <- paste0(expr,"[,1]"); ylab <- paste0(expr,"[,2]")
   }
   
-  # Univariate Case
-  if(is.null(dim(variable)) || dim(variable)[2] == 1){
-    overall_target <- sort(variable)
-    x <- overall_target
-    CDF <- LPM.ratio(degree, overall_target, variable)
-    values <- cbind.data.frame(sort(variable), CDF)
-    colnames(values) <- c(deparse(substitute(variable)), "CDF")
-    if(!is.null(target)){
-      P <- LPM.ratio(degree, target, variable)
+  # — Univariate branch
+  if (is.null(dim(variable))||ncol(variable)==1) {
+    x    <- sort(variable)
+    pval <- LPM.ratio(degree,x,variable)
+    DT   <- data.table::data.table(x, pval)
+    colname <- switch(type,
+                      cdf="CDF",
+                      survival="S(x)",
+                      hazard="h(x)",
+                      `cumulative hazard`="H(x)")
+    data.table::setnames(DT, c("x",colname))
+    
+    # adjust pval for survival/hazard/cumhaz
+    if (type=="survival") DT[[2]] <- 1-DT[[2]]
+    if (type=="hazard") {
+      n <- length(x); w <- min(10,n-1)
+      F <- pval; proxy <- vapply(seq_along(x),function(i){lo<-max(1,i-w%/%2);hi<-min(n,i+w%/%2);(F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
+      fit <- NNS.reg(x, pmax(proxy,1e-10), order=NULL, n.best=1, point.est=target, plot=FALSE)
+      DT[[2]] <- pmin(pmax(fit$Fitted$y.hat / pmax(1-F,1e-10),0),1e6)
+    }
+    if (type=="cumulative hazard") DT[[2]] <- pmax(-log(pmax(1-pval,1e-10)),0)
+    
+    # compute target.value
+    if (is.null(target)) {
+      Pv <- numeric(0)
     } else {
-      P <- NULL
-    }
-    ylabel <- "Probability"
-    if(type == "survival"){
-      CDF <- 1 - CDF
-      P <- 1 - P
-      ylabel <- "S(x)"
-    } else if(type == "hazard"){
-      n <- length(x)
-      window <- min(10, n-1)
-      f_proxy <- numeric(n)
-      for(i in 1:n){
-        start <- max(1, i - window %/% 2)
-        end <- min(n, i + window %/% 2)
-        dx <- x[end] - x[start]
-        f_proxy[i] <- (CDF[end] - CDF[start]) / dx
-      }
-      f_proxy <- pmax(f_proxy, 1e-10)
-      reg_fit <- NNS.reg(x, f_proxy, order = NULL, n.best = 1, point.est = if(!is.null(target)) target else NULL, plot = FALSE)
-      dens <- pmax(reg_fit$Fitted$y.hat, 1e-10)
-      S <- pmax(1e-10, 1 - CDF)
-      CDF <- dens / S
-      CDF <- pmin(CDF, 1e6)
-      CDF <- pmax(0, CDF)
-      ylabel <- "h(x)"
-      if(!is.null(target)){
-        P <- reg_fit$Point.est / S[which.min(abs(x - target))]
-        P <- min(P, 1e6)
-        P <- max(0, P)
-        CDF[is.infinite(CDF)] <- P
-      }
-    } else if(type == "cumulative hazard"){
-      S <- pmax(1e-10, 1 - CDF)
-      CDF <- -log(S)
-      CDF <- pmax(0, CDF)
-      if(!is.null(target)){
-        reg_fit <- NNS.reg(x, CDF, order = NULL, n.best = 1, point.est = target, plot = FALSE)
-        P <- reg_fit$Point.est
-      }
-      ylabel <- "H(x)"
-    }
-    if(plot){
-      plot(x, CDF, pch = 19, col = 'steelblue', xlab = deparse(substitute(variable)), ylab = ylabel, main = toupper(type), type = "s", lwd = 2)
-      points(x, CDF, pch = 19, col = 'steelblue')
-      lines(x, CDF, lty = 2, col = 'steelblue')
-      if(!is.null(target)){
-        segments(target, 0, target, P, col = "red", lwd = 2, lty = 2)
-        segments(min(variable), P, target, P, col = "red", lwd = 2, lty = 2)
-        points(target, P, col = "green", pch = 19)
-        mtext(text = round(P, 4), col = "red", side = 2, at = P, las = 2)
-        mtext(text = round(target, 4), col = "red", side = 1, at = target, las = 1)
-      }
-    }
-    values <- data.table::data.table(cbind.data.frame(x, CDF))
-    colnames(values) <- c(deparse(substitute(variable)), ylabel)
-    return(
-      list(
-        "Function" = values,
-        "target.value" = P
-      )
-    )
-  } 
-  # Bivariate Case
-  else {
-    overall_target_1 <- variable[,1]
-    overall_target_2 <- variable[,2]
-    
-    sorted_indices <- order(variable[,1], variable[,2])
-    sorted_x <- variable[sorted_indices, 1]
-    sorted_y <- variable[sorted_indices, 2]
-    
-    joint_cdf <- (
-      Co.LPM(degree, overall_target_1, overall_target_2, overall_target_1, overall_target_2) /
-        (
-          Co.LPM(degree, overall_target_1, overall_target_2, overall_target_1, overall_target_2) +
-            Co.UPM(degree, overall_target_1, overall_target_2, overall_target_1, overall_target_2) +
-            D.UPM(degree, degree, overall_target_1, overall_target_2, overall_target_1, overall_target_2) +
-            D.LPM(degree, degree, overall_target_1, overall_target_2, overall_target_1, overall_target_2)
-        )
-    )
-    CDF <- joint_cdf[sorted_indices]
-    
-    marginal_X <- LPM.ratio(degree, sorted_x, overall_target_1)
-    marginal_Y <- LPM.ratio(degree, sorted_y, overall_target_2)
-    
-    ylabel <- "Probability"
-    if(type == "survival"){
-      CDF <- 1 - marginal_X - marginal_Y + CDF
-      CDF <- pmax(0, pmin(1, CDF))
-      ylabel <- "S(x, y)"
-    } else if(type == "hazard"){
-      data_points <- data.frame(x = sorted_x, y = sorted_y)
-      dens_proxy <- pmax(joint_cdf[sorted_indices], 1e-10)
-      reg_fit <- NNS.reg(data_points, dens_proxy, order = "max", 
-                         point.est = if(!is.null(target)) data.frame(x = target[1], y = target[2]) else NULL, 
-                         plot = FALSE)
-      dens <- pmax(reg_fit$Fitted$y.hat, 1e-10)
-      S_xy <- pmax(1e-10, 1 - marginal_X - marginal_Y + CDF)
-      CDF <- dens / S_xy
-      CDF <- pmax(0, CDF)
-      ylabel <- "h(x, y)"
-    } else if(type == "cumulative hazard"){
-      S_xy <- pmax(1e-10, 1 - marginal_X - marginal_Y + CDF)
-      CDF <- -log(S_xy)
-      CDF <- pmax(0, CDF)
-      ylabel <- "H(x, y)"
+      Pv <- LPM.ratio(degree,target,variable)
+      if (type=="survival") Pv <- 1-Pv
+      if (type=="hazard") Pv <- fit$Point.est / pmax(1-pval[which.min(abs(x-target))],1e-10)
+      if (type=="cumulative hazard") Pv <- NNS.reg(x,DT[[2]],order=NULL,n.best=1,point.est=target,plot=FALSE)$Point.est
     }
     
-    if(!is.null(target)){
-      P <- (
-        Co.LPM(degree, overall_target_1, overall_target_2, target[1], target[2]) /
-          (
-            Co.LPM(degree, overall_target_1, overall_target_2, target[1], target[2]) +
-              Co.UPM(degree, overall_target_1, overall_target_2, target[1], target[2]) +
-              D.LPM(degree, degree, overall_target_1, overall_target_2, target[1], target[2]) +
-              D.UPM(degree, degree, overall_target_1, overall_target_2, target[1], target[2])
-          )
-      )
-      P_marginal_X <- LPM.ratio(degree, target[1], overall_target_1)
-      P_marginal_Y <- LPM.ratio(degree, target[2], overall_target_2)
-      if(type == "survival"){
-        P <- 1 - P_marginal_X - P_marginal_Y + P
-        P <- max(0, min(1, P))
-      } else if(type == "hazard"){
-        P_dens <- pmax(reg_fit$Point.est, 1e-10)
-        S_target <- max(1e-10, 1 - P_marginal_X - P_marginal_Y + P)
-        P <- P_dens / S_target
-        P <- min(P, 1e6)
-        P <- max(0, P)
-      } else if(type == "cumulative hazard"){
-        S_target <- max(1e-10, 1 - P_marginal_X - P_marginal_Y + P)
-        P <- -log(S_target)
-        P <- max(0, P)
-      }
-    } else {
-      P <- NULL
-    }
-    
-    if(plot){
-      plot3d(
-        variable[sorted_indices, 1], variable[sorted_indices, 2], CDF, col = "steelblue",
-        xlab = deparse(substitute(variable[,1])), ylab = deparse(substitute(variable[,2])),
-        zlab = ylabel, box = FALSE, pch = 19
-      )
-      if(!is.null(target) && !is.na(P)){
-        points3d(target[1], target[2], P, col = "green", pch = 19)
-        points3d(target[1], target[2], 0, col = "red", pch = 15, cex = 2)
-        lines3d(
-          x = c(target[1], max(variable[,1])),
-          y = c(target[2], max(variable[,2])),
-          z = c(P, P),
-          col = "red", lwd = 2, lty = 3
-        )
-        lines3d(
-          x = c(target[1], target[1]),
-          y = c(target[2], target[2]),
-          z = c(0, P),
-          col = "red", lwd = 1, lty = 3
-        )
-        text3d(
-          max(variable[,1]), max(variable[,2]), P, texts = paste0("P = ", round(P, 4)), pos = 4, col = "red"
-        )
+    # plotting
+    if (plot) {
+      plot(DT$x,DT[[2]],type="s",lwd=2,pch=19,col="steelblue",xlab=vn,ylab=colname,main=toupper(type))
+      points(DT$x,DT[[2]],pch=19,col="steelblue")
+      if(length(Pv)){
+        segments(target,0,target,Pv,col="red",lty=2,lwd=2)
+        segments(min(x),Pv,target,Pv,col="red",lty=2,lwd=2)
+        points(target,Pv,pch=19,col="green")
       }
     }
     
-    return(list(
-      "Function" = data.table::data.table(cbind(
-        data.frame(variable[sorted_indices, ], row.names = NULL), 
-        CDF = CDF
-      )),
-      "target.value" = P
-    ))
+    return(list(Function=DT,target.value=Pv))
   }
+  
+  # — Bivariate cloud branch
+  x1 <- variable[,1]; x2 <- variable[,2]
+  u1 <- LPM.ratio(degree,x1,x1); u2 <- LPM.ratio(degree,x2,x2)
+  CDF <- Co.LPM(degree,u1,u2,u1,u2)
+  mX  <- LPM.ratio(degree,x1,x1); mY <- LPM.ratio(degree,x2,x2)
+  if(type=="survival") CDF <- pmax(0,pmin(1,1-mX-mY+CDF))
+  if(type=="hazard"){f<-NNS.reg(data.frame(x=x1,y=x2),pmax(CDF,1e-10),order="max",plot=FALSE)$Fitted$y.hat;CDF<-pmax(f/pmax(1-mX-mY+CDF,1e-10),0)}
+  if(type=="cumulative hazard") CDF<-pmax(-log(pmax(1-mX-mY+CDF,1e-10)),0)
+  
+  # target
+  if(is.null(target)){Pv<-numeric(0)}else{
+    ut1<-LPM.ratio(degree,target[1],x1);ut2<-LPM.ratio(degree,target[2],x2)
+    num<-Co.LPM(degree,u1,u2,ut1,ut2);den<-num+Co.UPM(degree,u1,u2,ut1,ut2)+D.UPM(degree,degree,u1,u2,ut1,ut2)+D.LPM(degree,degree,u1,u2,ut1,ut2)
+    Pv<-num/den; if(type=="survival"){PVx<-LPM.ratio(degree,target[1],x1);PVy<-LPM.ratio(degree,target[2],x2);Pv<-max(0,min(1,1-PVx-PVy+Pv))}
+  }
+  
+  # plot cloud
+  if(plot){
+    rgl::plot3d(u1, u2, CDF,
+                xlab = xlab, ylab = ylab, zlab = toupper(type),
+                col  = "steelblue", pch = 19, box = FALSE)
+    if(length(Pv)){
+      # green target point
+      rgl::points3d(ut1, ut2, Pv, col = "green", pch = 19)
+      
+      # dashed horizontal segment along x at level Pv
+      rgl::segments3d(
+        x = c(min(u1), ut1),
+        y = c(ut2,    ut2),
+        z = c(Pv,     Pv),
+        col = "red", lwd = 2, lty = "dashed"
+      )
+      # dashed horizontal segment along y at level Pv
+      rgl::segments3d(
+        x = c(ut1,    ut1),
+        y = c(min(u2),ut2),
+        z = c(Pv,     Pv),
+        col = "red", lwd = 2, lty = "dashed"
+      )
+      # dashed vertical segment from base to Pv
+      rgl::segments3d(
+        x = c(ut1, ut1),
+        y = c(ut2, ut2),
+        z = c(0,   Pv),
+        col = "red", lwd = 2, lty = "dashed"
+      )
+    }
+  }
+  
+  outDT <- data.table::data.table(variable, CDF = CDF)
+  return(list(Function = outDT, target.value = Pv))(list(Function = outDT, target.value = Pv))(list(Function=outDT,target.value=Pv))
 }
+
+
+
+
 
 
 
