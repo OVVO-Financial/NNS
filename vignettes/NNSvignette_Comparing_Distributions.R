@@ -12,7 +12,7 @@ library(data.table)
 require(knitr)
 require(rgl)
 
-## ----cars, fig.width=7, fig.align='center'------------------------------------
+## ----cars, fig.width=10, fig.align='center'-----------------------------------
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
 mpg_man_trans = mtcars[mtcars$am==0, "mpg"]
 
@@ -21,7 +21,7 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
 ## ----cars2, warning=FALSE-----------------------------------------------------
 wilcox.test(mpg ~ am, data=mtcars) 
 
-## ----equalmeans, echo=TRUE, fig.width=7, fig.align='center'-------------------
+## ----equalmeans, echo=TRUE, fig.width=10, fig.align='center'------------------
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 0, sd = 2)
@@ -31,7 +31,7 @@ NNS.ANOVA(control = x, treatment = y,
 
 t.test(x,y)
 
-## ----unequalmeans, echo=TRUE, fig.width=7, fig.align='center'-----------------
+## ----unequalmeans, echo=TRUE, fig.width=10, fig.align='center'----------------
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
@@ -41,7 +41,7 @@ NNS.ANOVA(control = x, treatment = y,
 
 t.test(x,y)
 
-## ----unequalmedians, echo=TRUE, fig.width=7, fig.align='center'---------------
+## ----unequalmedians, echo=TRUE, fig.width=10, fig.align='center'--------------
 NNS.ANOVA(control = x, treatment = y,
           means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
 

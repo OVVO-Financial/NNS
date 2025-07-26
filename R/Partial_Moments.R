@@ -24,7 +24,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
   }
   
   .Call("_NNS_LPM_RCPP", degree, target, variable, excess_ret)
-
+  
 }
 
 
@@ -52,15 +52,15 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
     return(.Call("_NNS_UPM_CPv", degree, target, variable))
   }
   
- .Call("_NNS_UPM_RCPP", degree, target, variable, excess_ret)
-
+  .Call("_NNS_UPM_RCPP", degree, target, variable, excess_ret)
+  
 }
 
 #' NNS CDF
 #'
 #' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 #'
-#' @param variable a numeric vector or data.frame of 2 variables for joint CDF.
+#' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
 #' @param degree integer; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable.
 #' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return for bi-variate analysis.  Multivariate analysis is restricted to \code{"CDF"}.
@@ -153,7 +153,8 @@ NNS.CDF <- function(variable,
     if (type=="survival") DT[[2]] <- 1-DT[[2]]
     if (type=="hazard") {
       n <- length(x); w <- min(10,n-1)
-      F <- pval; proxy <- vapply(seq_along(x),function(i){lo<-max(1,i-w%/%2);hi<-min(n,i+w%/%2);(F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
+      F <- pval
+      proxy <- vapply(seq_along(x),function(i){lo<-max(1,i-w%/%2);hi<-min(n,i+w%/%2);(F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
       fit <- NNS.reg(x, pmax(proxy,1e-10), order=NULL, n.best=1, point.est=target, plot=FALSE)
       DT[[2]] <- pmin(pmax(fit$Fitted$y.hat / pmax(1-F,1e-10),0),1e6)
     }
@@ -183,61 +184,103 @@ NNS.CDF <- function(variable,
     return(list(Function=DT,target.value=Pv))
   }
   
-  # — Bivariate cloud branch
-  x1 <- variable[,1]; x2 <- variable[,2]
-  u1 <- LPM.ratio(degree,x1,x1); u2 <- LPM.ratio(degree,x2,x2)
-  CDF <- Co.LPM(degree,u1,u2,u1,u2)
-  mX  <- LPM.ratio(degree,x1,x1); mY <- LPM.ratio(degree,x2,x2)
-  if(type=="survival") CDF <- pmax(0,pmin(1,1-mX-mY+CDF))
-  if(type=="hazard"){f<-NNS.reg(data.frame(x=x1,y=x2),pmax(CDF,1e-10),order="max",plot=FALSE)$Fitted$y.hat;CDF<-pmax(f/pmax(1-mX-mY+CDF,1e-10),0)}
-  if(type=="cumulative hazard") CDF<-pmax(-log(pmax(1-mX-mY+CDF,1e-10)),0)
-  
-  # target
-  if(is.null(target)){Pv<-numeric(0)}else{
-    ut1<-LPM.ratio(degree,target[1],x1);ut2<-LPM.ratio(degree,target[2],x2)
-    num<-Co.LPM(degree,u1,u2,ut1,ut2);den<-num+Co.UPM(degree,u1,u2,ut1,ut2)+D.UPM(degree,degree,u1,u2,ut1,ut2)+D.LPM(degree,degree,u1,u2,ut1,ut2)
-    Pv<-num/den; if(type=="survival"){PVx<-LPM.ratio(degree,target[1],x1);PVy<-LPM.ratio(degree,target[2],x2);Pv<-max(0,min(1,1-PVx-PVy+Pv))}
-  }
-  
-  # plot cloud
-  if(plot){
-    rgl::plot3d(u1, u2, CDF,
-                xlab = xlab, ylab = ylab, zlab = toupper(type),
-                col  = "steelblue", pch = 19, box = FALSE)
-    if(length(Pv)){
-      # green target point
-      rgl::points3d(ut1, ut2, Pv, col = "green", pch = 19)
-      
-      # dashed horizontal segment along x at level Pv
-      rgl::segments3d(
-        x = c(min(u1), ut1),
-        y = c(ut2,    ut2),
-        z = c(Pv,     Pv),
-        col = "red", lwd = 2, lty = "dashed"
-      )
-      # dashed horizontal segment along y at level Pv
-      rgl::segments3d(
-        x = c(ut1,    ut1),
-        y = c(min(u2),ut2),
-        z = c(Pv,     Pv),
-        col = "red", lwd = 2, lty = "dashed"
-      )
-      # dashed vertical segment from base to Pv
-      rgl::segments3d(
-        x = c(ut1, ut1),
-        y = c(ut2, ut2),
-        z = c(0,   Pv),
-        col = "red", lwd = 2, lty = "dashed"
-      )
+  # — Multivariate case (d ≥ 2)
+  if (!is.null(dim(variable)) && ncol(variable) >= 2) {
+    xlab <- colnames(variable)[1]
+    ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
+    
+    # Compute joint conditional CDF using clpm_nD
+    CDF <- apply(variable, 1, function(row) clpm_nD_cpp(variable, row, degree = degree))
+    
+    # Apply transformation based on type
+    if (type == "survival") {
+      marginal_probs <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
+      CDF <- pmax(0, pmin(1, 1 - rowSums(marginal_probs) + CDF))
     }
+    
+    if (type == "hazard") {
+      f <- NNS.reg(variable, pmax(CDF, 1e-10), order = "max", plot = FALSE)$Fitted$y.hat
+      marginals <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
+      CDF <- pmax(f / pmax(1 - rowSums(marginals) + CDF, 1e-10), 0)
+    }
+    
+    if (type == "cumulative hazard") {
+      marginals <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
+      CDF <- pmax(-log(pmax(1 - rowSums(marginals) + CDF, 1e-10)), 0)
+    }
+    
+    # Target evaluation
+    Pv <- numeric(0)
+    if (!is.null(target)) {
+      Pv <- clpm_nD_cpp(variable, target, degree = degree)
+      if (type == "survival") {
+        marg_target <- mapply(LPM.ratio, degree, target, as.data.frame(variable))
+        Pv <- max(0, min(1, 1 - sum(marg_target) + Pv))
+      }
+      if (type == "hazard") {
+        Pv <- NNS.reg(variable, CDF, order = "max", plot = FALSE, point.est = target)$Point.est /
+          pmax(1 - Pv, 1e-10)
+      }
+      if (type == "cumulative hazard") {
+        Pv <- pmax(-log(pmax(1 - Pv, 1e-10)), 0)
+      }
+    }
+    
+    if (plot && ncol(variable) == 2) {
+      x1 <- variable[, 1]; x2 <- variable[, 2]
+      u1 <- LPM.ratio(degree, x1, x1)
+      u2 <- LPM.ratio(degree, x2, x2)
+      
+      rgl::plot3d(u1, u2, CDF,
+                  xlab = paste0(xlab, " uniform"), ylab = paste0(ylab, " uniform"), zlab = toupper(type),
+                  col  = "steelblue", pch = 19, box = FALSE)
+      
+      if (length(Pv)) {
+        ut1 <- LPM.ratio(degree, target[1], x1)
+        ut2 <- LPM.ratio(degree, target[2], x2)
+        
+        # Target point (green)
+        rgl::points3d(ut1, ut2, Pv, col = "green", pch = 19)
+        
+        # Horizontal segment along x at level Pv
+        rgl::segments3d(
+          x = c(min(u1), ut1),
+          y = c(ut2,     ut2),
+          z = c(Pv,      Pv),
+          col = "red", lwd = 2, lty = "dashed"
+        )
+        rgl::text3d(ut1,min(u2), Pv, 
+                    text = paste0("x = ", round(target[1], 3)), 
+                    col = "red", pos = 2, cex = 0.9)
+        
+        # Horizontal segment along y at level Pv
+        rgl::segments3d(
+          x = c(ut1,     ut1),
+          y = c(min(u2), ut2),
+          z = c(Pv,      Pv),
+          col = "red", lwd = 2, lty = "dashed"
+        )
+        rgl::text3d(min(u1), ut2, Pv, 
+                    text = paste0("y = ", round(target[2], 3)), 
+                    col = "red", pos = 2, cex = 0.9)
+        
+        # Final segment to CDF axis (min u1, min u2, Pv)
+        rgl::segments3d(
+          x = c(ut1,      max(u1)),
+          y = c(ut2,      max(u2)),
+          z = c(Pv,       Pv),
+          col = "red", lwd = 2, lty = "dashed"
+        )
+        rgl::text3d(max(u1), max(u2), Pv,
+                    text = paste0("CDF = ", round(Pv, 4)),
+                    col = "red", pos = 2, cex = 0.9)
+      }
+    }
+    
+    outDT <- data.table::data.table(variable, CDF = CDF)
+    return(list(Function = outDT, target.value = Pv))(list(Function = outDT, target.value = Pv))(list(Function=outDT,target.value=Pv))
   }
-  
-  outDT <- data.table::data.table(variable, CDF = CDF)
-  return(list(Function = outDT, target.value = Pv))(list(Function = outDT, target.value = Pv))(list(Function=outDT,target.value=Pv))
 }
-
-
-
 
 
 

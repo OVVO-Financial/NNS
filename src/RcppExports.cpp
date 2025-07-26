@@ -34,6 +34,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// clpm_nD_cpp
+double clpm_nD_cpp(NumericMatrix data, NumericVector target, double degree);
+RcppExport SEXP _NNS_clpm_nD_cpp(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< double >::type degree(degreeSEXP);
+    rcpp_result_gen = Rcpp::wrap(clpm_nD_cpp(data, target, degree));
+    return rcpp_result_gen;
+END_RCPP
+}
 // LPM_CPv
 NumericVector LPM_CPv(const double& degree, const NumericVector& target, const NumericVector& variable);
 RcppExport SEXP _NNS_LPM_CPv(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
@@ -200,6 +213,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
+    {"_NNS_clpm_nD_cpp", (DL_FUNC) &_NNS_clpm_nD_cpp, 3},
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
     {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
     {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 4},

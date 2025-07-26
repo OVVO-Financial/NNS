@@ -7,7 +7,7 @@
 NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 }
 \arguments{
-\item{variable}{a numeric vector or data.frame of 2 variables for joint CDF.}
+\item{variable}{a numeric vector or data.frame of >= 2 variables for joint CDF.}
 
 \item{degree}{integer; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.}
 

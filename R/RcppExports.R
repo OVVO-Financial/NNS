@@ -9,6 +9,10 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
+clpm_nD_cpp <- function(data, target, degree = 0.0) {
+    .Call(`_NNS_clpm_nD_cpp`, data, target, degree)
+}
+
 LPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_LPM_CPv`, degree, target, variable)
 }

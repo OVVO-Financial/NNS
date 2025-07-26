@@ -87,6 +87,86 @@ double UPM_C(const double &degree, const double &target, const RVector<double> &
   return out;
 }
 
+
+
+
+// [[Rcpp::export]]
+double clpm_nD_cpp(NumericMatrix data, NumericVector target, double degree = 0.0) {
+  int n = data.nrow();
+  int d = data.ncol();
+  
+  if (target.size() != d) {
+    stop("Length of 'target' must match number of columns in data");
+  }
+  
+  // Degree 0: Joint probability calculation
+  if (degree == 0.0) {
+    int count = 0;
+    for (int i = 0; i < n; ++i) {
+      bool all_leq = true;
+      for (int j = 0; j < d; ++j) {
+        if (data(i, j) > target[j]) {
+          all_leq = false;
+          break;
+        }
+      }
+      if (all_leq) count++;
+    }
+    return static_cast<double>(count) / n;
+  }
+  
+  // For degree > 0
+  double eps = std::numeric_limits<double>::epsilon();
+  
+  // Compute min_vals for normalization
+  NumericVector min_vals(d);
+  for (int j = 0; j < d; ++j) {
+    min_vals[j] = data(0, j);
+    for (int i = 1; i < n; ++i) {
+      if (data(i, j) < min_vals[j]) 
+        min_vals[j] = data(i, j);
+    }
+  }
+  
+  // Calculate max_contributions and norm_const
+  double norm_const = 1.0;
+  for (int j = 0; j < d; ++j) {
+    double max_contrib = std::max(0.0, target[j] - min_vals[j]);
+    if (max_contrib > 0) {
+      norm_const *= std::pow(max_contrib, degree);
+    } else {
+      norm_const = 0.0;
+    }
+  }
+  
+  // Handle near-zero normalization constant
+  if (norm_const <= eps) return 0.0;
+  
+  // Compute observation products
+  double sum_products = 0.0;
+  for (int i = 0; i < n; ++i) {
+    double prod_val = 1.0;
+    bool valid = true;
+    
+    for (int j = 0; j < d; ++j) {
+      double diff = target[j] - data(i, j);
+      
+      if (diff < 0) {
+        valid = false;
+        break;
+      }
+      prod_val *= std::pow(diff, degree);
+    }
+    
+    sum_products += valid ? prod_val : 0.0;
+  }
+  
+  // Return normalized value
+  return (sum_products / n) / norm_const;
+}
+
+
+
 // parallelFor
 #define NNS_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS)      \
 size_t target_size=target.size();                        \
