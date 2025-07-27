@@ -1,3 +1,4 @@
+// partial_moments.h
 #ifndef NNS_partial_moments_H
 #define NNS_partial_moments_H
 
@@ -14,24 +15,24 @@ using namespace RcppParallel;
 double LPM_C(const double &degree, const double &target, const RVector<double> &variable);
 double UPM_C(const double &degree, const double &target, const RVector<double> &variable);
 // parallelFor
-#define NNS_PM_SINGLE_VARIABLE_WORKER(NAME, FUNC) \
-  struct NAME : public Worker\
-  {\
-    const double degree;\
-    const RVector<double> target;\
-    const RVector<double> variable;\
-    RVector<double> output;\
-    NAME (\
-      const double degree,\
-      const NumericVector &target,\
-      const NumericVector &variable,\
-      NumericVector &output\
-    ): degree(degree), target(target), variable(variable), output(output) {}\
-    void operator()(std::size_t begin, std::size_t end) {\
-      for (size_t i = begin; i < end; i++)\
-        output[i] = FUNC(degree, target[i], variable); \
-    }\
-  }
+#define NNS_PM_SINGLE_VARIABLE_WORKER(NAME, FUNC)                         \
+struct NAME : public Worker                                               \
+{                                                                         \
+  const double degree;                                                    \
+  const RVector<double> target;                                           \
+  const RVector<double> variable;                                         \
+  RVector<double> output;                                                 \
+  NAME (                                                                  \
+      const double degree,                                                \
+      const NumericVector &target,                                        \
+      const NumericVector &variable,                                      \
+      NumericVector &output                                               \
+  ): degree(degree), target(target), variable(variable), output(output) {}\
+  void operator()(std::size_t begin, std::size_t end) {                   \
+    for (size_t i = begin; i < end; i++)                                  \
+      output[i] = FUNC(degree, target[i], variable);                      \
+  }                                                                       \
+}
 NNS_PM_SINGLE_VARIABLE_WORKER(LPM_Worker, LPM_C);
 NNS_PM_SINGLE_VARIABLE_WORKER(UPM_Worker, UPM_C);
 NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable);
@@ -65,36 +66,36 @@ double DUPM_C(
 );
 
 // parallelFor
-#define NNS_PM_TWO_VARIABLES_WORKER(NAME, FUNC) \
-  struct NAME : public Worker\
-  {\
-    const double degree_lpm;\
-    const double degree_upm;\
-    const RVector<double> x;\
-    const RVector<double> y;\
-    const RVector<double> target_x;\
-    const RVector<double> target_y;\
-    const size_t n_t_x;\
-    const size_t n_t_y;\
-    RVector<double> output;\
-    NAME (\
-      const double degree_lpm,\
-      const double degree_upm,\
-      const NumericVector &x, const NumericVector &y,\
-      const NumericVector &target_x, const NumericVector &target_y,\
-      NumericVector output\
-    ):\
-      degree_lpm(degree_lpm), degree_upm(degree_upm),  \
-	  x(x), y(y), target_x(target_x), target_y(target_y),\
-      n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)\
-    {}\
-    void operator()(std::size_t begin, std::size_t end) { \
-      for (size_t i = begin; i < end; i++) {\
-       output[i] = FUNC(degree_lpm, degree_upm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); \
-     } \
-    }\
-  }
-  
+#define NNS_PM_TWO_VARIABLES_WORKER(NAME, FUNC)                                             \
+struct NAME : public Worker                                                                 \
+{                                                                                           \
+  const double degree_lpm;                                                                  \
+  const double degree_upm;                                                                  \
+  const RVector<double> x;                                                                  \
+  const RVector<double> y;                                                                  \
+  const RVector<double> target_x;                                                           \
+  const RVector<double> target_y;                                                           \
+  const size_t n_t_x;                                                                       \
+  const size_t n_t_y;                                                                       \
+  RVector<double> output;                                                                   \
+  NAME (                                                                                    \
+      const double degree_lpm,                                                              \
+      const double degree_upm,                                                              \
+      const NumericVector &x, const NumericVector &y,                                       \
+      const NumericVector &target_x, const NumericVector &target_y,                         \
+      NumericVector &output                                                                 \
+  ):                                                                                        \
+    degree_lpm(degree_lpm), degree_upm(degree_upm),                                         \
+    x(x), y(y), target_x(target_x), target_y(target_y),                                     \
+    n_t_x(target_x.size()), n_t_y(target_y.size()), output(output)                          \
+  {}                                                                                        \
+  void operator()(std::size_t begin, std::size_t end) {                                     \
+    for (size_t i = begin; i < end; i++) {                                                  \
+      output[i] = FUNC(degree_lpm, degree_upm, x, y, target_x[i%n_t_x], target_y[i%n_t_y]); \
+    }                                                                                       \
+  }                                                                                         \
+}
+
 NNS_PM_TWO_VARIABLES_WORKER(CoLPM_Worker, CoLPM_C);
 NNS_PM_TWO_VARIABLES_WORKER(CoUPM_Worker, CoUPM_C);
 NNS_PM_TWO_VARIABLES_WORKER(DLPM_Worker, DLPM_C);
@@ -124,20 +125,20 @@ NumericVector DUPM_CPv(
 // PM MATRIX
 // single thread
 void PMMatrix_Cv(
-  const double &degree_lpm, 
-  const double &degree_upm, 
-  const RMatrix<double>::Column &x, 
-  const RMatrix<double>::Column &y, 
-  const double &target_x,
-  const double &target_y, 
-  const bool &pop_adj, 
-  const double &adjust, 
-  const size_t &rows, 
-  double &coLpm,
-  double &coUpm,   
-  double &dLpm, 
-  double &dUpm,
-  double &covMat
+    const double &degree_lpm, 
+    const double &degree_upm, 
+    const RMatrix<double>::Column &x, 
+    const RMatrix<double>::Column &y, 
+    const double &target_x,
+    const double &target_y, 
+    const bool &pop_adj, 
+    const double &adjust, 
+    const size_t &rows, 
+    double &coLpm,
+    double &coUpm,   
+    double &dLpm, 
+    double &dUpm,
+    double &covMat
 );
 // parallelFor
 struct PMMatrix_Worker : public Worker
@@ -177,10 +178,10 @@ struct PMMatrix_Worker : public Worker
       Rcpp::stop("varible matrix cols != target vector length");
     adjust = 1;
     if (variable_rows > 1)
-	  adjust=((double)variable_rows)/((double)variable_rows-1);
+      adjust=((double)variable_rows)/((double)variable_rows-1);
   }
   void operator()(std::size_t begin, std::size_t end) {
-	for (size_t i = begin; i < end; i++){
+    for (size_t i = begin; i < end; i++){
       for (size_t l = 0; l < variable_cols; l++){
         PMMatrix_Cv(
           degree_lpm,
@@ -188,15 +189,15 @@ struct PMMatrix_Worker : public Worker
           variable.column(i),
           variable.column(l),
           target[i],
-          target[l],
-          pop_adj,
-          adjust,
-          variable_rows,
-          coLpm(i,l),
-          coUpm(i,l),
-          dLpm(i,l),
-          dUpm(i,l),
-          covMat(i,l)
+                target[l],
+                      pop_adj,
+                      adjust,
+                      variable_rows,
+                      coLpm(i,l),
+                      coUpm(i,l),
+                      dLpm(i,l),
+                      dUpm(i,l),
+                      covMat(i,l)
         );
       }
     }
@@ -210,14 +211,20 @@ List PMMatrix_CPv(
     const bool &pop_adj
 );
 
-// Parallel back‑ends for n‑D Co‑partial moments
-double clpm_nD_cpp(Rcpp::NumericMatrix data,
-                   Rcpp::NumericVector target,
-                   double degree = 0.0);
+// n‐D co‐partial‐moments prototypes (parallel back‐ends)
+double clpm_nD_cpp(const NumericMatrix &data,
+                   const NumericVector &target,
+                   double degree,
+                   bool norm = true);
 
-double cupm_nD_cpp(Rcpp::NumericMatrix data,
-                   Rcpp::NumericVector target,
-                   double degree = 0.0);
+double cupm_nD_cpp(const NumericMatrix &data,
+                   const NumericVector &target,
+                   double degree,
+                   bool norm = true);
+
+double dpm_nD_cpp(const NumericMatrix &data,
+                  const NumericVector &target,
+                  double degree,
+                  bool norm = true);
 
 #endif  //NNS_partial_moments_H
-

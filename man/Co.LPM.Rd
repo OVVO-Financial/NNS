@@ -2,35 +2,35 @@
 % Please edit documentation in R/RcppExports.R
 \name{Co.LPM}
 \alias{Co.LPM}
-\title{Co-Lower Partial Moment
-(Lower Left Quadrant 4)}
+\title{Co‑Lower Partial Moment}
 \usage{
 Co.LPM(degree_lpm, x, y, target_x, target_y)
 }
 \arguments{
-\item{degree_lpm}{numeric; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.}
+\item{degree_lpm}{numeric; degree = 0 gives frequency, degree = 1 gives area.}
 
-\item{x}{a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.}
+\item{x}{numeric vector of observations.}
 
-\item{y}{a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.}
+\item{y}{numeric vector of the same length as x.}
 
-\item{target_x}{numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.}
+\item{target_x}{numeric vector; thresholds for x (defaults to mean(x)).}
 
-\item{target_y}{numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.}
+\item{target_y}{numeric vector; thresholds for y (defaults to mean(y)).}
 }
 \value{
-Co-LPM of two variables
+Numeric vector of co‑LPM values.
 }
 \description{
-This function generates a co-lower partial moment for between two equal length variables for any degree or target.
+Computes the co‑lower partial moment (lower‑left quadrant 4) between two
+  equal‑length numeric vectors at any degree and target.
 }
 \examples{
-set.seed(123)
-x <- rnorm(100) ; y <- rnorm(100)
-Co.LPM(0, x, y, mean(x), mean(y))
+  set.seed(123)
+  x <- rnorm(100); y <- rnorm(100)
+  Co.LPM(0, x, y, mean(x), mean(y))
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
 }
 \author{
 Fred Viole, OVVO Financial Systems

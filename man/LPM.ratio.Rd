@@ -2,47 +2,37 @@
 % Please edit documentation in R/RcppExports.R
 \name{LPM.ratio}
 \alias{LPM.ratio}
-\title{Lower Partial Moment RATIO}
+\title{Lower Partial Moment Ratio}
 \usage{
 LPM.ratio(degree, target, variable)
 }
 \arguments{
-\item{degree}{numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
+\item{degree}{numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.}
 
-\item{target}{numeric; Typically set to mean, but does not have to be. (Vectorized)}
+\item{target}{numeric vector; threshold(s). Defaults to mean(variable).}
 
-\item{variable}{a numeric vector.}
+\item{variable}{numeric vector or data‑frame column to evaluate.}
 }
 \value{
-Standardized LPM of variable
+Numeric vector of standardized lower partial moments.
 }
 \description{
-This function generates a standardized univariate lower partial moment for any degree or target.
+This function generates a standardized univariate lower partial moment
+  of any non‑negative degree for a given target.
 }
 \examples{
-set.seed(123)
-x <- rnorm(100)
-LPM.ratio(0, mean(x), x)
-
+  set.seed(123)
+  x <- rnorm(100)
+  LPM.ratio(0, mean(x), x)
 \dontrun{
-## Empirical CDF (degree = 0)
-lpm_cdf <- LPM.ratio(0, sort(x), x)
-plot(sort(x), lpm_cdf)
-
-## Continuous CDF (degree = 1)
-lpm_cdf_1 <- LPM.ratio(1, sort(x), x)
-plot(sort(x), lpm_cdf_1)
-
-## Joint CDF
-x <- rnorm(5000) ; y <- rnorm(5000)
-plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
-zlab = "Probability", box = FALSE)
+  plot(sort(x), LPM.ratio(0, sort(x), x))
+  plot(sort(x), LPM.ratio(1, sort(x), x))
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
 
-Viole, F. (2017) "Continuous CDFs and ANOVA with NNS" \doi{10.2139/ssrn.3007373}
+Viole, F. (2017) Continuous CDFs and ANOVA with NNS. \doi{10.2139/ssrn.3007373}
 }
 \author{
 Fred Viole, OVVO Financial Systems

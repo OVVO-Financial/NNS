@@ -9,173 +9,12 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
-clpm_nD_cpp <- function(data, target, degree, norm = TRUE) {
-    .Call(`_NNS_clpm_nD_cpp`, data, target, degree, norm)
-}
-
-cupm_nD_cpp <- function(data, target, degree, norm = TRUE) {
-    .Call(`_NNS_cupm_nD_cpp`, data, target, degree, norm)
-}
-
 LPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_LPM_CPv`, degree, target, variable)
 }
 
 UPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_UPM_CPv`, degree, target, variable)
-}
-
-LPM_RCPP <- function(degree, target, variable, excess_ret) {
-    .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
-}
-
-UPM_RCPP <- function(degree, target, variable, excess_ret) {
-    .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
-}
-
-#' Lower Partial Moment RATIO
-#'
-#' This function generates a standardized univariate lower partial moment for any degree or target.
-#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.
-#' @return Standardized LPM of variable
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @references Viole, F. (2017) "Continuous CDFs and ANOVA with NNS" \doi{10.2139/ssrn.3007373}
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100)
-#' LPM.ratio(0, mean(x), x)
-#'
-#' \dontrun{
-#' ## Empirical CDF (degree = 0)
-#' lpm_cdf <- LPM.ratio(0, sort(x), x)
-#' plot(sort(x), lpm_cdf)
-#'
-#' ## Continuous CDF (degree = 1)
-#' lpm_cdf_1 <- LPM.ratio(1, sort(x), x)
-#' plot(sort(x), lpm_cdf_1)
-#'
-#' ## Joint CDF
-#' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.LPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
-#' zlab = "Probability", box = FALSE)
-#' }
-#' @export
-LPM.ratio <- function(degree, target, variable) {
-    .Call(`_NNS_LPM_ratio_RCPP`, degree, target, variable)
-}
-
-#' Upper Partial Moment RATIO
-#'
-#' This function generates a standardized univariate upper partial moment for any degree or target.
-#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.
-#' @return Standardized UPM of variable
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100)
-#' UPM.ratio(0, mean(x), x)
-#'
-#' ## Joint Upper CDF
-#' \dontrun{
-#' x <- rnorm(5000) ; y <- rnorm(5000)
-#' plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
-#' zlab = "Probability", box = FALSE)
-#' }
-#' @export
-UPM.ratio <- function(degree, target, variable) {
-    .Call(`_NNS_UPM_ratio_RCPP`, degree, target, variable)
-}
-
-#' Co-Lower Partial Moment
-#' (Lower Left Quadrant 4)
-#'
-#' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-#' @param degree_lpm numeric; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
-#' @return Co-LPM of two variables
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.LPM(0, x, y, mean(x), mean(y))
-#' @export
-Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, x, y, target_x, target_y)
-}
-
-#' Co-Upper Partial Moment
-#' (Upper Right Quadrant 1)
-#'
-#' This function generates a co-upper partial moment between two equal length variables for any degree or target.
-#' @param degree_upm numeric; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
-#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Target for upside deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
-#' @return Co-UPM of two variables
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' Co.UPM(0, x, y, mean(x), mean(y))
-#' @export
-Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y)
-}
-
-#' Divergent-Lower Partial Moment
-#' (Lower Right Quadrant 3)
-#'
-#' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
-#' @param degree_lpm numeric; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-#' @param degree_upm numeric; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
-#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Target for lower deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
-#' @return Divergent LPM of two variables
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' D.LPM(0, 0, x, y, mean(x), mean(y))
-#' @export
-D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_DLPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
-}
-
-#' Divergent-Upper Partial Moment
-#' (Upper Left Quadrant 2)
-#'
-#' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
-#' @param degree_lpm numeric; Degree for lower deviations of variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-#' @param degree_upm numeric; Degree for upper deviations of variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
-#' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
-#' @param target_y numeric; Target for upper deviations of variable Y.  Typically the mean of Variable Y for classical statistics equivalences, but does not have to be.
-#' @return Divergent UPM of two variables
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' D.UPM(0, 0, x, y, mean(x), mean(y))
-#' @export
-D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
 CoLPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
@@ -186,36 +25,181 @@ CoUPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
     .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree, norm)
 }
 
-#' Partial Moment Matrix
-#'
-#'
-#' This function generates a co-partial moment matrix for the specified co-partial moment.
-#' @param LPM_degree integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.
-#' @param UPM_degree integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.
-#' @param target numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.
-#' @param variable a numeric matrix or data.frame.
-#' @param pop_adj logical; \code{TRUE} Adjusts the population co-partial moment matrices for sample statistics, which is default in base R.  Use \code{FALSE} for degree 0 frequency matrices.  Must be provided by user.
-#' @return Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
-#' @note For divergent asymmetrical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
+CoDPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_CoDPM_nD_RCPP`, data, target, degree, norm)
+}
+
+LPM_RCPP <- function(degree, target, variable, excess_ret) {
+    .Call(`_NNS_LPM_RCPP`, degree, target, variable, excess_ret)
+}
+
+UPM_RCPP <- function(degree, target, variable, excess_ret) {
+    .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
+}
+
+#' @name LPM.ratio
+#' @title Lower Partial Moment Ratio
+#' @description
+#'   This function generates a standardized univariate lower partial moment
+#'   of any non‑negative degree for a given target.
+#' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.
+#' @param target numeric vector; threshold(s). Defaults to mean(variable).
+#' @param variable numeric vector or data‑frame column to evaluate.
+#' @return Numeric vector of standardized lower partial moments.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-#' @references Viole, F. (2017) "Bayes' Theorem From Partial Moments" \doi{10.2139/ssrn.3457377}
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @references
+#'   Viole, F. (2017) Continuous CDFs and ANOVA with NNS. \doi{10.2139/ssrn.3007373}
 #' @examples
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
-#' A <- cbind(x,y,z)
-#' PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
-#'
-#' ## Use of vectorized numeric targets (target_x, target_y, target_z)
-#' PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
-#'
-#' ## Calling Individual Partial Moment Quadrants
-#' cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), 
-#'                      pop_adj = TRUE)
-#' cov.mtx$cupm
-#'
-#' ## Full covariance matrix
-#' cov.mtx$cov.matrix
+#'   set.seed(123)
+#'   x <- rnorm(100)
+#'   LPM.ratio(0, mean(x), x)
+#' \dontrun{
+#'   plot(sort(x), LPM.ratio(0, sort(x), x))
+#'   plot(sort(x), LPM.ratio(1, sort(x), x))
+#' }
+#' @export
+LPM.ratio <- function(degree, target, variable) {
+    .Call(`_NNS_LPM_ratio_RCPP`, degree, target, variable)
+}
+
+#' @name UPM.ratio
+#' @title Upper Partial Moment Ratio
+#' @description
+#'   This function generates a standardized univariate upper partial moment
+#'   of any non‑negative degree for a given target.
+#' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area.
+#' @param target numeric vector; threshold(s). Defaults to mean(variable).
+#' @param variable numeric vector or data‑frame column to evaluate.
+#' @return Numeric vector of standardized upper partial moments.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100)
+#'   UPM.ratio(0, mean(x), x)
+#' \dontrun{
+#'   plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), …)
+#' }
+#' @export
+UPM.ratio <- function(degree, target, variable) {
+    .Call(`_NNS_UPM_ratio_RCPP`, degree, target, variable)
+}
+
+#' @name Co.LPM
+#' @title Co‑Lower Partial Moment
+#' @description
+#'   Computes the co‑lower partial moment (lower‑left quadrant 4) between two
+#'   equal‑length numeric vectors at any degree and target.
+#' @param degree_lpm numeric; degree = 0 gives frequency, degree = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
+#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @return Numeric vector of co‑LPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   Co.LPM(0, x, y, mean(x), mean(y))
+#' @export
+Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
+    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, x, y, target_x, target_y)
+}
+
+#' @name Co.UPM
+#' @title Co‑Upper Partial Moment
+#' @description
+#'   Computes the co‑upper partial moment (upper‑right quadrant 1) between two
+#'   equal‑length numeric vectors at any degree and target.
+#' @param degree_upm numeric; degree = 0 gives frequency, degree = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
+#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @return Numeric vector of co‑UPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   Co.UPM(0, x, y, mean(x), mean(y))
+#' @export
+Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y)
+}
+
+#' @name D.LPM
+#' @title Divergent‑Lower Partial Moment
+#' @description
+#'   Computes the divergent lower partial moment (lower‑right quadrant 3)
+#'   between two equal‑length numeric vectors.
+#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
+#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
+#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @return Numeric vector of divergent LPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   D.LPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_DLPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
+}
+
+#' @name D.UPM
+#' @title Divergent‑Upper Partial Moment
+#' @description
+#'   Computes the divergent upper partial moment (upper‑left quadrant 2)
+#'   between two equal‑length numeric vectors.
+#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
+#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
+#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @return Numeric vector of divergent UPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   D.UPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+    .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
+}
+
+#' @name PM.matrix
+#' @title Partial Moment Matrix
+#' @description
+#'   Builds a list containing all four quadrant partial‑moment matrices
+#'   (CUPM, DUPM, DLPM, CLPM) plus the overall covariance matrix.
+#' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
+#' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
+#' @param target numeric vector; thresholds for each column (defaults to colMeans).
+#' @param variable numeric matrix or data.frame.
+#' @param pop_adj logical; TRUE adjusts population vs. sample moments.
+#' @return A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   A <- cbind(rnorm(100), rnorm(100), rnorm(100))
+#'   PM.matrix(1, 1, NULL, A, TRUE)
 #' @export
 PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
     .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj)

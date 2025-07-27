@@ -104,6 +104,29 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 }
 
 
+#' Divergent Partial Moment nD
+#'
+#' This function generates the aggregate n‑dimensional divergent partial moment (n ≥ 2) for any degree or target.
+#'
+#' @param data   A numeric matrix with observations in rows and variables in columns.
+#' @param target A numeric vector, length equal to ncol(data).
+#' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
+#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @return Numeric; the n‑dimensional co‑upper partial moment.
+#' @examples
+#' mat <- matrix(rnorm(200), ncol = 4)
+#' DPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
+#' @export
+DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
+  data   <- as.matrix(data)
+  target <- as.numeric(target)
+  degree <- as.numeric(degree)
+  norm   <- as.logical(norm)
+  
+  .Call("_NNS_CoDPM_nD_RCPP", data, target, degree, norm)
+}
+
+
 
 #' NNS CDF
 #'

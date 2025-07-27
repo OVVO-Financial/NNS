@@ -7,46 +7,30 @@
 PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)
 }
 \arguments{
-\item{LPM_degree}{integer; Degree for \code{variable} below \code{target} deviations.  \code{(LPM_degree = 0)} is frequency, \code{(LPM_degree = 1)} is area.}
+\item{LPM_degree}{numeric; lower partial moment degree (0 = freq, 1 = area).}
 
-\item{UPM_degree}{integer; Degree for \code{variable} above \code{target} deviations.  \code{(UPM_degree = 0)} is frequency, \code{(UPM_degree = 1)} is area.}
+\item{UPM_degree}{numeric; upper partial moment degree (0 = freq, 1 = area).}
 
-\item{target}{numeric; Typically the mean of Variable X for classical statistics equivalences, but does not have to be. (Vectorized)  \code{(target = NULL)} (default) will set the target as the mean of every variable.}
+\item{target}{numeric vector; thresholds for each column (defaults to colMeans).}
 
-\item{variable}{a numeric matrix or data.frame.}
+\item{variable}{numeric matrix or data.frame.}
 
-\item{pop_adj}{logical; \code{TRUE} Adjusts the population co-partial moment matrices for sample statistics, which is default in base R.  Use \code{FALSE} for degree 0 frequency matrices.  Must be provided by user.}
+\item{pop_adj}{logical; TRUE adjusts population vs. sample moments.}
 }
 \value{
-Matrix of partial moment quadrant values (CUPM, DUPM, DLPM, CLPM), and overall covariance matrix.  Uncalled quadrants will return a matrix of zeros.
+A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
 }
 \description{
-This function generates a co-partial moment matrix for the specified co-partial moment.
-}
-\note{
-For divergent asymmetrical \code{"D.LPM" and "D.UPM"} matrices, matrix is \code{D.LPM(column,row,...)}.
+Builds a list containing all four quadrant partial‑moment matrices
+  (CUPM, DUPM, DLPM, CLPM) plus the overall covariance matrix.
 }
 \examples{
-set.seed(123)
-x <- rnorm(100) ; y <- rnorm(100) ; z <- rnorm(100)
-A <- cbind(x,y,z)
-PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), pop_adj = TRUE)
-
-## Use of vectorized numeric targets (target_x, target_y, target_z)
-PM.matrix(LPM_degree = 1, UPM_degree = 1, target = c(0, 0.15, .25), variable = A, pop_adj = TRUE)
-
-## Calling Individual Partial Moment Quadrants
-cov.mtx <- PM.matrix(LPM_degree = 1, UPM_degree = 1, variable = A, target = colMeans(A), 
-                     pop_adj = TRUE)
-cov.mtx$cupm
-
-## Full covariance matrix
-cov.mtx$cov.matrix
+  set.seed(123)
+  A <- cbind(rnorm(100), rnorm(100), rnorm(100))
+  PM.matrix(1, 1, NULL, A, TRUE)
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
-
-Viole, F. (2017) "Bayes' Theorem From Partial Moments" \doi{10.2139/ssrn.3457377}
+Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
 }
 \author{
 Fred Viole, OVVO Financial Systems

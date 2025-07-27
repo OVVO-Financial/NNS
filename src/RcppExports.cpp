@@ -34,34 +34,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// clpm_nD_cpp
-double clpm_nD_cpp(const NumericMatrix& data, const NumericVector& target, double degree, bool norm);
-RcppExport SEXP _NNS_clpm_nD_cpp(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
-    Rcpp::traits::input_parameter< double >::type degree(degreeSEXP);
-    Rcpp::traits::input_parameter< bool >::type norm(normSEXP);
-    rcpp_result_gen = Rcpp::wrap(clpm_nD_cpp(data, target, degree, norm));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cupm_nD_cpp
-double cupm_nD_cpp(const NumericMatrix& data, const NumericVector& target, double degree, bool norm);
-RcppExport SEXP _NNS_cupm_nD_cpp(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
-    Rcpp::traits::input_parameter< double >::type degree(degreeSEXP);
-    Rcpp::traits::input_parameter< bool >::type norm(normSEXP);
-    rcpp_result_gen = Rcpp::wrap(cupm_nD_cpp(data, target, degree, norm));
-    return rcpp_result_gen;
-END_RCPP
-}
 // LPM_CPv
 NumericVector LPM_CPv(const double& degree, const NumericVector& target, const NumericVector& variable);
 RcppExport SEXP _NNS_LPM_CPv(SEXP degreeSEXP, SEXP targetSEXP, SEXP variableSEXP) {
@@ -85,6 +57,45 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type variable(variableSEXP);
     rcpp_result_gen = Rcpp::wrap(UPM_CPv(degree, target, variable));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CoLPM_nD_RCPP
+double CoLPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
+RcppExport SEXP _NNS_CoLPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
+    rcpp_result_gen = Rcpp::wrap(CoLPM_nD_RCPP(data, target, degree, norm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CoUPM_nD_RCPP
+double CoUPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
+RcppExport SEXP _NNS_CoUPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
+    rcpp_result_gen = Rcpp::wrap(CoUPM_nD_RCPP(data, target, degree, norm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CoDPM_nD_RCPP
+double CoDPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
+RcppExport SEXP _NNS_CoDPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
+    rcpp_result_gen = Rcpp::wrap(CoDPM_nD_RCPP(data, target, degree, norm));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -196,32 +207,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// CoLPM_nD_RCPP
-double CoLPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
-RcppExport SEXP _NNS_CoLPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
-    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
-    rcpp_result_gen = Rcpp::wrap(CoLPM_nD_RCPP(data, target, degree, norm));
-    return rcpp_result_gen;
-END_RCPP
-}
-// CoUPM_nD_RCPP
-double CoUPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
-RcppExport SEXP _NNS_CoUPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
-    Rcpp::traits::input_parameter< const double& >::type degree(degreeSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
-    rcpp_result_gen = Rcpp::wrap(CoUPM_nD_RCPP(data, target, degree, norm));
-    return rcpp_result_gen;
-END_RCPP
-}
 // PMMatrix_RCPP
 List PMMatrix_RCPP(const double& LPM_degree, const double& UPM_degree, const RObject& target, const RObject& variable, const bool pop_adj);
 RcppExport SEXP _NNS_PMMatrix_RCPP(SEXP LPM_degreeSEXP, SEXP UPM_degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP pop_adjSEXP) {
@@ -254,10 +239,11 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
-    {"_NNS_clpm_nD_cpp", (DL_FUNC) &_NNS_clpm_nD_cpp, 4},
-    {"_NNS_cupm_nD_cpp", (DL_FUNC) &_NNS_cupm_nD_cpp, 4},
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
     {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
+    {"_NNS_CoLPM_nD_RCPP", (DL_FUNC) &_NNS_CoLPM_nD_RCPP, 4},
+    {"_NNS_CoUPM_nD_RCPP", (DL_FUNC) &_NNS_CoUPM_nD_RCPP, 4},
+    {"_NNS_CoDPM_nD_RCPP", (DL_FUNC) &_NNS_CoDPM_nD_RCPP, 4},
     {"_NNS_LPM_RCPP", (DL_FUNC) &_NNS_LPM_RCPP, 4},
     {"_NNS_UPM_RCPP", (DL_FUNC) &_NNS_UPM_RCPP, 4},
     {"_NNS_LPM_ratio_RCPP", (DL_FUNC) &_NNS_LPM_ratio_RCPP, 3},
@@ -266,8 +252,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_CoUPM_RCPP", (DL_FUNC) &_NNS_CoUPM_RCPP, 5},
     {"_NNS_DLPM_RCPP", (DL_FUNC) &_NNS_DLPM_RCPP, 6},
     {"_NNS_DUPM_RCPP", (DL_FUNC) &_NNS_DUPM_RCPP, 6},
-    {"_NNS_CoLPM_nD_RCPP", (DL_FUNC) &_NNS_CoLPM_nD_RCPP, 4},
-    {"_NNS_CoUPM_nD_RCPP", (DL_FUNC) &_NNS_CoUPM_nD_RCPP, 4},
     {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 5},
     {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
     {NULL, NULL, 0}

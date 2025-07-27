@@ -2,37 +2,34 @@
 % Please edit documentation in R/RcppExports.R
 \name{UPM.ratio}
 \alias{UPM.ratio}
-\title{Upper Partial Moment RATIO}
+\title{Upper Partial Moment Ratio}
 \usage{
 UPM.ratio(degree, target, variable)
 }
 \arguments{
-\item{degree}{numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
+\item{degree}{numeric; degree = 0 gives frequency, degree = 1 gives area.}
 
-\item{target}{numeric; Typically set to mean, but does not have to be. (Vectorized)}
+\item{target}{numeric vector; threshold(s). Defaults to mean(variable).}
 
-\item{variable}{a numeric vector.}
+\item{variable}{numeric vector or data‑frame column to evaluate.}
 }
 \value{
-Standardized UPM of variable
+Numeric vector of standardized upper partial moments.
 }
 \description{
-This function generates a standardized univariate upper partial moment for any degree or target.
+This function generates a standardized univariate upper partial moment
+  of any non‑negative degree for a given target.
 }
 \examples{
-set.seed(123)
-x <- rnorm(100)
-UPM.ratio(0, mean(x), x)
-
-## Joint Upper CDF
+  set.seed(123)
+  x <- rnorm(100)
+  UPM.ratio(0, mean(x), x)
 \dontrun{
-x <- rnorm(5000) ; y <- rnorm(5000)
-plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), col = "blue", xlab = "X", ylab = "Y",
-zlab = "Probability", box = FALSE)
+  plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), …)
 }
 }
 \references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
 }
 \author{
 Fred Viole, OVVO Financial Systems
