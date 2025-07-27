@@ -9,12 +9,12 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
-clpm_nD_cpp <- function(data, target, degree) {
-    .Call(`_NNS_clpm_nD_cpp`, data, target, degree)
+clpm_nD_cpp <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_clpm_nD_cpp`, data, target, degree, norm)
 }
 
-cupm_nD_cpp <- function(data, target, degree) {
-    .Call(`_NNS_cupm_nD_cpp`, data, target, degree)
+cupm_nD_cpp <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_cupm_nD_cpp`, data, target, degree, norm)
 }
 
 LPM_CPv <- function(degree, target, variable) {
@@ -36,7 +36,7 @@ UPM_RCPP <- function(degree, target, variable, excess_ret) {
 #' Lower Partial Moment RATIO
 #'
 #' This function generates a standardized univariate lower partial moment for any degree or target.
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return Standardized LPM of variable
@@ -70,7 +70,7 @@ LPM.ratio <- function(degree, target, variable) {
 #' Upper Partial Moment RATIO
 #'
 #' This function generates a standardized univariate upper partial moment for any degree or target.
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.
 #' @return Standardized UPM of variable
@@ -96,7 +96,7 @@ UPM.ratio <- function(degree, target, variable) {
 #' (Lower Left Quadrant 4)
 #'
 #' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-#' @param degree_lpm integer; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+#' @param degree_lpm numeric; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -117,7 +117,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' (Upper Right Quadrant 1)
 #'
 #' This function generates a co-upper partial moment between two equal length variables for any degree or target.
-#' @param degree_upm integer; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+#' @param degree_upm numeric; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -138,8 +138,8 @@ Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
 #' (Lower Right Quadrant 3)
 #'
 #' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
-#' @param degree_lpm integer; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-#' @param degree_upm integer; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+#' @param degree_lpm numeric; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+#' @param degree_upm numeric; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -160,8 +160,8 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' (Upper Left Quadrant 2)
 #'
 #' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
-#' @param degree_lpm integer; Degree for lower deviations of variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-#' @param degree_upm integer; Degree for upper deviations of variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+#' @param degree_lpm numeric; Degree for lower deviations of variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+#' @param degree_upm numeric; Degree for upper deviations of variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 #' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -178,12 +178,12 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
-CoLPM_nD_RCPP <- function(data, target, degree) {
-    .Call(`_NNS_CoLPM_nD_RCPP`, data, target, degree)
+CoLPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_CoLPM_nD_RCPP`, data, target, degree, norm)
 }
 
-CoUPM_nD_RCPP <- function(data, target, degree) {
-    .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree)
+CoUPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree, norm)
 }
 
 #' Partial Moment Matrix

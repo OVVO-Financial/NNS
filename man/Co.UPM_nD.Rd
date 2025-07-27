@@ -4,22 +4,24 @@
 \alias{Co.UPM_nD}
 \title{Co‑Upper Partial Moment nD}
 \usage{
-Co.UPM_nD(data, target, degree = 0)
+Co.UPM_nD(data, target, degree = 0, norm = TRUE)
 }
 \arguments{
 \item{data}{A numeric matrix with observations in rows and variables in columns.}
 
-\item{target}{A numeric vector of length equal to the number of columns in `data`.}
+\item{target}{A numeric vector, length equal to ncol(data).}
 
-\item{degree}{Numeric; degree for upper deviations (0 = frequency, 1 = area).}
+\item{degree}{numeric; degree for upper deviations (0 = frequency, 1 = area).}
+
+\item{norm}{logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.}
 }
 \value{
-Numeric; the n‑dimensional co‑upper partial moment, normalized.
+Numeric; the n‑dimensional co‑upper partial moment.
 }
 \description{
-This function generates a co‑upper partial moment for n‑dimensional data (n >= 2) for any degree or target.
+This function generates an n‑dimensional co‑upper partial moment (n ≥ 2) for any degree or target.
 }
 \examples{
 mat <- matrix(rnorm(200), ncol = 4)
-Co.UPM_nD(mat, rep(0, ncol(mat)), 1)
+Co.UPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
 }

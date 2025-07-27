@@ -7,7 +7,7 @@
 LPM.ratio(degree, target, variable)
 }
 \arguments{
-\item{degree}{integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
+\item{degree}{numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
 
 \item{target}{numeric; Typically set to mean, but does not have to be. (Vectorized)}
 

@@ -108,7 +108,7 @@ NumericVector UPM_RCPP(const double &degree,
 //' Lower Partial Moment RATIO
 //'
 //' This function generates a standardized univariate lower partial moment for any degree or target.
-//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+//' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 //' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 //' @param variable a numeric vector.
 //' @return Standardized LPM of variable
@@ -159,7 +159,7 @@ NumericVector LPM_ratio_RCPP(const double &degree, const RObject &target, const 
 //' Upper Partial Moment RATIO
 //'
 //' This function generates a standardized univariate upper partial moment for any degree or target.
-//' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+//' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 //' @param target numeric; Typically set to mean, but does not have to be. (Vectorized)
 //' @param variable a numeric vector.
 //' @return Standardized UPM of variable
@@ -202,7 +202,7 @@ NumericVector UPM_ratio_RCPP(const double &degree, const RObject &target, const 
 //' (Lower Left Quadrant 4)
 //'
 //' This function generates a co-lower partial moment for between two equal length variables for any degree or target.
-//' @param degree_lpm integer; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+//' @param degree_lpm numeric; Degree for lower deviations of both variable X and Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -252,7 +252,7 @@ NumericVector CoLPM_RCPP(
 //' (Upper Right Quadrant 1)
 //'
 //' This function generates a co-upper partial moment between two equal length variables for any degree or target.
-//' @param degree_upm integer; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+//' @param degree_upm numeric; Degree for upper variations of both variable X and Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -302,8 +302,8 @@ NumericVector CoUPM_RCPP(
 //' (Lower Right Quadrant 3)
 //'
 //' This function generates a divergent lower partial moment between two equal length variables for any degree or target.
-//' @param degree_lpm integer; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-//' @param degree_upm integer; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+//' @param degree_lpm numeric; Degree for lower deviations of variable Y.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+//' @param degree_upm numeric; Degree for upper deviations of variable X.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param target_x numeric; Target for upside deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -353,8 +353,8 @@ NumericVector DLPM_RCPP(
 //' (Upper Left Quadrant 2)
 //'
 //' This function generates a divergent upper partial moment between two equal length variables for any degree or target.
-//' @param degree_lpm integer; Degree for lower deviations of variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
-//' @param degree_upm integer; Degree for upper deviations of variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
+//' @param degree_lpm numeric; Degree for lower deviations of variable X.  \code{(degree_lpm = 0)} is frequency, \code{(degree_lpm = 1)} is area.
+//' @param degree_upm numeric; Degree for upper deviations of variable Y.  \code{(degree_upm = 0)} is frequency, \code{(degree_upm = 1)} is area.
 //' @param x a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param y a numeric vector of equal length to \code{x}.   \link{data.frame} or \link{list} type objects are not permissible.
 //' @param target_x numeric; Target for lower deviations of variable X.  Typically the mean of Variable X for classical statistics equivalences, but does not have to be.
@@ -400,27 +400,29 @@ NumericVector DUPM_RCPP(
 }
 
 // Forward‐declare the parallel back‐ends
-double clpm_nD_cpp(NumericMatrix data,
-                   NumericVector target,
-                   double degree);
-double cupm_nD_cpp(NumericMatrix data,
-                   NumericVector target,
-                   double degree);
+double clpm_nD_cpp(const NumericMatrix& data,
+                   const NumericVector& target,
+                   double degree,
+                   bool norm = true);
+double cupm_nD_cpp(const NumericMatrix& data,
+                   const NumericVector& target,
+                   double degree,
+                   bool norm = true);
 
+// [[Rcpp::export(rng = false)]]
+double CoLPM_nD_RCPP(const NumericMatrix &data,
+                     const NumericVector &target,
+                     const double &degree,
+                     const bool &norm = true) {
+  return clpm_nD_cpp(data, target, degree, norm);
+}
 
- // [[Rcpp::export(rng = false)]]
- double CoLPM_nD_RCPP(const NumericMatrix &data,
-                      const NumericVector &target,
-                      const double &degree) {
-   return clpm_nD_cpp(data, target, degree);
- }
-
-
- // [[Rcpp::export(rng = false)]]
+// [[Rcpp::export(rng = false)]]
 double CoUPM_nD_RCPP(const NumericMatrix &data,
                      const NumericVector &target,
-                     const double &degree) {
-  return cupm_nD_cpp(data, target, degree);
+                     const double &degree,
+                     const bool &norm = true) {
+  return cupm_nD_cpp(data, target, degree, norm);
 }
 
 

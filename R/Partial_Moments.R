@@ -2,10 +2,10 @@
 #'
 #' This function generates a univariate lower partial moment for any degree or target.
 #'
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)
 #' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param excess_ret Logical; \code{FALSE} (default)
+#' @param excess_ret logical; \code{FALSE} (default)
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
@@ -32,10 +32,10 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #'
 #' This function generates a univariate upper partial moment for any degree or target.
 #'
-#' @param degree integer; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
 #' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param excess_ret Logical; \code{FALSE} (default)
+#' @param excess_ret logical; \code{FALSE} (default)
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
@@ -60,46 +60,48 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 
 #' Co‑Lower Partial Moment nD
 #'
-#' This function generates a co‑lower partial moment for n‑dimensional data (n >= 2) for any degree or target.
+#' This function generates an n‑dimensional co‑lower partial moment (n ≥ 2) for any degree or target.
 #'
-#' @param data A numeric matrix with observations in rows and variables in columns.
-#' @param target A numeric vector of length equal to the number of columns in `data`.
-#' @param degree Numeric; degree for lower deviations (0 = frequency, 1 = area).
-#' @return Numeric; the n‑dimensional co‑lower partial moment, normalized.
+#' @param data   A numeric matrix with observations in rows and variables in columns.
+#' @param target A numeric vector, length equal to ncol(data).
+#' @param degree numeric; degree for lower deviations (0 = frequency, 1 = area).
+#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @return Numeric; the n‑dimensional co‑lower partial moment.
 #' @examples
 #' mat <- matrix(rnorm(200), ncol = 4)
-#' Co.LPM_nD(mat, rep(0, ncol(mat)), 1)
+#' Co.LPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
 #' @export
-
-Co.LPM_nD <- function(data, target, degree = 0.0) {
+Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
   target <- as.numeric(target)
   degree <- as.numeric(degree)
+  norm   <- as.logical(norm)
   
-  .Call("_NNS_CoLPM_nD_RCPP", data, target, degree)
+  .Call("_NNS_CoLPM_nD_RCPP", data, target, degree, norm)
 }
+
 
 #' Co‑Upper Partial Moment nD
 #'
-#' This function generates a co‑upper partial moment for n‑dimensional data (n >= 2) for any degree or target.
+#' This function generates an n‑dimensional co‑upper partial moment (n ≥ 2) for any degree or target.
 #'
-#' @param data A numeric matrix with observations in rows and variables in columns.
-#' @param target A numeric vector of length equal to the number of columns in `data`.
-#' @param degree Numeric; degree for upper deviations (0 = frequency, 1 = area).
-#' @return Numeric; the n‑dimensional co‑upper partial moment, normalized.
+#' @param data   A numeric matrix with observations in rows and variables in columns.
+#' @param target A numeric vector, length equal to ncol(data).
+#' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
+#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @return Numeric; the n‑dimensional co‑upper partial moment.
 #' @examples
 #' mat <- matrix(rnorm(200), ncol = 4)
-#' Co.UPM_nD(mat, rep(0, ncol(mat)), 1)
+#' Co.UPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
 #' @export
-
-Co.UPM_nD <- function(data, target, degree = 0.0) {
+Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
   target <- as.numeric(target)
   degree <- as.numeric(degree)
+  norm   <- as.logical(norm)
   
-  .Call("_NNS_CoUPM_nD_RCPP", data, target, degree)
+  .Call("_NNS_CoUPM_nD_RCPP", data, target, degree, norm)
 }
-
 
 
 
@@ -108,7 +110,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0) {
 #' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 #'
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
-#' @param degree integer; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable.
 #' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return for bi-variate analysis.  Multivariate analysis is restricted to \code{"CDF"}.
 #' @param plot logical; plots CDF.

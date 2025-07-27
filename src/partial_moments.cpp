@@ -92,139 +92,90 @@ double UPM_C(const double &degree, const double &target, const RVector<double> &
 
 
 
-
-
-// Worker for clpm_nD_cpp: degree == 0 (count)
+// Count worker for clpm_nD_cpp (degree == 0)
 struct CoLPM_CountWorker : public Worker {
   const RMatrix<double> data;
   const RVector<double> target;
-  NumericVector output; // Store partial counts
-  
+  NumericVector output;
   CoLPM_CountWorker(const NumericMatrix& data_, const NumericVector& target_, NumericVector& output_)
     : data(data_), target(target_), output(output_) {}
-  
   void operator()(std::size_t begin, std::size_t end) {
     int d = target.length();
     for (std::size_t i = begin; i < end; ++i) {
       bool ok = true;
       for (int j = 0; j < d; ++j) {
-        if (data(i, j) > target[j]) {
-          ok = false;
-          break;
-        }
-      }
-      output[i] = ok ? 1.0 : 0.0; // Store 1 for valid rows, 0 otherwise
-    }
-  }
-};
-
-// Worker for clpm_nD_cpp: degree > 0 (sum)
-struct CoLPM_SumWorker : public Worker {
-  const RMatrix<double> data;
-  const RVector<double> target;
-  const double degree;
-  NumericVector output; // Store partial products
-  
-  CoLPM_SumWorker(const NumericMatrix& data_, const NumericVector& target_, double degree_, NumericVector& output_)
-    : data(data_), target(target_), degree(degree_), output(output_) {}
-  
-  void operator()(std::size_t begin, std::size_t end) {
-    int d = target.length();
-    for (std::size_t i = begin; i < end; ++i) {
-      double prod = 1.0;
-      for (int j = 0; j < d; ++j) {
-        double diff = target[j] - data(i, j);
-        if (diff < 0) {
-          prod = 0.0;
-          break;
-        }
-        prod *= std::pow(diff, degree);
-      }
-      output[i] = prod; // Store product for this row
-    }
-  }
-};
-
-// [[Rcpp::export]]
-double clpm_nD_cpp(Rcpp::NumericMatrix data, Rcpp::NumericVector target, double degree) {
-  const std::size_t n = data.nrow();
-  const int d = data.ncol();
-  if (target.size() != d)
-    stop("`target` length must match number of columns in `data`");
-  
-  // degree == 0: joint-frequency count
-  if (degree == 0.0) {
-    NumericVector output(n); // Initialize output vector for counts
-    CoLPM_CountWorker worker(data, target, output);
-    parallelFor(0, n, worker);
-    return sum(output) / double(n); // Sum counts and normalize
-  }
-  
-  // degree > 0: normalization
-  NumericVector minv(d);
-  for (int j = 0; j < d; ++j) {
-    double m = data(0, j);
-    for (std::size_t i = 1; i < n; ++i)
-      m = std::min(m, data(i, j));
-    minv[j] = m;
-  }
-  double norm = 1.0;
-  for (int j = 0; j < d; ++j)
-    norm *= std::pow(std::max(0.0, target[j] - minv[j]), degree);
-  if (norm <= std::numeric_limits<double>::epsilon())
-    return 0.0;
-  
-  NumericVector output(n); // Initialize output vector for products
-  CoLPM_SumWorker sumWorker(data, target, degree, output);
-  parallelFor(0, n, sumWorker);
-  return sum(output) / double(n) / norm; // Sum products and normalize
-}
-
-// Worker for cupm_nD_cpp: degree == 0 (count)
-struct CoUPM_CountWorker : public Worker {
-  const RMatrix<double> data;
-  const RVector<double> target;
-  NumericVector output;
-  
-  CoUPM_CountWorker(const NumericMatrix& data_, const NumericVector& target_, NumericVector& output_)
-    : data(data_), target(target_), output(output_) {}
-  
-  void operator()(std::size_t begin, std::size_t end) {
-    int d = target.length();
-    for (std::size_t i = begin; i < end; ++i) {
-      bool ok = true;
-      for (int j = 0; j < d; ++j) {
-        if (data(i, j) < target[j]) {
-          ok = false;
-          break;
-        }
+        if (data(i, j) > target[j]) { ok = false; break; }
       }
       output[i] = ok ? 1.0 : 0.0;
     }
   }
 };
 
-// Worker for cupm_nD_cpp: degree > 0 (sum)
+// Sum worker for clpm_nD_cpp (degree > 0)
+struct CoLPM_SumWorker : public Worker {
+  const RMatrix<double> data;
+  const RVector<double> target;
+  const double degree;
+  NumericVector output;
+  CoLPM_SumWorker(const NumericMatrix& data_, const NumericVector& target_, double degree_, NumericVector& output_)
+    : data(data_), target(target_), degree(degree_), output(output_) {}
+  void operator()(std::size_t begin, std::size_t end) {
+    int d = target.length();
+    for (std::size_t i = begin; i < end; ++i) {
+      double prod = 1.0;
+      for (int j = 0; j < d; ++j) {
+        double diff = target[j] - data(i, j);
+        if (diff < 0) { prod = 0.0; break; }
+        if (isInteger(degree)) {
+          prod *= repeatMultiplication(diff, static_cast<int>(degree));
+        } else {
+          prod *= fastPow(diff, degree);
+        }
+      }
+      output[i] = prod;
+    }
+  }
+};
+
+// Count worker for cupm_nD_cpp (degree == 0)
+struct CoUPM_CountWorker : public Worker {
+  const RMatrix<double> data;
+  const RVector<double> target;
+  NumericVector output;
+  CoUPM_CountWorker(const NumericMatrix& data_, const NumericVector& target_, NumericVector& output_)
+    : data(data_), target(target_), output(output_) {}
+  void operator()(std::size_t begin, std::size_t end) {
+    int d = target.length();
+    for (std::size_t i = begin; i < end; ++i) {
+      bool ok = true;
+      for (int j = 0; j < d; ++j) {
+        if (data(i, j) < target[j]) { ok = false; break; }
+      }
+      output[i] = ok ? 1.0 : 0.0;
+    }
+  }
+};
+
+// Sum worker for cupm_nD_cpp (degree > 0)
 struct CoUPM_SumWorker : public Worker {
   const RMatrix<double> data;
   const RVector<double> target;
   const double degree;
   NumericVector output;
-  
   CoUPM_SumWorker(const NumericMatrix& data_, const NumericVector& target_, double degree_, NumericVector& output_)
     : data(data_), target(target_), degree(degree_), output(output_) {}
-  
   void operator()(std::size_t begin, std::size_t end) {
     int d = target.length();
     for (std::size_t i = begin; i < end; ++i) {
       double prod = 1.0;
       for (int j = 0; j < d; ++j) {
         double diff = data(i, j) - target[j];
-        if (diff < 0) {
-          prod = 0.0;
-          break;
+        if (diff < 0) { prod = 0.0; break; }
+        if (isInteger(degree)) {
+          prod *= repeatMultiplication(diff, static_cast<int>(degree));
+        } else {
+          prod *= fastPow(diff, degree);
         }
-        prod *= std::pow(diff, degree);
       }
       output[i] = prod;
     }
@@ -232,40 +183,96 @@ struct CoUPM_SumWorker : public Worker {
 };
 
 // [[Rcpp::export]]
-double cupm_nD_cpp(Rcpp::NumericMatrix data, Rcpp::NumericVector target, double degree) {
+double clpm_nD_cpp(const NumericMatrix& data,
+                   const NumericVector& target,
+                   double degree,
+                   bool norm = true) {
   const std::size_t n = data.nrow();
   const int d = data.ncol();
   if (target.size() != d)
     stop("`target` length must match number of columns in `data`");
   
-  // degree == 0: joint-frequency count
+  NumericVector output(n);
+  
   if (degree == 0.0) {
-    NumericVector output(n);
-    CoUPM_CountWorker worker(data, target, output);
-    parallelFor(0, n, worker);
+    CoLPM_CountWorker countWorker(data, target, output);
+    parallelFor(0, n, countWorker);
     return sum(output) / double(n);
   }
   
-  // degree > 0: normalization
-  NumericVector maxv(d);
-  for (int j = 0; j < d; ++j) {
-    double m = data(0, j);
-    for (std::size_t i = 1; i < n; ++i)
-      m = std::max(m, data(i, j));
-    maxv[j] = m;
+  double norm_const = 1.0;
+  if (norm) {
+    NumericVector minv(d);
+    for (int j = 0; j < d; ++j) {
+      double m = data(0, j);
+      for (std::size_t i = 1; i < n; ++i)
+        m = std::min(m, data(i, j));
+      minv[j] = m;
+    }
+    for (int j = 0; j < d; ++j) {
+      double delta = std::max(0.0, target[j] - minv[j]);
+      if (isInteger(degree))
+        norm_const *= repeatMultiplication(delta, static_cast<int>(degree));
+      else
+        norm_const *= fastPow(delta, degree);
+    }
+    if (norm_const <= std::numeric_limits<double>::epsilon())
+      return 0.0;
   }
-  double norm = 1.0;
-  for (int j = 0; j < d; ++j)
-    norm *= std::pow(std::max(0.0, maxv[j] - target[j]), degree);
-  if (norm <= std::numeric_limits<double>::epsilon())
-    return 0.0;
   
-  NumericVector output(n);
-  CoUPM_SumWorker sumWorker(data, target, degree, output);
+  CoLPM_SumWorker sumWorker(data, target, degree, output);
   parallelFor(0, n, sumWorker);
-  return sum(output) / double(n) / norm;
+  
+  double result = sum(output) / double(n);
+  if (norm) result /= norm_const;
+  return result;
 }
 
+// [[Rcpp::export]]
+double cupm_nD_cpp(const NumericMatrix& data,
+                   const NumericVector& target,
+                   double degree,
+                   bool norm = true) {
+  const std::size_t n = data.nrow();
+  const int d = data.ncol();
+  if (target.size() != d)
+    stop("`target` length must match number of columns in `data`");
+  
+  NumericVector output(n);
+  
+  if (degree == 0.0) {
+    CoUPM_CountWorker countWorker(data, target, output);
+    parallelFor(0, n, countWorker);
+    return sum(output) / double(n);
+  }
+  
+  double norm_const = 1.0;
+  if (norm) {
+    NumericVector maxv(d);
+    for (int j = 0; j < d; ++j) {
+      double m = data(0, j);
+      for (std::size_t i = 1; i < n; ++i)
+        m = std::max(m, data(i, j));
+      maxv[j] = m;
+    }
+    for (int j = 0; j < d; ++j) {
+      double delta = std::max(0.0, maxv[j] - target[j]);
+      if (isInteger(degree))
+        norm_const *= repeatMultiplication(delta, static_cast<int>(degree));
+      else
+        norm_const *= fastPow(delta, degree);
+    }
+    if (norm_const <= std::numeric_limits<double>::epsilon())
+      return 0.0;
+  }
+  
+  CoUPM_SumWorker sumWorker(data, target, degree, output);
+  parallelFor(0, n, sumWorker);
+  
+  double result = sum(output) / double(n);
+  if (norm) result /= norm_const;
+  return result;
+}
 
 
 // parallelFor
