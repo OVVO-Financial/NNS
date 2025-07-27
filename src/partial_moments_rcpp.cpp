@@ -399,6 +399,32 @@ NumericVector DUPM_RCPP(
   return DUPM_CPv(degree_lpm, degree_upm, x_vec, y_vec, target_x_vec, target_y_vec);
 }
 
+// Forward‐declare the parallel back‐ends
+double clpm_nD_cpp(NumericMatrix data,
+                   NumericVector target,
+                   double degree);
+double cupm_nD_cpp(NumericMatrix data,
+                   NumericVector target,
+                   double degree);
+
+
+ // [[Rcpp::export(rng = false)]]
+ double CoLPM_nD_RCPP(const NumericMatrix &data,
+                      const NumericVector &target,
+                      const double &degree) {
+   return clpm_nD_cpp(data, target, degree);
+ }
+
+
+ // [[Rcpp::export(rng = false)]]
+double CoUPM_nD_RCPP(const NumericMatrix &data,
+                     const NumericVector &target,
+                     const double &degree) {
+  return cupm_nD_cpp(data, target, degree);
+}
+
+
+
 //' Partial Moment Matrix
 //'
 //'

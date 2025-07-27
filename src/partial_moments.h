@@ -209,5 +209,15 @@ List PMMatrix_CPv(
     const NumericMatrix &variable,
     const bool &pop_adj
 );
+
+// Parallel back‑ends for n‑D Co‑partial moments
+double clpm_nD_cpp(Rcpp::NumericMatrix data,
+                   Rcpp::NumericVector target,
+                   double degree = 0.0);
+
+double cupm_nD_cpp(Rcpp::NumericMatrix data,
+                   Rcpp::NumericVector target,
+                   double degree = 0.0);
+
 #endif  //NNS_partial_moments_H
 

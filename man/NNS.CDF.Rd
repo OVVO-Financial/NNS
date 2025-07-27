@@ -46,7 +46,7 @@ A <- cbind(x,y)
 NNS.CDF(A, 0)
 
 ## Joint CDF with target
-NNS.CDF(A, 0, target = c(0,0))
+NNS.CDF(A, 0, target = rep(0, ncol(A)))
 }
 }
 \references{

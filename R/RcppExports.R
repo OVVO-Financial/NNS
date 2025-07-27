@@ -9,8 +9,12 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
-clpm_nD_cpp <- function(data, target, degree = 0.0) {
+clpm_nD_cpp <- function(data, target, degree) {
     .Call(`_NNS_clpm_nD_cpp`, data, target, degree)
+}
+
+cupm_nD_cpp <- function(data, target, degree) {
+    .Call(`_NNS_cupm_nD_cpp`, data, target, degree)
 }
 
 LPM_CPv <- function(degree, target, variable) {
@@ -172,6 +176,14 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @export
 D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
+}
+
+CoLPM_nD_RCPP <- function(data, target, degree) {
+    .Call(`_NNS_CoLPM_nD_RCPP`, data, target, degree)
+}
+
+CoUPM_nD_RCPP <- function(data, target, degree) {
+    .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree)
 }
 
 #' Partial Moment Matrix

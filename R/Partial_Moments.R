@@ -14,7 +14,7 @@
 #' x <- rnorm(100)
 #' LPM(0, mean(x), x)
 #' @export
-#' 
+
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
   target   <- as.numeric(target)
   variable <- as.numeric(variable)
@@ -44,6 +44,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' x <- rnorm(100)
 #' UPM(0, mean(x), x)
 #' @export
+
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
   target   <- as.numeric(target)
   variable <- as.numeric(variable)
@@ -55,6 +56,52 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
   .Call("_NNS_UPM_RCPP", degree, target, variable, excess_ret)
   
 }
+
+
+#' Co‑Lower Partial Moment nD
+#'
+#' This function generates a co‑lower partial moment for n‑dimensional data (n >= 2) for any degree or target.
+#'
+#' @param data A numeric matrix with observations in rows and variables in columns.
+#' @param target A numeric vector of length equal to the number of columns in `data`.
+#' @param degree Numeric; degree for lower deviations (0 = frequency, 1 = area).
+#' @return Numeric; the n‑dimensional co‑lower partial moment, normalized.
+#' @examples
+#' mat <- matrix(rnorm(200), ncol = 4)
+#' Co.LPM_nD(mat, rep(0, ncol(mat)), 1)
+#' @export
+
+Co.LPM_nD <- function(data, target, degree = 0.0) {
+  data   <- as.matrix(data)
+  target <- as.numeric(target)
+  degree <- as.numeric(degree)
+  
+  .Call("_NNS_CoLPM_nD_RCPP", data, target, degree)
+}
+
+#' Co‑Upper Partial Moment nD
+#'
+#' This function generates a co‑upper partial moment for n‑dimensional data (n >= 2) for any degree or target.
+#'
+#' @param data A numeric matrix with observations in rows and variables in columns.
+#' @param target A numeric vector of length equal to the number of columns in `data`.
+#' @param degree Numeric; degree for upper deviations (0 = frequency, 1 = area).
+#' @return Numeric; the n‑dimensional co‑upper partial moment, normalized.
+#' @examples
+#' mat <- matrix(rnorm(200), ncol = 4)
+#' Co.UPM_nD(mat, rep(0, ncol(mat)), 1)
+#' @export
+
+Co.UPM_nD <- function(data, target, degree = 0.0) {
+  data   <- as.matrix(data)
+  target <- as.numeric(target)
+  degree <- as.numeric(degree)
+  
+  .Call("_NNS_CoUPM_nD_RCPP", data, target, degree)
+}
+
+
+
 
 #' NNS CDF
 #'
@@ -94,7 +141,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' NNS.CDF(A, 0)
 #'
 #' ## Joint CDF with target
-#' NNS.CDF(A, 0, target = c(0,0))
+#' NNS.CDF(A, 0, target = rep(0, ncol(A)))
 #' }
 #' @export
 
@@ -190,7 +237,7 @@ NNS.CDF <- function(variable,
     ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
     
     # Compute joint conditional CDF using clpm_nD
-    CDF <- apply(variable, 1, function(row) clpm_nD_cpp(variable, row, degree = degree))
+    CDF <- apply(variable, 1, function(row) Co.LPM_nD(variable, row, degree = degree))
     
     # Apply transformation based on type
     if (type == "survival") {
@@ -212,7 +259,7 @@ NNS.CDF <- function(variable,
     # Target evaluation
     Pv <- numeric(0)
     if (!is.null(target)) {
-      Pv <- clpm_nD_cpp(variable, target, degree = degree)
+      Pv <- Co.LPM_nD(variable, target, degree = degree)
       if (type == "survival") {
         marg_target <- mapply(LPM.ratio, degree, target, as.data.frame(variable))
         Pv <- max(0, min(1, 1 - sum(marg_target) + Pv))
