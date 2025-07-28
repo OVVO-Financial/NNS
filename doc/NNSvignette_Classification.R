@@ -25,16 +25,20 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #                status = FALSE, balance = TRUE,
 #                type = "CLASS", folds = 1)
 #  
-#  a$results
-#  [1] 3 3 3 3 3 3 3 3 3 3
+#  a
+#  $results
+#   [1] 3 3 3 3 3 3 3 3 3 3
 #  
-#  a$feature.weights
-#  Petal.Width Petal.Length Sepal.Length
-#     0.4285714    0.4285714    0.1428571
+#  $pred.int
+#  NULL
 #  
-#  a$feature.frequency
-#   Petal.Width Petal.Length Sepal.Length
-#             3            3            1
+#  $feature.weights
+#  Petal.Length  Petal.Width Sepal.Length
+#     0.5000000    0.3333333    0.1666667
+#  
+#  $feature.frequency
+#  Petal.Length  Petal.Width Sepal.Length
+#             3            2            1
 #  
 #  mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 1

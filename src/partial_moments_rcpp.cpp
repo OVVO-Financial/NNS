@@ -42,7 +42,7 @@ double CoUPM_nD_RCPP(const NumericMatrix &data,
 }
 
 // [[Rcpp::export(rng = false)]]
-double CoDPM_nD_RCPP(const NumericMatrix &data,
+double DPM_nD_RCPP(const NumericMatrix &data,
                      const NumericVector &target,
                      const double &degree,
                      const bool &norm = true) {

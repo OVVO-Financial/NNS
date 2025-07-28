@@ -381,7 +381,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   }
   
   rhs.partitions <- data.table::data.table(reg.points.matrix)
-  fitted.matrix$residuals <-  fitted.matrix$y.hat - original.DV
+  fitted.matrix$residuals <-   fitted.matrix$y.hat - original.DV
   
   if(!is.null(type) && type=="class"){
     R2 <- as.numeric(format(mean(fitted.matrix$y.hat==fitted.matrix$y), digits = 4))
@@ -398,10 +398,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, stn = NULL, 
   
   if(is.numeric(confidence.interval)){
     fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]
-    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
+    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
     
     if(!is.null(point.est)){
-      lower.pred.int = predict.fit - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
+      lower.pred.int = predict.fit - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
       upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals)) + predict.fit
       
       pred.int = data.table::data.table(lower.pred.int, upper.pred.int)

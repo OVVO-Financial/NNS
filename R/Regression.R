@@ -413,14 +413,11 @@ NNS.reg = function (x, y,
             
           }
           
-          
           x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = FALSE)
           x.star <- data.table::data.table(x)
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
 
-          dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
-          
           dependence[is.na(dependence)] <- 0.1
           
           if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
@@ -442,8 +439,6 @@ NNS.reg = function (x, y,
   if(is.null(x.label)) x.label <- "x"
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-  
-  dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
   
   dependence[is.na(dependence)] <- 0.1
  
@@ -771,7 +766,7 @@ NNS.reg = function (x, y,
   pred.int = NULL
   if(is.numeric(confidence.interval)){
     fitted[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat) , by = gradient]
-    fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(LPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
+    fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
     
     if(!is.null(point.est)){
       

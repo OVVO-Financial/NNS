@@ -379,37 +379,17 @@ techniques.</p>
 allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
-<pre><code>##           V1       V2       V3       V4
-##  1: 4.300000 2.000000 1.000000 0.100000
-##  2: 4.385417 2.170833 1.050000 0.200000
-##  3: 4.580521 2.319048 1.200000 0.300000
-##  4: 4.700000 2.500000 1.300000 0.400000
-##  5: 4.800000 2.600000 1.400000 0.500000
-##  6: 4.900000 2.700000 1.500000 0.600000
-##  7: 5.000000 2.800000 1.600000 1.000000
-##  8: 5.100000 2.900000 1.700000 1.100000
-##  9: 5.200000 3.000000 1.900000 1.200000
-## 10: 5.300000 3.100000 3.416305 1.300000
-## 11: 5.400000 3.200000 3.837990 1.400000
-## 12: 5.519872 3.300000 4.000000 1.500000
-## 13: 5.700000 3.400000 4.188889 1.600000
-## 14: 5.800000 3.500000 4.400000 1.700000
-## 15: 5.900000 3.600000 4.500000 1.800000
-## 16: 6.000000 3.700000 4.674969 1.900000
-## 17: 6.100000 3.800000 4.863889 2.000000
-## 18: 6.200000 4.002637 5.000000 2.114583
-## 19: 6.300000 4.400000 5.100000 2.300000
-## 20: 6.400000       NA 5.200000 2.431040
-## 21: 6.500000       NA 5.333333 2.500000
-## 22: 6.600000       NA 5.500000       NA
-## 23: 6.700000       NA 5.614583       NA
-## 24: 6.800000       NA 5.848512       NA
-## 25: 6.900000       NA 6.333750       NA
-## 26: 7.050000       NA 6.900000       NA
-## 27: 7.221250       NA       NA       NA
-## 28: 7.691246       NA       NA       NA
-## 29: 7.900000       NA       NA       NA
-##           V1       V2       V3       V4</code></pre>
+<pre><code>##           V1       V2       V3        V4
+##  1: 4.300000 2.000000 1.000000 0.1000000
+##  2: 4.645982 2.459974 1.264630 0.2000000
+##  3: 4.982292 2.777735 1.400000 0.3000000
+##  4: 5.119048 2.900000 1.500000 0.4083333
+##  5: 5.620805 3.000000 1.651190 1.0588730
+##  6: 6.051905 3.100000 3.951841 1.3742424
+##  7: 6.319271 3.216228 4.577963 1.7831476
+##  8: 6.667974 3.416667 5.109681 2.2285885
+##  9: 7.189819 3.794525 5.791778 2.5000000
+## 10: 7.900000 4.400000 6.900000        NA</code></pre>
 </div>
 </div>
 </div>
@@ -445,19 +425,23 @@ for classification problems when using
 <span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>a<span class="sc">$</span>results</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>a<span class="sc">$</span>feature.weights</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>   <span class="fl">0.4285714</span>    <span class="fl">0.4285714</span>    <span class="fl">0.1428571</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>   </span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>a<span class="sc">$</span>feature.frequency</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>           <span class="dv">3</span>            <span class="dv">3</span>            <span class="dv">1</span>   </span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>   </span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>a</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="sc">$</span>results</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">$</span>feature.weights</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.5000000</span>    <span class="fl">0.3333333</span>    <span class="fl">0.1666667</span> </span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="sc">$</span>feature.frequency</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length </span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">3</span>            <span class="dv">2</span>            <span class="dv">1</span>   </span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
 <p>A perfect classification, using the features weighted per the output
 above.</p>
 </div>

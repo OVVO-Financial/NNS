@@ -22,6 +22,8 @@ Numeric; the n‑dimensional co‑upper partial moment.
 This function generates an n‑dimensional co‑upper partial moment (n ≥ 2) for any degree or target.
 }
 \examples{
+\dontrun{
 mat <- matrix(rnorm(200), ncol = 4)
 Co.UPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
+}
 }

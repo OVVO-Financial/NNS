@@ -51,41 +51,37 @@ NNS.dep = function(x,
     l <- length(x)
     
     y <- as.numeric(y)
-    obs <- max(10, l/5)
+    obs <- max(8, l/8)
     
     # Define segments
-    if(print.map) PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = TRUE)) else PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE))
+    if(print.map) PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = NULL, Voronoi = TRUE)) else PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE))
     
-    PART_yx <- suppressWarnings(NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = TRUE, type = "XONLY", Voronoi = FALSE))
+    PART_yx <- suppressWarnings(NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE))
     
     if(dim(PART_xy$regression.points)[1]==0) return(list("Correlation" = 0, "Dependence" = 0))
     
     PART_xy <- PART_xy$dt
     PART_xy <- PART_xy[complete.cases(PART_xy),]
     
-    PART_xy[, weights_xy := .N/l, by = prior.quadrant]
-    weights_xy <- PART_xy[, weights_xy[1], by = prior.quadrant]$V1
+    PART_xy[, weights_xy := .N/l, by = quadrant]
+    weights_xy <- PART_xy[, weights_xy[1], by = quadrant]$V1
     
     PART_yx <- PART_yx$dt
     PART_yx <- PART_yx[complete.cases(PART_yx),]
     
-    PART_yx[, weights_yx := .N/l, by = prior.quadrant]
-    weights_yx <- PART_yx[, weights_yx[1], by = prior.quadrant]$V1
-    
-    
-    ll <- expression(max(.N, 8))
+    PART_yx[, weights_yx := .N/l, by = quadrant]
+    weights_yx <- PART_yx[, weights_yx[1], by = quadrant]$V1
     
     
     dep_fn = function(x, y){
       NNS::NNS.copula(cbind(x, y)) * sign(cov(x,y))
     }
+
+    res_xy <- suppressWarnings(tryCatch(PART_xy[,  dep_fn(x, y), by = quadrant],
+                                        error = function(e)PART_xy[,  dep_fn(x, y), by = prior.quadrant]))
     
-    
-    res_xy <- suppressWarnings(tryCatch(PART_xy[1:eval(ll),  dep_fn(x, y), by = prior.quadrant],
-                                        error = function(e) dep_fn(x, y)))
-    
-    res_yx <- suppressWarnings(tryCatch(PART_yx[1:eval(ll),  dep_fn(y, x), by = prior.quadrant],
-                                        error = function(e) dep_fn(y, x)))
+    res_yx <- suppressWarnings(tryCatch(PART_yx[,  dep_fn(y, x), by = quadrant],
+                                        error = function(e) PART_yx[,  dep_fn(y, x), by = prior.quadrant]))
     
     if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)

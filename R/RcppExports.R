@@ -25,8 +25,8 @@ CoUPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
     .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree, norm)
 }
 
-CoDPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
-    .Call(`_NNS_CoDPM_nD_RCPP`, data, target, degree, norm)
+DPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+    .Call(`_NNS_DPM_nD_RCPP`, data, target, degree, norm)
 }
 
 LPM_RCPP <- function(degree, target, variable, excess_ret) {

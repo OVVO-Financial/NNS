@@ -68,8 +68,10 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
 #' @return Numeric; the n‑dimensional co‑lower partial moment.
 #' @examples
+#' \dontrun{
 #' mat <- matrix(rnorm(200), ncol = 4)
 #' Co.LPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
+#' }
 #' @export
 Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
@@ -91,8 +93,10 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
 #' @return Numeric; the n‑dimensional co‑upper partial moment.
 #' @examples
+#' \dontrun{
 #' mat <- matrix(rnorm(200), ncol = 4)
 #' Co.UPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
+#' }
 #' @export
 Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
@@ -114,8 +118,10 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
 #' @return Numeric; the n‑dimensional co‑upper partial moment.
 #' @examples
+#' \dontrun{
 #' mat <- matrix(rnorm(200), ncol = 4)
 #' DPM_nD(mat, rep(0, ncol(mat)), degree = 1, norm = FALSE)
+#' }
 #' @export
 DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
@@ -123,7 +129,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
   
-  .Call("_NNS_CoDPM_nD_RCPP", data, target, degree, norm)
+  .Call("_NNS_DPM_nD_RCPP", data, target, degree, norm)
 }
 
 

@@ -240,7 +240,7 @@ NNS.ARMA <- function(variable,
         Nonlin.estimates <- sum(Regression.Estimates * Weights)
       }
       
-      if (method %in% c("lin", "both", "means")) {
+      if ((method %in% c("lin", "both", "means")) || is.numeric(pred.int)) {
         Lin.Regression.Estimates <- sapply(seq_along(lag), function(i) {
           last.x <- tail(Component.index[[i]], 1)
           lin.reg <- fast_lm(Component.index[[i]], Component.series[[i]])
@@ -270,7 +270,7 @@ NNS.ARMA <- function(variable,
   
   if(!is.null(pred.int)){
     if (method != "means") lin.resid <- mean(abs(Lin.Regression.Estimates - mean(Lin.Regression.Estimates)))
-    PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = 0, upper_rho = 1, by = .2, exp = 2)$replicates)
+    PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = -1, upper_rho = 1, by = .2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
     

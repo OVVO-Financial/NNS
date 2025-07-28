@@ -450,7 +450,7 @@ NNS.ARMA.optim <- function(variable,
     }
   }
 
-  lower_PIs_is <- final.predicted - abs(LPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
+  lower_PIs_is <- final.predicted - abs(UPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
   upper_PIs_is <- final.predicted + abs(UPM.VaR((1-pred.int)/2, 0, errors)) + abs(bias)
   
   options(warn = oldw)
@@ -465,7 +465,7 @@ NNS.ARMA.optim <- function(variable,
   }
   
   
-  lower_PIs <- model.results - abs(LPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
+  lower_PIs <- model.results - abs(UPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
   upper_PIs <- model.results + abs(UPM.VaR((1-pred.int)/2, 0, errors)) + abs(bias)
 
   if(!negative.values){
