@@ -286,8 +286,8 @@ Similar dependence with radically different values, since we used $N(10, 20)$ in
 NNS.copula(original.data)
 NNS.copula(new.dep.data)
 
-[1] 0.2891989
-[1] 0.2887138
+[1] 0.5198702
+[1] 0.5205398
 ```
 
 ```{r, eval=FALSE}
@@ -346,8 +346,8 @@ Similar dependence with similar values.
 NNS.copula(original.data)
 NNS.copula(new.boot.dep.matrix)
 
-[1] 0.2891989
-[1] 0.275043
+[1] 0.5198702
+[1] 0.5143436
 ```
 
 ```{r, eval=FALSE}

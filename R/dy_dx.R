@@ -104,10 +104,9 @@ dy.dx <- function(x, y, eval.point = NULL){
         second.deriv = (rise_1 / run_1 - rise_2 / run_2) / mean(c(run_1, run_2))
       )]
       
-      first.deriv <- tryCatch(combined.matrices[ , mean((first.deriv)), by = eval.point],
-                              error = function(e) combined.matrices[ , mean(first.deriv), by = eval.point])
-      second.deriv <- tryCatch(combined.matrices[ , mean((second.deriv)), by = eval.point], 
-                               error = function(e) combined.matrices[ , mean(second.deriv), by = eval.point])
+      first.deriv  <- combined.matrices[, .(first.derivative  = mean(first.deriv,  na.rm = TRUE)), by = eval.point]
+      second.deriv <- combined.matrices[, .(second.derivative = mean(second.deriv, na.rm = TRUE)), by = eval.point]
+
   }
 
   colnames(first.deriv) <- c("eval.point", "first.derivative")

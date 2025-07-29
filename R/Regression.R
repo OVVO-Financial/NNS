@@ -293,7 +293,7 @@ NNS.reg = function (x, y,
       if(is.null(dim.red.method)){
         if(is.null(colnames(x))) colnames(x) <- rep("x", ncol(x))        
         colnames(x) <- make.unique(colnames(x), sep = "_")
-
+        
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
@@ -309,7 +309,7 @@ NNS.reg = function (x, y,
         
         x <- apply(data.matrix(x), 2, as.numeric)
         y <- as.numeric(y)
-
+        
         if(!is.null(dim.red.method) & !is.null(dim(x))){
           if(!is.numeric(dim.red.method)) dim.red.method <- tolower(dim.red.method)
           x.star.matrix <- matrix(nrow = length(y))
@@ -417,16 +417,16 @@ NNS.reg = function (x, y,
           x.star <- data.table::data.table(x)
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-
+          
           dependence[is.na(dependence)] <- 0.1
           
-          if(is.null(order)) order <- max(1, ceiling(dependence * 10))
+          if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
           
           if(length(y) < 100) order <- order / 2
-        
+          
           if(is.numeric(order)) order <- max(1, order) else order <- n
           
-          order <- ceiling(order)
+          order <- ifelse(order%%1 < .5, floor(order), ceiling(order))
         }
       } # Multivariate Not NULL type
       
@@ -440,15 +440,17 @@ NNS.reg = function (x, y,
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
   
-  dependence[is.na(dependence)] <- 0.1
- 
-  rounded_dep <- ceiling(dependence * 10)
+  dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
   
-  if(n < 100){
+  dependence[is.na(dependence)] <- 0.1
+  
+  rounded_dep <- ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10))
+  
+  if(length(y) < 100){
     rounded_dep <- rounded_dep / 2
-    rounded_dep <- ceiling(rounded_dep)
+    rounded_dep <- floor(rounded_dep)
   }
-   
+  
   rounded_dep <- max(1, rounded_dep)
   
   
@@ -648,7 +650,7 @@ NNS.reg = function (x, y,
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))
   
- 
+  
   ### Regression Equation
   if(multivariate.call)  return(regression.points[, c("x","y")])
   
@@ -674,7 +676,7 @@ NNS.reg = function (x, y,
   
   ### Fitted Values
   p <- length(unlist(regression.points[ , 1]))
-
+  
   
   if(is.na(Regression.Coefficients[1, Coefficient])){
     Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
@@ -723,12 +725,12 @@ NNS.reg = function (x, y,
   if(!is.null(type)){
     if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
   }
-
+  
   fitted <- data.table::data.table(x = x,
                                    y = original.y,
                                    y.hat = estimate,
                                    NNS.ID = nns.ids)
- 
+  
   colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
   
   fitted$y.hat[is.na(fitted$y.hat)] <- gravity(na.omit(fitted$y.hat))
@@ -746,7 +748,7 @@ NNS.reg = function (x, y,
     regression.points <- part.map$dt[, .(x,y)]
     data.table::setkey(regression.points, x)
   }
-
+  
   
   if(!is.null(type)){
     if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
@@ -770,7 +772,7 @@ NNS.reg = function (x, y,
     
     if(!is.null(point.est)){
       
-  
+      
       fitted[, `:=` ( 'pred.int.pos' = (UPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
       fitted[, `:=` ( 'pred.int.neg' = (LPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
       

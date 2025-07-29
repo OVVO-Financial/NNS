@@ -28,7 +28,34 @@ NNS.mode <- function (x, discrete = FALSE, multi = TRUE)
   range <- abs(x_s[l] - x_s[1])
   if (range == 0)
     return(x[1])
-  z <- NNS_bin(x_s, range/128, origin = x_s[1], missinglast = FALSE)
+  
+  l_25 = l*.25
+  l_50 = l*.5
+  l_75 = l*.75
+  
+  if(l%%2==0){
+    q1 <- x_s[l_25]
+    q2 <- x_s[l_50]
+    q3 <- x_s[l_75]
+  } else {
+    f_l_25 = floor(l_25)
+    f_l_75 = floor(l_75)
+    
+    q1 <- sum(x_s[f_l_25]+(l_25%%1 * (x_s[ceiling(l_25)] - x_s[f_l_25])))
+    q2 <- (x_s[floor(l_50)]+x_s[ceiling(l_50)])/2
+    q3 <- sum(x_s[f_l_75]+((l_75)%%1 * (x_s[ceiling(l_75)] - x_s[f_l_75])))
+  }
+  
+  width = (q3 - q1) * l^(-1/2)
+  
+  z <- tryCatch(
+    {
+      NNS_bin(x_s, width, origin = x_s[1], missinglast = FALSE)
+    },
+    error = function(e) {
+      return(NNS_bin(x_s, range / 128, origin = x_s[1], missinglast = FALSE))
+    } )
+    
   lz <- length(z$counts)
   max_z <- z$counts == max(z$counts)
   z_names <- seq(x_s[1], x_s[l], z$width)

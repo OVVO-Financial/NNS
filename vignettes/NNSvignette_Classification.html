@@ -379,17 +379,25 @@ techniques.</p>
 allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
-<pre><code>##           V1       V2       V3        V4
-##  1: 4.300000 2.000000 1.000000 0.1000000
-##  2: 4.645982 2.459974 1.264630 0.2000000
-##  3: 4.982292 2.777735 1.400000 0.3000000
-##  4: 5.119048 2.900000 1.500000 0.4083333
-##  5: 5.620805 3.000000 1.651190 1.0588730
-##  6: 6.051905 3.100000 3.951841 1.3742424
-##  7: 6.319271 3.216228 4.577963 1.7831476
-##  8: 6.667974 3.416667 5.109681 2.2285885
-##  9: 7.189819 3.794525 5.791778 2.5000000
-## 10: 7.900000 4.400000 6.900000        NA</code></pre>
+<pre><code>##           V1       V2       V3       V4
+##  1: 4.300000 2.000000 1.000000 0.100000
+##  2: 4.493889 2.277887 1.122917 0.200000
+##  3: 4.778422 2.517949 1.300000 0.300000
+##  4: 4.900000 2.700000 1.400000 0.400000
+##  5: 5.000000 2.800000 1.500000 0.550000
+##  6: 5.100000 2.900000 1.600000 1.000000
+##  7: 5.205000 3.000000 1.777381 1.174969
+##  8: 5.497942 3.100000 3.637346 1.300000
+##  9: 5.720000 3.200000 4.085368 1.479027
+## 10: 5.983333 3.300000 4.479984 1.608333
+## 11: 6.118333 3.400000 4.760501 1.813603
+## 12: 6.300000 3.500000 5.079984 2.078450
+## 13: 6.400000 3.619048 5.287079 2.324405
+## 14: 6.509226 3.855692 5.588317 2.500000
+## 15: 6.708902 4.400000 6.065699       NA
+## 16: 6.912500       NA 6.900000       NA
+## 17: 7.484038       NA       NA       NA
+## 18: 7.900000       NA       NA       NA</code></pre>
 </div>
 </div>
 </div>
@@ -433,12 +441,12 @@ for classification problems when using
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="cn">NULL</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">$</span>feature.weights</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.5000000</span>    <span class="fl">0.3333333</span>    <span class="fl">0.1666667</span> </span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>         <span class="fl">0.4</span>          <span class="fl">0.4</span>          <span class="fl">0.2</span> </span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
 <span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="sc">$</span>feature.frequency</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length </span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">3</span>            <span class="dv">2</span>            <span class="dv">1</span>   </span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">2</span>            <span class="dv">2</span>            <span class="dv">1</span> </span>
 <span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
 <span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
 <span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>

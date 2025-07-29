@@ -9,11 +9,13 @@ Z <- data.frame(x,y,z)
 B <- NNS.copula(A, continuous=T, plot=F)
 C <- NNS.copula(A, continuous=F, plot=F)
 D <- NNS.copula(Z, continuous=T, plot=F)
+E <- NNS.copula(Z, continuous=F, plot=F)
 
 test_that(
 	"Copula", {
-	  expect_equal(B, 0.2247465, tolerance=1e-5)
-	  expect_equal(C, 0.03, tolerance=1e-5)
-	  expect_equal(D, 0.165554, tolerance=1e-5)
+	  expect_equal(B, 0.5202135, tolerance=1e-5)
+	  expect_equal(C, 0.441588, tolerance=1e-5)
+	  expect_equal(D, 0.3498327, tolerance=1e-5)
+	  expect_equal(E, 0.2600366, tolerance=1e-5)
 	}
 )

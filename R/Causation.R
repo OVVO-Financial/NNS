@@ -101,12 +101,18 @@ NNS.caus <- function(x, y = NULL,
     }
 
     if(tau == "ts"){
-      Causation.y.given.x <- Uni.caus(y, x, tau = 3, plot = FALSE)
-      Causation.x.given.y <- Uni.caus(x, y, tau = 3, plot = FALSE)
+      l <- length(x)
+      x_tau <- NNS.seas(x, plot = FALSE)$periods
+      y_tau <- NNS.seas(y, plot = FALSE)$periods
+      
+      x_tau <- x_tau[x_tau <= (l)^(1/2)][1]
+      y_tau <- y_tau[y_tau <= (l)^(1/2)][1]
+      
+      Causation.y.given.x <- Uni.caus(y, x, tau = x_tau, plot = FALSE)
+      Causation.x.given.y <- Uni.caus(x, y, tau = y_tau, plot = FALSE)
 
       Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
       Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-
     }
 
 
@@ -115,7 +121,7 @@ NNS.caus <- function(x, y = NULL,
           # For plotting only
           if(tau == "cs") tau <- 0
 
-          if(tau == "ts") tau <- 3
+          if(tau == "ts") tau <- mean(c(x_tau, y_tau))
 
           Uni.caus(y, x, tau = tau, plot = plot)
         }
@@ -126,7 +132,7 @@ NNS.caus <- function(x, y = NULL,
         if(plot){
           # For plotting only
           if(tau == "cs") tau <- 0
-          if(tau == "ts") tau <- 3
+          if(tau == "ts") tau <- mean(c(x_tau, y_tau))
 
           Uni.caus(x, y, tau = tau, plot = plot)
         }

@@ -36,6 +36,7 @@ NNS.copula <- function (
     stop("You have some missing values, please address.")
   }
   
+  
   n <- ncol(X)
   l <- dim(X)[1]
   
@@ -78,7 +79,13 @@ NNS.copula <- function (
     }
   }
   
+  if(is.null(target)) target <- colMeans(X)
+  
+  # Pairwise  
   discrete_pm_cov <- PM.matrix(0, 0, target = target, variable = X, pop_adj = FALSE)
+  discrete_Co_pm <- sum(discrete_pm_cov$cupm[upper.tri(discrete_pm_cov$cupm, diag = FALSE)]) + sum(discrete_pm_cov$clpm[upper.tri(discrete_pm_cov$clpm, diag = FALSE)]) 
+  if(discrete_Co_pm==1 || discrete_Co_pm==0) return(1)
+  
   
   if(continuous){
     degree <- 1
@@ -87,29 +94,35 @@ NNS.copula <- function (
     degree <- 0
     continuous_pm_cov <- discrete_pm_cov
   }
-
-
+  
+  
   # Isolate the upper triangles from each of the partial moment matrices
-  discrete_Co_pm <- sum(discrete_pm_cov$cupm[upper.tri(discrete_pm_cov$cupm, diag = FALSE)]) + sum(discrete_pm_cov$clpm[upper.tri(discrete_pm_cov$clpm, diag = FALSE)]) 
-  if(discrete_Co_pm==1 || discrete_Co_pm==0) return(1)
   discrete_D_pm <- sum(discrete_pm_cov$dupm[upper.tri(discrete_pm_cov$dupm, diag = FALSE)]) + sum(discrete_pm_cov$dlpm[upper.tri(discrete_pm_cov$dlpm, diag = FALSE)])
- 
+  
   continuous_Co_pm <- sum(continuous_pm_cov$cupm[upper.tri(continuous_pm_cov$cupm, diag = FALSE)]) + sum(continuous_pm_cov$clpm[upper.tri(continuous_pm_cov$clpm, diag = FALSE)]) 
   continuous_D_pm <- sum(continuous_pm_cov$dupm[upper.tri(continuous_pm_cov$dupm, diag = FALSE)]) + sum(continuous_pm_cov$dlpm[upper.tri(continuous_pm_cov$dlpm, diag = FALSE)]) 
-
+  
   
   indep_Co_pm <- .25 * (n^2 - n)
   
   if(continuous) continuous_indep_Co_pm <- 0.25 *(sum(continuous_Co_pm + continuous_D_pm)) else continuous_indep_Co_pm <- indep_Co_pm
-
+  
   
   if(discrete_Co_pm > indep_Co_pm) discrete_dep <- (discrete_Co_pm-indep_Co_pm)/indep_Co_pm else discrete_dep <- (indep_Co_pm - discrete_Co_pm)/indep_Co_pm
   if(continuous_Co_pm > continuous_indep_Co_pm) continuous_dep <- (continuous_Co_pm-continuous_indep_Co_pm)/(n*continuous_indep_Co_pm) else continuous_dep <- (continuous_indep_Co_pm - continuous_Co_pm)/(n*continuous_indep_Co_pm)
-
+  
   discrete_dep <- min(max(discrete_dep, 0), 1)
   continuous_dep <- min(max(continuous_dep, 0), 1)
+
+  # n-dimensional
+  discrete_D_pm <- DPM_nD(data = X, target = target, degree = 0, norm = TRUE)
+  if(continuous) continuous_D_pm <- DPM_nD(data = X, target = target, degree = 1, norm = TRUE) else continuous_D_pm <- discrete_D_pm
   
+  indep_D_pm <- 1-(0.5^n)
   
-  
-  return(mean(c(discrete_dep, continuous_dep)))
+  if(discrete_D_pm > indep_D_pm) n_dim_discrete_dep <- (discrete_D_pm - indep_D_pm)/(indep_D_pm) else n_dim_discrete_dep <- (indep_D_pm - discrete_D_pm)/(indep_D_pm)
+  if(continuous_D_pm > indep_D_pm) n_dim_continuous_dep <- (continuous_D_pm - indep_D_pm)/(indep_D_pm) else n_dim_continuous_dep <- (indep_D_pm - continuous_D_pm)/(indep_D_pm)
+
+
+  return(mean(c(discrete_dep, continuous_dep, n_dim_discrete_dep, n_dim_continuous_dep))^(1/2))
 }

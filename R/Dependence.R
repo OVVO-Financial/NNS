@@ -32,20 +32,20 @@ NNS.dep = function(x,
                    asym = FALSE,
                    p.value = FALSE,
                    print.map = FALSE){
-
-
-
+  
+  
+  
   if(any(class(x)%in%c("tbl","data.table")) && !is.null(y)) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
-
+  
   if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
-
+  
   if(p.value){
     y_p <- replicate(100, sample.int(length(y)))
     x <- cbind(x, y, matrix(y[y_p], ncol = dim(y_p)[2], byrow = F))
     y <- NULL
   }
-
+  
   if(!is.null(y)){
     x <- as.numeric(x)
     l <- length(x)
@@ -76,7 +76,7 @@ NNS.dep = function(x,
     dep_fn = function(x, y){
       NNS::NNS.copula(cbind(x, y)) * sign(cov(x,y))
     }
-
+    
     res_xy <- suppressWarnings(tryCatch(PART_xy[,  dep_fn(x, y), by = quadrant],
                                         error = function(e)PART_xy[,  dep_fn(x, y), by = prior.quadrant]))
     
@@ -124,14 +124,14 @@ NNS.dep = function(x,
   } else {
     if(p.value){
       original.par <- par(no.readonly = TRUE)
-
+      
       nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g))
-
+      
       ## Store results
       cors <- unlist(lapply(nns.mc, "[[", 1))
       deps <- unlist(lapply(nns.mc, "[[", 2))
-
-
+      
+      
       cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1,2)])
       cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1,2)])
       dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1,2)])
@@ -151,7 +151,7 @@ NNS.dep = function(x,
         abline(v =  dep_upper_CI , col = "red", lwd = 2, lty = 3)
         par(mfrow = original.par)
       }
-
+      
       return(list("Correlation" = as.numeric((cors)[2]),
                   "Correlation p.value" = min(LPM(0, cors[2], cors[-c(1,2)]),
                                               UPM(0, cors[2], cors[-c(1,2)])),
@@ -162,5 +162,5 @@ NNS.dep = function(x,
                   "Dependence 95% CIs" = c(dep_lower_CI, dep_upper_CI)))
     } else return(NNS.dep.matrix(x, asym = asym))
   }
-
+  
 }
