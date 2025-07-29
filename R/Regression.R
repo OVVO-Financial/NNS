@@ -6,7 +6,6 @@
 #' @param y a numeric or factor vector with compatible dimensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
-#' @param stn numeric [0, 1]; Signal to noise parameter, sets the threshold of \code{(NNS.dep)} which reduces \code{("order")} when \code{(order = NULL)}.  Defaults to 0.95 to ensure high dependence for higher \code{("order")} and endpoint determination.
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients.  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
@@ -131,7 +130,6 @@
 
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
-                    stn = .95,
                     dim.red.method = NULL, tau = NULL,
                     type = NULL,
                     point.est = NULL,
@@ -282,6 +280,8 @@ NNS.reg = function (x, y,
   
   np <- nrow(point.est)
   
+  stn <- .95
+  
   if(!is.null(type) && type == "class" ){
     if(is.null(n.best)) n.best <- 1
   }
@@ -297,7 +297,7 @@ NNS.reg = function (x, y,
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
                          residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
-                         dist = dist, stn = stn, return.values = return.values, plot.regions = plot.regions,
+                         dist = dist, return.values = return.values, plot.regions = plot.regions,
                          point.only = point.only, ncores = ncores, confidence.interval = confidence.interval))
         
       } else { # Multivariate dim.red == FALSE
@@ -420,13 +420,13 @@ NNS.reg = function (x, y,
 
           dependence[is.na(dependence)] <- 0.1
           
-          if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
+          if(is.null(order)) order <- max(1, ceiling(dependence * 10))
           
           if(length(y) < 100) order <- order / 2
         
           if(is.numeric(order)) order <- max(1, order) else order <- n
           
-          order <- ifelse(order%%1 < .5, floor(order), ceiling(order))
+          order <- ceiling(order)
         }
       } # Multivariate Not NULL type
       
@@ -442,11 +442,11 @@ NNS.reg = function (x, y,
   
   dependence[is.na(dependence)] <- 0.1
  
-  rounded_dep <- ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10))
+  rounded_dep <- ceiling(dependence * 10)
   
-  if(length(y) < 100){
+  if(n < 100){
     rounded_dep <- rounded_dep / 2
-    rounded_dep <- floor(rounded_dep)
+    rounded_dep <- ceiling(rounded_dep)
   }
    
   rounded_dep <- max(1, rounded_dep)
