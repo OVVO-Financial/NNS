@@ -105,7 +105,7 @@ NNS.copula <- function (
   
   indep_Co_pm <- .25 * (n^2 - n)
   
-  if(continuous) continuous_indep_Co_pm <- 0.25 *(sum(continuous_Co_pm + continuous_D_pm)) else continuous_indep_Co_pm <- indep_Co_pm
+  if(continuous) continuous_indep_Co_pm <- 0.5 *(sum(continuous_Co_pm + continuous_D_pm)) else continuous_indep_Co_pm <- indep_Co_pm
   
   
   if(discrete_Co_pm > indep_Co_pm) discrete_dep <- (discrete_Co_pm-indep_Co_pm)/indep_Co_pm else discrete_dep <- (indep_Co_pm - discrete_Co_pm)/indep_Co_pm

@@ -456,13 +456,13 @@ NNS.reg = function (x, y,
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
-  
+ 
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"
     part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
   } else {
     if(is.null(type)){
-      noise.reduction2 <- ifelse(noise.reduction=="mean", "off", noise.reduction)
+      noise.reduction2 <- noise.reduction # ifelse(noise.reduction=="mean", "off", noise.reduction)
     } else {
       if(type == "class") noise.reduction2 <- "mode_class" else noise.reduction2 <- noise.reduction
     }
@@ -476,7 +476,7 @@ NNS.reg = function (x, y,
       }
     }
   }
-  
+
   nns.ids <- part.map$dt$quadrant
   
   if(length(part.map$dt$y) > length(y)){
@@ -651,9 +651,6 @@ NNS.reg = function (x, y,
   regression.points$y <- pmax(regression.points$y, min(y))
   
   
-  ### Regression Equation
-  if(multivariate.call)  return(regression.points[, c("x","y")])
-  
   
   Regression.Coefficients <- regression.points[ , .(rise,run)]
   
@@ -696,10 +693,14 @@ NNS.reg = function (x, y,
       sorted_x <- sort(x, index= T)
       orig.order <- sorted_x$ix
       spline_fit <- stats::smooth.spline(regression.points[, x], regression.points[, y], spar = (dependence + 0.5)/2)
+      regression.points$y <- spline_fit$y
       plot_estimate <- stats::predict(spline_fit, sorted_x$x)$y
       estimate <- plot_estimate[orig.order]
     } else estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
   }
+  
+  ### Regression Equation
+  if(multivariate.call)  return(regression.points[, c("x","y")])
   
   if(!is.null(point.est)){
     coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)

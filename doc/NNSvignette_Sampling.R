@@ -179,8 +179,8 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  NNS.copula(original.data)
 #  NNS.copula(new.dep.data)
 #  
-#  [1] 0.5198702
-#  [1] 0.5205398
+#  [1] 0.4362801
+#  [1] 0.4368828
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)
@@ -223,8 +223,8 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  NNS.copula(original.data)
 #  NNS.copula(new.boot.dep.matrix)
 #  
-#  [1] 0.5198702
-#  [1] 0.5143436
+#  [1] 0.4362801
+#  [1] 0.4317082
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)

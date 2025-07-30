@@ -124,7 +124,7 @@ dy.d_ <- function(x, y, wrt,
   norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
  
   zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
- 
+
   h_s <- seq(2, 10, 2)
 
   results <- vector(mode = "list", length(h_s))

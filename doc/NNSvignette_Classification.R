@@ -34,11 +34,11 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #  
 #  $feature.weights
 #   Petal.Width Petal.Length Sepal.Length
-#           0.4          0.4          0.2
+#     0.4285714    0.4285714    0.1428571
 #  
 #  $feature.frequency
 #   Petal.Width Petal.Length Sepal.Length
-#             2            2            1
+#             3            3            1
 #  
 #  mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 1

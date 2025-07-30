@@ -221,7 +221,7 @@ NNS.stack <- function(IVs.train,
         var.cutoffs_2 <- abs(round(suppressWarnings(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)), method = "spearman"))[-1,1], digits = 2))
       } else {
         var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order = order, ncores = ncores,
-                                                            type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
+                                                            type = type, point.only = TRUE, smooth = smoothness)$equation$Coefficient[-(n+1)]), digits = 2))
       }
       
       var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
@@ -365,13 +365,13 @@ NNS.stack <- function(IVs.train,
         
         if(index==1){
           setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
-                                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE))
+                                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE, smooth = smoothness))
           
           if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
           
           if(is.null(dim(setup$RPM))  && is.null(setup$regression.points)){
             setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = "max",
-                                              type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE))
+                                              type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE, smooth = smoothness))
           }
           
           if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
@@ -405,11 +405,11 @@ NNS.stack <- function(IVs.train,
               rm(CV.IVs.test.new)
             } else {
               predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
-                                                     type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
+                                                     type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
             }
           } else {
             predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = unlist(CV.IVs.test), plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
-                                                   type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE)$Point.est)
+                                                   type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
           }
           
           if(!is.null(type)){
@@ -459,7 +459,7 @@ NNS.stack <- function(IVs.train,
 
         if(length(relevant_vars)>1){
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                     type = type, point.only = FALSE, confidence.interval = pred.int))
+                                                     type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness))
         } else {
             nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = unlist(IVs.test[, relevant_vars]), plot = FALSE, n.best = best.k, order = order, ncores = ncores,
                                                     type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness))
