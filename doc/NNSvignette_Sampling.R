@@ -29,7 +29,7 @@ points(sort(x), LPM.CDF, col='red')
 legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA, bty='n')
 
 ## ----fig.align='center', fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, message = FALSE, eval=FALSE----
-#  zzz= rnorm(length(x), mean = 0, sd = 1)
+#  zzz = rnorm(length(x), mean = 0, sd = 1)
 #  norm_approx = pnorm(sort(zzz), mean=0, sd=1) #pnorm(sort(x),mean=-mean(x),sd=sd(x))
 #  
 #  plot(ecdf(x), main = "eCDF via LPM.ratio()", lwd = 4)
@@ -161,26 +161,26 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 
 ## ----multisim, eval=FALSE-----------------------------------------------------
 #  set.seed(123)
-#  x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
+#  x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
 #  
 #  # Add variable x to original data to avoid total independence (example only)
-#  original.data <- cbind(x, y, z, x)
+#  original.data = cbind(x, y, z, x)
 #  
 #  # Determine dependence structure
-#  dep.structure <- apply(original.data, 2, function(x) LPM.ratio(degree = 1, target = x, variable = x))
+#  dep.structure = apply(original.data, 2, function(x) LPM.ratio(degree = 1, target = x, variable = x))
 #  
 #  # Generate new data with different mean, sd and length (or distribution type)
-#  new.data <- sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
+#  new.data = sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
 #  
 #  # Apply dependence structure to new data
-#  new.dep.data <- sapply(1:ncol(original.data), function(x) LPM.VaR(percentile = dep.structure[,x], degree = 1, x = new.data[,x]))
+#  new.dep.data = sapply(1:ncol(original.data), function(x) LPM.VaR(percentile = dep.structure[,x], degree = 1, x = new.data[,x]))
 
 ## ----comparison, warning=FALSE, eval=FALSE------------------------------------
 #  NNS.copula(original.data)
 #  NNS.copula(new.dep.data)
 #  
-#  [1] 0.4362801
-#  [1] 0.4368828
+#  [1] 0.4743531
+#  [1] 0.4753264
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)
@@ -223,8 +223,8 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  NNS.copula(original.data)
 #  NNS.copula(new.boot.dep.matrix)
 #  
-#  [1] 0.4362801
-#  [1] 0.4317082
+#  [1] 0.4743531
+#  [1] 0.4931871
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  head(original.data)

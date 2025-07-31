@@ -427,6 +427,7 @@ NumericVector UPM_RCPP(const double &degree,
 //' @param target numeric vector; thresholds for each column (defaults to colMeans).
 //' @param variable numeric matrix or data.frame.
 //' @param pop_adj logical; TRUE adjusts population vs. sample moments.
+//' @param norm logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.
 //' @return A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
@@ -442,7 +443,8 @@ NumericVector UPM_RCPP(const double &degree,
      const double &UPM_degree,
      const RObject &target,
      const RObject &variable,
-     const bool pop_adj
+     const bool pop_adj,
+     const bool norm = false
  ) {
    if(variable.isNULL()){
      Rcpp::stop("varible can't be null");
@@ -470,7 +472,7 @@ NumericVector UPM_RCPP(const double &degree,
      return List::create();
    }
    
-   return PMMatrix_CPv(LPM_degree, UPM_degree, tgt, variable_matrix, pop_adj);
+   return PMMatrix_CPv(LPM_degree, UPM_degree, tgt, variable_matrix, pop_adj, norm);
  }
 
 

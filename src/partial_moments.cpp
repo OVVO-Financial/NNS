@@ -587,7 +587,8 @@ List PMMatrix_CPv(
     const double &UPM_degree,
     const NumericVector &target,
     const NumericMatrix &variable,
-    const bool &pop_adj
+    const bool &pop_adj,
+    const bool &norm
 ) {
   size_t variable_cols=variable.cols();
   size_t target_length=target.size();
@@ -603,6 +604,28 @@ List PMMatrix_CPv(
   
   PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
   parallelFor(0, variable_cols, tmp_func);
+  
+  if (norm) {
+    // Normalize each quadrant matrix cell-wise so that at each (i,j):
+    // cupm + dupm + dlpm + clpm = 1 (if their sum > 0), else leave as zeros.
+    for (size_t i = 0; i < variable_cols; ++i) {
+      for (size_t j = 0; j < variable_cols; ++j) {
+        double cupm_ij = coUpm(i, j);
+        double dupm_ij = dUpm(i, j);
+        double dlpm_ij = dLpm(i, j);
+        double clpm_ij = coLpm(i, j);
+        double total = cupm_ij + dupm_ij + dlpm_ij + clpm_ij;
+        if (total > 0.0) {
+          coUpm(i, j) = cupm_ij / total;
+          dUpm(i, j) = dupm_ij / total;
+          dLpm(i, j) = dlpm_ij / total;
+          coLpm(i, j) = clpm_ij / total;
+        } else {
+          coUpm(i, j) = dUpm(i, j) = dLpm(i, j) = coLpm(i, j) = 0.0;
+        }
+      }
+    }
+  }
   
   rownames(coLpm) = colnames(variable);
   colnames(coLpm) = colnames(variable);

@@ -192,6 +192,7 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @param target numeric vector; thresholds for each column (defaults to colMeans).
 #' @param variable numeric matrix or data.frame.
 #' @param pop_adj logical; TRUE adjusts population vs. sample moments.
+#' @param norm logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.
 #' @return A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
@@ -201,8 +202,8 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #'   A <- cbind(rnorm(100), rnorm(100), rnorm(100))
 #'   PM.matrix(1, 1, NULL, A, TRUE)
 #' @export
-PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj) {
-    .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj)
+PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE) {
+    .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
 }
 
 NNS_bin <- function(x, width, origin = 0, missinglast = FALSE) {

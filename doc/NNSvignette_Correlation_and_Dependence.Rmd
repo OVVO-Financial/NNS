@@ -98,8 +98,8 @@ NNS.dep(y, x, asym = TRUE)
 Note the fact that all observations occupy only co- or divergent partial moment quadrants for a given subquadrant.
 ```{r dependence,fig.width=5,fig.height=3,fig.align = "center"}
 set.seed(123)
-df <- data.frame(x = runif(10000, -1, 1), y = runif(10000, -1, 1))
-df <- subset(df, (x ^ 2 + y ^ 2 <= 1 & x ^ 2 + y ^ 2 >= 0.95))
+df = data.frame(x = runif(10000, -1, 1), y = runif(10000, -1, 1))
+df = subset(df, (x ^ 2 + y ^ 2 <= 1 & x ^ 2 + y ^ 2 >= 0.95))
 ```
 
 ```{r circle1,fig.width=5,fig.height=3,fig.align = "center", results='hide', echo=FALSE}
@@ -121,7 +121,7 @@ Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run 100 permu
 ```{r permutations}
 ## p-values for [NNS.dep]
 set.seed(123)
-x <- seq(-5, 5, .1); y <- x^2 + rnorm(length(x))
+x = seq(-5, 5, .1); y = x^2 + rnorm(length(x))
 ```
 
 ```{r perm1,fig.width=5,fig.height=3,fig.align = "center", results='hide', echo=FALSE}
@@ -139,7 +139,7 @@ based correlation methods, which are restricted to bivariate cases.
 
 ```{r multi, warning=FALSE}
 set.seed(123)
-x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
+x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 ```
 

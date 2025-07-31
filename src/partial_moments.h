@@ -40,7 +40,6 @@ NumericVector UPM_CPv(const double &degree, const NumericVector &target, const N
 NumericVector LPM_ratio_CPv(const double &degree, const NumericVector &target, const NumericVector &variable);
 NumericVector UPM_ratio_CPv(const double &degree, const NumericVector &target, const NumericVector &variable);
 
-
 /////////////////
 // CoUPM / CoLPM / DUPM / DLPM
 // single thread
@@ -208,7 +207,8 @@ List PMMatrix_CPv(
     const double &UPM_degree,
     const NumericVector &target,
     const NumericMatrix &variable,
-    const bool &pop_adj
+    const bool &pop_adj,
+    const bool &norm
 );
 
 // n‐D co‐partial‐moments prototypes (parallel back‐ends)

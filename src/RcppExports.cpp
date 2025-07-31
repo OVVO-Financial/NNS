@@ -208,8 +208,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // PMMatrix_RCPP
-List PMMatrix_RCPP(const double& LPM_degree, const double& UPM_degree, const RObject& target, const RObject& variable, const bool pop_adj);
-RcppExport SEXP _NNS_PMMatrix_RCPP(SEXP LPM_degreeSEXP, SEXP UPM_degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP pop_adjSEXP) {
+List PMMatrix_RCPP(const double& LPM_degree, const double& UPM_degree, const RObject& target, const RObject& variable, const bool pop_adj, const bool norm);
+RcppExport SEXP _NNS_PMMatrix_RCPP(SEXP LPM_degreeSEXP, SEXP UPM_degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP pop_adjSEXP, SEXP normSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const double& >::type LPM_degree(LPM_degreeSEXP);
@@ -217,7 +217,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const RObject& >::type target(targetSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type variable(variableSEXP);
     Rcpp::traits::input_parameter< const bool >::type pop_adj(pop_adjSEXP);
-    rcpp_result_gen = Rcpp::wrap(PMMatrix_RCPP(LPM_degree, UPM_degree, target, variable, pop_adj));
+    Rcpp::traits::input_parameter< const bool >::type norm(normSEXP);
+    rcpp_result_gen = Rcpp::wrap(PMMatrix_RCPP(LPM_degree, UPM_degree, target, variable, pop_adj, norm));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -252,7 +253,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_CoUPM_RCPP", (DL_FUNC) &_NNS_CoUPM_RCPP, 5},
     {"_NNS_DLPM_RCPP", (DL_FUNC) &_NNS_DLPM_RCPP, 6},
     {"_NNS_DUPM_RCPP", (DL_FUNC) &_NNS_DUPM_RCPP, 6},
-    {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 5},
+    {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 6},
     {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
     {NULL, NULL, 0}
 };

@@ -89,7 +89,7 @@ NNS.copula <- function (
   
   if(continuous){
     degree <- 1
-    continuous_pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE)
+    continuous_pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE, norm = TRUE)
   } else {
     degree <- 0
     continuous_pm_cov <- discrete_pm_cov
@@ -102,15 +102,12 @@ NNS.copula <- function (
   continuous_Co_pm <- sum(continuous_pm_cov$cupm[upper.tri(continuous_pm_cov$cupm, diag = FALSE)]) + sum(continuous_pm_cov$clpm[upper.tri(continuous_pm_cov$clpm, diag = FALSE)]) 
   continuous_D_pm <- sum(continuous_pm_cov$dupm[upper.tri(continuous_pm_cov$dupm, diag = FALSE)]) + sum(continuous_pm_cov$dlpm[upper.tri(continuous_pm_cov$dlpm, diag = FALSE)]) 
   
-  
   indep_Co_pm <- .25 * (n^2 - n)
   
-  if(continuous) continuous_indep_Co_pm <- 0.5 *(sum(continuous_Co_pm + continuous_D_pm)) else continuous_indep_Co_pm <- indep_Co_pm
-  
-  
   if(discrete_Co_pm > indep_Co_pm) discrete_dep <- (discrete_Co_pm-indep_Co_pm)/indep_Co_pm else discrete_dep <- (indep_Co_pm - discrete_Co_pm)/indep_Co_pm
-  if(continuous_Co_pm > continuous_indep_Co_pm) continuous_dep <- (continuous_Co_pm-continuous_indep_Co_pm)/(n*continuous_indep_Co_pm) else continuous_dep <- (continuous_indep_Co_pm - continuous_Co_pm)/(n*continuous_indep_Co_pm)
+  if(continuous_Co_pm > indep_Co_pm) continuous_dep <- (continuous_Co_pm-indep_Co_pm)/(indep_Co_pm) else continuous_dep <- (indep_Co_pm - continuous_Co_pm)/(indep_Co_pm)
   
+   
   discrete_dep <- min(max(discrete_dep, 0), 1)
   continuous_dep <- min(max(continuous_dep, 0), 1)
 
