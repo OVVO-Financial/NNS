@@ -4,7 +4,18 @@
 \alias{NNS.caus}
 \title{NNS Causation}
 \usage{
-NNS.caus(x, y = NULL, factor.2.dummy = FALSE, tau = 0, plot = FALSE)
+NNS.caus(
+  x,
+  y = NULL,
+  factor.2.dummy = FALSE,
+  tau = 0,
+  plot = FALSE,
+  p.value = FALSE,
+  nperm = 100L,
+  permute = c("y", "x", "both"),
+  seed = NULL,
+  conf.int = 0.95
+)
 }
 \arguments{
 \item{x}{a numeric vector, matrix or data frame.}
@@ -16,9 +27,26 @@ NNS.caus(x, y = NULL, factor.2.dummy = FALSE, tau = 0, plot = FALSE)
 \item{tau}{options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.}
 
 \item{plot}{logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.}
+
+\item{p.value}{logical; \code{FALSE} (default) If \code{TRUE}, runs a permutation test to compute empirical p-values for the signed causation from x -> y.}
+
+\item{nperm}{integer; number of permutations to use when \code{p.value = TRUE}. Default 100.}
+
+\item{permute}{one of "both", "y", or "x"; which variable(s) to shuffle when constructing the null distribution.}
+
+\item{seed}{optional integer seed for reproducibility of the permutation test.}
+
+\item{conf.int}{numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.}
 }
 \value{
-Returns the directional causation (x ---> y) or (y ---> x) and net quantity of association.  For causal matrix, directional causation is returned as ([column variable] ---> [row variable]).  Negative numbers represent causal direction attributed to [row variable].
+If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot, normalized to [-1.1].  If \code{p.value=TRUE} returns a list with components:
+ * \code{causation}: the original causation vector as above.
+ * \code{p.value}: a list with empirical two-sided and one-sided p-values (x_causes_y, y_causes_x), the null distribution, the observed signed statistic, and metadata (permute, nperm).
+If \code{p.value=TRUE} for a matrix, the function returns a list with components:
+  * \code{causality}: the causality matrix.
+  * \code{lower_CI}: matrix of lower confidence bounds (partial-moment based).
+  * \code{upper_CI}: matrix of upper confidence bounds (partial-moment based).
+  * \code{p.value}: matrix of empirical two-sided p-values.
 }
 \description{
 Returns the causality from observational data between two variables.
