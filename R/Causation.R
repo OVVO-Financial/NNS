@@ -13,7 +13,7 @@
 #' @param seed optional integer seed for reproducibility of the permutation test.
 #' @param conf.int numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.
 #'
-#' @return If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot, normalized to [-1.1].  If \code{p.value=TRUE} returns a list with components:
+#' @return If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot.  If \code{p.value=TRUE} returns a list with components:
 #'  * \code{causation}: the original causation vector as above.
 #'  * \code{p.value}: a list with empirical two-sided and one-sided p-values (x_causes_y, y_causes_x), the null distribution, the observed signed statistic, and metadata (permute, nperm).
 #' If \code{p.value=TRUE} for a matrix, the function returns a list with components:
@@ -122,11 +122,6 @@ NNS.caus <- function(x, y = NULL,
   result$p.value$null_distribution[is.na(result$p.value$null_distribution)] <- 0
   result$p.value$lower_CI <- ifelse(is.na(result$p.value$lower_CI), 0, result$p.value$lower_CI)
   result$p.value$upper_CI <- ifelse(is.na(result$p.value$upper_CI), 0, result$p.value$upper_CI)
-  
-  # Normalized signed log-ratio (already capped/tanh via cap_inf100_scalar)
-  result$log_ratio <- signed_from_cp(cp)
-  result$normalized_log_ratio <- cap_inf100_scalar(result$log_ratio)
-  result$normalized <- result$normalized_log_ratio  # unify naming if you want just one normalized value
 
   return(result)
 }

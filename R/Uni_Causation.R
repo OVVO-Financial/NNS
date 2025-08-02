@@ -111,7 +111,8 @@ cap_inf100_scalar <- function(v, cap = 100, scaling_factor = 2){  # switched to 
   v2 <- v
   v2[is.infinite(v2)] <- sign(v2[is.infinite(v2)]) * cap
   v2 <- ifelse(abs(v2) > cap, sign(v2) * cap, v2)
-  return(tanh(v2 / scaling_factor))
+  return(v2)
+#  return(tanh(v2 / scaling_factor))
 }
 
 

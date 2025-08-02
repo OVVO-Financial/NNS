@@ -39,7 +39,7 @@ NNS.caus(
 \item{conf.int}{numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.}
 }
 \value{
-If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot, normalized to [-1.1].  If \code{p.value=TRUE} returns a list with components:
+If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot.  If \code{p.value=TRUE} returns a list with components:
  * \code{causation}: the original causation vector as above.
  * \code{p.value}: a list with empirical two-sided and one-sided p-values (x_causes_y, y_causes_x), the null distribution, the observed signed statistic, and metadata (permute, nperm).
 If \code{p.value=TRUE} for a matrix, the function returns a list with components:
