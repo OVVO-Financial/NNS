@@ -65,8 +65,8 @@ dy.dx <- function(x, y, eval.point = NULL){
       index <- which(h == h_s)
       h_step <- eval.point * h_s[index]
       
-      eval.point.min <- max(min(x), original.eval.point.min - h_step)
-      eval.point.max <- min(max(x), h_step + original.eval.point.max)
+      eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
+      eval.point.max <- pmin(max(x), h_step + original.eval.point.max)
       
       deriv.points[[index]] <- cbind(eval.point.min, eval.point, eval.point.max)
     }
@@ -101,7 +101,7 @@ dy.dx <- function(x, y, eval.point = NULL){
       
       combined.matrices[, `:=` (
         first.deriv = (rise_1 + rise_2) / (run_1 + run_2),
-        second.deriv = (rise_1 / run_1 - rise_2 / run_2) / mean(c(run_1, run_2))
+        second.deriv = (rise_1 / run_1 - rise_2 / run_2) / ((run_1 + run_2)/2)
       )]
       
       first.deriv  <- combined.matrices[, .(first.derivative  = mean(first.deriv,  na.rm = TRUE)), by = eval.point]

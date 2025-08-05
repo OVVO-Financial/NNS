@@ -268,7 +268,7 @@ dy.d_ <- function(x, y, wrt,
       mixed <- (z / mixed.distances)
       
       results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
-                               "Second" = (upper - f.x + lower) / ((distance_wrt) ^ 2),
+                               "Second" = (upper - 2 * f.x + lower) / ((distance_wrt) ^ 2),
                                "Mixed" = mixed)
       
     } else {
