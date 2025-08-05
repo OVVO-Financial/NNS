@@ -52,9 +52,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     
     eval.point.idx <- which(eval.point==eval.point)
 
-    h_s <- c(1:5, seq(10, 20, 5))/100 
+    h_s <- seq(2, 10, 2)
 
-    
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
     second.deriv <- vector(mode = "list", length(h_s))
@@ -63,8 +62,9 @@ dy.dx <- function(x, y, eval.point = NULL){
   
     for(h in h_s){
       index <- which(h == h_s)
-      h_step <- eval.point * h_s[index]
-      
+
+      h_step <- gravity(abs(diff(x))) * h_s[index]
+
       eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
       eval.point.max <- pmin(max(x), h_step + original.eval.point.max)
       

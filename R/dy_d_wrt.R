@@ -122,20 +122,20 @@ dy.d_ <- function(x, y, wrt,
   original.eval.points <- eval.points
   
   norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
- 
+  
   zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
-
+  
   h_s <- seq(2, 10, 2)
-
+  
   results <- vector(mode = "list", length(h_s))
   
   for(h in h_s){
     index <- which(h == h_s)
     if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
-
+      
       h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
-
+      
       
       if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
       
@@ -155,7 +155,7 @@ dy.d_ <- function(x, y, wrt,
       
       
       deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
-     
+      
       data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
                                                                                             eval.points,
                                                                                             original.eval.points.max))
@@ -200,7 +200,7 @@ dy.d_ <- function(x, y, wrt,
       
       n <- nrow(eval.points)
       original.eval.points <- eval.points
-
+      
       h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
       
       if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
@@ -216,7 +216,7 @@ dy.d_ <- function(x, y, wrt,
       
       
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
-
+      
       lower <- head(estimates,n)
       f.x <- estimates[(n+1):(2*n)]
       upper <- tail(estimates,n)
@@ -278,7 +278,7 @@ dy.d_ <- function(x, y, wrt,
     
     
   }
-
+  
   if(mixed){
     final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) mean(rep(x, length(x):1))),
                           "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))),
