@@ -2,6 +2,7 @@
 // [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
+#include <cmath>
 #include "partial_moments.h"
 
 using namespace Rcpp;
@@ -13,12 +14,12 @@ static double repeatMultiplication(double value, int n) {
   return result;
 }
 
-static double fastPow(double a, double b) {
-  union { double d; int x[2]; } u = { a };
-  u.x[1] = static_cast<int>(b * (u.x[1] - 1072632447) + 1072632447);
-  u.x[0] = 0;
-  return u.d;
-}
+//static double fastPow(double a, double b) {
+//  union { double d; int x[2]; } u = { a };
+//  u.x[1] = static_cast<int>(b * (u.x[1] - 1072632447) + 1072632447);
+//  u.x[0] = 0;
+//  return u.d;
+//}
 
 inline bool isInteger(double v) {
   return v == static_cast<int>(v);
@@ -46,7 +47,7 @@ double LPM_C(const double &degree, const double &target, const RVector<double> &
         }
       } else {
         // Use fastPow for non-integer degrees
-        out += fastPow(value, degree);
+        out += std::pow(value, degree);
       }
     } else out+= 0;
   }
@@ -73,7 +74,7 @@ double UPM_C(const double &degree, const double &target, const RVector<double> &
         }
       } else {
         // Use fastPow for non-integer degrees
-        out += fastPow(value, degree);
+        out += std::pow(value, degree);
       }
     } else out+= 0;
   }
@@ -118,7 +119,7 @@ struct CoLPM_SumWorker : public Worker {
         if (diff < 0.0) { prod = 0.0; break; }
         prod *= isInteger(degree)
           ? repeatMultiplication(diff, static_cast<int>(degree))
-            : fastPow(diff, degree);
+            : std::pow(diff, degree);
       }
       output[i] = prod;
     }
@@ -161,7 +162,7 @@ struct CoUPM_SumWorker : public Worker {
         if (diff < 0.0) { prod = 0.0; break; }
         prod *= isInteger(degree)
           ? repeatMultiplication(diff, static_cast<int>(degree))
-            : fastPow(diff, degree);
+            : std::pow(diff, degree);
       }
       output[i] = prod;
     }
@@ -214,7 +215,7 @@ struct DpmSumWorker : public Worker {
         double abs_dev = std::abs(data(i, j) - target[j]);
         prod *= isInteger(degree)
           ? repeatMultiplication(abs_dev, static_cast<int>(degree))
-            : fastPow(abs_dev, degree);
+            : std::pow(abs_dev, degree);
       }
       output[i] = prod;
     }
@@ -385,7 +386,7 @@ double CoUPM_C(
       if(d_upm_0) out += x1 * y1; 
       else
         out += repeatMultiplication(x1, static_cast<int>(degree_upm)) * repeatMultiplication(y1, static_cast<int>(degree_upm));
-    } else out += fastPow(x1, degree_upm) * fastPow(y1, degree_upm);
+    } else out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
 }
@@ -420,7 +421,7 @@ double CoLPM_C(
       if(d_lpm_0) out += x1 * y1;
       else
         out += repeatMultiplication(x1, static_cast<int>(degree_lpm)) * repeatMultiplication(y1, static_cast<int>(degree_lpm));
-    } else out += fastPow(x1, degree_lpm) * fastPow(y1, degree_lpm);
+    } else out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
   }
   return out/max_size;
 }
@@ -457,11 +458,11 @@ double DLPM_C(
       out += x1 * y1;
     } else if(dont_use_pow_lpm && !dont_use_pow_upm){
       if(!d_lpm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_lpm));
-      out += fastPow(x1, degree_upm) * y1;
+      out += std::pow(x1, degree_upm) * y1;
     } else if(dont_use_pow_upm && !dont_use_pow_lpm){
       if(!d_upm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_upm));
-      out += x1 * fastPow(y1, degree_lpm);
-    } else out += fastPow(x1, degree_upm) * fastPow(y1, degree_lpm);
+      out += x1 * std::pow(y1, degree_lpm);
+    } else out += std::pow(x1, degree_upm) * std::pow(y1, degree_lpm);
   }
   return out/max_size;
 }
@@ -499,11 +500,11 @@ double DUPM_C(
       out += x1 * y1;
     } else if(dont_use_pow_lpm && !dont_use_pow_upm){
       if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
-      out += fastPow(x1, degree_lpm) * y1;
+      out += std::pow(x1, degree_lpm) * y1;
     } else if(dont_use_pow_upm && !dont_use_pow_lpm){
       if(!d_lpm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
-      out += x1 * fastPow(y1, degree_upm);
-    } else out += fastPow(x1, degree_lpm) * fastPow(y1, degree_upm);
+      out += x1 * std::pow(y1, degree_upm);
+    } else out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
 }

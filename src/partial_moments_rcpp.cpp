@@ -2,6 +2,7 @@
 // [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
+#include <cmath>
 #include "partial_moments.h"
 using namespace Rcpp;
 
@@ -13,12 +14,12 @@ static inline double repeatMultiplication(double value, int n) {
   return result;
 }
 
-static inline double fastPow(double a, double b) {
-  union { double d; int x[2]; } u = { a };
-  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
-  u.x[0] = 0;
-  return u.d;
-}
+//static inline double fastPow(double a, double b) {
+//union { double d; int x[2]; } u = { a };
+//  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+//  u.x[0] = 0;
+//  return u.d;
+//}
 
 static inline bool isInteger(double value) {
   return value == static_cast<int>(value);
@@ -77,7 +78,7 @@ NumericVector LPM_RCPP(const double &degree,
         if      (degree == 0)       out[i] = 1;
         else if (degree == 1)       out[i] = diff;
         else if (isInteger(degree)) out[i] = repeatMultiplication(diff, (int)degree);
-        else                         out[i] = fastPow(diff, degree);
+        else                         out[i] = std::pow(diff, degree);
       }
     }
     return NumericVector::create(mean(out));
@@ -112,7 +113,7 @@ NumericVector UPM_RCPP(const double &degree,
         if      (degree == 0)       out[i] = 1;
         else if (degree == 1)       out[i] = diff;
         else if (isInteger(degree)) out[i] = repeatMultiplication(diff, (int)degree);
-        else                         out[i] = fastPow(diff, degree);
+        else                         out[i] = std::pow(diff, degree);
       }
     }
     return NumericVector::create(mean(out));
