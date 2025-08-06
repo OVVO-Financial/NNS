@@ -68,8 +68,6 @@ dy.d_ <- function(x, y, wrt,
                   mixed = FALSE,
                   messages = TRUE){
   
-  
-  
   n <- nrow(x)
   l <- ncol(x)
   
@@ -84,7 +82,6 @@ dy.d_ <- function(x, y, wrt,
   x <- do.call(cbind, dummies)
   
   if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r", appendLF=TRUE)
-  
   
   if(is.null(colnames(x))){
     colnames.list <- lapply(1 : l, function(i) paste0("X", i))
@@ -125,17 +122,17 @@ dy.d_ <- function(x, y, wrt,
   
   zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
   
-  h_s <- seq(2, 10, 2)
+  root_n <- floor(sqrt(n))
+  h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
   
   results <- vector(mode = "list", length(h_s))
   
   for(h in h_s){
-    index <- which(h == h_s)
+    index <- which(h == h_s)[1]
     if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
       
       h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
-      
       
       if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
       
@@ -152,8 +149,6 @@ dy.d_ <- function(x, y, wrt,
         deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
       }
       
-      
-      
       deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
       
       data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
@@ -161,19 +156,14 @@ dy.d_ <- function(x, y, wrt,
                                                                                             original.eval.points.max))
                                                                                , each = sampsize, length.out = nrow(deriv.points) ))
       
-      
       colnames(deriv.points) <- colnames(x)
       
       distance_wrt <- h_step
       
-      
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = nrow(deriv.points))
       id <- rep(1:length(eval.points), each = 3*sampsize, length.out = nrow(deriv.points))
       
-      
       if(messages) message(paste("Currently evaluating the ", nrow(deriv.points), " required points "  ), index, " of ", length(h_s),"\r", appendLF=FALSE)
-      
-      
       
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
       
@@ -214,7 +204,6 @@ dy.d_ <- function(x, y, wrt,
       
       if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r" ,appendLF=FALSE)
       
-      
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
       
       lower <- head(estimates,n)
@@ -227,7 +216,6 @@ dy.d_ <- function(x, y, wrt,
       distance_wrt <- h_step
     }
     
-    
     if(mixed){
       if(is.null(dim(eval.points))){
         if(length(eval.points)!=2) stop("Mixed Derivatives are only for 2 IV")
@@ -238,7 +226,6 @@ dy.d_ <- function(x, y, wrt,
       if(!is.null(dim(eval.points))){
         h_step_1 <- gravity(abs(diff(x[,1]))) * h_s[index]
         if(h_step_1==0) h_step_1 <- ((abs((max(x[,1]) - min(x[,1])) ))/length(x[,1])) * h_s[index]
-        
         
         h_step_2 <- gravity(abs(diff(x[,2]))) * h_s[index]
         if(h_step_2==0) h_step_2 <- ((abs((max(x[,2]) - min(x[,2])) ))/length(x[,2])) * h_s[index]
@@ -259,38 +246,32 @@ dy.d_ <- function(x, y, wrt,
         mixed.distances <- 4 * (h_step^2)
       }
       
-      
       mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
-      
       
       z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
       z <- z[,1] + z[,4] - z[,2] - z[,3]
-      mixed <- (z / mixed.distances)
+      mixed_deriv <- (z / mixed.distances) 
       
       results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
                                "Second" = (upper - 2 * f.x + lower) / ((distance_wrt) ^ 2),
-                               "Mixed" = mixed)
+                               "Mixed" = mixed_deriv) 
       
     } else {
       results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
-                               "Second" = (upper - f.x + lower) / ((distance_wrt) ^ 2) )
+                               "Second" = (upper - 2 * f.x + lower) / ((distance_wrt) ^ 2) )
     }
-    
-    
   }
   
   if(mixed){
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) mean(rep(x, length(x):1))),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))),
-                          "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) mean(rep(x, length(x):1))))
+    final_results <- list("First" = apply(do.call(cbind, (lapply(results, `[[`, 1))), 1, function(x) mean(rep(x, length(x):1))),
+                                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))),
+                                                           "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) mean(rep(x, length(x):1))))
   } else {
-    final_results <- list("First" = apply((do.call(cbind, (lapply(results, `[[`, 1)))), 1, function(x) mean(rep(x, length(x):1))),
-                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))))
-    
+    final_results <- list("First" = apply(do.call(cbind, (lapply(results, `[[`, 1))), 1, function(x) mean(rep(x, length(x):1))),
+                            "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))))
   }
   if(messages) message("","\r", appendLF=TRUE)
   return(final_results)
-  
 }
 
 dy.d_ <- Vectorize(dy.d_, vectorize.args = c("wrt"))

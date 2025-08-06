@@ -19,9 +19,6 @@ Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative
 \description{
 Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
 }
-\note{
-If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
-}
 \examples{
 \dontrun{
 x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)

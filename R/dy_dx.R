@@ -7,7 +7,6 @@
 #' @param eval.point numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
 #' @return Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative.
 #'
-#' @note If a vector of derivatives is required, ensure \code{(deriv.method = "FD")}.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
 #'
@@ -52,7 +51,9 @@ dy.dx <- function(x, y, eval.point = NULL){
     
     eval.point.idx <- which(eval.point==eval.point)
 
-    h_s <- seq(2, 10, 2)
+    n <- length(x)
+    root_n <- floor(sqrt(n))
+    h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
 
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
@@ -104,8 +105,8 @@ dy.dx <- function(x, y, eval.point = NULL){
         second.deriv = (rise_1 / run_1 - rise_2 / run_2) / ((run_1 + run_2)/2)
       )]
       
-      first.deriv  <- combined.matrices[, .(first.derivative  = mean(first.deriv,  na.rm = TRUE)), by = eval.point]
-      second.deriv <- combined.matrices[, .(second.derivative = mean(second.deriv, na.rm = TRUE)), by = eval.point]
+      first.deriv  <- combined.matrices[, .(first.derivative  = mean(first.deriv)), by = eval.point]
+      second.deriv <- combined.matrices[, .(second.derivative = mean(second.deriv)), by = eval.point]
 
   }
 
