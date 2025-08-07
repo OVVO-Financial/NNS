@@ -9,6 +9,7 @@ NNS.ARMA.optim(
   h = NULL,
   training.set = NULL,
   seasonal.factor,
+  lin.only = FALSE,
   negative.values = FALSE,
   obj.fn = expression(mean((predicted - actual)^2)/(NNS::Co.LPM(1, predicted, actual,
     target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted,
@@ -28,7 +29,9 @@ NNS.ARMA.optim(
 
 \item{training.set}{integer; \code{NULL} (default) Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.}
 
-\item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}}
+\item{seasonal.factor}{integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}.}
+
+\item{lin.only}{logical; \code{FALSE} (default) For fast optimization of the linear regression method.  More robust than \code{lin.only = TRUE}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
 \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.}
