@@ -4,16 +4,18 @@ name: build-linux-binary
 on:
   workflow_dispatch: {}
   push:
-    tags: ['v*']        # optional: also build on version tags
+    tags: ['v*']   # optional
 
 jobs:
   linux-binary:
     runs-on: ubuntu-22.04
     env:
-      # Use Posit PPM for fast, reproducible CRAN binaries on Ubuntu
-      RSPM: https://packagemanager.posit.co/cran/__linux__/jammy/latest
-      # <<< IMPORTANT >>> set this to the SAME R version your shinyapps.io app uses
+      # Use the same R version as your shinyapps.io app
       R_VERSION: '4.1.2'
+      # Fast/reproducible CRAN for Ubuntu
+      RSPM: https://packagemanager.posit.co/cran/__linux__/jammy/latest
+      # Avoid failing on Suggests (only needed if you have heavy Suggests)
+      _R_CHECK_FORCE_SUGGESTS_: 'false'
 
     steps:
       - name: Checkout
@@ -24,7 +26,7 @@ jobs:
         with:
           r-version: ${{ env.R_VERSION }}
 
-      # System libraries commonly required by your deps (rgl, curl, XML, etc.)
+      # System libs needed by deps: rgl, curl/ssl/xml, etc.
       - name: System dependencies
         run: |
           sudo apt-get update
@@ -35,44 +37,45 @@ jobs:
             libx11-dev libxxf86vm-dev libxext-dev \
             libpng-dev libjpeg-dev libtiff5-dev
 
-      # Install R dependencies declared in DESCRIPTION (Imports/LinkingTo/Depends/Remotes)
-      - name: Install R package dependencies
+      # Install deps of the *local package* (Imports/Depends/LinkingTo/Remotes)
+      - name: Install R dependencies (action)
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            local::.
+          needs: build
           cache: true
 
-      # Read package name/version from DESCRIPTION for consistent artifact naming
-      - name: Read package metadata
+      # Extra safety net: install anything still missing
+      - name: Install R dependencies (fallback)
+        run: |
+          R -q -e 'install.packages("remotes", repos = Sys.getenv("RSPM", "https://cloud.r-project.org"))'
+          R -q -e 'remotes::install_deps(dependencies = TRUE, upgrade = "never", repos = Sys.getenv("RSPM", "https://cloud.r-project.org"))'
+
+      # Build source tarball (now deps are present)
+      - name: Build source
+        run: R CMD build .
+
+      # Read package name/version for artifact naming
+      - name: Read DESCRIPTION
         id: desc
         run: |
           R -q -e "d<-read.dcf('DESCRIPTION')[1,]; \
                    write(sprintf('PACKAGE=%s', d['Package']), file=Sys.getenv('GITHUB_OUTPUT'), append=TRUE); \
                    write(sprintf('VERSION=%s', d['Version']), file=Sys.getenv('GITHUB_OUTPUT'), append=TRUE)"
 
-      # Build source tarball (needed before building a binary)
-      - name: Build source
-        run: R CMD build .
-
       # Build Linux binary from the source tarball
       - name: Build Linux binary
         run: |
           SRC="${{ steps.desc.outputs.PACKAGE }}_${{ steps.desc.outputs.VERSION }}.tar.gz"
-          echo "Source tarball: $SRC"
+          echo "Building from $SRC"
           R CMD INSTALL --build "$SRC"
           ls -l "${{ steps.desc.outputs.PACKAGE }}"_*_R_x86_64-pc-linux-gnu.tar.gz
 
-      # Upload the binary tarball as an artifact you can download
+      # Upload the binary for download
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.desc.outputs.PACKAGE }}-${{ steps.desc.outputs.VERSION }}-linux-binary
           path: ${{ steps.desc.outputs.PACKAGE }}_*_R_x86_64-pc-linux-gnu.tar.gz
-
-      # Optional: attach the binary to a GitHub Release when building from a tag
-      - name: Upload to release (on tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ steps.desc.outputs.PACKAGE }}_*_R_x86_64-pc-linux-gnu.tar.gz
 
