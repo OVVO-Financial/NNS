@@ -27,7 +27,7 @@ jobs:
             libcurl4-openssl-dev libssl-dev libxml2-dev \
             libglu1-mesa-dev mesa-common-dev freeglut3-dev \
             libx11-dev libxxf86vm-dev libxext-dev \
-            libpng-dev libjpeg-dev libtiff5-dev
+            libpng-dev libjpeg-dev libtiff5-dev libtbb-dev
 
       # Install your Imports explicitly BEFORE R CMD build
       - name: Install package Imports
