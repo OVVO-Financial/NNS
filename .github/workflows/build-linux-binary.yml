@@ -3,18 +3,19 @@ name: build-linux-binary
 
 on:
   workflow_dispatch: {}
-  push:
-    tags: ['v*']   # optional
 
 jobs:
   linux-binary:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     env:
-      # Use the same R version as your shinyapps.io app
+      # Match the R used by your shinyapps.io deployment
       R_VERSION: '4.1.2'
-      # Fast/reproducible CRAN for Ubuntu
-      RSPM: https://packagemanager.posit.co/cran/__linux__/jammy/latest
-      # Avoid failing on Suggests (only needed if you have heavy Suggests)
+      # Posit PPM for fast CRAN on Ubuntu focal (20.04)
+      RSPM: https://packagemanager.posit.co/cran/__linux__/focal/latest
+      CRAN: https://cloud.r-project.org
+      # rgl on CI without a display
+      RGL_USE_NULL: 'TRUE'
+      # You can loosen suggests during build/check if needed
       _R_CHECK_FORCE_SUGGESTS_: 'false'
 
     steps:
@@ -26,7 +27,7 @@ jobs:
         with:
           r-version: ${{ env.R_VERSION }}
 
-      # System libs needed by deps: rgl, curl/ssl/xml, etc.
+      # System libs for curl/ssl/xml and OpenGL/X11 (needed by rgl)
       - name: System dependencies
         run: |
           sudo apt-get update
@@ -37,26 +38,26 @@ jobs:
             libx11-dev libxxf86vm-dev libxext-dev \
             libpng-dev libjpeg-dev libtiff5-dev
 
-      # Install deps of the *local package* (Imports/Depends/LinkingTo/Remotes)
-      - name: Install R dependencies (action)
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            local::.
-          needs: build
-          cache: true
-
-      # Extra safety net: install anything still missing
-      - name: Install R dependencies (fallback)
+      # Install your Imports explicitly BEFORE the build
+      - name: Install package Imports
         run: |
-          R -q -e 'install.packages("remotes", repos = Sys.getenv("RSPM", "https://cloud.r-project.org"))'
-          R -q -e 'remotes::install_deps(dependencies = TRUE, upgrade = "never", repos = Sys.getenv("RSPM", "https://cloud.r-project.org"))'
+          Rscript -e 'repos <- Sys.getenv("RSPM", Sys.getenv("CRAN")); \
+                      install.packages(c("Rcpp","RcppArmadillo","RcppParallel", \
+                                         "data.table","foreach","doParallel", \
+                                         "quantmod","Rfast","rgl","xts","zoo"), \
+                                        repos = repos)'
+      # Double-check we really have them
+      - name: Verify Imports are installed
+        run: |
+          Rscript -e 'need <- c("Rcpp","RcppArmadillo","RcppParallel","data.table","foreach","doParallel","quantmod","Rfast","rgl","xts","zoo"); \
+                      miss <- setdiff(need, rownames(installed.packages())); \
+                      if (length(miss)) stop("Missing packages: ", paste(miss, collapse=", "))'
 
-      # Build source tarball (now deps are present)
-      - name: Build source
-        run: R CMD build .
+      # Build source tarball (skip vignettes/manual to keep it lean)
+      - name: Build source tarball
+        run: R CMD build --no-manual --no-build-vignettes .
 
-      # Read package name/version for artifact naming
+      # Read DESCRIPTION for artifact naming
       - name: Read DESCRIPTION
         id: desc
         run: |
@@ -68,14 +69,13 @@ jobs:
       - name: Build Linux binary
         run: |
           SRC="${{ steps.desc.outputs.PACKAGE }}_${{ steps.desc.outputs.VERSION }}.tar.gz"
-          echo "Building from $SRC"
+          echo "Building binary from $SRC"
           R CMD INSTALL --build "$SRC"
           ls -l "${{ steps.desc.outputs.PACKAGE }}"_*_R_x86_64-pc-linux-gnu.tar.gz
 
-      # Upload the binary for download
+      # Upload the binary tarball
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.desc.outputs.PACKAGE }}-${{ steps.desc.outputs.VERSION }}-linux-binary
           path: ${{ steps.desc.outputs.PACKAGE }}_*_R_x86_64-pc-linux-gnu.tar.gz
-
