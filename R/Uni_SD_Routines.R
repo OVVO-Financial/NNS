@@ -32,27 +32,7 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
     if(!any(type %in% c("discrete", "continuous"))) {
       warning("type needs to be either discrete or continuous")
     }
-    if(!(min(x) >= min(y))){
-      return(0)
-    }
-    Combined_sort <- sort(c(x, y), decreasing = FALSE)
-    if(type == "discrete"){
-      degree <- 0
-    } else {
-      degree <- 1
-    }
-    L.x <- LPM(degree, Combined_sort, x)
-    LPM_x_sort <- L.x / (UPM(degree, Combined_sort, x) + L.x)
-    L.y <- LPM(degree, Combined_sort, y)
-    LPM_y_sort <- L.y / (UPM(degree, Combined_sort, y) + L.y)
-    if (identical(LPM_x_sort, LPM_y_sort))
-      return (0)
-    
-    x.fsd.y <- any(LPM_x_sort > LPM_y_sort)
-    if(!x.fsd.y){
-      return(1)
-    }
-    return(0)
+    .Call(`_NNS_NNS_FSD_uni_cpp`, x, y, as.character(type))
 }
 
 #' NNS SSD Test uni-directional
@@ -81,20 +61,7 @@ NNS.SSD.uni <- function(x, y){
     if(sum(is.na(cbind(x,y))) > 0){
 	  stop("You have some missing values, please address.")
 	}
-    if(!(min(x) >= min(y)) | mean(y) > mean(x)){
-        return(0)
-    }
-	Combined_sort <- sort(c(x, y), decreasing = FALSE)
-	LPM_x_sort <- LPM(1, Combined_sort, x)
-	LPM_y_sort <- LPM(1, Combined_sort, y)
-    if (identical(LPM_x_sort, LPM_y_sort))
-      return (0)
-
-	x.ssd.y <- any(LPM_x_sort > LPM_y_sort)
-	if(!x.ssd.y){
-		return(1)
-	}
-	return(0)
+  .Call(`_NNS_NNS_SSD_uni_cpp`, x, y)
 }
 
 
@@ -124,17 +91,5 @@ NNS.TSD.uni <- function(x, y){
     if(sum(is.na(cbind(x,y))) > 0){
 	  stop("You have some missing values, please address.")
 	}
-    if(!(min(x) >= min(y)) | mean(y) > mean(x)) {
-        return(0)
-    }
-	Combined_sort <- sort(c(x, y), decreasing = FALSE)
-	LPM_x_sort <- LPM(2, Combined_sort, x)
-	LPM_y_sort <- LPM(2, Combined_sort, y)
-    if (identical(LPM_x_sort, LPM_y_sort))
-      return (0)
-	x.tsd.y <- any(LPM_x_sort > LPM_y_sort)
-	if(!x.tsd.y){
-	  return(1)
-	}
-	return(0)
+  .Call(`_NNS_NNS_TSD_uni_cpp`, x, y)
 }

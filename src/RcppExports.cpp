@@ -10,6 +10,70 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// sd_dom_matrix_prefix_parallel
+IntegerMatrix sd_dom_matrix_prefix_parallel(const NumericMatrix& X, int degree, std::string type);
+RcppExport SEXP _NNS_sd_dom_matrix_prefix_parallel(SEXP XSEXP, SEXP degreeSEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sd_dom_matrix_prefix_parallel(X, degree, type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_SD_efficient_set_parallel_cpp
+CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, std::string type, bool status);
+RcppExport SEXP _NNS_NNS_SD_efficient_set_parallel_cpp(SEXP XSEXP, SEXP degreeSEXP, SEXP typeSEXP, SEXP statusSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type status(statusSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_SD_efficient_set_parallel_cpp(X, degree, type, status));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_FSD_uni_cpp
+int NNS_FSD_uni_cpp(const NumericVector& x, const NumericVector& y, std::string type);
+RcppExport SEXP _NNS_NNS_FSD_uni_cpp(SEXP xSEXP, SEXP ySEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_FSD_uni_cpp(x, y, type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_SSD_uni_cpp
+int NNS_SSD_uni_cpp(const NumericVector& x, const NumericVector& y);
+RcppExport SEXP _NNS_NNS_SSD_uni_cpp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_SSD_uni_cpp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_TSD_uni_cpp
+int NNS_TSD_uni_cpp(const NumericVector& x, const NumericVector& y);
+RcppExport SEXP _NNS_NNS_TSD_uni_cpp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_TSD_uni_cpp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fast_lm
 List fast_lm(NumericVector x, NumericVector y);
 RcppExport SEXP _NNS_fast_lm(SEXP xSEXP, SEXP ySEXP) {
@@ -238,6 +302,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
+    {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},
+    {"_NNS_NNS_FSD_uni_cpp", (DL_FUNC) &_NNS_NNS_FSD_uni_cpp, 3},
+    {"_NNS_NNS_SSD_uni_cpp", (DL_FUNC) &_NNS_NNS_SSD_uni_cpp, 2},
+    {"_NNS_NNS_TSD_uni_cpp", (DL_FUNC) &_NNS_NNS_TSD_uni_cpp, 2},
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},

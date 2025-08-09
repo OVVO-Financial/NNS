@@ -93,8 +93,8 @@ NNS.ANOVA <- function(
         function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], means.only = means.only, medians = medians, plot = FALSE)$Certainty
       )
       
-      cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties[-1])
-      cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties[-1])
+      cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties)
+      cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties)
       
       robust_estimate <- gravity(nns.certainties)
       
