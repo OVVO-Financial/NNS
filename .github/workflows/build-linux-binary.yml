@@ -1,0 +1,38 @@
+name: build-linux-binary
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']   # optional: build when you tag a release
+
+jobs:
+  linux-binary:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # Use the SAME R VERSION as shinyapps.io for your app
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.1.2'
+
+      - name: System deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran \
+            libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - name: Build source tarball
+        run: |
+          R CMD build .
+
+      - name: Build Linux binary
+        run: |
+          SRC=$(ls -1 NNS_*.tar.gz | head -n1)
+          R CMD INSTALL --build "$SRC"
+          ls -l NNS_*_R_x86_64-pc-linux-gnu.tar.gz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NNS-linux-binary
+          path: NNS_*_R_x86_64-pc-linux-gnu.tar.gz
