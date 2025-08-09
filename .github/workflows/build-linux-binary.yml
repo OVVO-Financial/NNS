@@ -1,33 +1,24 @@
-# .github/workflows/build-linux-binary.yml
 name: build-linux-binary
-
 on:
   workflow_dispatch: {}
 
 jobs:
   linux-binary:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
-      # Match the R used by your shinyapps.io deployment
-      R_VERSION: '4.1.2'
-      # Posit PPM for fast CRAN on Ubuntu focal (20.04)
-      RSPM: https://packagemanager.posit.co/cran/__linux__/focal/latest
-      CRAN: https://cloud.r-project.org
-      # rgl on CI without a display
+      R_VERSION: '4.1.2'   # <-- match the R version you deploy on shinyapps.io
+      RSPM: https://packagemanager.posit.co/cran/__linux__/jammy/latest
       RGL_USE_NULL: 'TRUE'
-      # You can loosen suggests during build/check if needed
       _R_CHECK_FORCE_SUGGESTS_: 'false'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup R ${{ env.R_VERSION }}
-        uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ env.R_VERSION }}
 
-      # System libs for curl/ssl/xml and OpenGL/X11 (needed by rgl)
+      # System libs needed by deps (notably rgl)
       - name: System dependencies
         run: |
           sudo apt-get update
@@ -38,22 +29,19 @@ jobs:
             libx11-dev libxxf86vm-dev libxext-dev \
             libpng-dev libjpeg-dev libtiff5-dev
 
-      # Install your Imports explicitly BEFORE the build
+      # Install your Imports explicitly BEFORE R CMD build
       - name: Install package Imports
         run: |
-          Rscript -e 'repos <- Sys.getenv("RSPM", Sys.getenv("CRAN")); \
-                      install.packages(c("Rcpp","RcppArmadillo","RcppParallel", \
-                                         "data.table","foreach","doParallel", \
-                                         "quantmod","Rfast","rgl","xts","zoo"), \
-                                        repos = repos)'
-      # Double-check we really have them
-      - name: Verify Imports are installed
-        run: |
-          Rscript -e 'need <- c("Rcpp","RcppArmadillo","RcppParallel","data.table","foreach","doParallel","quantmod","Rfast","rgl","xts","zoo"); \
-                      miss <- setdiff(need, rownames(installed.packages())); \
+          Rscript -e 'repos <- Sys.getenv("RSPM", "https://cloud.r-project.org");
+                      install.packages(c("remotes","desc"), repos = repos);
+                      remotes::install_deps(dependencies = TRUE, upgrade = "never", repos = repos)'
+          Rscript -e 'need <- c("Rcpp","RcppArmadillo","RcppParallel",
+                                "data.table","foreach","doParallel",
+                                "quantmod","Rfast","rgl","xts","zoo");
+                      miss <- setdiff(need, rownames(installed.packages()));
                       if (length(miss)) stop("Missing packages: ", paste(miss, collapse=", "))'
 
-      # Build source tarball (skip vignettes/manual to keep it lean)
+      # Build source tarball (now that deps are present)
       - name: Build source tarball
         run: R CMD build --no-manual --no-build-vignettes .
 
@@ -61,9 +49,8 @@ jobs:
       - name: Read DESCRIPTION
         id: desc
         run: |
-          R -q -e "d<-read.dcf('DESCRIPTION')[1,]; \
-                   write(sprintf('PACKAGE=%s', d['Package']), file=Sys.getenv('GITHUB_OUTPUT'), append=TRUE); \
-                   write(sprintf('VERSION=%s', d['Version']), file=Sys.getenv('GITHUB_OUTPUT'), append=TRUE)"
+          Rscript -e 'd<-read.dcf("DESCRIPTION")[1,];
+                      cat(sprintf("PACKAGE=%s\nVERSION=%s\n", d["Package"], d["Version"]))' >> $GITHUB_OUTPUT
 
       # Build Linux binary from the source tarball
       - name: Build Linux binary
