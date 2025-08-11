@@ -21,6 +21,18 @@ NNS_TSD_uni_cpp <- function(x, y) {
     .Call(`_NNS_NNS_TSD_uni_cpp`, x, y)
 }
 
+NNS_mode_cpp <- function(xSEXP, discrete = FALSE, multi = TRUE) {
+    .Call(`_NNS_NNS_mode_cpp`, xSEXP, discrete, multi)
+}
+
+NNS_gravity_cpp <- function(xSEXP, discrete = FALSE) {
+    .Call(`_NNS_NNS_gravity_cpp`, xSEXP, discrete)
+}
+
+NNS_rescale_cpp <- function(xSEXP, a, b, method = "minmax", T_ = NULL, type = "Terminal") {
+    .Call(`_NNS_NNS_rescale_cpp`, xSEXP, a, b, method, T_, type)
+}
+
 fast_lm <- function(x, y) {
     .Call(`_NNS_fast_lm`, x, y)
 }

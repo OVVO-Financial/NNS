@@ -381,22 +381,22 @@ with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
 <pre><code>##           V1       V2       V3       V4
 ##  1: 4.300000 2.000000 1.000000 0.100000
-##  2: 4.493889 2.277887 1.122917 0.200000
-##  3: 4.778422 2.517949 1.300000 0.300000
+##  2: 4.498056 2.274762 1.122917 0.200000
+##  3: 4.774255 2.522115 1.300000 0.300000
 ##  4: 4.900000 2.700000 1.400000 0.400000
-##  5: 5.000000 2.800000 1.500000 0.550000
-##  6: 5.100000 2.900000 1.600000 1.000000
-##  7: 5.205000 3.000000 1.777381 1.174969
-##  8: 5.497942 3.100000 3.637346 1.300000
-##  9: 5.720000 3.200000 4.085368 1.479027
-## 10: 5.983333 3.300000 4.479984 1.608333
-## 11: 6.118333 3.400000 4.760501 1.813603
-## 12: 6.300000 3.500000 5.079984 2.078450
-## 13: 6.400000 3.619048 5.287079 2.324405
-## 14: 6.509226 3.855692 5.588317 2.500000
-## 15: 6.708902 4.400000 6.065699       NA
+##  5: 5.024342 2.800000 1.500000 0.550000
+##  6: 5.337272 2.900000 1.600000 1.000000
+##  7: 5.500000 3.000000 1.785714 1.170803
+##  8: 5.600000 3.100000 3.633180 1.300000
+##  9: 5.724167 3.200000 4.085368 1.474861
+## 10: 5.979167 3.300000 4.475817 1.608333
+## 11: 6.100000 3.400000 4.763626 1.816728
+## 12: 6.275609 3.500000 5.075817 2.074283
+## 13: 6.400000 3.623214 5.282912 2.328571
+## 14: 6.510268 3.864025 5.584151 2.500000
+## 15: 6.709943 4.400000 6.069866       NA
 ## 16: 6.912500       NA 6.900000       NA
-## 17: 7.484038       NA       NA       NA
+## 17: 7.479872       NA       NA       NA
 ## 18: 7.900000       NA       NA       NA</code></pre>
 </div>
 </div>
@@ -441,12 +441,12 @@ for classification problems when using
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="cn">NULL</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">$</span>feature.weights</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.4285714</span>    <span class="fl">0.4285714</span>    <span class="fl">0.1428571</span> </span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Petal.Length  Petal.Width </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>         <span class="fl">0.5</span>          <span class="fl">0.5</span> </span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
 <span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="sc">$</span>feature.frequency</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">3</span>            <span class="dv">3</span>            <span class="dv">1</span> </span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>Petal.Length  Petal.Width </span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">2</span>            <span class="dv">2</span> </span>
 <span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
 <span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
 <span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
@@ -475,22 +475,22 @@ for classification problems when using
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>b</span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8642857</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">5</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.43875</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.465</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9798658</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9642857</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.93</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">$</span>reg</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
 <span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="cn">NULL</span></span>
