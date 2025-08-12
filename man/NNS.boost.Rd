@@ -10,12 +10,12 @@ NNS.boost(
   IVs.test = NULL,
   type = NULL,
   depth = NULL,
-  learner.trials = 100,
+  learner.trials = 100L,
   epochs = NULL,
   CV.size = NULL,
   balance = FALSE,
   ts.test = NULL,
-  folds = 5,
+  folds = 5L,
   threshold = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
@@ -23,7 +23,9 @@ NNS.boost(
   features.only = FALSE,
   feature.importance = TRUE,
   pred.int = NULL,
-  status = TRUE
+  status = TRUE,
+  ncores = NULL,
+  seed = 123L
 )
 }
 \arguments{
