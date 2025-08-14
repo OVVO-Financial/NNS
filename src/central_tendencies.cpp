@@ -103,87 +103,6 @@ static void simple_bin_counts(const std::vector<double>& xs,
   }
 }
 
-// ---------- NNS.mode ----------
-
-// [[Rcpp::export]]
-SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
-  NumericVector xR(xSEXP);
-  std::vector<double> x(xR.begin(), xR.end());
-  
-  // Coerce to numeric & handle trivial cases
-  std::vector<double> xnum;
-  xnum.reserve(x.size());
-  for (double v : x) if (R_finite(v)) xnum.push_back((double)v);
-  
-  const int l = (int)xnum.size();
-  if (l == 0) return Rf_ScalarReal(NA_REAL);
-  if (l <= 3) {
-    // median(x)
-    std::vector<double> tmp = xnum;
-    std::sort(tmp.begin(), tmp.end());
-    double med;
-    if (l % 2 == 1) med = tmp[l/2];
-    else med = 0.5*(tmp[l/2 - 1] + tmp[l/2]);
-    if (discrete) return Rf_ScalarReal( nearest_int_half_up(med) );
-    return Rf_ScalarReal(med);
-  }
-  
-  // All-equal?
-  bool all_eq = true;
-  for (int i = 1; i < l; ++i) if (xnum[i] != xnum[0]) { all_eq = false; break; }
-  if (all_eq) return Rf_ScalarReal(xnum[0]);
-  
-  // Sort
-  std::sort(xnum.begin(), xnum.end());
-  double range = std::fabs(xnum.back() - xnum.front());
-  if (range == 0.0) return Rf_ScalarReal(xnum.front());
-  
-  // Quartiles and width
-  double q1, q2, q3;
-  quartiles_like_R_code(xnum, q1, q2, q3);
-  
-  double width = (q3 - q1) * std::pow((double)l, -0.5);
-  if (!(width > 0.0) || !R_finite(width)) {
-    width = range / 128.0;
-  }
-  
-  // Bin; fallback if degenerate
-  std::vector<double> z_names;
-  std::vector<int> counts;
-  if (width <= 0.0 || !R_finite(width)) width = range / 128.0;
-  simple_bin_counts(xnum, width, xnum.front(), z_names, counts);
-  const int lz = (int)counts.size();
-  
-  // Find max count
-  int maxc = 0;
-  for (int c : counts) if (c > maxc) maxc = c;
-  int ties = 0;
-  for (int c : counts) if (c == maxc) ++ties;
-  
-  if (ties > 1 && multi) {
-    // Return all bin "names" at max count
-    NumericVector out;
-    for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out.push_back(z_names[i]);
-    if (discrete) {
-      for (int i = 0; i < out.size(); ++i) out[i] = nearest_int_half_up(out[i]);
-    }
-    return out;
-  } else {
-    // Weighted center around winning bin ±1
-    int zc = 0;
-    for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { zc = i; break; }
-    int lo = std::max(0, zc - 1);
-    int hi = std::min(lz - 1, zc + 1);
-    long double num = 0.0L, den = 0.0L;
-    for (int i = lo; i <= hi; ++i) { num += (long double)z_names[i] * (long double)counts[i]; den += (long double)counts[i]; }
-    double finalv = (den > 0.0L) ? (double)(num / den) : z_names[zc];
-    if (discrete) finalv = nearest_int_half_up(finalv);
-    if (multi) return Rf_ScalarReal(finalv);
-    // The original code returns mean(final) if multi == FALSE, but final is scalar; keep scalar.
-    return Rf_ScalarReal(finalv);
-  }
-}
-
 // ---------- NNS.gravity ----------
 
 // [[Rcpp::export]]
@@ -305,4 +224,189 @@ NumericVector NNS_rescale_cpp(SEXP xSEXP, double a, double b,
   
   stop("Invalid method: use 'minmax' or 'riskneutral'");
   return out; // never reached
+}
+
+
+// ---------- NNS.mode ----------
+
+// --- Triangular smoothing helper: 7-tap [1,2,3,4,3,2,1] with mirrored edges ---
+static void smooth_counts_tri7(const std::vector<int>& counts, std::vector<double>& smooth) {
+  static const int w[7] = {1,2,3,4,3,2,1};
+  static const int Wsum = 16; // 1+2+3+4+3+2+1
+  const int n = (int)counts.size();
+  smooth.assign(n, 0.0);
+  if (n == 0) return;
+  
+  // Mirror at edges (symmetric extension)
+  auto at = [&](int idx)->int{
+    if (idx < 0)   return counts[-idx];            // reflect: -1 -> 1, -2 -> 2, ...
+    if (idx >= n)  return counts[2*n - 2 - idx];   // reflect: n -> n-2, n+1 -> n-3, ...
+    return counts[idx];
+  };
+  
+  for (int i = 0; i < n; ++i) {
+    int acc = 0;
+    acc += w[0]*at(i-3); acc += w[1]*at(i-2); acc += w[2]*at(i-1);
+    acc += w[3]*at(i  );
+    acc += w[4]*at(i+1); acc += w[5]*at(i+2); acc += w[6]*at(i+3);
+    smooth[i] = (double)acc / (double)Wsum;
+  }
+}
+
+// [[Rcpp::export]]
+SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
+  NumericVector xR(xSEXP);
+  std::vector<double> x(xR.begin(), xR.end());
+  
+  // Coerce to numeric & drop non-finite
+  std::vector<double> xnum; xnum.reserve(x.size());
+  for (double v : x) if (R_finite(v)) xnum.push_back((double)v);
+  
+  const int l = (int)xnum.size();
+  if (l == 0) return Rf_ScalarReal(NA_REAL);
+  
+  // ====================== DISCRETE PATH ======================
+  if (discrete) {
+    if (l <= 3) {
+      // For tiny samples, integerized median
+      std::vector<double> tmp = xnum; std::sort(tmp.begin(), tmp.end());
+      double med = (l % 2 == 1) ? tmp[l/2] : 0.5*(tmp[l/2 - 1] + tmp[l/2]);
+      return Rf_ScalarReal(nearest_int_half_up(med));
+    }
+    
+    // Integerize and count exact frequencies
+    std::unordered_map<int,int> freq; freq.reserve(l * 2u);
+    for (double v : xnum) ++freq[ nearest_int_half_up(v) ];
+    
+    int maxf = 0; for (auto &kv : freq) if (kv.second > maxf) maxf = kv.second;
+    
+    std::vector<int> modes_int;
+    for (auto &kv : freq) if (kv.second == maxf) modes_int.push_back(kv.first);
+    std::sort(modes_int.begin(), modes_int.end());
+    
+    if (multi) {
+      NumericVector out((int)modes_int.size());
+      for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = (double)modes_int[i];
+      return out;            // e.g., 2 3 4 for c(1,2,2,3,3,4,4,5)
+    } else {
+      int pick = modes_int[modes_int.size()/2];  // stable choice among ties
+      return Rf_ScalarReal((double)pick);
+    }
+  }
+  
+  // ====================== CONTINUOUS PATH ======================
+  if (l <= 3) {
+    std::vector<double> tmp = xnum; std::sort(tmp.begin(), tmp.end());
+    double med = (l % 2 == 1) ? tmp[l/2] : 0.5*(tmp[l/2 - 1] + tmp[l/2]);
+    return Rf_ScalarReal(med);
+  }
+  
+  // All-equal?
+  bool all_eq = true;
+  for (int i = 1; i < l; ++i) if (xnum[i] != xnum[0]) { all_eq = false; break; }
+  if (all_eq) return Rf_ScalarReal(xnum[0]);
+  
+  // Sort & basic stats
+  std::sort(xnum.begin(), xnum.end());
+  double range = std::fabs(xnum.back() - xnum.front());
+  if (range == 0.0) return Rf_ScalarReal(xnum.front());
+  
+  // Quartiles & default bin width
+  double q1, q2, q3;
+  quartiles_like_R_code(xnum, q1, q2, q3);
+  double width = (q3 - q1) * std::pow((double)l, -0.5);
+  if (!(width > 0.0) || !R_finite(width)) width = range / 128.0;
+  
+  // Histogram
+  std::vector<double> z_names;   // representative x for each bin (center/name)
+  std::vector<int> counts;       // histogram counts
+  if (width <= 0.0 || !R_finite(width)) width = range / 128.0;
+  simple_bin_counts(xnum, width, xnum.front(), z_names, counts);
+  const int lz = (int)counts.size();
+  if (lz == 0) return Rf_ScalarReal(NA_REAL);
+  
+  // For fallback paths
+  int maxc = 0; for (int c : counts) if (c > maxc) maxc = c;
+  
+  // ----- Peak detection on SMOOTHED counts (edge-aware 1..3 & concavity) -----
+  std::vector<double> cs; smooth_counts_tri7(counts, cs);
+  
+  // Optional: require a minimal absolute margin (in smoothed "counts") above side maxima
+  // to further suppress tail jitters WITHOUT using percentages.
+  const double MARGIN = 0.0;  // set to 1.0 if you still see spurious small peaks
+  
+  std::vector<int> peak_idx; peak_idx.reserve(lz);
+  // Require full neighborhoods for offsets 1..3
+  for (int i = 3; i <= lz - 4; ++i) {
+    double ci = cs[i];
+    if (ci <= 0.0) continue;
+    
+    // Max of neighbors at offsets 1..3 on each side (smoothed series)
+    double Ls = std::max(std::max(cs[i-1], cs[i-2]), cs[i-3]);
+    double Rs = std::max(std::max(cs[i+1], cs[i+2]), cs[i+3]);
+    if (!(ci > Ls + MARGIN && ci > Rs + MARGIN)) continue;
+    
+    // Negative curvature gate (concavity)
+    double curv = cs[i-1] - 2.0*cs[i] + cs[i+1];
+    if (!(curv < 0.0)) continue;
+    
+    peak_idx.push_back(i);
+  }
+  
+  // Non-maximum suppression on smoothed heights: keep peaks >= 4 bins apart
+  if (!peak_idx.empty()) {
+    std::sort(peak_idx.begin(), peak_idx.end(),
+              [&](int a, int b){ return cs[a] > cs[b]; });
+    std::vector<int> kept;
+    for (int idx : peak_idx) {
+      bool too_close = false;
+      for (int jdx : kept) if (std::abs(idx - jdx) <= 3) { too_close = true; break; }
+      if (!too_close) kept.push_back(idx);
+    }
+    
+    if (!kept.empty()) {
+      // Report each kept peak as weighted mean over ±3 bins using ORIGINAL counts
+      NumericVector out((int)kept.size());
+      for (int t = 0; t < (int)kept.size(); ++t) {
+        int zc = kept[t];
+        int lo = std::max(0, zc - 3);
+        int hi = std::min(lz - 1, zc + 3);
+        long double num = 0.0L, den = 0.0L;
+        for (int j = lo; j <= hi; ++j) {
+          if (std::abs(j - zc) <= 3) {
+            num += (long double)z_names[j] * (long double)counts[j];
+            den += (long double)counts[j];
+          }
+        }
+        double m = (den > 0.0L) ? (double)(num / den) : z_names[zc];
+        out[t] = m;
+      }
+      std::sort(out.begin(), out.end());
+      return out;
+    }
+  }
+  
+  // Fallback: multi == TRUE but no detected peaks -> return ties at global max bins (if any)
+  int ties = 0; for (int c : counts) if (c == maxc) ++ties;
+  if (ties > 1 && multi) {
+    NumericVector out(ties);
+    int pos = 0;
+    for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out[pos++] = z_names[i];
+    std::sort(out.begin(), out.end());
+    return out;
+  }
+  
+  // Final fallback: single winning bin -> weighted center around ±1
+  int zc = 0; for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { zc = i; break; }
+  {
+    int lo = std::max(0, zc - 1);
+    int hi = std::min(lz - 1, zc + 1);
+    long double num = 0.0L, den = 0.0L;
+    for (int j = lo; j <= hi; ++j) {
+      num += (long double)z_names[j] * (long double)counts[j];
+      den += (long double)counts[j];
+    }
+    double finalv = (den > 0.0L) ? (double)(num / den) : z_names[zc];
+    return Rf_ScalarReal(finalv);
+  }
 }

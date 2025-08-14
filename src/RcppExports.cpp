@@ -74,19 +74,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// NNS_mode_cpp
-SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi);
-RcppExport SEXP _NNS_NNS_mode_cpp(SEXP xSEXPSEXP, SEXP discreteSEXP, SEXP multiSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type xSEXP(xSEXPSEXP);
-    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
-    Rcpp::traits::input_parameter< bool >::type multi(multiSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_mode_cpp(xSEXP, discrete, multi));
-    return rcpp_result_gen;
-END_RCPP
-}
 // NNS_gravity_cpp
 SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete);
 RcppExport SEXP _NNS_NNS_gravity_cpp(SEXP xSEXPSEXP, SEXP discreteSEXP) {
@@ -112,6 +99,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type T_(T_SEXP);
     Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_rescale_cpp(xSEXP, a, b, method, T_, type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_mode_cpp
+SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi);
+RcppExport SEXP _NNS_NNS_mode_cpp(SEXP xSEXPSEXP, SEXP discreteSEXP, SEXP multiSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type xSEXP(xSEXPSEXP);
+    Rcpp::traits::input_parameter< bool >::type discrete(discreteSEXP);
+    Rcpp::traits::input_parameter< bool >::type multi(multiSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_mode_cpp(xSEXP, discrete, multi));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -348,9 +348,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_FSD_uni_cpp", (DL_FUNC) &_NNS_NNS_FSD_uni_cpp, 3},
     {"_NNS_NNS_SSD_uni_cpp", (DL_FUNC) &_NNS_NNS_SSD_uni_cpp, 2},
     {"_NNS_NNS_TSD_uni_cpp", (DL_FUNC) &_NNS_NNS_TSD_uni_cpp, 2},
-    {"_NNS_NNS_mode_cpp", (DL_FUNC) &_NNS_NNS_mode_cpp, 3},
     {"_NNS_NNS_gravity_cpp", (DL_FUNC) &_NNS_NNS_gravity_cpp, 2},
     {"_NNS_NNS_rescale_cpp", (DL_FUNC) &_NNS_NNS_rescale_cpp, 6},
+    {"_NNS_NNS_mode_cpp", (DL_FUNC) &_NNS_NNS_mode_cpp, 3},
     {"_NNS_fast_lm", (DL_FUNC) &_NNS_fast_lm, 2},
     {"_NNS_fast_lm_mult", (DL_FUNC) &_NNS_fast_lm_mult, 2},
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
