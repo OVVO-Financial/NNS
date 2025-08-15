@@ -99,7 +99,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL,
     if (is.null(type)) {
       PART[split.rows, {
         segments(min(x), calcY(y), max(x), calcY(y), lty = 3)
-        segments(gravity(x), min(y), gravity(x), max(y), lty = 3)
+        segments(noiseFunction(x), min(y), noiseFunction(x), max(y), lty = 3)
       }, by = quadrant]
     } else {
       bounds <- PART[, .(min = min(x), max = max(x)), by = quadrant]
@@ -139,7 +139,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL,
     if (Voronoi) drawSegments(noiseFunction)
     # Compute new regression points
     RP <- PART[split.rows, .(
-      x = gravity(x),
+      x = noiseFunction(x),
       y = noiseFunction(y)
     ), by = quadrant]
     # Split cells
@@ -157,7 +157,7 @@ NNS.part = function(x, y, Voronoi = FALSE, type = NULL,
   
   # Final regression points by prior.quadrant
   RP <- PART[, .(
-    x = gravity(x),
+    x = noiseFunction(x),
     y = noiseFunction(y)
   ), by = prior.quadrant]
   setnames(RP, "prior.quadrant", "quadrant")
