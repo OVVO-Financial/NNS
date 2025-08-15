@@ -286,6 +286,7 @@ NNS.reg = function (x, y,
     if(is.null(n.best)) n.best <- 1
   }
   
+
   if(!is.null(original.columns)){
     if(original.columns == 1){
       x <- original.variable
@@ -295,7 +296,7 @@ NNS.reg = function (x, y,
         colnames(x) <- make.unique(colnames(x), sep = "_")
         
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
-                         residual.plot = residual.plot, order = order, n.best = n.best, type = type,
+                         residual.plot = residual.plot, order = NULL, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, return.values = return.values, plot.regions = plot.regions,
                          point.only = point.only, ncores = ncores, confidence.interval = confidence.interval))
@@ -436,13 +437,14 @@ NNS.reg = function (x, y,
   } # Multivariate
   
   
+  
   x.label <- names(x)
   if(is.null(x.label)) x.label <- "x"
   
   dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
-
+  
   dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
-
+  
   dependence[is.na(dependence)] <- 0.1
   
   rounded_dep <- ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10))
@@ -451,10 +453,11 @@ NNS.reg = function (x, y,
     rounded_dep <- rounded_dep / 2
     rounded_dep <- floor(rounded_dep)
   }
- 
+  
   rounded_dep <- max(1, rounded_dep)
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
+  
   
 
   if(dependence == 1 || dep.reduced.order == "max"){

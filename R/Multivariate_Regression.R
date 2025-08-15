@@ -35,20 +35,13 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   original.matrix <- cbind.data.frame(original.DV, original.IVs)
   norm.matrix <- apply(original.matrix, 2, function(z) NNS.rescale(z, 0, 1))
-  
+
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
-  
-  dep_a <- tryCatch(NNS.copula(original.matrix), error = function(e) .5^n)
-  dep_b <- tryCatch(NNS.copula(norm.matrix), error = function(e) .5^n)
-  dep_c <- tryCatch(mean(unlist(cor(original.matrix)[-1,1])), error = function(e) .5^n)
 
-  dependence <- stats::fivenum(c(dep_a, dep_b, dep_c))[4]
-  
-  if(is.null(order)) order <- max(1, ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10)))
 
   ###  Regression Point Matrix
-  if(is.numeric(order)){
+  if(is.numeric(order) || is.null(order)){
     reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
     
     if(length(unique(sapply(reg.points, length))) != 1){
@@ -158,7 +151,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   fitted.matrix[, bias := gravity(residuals),  by = NNS.ID]
   fitted.matrix$y.hat <- fitted.matrix$y.hat - fitted.matrix$bias
   fitted.matrix$bias <- NULL
-  
+
   
   data.table::setkey(mean.by.id.matrix, 'NNS.ID')
   REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , c("obs") := NULL]
@@ -170,7 +163,10 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, colnames(mean.by.id.matrix)[1:n])
   
-  if(is.null(n.best)) n.best <- max(1, floor((1-dependence)*sqrt(n)))
+  if(is.null(n.best)){
+    dependence <- NNS.copula(cbind(original.IVs, original.DV))
+    n.best <- max(1, floor((1-dependence)*sqrt(n)))
+  }
 
   if(n.best > 1 && !point.only){
     if(num_cores > 1){
@@ -187,12 +183,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     
     if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
   }
-  
+ 
   
   
   ### Point Estimates
   if (!is.null(point.est)) {
-    
     # Calculate central points
     central.points <- apply(REGRESSION.POINT.MATRIX[, .SD, .SDcols = 1:n], 2, gravity)
     
@@ -389,9 +384,8 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   } else {
     y.mean <- mean(fitted.matrix$y)
     R2 <- (sum((fitted.matrix$y - y.mean)*(fitted.matrix$y.hat - y.mean))^2)/(sum((fitted.matrix$y - y.mean)^2)*sum((fitted.matrix$y.hat - y.mean)^2))
-    
   }
-  
+
   
   lower.pred.int <- NULL
   upper.pred.int <- NULL
@@ -465,7 +459,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
     if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2) 
     plot(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue", xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
-    lines(seq_along(y.hat), y.hat, col = 'red', lwd = 2, lty = 1)
+    lines(seq_along(fitted.matrix$y.hat), fitted.matrix$y.hat, col = 'red', lwd = 2, lty = 1)
     
     if(is.numeric(confidence.interval)){
       polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))), 
