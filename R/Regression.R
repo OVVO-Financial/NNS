@@ -296,7 +296,7 @@ NNS.reg = function (x, y,
         colnames(x) <- make.unique(colnames(x), sep = "_")
         
         return(NNS.M.reg(x, y, factor.2.dummy = factor.2.dummy, point.est = point.est, plot = plot,
-                         residual.plot = residual.plot, order = NULL, n.best = n.best, type = type,
+                         residual.plot = residual.plot, order = order, n.best = n.best, type = type,
                          location = location, noise.reduction = noise.reduction,
                          dist = dist, return.values = return.values, plot.regions = plot.regions,
                          point.only = point.only, ncores = ncores, confidence.interval = confidence.interval))
@@ -457,7 +457,6 @@ NNS.reg = function (x, y,
   rounded_dep <- max(1, rounded_dep)
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
-  
   
 
   if(dependence == 1 || dep.reduced.order == "max"){

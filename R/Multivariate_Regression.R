@@ -39,7 +39,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   minimums <- apply(original.IVs, 2, min)
   maximums <- apply(original.IVs, 2, max)
 
-
+ 
   ###  Regression Point Matrix
   if(is.numeric(order) || is.null(order)){
     reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
