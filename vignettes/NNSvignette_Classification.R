@@ -23,7 +23,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #                IVs.test = iris[test.set, 1:4],
 #                epochs = 10, learner.trials = 10,
 #                status = FALSE, balance = TRUE,
-#                type = "CLASS", folds = 1)
+#                type = "CLASS", folds = 5)
 #  
 #  a
 #  $results
@@ -48,7 +48,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #                DV.train = iris[-test.set, 5],
 #                IVs.test = iris[test.set, 1:4],
 #                type = "CLASS", balance = TRUE,
-#                ncores = 1, folds = 1)
+#                ncores = 1, folds = 5)
 #  
 #  b
 

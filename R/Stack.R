@@ -374,6 +374,7 @@ NNS.stack <- function(IVs.train,
       nns.cv.1 <- numeric()
       
       q <- length(IVs.train[, 1])
+      Kcand <- c(1:l, q)
       
       # Holders computed once per fold
       pred_path_small <- NULL   # |Xtest| x l (k = 1..l)
@@ -384,14 +385,14 @@ NNS.stack <- function(IVs.train,
         apply(data.frame(CV.IVs.test), 2, function(z) factor_2_dummy_FR(z))
       )
       
-      for (i in c(1:l, q)) {
-        index <- which(c(1:l, q) == i)
+      for (i in Kcand) {
+        index <- which(Kcand == i)[1L]
         if (status) {
           message(sprintf("Current NNS.reg(. , n.best = %d ) MAX Iterations Remaining = %d",
-                          i, l - index + 1))
+                          i, length(Kcand) - index))
         }
         
-        if (index == 1) {
+        if (index == 1L) {
           setup <- suppressWarnings(
             NNS.reg(
               CV.IVs.train, CV.DV.train,
@@ -440,7 +441,7 @@ NNS.stack <- function(IVs.train,
             )
           }
           
-          threshold_results_1[[index]] <- seq(.01, 99, .01)[
+          threshold_results_1[[index]] <- seq(.01, .99, .01)[
             which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))
           ]
           predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
@@ -452,24 +453,39 @@ NNS.stack <- function(IVs.train,
             rpm   = setup$RPM,
             Xtest = CV.IVs.test.new,
             kmax  = l,
-            class = type #,ncores = ncores
+            class = type # , ncores = ncores
           )
           #  (b) single vector for k = q (potentially large)
-          if (q > l) {
+          if (q > ncol(pred_path_small)) {
             pred_q <- NNS.distance.bulk(
               rpm   = setup$RPM,
               Xtest = CV.IVs.test.new,
               k     = q,
               class = type
             )
-          } else pred_q <- pred_path_small[, l]
+          } else {
+            pred_q <- pred_path_small[, q, drop = TRUE]
+          }
           
         } else {
           
           if (!is.null(dim(CV.IVs.train))) {
             if (ncol(CV.IVs.train) > 1) {
-              # Use precomputed results directly
-              if (i <= l) predicted <- pred_path_small[, i] else predicted <- pred_q
+              # Use precomputed results directly, with robust guards
+              ncols <- if (is.null(dim(pred_path_small))) 0L else ncol(pred_path_small)
+              if (i <= ncols) {
+                predicted <- pred_path_small[, i, drop = TRUE]
+              } else if (i == q) {
+                predicted <- pred_q
+              } else {
+                # rare fallback if a mid-range k exceeds path width
+                predicted <- NNS.distance.bulk(
+                  rpm   = setup$RPM,
+                  Xtest = CV.IVs.test.new,
+                  k     = i,
+                  class = type
+                )
+              }
             } else {
               predicted <- suppressWarnings(
                 NNS.reg(
@@ -508,7 +524,7 @@ NNS.stack <- function(IVs.train,
             }
             
             z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
-            threshold_results_1[[index]] <- seq(.01, 99, .01)[
+            threshold_results_1[[index]] <- seq(.01, .99, .01)[
               as.integer(median(which(z == max(z))))
             ]
             predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
@@ -526,7 +542,7 @@ NNS.stack <- function(IVs.train,
         }
       }
       
-      ks <- c(1:l, q)[!is.na(nns.cv.1)]
+      ks <- Kcand[!is.na(nns.cv.1)]
       if (objective == 'min') {
         k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
@@ -541,6 +557,7 @@ NNS.stack <- function(IVs.train,
       if (b == folds) {
         ks <- table(unlist(best.k))
         best.k <- mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
+        best.k <- ifelse(best.k%%1 < 0.5, floor(best.k), ceiling(best.k))
         
         if (length(relevant_vars) > 1) {
           nns.method.1 <- suppressWarnings(

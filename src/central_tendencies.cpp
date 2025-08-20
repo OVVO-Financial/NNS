@@ -289,8 +289,12 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
       for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = (double)modes_int[i];
       return out;            // e.g., 2 3 4 for c(1,2,2,3,3,4,4,5)
     } else {
-      int pick = modes_int[modes_int.size()/2];  // stable choice among ties
-      return Rf_ScalarReal((double)pick);
+      // Return the arithmetic mean of all tied modes
+      long double sum = 0.0L;
+      for (int m : modes_int) sum += (long double)m;
+      double mean_modes = (modes_int.empty() ? NA_REAL
+                             : (double)(sum / (long double)modes_int.size()));
+      return Rf_ScalarReal(mean_modes);
     }
   }
   
@@ -331,9 +335,8 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
   // ----- Peak detection on SMOOTHED counts (edge-aware 1..3 & concavity) -----
   std::vector<double> cs; smooth_counts_tri7(counts, cs);
   
-  // Optional: require a minimal absolute margin (in smoothed "counts") above side maxima
-  // to further suppress tail jitters WITHOUT using percentages.
-  const double MARGIN = 0.0;  // set to 1.0 if you still see spurious small peaks
+  // Optional margin above side maxima (in smoothed counts)
+  const double MARGIN = 0.0;
   
   std::vector<int> peak_idx; peak_idx.reserve(lz);
   // Require full neighborhoods for offsets 1..3
@@ -365,8 +368,8 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
     }
     
     if (!kept.empty()) {
-      // Report each kept peak as weighted mean over ±3 bins using ORIGINAL counts
-      NumericVector out((int)kept.size());
+      // Per-peak weighted center over ±3 bins using ORIGINAL counts
+      NumericVector centers((int)kept.size());
       for (int t = 0; t < (int)kept.size(); ++t) {
         int zc = kept[t];
         int lo = std::max(0, zc - 3);
@@ -379,21 +382,41 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
           }
         }
         double m = (den > 0.0L) ? (double)(num / den) : z_names[zc];
-        out[t] = m;
+        centers[t] = m;
       }
-      std::sort(out.begin(), out.end());
-      return out;
+      
+      if (multi) {
+        NumericVector out = clone(centers);
+        std::sort(out.begin(), out.end());
+        return out;
+      } else {
+        // GLOBAL-HEIGHT RULE: choose the kept peak with largest smoothed height cs[i]
+        int best_t = 0;
+        for (int t = 1; t < (int)kept.size(); ++t) {
+          if (cs[kept[t]] > cs[kept[best_t]]) best_t = t;
+        }
+        return Rf_ScalarReal(centers[best_t]);
+      }
     }
   }
   
-  // Fallback: multi == TRUE but no detected peaks -> return ties at global max bins (if any)
+  // Fallback: if multiple global-max bins exist
   int ties = 0; for (int c : counts) if (c == maxc) ++ties;
-  if (ties > 1 && multi) {
-    NumericVector out(ties);
-    int pos = 0;
-    for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out[pos++] = z_names[i];
-    std::sort(out.begin(), out.end());
-    return out;
+  if (ties > 1) {
+    if (multi) {
+      NumericVector out(ties);
+      int pos = 0;
+      for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out[pos++] = z_names[i];
+      std::sort(out.begin(), out.end());
+      return out;
+    } else {
+      // Mean of those bin centers when multi==false
+      long double sum = 0.0L;
+      int pos = 0;
+      for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { sum += (long double)z_names[i]; ++pos; }
+      double mean_modes = (pos > 0 ? (double)(sum / (long double)pos) : NA_REAL);
+      return Rf_ScalarReal(mean_modes);
+    }
   }
   
   // Final fallback: single winning bin -> weighted center around ±1
