@@ -429,7 +429,7 @@ NumericVector UPM_RCPP(const double &degree,
 //' @param variable numeric matrix or data.frame.
 //' @param pop_adj logical; TRUE adjusts population vs. sample moments.
 //' @param norm logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.
-//' @return A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
+//' @return A list with elements $cupm, $dupm, $dlpm, $clpm and $cov.matrix.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
 //'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)

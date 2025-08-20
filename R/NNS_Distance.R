@@ -11,84 +11,38 @@
 #'
 #' @export
 
-NNS.distance <- function(rpm, dist.estimate, k, class){
-  l <- nrow(rpm)
-  if(k=="all") k <- l
-  y.hat <- rpm$y.hat
-  raw.dist.estimate <- unlist(dist.estimate)
-  raw.rpm <- rpm[ , -"y.hat"]
-  n <- length(raw.dist.estimate)
-  parallel <- FALSE
 
+NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
+  rpm <- data.table::as.data.table(rpm)
+  if (!"y.hat" %in% names(rpm)) stop("rpm must contain column 'y.hat'")
   
-  rpm <- rbind(as.list(t(dist.estimate)), rpm[, .SD, .SDcols = 1:n])
-  rpm <- rpm[, names(rpm) := lapply(.SD, function(b) NNS.rescale(b, 0, 1)), .SDcols = 1:n]
-  dist.estimate <- unlist(rpm[1, ])
-  rpm <- rpm[-1,]
+  # 1) target vector
+  dest <- unlist(dist.estimate, use.names = TRUE)
+  n <- length(dest)
+  y.hat <- as.numeric(rpm$y.hat)
   
-  M <- matrix(rep(dist.estimate, l), byrow = T, ncol = n)
-
-  rpm$Sum <- Rfast::rowsums( ((t(t(rpm)) - M)^2) + abs(t(t(rpm)) - M), parallel = parallel)
-
-  rpm$Sum[rpm$Sum == 0] <- 1e-10
-  rpm$y.hat <- y.hat
+  # 2) candidate feature columns (drop y.hat)
+  feat_all <- setdiff(names(rpm), "y.hat")
   
-  data.table::setkey(rpm, Sum)
-  
-  ll <- min(k, l)
-
-  rpm <- rpm[1:ll,]
-  
-  SUM = rpm$Sum
-
-  if(k==1){
-    index <- which(SUM==min(SUM))
-    if(length(index)>1){
-      return(mode(rpm$y.hat[index]))
-    }  else {
-      return(rpm$y.hat[1])
-    }
+  # 3) choose columns to match dist.estimate
+  if (!is.null(names(dest)) && all(names(dest) %in% feat_all)) {
+    # align by names (preferred)
+    feat <- names(dest)
+  } else {
+    # fall back: take the first n *numeric* columns (like the original)
+    numerics <- vapply(rpm[, ..feat_all], is.numeric, logical(1L))
+    feat <- feat_all[numerics]
+    if (length(feat) < n) stop("Not enough numeric feature columns in rpm")
+    feat <- feat[seq_len(n)]
   }
   
+  X <- as.matrix(rpm[, ..feat])
+  if (ncol(X) != n) stop(sprintf("after alignment, ncol(X)=%d != length(dist.estimate)=%d", ncol(X), n))
   
-
-  uni_weights <- rep(1/ll, ll)
+  # 4) k handling
+  if (identical(k, "all")) k <- nrow(X)
+  k <- as.integer(k)
   
-  
-  t_weights <- dt(SUM, df = ll)
-  t_weights <- t_weights/sum(t_weights)
-  if(any(is.na(t_weights))) t_weights <- rep(0, ll)
-
-  emp <- SUM^(-1)
-  emp_weights <- emp / sum(emp)
-  if(any(is.na(emp_weights))) emp_weights <- rep(0, ll)
-
-  exp <- dexp(1:ll, rate = 1/ll)
-  exp_weights <- exp / sum(exp)
-  if(any(is.na(exp_weights))) exp_weights <- rep(0, ll)
-
-  lnorm <- abs(rev(dlnorm(1:ll, meanlog = 0, sdlog = sd(1:ll), log = TRUE)))
-  lnorm_weights <- lnorm / sum(lnorm)
-  if(any(is.na(lnorm_weights))) lnorm_weights <- rep(0, ll)
-
-  pl_weights <- (1:ll) ^ (-2)
-  pl_weights <- pl_weights / sum(pl_weights)
-  if(any(is.na(pl_weights))) pl_weights <- rep(0, ll)
-
-  norm_weights <- dnorm(SUM, mean = 0, sd = sd(SUM))
-  norm_weights <- norm_weights / sum(norm_weights)
-  if(any(is.na(norm_weights))) norm_weights <- rep(0, ll)
-  
-  rbf_weights <- exp(- SUM / (2*var(SUM)))
-  rbf_weights <- rbf_weights / sum(rbf_weights)
-  if(any(is.na(rbf_weights))) rbf_weights <- rep(0, ll)
-
-  weights <- (emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights + rbf_weights)/
-    sum(emp_weights + exp_weights + lnorm_weights + norm_weights + pl_weights + t_weights + uni_weights + rbf_weights)
-  
-  
-  if(is.null(class)) single.estimate <- rpm$y.hat%*%weights else single.estimate <- mode_class(rep(rpm$y.hat, ceiling(100*weights)))
-  
-
-  return(single.estimate)
+  # 5) call the C++ core
+  NNS_distance_cpp(X, y.hat, as.numeric(dest), k, !is.null(class))
 }

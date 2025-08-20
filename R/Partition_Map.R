@@ -43,107 +43,65 @@
 #' }
 #' @export
 
-NNS.part = function(x, y, Voronoi = FALSE, type = NULL,
-                    order = NULL, obs.req = 8, min.obs.stop = TRUE,
-                    noise.reduction = "off") {
+NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
+                     order = NULL, obs.req = 8, min.obs.stop = TRUE,
+                     noise.reduction = "off") {
   noise.reduction <- tolower(noise.reduction)
-  if (!noise.reduction %in% c("mean","median","mode","mode_class","off"))
-    stop("noise.reduction must be one of 'mean','median','mode','mode_class','off'")
+  ok <- c("mean","median","mode","mode_class","off")
+  if (!noise.reduction %in% ok)
+    stop("noise.reduction must be one of ", paste(shQuote(ok), collapse = ", "))
   
   if (any(class(x) %in% c("tbl","data.table"))) x <- unlist(x, use.names = FALSE)
   if (any(class(y) %in% c("tbl","data.table"))) y <- unlist(y, use.names = FALSE)
   x <- as.numeric(x); y <- as.numeric(y)
-  if (is.null(obs.req)) obs.req <- 8
-  if (!is.null(order) && order == 0) order <- 1
-  
-  # --- centralized inline reducers (no function-object switching) ---
-  nr_x <- function(v) {
-    if (noise.reduction == "mean")        mean(v)
-    else if (noise.reduction == "median") median(v)
-    else if (noise.reduction == "mode")   NNS::NNS.mode(v, discrete = TRUE, multi = FALSE)
-    else if (noise.reduction == "mode_class") NNS::NNS.gravity(v)  # gravity for x
-    else                                  NNS::NNS.gravity(v)      # "off"
-  }
-  nr_y <- function(v) {
-    if (noise.reduction == "mean")        mean(v)
-    else if (noise.reduction == "median") median(v)
-    else if (noise.reduction == "mode")   NNS::NNS.mode(v, discrete = TRUE, multi = FALSE)
-    else if (noise.reduction == "mode_class") NNS::NNS.mode(v, discrete = TRUE, multi = FALSE)
-    else                                  NNS::NNS.gravity(v)      # "off"
-  }
-  # -----------------------------------------------------------------
-  
-  if (Voronoi) {
-    mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)
-    plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
-  }
-  
-  PART <- data.table::data.table(x = x, y = y, quadrant = "q", prior.quadrant = "pq")
-  PART[, counts := .N, by = quadrant]
-  PART[, old.counts := .N, by = prior.quadrant]
+  if (is.null(obs.req)) obs.req <- 8L
+  if (!is.null(order) && order == 0) order <- 1L
   
   n <- length(x)
-  default.order <- max(ceiling(log(n, 2)), 1)
+  default.order <- max(ceiling(log(n, 2)), 1L)
   if (is.null(order)) order <- default.order
-  OR <- obs.req
   
-  drawSegments <- function() {
-    if (is.null(type)) {
-      PART[split.rows, {
-        yh <- nr_y(y); xv <- nr_x(x)
-        segments(min(x), yh, max(x), yh, lty = 3)
-        segments(xv, min(y), xv, max(y), lty = 3)
-      }, by = quadrant]
-    } else {
-      bounds <- PART[, .(min = min(x), max = max(x)), by = quadrant]
-      abline(v = bounds$min, lty = 3); abline(v = bounds$max, lty = 3)
-    }
+  out <- NNS_part_cpp(
+    x = x, y = y,
+    type = if (is.null(type)) NULL else as.character(type),
+    order_in = as.integer(order),
+    obs_req = as.integer(obs.req),
+    min_obs_stop = isTRUE(min.obs.stop),
+    noise_reduction = noise.reduction
+  )
+  
+  PART <- data.table::as.data.table(out$dt)
+  RP   <- data.table::as.data.table(out$`regression.points`)
+  data.table::setorder(RP, quadrant)
+  
+  is.discrete <- function(z, tol = .Machine$double.eps^0.5) {
+    z <- as.numeric(z)
+    all(is.finite(z)) && all(abs(z - round(z)) <= tol)
   }
-  
-  obs_assignment <- function() {
-    RP[, prior.quadrant := quadrant]
-    PART[split.rows, prior.quadrant := quadrant]
-    if (is.null(type)) {
-      PART[RP, on = .(quadrant), `:=`(q_new = { lox <- x.x <= i.x; loy <- x.y <= i.y; 1L + lox + loy * 2L })]
-    } else {
-      PART[RP, on = .(quadrant), `:=`(q_new = { lox <- x.x > i.x; 1L + lox })]
-    }
-    PART[split.rows, quadrant := paste0(quadrant, q_new)]
-  }
-  
-  i <- 0L
-  while (TRUE) {
-    if (nrow(PART) > n || i >= order || i >= floor(log(n, 2))) break
-    PART[, counts := .N, by = quadrant]
-    split.rows <- PART[counts > OR, which = TRUE]
-    if (length(split.rows) == 0) break
-    
-    if (Voronoi) drawSegments()
-    
-    RP <- PART[split.rows, .( x = nr_x(x), y = nr_y(y) ), by = quadrant]
-    
-    obs_assignment()
-    i <- i + 1L
-    if (min.obs.stop) {
-      PART[, counts := .N, by = quadrant]
-      if (min(PART$counts) <= OR) break
-    }
-  }
-  
-  PART[, c("counts","old.counts","q_new") := NULL]
-  
-  RP <- PART[, .( x = nr_x(x), y = nr_y(y) ), by = prior.quadrant]
-  data.table::setnames(RP, "prior.quadrant", "quadrant")
-  
   if (is.discrete(x)) {
     RP[, x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
   }
-  RP <- data.table::setorder(RP, quadrant)
   
-  if (Voronoi) {
-    title(main = paste0("NNS Order = ", i), cex.main = 2)
+  if (isTRUE(Voronoi)) {
+    mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)
+    plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
+    
+    if (is.null(type)) {
+      # draw dashed split segments (per-iteration, per-split group)
+      sh <- out$segments_h
+      if (NROW(sh)) segments(sh$x0, sh$y, sh$x1, sh$y, lty = 3)
+      sv <- out$segments_v
+      if (NROW(sv)) segments(sv$x,  sv$y0, sv$x,  sv$y1, lty = 3)
+    } else {
+      # XONLY: vertical ablines at group bounds each iteration
+      vl <- out$vlines
+      if (length(vl)) abline(v = vl, lty = 3)
+    }
+    
     points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+    title(main = paste0("NNS Order = ", out$order), cex.main = 2)
   }
   
-  list(order = i, dt = PART[], regression.points = RP)
+  # Return the same shape as original
+  list(order = as.integer(out$order), dt = PART[], regression.points = RP[])
 }

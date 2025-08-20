@@ -33,12 +33,12 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #  NULL
 #  
 #  $feature.weights
-#  Petal.Length  Petal.Width
-#           0.5          0.5
+#   Petal.Width Petal.Length Sepal.Length
+#     0.4285714    0.4285714    0.1428571
 #  
 #  $feature.frequency
-#  Petal.Length  Petal.Width
-#             2            2
+#   Petal.Width Petal.Length Sepal.Length
+#             3            3            1
 #  
 #  mean( a$results == as.numeric(iris[test.set, 5]) )
 #  [1] 1
@@ -54,10 +54,10 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----stackeval, eval = FALSE--------------------------------------------------
 #  $OBJfn.reg
-#  [1] 0.8642857
+#  [1] 0.8071429
 #  
 #  $NNS.reg.n.best
-#  [1] 5
+#  [1] 6
 #  
 #  $probability.threshold
 #  [1] 0.465

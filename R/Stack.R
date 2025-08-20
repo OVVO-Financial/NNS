@@ -214,233 +214,320 @@ NNS.stack <- function(IVs.train,
     
     
     # Dimension Reduction Regression Output
-    if(2 %in% method && ncol(IVs.train)>1){
+    if (2 %in% method && ncol(IVs.train) > 1) {
       actual <- CV.DV.test
       
-      if(dim.red.method=="cor"){
-        var.cutoffs_2 <- abs(round(suppressWarnings(cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)), method = "spearman"))[-1,1], digits = 2))
+      # --- compute per-variable scores for threshold grid ---
+      if (dim.red.method == "cor") {
+        var.cutoffs_2 <- abs(round(suppressWarnings(
+          cor(data.matrix(cbind(CV.DV.train, CV.IVs.train)), method = "spearman")
+        )[-1, 1], digits = 2))
       } else {
-        var.cutoffs_2 <- abs(round(suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order = order, ncores = ncores,
-                                                            type = type, point.only = TRUE, smooth = smoothness)$equation$Coefficient[-(n+1)]), digits = 2))
+        var.cutoffs_2 <- abs(round(suppressWarnings(
+          NNS.reg(CV.IVs.train, CV.DV.train,
+                  dim.red.method = dim.red.method,
+                  plot = FALSE, residual.plot = FALSE,
+                  order = order, ncores = ncores,
+                  type = type, point.only = TRUE, smooth = smoothness)$equation$Coefficient[-(n + 1)]
+        ), digits = 2))
       }
       
-      var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2))/2))
-      
+      var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2)) / 2))
       var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
-      
       var.cutoffs[is.na(var.cutoffs)] <- 0
-      
       var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
+      if (length(var.cutoffs) == 0 || is.null(var.cutoffs)) var.cutoffs <- 0
+      if (n == 2) var.cutoffs <- unique(c(var.cutoffs, 0))
+      if (dist == "factor" && length(var.cutoffs) > 1) var.cutoffs <- var.cutoffs[-1]
+      if (dim.red.method == "equal") var.cutoffs <- 0
       
-      if(is.null(var.cutoffs)) var.cutoffs <- 0
-      
-      if(n == 2) var.cutoffs <- c(var.cutoffs, 0)
-      
-      if(dist=="factor") var.cutoffs <- var.cutoffs[-1]
-      if(dim.red.method=="equal") var.cutoffs <- 0
-      
+      # --- evaluate ALL thresholds (no early stopping) ---
       threshold_results_2 <- vector(mode = "list", length = length(var.cutoffs))
-      nns.ord <- numeric(length(var.cutoffs))
+      nns.ord <- rep(NA_real_, length(var.cutoffs))
       
-      for(i in 1:length(var.cutoffs)){
-        if(status){
-          message("Current NNS.reg(... , threshold = ", var.cutoffs[i] ," ) MAX Iterations Remaining = " , length(var.cutoffs)-i," ","\r",appendLF=TRUE)
+      for (i in seq_along(var.cutoffs)) {
+        if (status) {
+          message(sprintf("Current NNS.reg(... , threshold = %.2f ) MAX Iterations Remaining = %d",
+                          var.cutoffs[i], length(var.cutoffs) - i))
         }
         
-        predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, dim.red.method = dim.red.method, threshold = var.cutoffs[i], order = order, ncores = ncores,
-                                              type = NULL, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
+        predicted <- suppressWarnings(
+          NNS.reg(CV.IVs.train, CV.DV.train,
+                  point.est = CV.IVs.test,
+                  plot = FALSE,
+                  dim.red.method = dim.red.method,
+                  threshold = var.cutoffs[i],
+                  order = order, ncores = ncores,
+                  type = NULL, dist = dist,
+                  point.only = TRUE, smooth = smoothness)$Point.est
+        )
         
+        # fill NA predictions with gravity of non-NA (original behavior)
         predicted[is.na(predicted)] <- gravity(na.omit(predicted))
         
-        if(!is.null(type)){
-          pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+        # per-threshold classification rounding (if needed)
+        if (!is.null(type)) {
+          if (length(unique(predicted)) == 1) {
+            pred_matrix <- matrix(replicate(100, predicted), nrow = length(predicted))
+          } else {
+            pred_matrix <- sapply(seq(.01, .99, .01),
+                                  function(z) ifelse(predicted %% 1 < z,
+                                                     as.integer(floor(predicted)),
+                                                     as.integer(ceiling(predicted))))
+          }
           z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
-          threshold_results_2[[i]] <- seq(.01,.99, .01)[as.integer(median(which(z==max(z))))]
-          
-          predicted <- ifelse(predicted%%1 < threshold_results_2[[i]], floor(predicted), ceiling(predicted))
-        }
+          threshold_results_2[[i]] <- seq(.01, .99, .01)[as.integer(median(which(z == max(z))))]
+          predicted <- ifelse(predicted %% 1 < threshold_results_2[[i]],
+                              floor(predicted), ceiling(predicted))
+          end_if <- TRUE
+        } # end if classification
         
+        # objective at this threshold
         nns.ord[i] <- eval(obj.fn)
-       
-        i_s[i] <- i
-
-        best.threshold <- ifelse(length(i_s <=2), var.cutoffs[1], var.cutoffs[mode_class(i_s) - 1])
-        THRESHOLDS[[b]] <- best.threshold
-
-        if(objective=="min"){
-          best.nns.ord[[b]] <- min(na.omit(nns.ord))
-          if(is.na(nns.ord[1])) nns.ord[1] <- Inf
-        } else {
-          best.nns.ord[[b]] <- max(na.omit(nns.ord))
-          if(is.na(nns.ord[1])) nns.ord[1] <- -Inf
-        }
-        
-        if(i > 2 && is.na(nns.ord[i])) break
-        if(i > 2 && (nns.ord[i] >= nns.ord[i-1]) && (nns.ord[i] >= nns.ord[i-2])) break
+      } # end for each threshold
+      
+      # --- pick best threshold across ALL tested ---
+      if (objective == "min") {
+        best.idx <- which.min(na.omit(nns.ord))
+        best.nns.ord[[b]] <- min(na.omit(nns.ord))
+      } else {
+        best.idx <- which.max(na.omit(nns.ord))
+        best.nns.ord[[b]] <- max(na.omit(nns.ord))
       }
+      if (length(best.idx) == 0) best.idx <- 1L  # fallback if all NA
+      best.threshold <- var.cutoffs[best.idx]
+      THRESHOLDS[[b]] <- best.threshold
       
-      
+      # --- downstream: finalize relevant vars and fit once using the chosen threshold ---
       relevant_vars <- colnames(IVs.train)
-      if(is.null(relevant_vars)) relevant_vars <- 1:n
-    
-      if(b==folds){
+      if (is.null(relevant_vars)) relevant_vars <- 1:n
+      
+      if (b == folds) {
         threshold.table <- sort(table(unlist(THRESHOLDS)), decreasing = TRUE)
+        nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table == max(threshold.table)])))
+        if (is.na(nns.ord.threshold)) nns.ord.threshold <- 0
         
-        nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table==max(threshold.table)])))
-        if(is.na(nns.ord.threshold)) nns.ord.threshold <- 0
-
-        nns.method.2 <- (NNS.reg(IVs.train, DV.train, point.est = IVs.test, dim.red.method = dim.red.method, plot = FALSE, order = order, threshold = nns.ord.threshold, ncores = ncores,
-                                                 type = type, point.only = TRUE, confidence.interval = pred.int, smooth = smoothness))
-  
-        actual <- nns.method.2$Fitted.xy$y
+        nns.method.2 <- NNS.reg(IVs.train, DV.train,
+                                point.est = IVs.test,
+                                dim.red.method = dim.red.method,
+                                plot = FALSE,
+                                order = order, threshold = nns.ord.threshold,
+                                ncores = ncores,
+                                type = type, point.only = TRUE,
+                                confidence.interval = pred.int,
+                                smooth = smoothness)
+        
+        actual    <- nns.method.2$Fitted.xy$y
         predicted <- nns.method.2$Fitted.xy$y.hat
         pred.int.2 <- nns.method.2$pred.int
-        
         best.nns.ord <- eval(obj.fn)
         
         rel_vars <- nns.method.2$equation
-        
-        rel_vars <- which(rel_vars$Coefficient>0)
+        rel_vars <- which(rel_vars$Coefficient > 0)
         rel_vars <- rel_vars[rel_vars <= n]
+        if (length(rel_vars) == 0 || is.null(rel_vars)) rel_vars <- 1:n
         
-        if(is.null(rel_vars) || length(rel_vars)==0) rel_vars <- 1:n
+        if (!stack) relevant_vars <- 1:n else relevant_vars <- rel_vars
+        if (all(relevant_vars == "FALSE")) relevant_vars <- 1:n
         
-        if(!stack) relevant_vars <- 1:n else relevant_vars <- rel_vars
-        
-        if(all(relevant_vars=="FALSE")) relevant_vars <- 1:n
-
-        
-        if(!is.null(type) && !is.null(nns.method.2$Point.est)){
+        if (!is.null(type) && !is.null(nns.method.2$Point.est)) {
           threshold_results_2 <- mean(unlist(threshold_results_2))
-          
-          nns.method.2 <- ifelse(nns.method.2$Point.est%%1 < threshold_results_2, floor(nns.method.2$Point.est), ceiling(nns.method.2$Point.est))
+          nns.method.2 <- ifelse(nns.method.2$Point.est %% 1 < threshold_results_2,
+                                 floor(nns.method.2$Point.est), ceiling(nns.method.2$Point.est))
           nns.method.2 <- pmin(nns.method.2, max(as.numeric(DV.train)))
           nns.method.2 <- pmax(nns.method.2, min(as.numeric(DV.train)))
         } else {
           nns.method.2 <- nns.method.2$Point.est
         }
-        
-        
       }
       
     } else {
       THRESHOLDS <- NA
       test.set.2 <- NULL
       nns.method.2 <- NA
-      if(objective=='min'){best.nns.ord <- Inf} else {best.nns.ord <- -Inf}
+      if (objective == "min") { best.nns.ord <- Inf } else { best.nns.ord <- -Inf }
       nns.ord.threshold <- NA
       threshold_results_2 <- NA
       relevant_vars <- 1:n
     } # 2 %in% method
     
     
+    
       
-    if(1 %in% method){
+
+    # --- Method 1 (NNS.reg / k-NN path) — optimized all‑k (only 1..l plus q) ---
+    if (1 %in% method) {
       actual <- CV.DV.test
       
-      if(is.character(relevant_vars)) relevant_vars <- relevant_vars!=""
-      
-      if(is.logical(relevant_vars)){
-        CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars])
-        CV.IVs.test <- data.frame(CV.IVs.test[, relevant_vars])
+      if (is.character(relevant_vars)) relevant_vars <- relevant_vars != ""
+      if (is.logical(relevant_vars)) {
+        CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars, drop = FALSE])
+        CV.IVs.test  <- data.frame(CV.IVs.test[,  relevant_vars, drop = FALSE])
       }
       
+      if (dim(CV.IVs.train)[2] != n) CV.IVs.train <- t(CV.IVs.train)
+      if (dim(CV.IVs.train)[2] != n) CV.IVs.train <- t(CV.IVs.train)
+      if (dim(CV.IVs.test)[2]  != n) CV.IVs.test  <- t(CV.IVs.test)
+      if (dim(CV.IVs.test)[2]  != n) CV.IVs.test  <- t(CV.IVs.test)
       
-      if(dim(CV.IVs.train)[2]!=n) CV.IVs.train <- t(CV.IVs.train)
-      if(dim(CV.IVs.train)[2]!=n) CV.IVs.train <- t(CV.IVs.train)
-      
-      if(dim(CV.IVs.test)[2]!=n) CV.IVs.test <- t(CV.IVs.test)
-      if(dim(CV.IVs.test)[2]!=n) CV.IVs.test <- t(CV.IVs.test)
-      
-      threshold_results_1 <- vector(mode = "list", length(c(1:l, length(IVs.train[ , 1]))))
+      threshold_results_1 <- vector(mode = "list", length(c(1:l, length(IVs.train[, 1]))))
       nns.cv.1 <- numeric()
       
-      q <- length(IVs.train[ , 1])
+      q <- length(IVs.train[, 1])
       
-      for(i in c(1:l, q)){
+      # Holders computed once per fold
+      pred_path_small <- NULL   # |Xtest| x l (k = 1..l)
+      pred_q          <- NULL   # |Xtest| vector (k = q)
+      
+      # Reuse the same dummy-encoded test design across i
+      CV.IVs.test.new <- data.table::data.table(
+        apply(data.frame(CV.IVs.test), 2, function(z) factor_2_dummy_FR(z))
+      )
+      
+      for (i in c(1:l, q)) {
         index <- which(c(1:l, q) == i)
-        if(status){
-          message("Current NNS.reg(... , n.best = ", i ," ) MAX Iterations Remaining = " ,l-index+1," ","\r",appendLF=TRUE)
+        if (status) {
+          message(sprintf("Current NNS.reg(. , n.best = %d ) MAX Iterations Remaining = %d",
+                          i, l - index + 1))
         }
         
-        if(index==1){
-          setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = order,
-                                            type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE, smooth = smoothness))
+        if (index == 1) {
+          setup <- suppressWarnings(
+            NNS.reg(
+              CV.IVs.train, CV.DV.train,
+              point.est = CV.IVs.test,
+              plot = FALSE, residual.plot = FALSE,
+              n.best = 1, order = order,
+              type = type, factor.2.dummy = TRUE,
+              dist = dist, ncores = ncores,
+              point.only = FALSE, smooth = smoothness
+            )
+          )
           
-          if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
+          if (is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
           
-          if(is.null(dim(setup$RPM))  && is.null(setup$regression.points)){
-            setup <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = 1, order = "max",
-                                              type = type, factor.2.dummy = TRUE, dist = dist, ncores = ncores, point.only = FALSE, smooth = smoothness))
+          if (is.null(dim(setup$RPM)) && is.null(setup$regression.points)) {
+            setup <- suppressWarnings(
+              NNS.reg(
+                CV.IVs.train, CV.DV.train,
+                point.est = CV.IVs.test,
+                plot = FALSE, residual.plot = FALSE,
+                n.best = 1, order = "max",
+                type = type, factor.2.dummy = TRUE,
+                dist = dist, ncores = ncores,
+                point.only = FALSE, smooth = smoothness
+              )
+            )
           }
           
-          if(is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
+          if (is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
           
-          nns.id <- setup$Fitted.xy$NNS.ID
+          nns.id      <- setup$Fitted.xy$NNS.ID
           original.DV <- setup$Fitted.xy$y
-         
+          
+          # Index==1: use NNS.reg (n.best=1) point estimates (original behavior)
           predicted <- setup$Point.est
-         
+          
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
-          if(length(unique(predicted))==1){
+          if (length(unique(predicted)) == 1) {
             pred_matrix <- matrix(replicate(100, predicted), nrow = length(predicted))
           } else {
-            pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+            pred_matrix <- sapply(
+              seq(.01, .99, .01),
+              function(z) ifelse(predicted %% 1 < z,
+                                 as.integer(floor(predicted)),
+                                 as.integer(ceiling(predicted)))
+            )
           }
-            
-          threshold_results_1[index] <- seq(.01,.99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
-
-          predicted <- ifelse(predicted%%1 < threshold_results_1[index], floor(predicted), ceiling(predicted))
+          
+          threshold_results_1[[index]] <- seq(.01, 99, .01)[
+            which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))
+          ]
+          predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
+                              floor(predicted), ceiling(predicted))
+          
+          # Precompute only what we need:
+          #  (a) path for k = 1..l  (typically small)
+          pred_path_small <- NNS.distance.path.bulk(
+            rpm   = setup$RPM,
+            Xtest = CV.IVs.test.new,
+            kmax  = l,
+            class = type #,ncores = ncores
+          )
+          #  (b) single vector for k = q (potentially large)
+          if (q > l) {
+            pred_q <- NNS.distance.bulk(
+              rpm   = setup$RPM,
+              Xtest = CV.IVs.test.new,
+              k     = q,
+              class = type
+            )
+          } else pred_q <- pred_path_small[, l]
           
         } else {
           
-          
-          if(!is.null(dim(CV.IVs.train))){
-            if(ncol(CV.IVs.train)>1){
-              CV.IVs.test.new <- data.table::data.table(apply(data.frame(CV.IVs.test), 2, function(z) factor_2_dummy_FR(z)))
-              
-              CV.IVs.test.new <- CV.IVs.test.new[, DISTANCES :=  NNS.distance(rpm = setup$RPM, dist.estimate = .SD, k = i, class = type)[1], by = 1:nrow(CV.IVs.test)]
-              
-              predicted <- as.numeric(unlist(CV.IVs.test.new$DISTANCES))
-              rm(CV.IVs.test.new)
+          if (!is.null(dim(CV.IVs.train))) {
+            if (ncol(CV.IVs.train) > 1) {
+              # Use precomputed results directly
+              if (i <= l) predicted <- pred_path_small[, i] else predicted <- pred_q
             } else {
-              predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test, plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
-                                                     type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
+              predicted <- suppressWarnings(
+                NNS.reg(
+                  CV.IVs.train, CV.DV.train,
+                  point.est = CV.IVs.test,
+                  plot = FALSE, residual.plot = FALSE,
+                  n.best = i, order = order, ncores = ncores,
+                  type = type, factor.2.dummy = TRUE,
+                  dist = dist, point.only = TRUE, smooth = smoothness
+                )$Point.est
+              )
             }
           } else {
-            predicted <-  suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = unlist(CV.IVs.test), plot = FALSE, residual.plot = FALSE, n.best = i, order = order, ncores = ncores,
-                                                   type = type, factor.2.dummy = TRUE, dist = dist, point.only = TRUE, smooth = smoothness)$Point.est)
+            predicted <- suppressWarnings(
+              NNS.reg(
+                CV.IVs.train, CV.DV.train,
+                point.est = unlist(CV.IVs.test),
+                plot = FALSE, residual.plot = FALSE,
+                n.best = i, order = order, ncores = ncores,
+                type = type, factor.2.dummy = TRUE,
+                dist = dist, point.only = TRUE, smooth = smoothness
+              )$Point.est
+            )
           }
           
-          if(!is.null(type)){
-            if(length(unique(predicted))==1){
+          if (!is.null(type)) {
+            if (length(unique(predicted)) == 1) {
               pred_matrix <- matrix(replicate(100, predicted), nrow = length(predicted))
             } else {
-              pred_matrix <- sapply(seq(.01, .99, .01), function(z) ifelse(predicted%%1<z, as.integer(floor(predicted)), as.integer(ceiling(predicted))))
+              pred_matrix <- sapply(
+                seq(.01, .99, .01),
+                function(z) ifelse(predicted %% 1 < z,
+                                   as.integer(floor(predicted)),
+                                   as.integer(ceiling(predicted)))
+              )
             }
             
             z <- apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual)))
-            threshold_results_1[[index]] <- seq(.01,.99, .01)[as.integer(median(which(z==max(z))))]
-            
-            predicted <- ifelse(predicted%%1 < threshold_results_1[[index]], floor(predicted), ceiling(predicted))
+            threshold_results_1[[index]] <- seq(.01, 99, .01)[
+              as.integer(median(which(z == max(z))))
+            ]
+            predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
+                                floor(predicted), ceiling(predicted))
           }
-          
-          
         }
         
         nns.cv.1[index] <- eval(obj.fn)
         
-        if(length(na.omit(nns.cv.1)) > 3){
-          if(objective=="min") nns.cv.1[is.na(nns.cv.1)] <- max(na.omit(nns.cv.1)) else nns.cv.1[is.na(nns.cv.1)] <- min(na.omit(nns.cv.1))
-          if(objective=='min' && nns.cv.1[index]>=nns.cv.1[index-1] && nns.cv.1[index]>=nns.cv.1[index-2]){ break }
-          if(objective=='max' && nns.cv.1[index]<=nns.cv.1[index-1] && nns.cv.1[index]<=nns.cv.1[index-2]){ break }
+        if (length(na.omit(nns.cv.1)) > 3) {
+          if (objective == 'min') nns.cv.1[is.na(nns.cv.1)] <- max(na.omit(nns.cv.1))
+          else                     nns.cv.1[is.na(nns.cv.1)] <- min(na.omit(nns.cv.1))
+          if (objective == 'min' && nns.cv.1[index] >= nns.cv.1[index - 1] && nns.cv.1[index] >= nns.cv.1[index - 2]) { break }
+          if (objective == 'max' && nns.cv.1[index] <= nns.cv.1[index - 1] && nns.cv.1[index] <= nns.cv.1[index - 2]) { break }
         }
       }
       
-      
       ks <- c(1:l, q)[!is.na(nns.cv.1)]
-      
-      if(objective=='min'){
+      if (objective == 'min') {
         k <- ks[which.min(na.omit(nns.cv.1))]
         nns.cv.1 <- min(na.omit(nns.cv.1))
       } else {
@@ -448,51 +535,58 @@ NNS.stack <- function(IVs.train,
         nns.cv.1 <- max(na.omit(nns.cv.1))
       }
       
+      best.k[[b]]      <- k
+      best.nns.cv[[b]] <- if (!is.null(type)) min(max(nns.cv.1, 0), 1) else nns.cv.1
       
-      best.k[[b]] <- k
-      best.nns.cv[[b]] <- if(!is.null(type)) min(max(nns.cv.1,0),1) else nns.cv.1
-      
-      if(b==folds){
+      if (b == folds) {
         ks <- table(unlist(best.k))
+        best.k <- mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
         
-        best.k <-  mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
-
-        if(length(relevant_vars)>1){
-            nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = IVs.test[, relevant_vars], plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                     type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness))
+        if (length(relevant_vars) > 1) {
+          nns.method.1 <- suppressWarnings(
+            NNS.reg(
+              IVs.train[, relevant_vars], DV.train,
+              point.est = IVs.test[, relevant_vars],
+              plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+              type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness
+            )
+          )
         } else {
-            nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[ , relevant_vars], DV.train, point.est = unlist(IVs.test[, relevant_vars]), plot = FALSE, n.best = best.k, order = order, ncores = ncores,
-                                                    type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness))
+          nns.method.1 <- suppressWarnings(
+            NNS.reg(
+              IVs.train[, relevant_vars], DV.train,
+              point.est = unlist(IVs.test[, relevant_vars]),
+              plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+              type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness
+            )
+          )
         }
         
-        actual <- nns.method.1$Fitted.xy$y
+        actual    <- nns.method.1$Fitted.xy$y
         predicted <- nns.method.1$Fitted.xy$y.hat
         
         best.nns.cv <- eval(obj.fn)
         
-        pred.int.1 <- nns.method.1$pred.int
+        pred.int.1   <- nns.method.1$pred.int
         nns.method.1 <- nns.method.1$Point.est
         
-        if(!is.null(type) && !is.null(nns.method.1)){
+        if (!is.null(type) && !is.null(nns.method.1)) {
           threshold_results_1 <- mean(unlist(threshold_results_1))
-          nns.method.1 <- ifelse(nns.method.1%%1 < threshold_results_1, floor(nns.method.1), ceiling(nns.method.1))
+          nns.method.1 <- ifelse(nns.method.1 %% 1 < threshold_results_1,
+                                 floor(nns.method.1), ceiling(nns.method.1))
           nns.method.1 <- pmin(nns.method.1, max(as.numeric(DV.train)))
           nns.method.1 <- pmax(nns.method.1, min(as.numeric(DV.train)))
         }
       }
       
-      
     } else {
-      test.set.1 <- NULL
-      best.k <- NA
-      nns.method.1 <- NA
+      test.set.1          <- NULL
+      best.k              <- NA
+      nns.method.1        <- NA
       threshold_results_1 <- NA
-      if(objective=='min'){best.nns.cv <- Inf} else {best.nns.cv <- -Inf}
-    }# 1 %in% method
-    
-    
-    
-    
+      if (objective == 'min') { best.nns.cv <- Inf } else { best.nns.cv <- -Inf }
+    } # end: 1 %in% method
+
   } # errors (b) loop
   
   

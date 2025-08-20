@@ -1,3 +1,8 @@
+is.fcl <- function(x) is.factor(x) || is.character(x) || is.logical(x)
+
+is.discrete <- function(x) sum(as.numeric(x)%%1)==0
+
+
 ### Continuous Mode of a distribution
 mode <- function(x) NNS.mode(x, discrete = FALSE, multi = FALSE)
 
@@ -311,10 +316,6 @@ force.clt <- function(x, ensemble)
   out
 }
 
-
-is.fcl <- function(x) is.factor(x) || is.character(x) || is.logical(x)
-
-is.discrete <- function(x) sum(as.numeric(x)%%1)==0
 
 
 ### upSample / downSample to avoid dependencies

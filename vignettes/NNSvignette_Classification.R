@@ -54,10 +54,10 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----stackeval, eval = FALSE--------------------------------------------------
 #  $OBJfn.reg
-#  [1] 0.8642857
+#  [1] 0.8071429
 #  
 #  $NNS.reg.n.best
-#  [1] 5
+#  [1] 6
 #  
 #  $probability.threshold
 #  [1] 0.465

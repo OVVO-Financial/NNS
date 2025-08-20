@@ -20,7 +20,7 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 \item{norm}{logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.}
 }
 \value{
-A list with elements $cupm, $dupм, $dlpm, $clpm and $cov.matrix.
+A list with elements $cupm, $dupm, $dlpm, $clpm and $cov.matrix.
 }
 \description{
 Builds a list containing all four quadrant partial‑moment matrices

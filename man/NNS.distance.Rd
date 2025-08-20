@@ -4,7 +4,7 @@
 \alias{NNS.distance}
 \title{NNS Distance}
 \usage{
-NNS.distance(rpm, dist.estimate, k, class)
+NNS.distance(rpm, dist.estimate, k = "all", class = NULL)
 }
 \arguments{
 \item{rpm}{REGRESSION.POINT.MATRIX from \link{NNS.reg}}

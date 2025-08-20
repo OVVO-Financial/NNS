@@ -19,7 +19,7 @@ Co.UPM_nD(data, target, degree = 0, norm = TRUE)
 Numeric; the n‑dimensional co‑upper partial moment.
 }
 \description{
-This function generates an n‑dimensional co‑upper partial moment (n ≥ 2) for any degree or target.
+This function generates an n‑dimensional co‑upper partial moment (n >= 2) for any degree or target.
 }
 \examples{
 \dontrun{

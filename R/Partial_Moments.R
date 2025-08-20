@@ -60,7 +60,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 
 #' Co‑Lower Partial Moment nD
 #'
-#' This function generates an n‑dimensional co‑lower partial moment (n ≥ 2) for any degree or target.
+#' This function generates an n‑dimensional co‑lower partial moment (n >= 2) for any degree or target.
 #'
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
@@ -85,7 +85,7 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 
 #' Co‑Upper Partial Moment nD
 #'
-#' This function generates an n‑dimensional co‑upper partial moment (n ≥ 2) for any degree or target.
+#' This function generates an n‑dimensional co‑upper partial moment (n >= 2) for any degree or target.
 #'
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
@@ -110,7 +110,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 
 #' Divergent Partial Moment nD
 #'
-#' This function generates the aggregate n‑dimensional divergent partial moment (n ≥ 2) for any degree or target.
+#' This function generates the aggregate n‑dimensional divergent partial moment (n >= 2) for any degree or target.
 #'
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
@@ -262,7 +262,7 @@ NNS.CDF <- function(variable,
     return(list(Function=DT,target.value=Pv))
   }
   
-  # — Multivariate case (d ≥ 2)
+  # — Multivariate case (d >= 2)
   if (!is.null(dim(variable)) && ncol(variable) >= 2) {
     xlab <- colnames(variable)[1]
     ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
