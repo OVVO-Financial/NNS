@@ -133,7 +133,6 @@ NNS.VAR <- function(variables,
     colnames(variables) <- as.character(colnames.list)
   }
   
-  
   if(any(colnames(variables)=="")){
     var_names <- character()
     for(i in 1:length(which(colnames(variables)==""))){
@@ -163,7 +162,6 @@ NNS.VAR <- function(variables,
   
   nns_IVs <- variable_interpolation <- variable_interpolation_and_extrapolation <- list(ncol(variables))
   
-  
   nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     n <- nrow(variables)
     index <- seq_len(n)
@@ -178,20 +176,17 @@ NNS.VAR <- function(variables,
     if(length(missing_index)==0){
       variable_interpolation <- selected_variable[,2]
     } else {
-      interpolation_start <- which(!is.na(selected_variable[,2]))[1]
       interpolation_point <- tail(which(!is.na(selected_variable[,2])), 1)
-      
       selected_variable <- selected_variable[complete.cases(selected_variable),]
       
       h_int <- tail(index, 1) - interpolation_point
       variable_interpolation <- variables[,i]
       
       if(h_int > 0){
-        multi <- NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2], order = NULL, ncores = 1, status = FALSE, folds = 5,
+        multi <- NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2],
+                           order = NULL, ncores = 1, status = FALSE, folds = 5,
                            IVs.test = cbind(missing_index, missing_index), method = 1)$stack
-        
         variable_interpolation[missing_index] <- multi
-        
       } else {
         variable_interpolation <- NNS.reg(selected_variable[,1], selected_variable[,2], order = "max", ncores = 1,
                                           point.est = index, plot = FALSE, point.only = TRUE)$Point.est
@@ -207,10 +202,9 @@ NNS.VAR <- function(variables,
                           objective = objective,
                           print.trace = FALSE,
                           ncores = 1,
-                          negative.values = min(variable_interpolation)<0, h = h)
+                          negative.values = min(variable_interpolation, na.rm = TRUE)<0, h = h)
       
       variable_extrapolation <- b$results
-      
     } else variable_extrapolation <- NULL
     
     return(list(variable_interpolation, variable_extrapolation))
@@ -226,7 +220,6 @@ NNS.VAR <- function(variables,
   for(i in 1:length(positive_values)){
     if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
   }
-  
   
   rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
@@ -251,30 +244,52 @@ NNS.VAR <- function(variables,
   # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, nrow(lagged_new_values) - h)
   
-  
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
-  
   
   if(num_cores > 1){
     if(status) message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     status <- FALSE
   }
   
-  
-  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{                   
+  # ==== FIXED MULTIVARIATE BLOCK (shape alignment + clean IVs.test) ====
+  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
     if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
     
-    IV <- lagged_new_values_train[, -i]
-    DV <- lagged_new_values_train[, i]
+    IV <- lagged_new_values_train[, -i, drop = FALSE]
+    DV <- lagged_new_values_train[,  i]
     
-    ts <- 2*h
-    ts <- max(ts, .2*length(DV))
+    # align by complete cases across DV + IV
+    train_block <- data.frame(DV = DV, IV)
+    cc <- stats::complete.cases(train_block)
+    train_block <- train_block[cc, , drop = FALSE]
     
-    # Dimension reduction NNS.reg to reduce variables
-    cor_threshold <- NNS.stack(IVs.train = IV,
-                               DV.train = DV,
-                               IVs.test = tail(IV, h),
-                               ts.test = ts, 
+    DVc <- as.numeric(train_block[, 1])
+    IVc <- as.matrix(train_block[, -1, drop = FALSE])
+    
+    # fallback if too little data after alignment
+    if (nrow(IVc) < 2) {
+      return(list(nns_IVs_results[, i, drop = TRUE], colnames(lagged_new_values_train)))
+    }
+    
+    ts <- as.integer(max(2*h, ceiling(0.2 * length(DVc))))
+    
+    # last h rows of full lagged panel for testing
+    IV_test <- as.matrix(tail(lagged_new_values[, -i, drop = FALSE], h))
+    if (anyNA(IV_test)) {
+      for (j in seq_len(ncol(IV_test))) {
+        if (anyNA(IV_test[, j])) {
+          fill_val <- utils::tail(IVc[, j], 1)
+          if (length(fill_val) == 0 || is.na(fill_val)) fill_val <- 0
+          IV_test[is.na(IV_test[, j]), j] <- fill_val
+        }
+      }
+    }
+    
+    # Dimension reduction + stack
+    cor_threshold <- NNS.stack(IVs.train = IVc,
+                               DV.train = DVc,
+                               IVs.test = IV_test,
+                               ts.test = ts,
                                folds = 1,
                                obj.fn = obj.fn,
                                objective = objective,
@@ -282,32 +297,26 @@ NNS.VAR <- function(variables,
                                dim.red.method = dim.red.method,
                                order = NULL, ncores = 1, stack = TRUE, status = FALSE)
     
-    
-    
+    # Relevance on aligned training block
     if(any(dim.red.method == "cor" | dim.red.method == "all")){
-      rel.1 <- abs(cor(cbind(DV, IV), method = "spearman"))
+      rel.1 <- abs(stats::cor(train_block, method = "spearman", use = "pairwise.complete.obs"))
     }
     
     if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
-      rel.2 <- NNS.dep(cbind(DV, IV))$Dependence
+      rel.2 <- NNS.dep(train_block)$Dependence
     }
     
     if(any(dim.red.method == "nns.caus" | dim.red.method == "all")){
-      rel.3 <- NNS.caus(cbind(DV, IV))
+      rel.3 <- NNS.caus(train_block)
     }
     
     if(dim.red.method == "cor") rel_vars <- rel.1[-1,1]
-    
     if(dim.red.method == "nns.dep") rel_vars <- rel.2[-1,1]
-    
     if(dim.red.method == "nns.caus") rel_vars <- rel.3[1,-1]
-    
     if(dim.red.method == "all") rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
     
     rel_vars <- names(rel_vars[rel_vars > cor_threshold$NNS.dim.red.threshold])
-    rel_vars <- rel_vars[rel_vars!=i]
-    rel_vars <- na.omit(rel_vars)
-    
+    rel_vars <- stats::na.omit(rel_vars)
     if(any(length(rel_vars)==0 | is.null(rel_vars))){
       rel_vars <- colnames(lagged_new_values_train)
     }
@@ -328,7 +337,6 @@ NNS.VAR <- function(variables,
   nns_DVs <- lapply(lists, `[[`, 1)
   relevant_vars <- lapply(lists, `[[`, 2)
   
-  
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
   nns_DVs <- head(nns_DVs, h)
   
@@ -342,9 +350,9 @@ NNS.VAR <- function(variables,
   multi <- uni <- numeric(length(colnames(RV)))
   
   for(i in 1:length(colnames(RV))){
-    if(length(na.omit(RV[,i]) > 0)){
+    if(length(stats::na.omit(RV[,i])) > 0){
       given_var <- unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]
-      observed_var <- do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]
+      observed_var <- do.call(rbind,(strsplit(stats::na.omit(RV[,i]), split = "_tau")))[,1]
       
       equal_tau <- sum(given_var==observed_var)
       unequal_tau <- sum(given_var!=observed_var)
@@ -357,10 +365,8 @@ NNS.VAR <- function(variables,
     }
   }
   
-  
   forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
   colnames(forecasts) <- colnames(variables)
-  
   
   colnames(nns_IVs_results) <- colnames(variables)
   rownames(nns_IVs_results) <- tail(dates, h)
@@ -371,7 +377,6 @@ NNS.VAR <- function(variables,
   rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(nns_IVs_interpolated_extrapolated))
   
   options(warn = oldw)
-  
   
   return( list("interpolated_and_extrapolated" = nns_IVs_interpolated_extrapolated,
                "relevant_variables" = data.frame(RV),
