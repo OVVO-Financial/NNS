@@ -18,7 +18,6 @@ NNS.stack(
   ts.test = NULL,
   folds = 5,
   order = NULL,
-  norm = NULL,
   method = c(1, 2),
   stack = TRUE,
   dim.red.method = "cor",
@@ -53,8 +52,6 @@ NNS.stack(
 \item{folds}{integer; \code{folds = 5} (default) Select the number of cross-validation folds.}
 
 \item{order}{options: (integer, "max", NULL); \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent, which is suggested for mixed continuous and discrete (unordered, ordered) data.}
-
-\item{norm}{options: ("std", "NNS", NULL); \code{NULL} (default) 3 settings offered: \code{NULL}, \code{"std"}, and \code{"NNS"}.  Selects the \code{norm} parameter in \link{NNS.reg}.}
 
 \item{method}{numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, which will reduce the dimension first, then find the optimal \code{n.best}.}
 
