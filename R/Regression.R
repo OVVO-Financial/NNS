@@ -696,7 +696,8 @@ NNS.reg = function (x, y,
       spline_fit <- stats::smooth.spline(regression.points[, x], regression.points[, y], spar = (dependence + 0.5)/2)
       regression.points$y <- spline_fit$y
       plot_estimate <- stats::predict(spline_fit, sorted_x$x)$y
-      estimate <- plot_estimate[orig.order]
+      estimate <- numeric(length(x))   # place predictions back in original positions
+      estimate[orig.order] <- plot_estimate
     } else estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
   }
   
