@@ -101,6 +101,7 @@
 #' @export
 
 
+
 NNS.VAR <- function(variables,
                     h,
                     tau = 1,
@@ -117,18 +118,7 @@ NNS.VAR <- function(variables,
   
   dates <- NULL
   
-  # --- helpers for data-driven blending ---
-  blend_weight_mse_opt <- function(y_val, u_val, m_val, shrink = NULL) {
-    d  <- u_val - m_val
-    num <- stats::cov(y_val - m_val, d, use = "complete.obs")
-    den <- stats::var(d, na.rm = TRUE)
-    w <- if (is.finite(num) && is.finite(den) && den > 0) num / den else 0.5
-    w <- max(0, min(1, w))               # clip to [0,1]
-    if (!is.null(shrink) && is.finite(shrink) && shrink > 0)
-      w <- (1 - shrink) * w + shrink * 0.5
-    w
-  }
-  
+  # --- helpers for data-driven blending via partial moments ---
   pool_logistic <- function(w_tau, w_val, gamma = 0.5, shrink = 0) {
     w_tau <- max(1e-8, min(1 - 1e-8, w_tau))
     w_val <- max(1e-8, min(1 - 1e-8, w_val))
@@ -140,28 +130,21 @@ NNS.VAR <- function(variables,
     max(0, min(1, w_star))
   }
   
-  # Fully dynamic gamma from validation only (no constants)
-  gamma_from_validation <- function(y_val, u_val, m_val, method = c("t", "wilcox")) {
-    method <- match.arg(method)
-    delta <- (y_val - u_val)^2 - (y_val - m_val)^2  # + => uni better
-    if (all(!is.finite(delta)) || length(delta) < 2L) return(0)  # no evidence
-    p <- tryCatch({
-      if (method == "t") {
-        m  <- mean(delta, na.rm = TRUE)
-        s  <- stats::sd(delta, na.rm = TRUE)
-        n  <- sum(is.finite(delta))
-        if (!is.finite(s) || s == 0 || n < 2) 1 else {
-          tstat <- m / (s / sqrt(n))
-          2 * (1 - stats::pt(abs(tstat), df = n - 1))
-        }
-      } else {
-        stats::wilcox.test(delta, mu = 0, alternative = "two.sided", exact = FALSE)$p.value
-      }
-    }, error = function(e) 1)
-    gamma <- 1 - p
-    if (!is.finite(gamma)) gamma <- 0
-    max(0, min(1, gamma))
+  # LPM/UPM-based validation weight and credibility (no constants)
+  # delta = (y - u)^2 - (y - m)^2 ; negative => univariate better, positive => multivariate better
+  compute_wval_gamma_lpm <- function(y_val, u_val, m_val) {
+    delta <- (y_val - u_val)^2 - (y_val - m_val)^2
+    L <- NNS::LPM.ratio(degree = 1, target = 0, variable = delta)  # standardized mass below 0
+    U <- NNS::UPM.ratio(degree = 1, target = 0, variable = delta)  # standardized mass above 0
+    if (!is.finite(L)) L <- 0
+    if (!is.finite(U)) U <- 0
+    S <- L + U
+    if (!is.finite(S) || S == 0) return(c(w_val = 0.5, gamma = 0))
+    w_val <- L / S                               # favor the side that wins more and by more
+    gamma <- abs(L - U) / S                      # credibility grows with separation
+    c(w_val = max(0, min(1, w_val)), gamma = max(0, min(1, gamma)))
   }
+  
   
   if(nowcast){
     year_mon <- zoo::as.yearmon(format(zoo::index(variables), '%Y-%m'))
@@ -227,28 +210,28 @@ NNS.VAR <- function(variables,
       variable_interpolation <- variables[,i]
       
       if(h_int > 0){
-        multi <- NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2],
-                           order = NULL, ncores = 1, status = FALSE, folds = 5,
-                           IVs.test = cbind(missing_index, missing_index), method = 1)$stack
+        multi <- NNS::NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2],
+                                order = NULL, ncores = 1, status = FALSE, folds = 5,
+                                IVs.test = cbind(missing_index, missing_index), method = 1)$stack
         variable_interpolation[missing_index] <- multi
       } else {
-        variable_interpolation <- NNS.reg(selected_variable[,1], selected_variable[,2], order = "max", ncores = 1,
-                                          point.est = index, plot = FALSE, point.only = TRUE)$Point.est
+        variable_interpolation <- NNS::NNS.reg(selected_variable[,1], selected_variable[,2], order = "max", ncores = 1,
+                                               point.est = index, plot = FALSE, point.only = TRUE)$Point.est
       }
     }
     
     if(h > 0){
-      periods <- NNS.seas(variable_interpolation, modulo = min(tau[[min(i, length(tau))]]),
-                          mod.only = FALSE, plot = FALSE)$periods
+      periods <- NNS::NNS.seas(variable_interpolation, modulo = min(tau[[min(i, length(tau))]]),
+                               mod.only = FALSE, plot = FALSE)$periods
       # guard: if no seasonality detected, allow NULL
       if (!is.numeric(periods) || length(periods) == 0L) periods <- NULL
       
-      b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
-                          obj.fn = obj.fn,
-                          objective = objective,
-                          print.trace = FALSE,
-                          ncores = 1,
-                          negative.values = min(variable_interpolation, na.rm = TRUE)<0, h = h)
+      b <- NNS::NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
+                               obj.fn = obj.fn,
+                               objective = objective,
+                               print.trace = FALSE,
+                               ncores = 1,
+                               negative.values = min(variable_interpolation, na.rm = TRUE)<0, h = h)
       
       variable_extrapolation <- b$results
     } else variable_extrapolation <- NULL
@@ -300,118 +283,117 @@ NNS.VAR <- function(variables,
     status <- FALSE
   }
   
-  # ==== FIXED MULTIVARIATE BLOCK (shape alignment + clean IVs.test + validation weights) ====
-  lists <- foreach(i = 1:ncol(variables),
-                   .packages = c("NNS", "data.table"),
-                   .export   = c("blend_weight_mse_opt","pool_logistic","gamma_from_validation",
-                                 "nns_IVs_interpolated_extrapolated","tau","obj.fn","objective",
-                                 "dim.red.method","h","lagged_new_values","nns_IVs_results")) %dopar%{
-                                   if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
-                                   
-                                   IV <- lagged_new_values_train[, -i, drop = FALSE]
-                                   DV <- lagged_new_values_train[,  i]
-                                   
-                                   # align by complete cases across DV + IV
-                                   train_block <- data.frame(DV = DV, IV)
-                                   cc <- stats::complete.cases(train_block)
-                                   train_block <- train_block[cc, , drop = FALSE]
-                                   
-                                   DVc <- as.numeric(train_block[, 1])                    # vector
-                                   IVc <- as.matrix(train_block[, -1, drop = FALSE])      # matrix
-                                   
-                                   # Guard: if no usable rows, fall back to univariate forecast for this target
-                                   if (nrow(IVc) < 2) {
-                                     return(list(nns_IVs_results[, i, drop = TRUE], colnames(lagged_new_values_train), 0.5, 0))
-                                   }
-                                   
-                                   # ts.test must be an integer; base it on the CLEAN DV length
-                                   ts <- as.integer( max(2*h, ceiling(0.2 * length(DVc))) )
-                                   
-                                   # ---- TEST BLOCK: last h rows of the FULL lagged panel (future slice) ----
-                                   IV_test <- as.matrix(tail(lagged_new_values[, -i, drop = FALSE], h))
-                                   if (anyNA(IV_test)) {
-                                     for (j in seq_len(ncol(IV_test))) {
-                                       if (anyNA(IV_test[, j])) {
-                                         fill_val <- utils::tail(IVc[, j], 1)
-                                         if (length(fill_val) == 0 || is.na(fill_val)) fill_val <- 0
-                                         IV_test[is.na(IV_test[, j]), j] <- fill_val
-                                       }
-                                     }
-                                   }
-                                   
-                                   # ---- Dimension reduction + stacked predictions (future horizon) ----
-                                   cor_threshold <- NNS.stack(IVs.train = IVc,
-                                                              DV.train  = DVc,
-                                                              IVs.test  = IV_test,
-                                                              ts.test   = ts,
-                                                              folds = 1,
-                                                              obj.fn = obj.fn,
-                                                              objective = objective,
-                                                              method = c(1,2),
-                                                              dim.red.method = dim.red.method,
-                                                              order = NULL, ncores = 1, stack = TRUE, status = FALSE)
-                                   
-                                   # Relevance on aligned training block
-                                   if(any(dim.red.method == "cor" | dim.red.method == "all")){
-                                     rel.1 <- abs(stats::cor(train_block, method = "spearman", use = "pairwise.complete.obs"))
-                                   }
-                                   if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
-                                     rel.2 <- NNS.dep(train_block)$Dependence
-                                   }
-                                   if(any(dim.red.method == "nns.caus" | dim.red.method == "all")){
-                                     rel.3 <- NNS.caus(train_block)
-                                   }
-                                   
-                                   if(dim.red.method == "cor")      rel_vars_vec <- rel.1[-1,1]
-                                   if(dim.red.method == "nns.dep")  rel_vars_vec <- rel.2[-1,1]
-                                   if(dim.red.method == "nns.caus") rel_vars_vec <- rel.3[1,-1]
-                                   if(dim.red.method == "all")      rel_vars_vec <- ((rel.1+rel.2+rel.3)/3)[1, -1]
-                                   
-                                   rel_vars <- names(rel_vars_vec[rel_vars_vec > cor_threshold$NNS.dim.red.threshold])
-                                   rel_vars <- stats::na.omit(rel_vars)
-                                   if(any(length(rel_vars)==0 | is.null(rel_vars))){
-                                     rel_vars <- colnames(lagged_new_values_train)
-                                   }
-                                   
-                                   nns_DVs <- cor_threshold$stack
-                                   nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
-                                   
-                                   # --- Validation predictions for weight learning ---
-                                   # Multivariate validation: stack on last ts in-sample rows
-                                   m_val <- NNS.stack(
-                                     IVs.train = IVc, DV.train = DVc,
-                                     IVs.test  = tail(IVc, ts),
-                                     ts.test   = ts, folds = 1,
-                                     obj.fn = obj.fn, objective = objective,
-                                     method = c(1, 2), dim.red.method = dim.red.method,
-                                     order = NULL, ncores = 1, stack = TRUE, status = FALSE
-                                   )$stack
-                                   
-                                   # Univariate validation from imputed target series:
-                                   x_i <- nns_IVs_interpolated_extrapolated[, i]
-                                   periods_val <- NNS.seas(x_i, modulo = min(tau[[min(i, length(tau))]]),
-                                                           mod.only = FALSE, plot = FALSE)$periods
-                                   if (!is.numeric(periods_val) || length(periods_val) == 0L) periods_val <- NULL
-                                   
-                                   u_val <- NNS.ARMA.optim(
-                                     variable = head(x_i, length(x_i) - ts),
-                                     seasonal.factor = periods_val,
-                                     obj.fn = obj.fn, objective = objective,
-                                     print.trace = FALSE, ncores = 1,
-                                     negative.values = (min(x_i, na.rm = TRUE) < 0),
-                                     h = ts
-                                   )$results
-                                   
-                                   y_val <- tail(DVc, ts)
-                                   
-                                   # dynamic, no-constant gamma from validation
-                                   gamma_i_val <- gamma_from_validation(y_val, u_val, m_val, method = "wilcox")
-                                   
-                                   # validation-based weight (still clipped/shrunk internally if requested; set shrink=NULL for pure)
-                                   w_val_i <- blend_weight_mse_opt(y_val, u_val, m_val, shrink = NULL)
-                                   
-                                   list(nns_DVs, rel_vars, w_val_i, gamma_i_val)
-                                 }
+  # ==== MULTIVARIATE BLOCK (alignment + NA-free IVs.test + LPM/UPM weights) ====
+  lists <- foreach::foreach(i = 1:ncol(variables),
+                            .packages = c("NNS", "data.table"),
+                            .export   = c("pool_logistic","compute_wval_gamma_lpm",
+                                          "nns_IVs_interpolated_extrapolated","tau","obj.fn","objective",
+                                          "dim.red.method","h","lagged_new_values","nns_IVs_results")) %dopar%{
+                                            if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
+                                            
+                                            IV <- lagged_new_values_train[, -i, drop = FALSE]
+                                            DV <- lagged_new_values_train[,  i]
+                                            
+                                            # align by complete cases across DV + IV
+                                            train_block <- data.frame(DV = DV, IV)
+                                            cc <- stats::complete.cases(train_block)
+                                            train_block <- train_block[cc, , drop = FALSE]
+                                            
+                                            DVc <- as.numeric(train_block[, 1])                    # vector
+                                            IVc <- as.matrix(train_block[, -1, drop = FALSE])      # matrix
+                                            
+                                            # Guard: if no usable rows, fall back to univariate forecast for this target
+                                            if (nrow(IVc) < 2) {
+                                              return(list(nns_IVs_results[, i, drop = TRUE], colnames(lagged_new_values_train), 0.5, 0))
+                                            }
+                                            
+                                            # ts.test must be an integer; base it on the CLEAN DV length
+                                            ts <- as.integer( max(2*h, ceiling(0.2 * length(DVc))) )
+                                            
+                                            # ---- TEST BLOCK: last h rows of the FULL lagged panel (future slice) ----
+                                            IV_test <- as.matrix(tail(lagged_new_values[, -i, drop = FALSE], h))
+                                            if (anyNA(IV_test)) {
+                                              for (j in seq_len(ncol(IV_test))) {
+                                                if (anyNA(IV_test[, j])) {
+                                                  fill_val <- utils::tail(IVc[, j], 1)
+                                                  if (length(fill_val) == 0 || is.na(fill_val)) fill_val <- 0
+                                                  IV_test[is.na(IV_test[, j]), j] <- fill_val
+                                                }
+                                              }
+                                            }
+                                            
+                                            # ---- Dimension reduction + stacked predictions (future horizon) ----
+                                            cor_threshold <- NNS::NNS.stack(IVs.train = IVc,
+                                                                            DV.train  = DVc,
+                                                                            IVs.test  = IV_test,
+                                                                            ts.test   = ts,
+                                                                            folds = 1,
+                                                                            obj.fn = obj.fn,
+                                                                            objective = objective,
+                                                                            method = c(1,2),
+                                                                            dim.red.method = dim.red.method,
+                                                                            order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+                                            
+                                            # Relevance on aligned training block
+                                            if(any(dim.red.method == "cor" | dim.red.method == "all")){
+                                              rel.1 <- abs(stats::cor(train_block, method = "spearman", use = "pairwise.complete.obs"))
+                                            }
+                                            if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
+                                              rel.2 <- NNS::NNS.dep(train_block)$Dependence
+                                            }
+                                            if(any(dim.red.method == "nns.caus" | dim.red.method == "all")){
+                                              rel.3 <- NNS::NNS.caus(train_block)
+                                            }
+                                            
+                                            if(dim.red.method == "cor")      rel_vars_vec <- rel.1[-1,1]
+                                            if(dim.red.method == "nns.dep")  rel_vars_vec <- rel.2[-1,1]
+                                            if(dim.red.method == "nns.caus") rel_vars_vec <- rel.3[1,-1]
+                                            if(dim.red.method == "all")      rel_vars_vec <- ((rel.1+rel.2+rel.3)/3)[1, -1]
+                                            
+                                            rel_vars <- names(rel_vars_vec[rel_vars_vec > cor_threshold$NNS.dim.red.threshold])
+                                            rel_vars <- stats::na.omit(rel_vars)
+                                            if(any(length(rel_vars)==0 | is.null(rel_vars))){
+                                              rel_vars <- colnames(lagged_new_values_train)
+                                            }
+                                            
+                                            nns_DVs <- cor_threshold$stack
+                                            nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
+                                            
+                                            # --- Validation predictions for weight learning ---
+                                            # Multivariate validation: stack on last ts in-sample rows
+                                            m_val <- NNS::NNS.stack(
+                                              IVs.train = IVc, DV.train = DVc,
+                                              IVs.test  = utils::tail(IVc, ts),
+                                              ts.test   = ts, folds = 1,
+                                              obj.fn = obj.fn, objective = objective,
+                                              method = c(1, 2), dim.red.method = dim.red.method,
+                                              order = NULL, ncores = 1, stack = TRUE, status = FALSE
+                                            )$stack
+                                            
+                                            # Univariate validation from imputed target series:
+                                            x_i <- nns_IVs_interpolated_extrapolated[, i]
+                                            periods_val <- NNS::NNS.seas(x_i, modulo = min(tau[[min(i, length(tau))]]),
+                                                                         mod.only = FALSE, plot = FALSE)$periods
+                                            if (!is.numeric(periods_val) || length(periods_val) == 0L) periods_val <- NULL
+                                            
+                                            u_val <- NNS::NNS.ARMA.optim(
+                                              variable = utils::head(x_i, length(x_i) - ts),
+                                              seasonal.factor = periods_val,
+                                              obj.fn = obj.fn, objective = objective,
+                                              print.trace = FALSE, ncores = 1,
+                                              negative.values = (min(x_i, na.rm = TRUE) < 0),
+                                              h = ts
+                                            )$results
+                                            
+                                            y_val <- utils::tail(DVc, ts)
+                                            
+                                            # LPM/UPM-based validation weight and credibility (no constants)
+                                            wg <- compute_wval_gamma_lpm(y_val, u_val, m_val)
+                                            w_val_i   <- wg[["w_val"]]
+                                            gamma_val <- wg[["gamma"]]
+                                            
+                                            list(nns_DVs, rel_vars, w_val_i, gamma_val)
+                                          }
   
   if(num_cores > 1) {
     doParallel::stopImplicitCluster()
@@ -422,11 +404,11 @@ NNS.VAR <- function(variables,
   
   nns_DVs <- lapply(lists, `[[`, 1)
   relevant_vars <- lapply(lists, `[[`, 2)
-  w_val_list   <- sapply(lists, `[[`, 3)
-  gamma_v_list <- sapply(lists, `[[`, 4)
+  w_val_list   <- as.numeric(sapply(lists, `[[`, 3))
+  gamma_v_list <- as.numeric(sapply(lists, `[[`, 4))
   
   nns_DVs <- data.frame(do.call(cbind, nns_DVs))
-  nns_DVs <- head(nns_DVs, h)
+  nns_DVs <- utils::head(nns_DVs, h)
   
   RV <- lapply(relevant_vars, function(x) if(length(x)==0){NA} else {x})
   
@@ -448,11 +430,11 @@ NNS.VAR <- function(variables,
       # tau-based heuristic
       w_tau <- if(naive.weights) 0.5 else equal_tau/(equal_tau + unequal_tau)
       
-      # validation-based weight and fully dynamic gamma
+      # validation-based weight and fully dynamic gamma (from LPM/UPM)
       w_val_i <- w_val_list[i]
       gamma_i <- gamma_v_list[i]
       
-      # pool in log-odds; no extra shrink to avoid new constants
+      # pool in log-odds; no extra shrink to avoid constants
       w_star  <- pool_logistic(w_tau, w_val_i, gamma = gamma_i, shrink = 0)
       
       uni[i]  <- w_star
