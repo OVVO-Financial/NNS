@@ -106,13 +106,13 @@ signed_from_cp <- function(cp){
   return(raw_val)
 }
 
-# helper: cap infinite values at 100 (preserves sign) and apply tanh normalization; vectorized and scalar-safe.
-cap_inf100_scalar <- function(v, cap = 100, scaling_factor = 2){  # switched to scaling_factor=2 to match log-ratio normalization
+# helper: cap infinite values at 100 (preserves sign) 
+cap_inf100_scalar <- function(v, cap = 100){  
   v2 <- v
   v2[is.infinite(v2)] <- sign(v2[is.infinite(v2)]) * cap
   v2 <- ifelse(abs(v2) > cap, sign(v2) * cap, v2)
   return(v2)
-#  return(tanh(v2 / scaling_factor))
+
 }
 
 
