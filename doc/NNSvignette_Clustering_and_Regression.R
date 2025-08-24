@@ -125,6 +125,106 @@ NNS.reg(cbind(x, x), y,
         residual.plot = TRUE,  
         ncores = 1, confidence.interval = .95)
 
+## ----uniimpute, eval=FALSE----------------------------------------------------
+#  set.seed(123)
+#  
+#  # Univariate predictor with nonlinear signal
+#  n <- 400
+#  x <- sort(runif(n, -3, 3))
+#  y <- sin(x) + 0.2 * x^2 + rnorm(n, 0, 0.25)
+#  
+#  # Induce ~25% MCAR missingness in y
+#  miss <- rbinom(n, 1, 0.25) == 1
+#  y_mis <- y
+#  y_mis[miss] <- NA
+#  
+#  # ---- Increasing dimensions trick ----
+#  # Duplicate x so the distance operates in a 2D space: cbind(x, x).
+#  # This sharpens nearest-neighbor selection even in a nominally univariate setting.
+#  x2_train <- cbind(x[!miss], x[!miss])
+#  x2_miss  <- cbind(x[miss],  x[miss])
+#  
+#  # 1-NN donor imputation with NNS.reg
+#  y_hat_uni <- NNS::NNS.reg(
+#    x         = x2_train,             # predictors (duplicated x)
+#    y         = y[!miss],             # observed responses
+#    point.est = x2_miss,              # rows to impute
+#    order     = "max",                # dependence-maximizing order
+#    n.best    = 1,                    # 1-NN donor
+#    plot      = FALSE
+#  )$Point.est
+#  
+#  # Fill back
+#  y_completed_uni <- y_mis
+#  y_completed_uni[miss] <- y_hat_uni
+#  
+#  # Plot observed vs imputed (NNS 1-NN)
+#  plot(x, y, pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
+#       xlab = "x", ylab = "y", main = "NNS 1-NN Imputation")
+#  points(x[miss], y_hat_uni, col = "red", pch = 15, cex = 1.3)
+#  
+#  legend("topleft",
+#         legend = c("Observed", "Imputed (NNS 1-NN)"),
+#         col    = c("steelblue", "red"),
+#         pch    = c(1, 15),
+#         pt.lwd = c(2, NA),
+#         bty    = "n")
+
+## ----multiimpute, eval=FALSE--------------------------------------------------
+#  set.seed(123)
+#  
+#  # Multivariate predictors with nonlinear & interaction structure
+#  n <- 800
+#  X <- cbind(
+#    x1 = rnorm(n),
+#    x2 = runif(n, -2, 2),
+#    x3 = rnorm(n, 0, 1)
+#  )
+#  
+#  f <- function(x1, x2, x3) 1.1*x1 - 0.8*x2 + 0.5*x3 + 0.6*x1*x2 - 0.4*x2*x3 + 0.3*sin(1.3*x1)
+#  y <- f(X[,1], X[,2], X[,3]) + rnorm(n, 0, 0.4)
+#  
+#  # Induce ~30% MCAR missingness in y
+#  miss <- rbinom(n, 1, 0.30) == 1
+#  y_mis <- y
+#  y_mis[miss] <- NA
+#  
+#  # Training (observed) vs rows to impute
+#  X_obs <- X[!miss, , drop = FALSE]
+#  y_obs <- y[!miss]
+#  X_mis <- X[ miss, , drop = FALSE]
+#  
+#  # 1-NN donor imputation with NNS.reg
+#  y_hat_mv <- NNS::NNS.reg(
+#    x         = X_obs,     # all observed predictors
+#    y         = y_obs,     # observed responses
+#    point.est = X_mis,     # rows to impute
+#    order     = "max",     # dependence-maximizing order
+#    n.best    = 1,         # 1-NN donor
+#    plot      = FALSE
+#  )$Point.est
+#  
+#  # Completed vector
+#  y_completed_mv <- y_mis
+#  y_completed_mv[miss] <- y_hat_mv
+#  
+#  # Plot observed vs imputed (multivariate, NNS 1-NN)
+#  plot(seq_along(y), y,
+#       pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
+#       xlab = "Observation index", ylab = "y",
+#       main = "NNS 1-NN Multivariate Imputation")
+#  
+#  # Overlay imputed values
+#  points(which(miss), y_hat_mv, pch = 15, col = "red", cex = 1.2)
+#  
+#  # Legend
+#  legend("topleft",
+#         legend = c("Observed", "Imputed (NNS 1-NN)"),
+#         col    = c("steelblue", "red"),
+#         pch    = c(1, 15),
+#         pt.lwd = c(2, NA),
+#         bty    = "n")
+
 ## ----smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'-----
 NNS.reg(x, y, smooth = T)
 
