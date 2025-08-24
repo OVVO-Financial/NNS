@@ -125,6 +125,9 @@ NNS.reg(cbind(x, x), y,
         residual.plot = TRUE,  
         ncores = 1, confidence.interval = .95)
 
+## ----smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'-----
+NNS.reg(x, y, smooth = T)
+
 ## ----uniimpute, eval=FALSE----------------------------------------------------
 #  set.seed(123)
 #  
@@ -224,9 +227,6 @@ NNS.reg(cbind(x, x), y,
 #         pch    = c(1, 15),
 #         pt.lwd = c(2, NA),
 #         bty    = "n")
-
-## ----smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'-----
-NNS.reg(x, y, smooth = T)
 
 ## ----threads, echo = FALSE----------------------------------------------------
 Sys.setenv("OMP_THREAD_LIMIT" = "")
