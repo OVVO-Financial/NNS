@@ -70,100 +70,138 @@ NNS.ANOVA <- function(
     plot = TRUE,
     robust = FALSE
 ){
+  # normalize tails to lower case for downstream functions
   tails <- tolower(tails)
-  if(!any(tails%in%c("left","right","both"))){
+  if (!any(tails %in% c("left","right","both"))) {
     stop("Please select tails from 'left', 'right', or 'both'")
   }
-  if(!missing(treatment)){
+  
+  if (!missing(treatment)) {
     # with treatment
-    if(any(class(control)%in%c("tbl","data.table"))) control <- as.vector(unlist(control))
+    if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
+    if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
     
-    if(any(class(treatment)%in%c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
-    
-    if(robust){
+    if (robust) {
+      # ---------------------------
+      # Robust path: resample pairs
+      # ---------------------------
       l <- min(length(treatment), length(control))
-      treatment_p <- replicate(100, sample.int(l, replace = TRUE))
-      treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
+      treatment_p      <- replicate(100, sample.int(l, replace = TRUE))
+      treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = FALSE)
       treatment_matrix <- cbind(treatment[treatment_p[,1]], treatment_matrix[, rev(seq_len(ncol(treatment_matrix)))])
-      control_matrix <- matrix(control[treatment_p], ncol = dim(treatment_p)[2], byrow = F)
-      full_matrix <- cbind(control[treatment_p[,1]], control_matrix, treatment[treatment_p[,1]], treatment_matrix)
+      control_matrix   <- matrix(control[treatment_p],   ncol = dim(treatment_p)[2], byrow = FALSE)
+      full_matrix      <- cbind(control[treatment_p[,1]], control_matrix, treatment[treatment_p[,1]], treatment_matrix)
       
       nns.certainties <- sapply(
-        1:ncol(control_matrix), 
-        function(g) NNS.ANOVA.bin(control_matrix[,g], treatment_matrix[,g], means.only = means.only, medians = medians, plot = FALSE)$Certainty
-      )
-      
-      cer_lower_CI <- LPM.VaR(.025, 1, nns.certainties)
-      cer_upper_CI <- UPM.VaR(.025, 1, nns.certainties)
-      
-      robust_estimate <- gravity(nns.certainties)
-      
-      if(plot){
-        original.par <- par(no.readonly = TRUE)
-        par(mfrow = c(1, 2))
-        hist(nns.certainties, main = "NNS Certainty")
-        abline(v = robust_estimate, col = 'red', lwd = 3)
-        mtext("Robust Certainty Estimate", side = 3, col = "red", at = robust_estimate)
-        abline(v =  cer_lower_CI, col = "red", lwd = 2, lty = 3)
-        abline(v =  cer_upper_CI , col = "red", lwd = 2, lty = 3)
-      }
-      return(
-        as.list(c(unlist(
-          NNS.ANOVA.bin(
-            control, 
-            treatment,
-            means.only = means.only,
-            medians = medians,
-            confidence.interval = confidence.interval, 
-            plot = plot, 
-            tails = tails, 
-            par = original.par
-          )
-        ),
-        "Robust Certainty Estimate" = robust_estimate,
-        "Lower 95% CI" = cer_lower_CI,
-        "Upper 95% CI" = cer_upper_CI))
-      )
-    } else {
-      return(
-        NNS.ANOVA.bin(
-          control, 
-          treatment, 
+        1:ncol(control_matrix),
+        function(g) NNS.ANOVA.bin(
+          control_matrix[, g],
+          treatment_matrix[, g],
           means.only = means.only,
           medians = medians,
-          confidence.interval = confidence.interval, 
-          plot = plot, 
+          plot = FALSE
+        )$Certainty
+      )
+      
+      # Robust point estimate of certainty
+      robust_estimate <- gravity(nns.certainties)
+      
+      # --- CI for robust certainty, honoring confidence.interval and tails
+      alpha <- if (tails == "both") (1 - confidence.interval) / 2 else 1 - confidence.interval
+      
+      # Use degree = 0 to obtain empirical quantiles of the certainty samples
+      cer_lower_CI <- if (tails %in% c("both","left"))  LPM.VaR(alpha, 0, nns.certainties) else NA_real_
+      cer_upper_CI <- if (tails %in% c("both","right")) UPM.VaR(alpha, 0, nns.certainties) else NA_real_
+      
+      # optional plotting (restore red lines and red label)
+      if (plot) {
+        original.par <- par(no.readonly = TRUE); on.exit(par(original.par), add = TRUE)
+        par(mfrow = c(1, 2))
+        hist(nns.certainties, main = "NNS Certainty")
+        abline(v = robust_estimate, col = "red", lwd = 3)
+        if (tails %in% c("both","left"))  abline(v = cer_lower_CI, col = "red", lwd = 2, lty = 3)
+        if (tails %in% c("both","right")) abline(v = cer_upper_CI, col = "red", lwd = 2, lty = 3)
+        mtext("Robust Certainty Estimate", side = 3, at = robust_estimate, col = "red")
+      }
+      
+      # Compute main ANOVA (non-robust) results but DO NOT pass 'par'
+      base <- NNS.ANOVA.bin(
+        control,
+        treatment,
+        means.only = means.only,
+        medians = medians,
+        confidence.interval = confidence.interval,
+        plot = plot,
+        tails = tails
+      )
+      
+      lvl <- round(100 * confidence.interval)
+      lower_label <- if (tails == "both") paste0("Lower ", lvl, "% CI") else paste0("Lower ", lvl, "% bound")
+      upper_label <- if (tails == "both") paste0("Upper ", lvl, "% CI") else paste0("Upper ", lvl, "% bound")
+      
+      # Build return object to match prior shape (flatten base then append)
+      ci_vals  <- numeric(0); ci_names <- character(0)
+      if (tails %in% c("both","left"))  { ci_vals <- c(ci_vals, cer_lower_CI); ci_names <- c(ci_names, lower_label) }
+      if (tails %in% c("both","right")) { ci_vals <- c(ci_vals, cer_upper_CI); ci_names <- c(ci_names, upper_label) }
+      if (length(ci_vals)) names(ci_vals) <- ci_names
+      
+      return(
+        as.list(c(
+          unlist(base),
+          "Robust Certainty Estimate" = robust_estimate,
+          ci_vals
+        ))
+      )
+      
+    } else {
+      # non-robust, binary ANOVA (already honors confidence.interval & tails)
+      return(
+        NNS.ANOVA.bin(
+          control,
+          treatment,
+          means.only = means.only,
+          medians = medians,
+          confidence.interval = confidence.interval,
+          plot = plot,
           tails = tails
         )
       )
     }
   }
   
-  # without treatment
-  if(is.list(control)) n <- length(control) else n <- ncol(control)
+  # ------------------------------
+  # Without treatment (k >= 2 vars)
+  # ------------------------------
+  if (is.list(control)) n <- length(control) else n <- ncol(control)
+  if (is.null(n) || n == 1)
+    stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
   
-  if(is.null(n)) stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
-  
-  if(n == 1) stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
-  
-  if(n >= 2){
-    if(any(class(control) %in% c("tbl","data.table"))){
+  if (n >= 2) {
+    if (any(class(control) %in% c("tbl","data.table"))) {
       A <- as.data.frame(control)
     } else {
-      if(any(class(control) %in% "list")) A <- do.call(cbind, lapply(control, `length<-`, max(lengths(control)))) else A <- control
+      if (any(class(control) %in% "list")) {
+        A <- do.call(cbind, lapply(control, `length<-`, max(lengths(control))))
+      } else {
+        A <- control
+      }
     }
   } else {
     A <- control
   }
   
-  if(medians) mean.of.means <- mean(apply(A, 2, function(i) median(i, na.rm = TRUE))) else mean.of.means <- mean(colMeans(A, na.rm = T))
+  if (medians) {
+    mean.of.means <- mean(apply(A, 2, function(i) median(i, na.rm = TRUE)))
+  } else {
+    mean.of.means <- mean(colMeans(A, na.rm = TRUE))
+  }
   
-  if(!pairwise){
-    #Continuous CDF for each variable from Mean of Means
-    if(medians){
-      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, na.omit(unlist(A[ , b]))))
+  if (!pairwise) {
+    # Continuous CDF for each variable from grand statistic
+    if (medians) {
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, na.omit(unlist(A[, b]))))
     } else {
-      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[ , b]))))
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[, b]))))
     }
     
     lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
@@ -171,13 +209,13 @@ NNS.ANOVA <- function(
     lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
     upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
     
-    raw.certainties <- list(n - 1)
-    for(i in 1:(n - 1)){
+    raw.certainties <- vector("list", n - 1)
+    for (i in 1:(n - 1)) {
       raw.certainties[[i]] <- sapply(
-        (i + 1) : n, 
+        (i + 1):n,
         function(b) NNS.ANOVA.bin(
-          na.omit(unlist(A[ , i])),
-          na.omit(unlist(A[ , b])),
+          na.omit(unlist(A[, i])),
+          na.omit(unlist(A[, b])),
           means.only = means.only,
           medians = medians,
           mean.of.means = mean.of.means,
@@ -190,51 +228,57 @@ NNS.ANOVA <- function(
       )
     }
     
-    #Certainty associated with samples
+    # Certainty associated with samples
     NNS.ANOVA.rho <- mean(unlist(raw.certainties))
     
-    #Graphs
-    if(plot){
+    # Graphs
+    if (plot) {
       boxplot(
-        A, 
-        las = 2,  
-        ylab = "Variable", 
-        horizontal = TRUE, 
-        main = "NNS ANOVA", 
+        A,
+        las = 2,
+        ylab = "Variable",
+        horizontal = TRUE,
+        main = "NNS ANOVA",
         col = c('steelblue', rainbow(n - 1))
       )
-      #For ANOVA Visualization
       abline(v = mean.of.means, col = "red", lwd = 4)
-      if(medians) mtext("Grand Median", side = 3,col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+      if (medians) mtext("Grand Median", side = 3, col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3, col = "red", at = mean.of.means)
     }
     return(c("Certainty" = NNS.ANOVA.rho))
   }
   
-  raw.certainties <- list(n - 1)
-  for(i in 1:(n - 1)){
+  # pairwise = TRUE: return symmetric matrix of certainties
+  raw.certainties <- vector("list", n - 1)
+  for (i in 1:(n - 1)) {
     raw.certainties[[i]] <- sapply(
-      (i + 1) : n, 
-      function(b) NNS.ANOVA.bin(na.omit(unlist(A[ , i])), na.omit(unlist(A[ , b])), means.only = means.only, medians = medians, plot = FALSE)$Certainty
+      (i + 1):n,
+      function(b) NNS.ANOVA.bin(
+        na.omit(unlist(A[, i])),
+        na.omit(unlist(A[, b])),
+        means.only = means.only,
+        medians = medians,
+        plot = FALSE
+      )$Certainty
     )
   }
   
-  certainties <- matrix(NA, n, n)
+  certainties <- matrix(NA_real_, n, n)
   certainties[lower.tri(certainties, diag = FALSE)] <- unlist(raw.certainties)
   diag(certainties) <- 1
   certainties <- pmax(certainties, t(certainties), na.rm = TRUE)
   colnames(certainties) <- rownames(certainties) <- colnames(A)
   
-  if(plot){
+  if (plot) {
     boxplot(
-      A, 
-      las = 2, 
-      ylab = "Variable", 
-      horizontal = TRUE, 
-      main = "ANOVA", 
+      A,
+      las = 2,
+      ylab = "Variable",
+      horizontal = TRUE,
+      main = "ANOVA",
       col = c('steelblue', rainbow(n - 1))
     )
     abline(v = mean.of.means, col = "red", lwd = 4)
-    if(medians) mtext("Grand Median", side = 3,col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3,col = "red", at = mean.of.means)
+    if (medians) mtext("Grand Median", side = 3, col = "red", at = mean.of.means) else mtext("Grand Mean", side = 3, col = "red", at = mean.of.means)
   }
   return(certainties)
 }
