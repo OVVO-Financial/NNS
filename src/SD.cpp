@@ -200,6 +200,14 @@ IntegerMatrix sd_dom_matrix_prefix_parallel(const NumericMatrix& X, int degree, 
   return D;
 }
 
+
+// small inline helper: repeated multiplication for integer exponents
+static inline double repeatMultiplication(double value, int n) {
+  double result = 1.0;
+  for (int i = 0; i < n; ++i) result *= value;
+  return result;
+}
+
 // =====================================================================
 // Export: Efficient set (LPM(1, tmax, ·) order + single scan)
 // =====================================================================
@@ -217,9 +225,38 @@ CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, s
   std::vector<ColPre> cols; cols.reserve(n);
   for (int j=0;j<n;++j) cols.push_back(precompute_col(X, j));
   
-  // order by LPM(1, tmax, ·) = tmax - mean  (same order)
-  std::vector<int> ord(n); for(int j=0;j<n;++j) ord[j]=j;
-  std::sort(ord.begin(), ord.end(), [&](int a, int b){ return (tmax - cols[a].mean) < (tmax - cols[b].mean); });
+  // ===== order by LPM(degree, tmax, ·) =====
+  std::vector<double> lpm_vals(n, 0.0);
+  std::vector<int> non_na_counts(n, 0);
+  
+  // compute LPM_r for each column (simple O(nrows * ncols) pass)
+  for (int j = 0; j < n; ++j) {
+    double sum = 0.0;
+    int cnt = 0;
+    for (int i = 0; i < X.nrow(); ++i) {
+      double xv = X(i, j);
+      if (!NumericVector::is_na(xv)) {
+        double diff = tmax - xv;
+        if (diff > 0.0) {
+          // use integer repeated multiplication (faster/more accurate than std::pow for integer exponents)
+          sum += repeatMultiplication(diff, degree);
+        }
+        cnt++;
+      }
+    }
+    if (cnt > 0) lpm_vals[j] = sum / (double) cnt;
+    else lpm_vals[j] = R_PosInf;   // push all-NA columns to the end
+    non_na_counts[j] = cnt;
+  }
+  
+  // Build index vector and sort by lpm_vals (ascending: lower LPM earlier)
+  std::vector<int> ord(n);
+  for (int j = 0; j < n; ++j) ord[j] = j;
+  std::sort(ord.begin(), ord.end(),
+            [&](int a, int b) {
+              if (lpm_vals[a] == lpm_vals[b]) return a < b; // stable tie-break by index
+              return lpm_vals[a] < lpm_vals[b];
+            });
   
   // build dominance matrix in the sorted order
   NumericMatrix Xo(X.nrow(), n); CharacterVector names_sorted(n);
