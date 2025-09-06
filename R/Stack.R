@@ -90,7 +90,6 @@ NNS.stack <- function(IVs.train,
                       ncores = NULL){
   
   if(sum(is.na(cbind(IVs.train,DV.train))) > 0) stop("You have some missing values, please address.")
-  
   if(is.null(obj.fn)) stop("Please provide an objective function")
   
   if(balance && is.null(type)) warning("type = 'CLASS' selected due to balance = TRUE.")
@@ -118,7 +117,7 @@ NNS.stack <- function(IVs.train,
   objective <- tolower(objective)
   
   if(!is.null(type) && type=="class"){
-    DV.train <- as.numeric(factor(DV.train)) 
+    DV.train <- as.numeric(factor(DV.train))
     smoothness <- FALSE
   } else {
     smoothness <- TRUE
@@ -126,7 +125,6 @@ NNS.stack <- function(IVs.train,
   }
   
   n <- ncol(IVs.train)
-  
   l <- floor(sqrt(length(IVs.train[ , 1])))
   
   if(is.null(IVs.test)){
@@ -146,8 +144,12 @@ NNS.stack <- function(IVs.train,
   best.nns.ord <- vector(mode = "list", folds)
   
   if(is.null(colnames(IVs.train))){
-    colnames.list <- lapply(1 : dim(IVs.train)[2], function(i) paste0("X", i))
+    colnames.list <- lapply(1 : ncol(IVs.train), function(i) paste0("X", i))
     colnames(IVs.test) <- colnames(IVs.train) <- as.character(colnames.list)
+  } else {
+    # FIX: if names exist on training and dimensions match, mirror them on the test matrix
+    if(!is.null(IVs.test) && ncol(IVs.test) == ncol(IVs.train))
+      colnames(IVs.test) <- colnames(IVs.train)
   }
   
   if(2 %in% method && dim(IVs.train)[2]>1){
@@ -179,7 +181,6 @@ NNS.stack <- function(IVs.train,
     if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
     if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
     
-    
     CV.IVs.test <- data.frame(IVs.train[test.set, ])
     if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
     if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
@@ -192,7 +193,7 @@ NNS.stack <- function(IVs.train,
     
     if(balance){
       DV.train <- as.numeric(as.factor(DV.train))
-
+      
       CV.DV.train <- DV.train[c(-test.set)]
       CV.DV.test <- DV.train[c(test.set)]
       
@@ -205,9 +206,7 @@ NNS.stack <- function(IVs.train,
       colnames(training) <- c(colnames(CV.IVs.train), names(CV.DV.train))
     }
     
-    
     CV.IVs.train <- data.frame(training[, -(ncol(training))])
-    
     CV.DV.train <- as.numeric(as.character(training[, ncol(training)]))
     
     
@@ -353,7 +352,7 @@ NNS.stack <- function(IVs.train,
     
       
 
-    # --- Method 1 (NNS.reg / k-NN path) — optimized all‑k (only 1..l plus q) ---
+    # --- Method 1 (NNS.reg / k-NN path) — optimized all-k (only 1..l plus q), with safe fallback when RPM lacks y.hat ---
     if (1 %in% method) {
       actual <- CV.DV.test
       
@@ -375,8 +374,10 @@ NNS.stack <- function(IVs.train,
       Kcand <- c(1:l, q)
       
       # Holders computed once per fold
-      pred_path_small <- NULL   # |Xtest| x l (k = 1..l)
-      pred_q          <- NULL   # |Xtest| vector (k = q)
+      pred_path_small <- NULL   # |Xtest| x l (k = 1..l) if available
+      pred_q          <- NULL   # |Xtest| vector (k = q) if available
+      use_cpp_path    <- FALSE  # will flip to TRUE only if RPM has y.hat and can be aligned
+      is_class        <- !is.null(type)
       
       # Reuse the same dummy-encoded test design across i
       CV.IVs.test.new <- data.table::data.table(
@@ -445,43 +446,87 @@ NNS.stack <- function(IVs.train,
           predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
                               floor(predicted), ceiling(predicted))
           
-          # Precompute only what we need:
-          #  (a) path for k = 1..l  (typically small)
-          pred_path_small <- NNS.distance.path.bulk(
-            rpm   = setup$RPM,
-            Xtest = CV.IVs.test.new,
-            kmax  = l,
-            class = type # , ncores = ncores
-          )
-          #  (b) single vector for k = q (potentially large)
-          if (q > ncol(pred_path_small)) {
-            pred_q <- NNS.distance.bulk(
-              rpm   = setup$RPM,
-              Xtest = CV.IVs.test.new,
-              k     = q,
-              class = type
-            )
-          } else {
-            pred_q <- pred_path_small[, q, drop = TRUE]
+          # -------- attempt fast path precompute (requires RPM to have y.hat) --------
+          RPM_df <- as.data.frame(setup$RPM)
+          has_yhat <- !is.null(colnames(RPM_df)) && any(colnames(RPM_df) == "y.hat")
+          
+          if (has_yhat) {
+            # Split features and yhat, then align columns with test design
+            yhat_vec <- as.numeric(RPM_df[["y.hat"]])
+            RPM_df[["y.hat"]] <- NULL
+            
+            Xtest_df <- as.data.frame(CV.IVs.test.new)
+            if (!is.null(colnames(RPM_df)) && !is.null(colnames(Xtest_df))) {
+              cmn <- intersect(colnames(RPM_df), colnames(Xtest_df))
+              if (length(cmn) > 0L) {
+                RPM_df  <- RPM_df[, cmn, drop = FALSE]
+                Xtest_df <- Xtest_df[, cmn, drop = FALSE]
+              } else {
+                # no common names; fall back to positional guard
+                if (ncol(RPM_df) != ncol(Xtest_df)) {
+                  # cannot align safely -> skip fast path
+                  has_yhat <- FALSE
+                }
+              }
+            } else {
+              # no names; ensure positional compatibility
+              if (ncol(RPM_df) != ncol(Xtest_df)) {
+                has_yhat <- FALSE
+              }
+            }
+            end_has <- TRUE
           }
+          
+          if (has_yhat) {
+            use_cpp_path <- TRUE
+            X_rpm_mat  <- data.matrix(RPM_df)
+            X_test_mat <- data.matrix(if (exists("Xtest_df")) Xtest_df else as.data.frame(CV.IVs.test.new))
+            
+            #  (a) all-k path for k = 1..l (fast C++)
+            pred_path_small <- NNS_distance_path_cpp(
+              X_rpm_mat, yhat_vec, X_test_mat, as.integer(l), is_class
+            )
+            #  (b) single-k for k = q (fast C++)
+            if (q > l) {
+              pred_q <- NNS_distance_bulk_cpp(
+                X_rpm_mat, yhat_vec, X_test_mat, as.integer(q), is_class
+              )
+            } else {
+              pred_q <- pred_path_small[, q, drop = TRUE]
+            }
+          } else {
+            use_cpp_path <- FALSE
+          }
+          # --------------------------------------------------------------------------
           
         } else {
           
           if (!is.null(dim(CV.IVs.train))) {
             if (ncol(CV.IVs.train) > 1) {
-              # Use precomputed results directly, with robust guards
-              ncols <- if (is.null(dim(pred_path_small))) 0L else ncol(pred_path_small)
-              if (i <= ncols) {
-                predicted <- pred_path_small[, i, drop = TRUE]
-              } else if (i == q) {
-                predicted <- pred_q
+              if (use_cpp_path) {
+                # Use precomputed results directly, with robust guards
+                ncols <- if (is.null(dim(pred_path_small))) 0L else ncol(pred_path_small)
+                if (i <= ncols) {
+                  predicted <- pred_path_small[, i, drop = TRUE]
+                } else if (i == q) {
+                  predicted <- pred_q
+                } else {
+                  # Fallback for a mid-range k exceeding path width
+                  predicted <- NNS_distance_bulk_cpp(
+                    X_rpm_mat, yhat_vec, X_test_mat, as.integer(i), is_class
+                  )
+                }
               } else {
-                # rare fallback if a mid-range k exceeds path width
-                predicted <- NNS.distance.bulk(
-                  rpm   = setup$RPM,
-                  Xtest = CV.IVs.test.new,
-                  k     = i,
-                  class = type
+                # Safe fallback: compute directly via NNS.reg for this k
+                predicted <- suppressWarnings(
+                  NNS.reg(
+                    CV.IVs.train, CV.DV.train,
+                    point.est = CV.IVs.test,
+                    plot = FALSE, residual.plot = FALSE,
+                    n.best = i, order = order, ncores = ncores,
+                    type = type, factor.2.dummy = TRUE,
+                    dist = dist, point.only = TRUE, smooth = smoothness
+                  )$Point.est
                 )
               }
             } else {
@@ -555,7 +600,7 @@ NNS.stack <- function(IVs.train,
       if (b == folds) {
         ks <- table(unlist(best.k))
         best.k <- mode_class(as.numeric(rep(names(ks), as.numeric(unlist(ks)))))
-        best.k <- ifelse(best.k%%1 < 0.5, floor(best.k), ceiling(best.k))
+        best.k <- ifelse(best.k %% 1 < 0.5, floor(best.k), ceiling(best.k))
         
         if (length(relevant_vars) > 1) {
           nns.method.1 <- suppressWarnings(
@@ -601,6 +646,7 @@ NNS.stack <- function(IVs.train,
       threshold_results_1 <- NA
       if (objective == 'min') { best.nns.cv <- Inf } else { best.nns.cv <- -Inf }
     } # end: 1 %in% method
+    
 
   } # errors (b) loop
   

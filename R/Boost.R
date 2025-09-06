@@ -49,6 +49,11 @@
 
 
 
+# --- NNS Boost (patched) ---
+
+# ===========================
+# Patched NNS.boost
+# ===========================
 NNS.boost <- function(IVs.train,
                       DV.train,
                       IVs.test = NULL,
@@ -92,70 +97,62 @@ NNS.boost <- function(IVs.train,
     
     objective <- tolower(objective)
     
+    # harmonize feature names
     if(is.null(colnames(IVs.train))){
-      colnames.list <- lapply(1 : dim(IVs.train)[2], function(i) paste0("X", i))
+      colnames.list <- lapply(1 : ncol(IVs.train), function(i) paste0("X", i))
       colnames(IVs.test) <- colnames(IVs.train) <- as.character(colnames.list)
     }
-    
     features <- colnames(IVs.train)
-    IVs.train <- IVs.train[ ,sort(features)]
     
-    transform <- data.matrix(cbind(DV.train, IVs.train))
-    
-    IVs.train <- transform[,-1]
+    # keep training columns sorted and numeric
+    IVs.train <- IVs.train[, sort(features), drop = FALSE]
+    transform  <- data.matrix(cbind(DV.train, IVs.train))
+    IVs.train  <- transform[ , -1, drop = FALSE]
     colnames(IVs.train) <- sort(features)
+    DV.train   <- transform[ ,  1]
     
-    DV.train <- transform[,1]
-    
+    # FIX: normalize test matrix names to match training
     if(is.null(IVs.test)){
       IVs.test <- IVs.train
     } else {
       if(any(class(IVs.test)%in%c("tbl","data.table"))) IVs.test <- as.data.frame(IVs.test)
+      if(ncol(IVs.test) != ncol(IVs.train))
+        stop("IVs.test must have the same number of columns as IVs.train")
+      colnames(IVs.test) <- colnames(IVs.train)   # <— key line
     }
     
     if(balance){
       DV.train <- as.numeric(as.factor(DV.train))
-      
-      y_train <- as.factor(as.character(DV.train))
-      
+      y_train  <- as.factor(as.character(DV.train))
       training_1 <- do.call(cbind, downSample(IVs.train, y_train, list = TRUE))
       training_2 <- do.call(cbind, upSample(IVs.train, y_train, list = TRUE))
-      
       training <- rbind.data.frame(training_1, training_2)
-      
       colnames(training) <- c(colnames(IVs.train), names(DV.train))
-      
-      IVs.train <- training[, -ncol(training)]
-      DV.train <- as.numeric(as.character(training[,ncol(training)]))
+      IVs.train <- training[, -ncol(training), drop = FALSE]
+      DV.train  <- as.numeric(as.character(training[, ncol(training)]))
     }
     
     x <- data.table::data.table(IVs.train)
     y <- DV.train
-    z <- IVs.test
+    z <- data.table::data.table(IVs.test)
     
-    ### Representative samples
+    ### Representative samples (unchanged)
     yx <- cbind(y, x)
-    rep.x <- yx[,lapply(.SD, function(z) fivenum(as.numeric(z)))]
+    rep.x <- yx[, lapply(.SD, function(z) fivenum(as.numeric(z)))]
     rm(yx)
-    
-    rep.y <- unlist(rep.x[,1])
-    rep.x <- rep.x[,-1]
-    
+    rep.y <- unlist(rep.x[,1]); rep.x <- rep.x[,-1]
     rep.x <- as.data.frame(rep.x)
     
     n <- ncol(x)
-    
     if(is.null(epochs)) epochs <- 2*length(y)
-    
-    if(!is.null(ts.test)) dist <- "DTW" else dist <- "L2"
+    dist <- if(!is.null(ts.test)) "DTW" else "L2"
     
     estimates <- list()
     fold <- list()
-    
     old.threshold <- 0
     
     sets <- sum(choose(n, 1:n))
-    deterministic <- FALSE 
+    deterministic <- FALSE
     if((sets < length(y)) || n <= 10){
       deterministic <- TRUE
       learner.trials <- sets
@@ -163,145 +160,110 @@ NNS.boost <- function(IVs.train,
       deterministic.sets <- unlist(lapply(combn_vec(n, 1:n), function(df) as.list(as.data.frame(df))), recursive = FALSE)
     }
     
-    # Add test loop for highest threshold ...
+    # ---------- threshold learning loop (unchanged except for safe subsetting) ----------
     if(is.null(threshold)){
       if(!extreme) epochs <- NULL
-      if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, 1/3), 3) else new.CV.size <- CV.size
-      
+      new.CV.size <- if(is.null(CV.size)) round(runif(1, .2, 1/3), 3) else CV.size
       old.threshold <- 1
-      
-      if(is.null(learner.trials)){learner.trials <- length(y)}
+      if(is.null(learner.trials)) learner.trials <- length(y)
       
       results <- numeric(learner.trials)
       test.features <- vector(mode = "list", learner.trials)
       
       for(i in 1:learner.trials){
         set.seed(123 + i)
-        
         l <- length(y)
-        if(i<=l/4) new.index <- as.integer(seq(i, length(y), length.out = as.integer(new.CV.size * length(y)))) else {
-          new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
-        }
-        
+        if(i<=l/4) new.index <- as.integer(seq(i, length(y), length.out = as.integer(new.CV.size * length(y))))
+        else       new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
         if(!is.null(ts.test)) new.index <- 1:(length(y) - ts.test)
-        
         new.index <- unlist(new.index)
         
-        new.iv.train <- cbind(y[-new.index], x[-new.index,]) 
-        new.iv.train <- new.iv.train[,lapply(.SD, as.double)]
-        
-        new.iv.train <- new.iv.train[,lapply(.SD, function(z) fivenum(as.numeric(z)))]
-        
+        new.iv.train <- cbind(y[-new.index], x[-new.index,])
+        new.iv.train <- new.iv.train[, lapply(.SD, as.double)]
+        new.iv.train <- new.iv.train[, lapply(.SD, function(z) fivenum(as.numeric(z)))]
         new.dv.train <- unlist(new.iv.train[,1])
         new.iv.train <- as.data.frame(new.iv.train)
-        new.iv.train <- new.iv.train[,unlist(colnames(new.iv.train)%in%colnames(IVs.train))]
-        
+        new.iv.train <- new.iv.train[, unlist(colnames(new.iv.train) %in% colnames(IVs.train)), drop = FALSE]
         new.iv.train <- data.table::rbindlist(list(new.iv.train, x[-new.index,]), use.names = FALSE)
         new.dv.train <- c(new.dv.train, y[-new.index])
         
-        colnames(new.iv.train) <- c( features)
+        colnames(new.iv.train) <- c(features)
         
         actual <- as.numeric(y[new.index])
         new.iv.test <- x[new.index,]
         
-        if(status) message("Current Threshold Iterations Remaining = " ,learner.trials+1-i," ","\r",appendLF=FALSE)
+        if(status) message("Current Threshold Iterations Remaining = " , learner.trials+1-i," ","\r",appendLF=FALSE)
         
         if(deterministic) test.features[[i]] <- deterministic.sets[[i]] else test.features[[i]] <- sort(sample(n, sample(2:n, 1), replace = FALSE))
         
-        learning.IVs <- new.iv.train[,.SD, .SDcols = unlist(test.features[i])]
+        # safe column selection for learning and point.est
+        learning.IVs <- as.data.frame(new.iv.train)[ , as.integer(unlist(test.features[[i]])), drop = FALSE]   # FIX
+        point.IVs    <- as.data.frame(new.iv.test)[  , as.integer(unlist(test.features[[i]])), drop = FALSE]   # FIX
         
-        #If estimate is > threshold, store 'features'
         predicted <- NNS.reg(learning.IVs,
                              new.dv.train,
-                             point.est = new.iv.test[, .SD, .SDcols=unlist(test.features[[i]])],
+                             point.est = point.IVs,
                              dim.red.method = "equal",
                              plot = FALSE, order = depth,
                              ncores = 1, type = type)$Point.est
         
         predicted[is.na(predicted)] <- gravity(na.omit(predicted))
         
-        # Do not predict a new unseen class
         if(!is.null(type)){
           predicted <- pmin(predicted, max(as.numeric(y)))
           predicted <- pmax(predicted, min(as.numeric(y)))
         }
         
         results[i] <- eval(obj.fn)
-        
-      } # i in learner.trials
+      }
     } else {
       results <- threshold
-    } # NULL threshold
-    
-    if(extreme){
-      if(objective=="max") threshold <- max(results) else threshold <- min(results)
-    } else {
-      if(objective=="max") threshold <- fivenum(results)[4] else threshold <- fivenum(results)[2]
     }
     
-    if(feature.importance){
-      par(mfrow = c(2,1))
-      par(mai = c(1.0,.5,0.8,0.5))
-      hist(results, main = "Distribution of Learner Trials Objective Function",
-           xlab = "Objective Function", col = "steelblue")
-      abline(v = threshold, col = 'red', lty = 2, lwd = 2)
-      mtext(round(threshold, 2), side = 1, col = "red", at = threshold)
-      if(extreme){
-        if(objective=='max') mtext("Threshold >", side = 3, col = "red", at = threshold, adj = 1) else mtext("< Threshold", side = 3, col = "red", at = threshold, adj = 0)
-      } else {
-        if(objective=='max') mtext("Threshold >", side = 3, col = "red", at = threshold) else mtext("< Threshold", side = 3, col = "red", at = threshold)
-      }
+    if(extreme){
+      threshold <- if(objective=="max") max(results) else min(results)
+    } else {
+      threshold <- if(objective=="max") fivenum(results)[4] else fivenum(results)[2]
     }
     
     if(status){
       message(paste0("Learner Accuracy Threshold = ", format(threshold, digits = 3, nsmall = 2),"           "), appendLF = TRUE)
-      # Clear message line
       message("                                       ", "\r", appendLF = FALSE)
     }
     
     if(extreme){
-      if(objective=="max") reduced.test.features <- test.features[which.max(results)] else reduced.test.features <- test.features[which.min(results)]
+      reduced.test.features <- if(objective=="max") test.features[which.max(results)] else test.features[which.min(results)]
     } else {
-      if(objective=="max") reduced.test.features <- test.features[which(results>=threshold)] else reduced.test.features <- test.features[which(results<=threshold)]
+      reduced.test.features <- if(objective=="max") test.features[which(results>=threshold)] else test.features[which(results<=threshold)]
     }
     
     rf <- data.table::data.table(table(as.character(reduced.test.features)))
     rf$N <- rf$N / sum(rf$N)
-    
     rf_reduced <- apply(rf, 1, function(x) eval(parse(text=x[1])))
-    
-    scale_factor_rf <- table(unlist(rf_reduced))/min(table(unlist(rf_reduced)))
-    
-    reduced.test.features <- as.numeric(rep(names(scale_factor_rf), ifelse(scale_factor_rf%%1 < .5, floor(scale_factor_rf), ceiling(scale_factor_rf))))
+    scale_factor_rf <- table(unlist(rf_reduced)) / min(table(unlist(rf_reduced)))
+    reduced.test.features <- as.numeric(rep(names(scale_factor_rf),
+                                            ifelse(scale_factor_rf%%1 < .5, floor(scale_factor_rf), ceiling(scale_factor_rf))))
     
     keeper.features <- list()
-    
     if(deterministic) epochs <- NULL
     
+    # ---------- epochs loop (unchanged except for safe subsetting) ----------
     if(!is.null(epochs) && !deterministic){
-      
-      if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, 1/3), 3) else new.CV.size <- CV.size
-      
+      new.CV.size <- if(is.null(CV.size)) round(runif(1, .2, 1/3), 3) else CV.size
       for(j in 1:epochs){
         set.seed(123 * j)
-        
         l <- length(y)
-        if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(new.CV.size * length(y)))) else {
-          new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
-        }
+        if(j<=l/4) new.index <- as.integer(seq(j, length(y), length.out = as.integer(new.CV.size * length(y))))
+        else       new.index <- sample(l, as.integer(new.CV.size * l), replace = FALSE)
         if(!is.null(ts.test)) new.index <- length(y) - (2*ts.test):0
-        
         new.index <- unlist(new.index)
         
         new.iv.train <- cbind(y[-new.index], x[-new.index, ])
         new.iv.train <- new.iv.train[, lapply(.SD, as.double)]
-        
-        new.iv.train <- new.iv.train[,lapply(.SD,fivenum), by = .(y[-new.index])]
-        
+        new.iv.train <- new.iv.train[, lapply(.SD, fivenum), by = .(y[-new.index])]
         new.dv.train <- unlist(new.iv.train[, 1])
         new.iv.train <- as.data.frame(new.iv.train)
-        new.iv.train <- new.iv.train[,unlist(colnames(new.iv.train)%in%colnames(IVs.train))]
-        
+        new.iv.train <- new.iv.train[, unlist(colnames(new.iv.train) %in% colnames(IVs.train)), drop = FALSE]
         new.iv.train <- data.table::rbindlist(list(new.iv.train, x[-new.index,]), use.names = FALSE)
         new.dv.train <- c(new.dv.train, y[-new.index])
         
@@ -316,35 +278,34 @@ NNS.boost <- function(IVs.train,
           }
         }
         
-        if(deterministic) features <- unlist(deterministic.sets[[j]]) else features <- sort(c(unlist(reduced.test.features), sample(c(1:n), sample(1:n, 1), replace = FALSE)))
+        features_j <- if(deterministic) unlist(deterministic.sets[[j]]) else sort(c(unlist(reduced.test.features), sample(c(1:n), sample(1:n, 1), replace = FALSE)))
         
-        if(length(features) == 1) point.est.values <- unlist(new.iv.test[, as.numeric(features)]) else point.est.values <- new.iv.test[, as.numeric(features)]
+        # FIX: safe subsetting for current feature set
+        learning_IVs_epoch <- as.data.frame(new.iv.train)[ , as.integer(features_j), drop = FALSE]
+        point_est_epoch    <- as.data.frame(new.iv.test)[  , as.integer(features_j), drop = FALSE]
         
-        #If estimate is > threshold, store 'features'
-        predicted <- NNS.reg(new.iv.train[, as.numeric(features)],
-                             new.dv.train, point.est = point.est.values,
+        predicted <- NNS.reg(learning_IVs_epoch,
+                             new.dv.train, point.est = point_est_epoch,
                              dim.red.method = "equal",
                              plot = FALSE, residual.plot = FALSE, order = depth,
                              ncores = 1, type = type)$Point.est
         
         predicted[is.na(predicted)] <- gravity(na.omit(predicted))
-        # Do not predict a new unseen class
         if(!is.null(type)){
-          predicted <- pmin(predicted,max(as.numeric(y)))
-          predicted <- pmax(predicted,min(as.numeric(y)))
+          predicted <- pmin(predicted, max(as.numeric(y)))
+          predicted <- pmax(predicted, min(as.numeric(y)))
         }
         
         new.results <- eval(obj.fn)
-        
         if(objective=="max"){
           if(is.na(new.results)) new.results <- .99*threshold
-          if(new.results>=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
+          keeper.features[[j]] <- if(new.results>=threshold) features_j else NULL
         } else {
           if(is.na(new.results)) new.results <- 1.01*threshold
-          if(new.results<=threshold) keeper.features[[j]] <- features else keeper.features[[j]] <- NULL
+          keeper.features[[j]] <- if(new.results<=threshold) features_j else NULL
         }
       }
-    } else { # !is.null(epochs)
+    } else {
       keeper.features <- reduced.test.features
     }
     
@@ -358,35 +319,33 @@ NNS.boost <- function(IVs.train,
     }
     
     plot.table <- table(unlist(keeper.features))
-    
     names(plot.table) <- colnames(IVs.train)[eval(as.numeric(names(plot.table)))]
-    
     if(features.only || feature.importance) plot.table <- plot.table[rev(order(plot.table))]
-    
     if(features.only){
       return(list("feature.weights" = plot.table/sum(plot.table),
                   "feature.frequency" = plot.table))
     }
     
-    if(!is.null(rep.y)){
-      x <- rbind(rep.x, (x))
-      y <- c(rep.y, y)
-    }
+    if(!is.null(rep.y)){ x <- rbind(rep.x, (x)); y <- c(rep.y, y) }
     
     kf <- data.table::data.table(table(as.character(keeper.features)))
     kf$N <- kf$N / sum(kf$N)
-    
-    kf_reduced <- apply(kf, 1, function(x) eval(parse(text=x[1])))
-    
+    kf_reduced   <- apply(kf, 1, function(x) eval(parse(text=x[1])))
     scale_factor <- table(unlist(kf_reduced))/min(table(unlist(kf_reduced)))
-    
-    final_scale <- as.numeric(rep(names(scale_factor), ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
+    final_scale  <- as.numeric(rep(names(scale_factor),
+                                   ifelse(scale_factor%%1 < .5, floor(scale_factor), ceiling(scale_factor))))
     
     if(status) message("Generating Final Estimate" ,"\r", appendLF = TRUE)
     
-    model <- NNS.stack(x[, keeper.features],
+    # FIX: build numeric keep index and subset as data.frames
+    keep_idx <- sort(unique(as.integer(unlist(keeper.features))))
+    if(length(keep_idx) == 0L) keep_idx <- seq_len(ncol(x))
+    X_keep <- as.data.frame(x)[ , keep_idx, drop = FALSE]
+    Z_keep <- as.data.frame(z)[ , keep_idx, drop = FALSE]
+    
+    model <- NNS.stack(X_keep,
                        y,
-                       IVs.test = z[, keeper.features],
+                       IVs.test = Z_keep,
                        order = depth, dim.red.method = "all",
                        ncores = 1,
                        stack = FALSE, status = status,
@@ -395,7 +354,12 @@ NNS.boost <- function(IVs.train,
     
     estimates <- model$stack
     
-    estimates[is.na(unlist(estimates))] <- ifelse(!is.null(type), mode_class(unlist(na.omit(estimates))), mode(unlist(na.omit(estimates))))
+    # FIX: principled NA fill
+    if(anyNA(estimates)){
+      nz <- unlist(estimates); nz <- nz[!is.na(nz)]
+      fill_val <- if (!is.null(type)) mode_class(nz) else gravity(nz)
+      estimates[is.na(unlist(estimates))] <- fill_val
+    }
     
     if(!is.null(type)){
       estimates <- pmin(estimates, max(as.numeric(y)))
@@ -405,19 +369,14 @@ NNS.boost <- function(IVs.train,
     if(feature.importance){
       linch <-  max(strwidth(names(plot.table), "inch") + 0.4, na.rm = TRUE)
       par(mai=c(1.0, linch, 0.8, 0.5))
-      
       if(length(plot.table)!=1){
-        barplot(sort(plot.table, decreasing = FALSE)[1:min(n, 10)],
-                horiz = TRUE,
-                col='steelblue',
-                main="Feature Frequency in Final Estimate",
-                xlab = "Frequency",las=1)
+        barplot(sort(plot.table, decreasing = FALSE)[1:min(n, 10)], horiz = TRUE,
+                col='steelblue', main="Feature Frequency in Final Estimate",
+                xlab = "Frequency", las=1)
       } else {
-        barplot(sort(plot.table,decreasing = FALSE),
-                horiz = TRUE,
-                col='steelblue',
-                main="Feature Frequency in Final Estimate",
-                xlab = "Frequency", las = 1)
+        barplot(sort(plot.table,decreasing = FALSE), horiz = TRUE,
+                col='steelblue', main="Feature Frequency in Final Estimate",
+                xlab = "Frequency", las=1)
       }
       par(mfrow=c(1,1))
     }
@@ -430,7 +389,6 @@ NNS.boost <- function(IVs.train,
                 "feature.frequency" = plot.table))
   } # end .core
   
-  # First attempt: suppress all warnings; on error, retry once with balance=FALSE
   out <- tryCatch(
     suppressWarnings(.core()),
     error = function(e) {
@@ -444,7 +402,7 @@ NNS.boost <- function(IVs.train,
                       learner.trials = learner.trials,
                       epochs = epochs,
                       CV.size = CV.size,
-                      balance = FALSE,          # single retry without balance
+                      balance = FALSE,
                       ts.test = ts.test,
                       folds = folds,
                       threshold = threshold,
@@ -462,3 +420,4 @@ NNS.boost <- function(IVs.train,
   
   out
 }
+
