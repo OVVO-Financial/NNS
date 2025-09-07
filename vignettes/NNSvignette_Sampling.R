@@ -149,8 +149,8 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval = FALSE-------------------------------------------------------------
 #  sapply(boots, function(r) cor(r, x, method = "spearman"))
 #  
-#      rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1
-#   0.97524152  0.47443144  0.01906991 -0.31301530 -0.96889289
+#       rho = 1    rho = 0.5      rho = 0   rho = -0.5     rho = -1
+#   0.996123612  0.492517252 -0.009276928 -0.492457246 -0.993339334
 
 ## ----tgt_drift, fig.align='center', fig.width=8, fig.height=8, eval=FALSE-----
 #  boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates

@@ -33,7 +33,8 @@
       "%dopar%","foreach","stopCluster", "cl",
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
       "bias", "conf.intervals", "conf.int.neg", "conf.int.pos", "pred.int", "lower.pred.int", "upper.pred.int",
-      "estimates", "estimates.max", "estimates.min", "naive.first.grad", "naive.second.grad", "poly", "rise_1", "rise_2"
+      "estimates", "estimates.max", "estimates.min", "naive.first.grad", "naive.second.grad", "poly", "rise_1", "rise_2",
+      "..feat", "..feat_all"
     ))
 
   requireNamespace("data.table")

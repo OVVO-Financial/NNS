@@ -128,7 +128,7 @@ NNS.meboot <- function(x,
   
   
   if(!is.null(target_drift) || !is.null(target_drift_scale)) drift <- TRUE 
-
+  
   ordxx_2 <- rev(ordxx) 
   
   

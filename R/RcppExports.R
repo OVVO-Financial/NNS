@@ -61,6 +61,58 @@ fast_lm_mult <- function(x, y) {
     .Call(`_NNS_fast_lm_mult`, x, y)
 }
 
+is.fcl <- function(x) {
+    .Call(`_NNS_is_fcl`, x)
+}
+
+is.discrete <- function(x) {
+    .Call(`_NNS_is_discrete`, x)
+}
+
+factor_2_dummy <- function(x) {
+    .Call(`_NNS_factor_2_dummy`, x)
+}
+
+factor_2_dummy_FR <- function(x) {
+    .Call(`_NNS_factor_2_dummy_FR`, x)
+}
+
+generate.vectors <- function(x, l) {
+    .Call(`_NNS_generate_vectors`, x, l)
+}
+
+generate.lin.vectors <- function(x, l, h = 1L) {
+    .Call(`_NNS_generate_lin_vectors`, x, l, h)
+}
+
+ARMA.seas.weighting <- function(sf, mat) {
+    .Call(`_NNS_ARMA_seas_weighting`, sf, mat)
+}
+
+lag.mtx <- function(x, tau) {
+    .Call(`_NNS_lag_mtx`, x, tau)
+}
+
+NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd) {
+    .Call(`_NNS_NNS_meboot_part`, x, n, z, xmin, xmax, desintxb, reachbnd)
+}
+
+NNS.meboot.expand.sd <- function(x, ensemble, fiv = 5.0) {
+    .Call(`_NNS_NNS_meboot_expand_sd`, x, ensemble, fiv)
+}
+
+force.clt <- function(x, ensemble) {
+    .Call(`_NNS_force_clt`, x, ensemble)
+}
+
+downSample <- function(x, y, list = FALSE, yname = "Class") {
+    .Call(`_NNS_downSample`, x, y, list, yname)
+}
+
+upSample <- function(x, y, list = FALSE, yname = "Class") {
+    .Call(`_NNS_upSample`, x, y, list, yname)
+}
+
 LPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_LPM_CPv`, degree, target, variable)
 }

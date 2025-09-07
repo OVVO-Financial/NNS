@@ -22,7 +22,7 @@ NNS.distance.bulk <- function(rpm, Xtest, k, class = NULL) {
 
 
 
-#' All-k bulk predictor (parallel if ncores > 1)
+
 NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) {
   rpm   <- data.table::as.data.table(rpm)
   stopifnot("y.hat" %in% names(rpm))

@@ -21,6 +21,10 @@ NNS.mode <- function(x, discrete = FALSE, multi = TRUE) {
 }
 
 
+mode <- function(x) NNS.mode(x, discrete = FALSE, multi = FALSE)
+
+mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
+
 
 #' NNS gravity
 #'
@@ -42,6 +46,9 @@ NNS.gravity <- function(x, discrete = FALSE) {
   .Call(`_NNS_NNS_gravity_cpp`, as.numeric(x), as.logical(discrete))
 }
 
+gravity <- function(x) NNS.gravity(x, discrete = FALSE)
+
+gravity_class <- function(x) NNS.gravity(x, discrete = TRUE)
 
 
 #' NNS rescale
