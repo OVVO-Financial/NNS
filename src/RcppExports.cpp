@@ -25,33 +25,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// NNS_distance_bulk_cpp
-NumericVector NNS_distance_bulk_cpp(NumericMatrix RPM, NumericVector yhat, NumericMatrix Xtest, int k, bool is_class);
-RcppExport SEXP _NNS_NNS_distance_bulk_cpp(SEXP RPMSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kSEXP, SEXP is_classSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type RPM(RPMSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type yhat(yhatSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type Xtest(XtestSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_distance_bulk_cpp(RPM, yhat, Xtest, k, is_class));
-    return rcpp_result_gen;
-END_RCPP
-}
 // NNS_distance_path_cpp
-NumericMatrix NNS_distance_path_cpp(NumericMatrix RPM, NumericVector yhat, NumericMatrix Xtest, int kmax, bool is_class);
+Rcpp::NumericMatrix NNS_distance_path_cpp(const Rcpp::NumericMatrix& RPM, const Rcpp::NumericVector& yhat, const Rcpp::NumericMatrix& Xtest, int kmax, bool is_class);
 RcppExport SEXP _NNS_NNS_distance_path_cpp(SEXP RPMSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kmaxSEXP, SEXP is_classSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type RPM(RPMSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type yhat(yhatSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type Xtest(XtestSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type RPM(RPMSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type yhat(yhatSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type Xtest(XtestSEXP);
     Rcpp::traits::input_parameter< int >::type kmax(kmaxSEXP);
     Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_distance_path_cpp(RPM, yhat, Xtest, kmax, is_class));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_distance_bulk_cpp
+Rcpp::NumericVector NNS_distance_bulk_cpp(const Rcpp::NumericMatrix& RPM, const Rcpp::NumericVector& yhat, const Rcpp::NumericMatrix& Xtest, int k, bool is_class);
+RcppExport SEXP _NNS_NNS_distance_bulk_cpp(SEXP RPMSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kSEXP, SEXP is_classSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type RPM(RPMSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type yhat(yhatSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type Xtest(XtestSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_distance_bulk_cpp(RPM, yhat, Xtest, k, is_class));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -585,8 +585,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_distance_cpp", (DL_FUNC) &_NNS_NNS_distance_cpp, 5},
-    {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
     {"_NNS_NNS_distance_path_cpp", (DL_FUNC) &_NNS_NNS_distance_path_cpp, 5},
+    {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
     {"_NNS_NNS_distance_path_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_parallel_cpp, 6},
     {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 7},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},

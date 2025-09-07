@@ -1,8 +1,10 @@
-// File: src/internal_functions.cpp
+// src/internal_functions.cpp
 // [[Rcpp::plugins(cpp11)]]
 #include <Rcpp.h>
 #include <algorithm>
 #include <cmath>
+#include <vector>
+#include <limits>
 
 using namespace Rcpp;
 
@@ -731,163 +733,260 @@ SEXP force_clt(SEXP x, NumericMatrix ensemble) {
 
 // ---------- 11) downSample / upSample ----------
 
+// ---- helpers ---------------------------------------------------------------
+
+// copy rows for a factor (IntegerVector with class "factor" and "levels")
+static IntegerVector subset_factor_codes(const IntegerVector& codes,
+                                         const IntegerVector& rows) {
+  const int m = rows.size();
+  IntegerVector out(m);
+  for (int i = 0; i < m; ++i) {
+    const int idx = rows[i] - 1; // rows are 1-based
+    out[i] = (idx >= 0 && idx < codes.size()) ? codes[idx] : NA_INTEGER;
+  }
+  return out;
+}
+
+// generic: copy rows for a simple vector while preserving NA and type
+template <int RTYPE>
+static Rcpp::Vector<RTYPE> subset_vec_template(const Rcpp::Vector<RTYPE>& v,
+                                               const IntegerVector& rows) {
+  const int m = rows.size();
+  Rcpp::Vector<RTYPE> out(m);
+  for (int i = 0; i < m; ++i) {
+    const int idx = rows[i] - 1;
+    if (idx >= 0 && idx < v.size()) {
+      out[i] = v[idx];
+    } else {
+      out[i] = Rcpp::Vector<RTYPE>::get_na();   // works for INT/REAL/LGL
+    }
+  }
+  return out;
+}
+
+// specialization for character vectors (STRSXP) to avoid proxy/SEXP mismatch
+template <>
+inline Rcpp::CharacterVector
+subset_vec_template<STRSXP>(const Rcpp::CharacterVector& v,
+                            const IntegerVector& rows) {
+  const int m = rows.size();
+  Rcpp::CharacterVector out(m);
+  for (int i = 0; i < m; ++i) {
+    const int idx = rows[i] - 1;
+    if (idx >= 0 && idx < v.size()) {
+      out[i] = v[idx];
+    } else {
+      out[i] = NA_STRING;                      // explicit NA for character
+    }
+  }
+  return out;
+}
+
+// build a data.frame from X for row indices `rows`,
+// optionally appending the factor `y_factor` as last column named `yname`.
+static DataFrame subset_df_rows_with_y(const DataFrame& X,
+                                       const IntegerVector& rows,
+                                       SEXP y_factor,                 // factor (or R_NilValue)
+                                       const std::string& yname,
+                                       bool include_y) {
+  const int p = X.size();
+  const int m = rows.size();
+  
+  List out(include_y ? (p + 1) : p);
+  CharacterVector out_names(include_y ? (p + 1) : p);
+  CharacterVector in_names = X.names();
+  
+  for (int j = 0; j < p; ++j) {
+    SEXP col = X[j];
+    out_names[j] = in_names[j];
+    
+    switch (TYPEOF(col)) {
+    case INTSXP: {
+      IntegerVector iv(col);
+      RObject cls = iv.attr("class");
+      // if factor, carry class + levels over
+      if (!cls.isNULL() && as<CharacterVector>(cls).size() > 0 &&
+          as<CharacterVector>(cls)[0] == "factor") {
+        IntegerVector sub = subset_factor_codes(iv, rows);
+        sub.attr("class")  = iv.attr("class");
+        sub.attr("levels") = iv.attr("levels");
+        out[j] = sub;
+      } else {
+        out[j] = subset_vec_template<INTSXP>(iv, rows);
+      }
+      break;
+    }
+    case REALSXP: out[j] = subset_vec_template<REALSXP>(NumericVector(col), rows); break;
+    case LGLSXP:  out[j] = subset_vec_template<LGLSXP>(LogicalVector(col), rows);  break;
+    case STRSXP:  out[j] = subset_vec_template<STRSXP>(CharacterVector(col), rows);break;
+    default: {
+      // fallback: coerce exotic types to character
+      CharacterVector cv = as<CharacterVector>(col);
+      out[j] = subset_vec_template<STRSXP>(cv, rows);
+      break;
+    }}
+  }
+  
+  if (include_y) {
+    IntegerVector ycodes = as<IntegerVector>(y_factor);
+    IntegerVector ysub   = subset_factor_codes(ycodes, rows);
+    ysub.attr("class")   = CharacterVector::create("factor");
+    ysub.attr("levels")  = Rf_getAttrib(y_factor, R_LevelsSymbol);
+    out[p]       = ysub;
+    out_names[p] = yname;
+  }
+  
+  out.attr("names")     = out_names;
+  out.attr("class")     = "data.frame";
+  out.attr("row.names") = IntegerVector::create(NA_INTEGER, -m);
+  return DataFrame(out);
+}
+
+// sample k integers in 1..N (with/without replacement) using R RNG
+static IntegerVector sample_indices(int N, int k, bool replace) {
+  IntegerVector res(k);
+  if (N <= 0 || k <= 0) return res;
+  if (!replace && k > N) k = N;
+  
+  if (replace) {
+    for (int i = 0; i < k; ++i) {
+      int draw = 1 + (int)floor(R::runif(0.0, 1.0) * N);
+      if (draw > N) draw = N;
+      res[i] = draw;
+    }
+  } else {
+    // partial Fisher–Yates for first k positions
+    std::vector<int> a(N);
+    for (int i = 0; i < N; ++i) a[i] = i + 1;
+    for (int i = 0; i < k; ++i) {
+      int j = i + (int)floor(R::runif(0.0, 1.0) * (N - i));
+      if (j >= N) j = N - 1;
+      std::swap(a[i], a[j]);
+      res[i] = a[i];
+    }
+  }
+  return res;
+}
+
+// ---------- downSample ------------------------------------
+
 // [[Rcpp::export]]
 SEXP downSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") {
-  // x -> data.frame(stringsAsFactors = TRUE)
-  Function as_df("as.data.frame");
-  DataFrame X = as<DataFrame>(as_df(x, _["stringsAsFactors"] = true));
+  RNGScope scope;
   
-  // y must be factor
+  // Coerce x -> data.frame (stringsAsFactors = TRUE equivalent)
+  Function as_df("as.data.frame");
+  DataFrame X = as<DataFrame>(as_df(x));
+  
+  // Require factor y (caret warns & returns original when not a factor)
   Function is_factor("is.factor");
-  LogicalVector ok = is_factor(y);
-  if (!(ok.size() && ok[0])) {
+  if (!as<bool>(is_factor(y))) {
     Rcpp::warning("Down-sampling requires a factor variable as the response. The original data was returned.");
     return List::create(_["x"] = X, _["y"] = y);
   }
   
-  IntegerVector fy = as<IntegerVector>(y); // factor codes 1..L
+  // y as factor codes (1..L) and levels
+  IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  int L = lev.size();
+  const int n = X.nrows();
+  if (fy.size() != n) stop("downSample: nrow(x) != length(y)");
+  const int L = lev.size();
   
-  // class counts (ignore NA)
-  std::vector< IntegerVector > perClass(L);
-  for (int i = 0; i < fy.size(); ++i) {
+  // collect row indices per class (1-based)
+  std::vector< std::vector<int> > perClass(L);
+  for (int i = 0; i < n; ++i) {
     int k = fy[i];
-    if (k == NA_INTEGER) continue;
-    perClass[k - 1].push_back(i + 1); // 1-based indices for R subsetting
+    if (k != NA_INTEGER) perClass[k - 1].push_back(i + 1);
   }
-  int minClass = INT_MAX;
-  for (int k = 0; k < L; ++k) if (perClass[k].size() > 0) minClass = std::min(minClass, (int)perClass[k].size());
-  if (minClass == INT_MAX) minClass = 0;
   
-  // sample each class
-  Function rbind_("rbind"), cbind_("cbind");
-  List sampled_frames;
-  CharacterVector presentLevels;
+  // target size: min class count (caret::min(table(y)))
+  int minClass = n;
+  bool any_ok = false;
   for (int k = 0; k < L; ++k) {
-    if (perClass[k].size() == 0) continue;
-    IntegerVector idx = sampleWithoutReplacement(perClass[k], minClass);
-    Language subset_call("[", X, idx, R_MissingArg); // rows only; drop not needed
-    SEXP Xi = subset_call.eval();
-    sampled_frames.push_back(Xi);
-    presentLevels.push_back(lev[k]);
+    int sz = (int)perClass[k].size();
+    if (sz > 0) { any_ok = true; if (sz < minClass) minClass = sz; }
   }
+  if (!any_ok || minClass <= 0) stop("downSample: no non-empty classes.");
   
-  // combine
-  SEXP Xc;
-  if (sampled_frames.size() == 0) {
-    Xc = X;
-  } else if (sampled_frames.size() == 1) {
-    Xc = sampled_frames[0];
-  } else {
-    Xc = rbind_(sampled_frames);
+  // sample minClass rows within each class without replacement
+  std::vector<int> rows_out;
+  rows_out.reserve(minClass * L);
+  for (int k = 0; k < L; ++k) {
+    const int gsz = (int)perClass[k].size();
+    if (gsz == 0) continue;
+    IntegerVector s = sample_indices(gsz, minClass, /*replace*/false); // 1..gsz
+    for (int j = 0; j < s.size(); ++j) rows_out.push_back(perClass[k][ s[j] - 1 ]);
   }
-  
-  // new y vector
-  int rows = Rf_length(Rf_getAttrib(Xc, R_RowNamesSymbol));
-  if (rows < 0) rows = -rows; // compact row.names negative encoding
-  IntegerVector ynew(rows);
-  CharacterVector ylev = presentLevels;
-  int block = (minClass > 0) ? minClass : 0;
-  int pos = 0;
-  for (int k = 0; k < ylev.size(); ++k) {
-    for (int i = 0; i < block; ++i) ynew[pos++] = k + 1;
-  }
-  ynew.attr("class") = "factor";
-  ynew.attr("levels") = ylev;
+  IntegerVector rows = wrap(rows_out);
   
   if (list) {
-    return List::create(_["x"] = Xc, _["y"] = ynew);
+    DataFrame Xout = subset_df_rows_with_y(X, rows, R_NilValue, yname, /*include_y=*/false);
+    IntegerVector ysub = subset_factor_codes(fy, rows);
+    ysub.attr("class")  = CharacterVector::create("factor");
+    ysub.attr("levels") = lev;
+    return List::create(_["x"] = Xout, _["y"] = ysub);
   } else {
-    SEXP out = cbind_(Xc, ynew);
-    List DF(out);
-    CharacterVector names = DF.names();
-    names[names.size() - 1] = yname;
-    DF.names() = names;
-    return DF;
+    return subset_df_rows_with_y(X, rows, y, yname, /*include_y=*/true);
   }
 }
 
+// ---------- upSample --------------------------------------
+
 // [[Rcpp::export]]
 SEXP upSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") {
-  // x -> data.frame(stringsAsFactors = TRUE)
-  Function as_df("as.data.frame");
-  DataFrame X = as<DataFrame>(as_df(x, _["stringsAsFactors"] = true));
+  RNGScope scope;
   
-  // y must be factor
+  // Coerce x -> data.frame
+  Function as_df("as.data.frame");
+  DataFrame X = as<DataFrame>(as_df(x));
+  
+  // Require factor y
   Function is_factor("is.factor");
-  LogicalVector ok = is_factor(y);
-  if (!(ok.size() && ok[0])) {
+  if (!as<bool>(is_factor(y))) {
     Rcpp::warning("Up-sampling requires a factor variable as the response. The original data was returned.");
     return List::create(_["x"] = X, _["y"] = y);
   }
   
-  IntegerVector fy = as<IntegerVector>(y); // factor codes 1..L
+  IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  int L = lev.size();
+  const int n = X.nrows();
+  if (fy.size() != n) stop("upSample: nrow(x) != length(y)");
+  const int L = lev.size();
   
-  // per-class indices
-  std::vector< IntegerVector > perClass(L);
-  for (int i = 0; i < fy.size(); ++i) {
+  // collect row indices per class (1-based)
+  std::vector< std::vector<int> > perClass(L);
+  for (int i = 0; i < n; ++i) {
     int k = fy[i];
-    if (k == NA_INTEGER) continue;
-    perClass[k - 1].push_back(i + 1);
+    if (k != NA_INTEGER) perClass[k - 1].push_back(i + 1);
   }
+  
+  // target size: max class count (caret::max(table(y)))
   int maxClass = 0;
-  for (int k = 0; k < L; ++k) maxClass = std::max(maxClass, (int)perClass[k].size());
-  
-  // assemble upsampled frames
-  Function rbind_("rbind"), cbind_("cbind");
-  List sampled_frames;
+  bool any_ok = false;
   for (int k = 0; k < L; ++k) {
-    IntegerVector idx = perClass[k];
-    if (idx.size() == 0) continue;
-    if (idx.size() < maxClass) {
-      IntegerVector extra(maxClass - idx.size());
-      for (int i = 0; i < extra.size(); ++i) {
-        int pick = (int)std::floor(R::runif(0.0, 1.0) * idx.size()); // 0..size-1
-        extra[i] = idx[pick];
-      }
-      IntegerVector idx2(idx.size() + extra.size());
-      std::copy(idx.begin(), idx.end(), idx2.begin());
-      std::copy(extra.begin(), extra.end(), idx2.begin() + idx.size());
-      idx = idx2;
-    }
-    Language subset_call("[", X, idx, R_MissingArg); // rows only; drop not needed
-    SEXP Xi = subset_call.eval();
-    sampled_frames.push_back(Xi);
+    int sz = (int)perClass[k].size();
+    if (sz > 0) { any_ok = true; if (sz > maxClass) maxClass = sz; }
   }
+  if (!any_ok || maxClass <= 0) stop("upSample: no non-empty classes.");
   
-  // combine
-  SEXP Xc;
-  if (sampled_frames.size() == 0) {
-    Xc = X;
-  } else if (sampled_frames.size() == 1) {
-    Xc = sampled_frames[0];
-  } else {
-    Xc = rbind_(sampled_frames);
-  }
-  
-  // new y vector: repeat each level maxClass times
-  int rows = Rf_length(Rf_getAttrib(Xc, R_RowNamesSymbol));
-  if (rows < 0) rows = -rows;
-  IntegerVector ynew(rows);
-  int pos = 0;
+  // sample up to maxClass within each class with replacement
+  std::vector<int> rows_out;
+  rows_out.reserve(maxClass * L);
   for (int k = 0; k < L; ++k) {
-    if (perClass[k].size() == 0) continue;
-    for (int i = 0; i < maxClass; ++i) ynew[pos++] = k + 1;
+    const int gsz = (int)perClass[k].size();
+    if (gsz == 0) continue;
+    IntegerVector s = sample_indices(gsz, maxClass, /*replace*/true); // 1..gsz
+    for (int j = 0; j < s.size(); ++j) rows_out.push_back(perClass[k][ s[j] - 1 ]);
   }
-  ynew.attr("class") = "factor";
-  ynew.attr("levels") = lev;
+  IntegerVector rows = wrap(rows_out);
   
   if (list) {
-    return List::create(_["x"] = Xc, _["y"] = ynew);
+    DataFrame Xout = subset_df_rows_with_y(X, rows, R_NilValue, yname, /*include_y=*/false);
+    IntegerVector ysub = subset_factor_codes(fy, rows);
+    ysub.attr("class")  = CharacterVector::create("factor");
+    ysub.attr("levels") = lev;
+    return List::create(_["x"] = Xout, _["y"] = ysub);
   } else {
-    SEXP out = cbind_(Xc, ynew);
-    List DF(out);
-    CharacterVector names = DF.names();
-    names[names.size() - 1] = yname;
-    DF.names() = names;
-    return DF;
+    return subset_df_rows_with_y(X, rows, y, yname, /*include_y=*/true);
   }
 }

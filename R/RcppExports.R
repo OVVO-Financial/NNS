@@ -5,16 +5,12 @@ NNS_distance_cpp <- function(X, yhat, dest, k, use_class) {
     .Call(`_NNS_NNS_distance_cpp`, X, yhat, dest, k, use_class)
 }
 
-NNS_distance_bulk_cpp <- function(RPM, yhat, Xtest, k, is_class) {
-    .Call(`_NNS_NNS_distance_bulk_cpp`, RPM, yhat, Xtest, k, is_class)
-}
-
 NNS_distance_path_cpp <- function(RPM, yhat, Xtest, kmax, is_class) {
     .Call(`_NNS_NNS_distance_path_cpp`, RPM, yhat, Xtest, kmax, is_class)
 }
 
-NNS_distance_path_parallel_cpp <- function(RPM, yhat, Xtest, kmax, is_class, nthreads = -1L) {
-    .Call(`_NNS_NNS_distance_path_parallel_cpp`, RPM, yhat, Xtest, kmax, is_class, nthreads)
+NNS_distance_bulk_cpp <- function(RPM, yhat, Xtest, k, is_class) {
+    .Call(`_NNS_NNS_distance_bulk_cpp`, RPM, yhat, Xtest, k, is_class)
 }
 
 NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction) {
