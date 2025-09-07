@@ -270,6 +270,61 @@ NNS.VAR <- function(variables,
   
   nns_IVs_interpolated_extrapolated <- head(new_values, nrow(variables))
   
+  
+  ### lag.mtx function
+  lag.mtx <- function(x, tau){
+    colheads <- NULL
+    
+    max_tau <- max(unlist(tau))
+    
+    if(is.null(dim(x)[2])) {
+      mc <- match.call()
+      colheads <- noquote(as.character(deparse(mc$x)))
+      x <- t(t(x))
+    }
+    
+    j.vectors <- vector(mode = "list", ncol(x))
+    
+    for(j in 1:ncol(x)){
+      if(is.null(colheads)){
+        colheads <- colnames(x)[j]
+        
+        colheads <- noquote(as.character(deparse(substitute(colheads))))
+      }
+      
+      x.vectors <- vector(mode = "list")
+      heads <- paste0(colheads, "_tau_")
+      heads <- gsub('"', '' ,heads)
+      
+      for (i in 0:max_tau){
+        x.vectors[[paste(heads, i, sep = "")]] <- numeric(0L)
+        start <- max_tau - i + 1
+        end <- length(x[,j]) - i
+        x.vectors[[i + 1]] <- x[start : end, j]
+      }
+      
+      j.vectors[[j]] <- do.call(cbind, x.vectors)
+      colheads <- NULL
+    }
+    mtx <- as.data.frame(do.call(cbind, j.vectors))
+    
+    
+    if(length(unlist(tau)) > 1){
+      relevant_lags <- lapply(1:length(tau), function(i) c((i-1)*max_tau + i, (i-1)*max_tau + unlist(tau[[i]]) + i))
+      
+      relevant_lags <- sort(unlist(relevant_lags))
+      mtx <- mtx[ , relevant_lags]
+    }
+    
+    vars <- which(grepl("tau_0", colnames(mtx)))
+    
+    everything_else <- seq_len(dim(mtx)[2])[-vars]
+    mtx <- mtx[,c(vars, everything_else)]
+    
+    return(mtx)
+  }
+  
+  
   # Now lag new forecasted data.frame
   lagged_new_values <- lag.mtx(new_values, tau = tau)
   

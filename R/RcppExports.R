@@ -13,6 +13,10 @@ NNS_distance_bulk_cpp <- function(RPM, yhat, Xtest, k, is_class) {
     .Call(`_NNS_NNS_distance_bulk_cpp`, RPM, yhat, Xtest, k, is_class)
 }
 
+NNS_distance_path_parallel_cpp <- function(RPM, yhat, Xtest, kmax, is_class, nthreads = -1L) {
+    .Call(`_NNS_NNS_distance_path_parallel_cpp`, RPM, yhat, Xtest, kmax, is_class, nthreads)
+}
+
 NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction) {
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction)
 }
@@ -83,10 +87,6 @@ generate.lin.vectors <- function(x, l, h = 1L) {
 
 ARMA.seas.weighting <- function(sf, mat) {
     .Call(`_NNS_ARMA_seas_weighting`, sf, mat)
-}
-
-lag.mtx <- function(x, tau) {
-    .Call(`_NNS_lag_mtx`, x, tau)
 }
 
 NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd) {

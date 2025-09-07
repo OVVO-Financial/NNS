@@ -298,18 +298,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// lag_mtx
-SEXP lag_mtx(SEXP x, SEXP tau);
-RcppExport SEXP _NNS_lag_mtx(SEXP xSEXP, SEXP tauSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(lag_mtx(x, tau));
-    return rcpp_result_gen;
-END_RCPP
-}
 // NNS_meboot_part
 NumericVector NNS_meboot_part(NumericVector x, int n, NumericVector z, double xmin, double xmax, NumericVector desintxb, bool reachbnd);
 RcppExport SEXP _NNS_NNS_meboot_part(SEXP xSEXP, SEXP nSEXP, SEXP zSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP desintxbSEXP, SEXP reachbndSEXP) {
@@ -606,7 +594,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_generate_vectors", (DL_FUNC) &_NNS_generate_vectors, 2},
     {"_NNS_generate_lin_vectors", (DL_FUNC) &_NNS_generate_lin_vectors, 3},
     {"_NNS_ARMA_seas_weighting", (DL_FUNC) &_NNS_ARMA_seas_weighting, 2},
-    {"_NNS_lag_mtx", (DL_FUNC) &_NNS_lag_mtx, 2},
     {"_NNS_NNS_meboot_part", (DL_FUNC) &_NNS_NNS_meboot_part, 7},
     {"_NNS_NNS_meboot_expand_sd", (DL_FUNC) &_NNS_NNS_meboot_expand_sd, 3},
     {"_NNS_force_clt", (DL_FUNC) &_NNS_force_clt, 2},
