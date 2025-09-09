@@ -146,6 +146,7 @@ NNS.ARMA.optim <- function(variable,
         )
         doParallel::registerDoParallel(cl)
         invisible(data.table::setDTthreads(1))  # Restrict threading for parallelization
+        parallel::clusterEvalQ(cl, library(NNS))
       } else {
         foreach::registerDoSEQ()
         invisible(data.table::setDTthreads(0))  # Default threading
