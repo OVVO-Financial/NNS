@@ -111,6 +111,8 @@ matplot(boots["replicates",]$replicates , type = 'l')
 # Plot ensemble
 lines(boots["ensemble",]$ensemble, lwd = 3)
 
+# Plot original
+lines(1:length(AirPassengers), AirPassengers, lwd = 3, col = "red")
 
 ### Vectorized drift with a single rho
 boots <- NNS.meboot(AirPassengers, reps = 10, rho = 0, xmin = 0, target_drift = c(1,7))

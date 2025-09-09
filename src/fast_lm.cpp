@@ -29,15 +29,18 @@ List fast_lm(NumericVector x, NumericVector y) {
   
   // Calculate fitted values and residuals
   NumericVector fitted_values(n);
+  NumericVector residuals(n);
   for (int i = 0; i < n; ++i) {
     fitted_values[i] = b0 + b1 * x[i];
+    residuals[i] =  y[i] - fitted_values[i];
   }
   
   
   // Return coefficients, fitted values, residuals, and R-squared
   return List::create(
     _["coef"] = NumericVector::create(b0, b1),
-    _["fitted.values"] = fitted_values
+    _["fitted.values"] = fitted_values,
+    _["residuals"] = residuals
   );
 }
 
