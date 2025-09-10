@@ -98,9 +98,10 @@ NNS.ARMA.optim <- function(variable,
     h_oos <- NULL
   }
   
-  if(is.null(training.set)) training.set <- .8 * n
+  if(is.null(training.set)) training.set <- floor(.8 * n)
+  training.set <- as.integer(training.set)
   
-  h_eval <- h_is <- n - training.set
+  h_eval <- h_is <- as.integer(n - training.set)
   
   actual <- tail(variable, h_eval)
   
@@ -485,7 +486,7 @@ NNS.ARMA.optim <- function(variable,
     
     lfp <- length(final.predicted)
     
-    starting.point <- min(training.set, min(n - lfp))
+    starting.point <- as.integer(n - lfp)
     
     lines((starting.point + 1) : (starting.point + lfp), final.predicted, col = "red", lwd = 2, lty = 2)
     
@@ -511,10 +512,7 @@ NNS.ARMA.optim <- function(variable,
       legend("topleft", legend = c("Variable", "Internal Validation", "Forecast"), 
              col = c("steelblue", "red", "red"), lty = c(1, 2, 1), bty = "n", lwd = 2)
     } 
-    
-    
-    
-    
+   
   }
   
   
