@@ -184,6 +184,8 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode_class"
   }
   
+  if(!is.null(type) && type == "class") smooth = FALSE
+  
   if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
   
   if(!plot) residual.plot <- FALSE
@@ -633,78 +635,102 @@ NNS.reg = function (x, y,
   regression.points <- regression.points[, y := gravity(y), by = "x"]
   regression.points <- unique(regression.points)
   
+  p <- nrow(regression.points)
+
+  smooth_condition <- (p >= 4 && is.null(type) &&
+    (isTRUE(smooth) || (!isTRUE(smooth) && dep.reduced.order > 5)))
+  # Smooth regression.points IFF:
+  #   (smooth == TRUE) OR (smooth == FALSE && dep.reduced.order > 5)
+  # and we have enough points/unique x.
+  if (smooth_condition) {
   
-  if(dim(regression.points)[1] > 1){
-    rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
-    run <- regression.points[ , 'run' := x - data.table::shift(x)]
+    spline_fit <- stats::smooth.spline(
+      x    = regression.points[, x],
+      y    = regression.points[, y],
+      spar = (dependence + 0.5) / 2
+    )
+    
+    # return smoothed regression points
+    regression.points[, y := stats::predict(spline_fit, regression.points$x)$y]
+  }
+  
+  # Slopes
+  if (nrow(regression.points) > 1) {
+    rise <- regression.points[, 'rise' := y - data.table::shift(y)]
+    run  <- regression.points[, 'run'  := x - data.table::shift(x)]
   } else {
     rise <- max(y) - min(y)
-    rise <- regression.points[ , 'rise' := rise]
-    run <- max(x) - min(x)
-    if(run==0) run <- 1
-    run <- regression.points[ , 'run' := run]
-    regression.points <- data.table::rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
+    rise <- regression.points[, 'rise' := rise]
+    run  <- max(x) - min(x); if (run == 0) run <- 1
+    run  <- regression.points[, 'run'  := run]
+    regression.points <- data.table::rbindlist(
+      list(regression.points, regression.points, regression.points),
+      use.names = FALSE
+    )
   }
   
+  # Clamp
+  regression.points$x <- pmin(pmax(regression.points$x, min(x)), max(x))
+  regression.points$y <- pmin(pmax(regression.points$y, min(y)), max(y))
   
-  regression.points$x <- pmin(regression.points$x, max(x))
-  regression.points$x <- pmax(regression.points$x, min(x))
-  
-  regression.points$y <- pmin(regression.points$y, max(y))
-  regression.points$y <- pmax(regression.points$y, min(y))
-  
+  if(!is.null(type) && type=="class") regression.points$y <- pmax(min(y), pmin(max(y), ifelse(regression.points$y %% 1 < 0.5, floor(regression.points$y), ceiling(regression.points$y))))
   
   
-  Regression.Coefficients <- regression.points[ , .(rise,run)]
-  
+  # Coefficients 
+  Regression.Coefficients <- regression.points[, .(rise, run)]
   Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-  
-  upper.x <- regression.points[(2 : .N), x]
-  
-  if(length(unique(upper.x)) > 1){
-    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+  upper.x <- regression.points[(2:.N), x]
+  if (length(unique(upper.x)) > 1) {
+    Regression.Coefficients <- Regression.Coefficients[
+      , `:=`('Coefficient' = (rise / run),
+             'X.Lower.Range' = regression.points[-.N, x],
+             'X.Upper.Range'  = upper.x)
+    ]
   } else {
-    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'= 0,'X.Lower.Range' = unique(upper.x), 'X.Upper.Range' = unique(upper.x))]
+    Regression.Coefficients <- Regression.Coefficients[
+      , `:=`('Coefficient' = 0,
+             'X.Lower.Range' = unique(upper.x),
+             'X.Upper.Range'  = unique(upper.x))
+    ]
   }
-  
-  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
-  
-  
+  Regression.Coefficients <- Regression.Coefficients[, .(Coefficient, X.Lower.Range, X.Upper.Range)]
   Regression.Coefficients <- unique(Regression.Coefficients)
   Regression.Coefficients[Regression.Coefficients == Inf] <- 1
   Regression.Coefficients[is.na(Regression.Coefficients)] <- 0
   
-  ### Fitted Values
-  p <- length(unlist(regression.points[ , 1]))
+  ### Fitted values
+  if (is.na(Regression.Coefficients[1, Coefficient]))  Regression.Coefficients[1,  Coefficient := Regression.Coefficients[2,  Coefficient]]
+  if (is.na(Regression.Coefficients[.N, Coefficient])) Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient]]
   
+  coef.interval <- findInterval(x, Regression.Coefficients[, (X.Lower.Range)], left.open = FALSE)
+  reg.interval  <- findInterval(x, regression.points[, x], left.open = FALSE)
   
-  if(is.na(Regression.Coefficients[1, Coefficient])){
-    Regression.Coefficients[1, Coefficient := Regression.Coefficients[2, Coefficient] ]
-  }
-  if(is.na(Regression.Coefficients[.N, Coefficient])){
-    Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient] ]
-  }
-  
-  coef.interval <- findInterval(x, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE)
-  reg.interval <- findInterval(x, regression.points[, x], left.open = FALSE)
-  
-  
-  if(is.fcl(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))){
+  if (is.fcl(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))) {
     estimate <- y
+  } else if (smooth_condition) {
+    # spline predictions
+    if (!exists("spline_fit")) {
+      spline_fit <- stats::smooth.spline(
+        x    = regression.points[, x],
+        y    = regression.points[, y],
+        spar = (dependence + 0.5) / 2
+      )
+    }
+    sorted_x   <- sort(x, index = TRUE)
+    orig.order <- sorted_x$ix
+    plot_estimate <- stats::predict(spline_fit, sorted_x$x)$y
+    estimate <- numeric(length(x))
+    estimate[orig.order] <- plot_estimate
   } else {
-    if(smooth && p >= 4){
-      sorted_x <- sort(x, index= T)
-      orig.order <- sorted_x$ix
-      spline_fit <- stats::smooth.spline(regression.points[, x], regression.points[, y], spar = (dependence + 0.5)/2)
-      regression.points$y <- spline_fit$y
-      plot_estimate <- stats::predict(spline_fit, sorted_x$x)$y
-      estimate <- numeric(length(x))   # place predictions back in original positions
-      estimate[orig.order] <- plot_estimate
-    } else estimate <- ((x - regression.points[reg.interval, x]) * Regression.Coefficients[coef.interval, Coefficient]) + regression.points[reg.interval, y]
+    # piecewise predictions
+    estimate <- ((x - regression.points[reg.interval, x]) *
+                   Regression.Coefficients[coef.interval, Coefficient]) +
+      regression.points[reg.interval, y]
   }
+  
   
   ### Regression Equation
-  if(multivariate.call)  return(regression.points[, c("x","y")])
+  if (multivariate.call) return(regression.points[, .(x, y)])
   
   if(!is.null(point.est)){
     coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
@@ -721,15 +747,15 @@ NNS.reg = function (x, y,
       point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
     }
     
-    if(!is.null(type)){
-      if(type=="class") point.est.y <- pmax(min(y), pmin(max(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
-    }
+
+    if(!is.null(type) && type=="class") point.est.y <- pmax(min(y), pmin(max(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
+    
   }
   
   colnames(estimate) <- NULL
-  if(!is.null(type)){
-    if(type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
-  }
+  
+  if(!is.null(type) && type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
+
   
   fitted <- data.table::data.table(x = x,
                                    y = original.y,
@@ -754,12 +780,11 @@ NNS.reg = function (x, y,
     data.table::setkey(regression.points, x)
   }
   
+  Prediction.Accuracy <- NULL
   
-  if(!is.null(type)){
-    if(type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
-  } else {
-    Prediction.Accuracy <- NULL
-  }
+
+  if(!is.null(type) && type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
+
   
   y.mean <- mean(y)
   R2 <- (sum((fitted$y - y.mean)*(fitted$y.hat - y.mean))^2)/(sum((fitted$y - y.mean)^2)*sum((fitted$y.hat - y.mean)^2))
@@ -844,7 +869,11 @@ NNS.reg = function (x, y,
     
     ### Plot Regression points and fitted values and legend
     points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
-    if(smooth && p >= 4 && !is.character(order)) lines(sorted_x$x, plot_estimate, col = "red", lwd = 2) else lines(na.omit(regression.points[ , .(x,y)]), col = 'red', lwd = 2, lty = 2)
+    if (smooth_condition && !is.character(order)) {
+      lines(sorted_x$x, plot_estimate, col = "red", lwd = 2)
+    } else {
+      lines(na.omit(regression.points[, .(x, y)]), col = 'red', lwd = 2, lty = 2)
+    }
     
     if(!is.null(point.est)){
       points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)

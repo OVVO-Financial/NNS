@@ -120,7 +120,7 @@ NNS.stack <- function(IVs.train,
     DV.train <- as.numeric(factor(DV.train))
     smoothness <- FALSE
   } else {
-    smoothness <- TRUE
+    smoothness <- FALSE
     DV.train <- as.numeric(DV.train)
   }
   
