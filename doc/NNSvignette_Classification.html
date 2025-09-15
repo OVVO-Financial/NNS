@@ -347,6 +347,7 @@ Classification</h1>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
+<p>C:_Classification.R</p>
 <div id="classification" class="section level1">
 <h1>Classification</h1>
 <p><strong><code>NNS.reg</code></strong> is a very robust regression
@@ -410,6 +411,7 @@ with the <strong><code>NNS.dep</code></strong> measure.</p>
 ## 28: 7.687079       NA       NA        NA
 ## 29: 7.900000       NA       NA        NA
 ##           V1       V2       V3        V4</code></pre>
+<p>C:_Classification.R</p>
 </div>
 </div>
 </div>
@@ -462,6 +464,7 @@ for classification problems when using
 <span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
 <span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
 <span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<p>C:_Classification.R</p>
 <p>A perfect classification, using the features weighted per the output
 above.</p>
 </div>
@@ -486,23 +489,24 @@ for classification problems when using
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>              <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>b</span></code></pre></div>
+<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.8071429</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.955787</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">6</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.465</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.6429167</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9642857</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.955787</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.93</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.925</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">$</span>reg</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
 <span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
 <span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="cn">NULL</span></span>
@@ -518,8 +522,11 @@ for classification problems when using
 <span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
 <span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="cn">NULL</span></span></code></pre></div>
+<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">mean</span>( b<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span></code></pre></div>
+<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<p>C:_Classification.R</p>
 <div id="brief-notes-on-other-parameters" class="section level2">
 <h2>Brief Notes on Other Parameters</h2>
 <ul>
@@ -554,6 +561,7 @@ Curve Fitting by Line Segments</a></p></li>
 <li><p><a href="https://doi.org/10.2139/ssrn.2864711">Classification
 Using NNS Clustering Analysis</a></p></li>
 </ul>
+<p>C:_Classification.R</p>
 </div>
 
 

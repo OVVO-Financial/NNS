@@ -637,11 +637,12 @@ NNS.reg = function (x, y,
   
   p <- nrow(regression.points)
 
-  smooth_condition <- (p >= 4 && is.null(type) && dependence < stn &&
-    (isTRUE(smooth) || (!isTRUE(smooth) && dep.reduced.order > 5)))
-  # Smooth regression.points IFF:
-  #   (smooth == TRUE) OR (smooth == FALSE && dep.reduced.order > 5)
-  # and we have enough points/unique x.
+  smooth_condition <- (p >= 4 && 
+                         is.null(type) && 
+                         !is.character(order) &&
+                         (isTRUE(smooth) || dependence < stn) &&
+                         (isTRUE(smooth) || (!isTRUE(smooth) && dep.reduced.order > 5)))
+
   if (smooth_condition) {
     spline_fit <- stats::smooth.spline(
       x    = regression.points[, x],
@@ -868,7 +869,7 @@ NNS.reg = function (x, y,
     
     ### Plot Regression points and fitted values and legend
     points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
-    if (smooth_condition && !is.character(order) && dependence < stn) {
+    if (smooth_condition) {
       lines(sorted_x$x, plot_estimate, col = "red", lwd = 2)
     } else {
       lines(na.omit(regression.points[, .(x, y)]), col = 'red', lwd = 2, lty = 2)

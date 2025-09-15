@@ -351,6 +351,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">library</span>(data.table)</span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>})</span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span></code></pre></div>
+<p>C:_Overview.R</p>
 <div id="orientation" class="section level1">
 <h1>Orientation</h1>
 <p><strong>Goal.</strong> A complete, hands‑on curriculum for Nonlinear
@@ -434,6 +435,7 @@ partial‑moment CDFs)</li>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">3000</span>)<span class="sc">-</span><span class="dv">1</span>; mu_z <span class="ot">&lt;-</span> <span class="fu">mean</span>(z)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">LPM</span>(<span class="dv">2</span>,mu_z,z), <span class="fu">UPM</span>(<span class="dv">2</span>,mu_z,z)))</span></code></pre></div>
 <pre><code>## Skewed z: LPM2=0.2780, UPM2=0.7682 (expect imbalance)</code></pre>
+<p>C:_Overview.R</p>
 <p><strong>Interpretation.</strong> The equality
 <code>LPM2 + UPM2 == var(x)</code> (Bessel adjustment used) holds
 because deviations are measured against the <em>global</em> mean.
@@ -462,6 +464,7 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 ## 
 ## $kurtosis
 ## [1] 0.06723772</code></pre>
+<p>C:_Overview.R</p>
 </div>
 <div id="mode-estimation-no-binorbandwidth-angst" class="section level2">
 <h2>2.2 Mode estimation (no bin‑or‑bandwidth angst)</h2>
@@ -470,6 +473,7 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>multimodal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="sc">-</span><span class="dv">2</span>,.<span class="dv">5</span>), <span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="dv">2</span>,.<span class="dv">5</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">NNS.mode</span>(multimodal,<span class="at">multi =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## [1] -2.049405  1.987674</code></pre>
+<p>C:_Overview.R</p>
 </div>
 <div id="cdf-tables-via-lpm-ratios" class="section level2">
 <h2>2.3 CDF tables via LPM ratios</h2>
@@ -487,6 +491,7 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 ##  8:  0.41462712 0.75
 ##  9:  0.94307172 0.85
 ## 10:  2.09633977 0.95</code></pre>
+<p>C:_Overview.R</p>
 <hr />
 </div>
 </div>
@@ -547,6 +552,7 @@ Partial‑moment dependence metrics respond to such structure.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>cop <span class="ot">&lt;-</span> <span class="fu">NNS.copula</span>(X, <span class="at">continuous=</span><span class="cn">TRUE</span>, <span class="at">plot=</span><span class="cn">FALSE</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>cop</span></code></pre></div>
 <pre><code>## [1] 0.5692785</code></pre>
+<p>C:_Overview.R</p>
 </div>
 <div id="code-copula" class="section level2">
 <h2>3.3 Code: copula</h2>
@@ -561,6 +567,7 @@ Partial‑moment dependence metrics respond to such structure.</p>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a></span>
 <span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="co"># Plot</span></span>
 <span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], <span class="fu">Co.LPM</span>(<span class="dv">0</span>, z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], z[,<span class="dv">1</span>], z[,<span class="dv">2</span>]), <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p>C:_Overview.R</p>
 <p><strong>Interpretation.</strong> <code>NNS.dep</code> remains high
 for curved relationships; <code>PM.matrix</code> collects co‑partial
 moments across variables; <code>NNS.copula</code> summarizes
@@ -616,6 +623,7 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">NNS.ANOVA</span>(<span class="at">control=</span>A, <span class="at">means.only=</span><span class="cn">TRUE</span>, <span class="at">plot=</span><span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## Certainty 
 ## 0.4870367</code></pre>
+<p>C:_Overview.R</p>
 <p><strong>Math sketch.</strong> For each quantile/threshold <span class="math inline">\(t\)</span>, compare CDFs built from
 <code>LPM.ratio(0, t, •)</code> (possibly with one‑sided tails).
 Aggregate across <span class="math inline">\(t\)</span> to a certainty
@@ -739,6 +747,7 @@ conditional dependence)</p>
 ## 198:       0.2474949
 ## 199:       0.2329677
 ## 200:       0.2435048</code></pre>
+<p>C:_Overview.R</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
 <span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
 <span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a> </span>
@@ -747,7 +756,7 @@ conditional dependence)</p>
 <span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
 <span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
 <span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
 <span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a></span>
 <span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a></span>
 <span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a><span class="fu">mean</span>(boost<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
@@ -763,15 +772,17 @@ conditional dependence)</p>
 <span id="cb29-22"><a href="#cb29-22" tabindex="-1"></a>                     <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
 <span id="cb29-23"><a href="#cb29-23" tabindex="-1"></a><span class="fu">mean</span>(stacked<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
 <span id="cb29-24"><a href="#cb29-24" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<p>C:_Overview.R</p>
 </div>
 <div id="code-directional-causality" class="section level2">
 <h2>5.3 Code: directional causality</h2>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>hp,  mtcars<span class="sc">$</span>mpg)  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code>## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) 
 ##           0.2607148           0.3863580           0.3933374</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp)   <span class="co"># mpg -&gt; hp</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp)   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code>## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) 
 ##           0.3863580           0.2607148           0.3933374</code></pre>
+<p>C:_Overview.R</p>
 <p><strong>Interpretation.</strong> Examine asymmetry in scores to infer
 direction. The method conditions partial‑moment dependence on candidate
 drivers.</p>
@@ -914,6 +925,7 @@ drivers.</p>
 ## [31]  2.55866015  2.11866163  2.74586923  2.51735125  2.65010464  2.74271312
 ## [37]  2.57476571  2.36765563  2.19204028  2.11237709  1.75937933  1.85620209
 ## [43]  1.67967895  1.11752903  1.58146774  1.56658789  0.93472275  0.84290235</code></pre>
+<p>C:_Overview.R</p>
 <p><strong>Notes.</strong> NNS seasonality uses coefficient of variation
 instead of ACF/PACFs, and NNS ARMA blends multiple seasonal periods into
 the linear or nonlinear regression forecasts.</p>
@@ -929,6 +941,7 @@ the linear or nonlinear regression forecasts.</p>
 <span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">NNS.meboot</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">rho =</span> <span class="dv">1</span>)</span>
 <span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="fu">dim</span>(mb[<span class="st">&quot;replicates&quot;</span>, ]<span class="sc">$</span>replicates)</span></code></pre></div>
 <pre><code>## [1] 350   5</code></pre>
+<p>C:_Overview.R</p>
 </div>
 <div id="monte-carlo-over-the-full-correlation-space" class="section level2">
 <h2>7.2 Monte Carlo over the full correlation space</h2>
@@ -938,6 +951,7 @@ the linear or nonlinear regression forecasts.</p>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">head</span>(<span class="fu">names</span>(mc<span class="sc">$</span>replicates),<span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## [1] 350</code></pre>
 <pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
+<p>C:_Overview.R</p>
 </div>
 <div id="riskneutral-rescale-pricing-context" class="section level2">
 <h2>7.3 Risk‑neutral rescale (pricing context)</h2>
@@ -948,6 +962,7 @@ the linear or nonlinear regression forecasts.</p>
 <span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
 <pre><code>##   target  mean_rn 
 ## 103.0455 103.0455</code></pre>
+<p>C:_Overview.R</p>
 <p><strong>Interpretation.</strong> <code>riskneutral</code> shifts the
 mean to match <span class="math inline">\(S_0 e^{rT}\)</span> (Terminal)
 or <span class="math inline">\(S_0\)</span> (Discounted), preserving
@@ -977,10 +992,11 @@ estimators.</p>
 <span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1
-## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
 <div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
-<pre><code>## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+<pre><code>## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
+<p>C:_Overview.R</p>
 <hr />
 </div>
 <div id="appendix-a-measuretheoretic-sketch-why-partial-moments-are-rigorous" class="section level1">
@@ -1133,6 +1149,7 @@ tests.</li>
 </ul>
 <p>For complete references, please see the Vignettes linked above and
 their specific referenced materials.</p>
+<p>C:_Overview.R</p>
 </div>
 </div>
 

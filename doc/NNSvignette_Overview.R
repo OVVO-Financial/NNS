@@ -99,7 +99,7 @@ NNS.reg(x = data.frame(x = x_train), y = y_train, order = NULL)
 #                IVs.test = iris[test.set, 1:4],
 #                epochs = 10, learner.trials = 10,
 #                status = FALSE, balance = TRUE,
-#                type = "CLASS", folds = 1)
+#                type = "CLASS", folds = 5)
 #  
 #  
 #  mean(boost$results == as.numeric(iris[test.set,5]))
@@ -118,7 +118,7 @@ NNS.reg(x = data.frame(x = x_train), y = y_train, order = NULL)
 
 ## -----------------------------------------------------------------------------
 NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg
-NNS.caus(mtcars$mpg, mtcars$hp)   # mpg -> hp
+NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 
 ## ----fig.width=7, fig.align='center'------------------------------------------
 # Univariate nonlinear ARMA

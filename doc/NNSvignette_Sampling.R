@@ -150,7 +150,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 #  sapply(boots, function(r) cor(r, x, method = "spearman"))
 #  
 #      rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1
-#   0.97524152  0.47443144  0.01906991 -0.31301530 -0.96889289
+#   0.99732373  0.51147915  0.01036904 -0.48720072 -0.98294629
 
 ## ----tgt_drift, fig.align='center', fig.width=8, fig.height=8, eval=FALSE-----
 #  boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
@@ -214,10 +214,10 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval=FALSE---------------------------------------------------------------
 #  for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
 #  
-#  [1] 0.9432899
-#  [1] 0.9460947
-#  [1] 0.9442031
-#  [1] 0.9423242
+#  [1] 0.9452863
+#  [1] 0.9499478
+#  [1] 0.945878
+#  [1] 0.9442845
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  NNS.copula(original.data)

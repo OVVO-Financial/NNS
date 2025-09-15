@@ -64,23 +64,24 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 
 ## ----stackevalres, eval = FALSE-----------------------------------------------
 #  Folds Remaining = 0
-#  Current NNS.reg(... , threshold = 0.8 ) MAX Iterations Remaining = 1
-#  Current NNS.reg(... , threshold = 0.405 ) MAX Iterations Remaining = 0
-#  Current NNS.reg(... , n.best = 1 ) MAX Iterations Remaining = 12
-#  Current NNS.reg(... , n.best = 2 ) MAX Iterations Remaining = 11
-#  Current NNS.reg(... , n.best = 3 ) MAX Iterations Remaining = 10
-#  Current NNS.reg(... , n.best = 4 ) MAX Iterations Remaining = 9
+#  Current NNS.reg(... , threshold = 0.80 ) MAX Iterations Remaining = 1
+#  Current NNS.reg(... , threshold = 0.40 ) MAX Iterations Remaining = 0
+#  Current NNS.reg(. , n.best = 1 ) MAX Iterations Remaining = 12
+#  Current NNS.reg(. , n.best = 2 ) MAX Iterations Remaining = 11
+#  Current NNS.reg(. , n.best = 3 ) MAX Iterations Remaining = 10
+#  Current NNS.reg(. , n.best = 4 ) MAX Iterations Remaining = 9
+#  Current NNS.reg(. , n.best = 5 ) MAX Iterations Remaining = 8
 #  $OBJfn.reg
-#  [1] 0.9933333
+#  [1] 0.9733333
 #  
 #  $NNS.reg.n.best
 #  [1] 1
 #  
 #  $probability.threshold
-#  [1] 0.43875
+#  [1] 0.547
 #  
 #  $OBJfn.dim.red
-#  [1] 0.96
+#  [1] 0.9666667
 #  
 #  $NNS.dim.red.threshold
 #  [1] 0.8
@@ -126,7 +127,7 @@ NNS.reg(cbind(x, x), y,
         ncores = 1, confidence.interval = .95)
 
 ## ----smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'-----
-NNS.reg(x, y, smooth = T)
+NNS.reg(x, y, smooth = TRUE)
 
 ## ----uniimpute, eval=FALSE----------------------------------------------------
 #  set.seed(123)
