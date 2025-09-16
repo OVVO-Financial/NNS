@@ -76,7 +76,7 @@ NNS.ANOVA <- function(
     stop("Please select tails from 'left', 'right', or 'both'")
   }
   
-  if (!missing(treatment)) {
+  if (!missing(treatment) && !is.null(treatment)) {
     # with treatment
     if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
     if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))

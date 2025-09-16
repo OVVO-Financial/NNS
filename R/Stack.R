@@ -59,13 +59,11 @@
 #' @examples
 #'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
 #'  \dontrun{
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS")
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
+#'  balance = TRUE)
 #'
 #'  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
 #'  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
-#'
-#'  ## Selecting NNS.reg and dimension reduction techniques.
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")
 #'  }
 #' @export
 
@@ -374,13 +372,29 @@ NNS.stack <- function(IVs.train,
       
       # build *aligned* dummy matrices for TRAIN=RPM and TEST in one shot
       build_design_pair <- function(train_df, test_df) {
-        stopifnot(identical(names(train_df), names(test_df)))
         tr <- as.data.frame(train_df, stringsAsFactors = TRUE)
         te <- as.data.frame(test_df,  stringsAsFactors = TRUE)
-        pieces_tr <- list()
-        pieces_te <- list()
+        
+        # If either has no names, synthesize consistent names
+        if (is.null(names(tr)) || anyNA(names(tr))) names(tr) <- paste0("X", seq_len(ncol(tr)))
+        if (is.null(names(te)) || anyNA(names(te))) names(te) <- paste0("X", seq_len(ncol(te)))
+        
+        # 1) take the UNION of names
+        alln <- union(names(tr), names(te))
+        
+        # 2) add any missing columns as NA (they’ll dummy to zeros after factor -> dummy)
+        add_missing <- function(df, alln) {
+          miss <- setdiff(alln, names(df))
+          for (m in miss) df[[m]] <- NA
+          # reorder to the common order
+          df[, alln, drop = FALSE]
+        }
+        tr <- add_missing(tr, alln)
+        te <- add_missing(te, alln)
+        
+        # proceed with factor_2_dummy_FR on the combined columns as before
+        pieces_tr <- list(); pieces_te <- list()
         for (nm in names(tr)) {
-          # combine → get union-of-levels and identical dummy set
           combo <- c(tr[[nm]], te[[nm]])
           block <- factor_2_dummy_FR(combo)
           if (is.null(dim(block))) block <- matrix(as.numeric(block), ncol = 1L)
@@ -392,6 +406,7 @@ NNS.stack <- function(IVs.train,
         Xte <- do.call(cbind, pieces_te); storage.mode(Xte) <- "double"
         list(Xtr = Xtr, Xte = Xte)
       }
+      
       
       pred_path_small <- NULL   # |Xtest| x l (k = 1..l)
       pred_q          <- NULL   # |Xtest| vector (k = q)

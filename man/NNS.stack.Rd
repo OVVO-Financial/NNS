@@ -102,13 +102,11 @@ reduce the \code{CV.size}.
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
  \dontrun{
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS")
+ NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
+ balance = TRUE)
 
  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
-
- ## Selecting NNS.reg and dimension reduction techniques.
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], iris[141:150, 1:4], method = c(1, 2), type = "CLASS")
  }
 }
 \references{
