@@ -32,23 +32,14 @@ NNS.copula <- function (
     plot = FALSE,
     independence.overlay = FALSE
 ){
-  if(sum(is.na(X)) > 0){
-    stop("You have some missing values, please address.")
-  }
   
+  if(anyNA(X)) stop("You have some missing values, please address.")
   
   n <- ncol(X)
-  l <- dim(X)[1]
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
   
-  if(is.null(colnames(X))){
-    colnames.list <- list()
-    for(i in 1 : n){
-      colnames.list[i] <- paste0("Var ", i)
-    }
-    colnames(X) <- c(colnames.list)
-  }
+  if(is.null(colnames(X))) colnames(X) <- paste0("Var ", seq_len(n))
   
   if((plot||independence.overlay) && n == 3){
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
@@ -82,30 +73,29 @@ NNS.copula <- function (
   if(is.null(target)) target <- colMeans(X)
   
   # Pairwise  
-  discrete_pm_cov <- PM.matrix(0, 0, target = target, variable = X, pop_adj = FALSE)
-  discrete_Co_pm <- sum(discrete_pm_cov$cupm[upper.tri(discrete_pm_cov$cupm, diag = FALSE)]) + sum(discrete_pm_cov$clpm[upper.tri(discrete_pm_cov$clpm, diag = FALSE)]) 
+  discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
+  utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
+  discrete_Co_pm <- sum(discrete_pm_cov$cupm[utr]) + sum(discrete_pm_cov$clpm[utr]) 
   if(discrete_Co_pm==1 || discrete_Co_pm==0) return(1)
   
   
   if(continuous){
-    degree <- 1
-    continuous_pm_cov <- PM.matrix(degree, degree, target = target, variable = X, pop_adj = TRUE, norm = TRUE)
+    continuous_pm_cov <- PM.matrix(LPM_degree = 1, UPM_degree = 1, target = target, variable = X, pop_adj = TRUE, norm = TRUE)
   } else {
-    degree <- 0
     continuous_pm_cov <- discrete_pm_cov
   }
   
-  
+
   # Isolate the upper triangles from each of the partial moment matrices
-  discrete_D_pm <- sum(discrete_pm_cov$dupm[upper.tri(discrete_pm_cov$dupm, diag = FALSE)]) + sum(discrete_pm_cov$dlpm[upper.tri(discrete_pm_cov$dlpm, diag = FALSE)])
+  discrete_D_pm <- sum(discrete_pm_cov$dupm[utr]) + sum(discrete_pm_cov$dlpm[utr])
   
-  continuous_Co_pm <- sum(continuous_pm_cov$cupm[upper.tri(continuous_pm_cov$cupm, diag = FALSE)]) + sum(continuous_pm_cov$clpm[upper.tri(continuous_pm_cov$clpm, diag = FALSE)]) 
-  continuous_D_pm <- sum(continuous_pm_cov$dupm[upper.tri(continuous_pm_cov$dupm, diag = FALSE)]) + sum(continuous_pm_cov$dlpm[upper.tri(continuous_pm_cov$dlpm, diag = FALSE)]) 
+  continuous_Co_pm <- sum(continuous_pm_cov$cupm[utr]) + sum(continuous_pm_cov$clpm[utr]) 
+  continuous_D_pm <- sum(continuous_pm_cov$dupm[utr]) + sum(continuous_pm_cov$dlpm[utr]) 
   
   indep_Co_pm <- .25 * (n^2 - n)
   
-  if(discrete_Co_pm > indep_Co_pm) discrete_dep <- (discrete_Co_pm-indep_Co_pm)/indep_Co_pm else discrete_dep <- (indep_Co_pm - discrete_Co_pm)/indep_Co_pm
-  if(continuous_Co_pm > indep_Co_pm) continuous_dep <- (continuous_Co_pm-indep_Co_pm)/(indep_Co_pm) else continuous_dep <- (indep_Co_pm - continuous_Co_pm)/(indep_Co_pm)
+  discrete_dep <- abs(discrete_Co_pm-indep_Co_pm)/indep_Co_pm
+  continuous_dep <- abs(continuous_Co_pm-indep_Co_pm)/indep_Co_pm 
   
    
   discrete_dep <- min(max(discrete_dep, 0), 1)
@@ -117,8 +107,8 @@ NNS.copula <- function (
   
   indep_D_pm <- 1-(0.5^n)
   
-  if(discrete_D_pm > indep_D_pm) n_dim_discrete_dep <- (discrete_D_pm - indep_D_pm)/(indep_D_pm) else n_dim_discrete_dep <- (indep_D_pm - discrete_D_pm)/(indep_D_pm)
-  if(continuous_D_pm > indep_D_pm) n_dim_continuous_dep <- (continuous_D_pm - indep_D_pm)/(indep_D_pm) else n_dim_continuous_dep <- (indep_D_pm - continuous_D_pm)/(indep_D_pm)
+  n_dim_discrete_dep <- abs(discrete_D_pm - indep_D_pm)/indep_D_pm 
+  n_dim_continuous_dep <- abs(continuous_D_pm - indep_D_pm)/indep_D_pm
 
 
   return(mean(c(discrete_dep, continuous_dep, n_dim_discrete_dep, n_dim_continuous_dep))^(1/2))

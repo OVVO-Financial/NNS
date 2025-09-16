@@ -74,6 +74,8 @@ dy.d_ <- function(x, y, wrt,
   if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
   if(l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
   
+  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+  
   dummies <- list()
   for(i in 1:l){
     dummies[[i]] <- factor_2_dummy_FR(x[,i])

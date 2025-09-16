@@ -30,7 +30,7 @@ NNS.seas <- function(variable,
 
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
 
-  if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
+  if(anyNA(variable)) stop("You have some missing values, please address.")
 
   if(length(variable) < 5){
     return(data.table::data.table("Period" = 0, "Coefficient.of.Variation" = 0, "Variable.Coefficient.of.Variation" = 0, key = "Coefficient.of.Variation"))

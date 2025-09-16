@@ -111,7 +111,7 @@ NNS.meboot <- function(x,
   if (length(x) == 1) return(list(x = x))
   type <- tolower(type)
   if (any(class(x) %in% c("tbl","data.table"))) x <- as.vector(unlist(x))
-  if (sum(is.na(x)) > 0) stop("You have some missing values, please address.")
+  if (anyNA(x)) stop("You have some missing values, please address.")
   
   trim <- list(trim = trim, xmin = xmin, xmax = xmax)
   trimval <- if (is.null(trim$trim)) 0.1 else trim$trim

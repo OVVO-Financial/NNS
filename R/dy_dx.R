@@ -33,7 +33,7 @@ dy.dx <- function(x, y, eval.point = NULL){
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
   
-  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
   
   order <- NULL
   

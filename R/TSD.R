@@ -20,6 +20,8 @@ NNS.TSD <- function(x, y, plot = TRUE){
 
     if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
     if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+    
+    if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
 
     Combined_sort <- sort(c(x, y), decreasing = FALSE)
 

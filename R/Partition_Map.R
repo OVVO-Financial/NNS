@@ -51,9 +51,9 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   if (!noise.reduction %in% ok)
     stop("noise.reduction must be one of ", paste(shQuote(ok), collapse = ", "))
   
-  if (any(class(x) %in% c("tbl","data.table"))) x <- unlist(x, use.names = FALSE)
-  if (any(class(y) %in% c("tbl","data.table"))) y <- unlist(y, use.names = FALSE)
-  x <- as.numeric(x); y <- as.numeric(y)
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
+  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+  
   if (is.null(obs.req)) obs.req <- 8L
   if (!is.null(order) && order == 0) order <- 1L
   
@@ -74,13 +74,8 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   RP   <- data.table::as.data.table(out$`regression.points`)
   data.table::setorder(RP, quadrant)
   
-  is.discrete <- function(z, tol = .Machine$double.eps^0.5) {
-    z <- as.numeric(z)
-    all(is.finite(z)) && all(abs(z - round(z)) <= tol)
-  }
-  if (is.discrete(x)) {
-    RP[, x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
-  }
+
+  if (is.discrete(x)) RP[, x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
   
   if (isTRUE(Voronoi)) {
     mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)

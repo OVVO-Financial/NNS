@@ -72,8 +72,7 @@ NNS.boost <- function(IVs.train,
   
   .core <- function() {
     
-    if (sum(is.na(cbind(IVs.train, DV.train))) > 0)
-      stop("You have some missing values, please address.")
+    if (anyNA(cbind(IVs.train, DV.train))) stop("You have some missing values, please address.")
     if (is.null(obj.fn)) stop("Please provide an objective function")
     
     if (balance && is.null(type)) warning("type = 'CLASS' selected due to balance = TRUE.")

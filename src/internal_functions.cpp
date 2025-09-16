@@ -124,6 +124,7 @@ bool is_discrete(SEXP x) {
   return acc == 0.0L;
 }
 
+
 // ---------- 3) factor_2_dummy & factor_2_dummy_FR ----------
 
 // [[Rcpp::export]]

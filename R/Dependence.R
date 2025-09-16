@@ -35,10 +35,14 @@ NNS.dep = function(x,
   
   
   
-  if(any(class(x)%in%c("tbl","data.table")) && !is.null(y)) x <- as.vector(unlist(x))
-  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+  if (any(class(x) %in% c("tbl","data.table")) && !is.null(y)) {
+    x <- if (!is.null(ncol(x)) && ncol(x) == 1) as.vector(unlist(x)) else as.numeric(x)
+  }
+  if (any(class(y) %in% c("tbl","data.table"))) {
+    y <- if (!is.null(ncol(y)) && ncol(y) == 1) as.vector(unlist(y)) else as.numeric(y)
+  }
   
-  if(sum(is.na(x)) > 0) stop("You have some missing values, please address.")
+  if(anyNA(x)) stop("You have some missing values, please address.")
   
   if(p.value){
     y_p <- replicate(100, sample.int(length(y)))
@@ -47,10 +51,8 @@ NNS.dep = function(x,
   }
   
   if(!is.null(y)){
-    x <- as.numeric(x)
     l <- length(x)
     
-    y <- as.numeric(y)
     obs <- max(8, l/8)
     
     # Define segments
@@ -62,19 +64,15 @@ NNS.dep = function(x,
     
     PART_xy <- PART_xy$dt
     PART_xy <- PART_xy[complete.cases(PART_xy),]
-    
-    PART_xy[, weights_xy := .N/l, by = quadrant]
-    weights_xy <- PART_xy[, weights_xy[1], by = quadrant]$V1
-    
+    weights_xy <- PART_xy[, .N / l, by = quadrant]$V1
+   
     PART_yx <- PART_yx$dt
     PART_yx <- PART_yx[complete.cases(PART_yx),]
-    
-    PART_yx[, weights_yx := .N/l, by = quadrant]
-    weights_yx <- PART_yx[, weights_yx[1], by = quadrant]$V1
+    weights_yx <- PART_yx[, .N / l, by = quadrant]$V1
     
     
     dep_fn = function(x, y){
-      NNS::NNS.copula(cbind(x, y)) * sign(cov(x,y))
+      NNS::NNS.copula(cbind(x, y)) * sign(fast_lm(x,y)$coef[2])
     }
     
     res_xy <- suppressWarnings(tryCatch(PART_xy[,  dep_fn(x, y), by = quadrant],
@@ -83,10 +81,10 @@ NNS.dep = function(x,
     res_yx <- suppressWarnings(tryCatch(PART_yx[,  dep_fn(y, x), by = quadrant],
                                         error = function(e) PART_yx[,  dep_fn(y, x), by = prior.quadrant]))
     
-    if(sum(is.na(res_xy))>0) res_xy[is.na(res_xy)] <- dep_fn(x, y)
+    if(anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
     
-    if(sum(is.na(res_yx))>0) res_yx[is.na(res_yx)] <- dep_fn(x, y)
+    if(anyNA(res_yx)) res_yx[is.na(res_yx)] <- dep_fn(x, y)
     if(is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
     
     if(asym){

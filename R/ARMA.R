@@ -72,7 +72,7 @@ NNS.ARMA <- function(variable,
   
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
   
-  if(sum(is.na(variable)) > 0) stop("You have some missing values, please address.")
+  if(anyNA(variable)) stop("You have some missing values, please address.")
   
   method <- tolower(method)
   if(method == "means") shrink <- FALSE
@@ -218,12 +218,13 @@ NNS.ARMA <- function(variable,
         Regression.Estimates <- sapply(seq_along(lag), function(i) {
           x <- Component.index[[i]]
           y <- Component.series[[i]]
-          
+
           last.y <- tail(y, 1)
           
           reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
+
           reg.points <- reg.points[complete.cases(reg.points), ]
-          
+       
           xs <- tail(reg.points$x, 1) - reg.points$x
           ys <- tail(reg.points$y, 1) - reg.points$y
           
@@ -343,8 +344,8 @@ NNS.ARMA <- function(variable,
   
   
   options(warn = oldw)
+  
   if(!is.null(pred.int)){
-    
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_PIs),  pmax(Estimates, upper_PIs))
     colnames(results) = c("Estimates",
                           paste0("Lower ", round(pred.int*100,2), "% pred.int"),

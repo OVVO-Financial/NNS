@@ -151,7 +151,7 @@ NNS.reg = function (x, y,
   oldw <- getOption("warn")
   options(warn = -1)
   
-  if(sum(is.na(cbind(x,y))) > 0) stop("You have some missing values, please address.")
+  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
   
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
   
@@ -160,6 +160,7 @@ NNS.reg = function (x, y,
   if(any(class(x)%in%c("tbl","data.table")) && ncol(x)==1) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table")) && ncol(y)==1) y <- as.vector(unlist(y))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
+  
   
   n <- length(y)
   original.x <- x
@@ -290,7 +291,7 @@ NNS.reg = function (x, y,
     if(is.null(n.best)) n.best <- 1
   }
   
-
+  
   if(!is.null(original.columns)){
     if(original.columns == 1){
       x <- original.variable
@@ -312,7 +313,7 @@ NNS.reg = function (x, y,
           colnames.list <- original.names
         }
         
-        x <- apply(data.matrix(x), 2, as.numeric)
+        x <- data.matrix(x) 
         y <- as.numeric(y)
         
         if(!is.null(dim.red.method) & !is.null(dim(x))){
@@ -461,7 +462,7 @@ NNS.reg = function (x, y,
   
   dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
   
-
+  
   if(dependence == 1 || dep.reduced.order == "max"){
     if(is.null(order)) dep.reduced.order <- "max"
     part.map <- NNS.part(x, y, order = dep.reduced.order, obs.req = 0)
@@ -481,7 +482,7 @@ NNS.reg = function (x, y,
       }
     }
   }
-
+  
   nns.ids <- part.map$dt$quadrant
   
   if(length(part.map$dt$y) > length(y)){
@@ -624,7 +625,6 @@ NNS.reg = function (x, y,
   }
   
   
-  
   regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(min.rps, max.rps, med.rps )))), use.names = FALSE)
   
   regression.points <- regression.points[complete.cases(regression.points),]
@@ -636,13 +636,13 @@ NNS.reg = function (x, y,
   regression.points <- unique(regression.points)
   
   p <- nrow(regression.points)
-
+  
   smooth_condition <- (p >= 4 && 
                          is.null(type) && 
                          !is.character(order) &&
-                         (isTRUE(smooth) || dependence < stn) &&
-                         (isTRUE(smooth) || (!isTRUE(smooth) && dep.reduced.order > 5)))
-
+                         (isTRUE(smooth) || dependence < stn))
+  
+  
   if (smooth_condition) {
     spline_fit <- stats::smooth.spline(
       x    = regression.points[, x],
@@ -747,7 +747,7 @@ NNS.reg = function (x, y,
       point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
     }
     
-
+    
     if(!is.null(type) && type=="class") point.est.y <- pmax(min(y), pmin(max(y), ifelse(point.est.y%%1 < .5, floor(point.est.y), ceiling(point.est.y))))
     
   }
@@ -755,7 +755,7 @@ NNS.reg = function (x, y,
   colnames(estimate) <- NULL
   
   if(!is.null(type) && type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
-
+  
   
   fitted <- data.table::data.table(x = x,
                                    y = original.y,
@@ -782,9 +782,9 @@ NNS.reg = function (x, y,
   
   Prediction.Accuracy <- NULL
   
-
+  
   if(!is.null(type) && type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
-
+  
   
   y.mean <- mean(y)
   R2 <- (sum((fitted$y - y.mean)*(fitted$y.hat - y.mean))^2)/(sum((fitted$y - y.mean)^2)*sum((fitted$y.hat - y.mean)^2))

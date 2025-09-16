@@ -25,7 +25,7 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
     if(any(class(y)%in%c("tbl","data.table"))) {
       y <- as.vector(unlist(y))
     }
-    if(sum(is.na(cbind(x,y))) > 0) {
+    if(anyNA(cbind(x,y))) {
       stop("You have some missing values, please address.")
     }
     type <- tolower(type)
@@ -58,7 +58,7 @@ NNS.SSD.uni <- function(x, y){
     if(any(class(y) %in% c("tbl","data.table"))){
 	  y <- as.vector(unlist(y))
 	}
-    if(sum(is.na(cbind(x,y))) > 0){
+    if(anyNA(cbind(x,y))){
 	  stop("You have some missing values, please address.")
 	}
   .Call(`_NNS_NNS_SSD_uni_cpp`, x, y)
@@ -88,7 +88,7 @@ NNS.TSD.uni <- function(x, y){
     if(any(class(y)%in%c("tbl","data.table"))){
 	  y <- as.vector(unlist(y))
 	}
-    if(sum(is.na(cbind(x,y))) > 0){
+    if(anyNA(cbind(x,y))){
 	  stop("You have some missing values, please address.")
 	}
   .Call(`_NNS_NNS_TSD_uni_cpp`, x, y)

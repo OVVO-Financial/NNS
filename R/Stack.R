@@ -89,7 +89,7 @@ NNS.stack <- function(IVs.train,
                       status = TRUE,
                       ncores = NULL){
   
-  if(sum(is.na(cbind(IVs.train,DV.train))) > 0) stop("You have some missing values, please address.")
+  if(anyNA(cbind(IVs.train,DV.train))) stop("You have some missing values, please address.")
   if(is.null(obj.fn)) stop("Please provide an objective function")
   
   if(balance && is.null(type)) warning("type = 'CLASS' selected due to balance = TRUE.")
@@ -622,11 +622,11 @@ NNS.stack <- function(IVs.train,
   if(!is.null(type)) probability.threshold <-  mean(c(threshold_results_1, threshold_results_2), na.rm = TRUE) else probability.threshold <- .5
   
   if(identical(sort(method),c(1,2))){
-    if(sum(is.na(nns.method.1)>0)){
+    if(anyNA(nns.method.1)){
       na.1.index <- which(is.na(nns.method.1))
       nns.method.1[na.1.index] <- nns.method.2[na.1.index]
     }
-    if(sum(is.na(nns.method.2)>0)){
+    if(anyNA(nns.method.2)){
       na.2.index <- which(is.na(nns.method.2))
       nns.method.2[na.2.index] <- nns.method.1[na.2.index]
     }
