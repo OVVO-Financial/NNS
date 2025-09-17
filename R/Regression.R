@@ -161,7 +161,6 @@ NNS.reg = function (x, y,
   if(any(class(y)%in%c("tbl","data.table")) && ncol(y)==1) y <- as.vector(unlist(y))
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
   
-  
   n <- length(y)
   original.x <- x
   
@@ -184,8 +183,6 @@ NNS.reg = function (x, y,
     type <- "class"
     noise.reduction <- "mode_class"
   }
-  
-  if(!is.null(type) && type == "class") smooth = FALSE
   
   if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
   
@@ -313,7 +310,7 @@ NNS.reg = function (x, y,
           colnames.list <- original.names
         }
         
-        x <- data.matrix(x) 
+        x <- apply(data.matrix(x), 2, as.numeric)
         y <- as.numeric(y)
         
         if(!is.null(dim.red.method) & !is.null(dim(x))){
@@ -625,6 +622,7 @@ NNS.reg = function (x, y,
   }
   
   
+  
   regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(min.rps, max.rps, med.rps )))), use.names = FALSE)
   
   regression.points <- regression.points[complete.cases(regression.points),]
@@ -635,13 +633,51 @@ NNS.reg = function (x, y,
   regression.points <- regression.points[, y := gravity(y), by = "x"]
   regression.points <- unique(regression.points)
   
-  p <- nrow(regression.points)
   
-  smooth_condition <- (p >= 4 && 
-                         is.null(type) && 
-                         !is.character(order) &&
-                         (isTRUE(smooth) || dependence < stn))
+  if(dim(regression.points)[1] > 1){
+    rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
+    run <- regression.points[ , 'run' := x - data.table::shift(x)]
+  } else {
+    rise <- max(y) - min(y)
+    rise <- regression.points[ , 'rise' := rise]
+    run <- max(x) - min(x)
+    if(run==0) run <- 1
+    run <- regression.points[ , 'run' := run]
+    regression.points <- data.table::rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
+  }
   
+  
+  regression.points$x <- pmin(regression.points$x, max(x))
+  regression.points$x <- pmax(regression.points$x, min(x))
+  
+  regression.points$y <- pmin(regression.points$y, max(y))
+  regression.points$y <- pmax(regression.points$y, min(y))
+  
+  
+  
+  Regression.Coefficients <- regression.points[ , .(rise,run)]
+  
+  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
+  
+  upper.x <- regression.points[(2 : .N), x]
+  
+  if(length(unique(upper.x)) > 1){
+    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+  } else {
+    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'= 0,'X.Lower.Range' = unique(upper.x), 'X.Upper.Range' = unique(upper.x))]
+  }
+  
+  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
+  
+  
+  Regression.Coefficients <- unique(Regression.Coefficients)
+  Regression.Coefficients[Regression.Coefficients == Inf] <- 1
+  Regression.Coefficients[is.na(Regression.Coefficients)] <- 0
+  
+  ### Fitted Values
+  p <- length(unlist(regression.points[ , 1]))
+  
+  smooth_condition <- smooth && p >= 4 && !is.character(order)
   
   if (smooth_condition) {
     spline_fit <- stats::smooth.spline(

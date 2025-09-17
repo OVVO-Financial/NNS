@@ -162,7 +162,7 @@ NNS.ARMA <- function(variable,
         last.xs <- tail(GV.lin$Component.index[[i]], 1)
         lin.reg <- fast_lm(GV.lin$Component.index[[i]], GV.lin$Component.series[[i]])
         coefs <- lin.reg$coef
-
+        
         return(as.numeric(coefs[1] + coefs[2] * unlist(GV.lin$forecast.values[[i]])))
       })
       
@@ -218,13 +218,13 @@ NNS.ARMA <- function(variable,
         Regression.Estimates <- sapply(seq_along(lag), function(i) {
           x <- Component.index[[i]]
           y <- Component.series[[i]]
-
+          
           last.y <- tail(y, 1)
           
           reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
-
+          
           reg.points <- reg.points[complete.cases(reg.points), ]
-       
+          
           xs <- tail(reg.points$x, 1) - reg.points$x
           ys <- tail(reg.points$y, 1) - reg.points$y
           
