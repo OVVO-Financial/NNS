@@ -1,0 +1,78 @@
+name: CRAN memtests (ASAN/UBSAN)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  memtests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          # Closest to CRAN clang-ASAN logs
+          - rocker/r-devel-ubsan-clang
+          # Closest to CRAN gcc-ASAN logs
+          - rocker/r-devel-san
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull ${{ matrix.image }}
+        run: docker pull ${{ matrix.image }}
+
+      - name: Run R CMD check under ${{ matrix.image }}
+        # NOTE: --cap-add=SYS_PTRACE is needed for clang ASAN inside Docker
+        run: |
+          docker run --rm --cap-add=SYS_PTRACE \
+            -e OMP_THREAD_LIMIT=1 \
+            -e OMP_NUM_THREADS=1 \
+            -e OPENBLAS_NUM_THREADS=1 \
+            -e MKL_NUM_THREADS=1 \
+            -e VECLIB_MAXIMUM_THREADS=1 \
+            -e RCPP_PARALLEL_NUM_THREADS=1 \
+            -e ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 \
+            -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg ${{ matrix.image }} bash -lc '
+              echo "== R-devel (sanitized) ==";
+              RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()";
+
+              echo "== Install build/vignette deps ==";
+              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\")";
+
+              echo "== Build package tarball ==";
+              RD CMD build . || exit 1;
+              TARBALL=$(ls -1t *.tar.gz | head -n1);
+              echo "Built: $TARBALL";
+
+              echo "== R CMD check --as-cran (sanitized) ==";
+              RD CMD check "$TARBALL" --as-cran --no-manual
+            '
+
+  # Optional: just rebuild vignettes to mirror CRAN's build_vignettes.log
+  vignettes-only:
+    runs-on: ubuntu-latest
+    needs: memtests
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull rocker/r-devel-ubsan-clang
+        run: docker pull rocker/r-devel-ubsan-clang
+
+      - name: Build vignettes under clang ASAN
+        run: |
+          docker run --rm --cap-add=SYS_PTRACE \
+            -e OMP_THREAD_LIMIT=1 \
+            -e OMP_NUM_THREADS=1 \
+            -e OPENBLAS_NUM_THREADS=1 \
+            -e MKL_NUM_THREADS=1 \
+            -e VECLIB_MAXIMUM_THREADS=1 \
+            -e RCPP_PARALLEL_NUM_THREADS=1 \
+            -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
+              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\")";
+              RD -q -e "tools::buildVignettes(dir=\".\")"
+            '
