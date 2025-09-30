@@ -14,7 +14,8 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(2L)
 options(mc.cores = 1)
-Sys.setenv("OMP_THREAD_LIMIT" = 2)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 ```
 
 ```{r setup2,message=FALSE,warning = FALSE}
@@ -146,6 +147,3 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 
 *   [LPM Density Functions for the Computation of the SD Efficient Set](http://dx.doi.org/10.4236/jmf.2016.61012)
 
-```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = "")
-```

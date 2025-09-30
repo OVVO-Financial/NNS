@@ -10,9 +10,9 @@ suppressPackageStartupMessages({
 set.seed(42)
 
 ## ----include=FALSE, message=FALSE---------------------------------------------
-data.table::setDTthreads(2L)
+data.table::setDTthreads(1L)
 options(mc.cores = 1)
-Sys.setenv("OMP_THREAD_LIMIT" = 2)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## -----------------------------------------------------------------------------
 # Normal sample
@@ -60,17 +60,17 @@ cop <- NNS.copula(X, continuous=TRUE, plot=FALSE)
 cop
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  # Data
-#  set.seed(123); x = rnorm(100); y = rnorm(100); z = expand.grid(x, y)
-#  
-#  # Plot
-#  rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "red")
-#  
-#  # Uniform values
-#  u_x = LPM.ratio(0, x, x); u_y = LPM.ratio(0, y, y); z = expand.grid(u_x, u_y)
-#  
-#  # Plot
-#  rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
+# # Data
+# set.seed(123); x = rnorm(100); y = rnorm(100); z = expand.grid(x, y)
+# 
+# # Plot
+# rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "red")
+# 
+# # Uniform values
+# u_x = LPM.ratio(0, x, x); u_y = LPM.ratio(0, y, y); z = expand.grid(u_x, u_y)
+# 
+# # Plot
+# rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 
 ## -----------------------------------------------------------------------------
 ctrl <- rnorm(200, 0, 1)
@@ -91,30 +91,30 @@ x_test <- seq(-2, 2, length.out = 100)
 NNS.reg(x = data.frame(x = x_train), y = y_train, order = NULL)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  # Simple train/test for boosting & stacking
-#  test.set = 141:150
-#  
-#  boost <- NNS.boost(IVs.train = iris[-test.set, 1:4],
-#                DV.train = iris[-test.set, 5],
-#                IVs.test = iris[test.set, 1:4],
-#                epochs = 10, learner.trials = 10,
-#                status = FALSE, balance = TRUE,
-#                type = "CLASS", folds = 5)
-#  
-#  
-#  mean(boost$results == as.numeric(iris[test.set,5]))
-#  [1] 1
-#  
-#  
-#  boost$feature.weights; boost$feature.frequency
-#  
-#  stacked <- NNS.stack(IVs.train = iris[-test.set, 1:4],
-#                       DV.train = iris[-test.set, 5],
-#                       IVs.test = iris[test.set, 1:4],
-#                       type = "CLASS", balance = TRUE,
-#                       ncores = 1, folds = 1)
-#  mean(stacked$stack == as.numeric(iris[test.set,5]))
-#  [1] 1
+# # Simple train/test for boosting & stacking
+# test.set = 141:150
+# 
+# boost <- NNS.boost(IVs.train = iris[-test.set, 1:4],
+#               DV.train = iris[-test.set, 5],
+#               IVs.test = iris[test.set, 1:4],
+#               epochs = 10, learner.trials = 10,
+#               status = FALSE, balance = TRUE,
+#               type = "CLASS", folds = 5)
+# 
+# 
+# mean(boost$results == as.numeric(iris[test.set,5]))
+# [1] 1
+# 
+# 
+# boost$feature.weights; boost$feature.frequency
+# 
+# stacked <- NNS.stack(IVs.train = iris[-test.set, 1:4],
+#                      DV.train = iris[-test.set, 5],
+#                      IVs.test = iris[test.set, 1:4],
+#                      type = "CLASS", balance = TRUE,
+#                      ncores = 1, folds = 1)
+# mean(stacked$stack == as.numeric(iris[test.set,5]))
+# [1] 1
 
 ## -----------------------------------------------------------------------------
 NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg

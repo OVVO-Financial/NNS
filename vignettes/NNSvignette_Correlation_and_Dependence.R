@@ -2,9 +2,10 @@
 knitr::opts_chunk$set(echo = TRUE)
 library(NNS)
 library(data.table)
-data.table::setDTthreads(2L)
+data.table::setDTthreads(1L)
 options(mc.cores = 1)
-Sys.setenv("OMP_THREAD_LIMIT" = 2)
+RcppParallel::setThreadOptions(numThreads = 1)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2,message=FALSE,warning = FALSE-------------------------------------
 library(NNS)
@@ -76,7 +77,4 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 set.seed(123)
 x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

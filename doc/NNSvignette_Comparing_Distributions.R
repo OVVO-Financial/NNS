@@ -4,7 +4,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(2L)
 options(mc.cores = 1)
-Sys.setenv("OMP_THREAD_LIMIT" = 2)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2,message=FALSE,warning = FALSE-------------------------------------
 library(NNS)

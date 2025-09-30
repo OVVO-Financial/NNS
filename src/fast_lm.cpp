@@ -1,169 +1,184 @@
 #include <Rcpp.h>
+#include <cmath>
 using namespace Rcpp;
+
+// Small numerical tolerance for positive-definite checks
+static inline bool is_pos(double x) { return x > 0.0 && std::isfinite(x); }
 
 // [[Rcpp::export]]
 List fast_lm(NumericVector x, NumericVector y) {
-  int n = x.size();
+  const R_xlen_t nx = x.size();
+  const R_xlen_t ny = y.size();
+  
+  // --- strict input validation ---
+  if (nx == 0 || ny == 0)
+    stop("fast_lm: 'x' and 'y' must be non-empty.");
+  if (nx != ny)
+    stop("fast_lm: length(x) != length(y) (got %lld vs %lld).",
+         static_cast<long long>(nx), static_cast<long long>(ny));
+  
+  const R_xlen_t n = nx;
   
   // Calculate means
-  double mean_x = 0;
-  double mean_y = 0;
-  for (int i = 0; i < n; ++i) {
+  double mean_x = 0.0;
+  double mean_y = 0.0;
+  for (R_xlen_t i = 0; i < n; ++i) {
     mean_x += x[i];
     mean_y += y[i];
   }
-  mean_x /= n;
-  mean_y /= n;
+  mean_x /= static_cast<double>(n);
+  mean_y /= static_cast<double>(n);
   
-  // Calculate coefficients
-  double b1 = 0;
-  double b0 = 0;
-  double numerator = 0;
-  double denominator = 0;
-  for (int i = 0; i < n; ++i) {
-    numerator += (x[i] - mean_x) * (y[i] - mean_y);
-    denominator += (x[i] - mean_x) * (x[i] - mean_x);
+  // Calculate slope/intercept via centered cross-moments
+  double numerator = 0.0;
+  double denominator = 0.0;
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const double dx = x[i] - mean_x;
+    numerator   += dx * (y[i] - mean_y);
+    denominator += dx * dx;
   }
-  b1 = numerator / denominator;
-  b0 = mean_y - b1 * mean_x;
+  if (denominator == 0.0)
+    stop("fast_lm: variance of 'x' is zero; slope undefined.");
   
-  // Calculate fitted values and residuals
-  NumericVector fitted_values(n);
-  NumericVector residuals(n);
-  for (int i = 0; i < n; ++i) {
-    fitted_values[i] = b0 + b1 * x[i];
-    residuals[i] =  y[i] - fitted_values[i];
+  const double b1 = numerator / denominator;
+  const double b0 = mean_y - b1 * mean_x;
+  
+  // fitted values and residuals
+  NumericVector fitted_values(n), residuals(n);
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const double fi = b0 + b1 * x[i];
+    fitted_values[i] = fi;
+    residuals[i]     = y[i] - fi;
   }
   
-  
-  // Return coefficients, fitted values, residuals, and R-squared
   return List::create(
-    _["coef"] = NumericVector::create(b0, b1),
+    _["coef"]          = NumericVector::create(b0, b1),
     _["fitted.values"] = fitted_values,
-    _["residuals"] = residuals
+    _["residuals"]     = residuals
   );
 }
 
+// --- Linear algebra helpers for multiple regression ---
+
 // Cholesky decomposition of a symmetric positive-definite matrix A
 // Returns lower triangular matrix L such that A = L * L^T
-NumericMatrix cholesky_decomposition(NumericMatrix A) {
-  int n = A.nrow();
-  NumericMatrix L(n, n); // Initialize L with zeros
+static NumericMatrix cholesky_decomposition(const NumericMatrix& A) {
+  const R_xlen_t n = A.nrow();
+  if (n != A.ncol()) stop("cholesky_decomposition: matrix must be square.");
+  NumericMatrix L(n, n);
   
-  for (int i = 0; i < n; ++i) {
+  for (R_xlen_t i = 0; i < n; ++i) {
     // Compute L(i, i)
     double sum = A(i, i);
-    for (int k = 0; k < i; ++k) {
-      sum -= L(i, k) * L(i, k);
-    }
-    L(i, i) = sqrt(sum > 0 ? sum : 0); // Ensure non-negative for stability
+    for (R_xlen_t k = 0; k < i; ++k) sum -= L(i, k) * L(i, k);
+    if (!is_pos(sum)) stop("cholesky_decomposition: matrix not positive-definite (nonpositive pivot at %lld).", static_cast<long long>(i+1));
+    L(i, i) = std::sqrt(sum);
     
     // Compute L(j, i) for j > i
-    for (int j = i + 1; j < n; ++j) {
-      sum = A(j, i);
-      for (int k = 0; k < i; ++k) {
-        sum -= L(j, k) * L(i, k);
-      }
-      L(j, i) = sum / L(i, i);
+    const double Lii = L(i, i);
+    for (R_xlen_t j = i + 1; j < n; ++j) {
+      double s = A(j, i);
+      for (R_xlen_t k = 0; k < i; ++k) s -= L(j, k) * L(i, k);
+      L(j, i) = s / Lii;
     }
   }
   return L;
 }
 
 // Solve L * z = b (forward substitution, L is lower triangular)
-NumericVector forward_substitution(NumericMatrix L, NumericVector b) {
-  int n = L.nrow();
+static NumericVector forward_substitution(const NumericMatrix& L, const NumericVector& b) {
+  const R_xlen_t n = L.nrow();
+  if (b.size() != n) stop("forward_substitution: incompatible dimensions.");
   NumericVector z(n);
   
-  for (int i = 0; i < n; ++i) {
+  for (R_xlen_t i = 0; i < n; ++i) {
     double sum = b[i];
-    for (int j = 0; j < i; ++j) {
-      sum -= L(i, j) * z[j];
-    }
-    z[i] = sum / L(i, i);
+    for (R_xlen_t j = 0; j < i; ++j) sum -= L(i, j) * z[j];
+    const double Lii = L(i, i);
+    if (Lii == 0.0 || !std::isfinite(Lii)) stop("forward_substitution: singular pivot.");
+    z[i] = sum / Lii;
   }
   return z;
 }
 
 // Solve L^T * x = z (back substitution, L^T is upper triangular)
-NumericVector back_substitution(NumericMatrix L, NumericVector z) {
-  int n = L.nrow();
+static NumericVector back_substitution(const NumericMatrix& L, const NumericVector& z) {
+  const R_xlen_t n = L.nrow();
+  if (z.size() != n) stop("back_substitution: incompatible dimensions.");
   NumericVector x(n);
   
-  for (int i = n - 1; i >= 0; --i) {
+  for (R_xlen_t i = n; i-- > 0; ) { // i = n-1 ... 0
     double sum = z[i];
-    for (int j = i + 1; j < n; ++j) {
-      sum -= L(j, i) * x[j]; // L(j, i) is L^T(i, j)
-    }
-    x[i] = sum / L(i, i);
+    for (R_xlen_t j = i + 1; j < n; ++j) sum -= L(j, i) * x[j]; // L^T(i, j) = L(j, i)
+    const double Lii = L(i, i);
+    if (Lii == 0.0 || !std::isfinite(Lii)) stop("back_substitution: singular pivot.");
+    x[i] = sum / Lii;
   }
   return x;
 }
 
 // [[Rcpp::export]]
 List fast_lm_mult(NumericMatrix x, NumericVector y) {
-  int n = x.nrow(); // Number of observations
-  int p = x.ncol(); // Number of predictors
+  const R_xlen_t n = x.nrow();
+  const R_xlen_t p = x.ncol();
+  if (n == 0) stop("fast_lm_mult: 'x' has zero rows.");
+  if (p == 0) stop("fast_lm_mult: 'x' has zero columns.");
+  if (y.size() != n) stop("fast_lm_mult: length(y) != nrow(x) (got %lld vs %lld).",
+      static_cast<long long>(y.size()), static_cast<long long>(n));
   
-  // Add intercept term to the design matrix
+  // Design matrix with intercept
   NumericMatrix X(n, p + 1);
-  for (int i = 0; i < n; ++i) {
-    X(i, 0) = 1; // Intercept column
-    for (int j = 0; j < p; ++j) {
-      X(i, j + 1) = x(i, j);
-    }
+  for (R_xlen_t i = 0; i < n; ++i) {
+    X(i, 0) = 1.0; // Intercept
+    for (R_xlen_t j = 0; j < p; ++j) X(i, j + 1) = x(i, j);
   }
   
-  // Compute X'X and X'y
-  NumericMatrix XtX(p + 1, p + 1);
-  NumericVector Xty(p + 1);
-  for (int i = 0; i < p + 1; ++i) {
-    for (int j = 0; j < p + 1; ++j) {
-      double sum = 0;
-      for (int k = 0; k < n; ++k) {
-        sum += X(k, i) * X(k, j);
-      }
-      XtX(i, j) = sum;
+  // Compute XtX and Xty
+  const R_xlen_t q = p + 1;
+  NumericMatrix XtX(q, q);
+  NumericVector Xty(q);
+  
+  for (R_xlen_t i = 0; i < q; ++i) {
+    for (R_xlen_t j = 0; j <= i; ++j) { // fill lower triangle, then mirror
+      double s = 0.0;
+      for (R_xlen_t k = 0; k < n; ++k) s += X(k, i) * X(k, j);
+      XtX(i, j) = s;
+      if (i != j) XtX(j, i) = s;
     }
-    double sum = 0;
-    for (int k = 0; k < n; ++k) {
-      sum += X(k, i) * y[k];
-    }
-    Xty[i] = sum;
+    double sy = 0.0;
+    for (R_xlen_t k = 0; k < n; ++k) sy += X(k, i) * y[k];
+    Xty[i] = sy;
   }
   
-  // Cholesky decomposition: X'X = L * L^T
+  // Solve normal equations via Cholesky
   NumericMatrix L = cholesky_decomposition(XtX);
-  
-  // Solve L * z = X'y (forward substitution)
   NumericVector z = forward_substitution(L, Xty);
-  
-  // Solve L^T * beta = z (back substitution)
   NumericVector coef = back_substitution(L, z);
   
-  // Compute fitted values
+  // Fitted values and residuals
   NumericVector fitted_values(n);
-  for (int i = 0; i < n; ++i) {
-    double sum = 0;
-    for (int j = 0; j < p + 1; ++j) {
-      sum += coef[j] * X(i, j);
-    }
-    fitted_values[i] = sum;
+  for (R_xlen_t i = 0; i < n; ++i) {
+    double s = 0.0;
+    for (R_xlen_t j = 0; j < q; ++j) s += coef[j] * X(i, j);
+    fitted_values[i] = s;
   }
-  
-  // Compute residuals
   NumericVector residuals = fitted_values - y;
   
-  // Compute R-squared
-  double y_mean = mean(y);
-  double TSS = sum(pow(y - y_mean, 2));
-  double RSS = sum(pow(residuals, 2));
-  double R2 = 1 - RSS / TSS;
+  // R-squared
+  const double y_mean = mean(y);
+  double TSS = 0.0, RSS = 0.0;
+  for (R_xlen_t i = 0; i < n; ++i) {
+    const double dy = y[i] - y_mean;
+    TSS += dy * dy;
+    const double re = residuals[i];
+    RSS += re * re;
+  }
+  const double R2 = (TSS == 0.0) ? NA_REAL : (1.0 - RSS / TSS);
   
   return List::create(
     _["coefficients"] = coef,
     _["fitted.values"] = fitted_values,
-    _["residuals"] = residuals,
-    _["r.squared"] = R2
+    _["residuals"]     = residuals,
+    _["r.squared"]     = R2
   );
 }

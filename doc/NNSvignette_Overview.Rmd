@@ -24,18 +24,29 @@ set.seed(42)
 
 
 ```{r, include=FALSE, message=FALSE}
-data.table::setDTthreads(2L)
+data.table::setDTthreads(1L)
 options(mc.cores = 1)
-Sys.setenv("OMP_THREAD_LIMIT" = 2)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
 ```
 
 # Orientation
 
-**Goal.** A complete, hands‑on curriculum for Nonlinear Nonparametric Statistics (NNS) using **partial moments**. Each section blends narrative intuition, precise math, and executable code.
+**Goal.** 
+A complete, hands‑on curriculum for Nonlinear Nonparametric Statistics (NNS) using **partial moments**. Each section blends narrative intuition, precise math, and executable code.
 
-**Structure.** 1. Foundations — partial moments & variance decomposition 2. Descriptive & distributional tools 3. Dependence & nonlinear association 4. Hypothesis testing & ANOVA (LPM‑CDF) 5. Regression, boosting, stacking & causality 6. Time series & forecasting 7. Simulation (max‑entropy), Monte Carlo & risk‑neutral rescaling 8. Portfolio & stochastic dominance
+**Structure.** 
 
-**Notation.** For a random variable $X$ and threshold/target $t$, the population $n$‑th **partial moments** are defined as
+1. Foundations — partial moments & variance decomposition
+2. Descriptive & distributional tools 
+3. Dependence & nonlinear association 
+4. Hypothesis testing & ANOVA (LPM‑CDF) 
+5. Regression, boosting, stacking & causality 
+6. Time series & forecasting 
+7. Simulation (max‑entropy), Monte Carlo & risk‑neutral rescaling 
+8. Portfolio & stochastic dominance
+
+**Notation.** 
+For a random variable $X$ and threshold/target $t$, the population $n$‑th **partial moments** are defined as
 
 $$
 \operatorname{LPM}(n,t,X) 
@@ -139,7 +150,12 @@ CDF_tbl
 
 Pearson captures linear monotone relationships. Many structures (U‑shapes, saturation, asymmetric tails) produce near‑zero $r$ despite strong dependence. Partial‑moment dependence metrics respond to such structure.
 
-**Headers.** - `Co.LPM(degree, target, x, y)` / `Co.UPM(...)` (co‑partial moments) - `PM.matrix(l_degree, u_degree, target=NULL, variable, pop_adj=TRUE)` - `NNS.dep(x, y)` (scalar dependence coefficient) - `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
+**Headers.** 
+
+- `Co.LPM(degree, target, x, y)` / `Co.UPM(...)` (co‑partial moments) 
+- `PM.matrix(l_degree, u_degree, target=NULL, variable, pop_adj=TRUE)` 
+- `NNS.dep(x, y)` (scalar dependence coefficient) 
+- `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
 
 ## 3.2 Code: nonlinear dependence
 
@@ -184,7 +200,9 @@ rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 
 Instead of distributional assumptions, compare groups via **LPM‑based CDFs**. Output is a *degree of certainty* (not a p‑value) for equality of populations or means.
 
-**Header.** `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
+**Header.** 
+
+- `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
 
 ## 4.2 Code: two‑sample & multi‑group
 
@@ -207,7 +225,10 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 
 `NNS.reg` learns **partitioned** relationships using partial‑moment weights — linear where appropriate, nonlinear where needed — avoiding fragile global parametric forms.
 
-**Headers.** - `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, … - `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)` - `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` - `NNS.caus(x, y)` (directional causality score via conditional dependence)
+**Headers.** 
+
+- `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, … 
+- `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)` - `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` - `NNS.caus(x, y)` (directional causality score via conditional dependence)
 
 ## 5.2 Code: classification via regression + ensembles
 
@@ -263,7 +284,12 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 
 # 6. Time Series & Forecasting
 
-**Headers.** `NNS.ARMA`, `NNS.ARMA.optim`, `NNS.seas`, `NNS.VAR`
+**Headers.**
+
+- `NNS.ARMA`
+- `NNS.ARMA.optim`
+- `NNS.seas`
+- `NNS.VAR`
 
 ```{r , fig.width=7, fig.align='center'}
 # Univariate nonlinear ARMA
@@ -284,7 +310,9 @@ NNS.ARMA.optim(z, h=48, seasonal.factor = NNS.seas(z, plot = FALSE)$periods, plo
 
 ## 7.1 Maximum entropy bootstrap (shape‑preserving)
 
-**Header.** `NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)`
+**Header.** 
+
+- `NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)`
 
 ```{r}
 x_ts <- cumsum(rnorm(350, sd=.7))
@@ -294,7 +322,9 @@ dim(mb["replicates", ]$replicates)
 
 ## 7.2 Monte Carlo over the full correlation space
 
-**Header.** `NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)`
+**Header.** 
+
+- `NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)`
 
 ```{r}
 mc <- NNS.MC(x_ts, reps=5, lower_rho=-1, upper_rho=1, by=.5, exp=1)
@@ -303,7 +333,9 @@ length(mc$ensemble); head(names(mc$replicates),5)
 
 ## 7.3 Risk‑neutral rescale (pricing context)
 
-**Header.** `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
+**Header.** 
+
+- `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
 
 ```{r}
 px <- 100 + cumsum(rnorm(260, sd = 1))
@@ -319,7 +351,12 @@ c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 
 Stochastic dominance orders uncertain prospects for broad classes of risk‑averse utilities; partial moments supply practical, nonparametric estimators.
 
-**Headers.** - `NNS.FSD.uni(x, y)`, `NNS.SSD.uni(x, y)`, `NNS.TSD.uni(x, y)` - `NNS.SD.cluster(R)`, `NNS.SD.efficient.set(R)`
+**Headers.** 
+- `NNS.FSD.uni(x, y)`
+- `NNS.SSD.uni(x, y)`
+- `NNS.TSD.uni(x, y)` 
+- `NNS.SD.cluster(R)`
+- `NNS.SD.efficient.set(R)`
 
 ```{r}
 RA <- rnorm(240, 0.005, 0.03)

@@ -49,8 +49,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -347,7 +348,6 @@ Classification</h1>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
-<p>C:_Classification.R</p>
 <div id="classification" class="section level1">
 <h1>Classification</h1>
 <p><strong><code>NNS.reg</code></strong> is a very robust regression
@@ -380,38 +380,43 @@ techniques.</p>
 allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
-<pre><code>##           V1       V2       V3        V4
-##  1: 4.300000 2.000000 1.000000 0.1000000
-##  2: 4.381250 2.829734 1.050000 0.2000000
-##  3: 4.577396 3.358016 1.200000 0.3000000
-##  4: 4.700000 4.400000 1.300000 0.4083333
-##  5: 4.800000       NA 1.400000 1.0630397
-##  6: 4.900000       NA 1.500000 1.3742424
-##  7: 5.000000       NA 1.600000 1.7789810
-##  8: 5.100000       NA 1.700000 2.2285885
-##  9: 5.205000       NA 1.900000 2.5000000
-## 10: 5.400000       NA 3.416305        NA
-## 11: 5.500000       NA 3.834865        NA
-## 12: 5.600000       NA 4.000000        NA
-## 13: 5.700000       NA 4.184722        NA
-## 14: 5.800000       NA 4.400000        NA
-## 15: 5.900000       NA 4.500000        NA
-## 16: 6.000000       NA 4.670803        NA
-## 17: 6.100000       NA 4.863889        NA
-## 18: 6.200000       NA 5.000000        NA
-## 19: 6.300000       NA 5.100000        NA
-## 20: 6.400000       NA 5.200000        NA
-## 21: 6.500000       NA 5.337500        NA
-## 22: 6.600000       NA 5.500000        NA
-## 23: 6.700000       NA 5.617708        NA
-## 24: 6.800000       NA 5.849554        NA
-## 25: 6.900000       NA 6.336875        NA
-## 26: 7.050000       NA 6.900000        NA
-## 27: 7.224375       NA       NA        NA
-## 28: 7.687079       NA       NA        NA
-## 29: 7.900000       NA       NA        NA
-##           V1       V2       V3        V4</code></pre>
-<p>C:_Classification.R</p>
+<pre><code>##        V1       V2       V3       V4
+##     &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;
+##  1:  4.30 2.000000 1.000000 0.100000
+##  2:  4.40 2.451641 1.050000 0.200000
+##  3:  4.50 2.773569 1.200000 0.300000
+##  4:  4.60 2.900000 1.300000 0.400000
+##  5:  4.70 3.000000 1.400000 0.550000
+##  6:  4.80 3.100000 1.500000 1.000000
+##  7:  4.90 3.220395 1.600000 1.170803
+##  8:  5.00 3.420833 1.700000 1.300000
+##  9:  5.10 3.793484 1.900000 1.474861
+## 10:  5.20 4.400000 3.416305 1.608333
+## 11:  5.30       NA 3.834865 1.816728
+## 12:  5.40       NA 4.000000 2.074283
+## 13:  5.50       NA 4.184722 2.328571
+## 14:  5.60       NA 4.400000 2.500000
+## 15:  5.70       NA 4.500000       NA
+## 16:  5.80       NA 4.670803       NA
+## 17:  5.90       NA 4.863889       NA
+## 18:  6.00       NA 5.000000       NA
+## 19:  6.10       NA 5.100000       NA
+## 20:  6.20       NA 5.200000       NA
+## 21:  6.30       NA 5.337500       NA
+## 22:  6.40       NA 5.500000       NA
+## 23:  6.50       NA 5.617708       NA
+## 24:  6.60       NA 5.849554       NA
+## 25:  6.70       NA 6.336875       NA
+## 26:  6.80       NA 6.900000       NA
+## 27:  6.90       NA       NA       NA
+## 28:  7.00       NA       NA       NA
+## 29:  7.10       NA       NA       NA
+## 30:  7.20       NA       NA       NA
+## 31:  7.35       NA       NA       NA
+## 32:  7.60       NA       NA       NA
+## 33:  7.71       NA       NA       NA
+## 34:  7.90       NA       NA       NA
+##        V1       V2       V3       V4</code></pre>
 </div>
 </div>
 </div>
@@ -464,7 +469,6 @@ for classification problems when using
 <span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
 <span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
 <span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
-<p>C:_Classification.R</p>
 <p>A perfect classification, using the features weighted per the output
 above.</p>
 </div>
@@ -489,7 +493,6 @@ for classification problems when using
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>              <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>b</span></code></pre></div>
-<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.955787</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
@@ -522,11 +525,8 @@ for classification problems when using
 <span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
 <span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="cn">NULL</span></span></code></pre></div>
-<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">mean</span>( b<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span></code></pre></div>
-<p>C:_Classification.R</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
-<p>C:_Classification.R</p>
 <div id="brief-notes-on-other-parameters" class="section level2">
 <h2>Brief Notes on Other Parameters</h2>
 <ul>
@@ -561,7 +561,6 @@ Curve Fitting by Line Segments</a></p></li>
 <li><p><a href="https://doi.org/10.2139/ssrn.2864711">Classification
 Using NNS Clustering Analysis</a></p></li>
 </ul>
-<p>C:_Classification.R</p>
 </div>
 
 
