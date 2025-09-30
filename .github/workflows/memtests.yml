@@ -24,8 +24,7 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
-      - name: Run R CMD check under ${{ matrix.image }}
-        # NOTE: --cap-add=SYS_PTRACE is needed for clang ASAN inside Docker
+            - name: Run under ${{ matrix.image }}
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -35,21 +34,57 @@ jobs:
             -e VECLIB_MAXIMUM_THREADS=1 \
             -e RCPP_PARALLEL_NUM_THREADS=1 \
             -e ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 \
+            -e UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
+            -e RGL_USE_NULL=TRUE \
+            -e MAKEFLAGS="-j2" \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg ${{ matrix.image }} bash -lc '
-              echo "== R-devel (sanitized) ==";
-              RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()";
+              set -euo pipefail
+              echo "== R-devel (sanitized) =="
+              RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()"
 
-              echo "== Install build/vignette deps ==";
-              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\")";
+              echo "== apt: system libraries for rgl, curl/ssl/xml, etc. =="
+              apt-get update -y
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
+                libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
+                libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Build package tarball ==";
-              RD CMD build . || exit 1;
-              TARBALL=$(ls -1t *.tar.gz | head -n1);
-              echo "Built: $TARBALL";
+              echo "== Install R dependencies (Imports/Suggests used in vignettes) =="
+              RD -q -e "install.packages(c( \
+                \"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\", \
+                \"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\" \
+              ), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== R CMD check --as-cran (sanitized) ==";
-              RD CMD check "$TARBALL" --as-cran --no-manual
+              echo "== Build tarball =="
+              RD CMD build .
+              TARBALL=$(ls -1t *.tar.gz | head -n1)
+              echo "Built: ${TARBALL}"
+
+              echo "== R CMD check (sanitized) =="
+              set +e
+              RD CMD check "${TARBALL}" --as-cran --no-manual
+              STATUS=$?
+              set -e
+
+              echo "== Harvest logs =="
+              PKG=${TARBALL%.tar.gz}
+              CHECKDIR="${PKG}.Rcheck"
+              [ -f "${CHECKDIR}/00check.log" ] && tail -n 400 "${CHECKDIR}/00check.log" || true
+              [ -f "${CHECKDIR}/00install.out" ] && tail -n 200 "${CHECKDIR}/00install.out" || true
+              find "${CHECKDIR}" -maxdepth 3 -name "*vignette*.log" -print -exec tail -n 120 {} \; || true
+              exit ${STATUS}
             '
+
+      - name: Upload check artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image }}-Rcheck
+          path: |
+            *.tar.gz
+            *.Rcheck/**
+          if-no-files-found: warn
+
 
   # Optional: just rebuild vignettes to mirror CRAN's build_vignettes.log
   vignettes-only:
