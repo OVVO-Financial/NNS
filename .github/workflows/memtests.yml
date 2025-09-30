@@ -12,10 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          # Closest to CRAN clang-ASAN logs
-          - rocker/r-devel-ubsan-clang
-          # Closest to CRAN gcc-ASAN logs
-          - rocker/r-devel-san
+          - rocker/r-devel-ubsan-clang   # clang ASAN/UBSAN
+          - rocker/r-devel-san           # gcc ASAN/UBSAN
 
     steps:
       - name: Checkout
@@ -24,7 +22,7 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
-            - name: Run under ${{ matrix.image }}
+      - name: Run under ${{ matrix.image }}
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -84,7 +82,6 @@ jobs:
             *.tar.gz
             *.Rcheck/**
           if-no-files-found: warn
-
 
   # Optional: just rebuild vignettes to mirror CRAN's build_vignettes.log
   vignettes-only:
