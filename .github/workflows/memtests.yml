@@ -11,9 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image:
-          - rocker/r-devel-ubsan-clang   # clang ASAN/UBSAN
-          - rocker/r-devel-san           # gcc ASAN/UBSAN
+        include:
+          - image: rocker/r-devel-ubsan-clang
+            id: r-devel-ubsan-clang
+          - image: rocker/r-devel-san
+            id: r-devel-san
 
     steps:
       - name: Checkout
@@ -40,14 +42,15 @@ jobs:
               echo "== R-devel (sanitized) =="
               RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()"
 
-              echo "== apt: system libraries for rgl, curl/ssl/xml, etc. =="
+              echo "== apt: system libraries (rgl, pandoc, etc.) =="
               apt-get update -y
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                pandoc \
                 libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Install R dependencies (Imports/Suggests used in vignettes) =="
+              echo "== Install R dependencies (Imports/Suggests for vignettes) =="
               RD -q -e "install.packages(c( \
                 \"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\", \
                 \"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\" \
@@ -77,7 +80,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.image }}-Rcheck
+          name: ${{ matrix.id }}-Rcheck
           path: |
             *.tar.gz
             *.Rcheck/**
@@ -104,7 +107,24 @@ jobs:
             -e MKL_NUM_THREADS=1 \
             -e VECLIB_MAXIMUM_THREADS=1 \
             -e RCPP_PARALLEL_NUM_THREADS=1 \
+            -e RGL_USE_NULL=TRUE \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
-              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\")";
+              set -euo pipefail
+              apt-get update -y
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pandoc \
+                libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
+                libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
+                libcurl4-openssl-dev libssl-dev libxml2-dev
+              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
               RD -q -e "tools::buildVignettes(dir=\".\")"
             '
+
+      - name: Upload vignette logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vignettes-only-logs
+          path: |
+            *.Rcheck/**/vignette*.log
+            vignettes/*.html
+          if-no-files-found: ignore
