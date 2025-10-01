@@ -26,7 +26,6 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
-      # -------- PMMatrix stress-test (strict sanitizers) --------
       - name: Stress-test PMMatrix under sanitizers
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
@@ -56,7 +55,6 @@ jobs:
               cat > test_pmmatrix.R <<'RS'
               suppressMessages(library(NNS))
               set.seed(42)
-
               run_case <- function(tag, gen) {
                 cat(sprintf("\n--- CASE: %s ---\n", tag)); flush.console()
                 res <- try(gen(), silent=TRUE)
@@ -67,34 +65,21 @@ jobs:
                   cat("ok checksum:", s, "\n")
                 }
               }
-
-              # big dense numeric (clean)
               run_case("big-1000x1000-clean", function(){
-                X <- matrix(rnorm(1e6), 1000, 1000)
-                y <- rnorm(1000)
+                X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
                 NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
               })
-
-              # NA/Inf sprinkled
               run_case("with-na-inf", function(){
-                X <- matrix(rnorm(1e6), 1000, 1000)
-                y <- rnorm(1000)
-                X[sample(length(X), 1000)] <- NA
-                X[sample(length(X), 1000)] <- Inf
+                X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
+                X[sample(length(X), 1000)] <- NA; X[sample(length(X), 1000)] <- Inf
                 NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
               })
-
-              # mismatched sizes (should error, not crash)
               run_case("mismatch-n", function(){
-                X <- matrix(rnorm(1000*50), 1000, 50)
-                y <- rnorm(999)
+                X <- matrix(rnorm(1000*50), 1000, 50); y <- rnorm(999)
                 NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
               })
-
-              # tall-narrow
               run_case("tall-narrow", function(){
-                X <- matrix(rnorm(2000*3), 2000, 3)
-                y <- rnorm(2000)
+                X <- matrix(rnorm(2000*3), 2000, 3); y <- rnorm(2000)
                 NNS::PMMatrix(LPM_degree=2, UPM_degree=2, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
               })
               RS
@@ -110,10 +95,10 @@ jobs:
               RD --vanilla -q < test_pmmatrix.R >> test_pmmatrix.log 2>&1 || true
 
               echo "== Gate on sanitizer hits in NNS/src only =="
-              if grep -E \"AddressSanitizer|UndefinedBehaviorSanitizer\" -n test_pmmatrix.log | grep -q \"NNS/src/\"; then
-                echo \"Sanitizer hit inside NNS code (see below)\"; sed -n \"1,400p\" test_pmmatrix.log; exit 1
+              if grep -E "AddressSanitizer|UndefinedBehaviorSanitizer" -n test_pmmatrix.log | grep -q "NNS/src/"; then
+                echo "Sanitizer hit inside NNS code (see below)"; sed -n "1,400p" test_pmmatrix.log; exit 1
               else
-                echo \"No sanitizer hits in NNS/src during stress; external reports (if any) ignored.\"
+                echo "No sanitizer hits in NNS/src during stress; external reports (if any) ignored."
               fi
             '
 
@@ -124,9 +109,8 @@ jobs:
           name: ${{ matrix.id }}-test_pmmatrix
           path: test_pmmatrix.log
           if-no-files-found: warn
-      # -------- end stress-test --------
 
-      - name: Run under ${{ matrix.image }}
+      - name: R CMD check under ${{ matrix.image }}
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -204,7 +188,7 @@ jobs:
       - name: Pull rocker/r-devel-ubsan-clang
         run: docker pull rocker/r-devel-ubsan-clang
 
-            - name: Build vignettes under clang ASAN (relaxed)
+      - name: Build vignettes under clang ASAN (relaxed)
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -220,7 +204,6 @@ jobs:
             -e UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
-
               echo "== apt: system libraries and pandoc =="
               apt-get update -y
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -240,7 +223,6 @@ jobs:
               echo "== Build vignettes (relaxed sanitizers active) =="
               RD -q -e "tools::buildVignettes(dir=\".\")"
             '
-
 
       - name: Upload vignette logs
         if: always()
