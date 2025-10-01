@@ -50,14 +50,14 @@ jobs:
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Install base deps =="
+              echo "== Base deps =="
               RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== Install RcppParallel with ODR detection temporarily OFF =="
+              echo "== RcppParallel with ODR detection OFF (install-time only) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
               RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== Install remaining package deps (ODR back ON for our code later) =="
+              echo "== Remaining deps =="
               RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Build tarball =="
@@ -65,7 +65,7 @@ jobs:
               TARBALL=$(ls -1t *.tar.gz | head -n1)
               echo "Built: ${TARBALL}"
 
-              echo "== R CMD check (strict ASAN back ON; skip vignettes here) =="
+              echo "== R CMD check (strict sanitizers; skip vignettes here) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
               export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
               set +e
@@ -92,6 +92,7 @@ jobs:
             *.Rcheck/**
           if-no-files-found: warn
 
+  # Build vignettes separately; relax sanitizers to avoid third-party noise
   vignettes-only:
     runs-on: ubuntu-latest
     needs: memtests
@@ -103,7 +104,7 @@ jobs:
       - name: Pull rocker/r-devel-ubsan-clang
         run: docker pull rocker/r-devel-ubsan-clang
 
-      - name: Build vignettes under clang ASAN
+      - name: Build vignettes under clang ASAN (relaxed)
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -113,6 +114,12 @@ jobs:
             -e VECLIB_MAXIMUM_THREADS=1 \
             -e RCPP_PARALLEL_NUM_THREADS=1 \
             -e RGL_USE_NULL=TRUE \
+            # Disable TBB scalable allocator to avoid UBSAN vptr churn on exit
+            -e TBBMALLOC_DISABLE=1 \
+            -e TBB_MALLOC_DISABLE=1 \
+            # Relax sanitizers for vignette rendering: ignore external leaks, don’t halt on UB
+            -e ASAN_OPTIONS="detect_leaks=0:abort_on_error=1:detect_odr_violation=0" \
+            -e UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
 
@@ -124,18 +131,15 @@ jobs:
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Install deps (RcppParallel with ODR OFF) =="
+              echo "== Deps (RcppParallel with ODR OFF) =="
               RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
               RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
               RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Install package so vignettes can library(NNS) =="
               RD CMD INSTALL .
 
-              echo "== Build vignettes (ASAN defaults OK) =="
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
-              export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+              echo "== Build vignettes (relaxed sanitizers active) =="
               RD -q -e "tools::buildVignettes(dir=\".\")"
             '
 
@@ -148,3 +152,4 @@ jobs:
             *.Rcheck/**/vignette*.log
             vignettes/*.html
           if-no-files-found: ignore
+
