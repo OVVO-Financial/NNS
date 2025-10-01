@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1) FAST FAIL: exercise NNS internals (PMMatrix + fast_lm) under sanitizers
+  # 1) FAST FAIL: exercise NNS internals (PMMatrix + fast_lm)
   nns-stress:
     runs-on: ubuntu-latest
     steps:
@@ -40,18 +40,17 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Install CRAN deps (incl. RcppParallel) =="
-              # Keep ODR detection off only during RcppParallel installation to avoid TBB ODR noise
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e 'install.packages(c(
-                "Rcpp","RcppParallel","data.table","knitr","rmarkdown",
-                "doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"
-              ), repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e "install.packages(c( \
+                \"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\", \
+                \"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\" \
+              ), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo '== Install NNS =='
+              echo "== Install NNS =="
               RD CMD INSTALL .
 
-              echo "== Create stress script =="
-              cat > test_nns.R <<'"'"'RS'"'"'
+              echo \"== Create stress script ==\"
+              cat > test_nns.R <<'RS'
               suppressMessages(library(NNS))
               set.seed(42)
 
@@ -133,7 +132,7 @@ jobs:
           path: test_nns.log
           if-no-files-found: warn
 
-  # 2) R CMD check with sanitizers (only if nns-stress passed)
+  # 2) R CMD check with sanitizers (runs after nns-stress)
   memtests:
     runs-on: ubuntu-latest
     needs: nns-stress
@@ -178,14 +177,14 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Base deps =="
-              RD -q -e 'install.packages(c("Rcpp","data.table","knitr","rmarkdown"), repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== RcppParallel (ODR OFF during install) =="
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e 'install.packages("RcppParallel", repos="https://cloud.r-project.org", Ncpus=2)'
+              export ASAN_OPTIONS=\"detect_leaks=1:abort_on_error=1:detect_odr_violation=0\"
+              RD -q -e \"install.packages('RcppParallel', repos='https://cloud.r-project.org', Ncpus=2)\"
 
               echo "== Remaining deps =="
-              RD -q -e 'install.packages(c("doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"), repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Build tarball =="
               RD CMD build .
@@ -219,7 +218,7 @@ jobs:
             *.Rcheck/**
           if-no-files-found: warn
 
-  # 3) Build vignettes with relaxed sanitizers (only if memtests passed or ran)
+  # 3) Build vignettes relaxed (always runs after memtests)
   vignettes-only:
     runs-on: ubuntu-latest
     needs: memtests
@@ -257,15 +256,15 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Deps (RcppParallel with ODR OFF) =="
-              RD -q -e 'install.packages(c("Rcpp","data.table","knitr","rmarkdown"), repos="https://cloud.r-project.org", Ncpus=2)'
-              RD -q -e 'install.packages("RcppParallel", repos="https://cloud.r-project.org", Ncpus=2)'
-              RD -q -e 'install.packages(c("doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"), repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Install package so vignettes can library(NNS) =="
               RD CMD INSTALL .
 
               echo "== Build vignettes (relaxed sanitizers active) =="
-              RD -q -e "tools::buildVignettes(dir='.'.)"
+              RD -q -e "tools::buildVignettes(dir=\".\")"
             '
 
       - name: Upload vignette logs
