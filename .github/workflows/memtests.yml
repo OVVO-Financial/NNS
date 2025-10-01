@@ -26,7 +26,7 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
-      - name: Stress-test PMMatrix under sanitizers
+      - name: Stress-test NNS (PMMatrix + fast_lm) under sanitizers
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -52,35 +52,55 @@ jobs:
               RD CMD INSTALL .
 
               echo "== Create stress script =="
-              cat > test_pmmatrix.R <<'RS'
+              cat > test_nns.R <<'"'"'RS'"'"'
               suppressMessages(library(NNS))
               set.seed(42)
+
               run_case <- function(tag, gen) {
                 cat(sprintf("\n--- CASE: %s ---\n", tag)); flush.console()
-                res <- try(gen(), silent=TRUE)
+                res <- try(gen(), silent = TRUE)
                 if (inherits(res, "try-error")) {
                   cat("ERROR in", tag, ":\n"); cat(as.character(res), "\n")
                 } else {
-                  s <- tryCatch(sum(unlist(res), na.rm=TRUE), error=function(e) NA_real_)
+                  s <- tryCatch(sum(unlist(res), na.rm = TRUE), error = function(e) NA_real_)
                   cat("ok checksum:", s, "\n")
                 }
               }
-              run_case("big-1000x1000-clean", function(){
+
+              ## PMMatrix tests
+              run_case("PMMatrix big-1000x1000", function(){
                 X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
-                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1, target = y, variable = X, pop_adj = FALSE, norm = FALSE)
               })
-              run_case("with-na-inf", function(){
+              run_case("PMMatrix with NA/Inf", function(){
                 X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
-                X[sample(length(X), 1000)] <- NA; X[sample(length(X), 1000)] <- Inf
-                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+                X[sample(length(X), 1000)] <- NA
+                X[sample(length(X), 1000)] <- Inf
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1, target = y, variable = X, pop_adj = FALSE, norm = FALSE)
               })
-              run_case("mismatch-n", function(){
-                X <- matrix(rnorm(1000*50), 1000, 50); y <- rnorm(999)
-                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+              run_case("PMMatrix mismatch-n", function(){
+                X <- matrix(rnorm(1000*50), 1000, 50); y <- rnorm(999)  # off-by-one
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1, target = y, variable = X, pop_adj = FALSE, norm = FALSE)
               })
-              run_case("tall-narrow", function(){
+              run_case("PMMatrix tall-narrow", function(){
                 X <- matrix(rnorm(2000*3), 2000, 3); y <- rnorm(2000)
-                NNS::PMMatrix(LPM_degree=2, UPM_degree=2, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+                NNS::PMMatrix(LPM_degree = 2, UPM_degree = 2, target = y, variable = X, pop_adj = FALSE, norm = FALSE)
+              })
+
+              ## fast_lm (C++ helpers) tests
+              run_case("fast_lm simple", function(){
+                x <- rnorm(1000); y <- 2 + 3*x + rnorm(1000)
+                NNS:::fast_lm(x, y)
+              })
+              run_case("fast_lm_mult multiple predictors", function(){
+                X <- cbind(rnorm(1000), rnorm(1000))
+                y <- 1 + 0.5*X[,1] - 2*X[,2] + rnorm(1000)
+                NNS:::fast_lm_mult(X, y)
+              })
+              run_case("fast_lm_mult collinear", function(){
+                X <- cbind(rnorm(1000), rnorm(1000)); X <- cbind(X, X[,1] + X[,2])
+                y <- rnorm(1000)
+                NNS:::fast_lm_mult(X, y)
               })
               RS
 
@@ -88,15 +108,15 @@ jobs:
               export RCPP_PARALLEL_NUM_THREADS=1
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
               export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
-              RD --vanilla -q < test_pmmatrix.R > test_pmmatrix.log 2>&1 || true
+              RD --vanilla -q < test_nns.R > test_nns.log 2>&1 || true
 
               echo "== Run stress (threads=4) =="
               export RCPP_PARALLEL_NUM_THREADS=4
-              RD --vanilla -q < test_pmmatrix.R >> test_pmmatrix.log 2>&1 || true
+              RD --vanilla -q < test_nns.R >> test_nns.log 2>&1 || true
 
               echo "== Gate on sanitizer hits in NNS/src only =="
-              if grep -E "AddressSanitizer|UndefinedBehaviorSanitizer" -n test_pmmatrix.log | grep -q "NNS/src/"; then
-                echo "Sanitizer hit inside NNS code (see below)"; sed -n "1,400p" test_pmmatrix.log; exit 1
+              if grep -E "AddressSanitizer|UndefinedBehaviorSanitizer" -n test_nns.log | grep -q "NNS/src/"; then
+                echo "Sanitizer hit inside NNS code (see below)"; sed -n "1,400p" test_nns.log; exit 1
               else
                 echo "No sanitizer hits in NNS/src during stress; external reports (if any) ignored."
               fi
@@ -106,8 +126,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.id }}-test_pmmatrix
-          path: test_pmmatrix.log
+          name: ${{ matrix.id }}-test_nns
+          path: test_nns.log
           if-no-files-found: warn
 
       - name: R CMD check under ${{ matrix.image }}
