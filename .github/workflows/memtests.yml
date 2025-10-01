@@ -8,8 +8,135 @@ on:
   workflow_dispatch:
 
 jobs:
+  # 1) FAST FAIL: exercise NNS internals (PMMatrix + fast_lm) under sanitizers
+  nns-stress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull rocker/r-devel-ubsan-clang
+        run: docker pull rocker/r-devel-ubsan-clang
+
+      - name: Stress test fast_lm and PMMatrix (strict sanitizers)
+        run: |
+          docker run --rm --cap-add=SYS_PTRACE \
+            -e OMP_THREAD_LIMIT=1 \
+            -e OMP_NUM_THREADS=1 \
+            -e OPENBLAS_NUM_THREADS=1 \
+            -e MKL_NUM_THREADS=1 \
+            -e VECLIB_MAXIMUM_THREADS=1 \
+            -e RCPP_PARALLEL_NUM_THREADS=1 \
+            -e RGL_USE_NULL=TRUE \
+            -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
+              set -euo pipefail
+
+              echo "== apt: system libraries =="
+              apt-get update -y
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                pandoc \
+                libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
+                libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
+                libcurl4-openssl-dev libssl-dev libxml2-dev
+
+              echo "== Install CRAN deps (incl. RcppParallel) =="
+              # Keep ODR detection off only during RcppParallel installation to avoid TBB ODR noise
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              RD -q -e "install.packages(c(
+                'Rcpp','RcppParallel','data.table','knitr','rmarkdown',
+                'doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'
+              ), repos='https://cloud.r-project.org', Ncpus=2)"
+
+              echo '== Install NNS =='
+              RD CMD INSTALL .
+
+              echo "== Create stress script =="
+              cat > test_nns.R <<'"'"'RS'"'"'
+              suppressMessages(library(NNS))
+              set.seed(42)
+
+              run_case <- function(tag, gen) {
+                cat(sprintf("\n--- CASE: %s ---\n", tag)); flush.console()
+                res <- try(gen(), silent = TRUE)
+                if (inherits(res, "try-error")) {
+                  cat("ERROR in", tag, ":\n"); cat(as.character(res), "\n")
+                } else {
+                  s <- tryCatch(sum(unlist(res), na.rm = TRUE), error = function(e) NA_real_)
+                  cat("ok checksum:", s, "\n")
+                }
+              }
+
+              ## PMMatrix tests (public API)
+              run_case("PMMatrix big-1000x1000", function(){
+                X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1,
+                              target = y, variable = X, pop_adj = FALSE, norm = FALSE)
+              })
+              run_case("PMMatrix with NA/Inf", function(){
+                X <- matrix(rnorm(1e6), 1000, 1000); y <- rnorm(1000)
+                X[sample(length(X), 1000)] <- NA
+                X[sample(length(X), 1000)] <- Inf
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1,
+                              target = y, variable = X, pop_adj = FALSE, norm = FALSE)
+              })
+              run_case("PMMatrix mismatch-n (should error, not crash)", function(){
+                X <- matrix(rnorm(1000*50), 1000, 50); y <- rnorm(999)
+                NNS::PMMatrix(LPM_degree = 1, UPM_degree = 1,
+                              target = y, variable = X, pop_adj = FALSE, norm = FALSE)
+              })
+              run_case("PMMatrix tall-narrow", function(){
+                X <- matrix(rnorm(2000*3), 2000, 3); y <- rnorm(2000)
+                NNS::PMMatrix(LPM_degree = 2, UPM_degree = 2,
+                              target = y, variable = X, pop_adj = FALSE, norm = FALSE)
+              })
+
+              ## fast_lm tests (C++ helpers; internal symbols)
+              run_case("fast_lm simple", function(){
+                x <- rnorm(2000); y <- 2 + 3*x + rnorm(2000)
+                NNS:::fast_lm(x, y)
+              })
+              run_case("fast_lm_mult multiple predictors", function(){
+                X <- cbind(rnorm(1500), rnorm(1500))
+                y <- 1 + 0.5*X[,1] - 2*X[,2] + rnorm(1500)
+                NNS:::fast_lm_mult(X, y)
+              })
+              run_case("fast_lm_mult collinear", function(){
+                X <- cbind(rnorm(1000), rnorm(1000)); X <- cbind(X, X[,1] + X[,2])
+                y <- rnorm(1000)
+                NNS:::fast_lm_mult(X, y)
+              })
+              RS
+
+              echo "== Run stress (threads=1) =="
+              export RCPP_PARALLEL_NUM_THREADS=1
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
+              export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+              RD --vanilla -q < test_nns.R > test_nns.log 2>&1 || true
+
+              echo "== Run stress (threads=4) =="
+              export RCPP_PARALLEL_NUM_THREADS=4
+              RD --vanilla -q < test_nns.R >> test_nns.log 2>&1 || true
+
+              echo "== Gating: only fail on sanitizer hits inside NNS/src =="
+              if grep -E "AddressSanitizer|UndefinedBehaviorSanitizer" -n test_nns.log | grep -q "NNS/src/"; then
+                echo "Sanitizer hit inside NNS code (see below)"; sed -n "1,400p" test_nns.log; exit 1
+              else
+                echo "No sanitizer hits in NNS/src during stress; external reports (if any) ignored."
+              fi
+            '
+
+      - name: Upload stress-test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nns-stress-log
+          path: test_nns.log
+          if-no-files-found: warn
+
+  # 2) R CMD check with sanitizers (only if nns-stress passed)
   memtests:
     runs-on: ubuntu-latest
+    needs: nns-stress
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +153,7 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
-      - name: Run under ${{ matrix.image }}
+      - name: R CMD check under ${{ matrix.image }}
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -51,14 +178,14 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Base deps =="
-              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c('Rcpp','data.table','knitr','rmarkdown'), repos='https://cloud.r-project.org', Ncpus=2)"
 
-              echo "== RcppParallel with ODR detection OFF (install-time only) =="
+              echo "== RcppParallel (ODR OFF during install) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages('RcppParallel', repos='https://cloud.r-project.org', Ncpus=2)"
 
               echo "== Remaining deps =="
-              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c('doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'), repos='https://cloud.r-project.org', Ncpus=2)"
 
               echo "== Build tarball =="
               RD CMD build .
@@ -92,7 +219,7 @@ jobs:
             *.Rcheck/**
           if-no-files-found: warn
 
-  # Build vignettes separately; relax sanitizers to avoid third-party noise
+  # 3) Build vignettes with relaxed sanitizers (only if memtests passed or ran)
   vignettes-only:
     runs-on: ubuntu-latest
     needs: memtests
@@ -130,15 +257,15 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Deps (RcppParallel with ODR OFF) =="
-              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
-              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
-              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c('Rcpp','data.table','knitr','rmarkdown'), repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e "install.packages('RcppParallel', repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e "install.packages(c('doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'), repos='https://cloud.r-project.org', Ncpus=2)"
 
               echo "== Install package so vignettes can library(NNS) =="
               RD CMD INSTALL .
 
               echo "== Build vignettes (relaxed sanitizers active) =="
-              RD -q -e "tools::buildVignettes(dir=\".\")"
+              RD -q -e "tools::buildVignettes(dir='.'.)"
             '
 
       - name: Upload vignette logs
@@ -149,61 +276,4 @@ jobs:
           path: |
             *.Rcheck/**/vignette*.log
             vignettes/*.html
-          if-no-files-found: ignore
-
-  # Stress-test NNS internals (fast_lm and PMMatrix)
-  nns-stress:
-    runs-on: ubuntu-latest
-    needs: memtests
-    if: always()
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Pull rocker/r-devel-ubsan-clang
-        run: docker pull rocker/r-devel-ubsan-clang
-
-      - name: Stress test fast_lm and PMMatrix
-        run: |
-          docker run --rm --cap-add=SYS_PTRACE \
-            -e OMP_THREAD_LIMIT=1 \
-            -e OMP_NUM_THREADS=1 \
-            -e OPENBLAS_NUM_THREADS=1 \
-            -e MKL_NUM_THREADS=1 \
-            -e VECLIB_MAXIMUM_THREADS=1 \
-            -e RCPP_PARALLEL_NUM_THREADS=1 \
-            -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
-              set -euo pipefail
-              echo "== Install deps =="
-              apt-get update -y
-              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pandoc \
-                libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
-                libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
-                libcurl4-openssl-dev libssl-dev libxml2-dev
-              RD -q -e "install.packages(c(
-                \"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\",
-                \"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"
-              ), repos=\"https://cloud.r-project.org\", Ncpus=2)"
-
-              echo "== Install NNS =="
-              RD CMD INSTALL .
-
-              echo "== Run stress tests =="
-              RD -q -e "library(NNS); set.seed(1);
-                X <- matrix(rnorm(1e6), ncol=1000);
-                y <- rnorm(1000);
-                print(head(NNS:::fast_lm(X, y)));
-
-                var <- rnorm(1000); tgt <- rnorm(1000);
-                res <- NNS:::PMMatrix_RCPP(0.5, 0.5, var, tgt, TRUE, TRUE);
-                print(head(res))" > stress-tests.log 2>&1 || true
-              cat stress-tests.log
-            '
-
-      - name: Upload stress logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stress-logs
-          path: stress-tests.log
           if-no-files-found: ignore
