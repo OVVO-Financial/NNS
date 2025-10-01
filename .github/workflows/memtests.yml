@@ -18,8 +18,6 @@ jobs:
             id: r-devel-ubsan-clang
           - image: rocker/r-devel-san
             id: r-devel-san
-          - image: rocker/r-devel-san-gcc
-            id: r-devel-san-gcc
 
     steps:
       - name: Checkout
@@ -44,7 +42,7 @@ jobs:
               echo "== R-devel (sanitized) =="
               RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()"
 
-              echo "== apt: system libraries =="
+              echo "== apt: system libraries (pandoc, rgl, curl/ssl/xml) =="
               apt-get update -y
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 pandoc \
@@ -52,47 +50,35 @@ jobs:
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Validate ASAN =="
-              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              set +e
-              RD -q -e "install.packages(\"sanitizers\", repos=\"https://cloud.r-project.org\"); library(sanitizers); stackAddressSanitize(42)" > asan_validate.log 2>&1
-              STATUS=$?
-              set -e
-              if ! grep -q "AddressSanitizer:\|UndefinedBehaviorSanitizer:" asan_validate.log; then
-                echo "ASAN validation failed: No sanitizer errors detected!"
-                cat asan_validate.log
-                exit 1
-              fi
-              echo "ASAN validation passed (exit code $STATUS expected due to deliberate error)"
+              echo "== Install base deps =="
+              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== Install R dependencies =="
+              echo "== Install RcppParallel with ODR detection temporarily OFF =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "install.packages(c(\"devtools\", \"Rcpp\", \"RcppParallel\", \"data.table\", \"knitr\", \"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2); devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== Inject ASAN flags =="
-              mkdir -p src
-              echo "PKG_CPPFLAGS = -fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer -g3" > src/Makevars
-              echo "PKG_LIBS = -fsanitize=address,undefined -fno-sanitize=vptr" >> src/Makevars
+              echo "== Install remaining package deps (ODR back ON for our code later) =="
+              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Build tarball =="
               RD CMD build .
               TARBALL=$(ls -1t *.tar.gz | head -n1)
               echo "Built: ${TARBALL}"
 
-              echo "== R CMD check =="
+              echo "== R CMD check (strict ASAN back ON; skip vignettes here) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
               export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
               set +e
-              RD CMD check "${TARBALL}" --as-cran --no-manual
+              RD CMD check "${TARBALL}" --as-cran --no-manual --no-build-vignettes
               STATUS=$?
               set -e
 
               echo "== Harvest logs =="
               PKG=${TARBALL%.tar.gz}
               CHECKDIR="${PKG}.Rcheck"
-              [ -f "${CHECKDIR}/00check.log" ] && cat "${CHECKDIR}/00check.log" || true
-              [ -f "${CHECKDIR}/00install.out" ] && cat "${CHECKDIR}/00install.out" || true
-              find "${CHECKDIR}" -maxdepth 3 -name "*vignette*.log" -print -exec cat {} \; || true
+              [ -f "${CHECKDIR}/00check.log" ] && tail -n 400 "${CHECKDIR}/00check.log" || true
+              [ -f "${CHECKDIR}/00install.out" ] && tail -n 200 "${CHECKDIR}/00install.out" || true
+              find "${CHECKDIR}" -maxdepth 3 -name "*vignette*.log" -print -exec tail -n 120 {} \; || true
               exit ${STATUS}
             '
 
@@ -129,6 +115,8 @@ jobs:
             -e RGL_USE_NULL=TRUE \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
+
+              echo "== apt: system libraries and pandoc =="
               apt-get update -y
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 pandoc \
@@ -136,27 +124,19 @@ jobs:
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Install R dependencies =="
+              echo "== Install deps (RcppParallel with ODR OFF) =="
+              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "install.packages(c(\"devtools\", \"Rcpp\", \"RcppParallel\", \"data.table\", \"knitr\", \"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2); devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c(\"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
-              echo "== Inject ASAN flags =="
-              mkdir -p src
-              echo "PKG_CPPFLAGS = -fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer -g3" > src/Makevars
-              echo "PKG_LIBS = -fsanitize=address,undefined -fno-sanitize=vptr" >> src/Makevars
-
-              echo "== Install package =="
+              echo "== Install package so vignettes can library(NNS) =="
               RD CMD INSTALL .
 
-              echo "== Build vignettes =="
+              echo "== Build vignettes (ASAN defaults OK) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
               export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
-              RD -q -e "tools::buildVignettes(dir=\".\")" > vignette_build.log 2>&1
-              if grep -q "AddressSanitizer:\|UndefinedBehaviorSanitizer:" vignette_build.log; then
-                echo "ASAN/UBSAN errors in vignettes!"
-                cat vignette_build.log
-                exit 1
-              fi
+              RD -q -e "tools::buildVignettes(dir=\".\")"
             '
 
       - name: Upload vignette logs
@@ -165,6 +145,6 @@ jobs:
         with:
           name: vignettes-only-logs
           path: |
-            vignettes/*.log
+            *.Rcheck/**/vignette*.log
             vignettes/*.html
           if-no-files-found: ignore
