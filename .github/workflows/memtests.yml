@@ -26,6 +26,106 @@ jobs:
       - name: Pull ${{ matrix.image }}
         run: docker pull ${{ matrix.image }}
 
+      # -------- PMMatrix stress-test (strict sanitizers) --------
+      - name: Stress-test PMMatrix under sanitizers
+        run: |
+          docker run --rm --cap-add=SYS_PTRACE \
+            -e OMP_THREAD_LIMIT=1 \
+            -e OMP_NUM_THREADS=1 \
+            -e OPENBLAS_NUM_THREADS=1 \
+            -e MKL_NUM_THREADS=1 \
+            -e VECLIB_MAXIMUM_THREADS=1 \
+            -e RCPP_PARALLEL_NUM_THREADS=1 \
+            -e RGL_USE_NULL=TRUE \
+            -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg ${{ matrix.image }} bash -lc '
+              set -euo pipefail
+              echo "== Minimal deps for stress =="
+              apt-get update -y
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                pandoc libcurl4-openssl-dev libssl-dev libxml2-dev
+              RD -q -e "install.packages(c(\"Rcpp\",\"data.table\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+
+              echo "== Install RcppParallel (ODR OFF only for install) =="
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              RD -q -e "install.packages(\"RcppParallel\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
+
+              echo "== Install NNS for direct calls =="
+              RD CMD INSTALL .
+
+              echo "== Create stress script =="
+              cat > test_pmmatrix.R <<'RS'
+              suppressMessages(library(NNS))
+              set.seed(42)
+
+              run_case <- function(tag, gen) {
+                cat(sprintf("\n--- CASE: %s ---\n", tag)); flush.console()
+                res <- try(gen(), silent=TRUE)
+                if (inherits(res, "try-error")) {
+                  cat("ERROR in", tag, ":\n"); cat(as.character(res), "\n")
+                } else {
+                  s <- tryCatch(sum(unlist(res), na.rm=TRUE), error=function(e) NA_real_)
+                  cat("ok checksum:", s, "\n")
+                }
+              }
+
+              # big dense numeric (clean)
+              run_case("big-1000x1000-clean", function(){
+                X <- matrix(rnorm(1e6), 1000, 1000)
+                y <- rnorm(1000)
+                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+              })
+
+              # NA/Inf sprinkled
+              run_case("with-na-inf", function(){
+                X <- matrix(rnorm(1e6), 1000, 1000)
+                y <- rnorm(1000)
+                X[sample(length(X), 1000)] <- NA
+                X[sample(length(X), 1000)] <- Inf
+                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+              })
+
+              # mismatched sizes (should error, not crash)
+              run_case("mismatch-n", function(){
+                X <- matrix(rnorm(1000*50), 1000, 50)
+                y <- rnorm(999)
+                NNS::PMMatrix(LPM_degree=1, UPM_degree=1, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+              })
+
+              # tall-narrow
+              run_case("tall-narrow", function(){
+                X <- matrix(rnorm(2000*3), 2000, 3)
+                y <- rnorm(2000)
+                NNS::PMMatrix(LPM_degree=2, UPM_degree=2, target=y, variable=X, pop_adj=FALSE, norm=FALSE)
+              })
+              RS
+
+              echo "== Run stress (threads=1) =="
+              export RCPP_PARALLEL_NUM_THREADS=1
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
+              export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+              RD --vanilla -q < test_pmmatrix.R > test_pmmatrix.log 2>&1 || true
+
+              echo "== Run stress (threads=4) =="
+              export RCPP_PARALLEL_NUM_THREADS=4
+              RD --vanilla -q < test_pmmatrix.R >> test_pmmatrix.log 2>&1 || true
+
+              echo "== Gate on sanitizer hits in NNS/src only =="
+              if grep -E \"AddressSanitizer|UndefinedBehaviorSanitizer\" -n test_pmmatrix.log | grep -q \"NNS/src/\"; then
+                echo \"Sanitizer hit inside NNS code (see below)\"; sed -n \"1,400p\" test_pmmatrix.log; exit 1
+              else
+                echo \"No sanitizer hits in NNS/src during stress; external reports (if any) ignored.\"
+              fi
+            '
+
+      - name: Upload stress-test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.id }}-test_pmmatrix
+          path: test_pmmatrix.log
+          if-no-files-found: warn
+      # -------- end stress-test --------
+
       - name: Run under ${{ matrix.image }}
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
@@ -104,7 +204,7 @@ jobs:
       - name: Pull rocker/r-devel-ubsan-clang
         run: docker pull rocker/r-devel-ubsan-clang
 
-      - name: Build vignettes under clang ASAN (relaxed)
+            - name: Build vignettes under clang ASAN (relaxed)
         run: |
           docker run --rm --cap-add=SYS_PTRACE \
             -e OMP_THREAD_LIMIT=1 \
@@ -114,10 +214,8 @@ jobs:
             -e VECLIB_MAXIMUM_THREADS=1 \
             -e RCPP_PARALLEL_NUM_THREADS=1 \
             -e RGL_USE_NULL=TRUE \
-            # Disable TBB scalable allocator to avoid UBSAN vptr churn on exit
             -e TBBMALLOC_DISABLE=1 \
             -e TBB_MALLOC_DISABLE=1 \
-            # Relax sanitizers for vignette rendering: ignore external leaks, don’t halt on UB
             -e ASAN_OPTIONS="detect_leaks=0:abort_on_error=1:detect_odr_violation=0" \
             -e UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
@@ -143,6 +241,7 @@ jobs:
               RD -q -e "tools::buildVignettes(dir=\".\")"
             '
 
+
       - name: Upload vignette logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -152,4 +251,3 @@ jobs:
             *.Rcheck/**/vignette*.log
             vignettes/*.html
           if-no-files-found: ignore
-
