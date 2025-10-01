@@ -42,10 +42,10 @@ jobs:
               echo "== Install CRAN deps (incl. RcppParallel) =="
               # Keep ODR detection off only during RcppParallel installation to avoid TBB ODR noise
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "install.packages(c(
-                'Rcpp','RcppParallel','data.table','knitr','rmarkdown',
-                'doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'
-              ), repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e 'install.packages(c(
+                "Rcpp","RcppParallel","data.table","knitr","rmarkdown",
+                "doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"
+              ), repos="https://cloud.r-project.org", Ncpus=2)'
 
               echo '== Install NNS =='
               RD CMD INSTALL .
@@ -178,14 +178,14 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Base deps =="
-              RD -q -e "install.packages(c('Rcpp','data.table','knitr','rmarkdown'), repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e 'install.packages(c("Rcpp","data.table","knitr","rmarkdown"), repos="https://cloud.r-project.org", Ncpus=2)'
 
               echo "== RcppParallel (ODR OFF during install) =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "install.packages('RcppParallel', repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e 'install.packages("RcppParallel", repos="https://cloud.r-project.org", Ncpus=2)'
 
               echo "== Remaining deps =="
-              RD -q -e "install.packages(c('doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'), repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e 'install.packages(c("doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"), repos="https://cloud.r-project.org", Ncpus=2)'
 
               echo "== Build tarball =="
               RD CMD build .
@@ -257,9 +257,9 @@ jobs:
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
               echo "== Deps (RcppParallel with ODR OFF) =="
-              RD -q -e "install.packages(c('Rcpp','data.table','knitr','rmarkdown'), repos='https://cloud.r-project.org', Ncpus=2)"
-              RD -q -e "install.packages('RcppParallel', repos='https://cloud.r-project.org', Ncpus=2)"
-              RD -q -e "install.packages(c('doParallel','foreach','quantmod','Rfast','rgl','xts','zoo','TTR'), repos='https://cloud.r-project.org', Ncpus=2)"
+              RD -q -e 'install.packages(c("Rcpp","data.table","knitr","rmarkdown"), repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e 'install.packages("RcppParallel", repos="https://cloud.r-project.org", Ncpus=2)'
+              RD -q -e 'install.packages(c("doParallel","foreach","quantmod","Rfast","rgl","xts","zoo","TTR"), repos="https://cloud.r-project.org", Ncpus=2)'
 
               echo "== Install package so vignettes can library(NNS) =="
               RD CMD INSTALL .
