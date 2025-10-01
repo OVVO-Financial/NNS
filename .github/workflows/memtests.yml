@@ -2,7 +2,9 @@ name: CRAN memtests (ASAN/UBSAN)
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -16,6 +18,8 @@ jobs:
             id: r-devel-ubsan-clang
           - image: rocker/r-devel-san
             id: r-devel-san
+          - image: rhub/r-devel-san-gcc
+            id: r-devel-san-gcc
 
     steps:
       - name: Checkout
@@ -33,8 +37,6 @@ jobs:
             -e MKL_NUM_THREADS=1 \
             -e VECLIB_MAXIMUM_THREADS=1 \
             -e RCPP_PARALLEL_NUM_THREADS=1 \
-            -e ASAN_OPTIONS=detect_leaks=1:abort_on_error=1 \
-            -e UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 \
             -e RGL_USE_NULL=TRUE \
             -e MAKEFLAGS="-j2" \
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg ${{ matrix.image }} bash -lc '
@@ -42,7 +44,7 @@ jobs:
               echo "== R-devel (sanitized) =="
               RD -q -e "R.version[c(\"version.string\",\"platform\")]; sessionInfo()"
 
-              echo "== apt: system libraries (rgl, pandoc, etc.) =="
+              echo "== apt: system libraries =="
               apt-get update -y
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 pandoc \
@@ -50,18 +52,31 @@ jobs:
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
 
-              echo "== Install R dependencies (Imports/Suggests for vignettes) =="
-              RD -q -e "install.packages(c( \
-                \"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\", \
-                \"doParallel\",\"foreach\",\"quantmod\",\"Rfast\",\"rgl\",\"xts\",\"zoo\",\"TTR\" \
-              ), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              echo "== Validate ASAN =="
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              RD -q -e "install.packages(\"sanitizers\", repos=\"https://cloud.r-project.org\"); library(sanitizers); stackAddressSanitize(42)" > asan_validate.log 2>&1
+              if ! grep -q "AddressSanitizer:" asan_validate.log; then
+                echo "ASAN validation failed!"
+                cat asan_validate.log
+                exit 1
+              fi
+
+              echo "== Install R dependencies =="
+              RD -q -e "devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+
+              echo "== Inject ASAN flags =="
+              mkdir -p src
+              echo "PKG_CPPFLAGS = -fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer -g3" > src/Makevars
+              echo "PKG_LIBS = -fsanitize=address,undefined -fno-sanitize=vptr" >> src/Makevars
 
               echo "== Build tarball =="
               RD CMD build .
               TARBALL=$(ls -1t *.tar.gz | head -n1)
               echo "Built: ${TARBALL}"
 
-              echo "== R CMD check (sanitized) =="
+              echo "== R CMD check =="
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
+              export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
               set +e
               RD CMD check "${TARBALL}" --as-cran --no-manual
               STATUS=$?
@@ -70,9 +85,9 @@ jobs:
               echo "== Harvest logs =="
               PKG=${TARBALL%.tar.gz}
               CHECKDIR="${PKG}.Rcheck"
-              [ -f "${CHECKDIR}/00check.log" ] && tail -n 400 "${CHECKDIR}/00check.log" || true
-              [ -f "${CHECKDIR}/00install.out" ] && tail -n 200 "${CHECKDIR}/00install.out" || true
-              find "${CHECKDIR}" -maxdepth 3 -name "*vignette*.log" -print -exec tail -n 120 {} \; || true
+              [ -f "${CHECKDIR}/00check.log" ] && cat "${CHECKDIR}/00check.log" || true
+              [ -f "${CHECKDIR}/00install.out" ] && cat "${CHECKDIR}/00install.out" || true
+              find "${CHECKDIR}" -maxdepth 3 -name "*vignette*.log" -print -exec cat {} \; || true
               exit ${STATUS}
             '
 
@@ -86,7 +101,6 @@ jobs:
             *.Rcheck/**
           if-no-files-found: warn
 
-  # Optional: just rebuild vignettes to mirror CRAN's build_vignettes.log
   vignettes-only:
     runs-on: ubuntu-latest
     needs: memtests
@@ -111,12 +125,33 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/pkg" -w /pkg rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
               apt-get update -y
-              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pandoc \
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                pandoc \
                 libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
                 libx11-dev libxext-dev libxt-dev libxmu-dev libxxf86vm-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev
-              RD -q -e "install.packages(c(\"Rcpp\",\"RcppParallel\",\"data.table\",\"knitr\",\"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
-              RD -q -e "tools::buildVignettes(dir=\".\")"
+
+              echo "== Install R dependencies =="
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              RD -q -e "devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+
+              echo "== Inject ASAN flags =="
+              mkdir -p src
+              echo "PKG_CPPFLAGS = -fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer -g3" > src/Makevars
+              echo "PKG_LIBS = -fsanitize=address,undefined -fno-sanitize=vptr" >> src/Makevars
+
+              echo "== Install package =="
+              RD CMD INSTALL .
+
+              echo "== Build vignettes =="
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:strict_string_checks=1:detect_odr_violation=1"
+              export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+              RD -q -e "tools::buildVignettes(dir=\".\")" > vignette_build.log 2>&1
+              if grep -q "AddressSanitizer:\|UndefinedBehaviorSanitizer:" vignette_build.log; then
+                echo "ASAN/UBSAN errors in vignettes!"
+                cat vignette_build.log
+                exit 1
+              fi
             '
 
       - name: Upload vignette logs
@@ -125,6 +160,6 @@ jobs:
         with:
           name: vignettes-only-logs
           path: |
-            *.Rcheck/**/vignette*.log
+            vignettes/*.log
             vignettes/*.html
           if-no-files-found: ignore
