@@ -421,7 +421,7 @@ NumericVector UPM_RCPP(const double &degree,
 
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export("PMMatrix_RCPP", rng = false)]]
  List PMMatrix_RCPP(
      const double &LPM_degree,
      const double &UPM_degree,
@@ -431,7 +431,7 @@ NumericVector UPM_RCPP(const double &degree,
      const bool norm
  ) {
    if(variable.isNULL()){
-     Rcpp::stop("varible can't be null");
+     Rcpp::stop("variable can't be null");
      return List::create();
    }
    NumericMatrix variable_matrix;
@@ -452,7 +452,7 @@ NumericVector UPM_RCPP(const double &degree,
    
    size_t target_length=tgt.size();
    if(variable_cols != target_length){
-     Rcpp::stop("varible matrix cols != target vector length");
+     Rcpp::stop("variable matrix cols != target vector length");
      return List::create();
    }
    
