@@ -117,15 +117,15 @@ UPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_UPM_CPv`, degree, target, variable)
 }
 
-CoLPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+CoLPM_nD_RCPP <- function(data, target, degree, norm) {
     .Call(`_NNS_CoLPM_nD_RCPP`, data, target, degree, norm)
 }
 
-CoUPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+CoUPM_nD_RCPP <- function(data, target, degree, norm) {
     .Call(`_NNS_CoUPM_nD_RCPP`, data, target, degree, norm)
 }
 
-DPM_nD_RCPP <- function(data, target, degree, norm = TRUE) {
+DPM_nD_RCPP <- function(data, target, degree, norm) {
     .Call(`_NNS_DPM_nD_RCPP`, data, target, degree, norm)
 }
 
@@ -282,27 +282,7 @@ D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
-#' @name PM.matrix
-#' @title Partial Moment Matrix
-#' @description
-#'   Builds a list containing all four quadrant partial‑moment matrices
-#'   (CUPM, DUPM, DLPM, CLPM) plus the overall covariance matrix.
-#' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
-#' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
-#' @param target numeric vector; thresholds for each column (defaults to colMeans).
-#' @param variable numeric matrix or data.frame.
-#' @param pop_adj logical; TRUE adjusts population vs. sample moments.
-#' @param norm logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.
-#' @return A list with elements $cupm, $dupm, $dlpm, $clpm and $cov.matrix.
-#' @author Fred Viole, OVVO Financial Systems
-#' @references
-#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-#' @examples
-#'   set.seed(123)
-#'   A <- cbind(rnorm(100), rnorm(100), rnorm(100))
-#'   PM.matrix(1, 1, NULL, A, TRUE)
-#' @export
-PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE) {
+PMMatrix_RCPP <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm) {
     .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
 }
 

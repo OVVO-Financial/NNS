@@ -546,6 +546,7 @@ List PMMatrix_RCPP(const double& LPM_degree, const double& UPM_degree, const ROb
 RcppExport SEXP _NNS_PMMatrix_RCPP(SEXP LPM_degreeSEXP, SEXP UPM_degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP pop_adjSEXP, SEXP normSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const double& >::type LPM_degree(LPM_degreeSEXP);
     Rcpp::traits::input_parameter< const double& >::type UPM_degree(UPM_degreeSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target(targetSEXP);

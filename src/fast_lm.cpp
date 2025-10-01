@@ -162,7 +162,7 @@ List fast_lm_mult(NumericMatrix x, NumericVector y) {
     for (R_xlen_t j = 0; j < q; ++j) s += coef[j] * X(i, j);
     fitted_values[i] = s;
   }
-  NumericVector residuals = fitted_values - y;
+  NumericVector residuals = y - fitted_values;
   
   // R-squared
   const double y_mean = mean(y);

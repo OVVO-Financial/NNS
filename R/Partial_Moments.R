@@ -408,3 +408,28 @@ NNS.moments <- function(x, population = TRUE){
               "skewness" = skewness,
               "kurtosis" = kurtosis))
 }
+
+
+
+
+#' Partial Moment Matrix
+#' @name PM.matrix
+#' @title Partial Moment Matrix
+#' @description Builds a list containing CUPM, DUPM, DLPM, CLPM and the overall covariance matrix.
+#' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
+#' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
+#' @param target numeric vector; thresholds for each column (defaults to colMeans).
+#' @param variable numeric matrix or data.frame.
+#' @param pop_adj logical; TRUE adjusts population vs. sample moments.
+#' @param norm logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j).
+#' @return A list: $cupm, $dupm, $dlpm, $clpm, $cov.matrix.
+#' @examples
+#' set.seed(123)
+#' A <- cbind(rnorm(100), rnorm(100), rnorm(100))
+#' PM.matrix(1, 1, NULL, A, TRUE)          # uses norm = FALSE by default
+#' PM.matrix(1, 1, NULL, A, TRUE, TRUE)    # enable normalization
+#' @export
+PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE) {
+  .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
+}
+

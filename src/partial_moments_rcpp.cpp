@@ -4,6 +4,8 @@
 #include <RcppParallel.h>
 #include <cmath>
 #include "partial_moments.h"
+#include "partial_moments_rcpp.h"
+
 using namespace Rcpp;
 
 static inline double repeatMultiplication(double value, int n) {
@@ -30,7 +32,7 @@ static inline bool isInteger(double value) {
 double CoLPM_nD_RCPP(const NumericMatrix &data,
                      const NumericVector &target,
                      const double &degree,
-                     const bool &norm = true) {
+                     const bool &norm ) {
   return clpm_nD_cpp(data, target, degree, norm);
 }
 
@@ -38,7 +40,7 @@ double CoLPM_nD_RCPP(const NumericMatrix &data,
 double CoUPM_nD_RCPP(const NumericMatrix &data,
                      const NumericVector &target,
                      const double &degree,
-                     const bool &norm = true) {
+                     const bool &norm ) {
   return cupm_nD_cpp(data, target, degree, norm);
 }
 
@@ -46,7 +48,7 @@ double CoUPM_nD_RCPP(const NumericMatrix &data,
 double DPM_nD_RCPP(const NumericMatrix &data,
                      const NumericVector &target,
                      const double &degree,
-                     const bool &norm = true) {
+                     const bool &norm ) {
   return dpm_nD_cpp(data, target, degree, norm);
 } 
 
@@ -418,34 +420,15 @@ NumericVector UPM_RCPP(const double &degree,
 
 
 
-//' @name PM.matrix
-//' @title Partial Moment Matrix
-//' @description
-//'   Builds a list containing all four quadrant partial‑moment matrices
-//'   (CUPM, DUPM, DLPM, CLPM) plus the overall covariance matrix.
-//' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
-//' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
-//' @param target numeric vector; thresholds for each column (defaults to colMeans).
-//' @param variable numeric matrix or data.frame.
-//' @param pop_adj logical; TRUE adjusts population vs. sample moments.
-//' @param norm logical; \code{FALSE} (default) if TRUE, each of the four quadrant partial-moment matrices (cupm, dupm, dlpm, clpm) is normalized cell-wise so that their sum at each position is 1. The covariance matrix is then recomputed from those normalized quadrants.
-//' @return A list with elements $cupm, $dupm, $dlpm, $clpm and $cov.matrix.
-//' @author Fred Viole, OVVO Financial Systems
-//' @references
-//'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-//' @examples
-//'   set.seed(123)
-//'   A <- cbind(rnorm(100), rnorm(100), rnorm(100))
-//'   PM.matrix(1, 1, NULL, A, TRUE)
-//' @export
-// [[Rcpp::export("PM.matrix", rng = false)]]
+
+// [[Rcpp::export]]
  List PMMatrix_RCPP(
      const double &LPM_degree,
      const double &UPM_degree,
      const RObject &target,
      const RObject &variable,
      const bool pop_adj,
-     const bool norm = false
+     const bool norm
  ) {
    if(variable.isNULL()){
      Rcpp::stop("varible can't be null");
