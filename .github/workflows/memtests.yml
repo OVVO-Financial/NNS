@@ -18,7 +18,7 @@ jobs:
             id: r-devel-ubsan-clang
           - image: rocker/r-devel-san
             id: r-devel-san
-          - image: rhub/r-devel-san-gcc
+          - image: rocker/r-devel-san-gcc
             id: r-devel-san-gcc
 
     steps:
@@ -54,15 +54,20 @@ jobs:
 
               echo "== Validate ASAN =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              set +e
               RD -q -e "install.packages(\"sanitizers\", repos=\"https://cloud.r-project.org\"); library(sanitizers); stackAddressSanitize(42)" > asan_validate.log 2>&1
-              if ! grep -q "AddressSanitizer:" asan_validate.log; then
-                echo "ASAN validation failed!"
+              STATUS=$?
+              set -e
+              if ! grep -q "AddressSanitizer:\|UndefinedBehaviorSanitizer:" asan_validate.log; then
+                echo "ASAN validation failed: No sanitizer errors detected!"
                 cat asan_validate.log
                 exit 1
               fi
+              echo "ASAN validation passed (exit code $STATUS expected due to deliberate error)"
 
               echo "== Install R dependencies =="
-              RD -q -e "devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
+              RD -q -e "install.packages(c(\"devtools\", \"Rcpp\", \"RcppParallel\", \"data.table\", \"knitr\", \"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2); devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Inject ASAN flags =="
               mkdir -p src
@@ -133,7 +138,7 @@ jobs:
 
               echo "== Install R dependencies =="
               export ASAN_OPTIONS="detect_leaks=1:abort_on_error=1:detect_odr_violation=0"
-              RD -q -e "devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c(\"devtools\", \"Rcpp\", \"RcppParallel\", \"data.table\", \"knitr\", \"rmarkdown\"), repos=\"https://cloud.r-project.org\", Ncpus=2); devtools::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\", Ncpus=2)"
 
               echo "== Inject ASAN flags =="
               mkdir -p src
