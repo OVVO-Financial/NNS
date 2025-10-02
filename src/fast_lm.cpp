@@ -7,54 +7,61 @@ static inline bool is_pos(double x) { return x > 0.0 && std::isfinite(x); }
 
 // [[Rcpp::export]]
 List fast_lm(NumericVector x, NumericVector y) {
-  const R_xlen_t nx = x.size();
-  const R_xlen_t ny = y.size();
+  int nx = x.size();
+  int ny = y.size();
   
-  // --- strict input validation ---
-  if (nx == 0 || ny == 0)
-    stop("fast_lm: 'x' and 'y' must be non-empty.");
-  if (nx != ny)
-    stop("fast_lm: length(x) != length(y) (got %lld vs %lld).",
-         static_cast<long long>(nx), static_cast<long long>(ny));
-  
-  const R_xlen_t n = nx;
-  
-  // Calculate means
-  double mean_x = 0.0;
-  double mean_y = 0.0;
-  for (R_xlen_t i = 0; i < n; ++i) {
-    mean_x += x[i];
-    mean_y += y[i];
+  if (nx != ny) {
+    stop("fast_lm: length(x) != length(y) (got %i vs %i).", nx, ny);
   }
-  mean_x /= static_cast<double>(n);
-  mean_y /= static_cast<double>(n);
   
-  // Calculate slope/intercept via centered cross-moments
-  double numerator = 0.0;
-  double denominator = 0.0;
-  for (R_xlen_t i = 0; i < n; ++i) {
-    const double dx = x[i] - mean_x;
-    numerator   += dx * (y[i] - mean_y);
-    denominator += dx * dx;
+  // Means
+  double mean_x = mean(x);
+  double mean_y = mean(y);
+  
+  // Variance of x and covariance of (x,y)
+  double var_x = 0.0, cov_xy = 0.0;
+  for (int i = 0; i < nx; i++) {
+    double dx = x[i] - mean_x;
+    double dy = y[i] - mean_y;
+    var_x += dx * dx;
+    cov_xy += dx * dy;
   }
-  if (denominator == 0.0)
-    stop("fast_lm: variance of 'x' is zero; slope undefined.");
   
-  const double b1 = numerator / denominator;
-  const double b0 = mean_y - b1 * mean_x;
+  NumericVector coef(2);
+  NumericVector fitted(ny);
+  NumericVector residuals(ny);
   
-  // fitted values and residuals
-  NumericVector fitted_values(n), residuals(n);
-  for (R_xlen_t i = 0; i < n; ++i) {
-    const double fi = b0 + b1 * x[i];
-    fitted_values[i] = fi;
-    residuals[i]     = y[i] - fi;
+  if (var_x == 0.0) {
+    // All x are identical -> slope = 0, intercept = mean(y)
+    coef[0] = mean_y;   // intercept
+    coef[1] = 0.0;      // slope
+    
+    for (int i = 0; i < ny; i++) {
+      fitted[i] = mean_y;
+      residuals[i] = y[i] - mean_y;
+    }
+    
+  } else {
+    // Standard OLS slope + intercept
+    double slope = cov_xy / var_x;
+    double intercept = mean_y - slope * mean_x;
+    
+    coef[0] = intercept;
+    coef[1] = slope;
+    
+    for (int i = 0; i < ny; i++) {
+      fitted[i] = intercept + slope * x[i];
+      residuals[i] = y[i] - fitted[i];
+    }
   }
+  
+  int df_resid = ny - 2;
   
   return List::create(
-    _["coef"]          = NumericVector::create(b0, b1),
-    _["fitted.values"] = fitted_values,
-    _["residuals"]     = residuals
+    Named("coef") = coef,
+    Named("residuals") = residuals,
+    Named("fitted.values") = fitted,
+    Named("df.residual") = df_resid
   );
 }
 

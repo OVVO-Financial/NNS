@@ -69,17 +69,18 @@ NNS.dep = function(x,
     PART_yx <- PART_yx$dt
     PART_yx <- PART_yx[complete.cases(PART_yx),]
     weights_yx <- PART_yx[, .N / l, by = quadrant]$V1
+
     
-    
-    dep_fn = function(x, y){
-      NNS::NNS.copula(cbind(x, y)) * sign(fast_lm(x,y)$coef[2])
+    dep_fn <- function(xx, yy) {
+      NNS::NNS.copula(cbind(xx, yy)) * sign(fast_lm(xx, yy)$coef[2])
     }
+  
     
-    res_xy <- suppressWarnings(tryCatch(PART_xy[,  dep_fn(x, y), by = quadrant],
-                                        error = function(e)PART_xy[,  dep_fn(x, y), by = prior.quadrant]))
-    
-    res_yx <- suppressWarnings(tryCatch(PART_yx[,  dep_fn(y, x), by = quadrant],
-                                        error = function(e) PART_yx[,  dep_fn(y, x), by = prior.quadrant]))
+    res_xy <- suppressWarnings(tryCatch(PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
+                                         error = function(e) PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
+     
+    res_yx <- suppressWarnings(tryCatch(PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
+                                         error = function(e) PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
     
     if(anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)

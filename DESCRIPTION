@@ -1,8 +1,8 @@
 Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
-Version: 11.6.1
-Date: 2025-10-01
+Version: 11.6.2
+Date: 2025-10-02
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.financial.systems@gmail.com"),
   person("Roberto", "Spadim", role=c("ctb"))

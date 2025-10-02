@@ -594,7 +594,7 @@ List PMMatrix_CPv(
   size_t variable_cols=variable.cols();
   size_t target_length=target.size();
   if(variable_cols != target_length){
-    Rcpp::stop("varible matrix cols != target vector length");
+    Rcpp::stop("variable matrix cols != target vector length");
     return List::create();
   }
   NumericMatrix coLpm(variable_cols, variable_cols);
