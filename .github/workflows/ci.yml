@@ -1,27 +1,16 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-#
-# See https://github.com/r-lib/actions/tree/master/examples#readme for
-# additional example workflows available for the R community.
-
+name: R-CMD-check
 
 on:
   push:
-    branches: [ "NNS-Beta-Version" ]
+    branches: ["NNS-Beta-Version"]
   pull_request:
-    branches: [ "NNS-Beta-Version" ]
-
+    branches: ["NNS-Beta-Version"]
   workflow_dispatch:
-
-name: R-CMD-check
 
 jobs:
   R-CMD-check:
+    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
     runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
@@ -29,60 +18,74 @@ jobs:
         config:
           - {os: windows-latest, r: 'release'}
           - {os: windows-latest, r: 'devel'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-#          - {os: macos-latest, r: 'devel'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          # Prefer Intel mac for wider binary availability; adjust if you want Apple Silicon
+          - {os: macos-13,       r: 'release'}
 
     env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       _R_CHECK_FORCE_SUGGESTS_: false
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       RGL_USE_NULL: true
       R_KEEP_PKG_SOURCE: yes
 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install dependencies on MacOS
-        if: runner.os == 'macOS'
-        run: |
-          brew install xquartz
-          brew install fribidi
-          brew install gsl  # Install GSL library on macOS
 
-      - name: Set up GSL environment variables on MacOS
-        if: runner.os == 'macOS'
-        run: |
-          export PKG_CPPFLAGS="-I$(brew --prefix gsl)/include"
-          export PKG_LIBS="-L$(brew --prefix gsl)/lib -lgsl -lgslcblas -lm"
-        shell: bash
+      - uses: r-lib/actions/setup-pandoc@v2
 
-      - uses: r-lib/actions/setup-r@v2
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          
-      - name: Install CRAN libjpeg on MacOS
+
+      # ---------- System dependencies ----------
+      # Linux: install GSL + typical image/graphics deps used by CRAN pkgs (jpeg, png, freetype, harfbuzz) and GL bits for rgl
+      - name: Install system libs (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgsl-dev \
+            libjpeg-turbo8-dev libpng-dev libtiff5-dev \
+            libfreetype6-dev libharfbuzz-dev libfribidi-dev \
+            libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev \
+            xorg-dev
+      # macOS: install GSL and text shaping libs; XQuartz provides GL for rgl
+      - name: Install system libs (macOS)
         if: runner.os == 'macOS'
         run: |
-          ARCH=`uname -m`
-          if [ ! -e /opt/R/$ARCH ]; then sudo mkdir -p /opt/R/$ARCH; sudo chown -R $USER /opt/R; fi
-          sudo Rscript -e 'dep="jpeg"; source("https://mac.R-project.org/bin/install.R"); install.libs(dep)'
-          if ! echo $PATH | grep /opt/R/$ARCH/bin >/dev/null; then echo /opt/R/$ARCH/bin > newPATH; cat $GITHUB_PATH >> newPATH; cat newPATH > $GITHUB_PATH; fi
-        shell: bash
+          brew update
+          brew install gsl fribidi harfbuzz freetype libpng jpeg
+          brew install --cask xquartz
+          # help pkg-config find Homebrew formulae
+          echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gsl/lib/pkgconfig" >> "$GITHUB_ENV"
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      # ---------- R dependencies ----------
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          # rcmdcheck is pulled automatically by check-r-package, but we keep it explicit
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install R packages
+      # If you must ensure extra CRAN packages (e.g., Rfast, recipes, rgl), do it here.
+      # These will be no-ops when already present from setup-r-dependencies resolution.
+      - name: Ensure additional CRAN packages
+        shell: Rscript {0}
         run: |
-          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
-          remotes::install_cran("rgl")
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-        
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"), error_on = "error")
-        shell: Rscript {0}
+          pkgs <- c("Rfast","recipes","rgl")
+          to_install <- setdiff(pkgs, rownames(installed.packages()))
+          if (length(to_install)) install.packages(to_install)
+
+      # ---------- Check ----------
+      - name: Check package
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build-args: 'c("--no-manual","--no-build-vignettes")'
+          args: 'c("--no-manual","--ignore-vignettes","--no-build-vignettes")'
+
