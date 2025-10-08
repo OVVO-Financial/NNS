@@ -41,7 +41,7 @@ NNS_TSD_uni_cpp <- function(x, y) {
     .Call(`_NNS_NNS_TSD_uni_cpp`, x, y)
 }
 
-NNS_gravity_cpp <- function(xSEXP, discrete = FALSE) {
+NNS_gravity_cpp <- function(xSEXP, discrete) {
     .Call(`_NNS_NNS_gravity_cpp`, xSEXP, discrete)
 }
 
@@ -49,7 +49,7 @@ NNS_rescale_cpp <- function(xSEXP, a, b, method = "minmax", T_ = NULL, type = "T
     .Call(`_NNS_NNS_rescale_cpp`, xSEXP, a, b, method, T_, type)
 }
 
-NNS_mode_cpp <- function(xSEXP, discrete = FALSE, multi = TRUE) {
+NNS_mode_cpp <- function(xSEXP, discrete, multi) {
     .Call(`_NNS_NNS_mode_cpp`, xSEXP, discrete, multi)
 }
 

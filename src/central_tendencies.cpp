@@ -2,6 +2,7 @@
 #include <Rcpp.h>
 #include <algorithm>
 #include <cmath>
+#include "central_tendencies.h"
 
 using namespace Rcpp;
 
@@ -106,7 +107,7 @@ static void simple_bin_counts(const std::vector<double>& xs,
 // ---------- NNS.gravity ----------
 
 // [[Rcpp::export]]
-SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete = false) {
+SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete) {
   NumericVector xR(xSEXP);
   std::vector<double> x;
   x.reserve(xR.size());
@@ -254,7 +255,7 @@ static void smooth_counts_tri7(const std::vector<int>& counts, std::vector<doubl
 }
 
 // [[Rcpp::export]]
-SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete = false, bool multi = true) {
+SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   NumericVector xR(xSEXP);
   std::vector<double> x(xR.begin(), xR.end());
   

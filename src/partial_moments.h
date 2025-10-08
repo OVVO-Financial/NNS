@@ -229,16 +229,16 @@ Rcpp::List PMMatrix_CPv(
 double clpm_nD_cpp(const Rcpp::NumericMatrix &data,
                    const Rcpp::NumericVector &target,
                    double degree,
-                   bool norm = true);
+                   bool norm);
 
 double cupm_nD_cpp(const Rcpp::NumericMatrix &data,
                    const Rcpp::NumericVector &target,
                    double degree,
-                   bool norm = true);
+                   bool norm);
 
 double dpm_nD_cpp(const Rcpp::NumericMatrix &data,
                   const Rcpp::NumericVector &target,
                   double degree,
-                  bool norm = true);
+                  bool norm);
 
 #endif  //NNS_partial_moments_H
