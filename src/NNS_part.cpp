@@ -6,12 +6,9 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include "central_tendencies.h"
 
 using namespace Rcpp;
-
-// forward decls to your central_tendencies (or include the header you made)
-SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi);
-SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete);
 
 // mean/median helpers
 static inline double mean_no_na(const NumericVector& v){
