@@ -4,6 +4,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----mean, message=FALSE------------------------------------------------------
@@ -107,7 +108,4 @@ NNS.CDF(x, 1, type = "survival")
 ## ----numerical integration----------------------------------------------------
 x = seq(0, 1, .001) ; y = x ^ 2
 (UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

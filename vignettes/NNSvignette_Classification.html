@@ -380,26 +380,38 @@ techniques.</p>
 allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[,<span class="dv">5</span>], <span class="at">residual.plot =</span> <span class="cn">FALSE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>rhs.partitions</span></code></pre></div>
-<pre><code>##           V1       V2       V3       V4
-##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;
-##  1: 4.300000 2.000000 1.000000 0.100000
-##  2: 4.498056 2.829734 1.122917 0.200000
-##  3: 4.774255 3.358016 1.300000 0.300000
-##  4: 4.900000 4.400000 1.400000 0.400000
-##  5: 5.024342       NA 1.500000 0.550000
-##  6: 5.337272       NA 1.600000 1.000000
-##  7: 5.500000       NA 1.785714 1.170803
-##  8: 5.600000       NA 3.633180 1.300000
-##  9: 5.724167       NA 4.085368 1.474861
-## 10: 5.979167       NA 4.475817 1.608333
-## 11: 6.100000       NA 4.763626 1.816728
-## 12: 6.275609       NA 5.075817 2.074283
-## 13: 6.400000       NA 5.282912 2.328571
-## 14: 6.510268       NA 5.584151 2.500000
-## 15: 6.709943       NA 6.069866       NA
-## 16: 6.912500       NA 6.900000       NA
-## 17: 7.479872       NA       NA       NA
-## 18: 7.900000       NA       NA       NA</code></pre>
+<pre><code>##           V1       V2       V3        V4
+##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;     &lt;num&gt;
+##  1: 4.300000 2.000000 1.000000 0.1000000
+##  2: 4.381250 2.829734 1.050000 0.2000000
+##  3: 4.577396 3.358016 1.200000 0.3000000
+##  4: 4.700000 4.400000 1.300000 0.4083333
+##  5: 4.800000       NA 1.400000 1.0630397
+##  6: 4.900000       NA 1.500000 1.3742424
+##  7: 5.000000       NA 1.600000 1.7789810
+##  8: 5.100000       NA 1.700000 2.2285885
+##  9: 5.205000       NA 1.900000 2.5000000
+## 10: 5.400000       NA 3.416305        NA
+## 11: 5.500000       NA 3.834865        NA
+## 12: 5.600000       NA 4.000000        NA
+## 13: 5.700000       NA 4.184722        NA
+## 14: 5.800000       NA 4.400000        NA
+## 15: 5.900000       NA 4.500000        NA
+## 16: 6.000000       NA 4.670803        NA
+## 17: 6.100000       NA 4.863889        NA
+## 18: 6.200000       NA 5.000000        NA
+## 19: 6.300000       NA 5.100000        NA
+## 20: 6.400000       NA 5.200000        NA
+## 21: 6.500000       NA 5.337500        NA
+## 22: 6.600000       NA 5.500000        NA
+## 23: 6.700000       NA 5.617708        NA
+## 24: 6.800000       NA 5.849554        NA
+## 25: 6.900000       NA 6.336875        NA
+## 26: 7.050000       NA 6.900000        NA
+## 27: 7.224375       NA       NA        NA
+## 28: 7.687079       NA       NA        NA
+## 29: 7.900000       NA       NA        NA
+##           V1       V2       V3        V4</code></pre>
 </div>
 </div>
 </div>

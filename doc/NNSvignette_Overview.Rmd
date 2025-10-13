@@ -26,6 +26,7 @@ set.seed(42)
 ```{r, include=FALSE, message=FALSE}
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 ```
 
@@ -470,6 +471,3 @@ See NNS Vignette: [Getting Started with NNS: Sampling and Simulation](https://CR
 For complete references, please see the Vignettes linked above and their specific referenced materials.
 
 
-```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = "")
-```

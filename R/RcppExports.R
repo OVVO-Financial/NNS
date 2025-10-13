@@ -21,6 +21,10 @@ NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_redu
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction)
 }
 
+NNS_seas_cpp <- function(variable, modulo = NULL, mod_only = TRUE) {
+    .Call(`_NNS_NNS_seas_cpp`, variable, modulo, mod_only)
+}
+
 sd_dom_matrix_prefix_parallel <- function(X, degree, type = "discrete") {
     .Call(`_NNS_sd_dom_matrix_prefix_parallel`, X, degree, type)
 }

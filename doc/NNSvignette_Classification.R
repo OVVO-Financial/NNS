@@ -4,6 +4,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2, message=FALSE, warning = FALSE-----------------------------------
@@ -91,7 +92,4 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----stackreseval, eval = FALSE-----------------------------------------------
 # [1] 1
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

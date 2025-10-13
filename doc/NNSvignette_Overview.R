@@ -12,6 +12,7 @@ set.seed(42)
 ## ----include=FALSE, message=FALSE---------------------------------------------
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## -----------------------------------------------------------------------------
@@ -156,7 +157,4 @@ NNS.TSD.uni(RA, RB)
 Rmat <- cbind(A=RA, B=RB, C=RC)
 try(NNS.SD.cluster(Rmat, degree = 1))
 try(NNS.SD.efficient.set(Rmat, degree = 1))
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

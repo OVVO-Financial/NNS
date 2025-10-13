@@ -4,6 +4,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2, message=FALSE, warning = FALSE-----------------------------------
@@ -139,7 +140,4 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 #                 obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
 #                 objective = "min",
 #                 pred.int = .95, h = 50, plot = TRUE)
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

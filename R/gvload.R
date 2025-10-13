@@ -34,7 +34,7 @@
       "%do%", "k", "V1", "residuals", "nns_results", "bias_l", "bias_r",
       "bias", "conf.intervals", "conf.int.neg", "conf.int.pos", "pred.int", "lower.pred.int", "upper.pred.int",
       "estimates", "estimates.max", "estimates.min", "naive.first.grad", "naive.second.grad", "poly", "rise_1", "rise_2",
-      "..feat", "..feat_all"
+      "..feat", "..feat_all",  "M", "mean_var",  "use_cv", "var_cov"
     ))
 
   requireNamespace("data.table")

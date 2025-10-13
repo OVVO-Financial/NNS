@@ -385,7 +385,5 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 
 -   [Value-at-Risk (VaR) and Probability Bounds Analysis](https://doi.org/10.2139/ssrn.5310345)
 
-```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = "")
-```
+
 

@@ -4,6 +4,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2, message=FALSE, warning = FALSE-----------------------------------
@@ -244,7 +245,4 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 # ensemble4  0.2257378  0.3108846  1.0603892  0.1728540
 # ensemble5  0.4716743 -3.3344967 -0.1917697  0.4309379
 # ensemble6  1.3984978  1.1881374 -0.5295386  1.5326055
-
-## ----threads, echo = FALSE----------------------------------------------------
-Sys.setenv("OMP_THREAD_LIMIT" = "")
 

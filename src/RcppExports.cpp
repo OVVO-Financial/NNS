@@ -88,6 +88,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NNS_seas_cpp
+Rcpp::List NNS_seas_cpp(NumericVector variable, Nullable<IntegerVector> modulo, bool mod_only);
+RcppExport SEXP _NNS_NNS_seas_cpp(SEXP variableSEXP, SEXP moduloSEXP, SEXP mod_onlySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type variable(variableSEXP);
+    Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type modulo(moduloSEXP);
+    Rcpp::traits::input_parameter< bool >::type mod_only(mod_onlySEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sd_dom_matrix_prefix_parallel
 IntegerMatrix sd_dom_matrix_prefix_parallel(const NumericMatrix& X, int degree, std::string type);
 RcppExport SEXP _NNS_sd_dom_matrix_prefix_parallel(SEXP XSEXP, SEXP degreeSEXP, SEXP typeSEXP) {
@@ -577,6 +590,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
     {"_NNS_NNS_distance_path_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_parallel_cpp, 6},
     {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 7},
+    {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 3},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
     {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},
     {"_NNS_NNS_FSD_uni_cpp", (DL_FUNC) &_NNS_NNS_FSD_uni_cpp, 3},

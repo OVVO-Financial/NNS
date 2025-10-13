@@ -173,6 +173,3 @@ If the user is so motivated, detailed arguments further examples are provided wi
 
 -   [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
 
-```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = "")
-```

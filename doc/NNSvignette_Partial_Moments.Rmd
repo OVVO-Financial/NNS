@@ -14,6 +14,7 @@ library(NNS)
 library(data.table)
 data.table::setDTthreads(1L)
 options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 ```
 
@@ -184,6 +185,3 @@ If the user is so motivated, detailed arguments and proofs are provided within t
 
 * [Bayes' Theorem From Partial Moments](https://doi.org/10.2139/ssrn.3457377)
 
-```{r threads, echo = FALSE}
-Sys.setenv("OMP_THREAD_LIMIT" = "")
-```

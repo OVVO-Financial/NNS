@@ -467,20 +467,18 @@ series with logically inferred cyclical patterns. The nearest periods to
 that <code>modulo</code> will be in the expanded output.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">NNS.seas</span>(AirPassengers, <span class="at">modulo =</span> <span class="dv">12</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## $all.periods
-##    Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-##    &lt;list&gt;                   &lt;list&gt;                            &lt;list&gt;
-## 1:     48                0.4002249                         0.4279947
-## 2:     12                0.4059923                         0.4279947
-## 3:     60                0.4279947                         0.4279947
-## 4:     36                0.4279947                         0.4279947
-## 5:     24                0.4279947                         0.4279947
+##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1     48                0.4002249                         0.4279947
+## 2     12                0.4059923                         0.4279947
+## 3     24                0.4279947                         0.4279947
+## 4     36                0.4279947                         0.4279947
+## 5     60                0.4279947                         0.4279947
 ## 
 ## $best.period
-## Period 
-##     48 
+## [1] 48
 ## 
 ## $periods
-## [1] 48 12 60 36 24</code></pre>
+## [1] 48 12 24 36 60</code></pre>
 </div>
 <div id="cross-validating-all-combinations-of-seasonal.factor" class="section level2">
 <h2>Cross-Validating All Combinations of
