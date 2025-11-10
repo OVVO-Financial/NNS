@@ -454,7 +454,7 @@ See NNS Vignette: [Getting Started with NNS: Clustering and Regression](https://
 See NNS Vignette: [Getting Started with NNS: Classification](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Classification.html)
 
 ## 6. Differentiation & Slope Measures
-- `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via partial moments.
+- `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via `NNS.reg`.
 - `dy.d_(x, Y, var)` — partial derivative of multivariate `Y` w.r.t. `var`.
 - `NNS.diff(x, y)` — derivative via secant projections.
 

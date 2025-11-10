@@ -88,6 +88,7 @@ Specific regressors include:
   \item \code{PPIACO} -- Producer Price Index All Commodities
   \item \code{CIVPART} -- Labor Force Participation Rate
   \item \code{M2NS} -- M2 Money Supply
+  \item \code{ADPMNUSNERNSA} -- ADP Payrolls
  }
 }
 \examples{
