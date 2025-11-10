@@ -84,9 +84,7 @@ This **is not** the same as splitting conditional variances around a threshold; 
 
 -   `LPM(degree, target, variable)`
 -   `UPM(degree, target, variable)`
--   `LPM.ratio(degree = 0, target, variable)` (empirical CDF when `degree=0`)
--   `UPM.ratio(degree = 0, target, variable)`
--   `LPM.VaR(p, degree, variable)` (quantiles via partial‑moment CDFs)
+
 
 ## 1.3 Code: variance decomposition & CDF
 
@@ -137,9 +135,16 @@ NNS.mode(multimodal,multi = TRUE)
 
 ## 2.3 CDF tables via LPM ratios
 
+**Headers.**
+
+-   `LPM.ratio(degree = 0, target, variable)` (empirical CDF when `degree=0`)
+-   `UPM.ratio(degree = 0, target, variable)`
+-   `LPM.VaR(p, degree, variable)` (quantiles via partial‑moment CDFs)
+-   `UPM.VaR(p, degree, variable)`
+
 ```{r}
-qgrid <- quantile(z, probs = seq(0.05,0.95,by=0.1))
-CDF_tbl <- data.table(threshold = as.numeric(qgrid), CDF = sapply(qgrid, function(q) LPM.ratio(0,q,z)))
+qgrid <- LPM.VaR(seq(0.05,0.95,.1),0,z) # equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))
+CDF_tbl <- data.table(threshold = as.numeric(qgrid), CDF = LPM.ratio(0,qgrid,z))
 CDF_tbl
 ```
 
@@ -229,7 +234,9 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 **Headers.** 
 
 - `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, … 
-- `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)` - `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` - `NNS.caus(x, y)` (directional causality score via conditional dependence)
+- `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)` 
+- `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` 
+- `NNS.caus(x, y)` (directional causality score via conditional dependence)
 
 ## 5.2 Code: classification via regression + ensembles
 
@@ -297,10 +304,11 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 z <- as.numeric(scale(sin(1:480/8) + rnorm(480, sd=.35)))
 
 # Seasonality detection (prints a summary)
-NNS.seas(z, plot = FALSE)
+seasonal_period <- NNS.seas(z, plot = FALSE)
+head(seasonal_period$all.periods)
 
 # Validate seasonal periods
-NNS.ARMA.optim(z, h=48, seasonal.factor = NNS.seas(z, plot = FALSE)$periods, plot = TRUE, ncores = 1)
+NNS.ARMA.optim(z, h=48, seasonal.factor = seasonal_period$periods, plot = TRUE, ncores = 1)
 ```
 
 **Notes.** NNS seasonality uses coefficient of variation instead of ACF/PACFs, and NNS ARMA blends multiple seasonal periods into the linear or nonlinear regression forecasts.
@@ -329,7 +337,9 @@ dim(mb["replicates", ]$replicates)
 
 ```{r}
 mc <- NNS.MC(x_ts, reps=5, lower_rho=-1, upper_rho=1, by=.5, exp=1)
-length(mc$ensemble); head(names(mc$replicates),5)
+length(mc$ensemble); names(mc$replicates)
+
+head(mc$replicates$`rho = 0`)
 ```
 
 ## 7.3 Risk‑neutral rescale (pricing context)

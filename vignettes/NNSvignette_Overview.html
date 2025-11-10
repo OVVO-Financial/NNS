@@ -414,11 +414,6 @@ reference, preserving the between‑group contribution.</li>
 <ul>
 <li><code>LPM(degree, target, variable)</code></li>
 <li><code>UPM(degree, target, variable)</code></li>
-<li><code>LPM.ratio(degree = 0, target, variable)</code> (empirical CDF
-when <code>degree=0</code>)</li>
-<li><code>UPM.ratio(degree = 0, target, variable)</code></li>
-<li><code>LPM.VaR(p, degree, variable)</code> (quantiles via
-partial‑moment CDFs)</li>
 </ul>
 </div>
 <div id="code-variance-decomposition-cdf" class="section level2">
@@ -480,8 +475,17 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 </div>
 <div id="cdf-tables-via-lpm-ratios" class="section level2">
 <h2>2.3 CDF tables via LPM ratios</h2>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">quantile</span>(z, <span class="at">probs =</span> <span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,<span class="at">by=</span><span class="fl">0.1</span>))</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">sapply</span>(qgrid, <span class="cf">function</span>(q) <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,q,z)))</span>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>LPM.ratio(degree = 0, target, variable)</code> (empirical CDF
+when <code>degree=0</code>)</li>
+<li><code>UPM.ratio(degree = 0, target, variable)</code></li>
+<li><code>LPM.VaR(p, degree, variable)</code> (quantiles via
+partial‑moment CDFs)</li>
+<li><code>UPM.VaR(p, degree, variable)</code></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">LPM.VaR</span>(<span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,.<span class="dv">1</span>),<span class="dv">0</span>,z) <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,qgrid,z))</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>CDF_tbl</span></code></pre></div>
 <pre><code>##       threshold   CDF
 ##           &lt;num&gt; &lt;num&gt;
@@ -647,10 +651,9 @@ nonlinear where needed — avoiding fragile global parametric forms.</p>
 <ul>
 <li><code>NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)</code> →
 <code>$Fitted.xy</code>, <code>$Point.est</code>, …</li>
-<li><code>NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)</code>
--
-<code>NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)</code>
-- <code>NNS.caus(x, y)</code> (directional causality score via
+<li><code>NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)</code></li>
+<li><code>NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)</code></li>
+<li><code>NNS.caus(x, y)</code> (directional causality score via
 conditional dependence)</li>
 </ul>
 </div>
@@ -810,269 +813,17 @@ drivers.</p>
 <span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
 <span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a></span>
 <span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
-<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a><span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## $all.periods
-##     Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-## 1       99             5.122054e-01                      1.168502e+17
-## 2      147             5.256021e-01                      1.168502e+17
-## 3      100             5.598477e-01                      1.168502e+17
-## 4      146             5.618687e-01                      1.168502e+17
-## 5      199             5.766158e-01                      1.168502e+17
-## 6       98             5.801409e-01                      1.168502e+17
-## 7       97             5.913864e-01                      1.168502e+17
-## 8      200             5.940957e-01                      1.168502e+17
-## 9       49             6.130101e-01                      1.168502e+17
-## 10     198             6.304493e-01                      1.168502e+17
-## 11      48             6.351277e-01                      1.168502e+17
-## 12      96             6.480126e-01                      1.168502e+17
-## 13     145             6.633397e-01                      1.168502e+17
-## 14     196             6.678885e-01                      1.168502e+17
-## 15     194             6.705131e-01                      1.168502e+17
-## 16     193             6.836003e-01                      1.168502e+17
-## 17     195             6.937159e-01                      1.168502e+17
-## 18     197             7.061230e-01                      1.168502e+17
-## 19     144             7.270043e-01                      1.168502e+17
-## 20      50             7.717106e-01                      1.168502e+17
-## 21     192             8.420983e-01                      1.168502e+17
-## 22     149             8.762590e-01                      1.168502e+17
-## 23     176             8.923652e-01                      1.168502e+17
-## 24      53             9.753701e-01                      1.168502e+17
-## 25     191             9.970880e-01                      1.168502e+17
-## 26     148             1.000133e+00                      1.168502e+17
-## 27      95             1.001327e+00                      1.168502e+17
-## 28     156             1.023517e+00                      1.168502e+17
-## 29     190             1.026365e+00                      1.168502e+17
-## 30     106             1.031515e+00                      1.168502e+17
-## 31     150             1.031874e+00                      1.168502e+17
-## 32     202             1.095312e+00                      1.168502e+17
-## 33     239             1.120591e+00                      1.168502e+17
-## 34      52             1.127889e+00                      1.168502e+17
-## 35     143             1.136258e+00                      1.168502e+17
-## 36     201             1.142879e+00                      1.168502e+17
-## 37     105             1.161212e+00                      1.168502e+17
-## 38     142             1.185851e+00                      1.168502e+17
-## 39     189             1.192676e+00                      1.168502e+17
-## 40     209             1.277932e+00                      1.168502e+17
-## 41     158             1.326313e+00                      1.168502e+17
-## 42     238             1.374301e+00                      1.168502e+17
-## 43     157             1.377018e+00                      1.168502e+17
-## 44     211             1.385362e+00                      1.168502e+17
-## 45     160             1.392640e+00                      1.168502e+17
-## 46     155             1.413546e+00                      1.168502e+17
-## 47     107             1.475044e+00                      1.168502e+17
-## 48     212             1.525669e+00                      1.168502e+17
-## 49     177             1.558282e+00                      1.168502e+17
-## 50     104             1.565842e+00                      1.168502e+17
-## 51     210             1.598036e+00                      1.168502e+17
-## 52     188             1.654696e+00                      1.168502e+17
-## 53     154             1.706663e+00                      1.168502e+17
-## 54     208             1.776901e+00                      1.168502e+17
-## 55     126             1.793373e+00                      1.168502e+17
-## 56     163             1.808468e+00                      1.168502e+17
-## 57     152             1.876407e+00                      1.168502e+17
-## 58     103             2.235488e+00                      1.168502e+17
-## 59     207             2.278853e+00                      1.168502e+17
-## 60     127             2.280616e+00                      1.168502e+17
-## 61     172             2.366095e+00                      1.168502e+17
-## 62     117             2.427411e+00                      1.168502e+17
-## 63     159             2.524505e+00                      1.168502e+17
-## 64     128             2.629598e+00                      1.168502e+17
-## 65     206             2.690670e+00                      1.168502e+17
-## 66     109             2.709602e+00                      1.168502e+17
-## 67     175             2.741247e+00                      1.168502e+17
-## 68     224             2.766639e+00                      1.168502e+17
-## 69     179             2.877686e+00                      1.168502e+17
-## 70      47             2.955495e+00                      1.168502e+17
-## 71     170             2.988239e+00                      1.168502e+17
-## 72     221             3.029738e+00                      1.168502e+17
-## 73     227             3.162556e+00                      1.168502e+17
-## 74     171             3.179398e+00                      1.168502e+17
-## 75      86             3.239900e+00                      1.168502e+17
-## 76      85             3.247839e+00                      1.168502e+17
-## 77     130             3.276962e+00                      1.168502e+17
-## 78      54             3.326602e+00                      1.168502e+17
-## 79     222             3.489286e+00                      1.168502e+17
-## 80     129             3.607986e+00                      1.168502e+17
-## 81     236             3.633472e+00                      1.168502e+17
-## 82     178             3.654937e+00                      1.168502e+17
-## 83     153             3.688854e+00                      1.168502e+17
-## 84     141             3.807346e+00                      1.168502e+17
-## 85     237             3.899336e+00                      1.168502e+17
-## 86     108             3.938093e+00                      1.168502e+17
-## 87     203             4.195977e+00                      1.168502e+17
-## 88     181             4.198172e+00                      1.168502e+17
-## 89      34             4.252195e+00                      1.168502e+17
-## 90     101             4.272265e+00                      1.168502e+17
-## 91     180             4.380574e+00                      1.168502e+17
-## 92     226             4.421886e+00                      1.168502e+17
-## 93     161             4.423973e+00                      1.168502e+17
-## 94      94             4.458293e+00                      1.168502e+17
-## 95      87             4.471782e+00                      1.168502e+17
-## 96     213             4.508373e+00                      1.168502e+17
-## 97     162             4.556610e+00                      1.168502e+17
-## 98      43             4.586927e+00                      1.168502e+17
-## 99     115             4.613285e+00                      1.168502e+17
-## 100    113             4.770551e+00                      1.168502e+17
-## 101    166             4.811135e+00                      1.168502e+17
-## 102    102             4.841008e+00                      1.168502e+17
-## 103     80             4.844363e+00                      1.168502e+17
-## 104     59             4.873768e+00                      1.168502e+17
-## 105    204             4.915212e+00                      1.168502e+17
-## 106     66             5.029585e+00                      1.168502e+17
-## 107     40             5.041325e+00                      1.168502e+17
-## 108    135             5.163577e+00                      1.168502e+17
-## 109     61             5.205706e+00                      1.168502e+17
-## 110    217             5.245437e+00                      1.168502e+17
-## 111     81             5.270768e+00                      1.168502e+17
-## 112     90             5.272675e+00                      1.168502e+17
-## 113    131             5.362916e+00                      1.168502e+17
-## 114     56             5.411184e+00                      1.168502e+17
-## 115     44             5.450005e+00                      1.168502e+17
-## 116    223             5.769267e+00                      1.168502e+17
-## 117     83             5.822533e+00                      1.168502e+17
-## 118     60             5.868392e+00                      1.168502e+17
-## 119    132             5.882595e+00                      1.168502e+17
-## 120     84             5.907785e+00                      1.168502e+17
-## 121     74             5.910181e+00                      1.168502e+17
-## 122     93             5.958629e+00                      1.168502e+17
-## 123     88             6.058206e+00                      1.168502e+17
-## 124     45             6.217181e+00                      1.168502e+17
-## 125    229             6.265882e+00                      1.168502e+17
-## 126    167             6.342308e+00                      1.168502e+17
-## 127    173             6.643852e+00                      1.168502e+17
-## 128    133             6.895194e+00                      1.168502e+17
-## 129    122             7.083905e+00                      1.168502e+17
-## 130    116             7.139176e+00                      1.168502e+17
-## 131    151             7.149409e+00                      1.168502e+17
-## 132     70             7.240700e+00                      1.168502e+17
-## 133    174             7.308879e+00                      1.168502e+17
-## 134    187             7.344237e+00                      1.168502e+17
-## 135     51             7.495080e+00                      1.168502e+17
-## 136    112             7.610851e+00                      1.168502e+17
-## 137    219             7.932584e+00                      1.168502e+17
-## 138    228             7.963662e+00                      1.168502e+17
-## 139    121             8.354801e+00                      1.168502e+17
-## 140    136             8.629112e+00                      1.168502e+17
-## 141    232             8.703616e+00                      1.168502e+17
-## 142    120             8.733889e+00                      1.168502e+17
-## 143     37             8.754739e+00                      1.168502e+17
-## 144    169             8.867067e+00                      1.168502e+17
-## 145     25             8.963970e+00                      1.168502e+17
-## 146    182             8.983659e+00                      1.168502e+17
-## 147     22             9.237323e+00                      1.168502e+17
-## 148     14             9.274978e+00                      1.168502e+17
-## 149    186             9.295678e+00                      1.168502e+17
-## 150     82             9.574473e+00                      1.168502e+17
-## 151    118             9.918862e+00                      1.168502e+17
-## 152     89             1.010082e+01                      1.168502e+17
-## 153    184             1.011434e+01                      1.168502e+17
-## 154     39             1.016482e+01                      1.168502e+17
-## 155     72             1.033458e+01                      1.168502e+17
-## 156     67             1.045813e+01                      1.168502e+17
-## 157    234             1.068520e+01                      1.168502e+17
-## 158     64             1.069202e+01                      1.168502e+17
-## 159     18             1.111229e+01                      1.168502e+17
-## 160    140             1.131426e+01                      1.168502e+17
-## 161     91             1.133352e+01                      1.168502e+17
-## 162    216             1.145227e+01                      1.168502e+17
-## 163     57             1.162079e+01                      1.168502e+17
-## 164    124             1.209170e+01                      1.168502e+17
-## 165    233             1.222126e+01                      1.168502e+17
-## 166    168             1.223721e+01                      1.168502e+17
-## 167     32             1.292857e+01                      1.168502e+17
-## 168     16             1.296332e+01                      1.168502e+17
-## 169    134             1.338857e+01                      1.168502e+17
-## 170     73             1.393811e+01                      1.168502e+17
-## 171     75             1.401009e+01                      1.168502e+17
-## 172     92             1.421525e+01                      1.168502e+17
-## 173    139             1.451676e+01                      1.168502e+17
-## 174     36             1.470681e+01                      1.168502e+17
-## 175     41             1.499788e+01                      1.168502e+17
-## 176    220             1.615333e+01                      1.168502e+17
-## 177    230             1.684462e+01                      1.168502e+17
-## 178     58             1.708848e+01                      1.168502e+17
-## 179    123             1.732625e+01                      1.168502e+17
-## 180     69             1.764245e+01                      1.168502e+17
-## 181     38             1.834018e+01                      1.168502e+17
-## 182     76             1.855871e+01                      1.168502e+17
-## 183     28             1.878076e+01                      1.168502e+17
-## 184    164             1.932163e+01                      1.168502e+17
-## 185     26             1.952217e+01                      1.168502e+17
-## 186    138             1.971883e+01                      1.168502e+17
-## 187    225             2.050023e+01                      1.168502e+17
-## 188    125             2.143126e+01                      1.168502e+17
-## 189    165             2.162192e+01                      1.168502e+17
-## 190    185             2.211318e+01                      1.168502e+17
-## 191     68             2.265208e+01                      1.168502e+17
-## 192     55             2.403825e+01                      1.168502e+17
-## 193     65             2.454398e+01                      1.168502e+17
-## 194     35             2.504945e+01                      1.168502e+17
-## 195      2             2.533018e+01                      1.168502e+17
-## 196    183             2.711860e+01                      1.168502e+17
-## 197      6             2.732554e+01                      1.168502e+17
-## 198     42             2.761196e+01                      1.168502e+17
-## 199     78             2.778644e+01                      1.168502e+17
-## 200    215             2.783021e+01                      1.168502e+17
-## 201    137             2.853969e+01                      1.168502e+17
-## 202     21             2.892434e+01                      1.168502e+17
-## 203      8             2.923985e+01                      1.168502e+17
-## 204     20             3.016919e+01                      1.168502e+17
-## 205     15             3.035759e+01                      1.168502e+17
-## 206     62             3.125688e+01                      1.168502e+17
-## 207      7             3.212915e+01                      1.168502e+17
-## 208    231             3.216774e+01                      1.168502e+17
-## 209     79             3.245748e+01                      1.168502e+17
-## 210     13             3.344029e+01                      1.168502e+17
-## 211    205             3.569797e+01                      1.168502e+17
-## 212     24             3.731914e+01                      1.168502e+17
-## 213     17             3.982596e+01                      1.168502e+17
-## 214    119             4.041381e+01                      1.168502e+17
-## 215     12             4.367816e+01                      1.168502e+17
-## 216     31             5.056934e+01                      1.168502e+17
-## 217    214             5.079334e+01                      1.168502e+17
-## 218     63             5.187227e+01                      1.168502e+17
-## 219     33             5.421531e+01                      1.168502e+17
-## 220     27             5.966774e+01                      1.168502e+17
-## 221    111             6.256476e+01                      1.168502e+17
-## 222      3             6.716509e+01                      1.168502e+17
-## 223      9             6.750032e+01                      1.168502e+17
-## 224     19             7.484556e+01                      1.168502e+17
-## 225     10             8.002349e+01                      1.168502e+17
-## 226    218             8.348530e+01                      1.168502e+17
-## 227    114             8.819610e+01                      1.168502e+17
-## 228      4             9.444174e+01                      1.168502e+17
-## 229     23             1.076263e+02                      1.168502e+17
-## 230      5             1.094794e+02                      1.168502e+17
-## 231    110             1.384396e+02                      1.168502e+17
-## 232     71             1.414188e+02                      1.168502e+17
-## 233     77             1.623010e+02                      1.168502e+17
-## 234     29             2.243366e+02                      1.168502e+17
-## 235    235             2.273832e+02                      1.168502e+17
-## 236     30             4.402306e+02                      1.168502e+17
-## 237     11             4.879713e+02                      1.168502e+17
-## 238     46             5.854636e+02                      1.168502e+17
-## 239      1             3.034004e+16                      1.168502e+17
-## 
-## $best.period
-## [1] 99
-## 
-## $periods
-##   [1]  99 147 100 146 199  98  97 200  49 198  48  96 145 196 194 193 195 197
-##  [19] 144  50 192 149 176  53 191 148  95 156 190 106 150 202 239  52 143 201
-##  [37] 105 142 189 209 158 238 157 211 160 155 107 212 177 104 210 188 154 208
-##  [55] 126 163 152 103 207 127 172 117 159 128 206 109 175 224 179  47 170 221
-##  [73] 227 171  86  85 130  54 222 129 236 178 153 141 237 108 203 181  34 101
-##  [91] 180 226 161  94  87 213 162  43 115 113 166 102  80  59 204  66  40 135
-## [109]  61 217  81  90 131  56  44 223  83  60 132  84  74  93  88  45 229 167
-## [127] 173 133 122 116 151  70 174 187  51 112 219 228 121 136 232 120  37 169
-## [145]  25 182  22  14 186  82 118  89 184  39  72  67 234  64  18 140  91 216
-## [163]  57 124 233 168  32  16 134  73  75  92 139  36  41 220 230  58 123  69
-## [181]  38  76  28 164  26 138 225 125 165 185  68  55  65  35   2 183   6  42
-## [199]  78 215 137  21   8  20  15  62   7 231  79  13 205  24  17 119  12  31
-## [217] 214  63  33  27 111   3   9  19  10 218 114   4  23   5 110  71  77  29
-## [235] 235  30  11  46   1</code></pre>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
+<pre><code>##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1     99                0.5122054                      1.168502e+17
+## 2    147                0.5256021                      1.168502e+17
+## 3    100                0.5598477                      1.168502e+17
+## 4    146                0.5618687                      1.168502e+17
+## 5    199                0.5766158                      1.168502e+17
+## 6     98                0.5801409                      1.168502e+17</code></pre>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h=</span><span class="dv">48</span>, <span class="at">seasonal.factor =</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h=</span><span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
 ## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 52 ) ...)&quot;
@@ -1189,9 +940,17 @@ the linear or nonlinear regression forecasts.</p>
 <li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type=&quot;spearman&quot;, ...)</code></li>
 </ul>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">NNS.MC</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">lower_rho=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">upper_rho=</span><span class="dv">1</span>, <span class="at">by=</span>.<span class="dv">5</span>, <span class="at">exp=</span><span class="dv">1</span>)</span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">head</span>(<span class="fu">names</span>(mc<span class="sc">$</span>replicates),<span class="dv">5</span>)</span></code></pre></div>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">names</span>(mc<span class="sc">$</span>replicates)</span></code></pre></div>
 <pre><code>## [1] 350</code></pre>
 <pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
+<pre><code>##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5
+## [1,]   -6.097304   -0.246557   -4.427608   -2.153337   -5.050326
+## [2,]   -6.582158    0.343863   -2.445919   -3.175586   -4.777579
+## [3,]   -4.393280    0.548543   -1.822378   -2.637809   -4.708166
+## [4,]   -6.134514   -0.584076   -6.920453   -1.800864   -4.861689
+## [5,]   -5.270871    1.095869   -1.964841   -1.204533   -1.626527
+## [6,]   -5.627466    1.128039   -3.351027   -2.736647   -0.587572</code></pre>
 </div>
 <div id="riskneutral-rescale-pricing-context" class="section level2">
 <h2>7.3 Risk‑neutral rescale (pricing context)</h2>
@@ -1199,9 +958,9 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.rescale(x, a, b, method=c(&quot;minmax&quot;,&quot;riskneutral&quot;), T=NULL, type=c(&quot;Terminal&quot;,&quot;Discounted&quot;))</code></li>
 </ul>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>px <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">260</span>, <span class="at">sd =</span> <span class="dv">1</span>))</span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>rn <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(px, <span class="at">a=</span><span class="dv">100</span>, <span class="at">b=</span><span class="fl">0.03</span>, <span class="at">method=</span><span class="st">&quot;riskneutral&quot;</span>, <span class="at">T=</span><span class="dv">1</span>, <span class="at">type=</span><span class="st">&quot;Terminal&quot;</span>)</span>
-<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>px <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">260</span>, <span class="at">sd =</span> <span class="dv">1</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>rn <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(px, <span class="at">a=</span><span class="dv">100</span>, <span class="at">b=</span><span class="fl">0.03</span>, <span class="at">method=</span><span class="st">&quot;riskneutral&quot;</span>, <span class="at">T=</span><span class="dv">1</span>, <span class="at">type=</span><span class="st">&quot;Terminal&quot;</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
 <pre><code>##   target  mean_rn 
 ## 103.0455 103.0455</code></pre>
 <p><strong>Interpretation.</strong> <code>riskneutral</code> shifts the
@@ -1220,22 +979,22 @@ estimators.</p>
 <code>NNS.SSD.uni(x, y)</code> - <code>NNS.TSD.uni(x, y)</code> -
 <code>NNS.SD.cluster(R)</code> -
 <code>NNS.SD.efficient.set(R)</code></p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
-<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
-<span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a></span>
-<span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1
 ## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
 <pre><code>## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
 <hr />

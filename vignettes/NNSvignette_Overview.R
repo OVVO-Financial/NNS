@@ -42,8 +42,8 @@ multimodal <- c(rnorm(1500,-2,.5), rnorm(1500,2,.5))
 NNS.mode(multimodal,multi = TRUE)
 
 ## -----------------------------------------------------------------------------
-qgrid <- quantile(z, probs = seq(0.05,0.95,by=0.1))
-CDF_tbl <- data.table(threshold = as.numeric(qgrid), CDF = sapply(qgrid, function(q) LPM.ratio(0,q,z)))
+qgrid <- LPM.VaR(seq(0.05,0.95,.1),0,z) # equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))
+CDF_tbl <- data.table(threshold = as.numeric(qgrid), CDF = LPM.ratio(0,qgrid,z))
 CDF_tbl
 
 ## -----------------------------------------------------------------------------
@@ -126,10 +126,11 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 z <- as.numeric(scale(sin(1:480/8) + rnorm(480, sd=.35)))
 
 # Seasonality detection (prints a summary)
-NNS.seas(z, plot = FALSE)
+seasonal_period <- NNS.seas(z, plot = FALSE)
+head(seasonal_period$all.periods)
 
 # Validate seasonal periods
-NNS.ARMA.optim(z, h=48, seasonal.factor = NNS.seas(z, plot = FALSE)$periods, plot = TRUE, ncores = 1)
+NNS.ARMA.optim(z, h=48, seasonal.factor = seasonal_period$periods, plot = TRUE, ncores = 1)
 
 ## -----------------------------------------------------------------------------
 x_ts <- cumsum(rnorm(350, sd=.7))
@@ -138,7 +139,9 @@ dim(mb["replicates", ]$replicates)
 
 ## -----------------------------------------------------------------------------
 mc <- NNS.MC(x_ts, reps=5, lower_rho=-1, upper_rho=1, by=.5, exp=1)
-length(mc$ensemble); head(names(mc$replicates),5)
+length(mc$ensemble); names(mc$replicates)
+
+head(mc$replicates$`rho = 0`)
 
 ## -----------------------------------------------------------------------------
 px <- 100 + cumsum(rnorm(260, sd = 1))

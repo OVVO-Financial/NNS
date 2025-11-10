@@ -56,7 +56,7 @@ NNS.dep = function(x,
     obs <- max(8, l/8)
     
     # Define segments
-    if(print.map) PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = NULL, Voronoi = TRUE)) else PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE))
+    PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map))
     
     PART_yx <- suppressWarnings(NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE))
     
@@ -65,22 +65,22 @@ NNS.dep = function(x,
     PART_xy <- PART_xy$dt
     PART_xy <- PART_xy[complete.cases(PART_xy),]
     weights_xy <- PART_xy[, .N / l, by = quadrant]$V1
-   
+    
     PART_yx <- PART_yx$dt
     PART_yx <- PART_yx[complete.cases(PART_yx),]
     weights_yx <- PART_yx[, .N / l, by = quadrant]$V1
-
+    
     
     dep_fn <- function(xx, yy) {
       NNS::NNS.copula(cbind(xx, yy)) * sign(fast_lm(xx, yy)$coef[2])
     }
-  
+    
     
     res_xy <- suppressWarnings(tryCatch(PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
-                                         error = function(e) PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
-     
+                                        error = function(e) PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
+    
     res_yx <- suppressWarnings(tryCatch(PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
-                                         error = function(e) PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
+                                        error = function(e) PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
     
     if(anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
     if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
@@ -97,6 +97,7 @@ NNS.dep = function(x,
     
     lx <- PART_xy[, length(unique(x))]
     ly <- PART_xy[, length(unique(y))]
+    
     degree_x <- min(10, max(1,lx-1), max(1,ly-1))
     
     I_x <- lx < sqrt(l)

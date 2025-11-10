@@ -414,11 +414,6 @@ reference, preserving the between‑group contribution.</li>
 <ul>
 <li><code>LPM(degree, target, variable)</code></li>
 <li><code>UPM(degree, target, variable)</code></li>
-<li><code>LPM.ratio(degree = 0, target, variable)</code> (empirical CDF
-when <code>degree=0</code>)</li>
-<li><code>UPM.ratio(degree = 0, target, variable)</code></li>
-<li><code>LPM.VaR(p, degree, variable)</code> (quantiles via
-partial‑moment CDFs)</li>
 </ul>
 </div>
 <div id="code-variance-decomposition-cdf" class="section level2">
@@ -480,8 +475,17 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 </div>
 <div id="cdf-tables-via-lpm-ratios" class="section level2">
 <h2>2.3 CDF tables via LPM ratios</h2>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">quantile</span>(z, <span class="at">probs =</span> <span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,<span class="at">by=</span><span class="fl">0.1</span>))</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">sapply</span>(qgrid, <span class="cf">function</span>(q) <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,q,z)))</span>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>LPM.ratio(degree = 0, target, variable)</code> (empirical CDF
+when <code>degree=0</code>)</li>
+<li><code>UPM.ratio(degree = 0, target, variable)</code></li>
+<li><code>LPM.VaR(p, degree, variable)</code> (quantiles via
+partial‑moment CDFs)</li>
+<li><code>UPM.VaR(p, degree, variable)</code></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">LPM.VaR</span>(<span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,.<span class="dv">1</span>),<span class="dv">0</span>,z) <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,qgrid,z))</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>CDF_tbl</span></code></pre></div>
 <pre><code>##       threshold   CDF
 ##           &lt;num&gt; &lt;num&gt;
@@ -647,10 +651,9 @@ nonlinear where needed — avoiding fragile global parametric forms.</p>
 <ul>
 <li><code>NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)</code> →
 <code>$Fitted.xy</code>, <code>$Point.est</code>, …</li>
-<li><code>NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)</code>
--
-<code>NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)</code>
-- <code>NNS.caus(x, y)</code> (directional causality score via
+<li><code>NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)</code></li>
+<li><code>NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)</code></li>
+<li><code>NNS.caus(x, y)</code> (directional causality score via
 conditional dependence)</li>
 </ul>
 </div>
@@ -810,43 +813,17 @@ drivers.</p>
 <span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
 <span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a></span>
 <span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
-<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a><span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## $all.periods
-## Key: &lt;Coefficient.of.Variation&gt;
-##      Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-##       &lt;int&gt;                    &lt;num&gt;                             &lt;num&gt;
-##   1:     99             5.122054e-01                      7.866136e+16
-##   2:    147             5.256021e-01                      7.866136e+16
-##   3:    100             5.598477e-01                      7.866136e+16
-##   4:    146             5.618687e-01                      7.866136e+16
-##   5:    199             5.766158e-01                      7.866136e+16
-##  ---                                                                  
-## 235:    235             2.273832e+02                      7.866136e+16
-## 236:     30             4.402306e+02                      7.866136e+16
-## 237:     11             4.879713e+02                      7.866136e+16
-## 238:     46             5.854636e+02                      7.866136e+16
-## 239:      1             2.621230e+16                      7.866136e+16
-## 
-## $best.period
-## [1] 99
-## 
-## $periods
-##   [1]  99 147 100 146 199  98  97 200  49 198  48  96 145 196 194 193 195 197
-##  [19] 144  50 192 149 176  53 191 148  95 156 190 106 150 202 239  52 143 201
-##  [37] 105 142 189 209 158 238 157 211 160 155 107 212 177 104 210 188 154 208
-##  [55] 126 163 152 103 207 127 172 117 159 128 206 109 175 224 179  47 170 221
-##  [73] 227 171  86  85 130  54 222 129 236 178 153 141 237 108 203 181  34 101
-##  [91] 180 226 161  94  87 213 162  43 115 113 166 102  80  59 204  66  40 135
-## [109]  61 217  81  90 131  56  44 223  83  60 132  84  74  93  88  45 229 167
-## [127] 173 133 122 116 151  70 174 187  51 112 219 228 121 136 232 120  37 169
-## [145]  25 182  22  14 186  82 118  89 184  39  72  67 234  64  18 140  91 216
-## [163]  57 124 233 168  32  16 134  73  75  92 139  36  41 220 230  58 123  69
-## [181]  38  76  28 164  26 138 225 125 165 185  68  55  65  35   2 183   6  42
-## [199]  78 215 137  21   8  20  15  62   7 231  79  13 205  24  17 119  12  31
-## [217] 214  63  33  27 111   3   9  19  10 218 114   4  23   5 110  71  77  29
-## [235] 235  30  11  46   1</code></pre>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
+<pre><code>##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1     99                0.5122054                      1.168502e+17
+## 2    147                0.5256021                      1.168502e+17
+## 3    100                0.5598477                      1.168502e+17
+## 4    146                0.5618687                      1.168502e+17
+## 5    199                0.5766158                      1.168502e+17
+## 6     98                0.5801409                      1.168502e+17</code></pre>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h=</span><span class="dv">48</span>, <span class="at">seasonal.factor =</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h=</span><span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
 ## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 52 ) ...)&quot;
@@ -963,9 +940,17 @@ the linear or nonlinear regression forecasts.</p>
 <li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type=&quot;spearman&quot;, ...)</code></li>
 </ul>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">NNS.MC</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">lower_rho=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">upper_rho=</span><span class="dv">1</span>, <span class="at">by=</span>.<span class="dv">5</span>, <span class="at">exp=</span><span class="dv">1</span>)</span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">head</span>(<span class="fu">names</span>(mc<span class="sc">$</span>replicates),<span class="dv">5</span>)</span></code></pre></div>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">names</span>(mc<span class="sc">$</span>replicates)</span></code></pre></div>
 <pre><code>## [1] 350</code></pre>
 <pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
+<pre><code>##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5
+## [1,]   -6.097304   -0.246557   -4.427608   -2.153337   -5.050326
+## [2,]   -6.582158    0.343863   -2.445919   -3.175586   -4.777579
+## [3,]   -4.393280    0.548543   -1.822378   -2.637809   -4.708166
+## [4,]   -6.134514   -0.584076   -6.920453   -1.800864   -4.861689
+## [5,]   -5.270871    1.095869   -1.964841   -1.204533   -1.626527
+## [6,]   -5.627466    1.128039   -3.351027   -2.736647   -0.587572</code></pre>
 </div>
 <div id="riskneutral-rescale-pricing-context" class="section level2">
 <h2>7.3 Risk‑neutral rescale (pricing context)</h2>
@@ -973,9 +958,9 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.rescale(x, a, b, method=c(&quot;minmax&quot;,&quot;riskneutral&quot;), T=NULL, type=c(&quot;Terminal&quot;,&quot;Discounted&quot;))</code></li>
 </ul>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>px <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">260</span>, <span class="at">sd =</span> <span class="dv">1</span>))</span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>rn <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(px, <span class="at">a=</span><span class="dv">100</span>, <span class="at">b=</span><span class="fl">0.03</span>, <span class="at">method=</span><span class="st">&quot;riskneutral&quot;</span>, <span class="at">T=</span><span class="dv">1</span>, <span class="at">type=</span><span class="st">&quot;Terminal&quot;</span>)</span>
-<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>px <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">260</span>, <span class="at">sd =</span> <span class="dv">1</span>))</span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>rn <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(px, <span class="at">a=</span><span class="dv">100</span>, <span class="at">b=</span><span class="fl">0.03</span>, <span class="at">method=</span><span class="st">&quot;riskneutral&quot;</span>, <span class="at">T=</span><span class="dv">1</span>, <span class="at">type=</span><span class="st">&quot;Terminal&quot;</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
 <pre><code>##   target  mean_rn 
 ## 103.0455 103.0455</code></pre>
 <p><strong>Interpretation.</strong> <code>riskneutral</code> shifts the
@@ -994,22 +979,22 @@ estimators.</p>
 <code>NNS.SSD.uni(x, y)</code> - <code>NNS.TSD.uni(x, y)</code> -
 <code>NNS.SD.cluster(R)</code> -
 <code>NNS.SD.efficient.set(R)</code></p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
-<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
-<span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a></span>
-<span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1
 ## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
 <pre><code>## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot;</code></pre>
 <hr />
