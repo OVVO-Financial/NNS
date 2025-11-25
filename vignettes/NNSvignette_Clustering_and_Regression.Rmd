@@ -235,6 +235,8 @@ A key insight is that even in univariate regressions, `NNS.reg` benefits from th
 
 For multivariate predictors, the same form applies directly — supply the full set of observed predictors in $x$, the observed responses in $y$, and the incomplete rows in `point.est`. With `order = "max", n.best = 1`, the imputation is always 1-NN donor-based: each missing $y$ is filled in by the response of its closest donor under the `NNS` hybrid distance. This ensures imputations remain strictly within the support of the observed data.
 
+**Categorical data** is handled analogously, only requiring `NNS.reg(..., type = "CLASS")` in the procedure.
+
 ## Univariate Imputation
 
 ```{r uniimpute, eval=FALSE}

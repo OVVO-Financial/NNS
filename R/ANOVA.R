@@ -1,7 +1,24 @@
 #' NNS ANOVA: Nonparametric Analysis of Variance
-#' 
-#' Performs a distribution-free ANOVA using partial moment statistics to evaluate differences between control and treatment groups. Returns a certainty metric (0-1) indicating separation likelihood rather than traditional p-values. Includes bootstrapped effect size bounds.
-#' 
+#'
+#' Performs a distribution-free ANOVA using partial-moment statistics to assess
+#' differences between control and treatment groups. Depending on the setting of
+#' \code{means.only}, the procedure tests either differences in central tendency
+#' (means or medians) or differences across the full empirical distributions.
+#'
+#' The key output is the \code{Certainty} metric, a calibrated probability in
+#' \eqn{[0, 1]} representing the likelihood that the groups being compared are
+#' the *same* with respect to the chosen comparison mode:
+#' \itemize{
+#'   \item If \code{means.only = TRUE}: \code{Certainty} is the probability that
+#'         the group \emph{means} (or medians, if \code{medians = TRUE}) are the same.
+#'   \item If \code{means.only = FALSE}: \code{Certainty} is the probability that
+#'         the two \emph{entire distributions} are the same.
+#' }
+#'
+#' This makes \code{Certainty} the conceptual inverse of a classical p-value.
+#' A *low* Certainty (e.g., < 0.10) indicates strong evidence of difference,
+#' while a *high* Certainty (e.g., > 0.90) indicates strong evidence of similarity.
+#'  
 #' @param control Numeric vector of control group observations
 #' @param treatment Numeric vector of treatment group observations
 #' @param means.only Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for mean-only comparison
@@ -19,11 +36,13 @@
 #'   \item \code{Grand_Statistic}: Grand mean/median
 #'   \item \code{Control_CDF}: CDF value at grand statistic (control)
 #'   \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
-#'   \item \code{Certainty}: Separation certainty (0-1)
+#'   \item \code{Certainty}: Probability that the groups are the \emph{same}
+#'         (means-only or full distribution depending on \code{means.only}).
 #'   \item \code{Effect_Size_LB}: Lower bound of treatment effect (if CI requested)
 #'   \item \code{Effect_Size_UB}: Upper bound of treatment effect (if CI requested)
 #'   \item \code{Confidence_Level}: Confidence level used (if CI requested)
 #' }
+#' 
 #' 
 #'
 #' @author Fred Viole, OVVO Financial Systems

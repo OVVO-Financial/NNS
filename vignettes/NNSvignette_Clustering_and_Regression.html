@@ -847,6 +847,9 @@ the full set of observed predictors in <span class="math inline">\(x\)</span>, t
 imputation is always 1-NN donor-based: each missing <span class="math inline">\(y\)</span> is filled in by the response of its
 closest donor under the <code>NNS</code> hybrid distance. This ensures
 imputations remain strictly within the support of the observed data.</p>
+<p><strong>Categorical data</strong> is handled analogously, only
+requiring <code>NNS.reg(..., type = &quot;CLASS&quot;)</code> in the
+procedure.</p>
 <div id="univariate-imputation" class="section level2">
 <h2>Univariate Imputation</h2>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
