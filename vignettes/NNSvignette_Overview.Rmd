@@ -363,6 +363,7 @@ c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 Stochastic dominance orders uncertain prospects for broad classes of risk‑averse utilities; partial moments supply practical, nonparametric estimators.
 
 **Headers.** 
+
 - `NNS.FSD.uni(x, y)`
 - `NNS.SSD.uni(x, y)`
 - `NNS.TSD.uni(x, y)` 

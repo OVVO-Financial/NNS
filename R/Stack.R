@@ -242,10 +242,6 @@ NNS.stack <- function(IVs.train,
       nns.ord <- rep(NA_real_, length(var.cutoffs))
       
       for (i in seq_along(var.cutoffs)) {
-        if (status) {
-          message(sprintf("Current NNS.reg(... , threshold = %.2f ) MAX Iterations Remaining = %d",
-                          var.cutoffs[i], length(var.cutoffs) - i))
-        }
         
         predicted <- suppressWarnings(
           NNS.reg(CV.IVs.train, CV.DV.train,
@@ -280,6 +276,16 @@ NNS.stack <- function(IVs.train,
         
         # objective at this threshold
         nns.ord[i] <- eval(obj.fn)
+        
+        # print threshold + eval(obj.fn) when status = TRUE
+        if (status) {
+          message(sprintf(
+            "Current NNS.reg(... , threshold = %.4f ) | eval(obj.fn) = %.6f | MAX Iterations Remaining = %d",
+            var.cutoffs[i],
+            nns.ord[i],
+            length(var.cutoffs) - i
+          ))
+        }
       } # end for each threshold
       
       # --- pick best threshold across ALL tested ---
@@ -370,7 +376,7 @@ NNS.stack <- function(IVs.train,
       q     <- length(IVs.train[, 1])
       Kcand <- c(1:l, q)
       
-      # build *aligned* dummy matrices for TRAIN=RPM and TEST in one shot
+      # build *aligned* dummy matrices for TRAIN and TEST in one shot
       build_design_pair <- function(train_df, test_df) {
         tr <- as.data.frame(train_df, stringsAsFactors = TRUE)
         te <- as.data.frame(test_df,  stringsAsFactors = TRUE)
@@ -392,7 +398,7 @@ NNS.stack <- function(IVs.train,
         tr <- add_missing(tr, alln)
         te <- add_missing(te, alln)
         
-        # proceed with factor_2_dummy_FR on the combined columns as before
+        # proceed with factor_2_dummy_FR on the combined columns
         pieces_tr <- list(); pieces_te <- list()
         for (nm in names(tr)) {
           combo <- c(tr[[nm]], te[[nm]])
@@ -407,18 +413,15 @@ NNS.stack <- function(IVs.train,
         list(Xtr = Xtr, Xte = Xte)
       }
       
-      
       pred_path_small <- NULL   # |Xtest| x l (k = 1..l)
       pred_q          <- NULL   # |Xtest| vector (k = q)
       
       for (i in Kcand) {
         index <- which(Kcand == i)[1L]
-        if (status) {
-          message(sprintf("Current NNS.reg(. , n.best = %d ) MAX Iterations Remaining = %d",
-                          i, length(Kcand) - index))
-        }
         
         if (index == 1L) {
+          # One NNS.reg call per fold to get fitted y.hat and
+          # a baseline prediction for threshold optimisation
           setup <- suppressWarnings(
             NNS.reg(
               CV.IVs.train, CV.DV.train,
@@ -431,71 +434,67 @@ NNS.stack <- function(IVs.train,
             )
           )
           
-          if (is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
-          if (is.null(dim(setup$RPM)) && is.null(setup$regression.points)) {
-            setup <- suppressWarnings(
-              NNS.reg(
-                CV.IVs.train, CV.DV.train,
-                point.est = CV.IVs.test,
-                plot = FALSE, residual.plot = FALSE,
-                n.best = 1, order = "max",
-                type = type, factor.2.dummy = TRUE,
-                dist = dist, ncores = ncores,
-                point.only = FALSE, smooth = smoothness
-              )
-            )
-          }
-          if (is.null(dim(setup$RPM))) setup$RPM <- setup$regression.points
-          
-          # ---- split RPM into features + yhat, build aligned numeric designs ----
-          RPM_df <- data.table::as.data.table(setup$RPM)
-          if ("y.hat" %in% names(RPM_df)) {
-            yhat_vec <- as.numeric(RPM_df[["y.hat"]])
-            RPM_df[, "y.hat" := NULL]
-          } else {
-            yhat_vec <- suppressWarnings(as.numeric(setup$Fitted.xy$y.hat))
-            if (!length(yhat_vec) || anyNA(yhat_vec)) {
-              stop("Unable to align RPM rows with y.hat (or y) in Fitted.xy.")
-            }
+          # y.hat for each TRAINING point – used as the value aggregated by k-NN
+          yhat_vec <- as.numeric(setup$Fitted.xy$y.hat)
+          if (length(yhat_vec) != NROW(CV.IVs.train)) {
+            stop("Internal: length(yhat_vec) must equal nrow(CV.IVs.train).")
           }
           
-          design <- build_design_pair(RPM_df, as.data.frame(CV.IVs.test, stringsAsFactors = TRUE))
-          RPM_num   <- design$Xtr
-          Xtest_num <- design$Xte
+          # Build aligned numeric design matrices directly from TRAIN & TEST IVs
+          design   <- build_design_pair(CV.IVs.train, CV.IVs.test)
+          RPM_num   <- design$Xtr   # one row per training observation
+          Xtest_num <- design$Xte   # one row per test observation
           
-          # sanity guards (fail fast instead of crashing in C++)
-          stopifnot(is.double(RPM_num), is.matrix(RPM_num),
-                    is.double(Xtest_num), is.matrix(Xtest_num),
-                    ncol(RPM_num) == ncol(Xtest_num),
-                    length(yhat_vec) == nrow(RPM_num))
+          # Sanity guards (fail fast instead of crashing in C++)
+          stopifnot(
+            is.matrix(RPM_num), is.double(RPM_num),
+            is.matrix(Xtest_num), is.double(Xtest_num),
+            nrow(RPM_num) == length(yhat_vec),
+            ncol(RPM_num) == ncol(Xtest_num)
+          )
           
-          # Index==1: original point estimates for thresholding (classification only)
+          # Index == 1: original point estimates from NNS.reg for thresholding
           predicted <- setup$Point.est
           predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
+          
           if (!is.null(type)) {
-            pred_matrix <- if (length(unique(predicted)) == 1) {
-              matrix(replicate(100, predicted), nrow = length(predicted))
+            pred_matrix <- if (length(unique(predicted)) == 1L) {
+              matrix(replicate(100L, predicted), nrow = length(predicted))
             } else {
               sapply(seq(.01, .99, .01),
-                     function(z) ifelse(predicted %% 1 < z, floor(predicted), ceiling(predicted)))
+                     function(z)
+                       ifelse(predicted %% 1 < z,
+                              floor(predicted),
+                              ceiling(predicted)))
             }
             threshold_results_1[[index]] <-
-              seq(.01, .99, .01)[which.max(apply(pred_matrix, 2, function(z) mean(z == as.numeric(actual))))]
+              seq(.01, .99, .01)[
+                which.max(apply(pred_matrix, 2L,
+                                function(z) mean(z == as.numeric(actual))))
+              ]
             predicted <- ifelse(predicted %% 1 < threshold_results_1[[index]],
                                 floor(predicted), ceiling(predicted))
           }
           
-          # ---- precompute only what we need using C++ (SAFE) ----
+          # Precompute only what we need via C++ for k = 1..min(l, n_train)
           kmax_use <- min(l, nrow(RPM_num))
           pred_path_small <- NNS_distance_path_cpp(
-            RPM = RPM_num, yhat = yhat_vec, Xtest = Xtest_num,
-            kmax = kmax_use, is_class = !is.null(type)
+            RPM   = RPM_num,
+            yhat  = yhat_vec,
+            Xtest = Xtest_num,
+            kmax  = kmax_use,
+            is_class = !is.null(type)
           )
           
-          if (q > ncol(pred_path_small)) {
+          # Cache the "all training points" prediction for k = min(q, n_train)
+          n_train_fold <- nrow(RPM_num)
+          if (q > ncol(pred_path_small) || q > kmax_use) {
             pred_q <- NNS_distance_bulk_cpp(
-              RPM = RPM_num, yhat = yhat_vec, Xtest = Xtest_num,
-              k = min(q, nrow(RPM_num)), is_class = !is.null(type)
+              RPM   = RPM_num,
+              yhat  = yhat_vec,
+              Xtest = Xtest_num,
+              k     = min(q, n_train_fold),
+              is_class = !is.null(type)
             )
           } else {
             pred_q <- pred_path_small[, q, drop = TRUE]
@@ -509,8 +508,11 @@ NNS.stack <- function(IVs.train,
               predicted <- pred_q
             } else {
               predicted <- NNS_distance_bulk_cpp(
-                RPM = RPM_num, yhat = yhat_vec, Xtest = Xtest_num,
-                k = min(i, nrow(RPM_num)), is_class = !is.null(type)
+                RPM   = RPM_num,
+                yhat  = yhat_vec,
+                Xtest = Xtest_num,
+                k     = min(i, nrow(RPM_num)),
+                is_class = !is.null(type)
               )
             }
           } else {
@@ -540,7 +542,18 @@ NNS.stack <- function(IVs.train,
           }
         }
         
+        # objective at this n.best
         nns.cv.1[index] <- eval(obj.fn)
+        
+        # print n.best + eval(obj.fn) when status = TRUE
+        if (status) {
+          message(sprintf(
+            "Current NNS.reg(. , n.best = %d ) | eval(obj.fn) = %.6f | MAX Iterations Remaining = %d",
+            i,
+            nns.cv.1[index],
+            length(Kcand) - index
+          ))
+        }
         
         if (length(na.omit(nns.cv.1)) > 3) {
           if (objective == 'min') nns.cv.1[is.na(nns.cv.1)] <- max(na.omit(nns.cv.1)) else
@@ -612,7 +625,7 @@ NNS.stack <- function(IVs.train,
     
     
     
-
+    
   } # errors (b) loop
   
   
@@ -648,7 +661,7 @@ NNS.stack <- function(IVs.train,
     
     estimates <- (weights[1] * nns.method.1 + weights[2] * nns.method.2)
     if(!is.null(pred.int)) stacked.pred.int <- (weights[1] * pred.int.1 + weights[2] * pred.int.2) else stacked.pred.int <- NULL
-
+    
     if(!is.null(type)){
       estimates <- ifelse(estimates%%1 < probability.threshold, floor(estimates), ceiling(estimates))
       estimates <- pmin(estimates, max(as.numeric(DV.train)))
