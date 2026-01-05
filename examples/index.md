@@ -6,7 +6,7 @@ Nonlinear nonparametric statistics using partial moments.  Partial moments are t
 
 NNS offers: 
   - Numerical Integration & Numerical Differentiation
-  - Partitional & Hierarchial Clustering
+  - Partitional & Hierarchical Clustering
   - Nonlinear Correlation & Dependence
   - Causal Analysis
   - Nonlinear Regression & Classification
@@ -69,7 +69,7 @@ See the following for NNS detailed examples and specific applications:
    
    3.6 [Time-Series Classification II](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
 
-   3.7 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sprial%20Matching%20Example.pdf)
+   3.7 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Spiral%20Matching%20Example.pdf)
    
    3.8 [MNIST](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20vs%20KNN%20MNIST%20dataset.pdf)
 
@@ -87,7 +87,7 @@ See the following for NNS detailed examples and specific applications:
 
 # 5. Econometrics
 
-   5.1 [Econometrics Critiques and Solutions](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/7_Econometic_Reasons.html)
+   5.1 [Econometrics Critiques and Solutions](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/7_Econometric_Reasons.html)
    
    5.2 [VAR Alternative](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html)
    
@@ -100,9 +100,10 @@ See the following for NNS detailed examples and specific applications:
 
 # References
 
-The previous examples are just that...examples.  They are not meant to serve as proofs or intended to be exhaustive demonstrations, rather the hands-on application of a robust nonparametetric regression in many different types of common machine learning problems.
+The previous examples are just that...examples.  They are not meant to serve as proofs or intended to be exhaustive demonstrations, rather the hands-on application of a robust nonparametric regression in many different types of common machine learning problems.
 
 See the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356), if you'd like to learn *why* & *how* NNS does what it does.
 
 
 # Thank you for your interest in NNS! 
+
