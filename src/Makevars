@@ -1,2 +1,4 @@
 PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
 LDFLAGS += -Wl,-rpath,$(shell ${R_HOME}/bin/Rscript -e "cat(system.file('lib', package='RcppParallel'))")
+
+PKG_CPPFLAGS = -DR_NO_REMAP

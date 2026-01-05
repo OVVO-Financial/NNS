@@ -47,7 +47,8 @@ NumericVector flattenNumericNoNA(SEXP x) {
 
 // set colnames helper
 inline void setColNames(NumericMatrix &m, const CharacterVector &nm) {
-  Rf_setAttrib(m, R_DimNamesSymbol, List::create(R_NilValue, nm));
+  //Rf_setAttrib(m, R_DimNamesSymbol, List::create(R_NilValue, nm));
+  colnames(m) = nm;
 }
 
 // sample k distinct indices from IntegerVector idx (without replacement)
@@ -433,7 +434,9 @@ SEXP NNS_meboot_expand_sd(SEXP x, NumericMatrix ensemble, double fiv = 5.0) {
     NumericMatrix X;
     if (Rf_inherits(x, "data.frame")) {
       DataFrame DF = as<DataFrame>(x);
-      int nr = DF.nrows(), p = DF.size();
+      //int nr = DF.nrows(), p = DF.size();
+      int nr = (Rf_length(x) == 0) ? 0 : Rf_length(VECTOR_ELT(x, 0));
+      int p  = Rf_length(x);
       X = NumericMatrix(nr, p);
       for (int j = 0; j < p; ++j) X(_, j) = as<NumericVector>(DF[j]);
     } else {
@@ -498,7 +501,9 @@ SEXP force_clt(SEXP x, NumericMatrix ensemble) {
     NumericMatrix X;
     if (Rf_inherits(x, "data.frame")) {
       DataFrame DF = as<DataFrame>(x);
-      int nr = DF.nrows(), p = DF.size();
+      //int nr = DF.nrows(), p = DF.size();
+      int nr = (Rf_length(x) == 0) ? 0 : Rf_length(VECTOR_ELT(x, 0));
+      int p  = Rf_length(x);
       X = NumericMatrix(nr, p);
       for (int j = 0; j < p; ++j) X(_, j) = as<NumericVector>(DF[j]);
     } else {
@@ -747,7 +752,8 @@ SEXP downSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") 
   // y as factor codes (1..L) and levels
   IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  const int n = X.nrows();
+  //const int n = X.nrows();
+  const int n = Rf_nrows(X);
   if (fy.size() != n) stop("downSample: nrow(x) != length(y)");
   const int L = lev.size();
   
@@ -808,7 +814,8 @@ SEXP upSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") {
   
   IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  const int n = X.nrows();
+  //const int n = X.nrows();
+  const int n = Rf_nrows(X);
   if (fy.size() != n) stop("upSample: nrow(x) != length(y)");
   const int L = lev.size();
   

@@ -3,7 +3,7 @@
 
 
 
-[![packageversion](https://img.shields.io/badge/NNS%20version-11.6.3-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![packageversion](https://img.shields.io/badge/NNS%20version-11.6.4-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 <h2 style="margin: 0; padding: 0; border: none; height: 40px;"></h2>
 
@@ -12,7 +12,7 @@ NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the funda
 
 NNS delivers a comprehensive suite of advanced statistical techniques, including:
   - Numerical Integration & Numerical Differentiation
-  - Partitional & Hierarchial Clustering
+  - Partitional & Hierarchical Clustering
   - Nonlinear Correlation & Dependence
   - Causal Analysis
   - Nonlinear Regression & Classification
@@ -54,7 +54,7 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 11.6.3},
+    note = {R package version 11.6.4},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```

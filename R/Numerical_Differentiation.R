@@ -41,7 +41,7 @@ NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = 
   Bs <- numeric()
   Bl <- numeric()
   Bu <- numeric()
-  ### Step 1 initalize the boundaries for B
+  ### Step 1 initaliaze the boundaries for B
 
   ### Initial step size h
   f.x <- f(point)
