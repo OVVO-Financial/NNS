@@ -93,3 +93,79 @@ jobs:
             build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"),
             error_on = "error"
           )
+
+  ubsan-clang-docker:
+    name: UBSAN clang (rocker r-devel-ubsan-clang)
+    runs-on: ubuntu-latest
+    # Optional: uncomment to make UBSAN run only after standard checks pass
+    # needs: R-CMD-check
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull UBSAN image
+        run: |
+          docker pull --platform linux/x86_64 rocker/r-devel-ubsan-clang
+
+      - name: Run UBSAN check inside container
+        run: |
+          docker run --rm --platform linux/x86_64 \
+            --cap-add=SYS_PTRACE \
+            -e UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
+            -e RGL_USE_NULL=true \
+            -v "${GITHUB_WORKSPACE}:/data" -w /data \
+            rocker/r-devel-ubsan-clang bash -lc '
+              set -euo pipefail
+
+              echo "::group::Install system dependencies"
+              apt-get update -y
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                cmake \
+                libgsl-dev \
+                libcurl4-openssl-dev libssl-dev libxml2-dev \
+                libgl1-mesa-dev libglu1-mesa-dev \
+                libjpeg-dev libpng-dev libtiff5-dev \
+                libfreetype6-dev libharfbuzz-dev libfribidi-dev
+              echo "::endgroup::"
+
+              echo "::group::Install R package dependencies"
+              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "remotes::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\")"
+              echo "::endgroup::"
+
+              echo "::group::Run R CMD check with UBSAN"
+              RD CMD check --no-manual --ignore-vignettes --no-build-vignettes . \
+                > ubsan_check.out 2> ubsan_check.err || true
+              echo "::endgroup::"
+              
+              echo "::group::UBSAN output"
+              cat ubsan_check.err
+              echo "::endgroup::"
+            '
+
+      - name: Check for UBSAN errors
+        run: |
+          if [ -f ubsan_check.err ]; then
+            if grep -iE "(runtime error|sanitizer)" ubsan_check.err; then
+              echo "::error::UBSAN detected runtime errors. Check the logs for details."
+              echo "::group::UBSAN errors found"
+              grep -iE "(runtime error|sanitizer)" ubsan_check.err || true
+              echo "::endgroup::"
+              exit 1
+            else
+              echo "::notice::No UBSAN errors detected"
+            fi
+          else
+            echo "::warning::UBSAN error log not found"
+          fi
+
+      - name: Upload UBSAN logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubsan-logs
+          path: |
+            ubsan_check.out
+            ubsan_check.err
+            *.Rcheck/
+          if-no-files-found: warn
