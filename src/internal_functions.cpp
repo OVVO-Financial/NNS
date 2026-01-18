@@ -375,12 +375,39 @@ List ARMA_seas_weighting(bool sf, SEXP mat) {
 // ---------- 8) NNS.meboot.part ----------
 
 // [[Rcpp::export(name = "NNS.meboot.part")]]
-NumericVector NNS_meboot_part(NumericVector x, int n, NumericVector z,
+NumericVector NNS_meboot_part(NumericVector xx, int n, NumericVector z,
                               double xmin, double xmax,
                               NumericVector desintxb, bool reachbnd) {
   NumericVector p = runif(n);
-  Function quantile("quantile");
-  NumericVector q = as<NumericVector>(quantile(x, _["probs"] = p));
+  int m = xx.size();
+  NumericVector q(n);
+
+  if (m == 0) {
+    std::fill(q.begin(), q.end(), NA_REAL);
+  } else if (m == 1) {
+    std::fill(q.begin(), q.end(), xx[0]);
+  } else {
+    for (int i = 0; i < n; ++i) {
+      double pi = p[i];
+      if (pi <= 0.0) {
+        q[i] = xx[0];
+        continue;
+      }
+      if (pi >= 1.0) {
+        q[i] = xx[m - 1];
+        continue;
+      }
+
+      double h = 1.0 + (m - 1.0) * pi;
+      int j = static_cast<int>(std::floor(h));
+      double g = h - static_cast<double>(j);
+
+      if (j < 1) j = 1;
+      if (j > m - 1) j = m - 1;
+
+      q[i] = (1.0 - g) * xx[j - 1] + g * xx[j];
+    }
+  }
   
   std::vector<int> ref1;
   double invn = 1.0 / (double)n;
@@ -400,13 +427,9 @@ NumericVector NNS_meboot_part(NumericVector x, int n, NumericVector z,
     }
   }
   
-  std::vector<int> ref4;
   double edge = (double)(n - 1) / (double)n;
-  for (int i = 0; i < p.size(); ++i) if (p[i] == edge) ref4.push_back(i);
-  for (int idx : ref4) q[idx] = z[n - 2];
-  
   std::vector<int> ref5;
-  for (int i = 0; i < p.size(); ++i) if (p[i] > edge) ref5.push_back(i);
+  for (int i = 0; i < p.size(); ++i) if (p[i] >= edge) ref5.push_back(i);
   if (!ref5.empty()) {
     NumericVector px(ref5.size());
     for (int i = 0; i < (int)ref5.size(); ++i) px[i] = p[ref5[i]];
