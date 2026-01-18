@@ -93,8 +93,8 @@ ARMA.seas.weighting <- function(sf, mat) {
     .Call(`_NNS_ARMA_seas_weighting`, sf, mat)
 }
 
-NNS.meboot.part <- function(x, n, z, xmin, xmax, desintxb, reachbnd) {
-    .Call(`_NNS_NNS_meboot_part`, x, n, z, xmin, xmax, desintxb, reachbnd)
+NNS.meboot.part <- function(xx, n, z, xmin, xmax, desintxb, reachbnd) {
+    .Call(`_NNS_NNS_meboot_part`, xx, n, z, xmin, xmax, desintxb, reachbnd)
 }
 
 NNS.meboot.expand.sd <- function(x, ensemble, fiv = 5.0) {

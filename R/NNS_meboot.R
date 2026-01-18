@@ -164,7 +164,13 @@ NNS.meboot <- function(x,
   
   # Quantile draws from max-entropy bootstrap IN RESIDUAL SPACE
   res_mat <- matrix(rr, nrow = n, ncol = reps)
-  res_mat <- apply(res_mat, 2, NNS.meboot.part, n, z, xmin, xmax, desintxb, reachbnd)  
+  res_mat <- apply(
+    res_mat,
+    2,
+    function(col) {
+      NNS.meboot.part(xx, n, z, xmin, xmax, desintxb, reachbnd)
+    }
+  )
   qseq <- apply(res_mat, 2, sort)
   res_mat[ordxx, ] <- qseq
   

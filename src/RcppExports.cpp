@@ -312,19 +312,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_meboot_part
-NumericVector NNS_meboot_part(NumericVector x, int n, NumericVector z, double xmin, double xmax, NumericVector desintxb, bool reachbnd);
-RcppExport SEXP _NNS_NNS_meboot_part(SEXP xSEXP, SEXP nSEXP, SEXP zSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP desintxbSEXP, SEXP reachbndSEXP) {
+NumericVector NNS_meboot_part(NumericVector xx, int n, NumericVector z, double xmin, double xmax, NumericVector desintxb, bool reachbnd);
+RcppExport SEXP _NNS_NNS_meboot_part(SEXP xxSEXP, SEXP nSEXP, SEXP zSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP desintxbSEXP, SEXP reachbndSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type xx(xxSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
     Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
     Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type desintxb(desintxbSEXP);
     Rcpp::traits::input_parameter< bool >::type reachbnd(reachbndSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_meboot_part(x, n, z, xmin, xmax, desintxb, reachbnd));
+    rcpp_result_gen = Rcpp::wrap(NNS_meboot_part(xx, n, z, xmin, xmax, desintxb, reachbnd));
     return rcpp_result_gen;
 END_RCPP
 }
