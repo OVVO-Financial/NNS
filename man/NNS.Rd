@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Fred Viole \email{ovvo.financial.systems@gmail.com}
+\strong{Maintainer}: Fred Viole \email{ovvo.open.source@gmail.com}
 
 Other contributors:
 \itemize{

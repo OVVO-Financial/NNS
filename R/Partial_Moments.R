@@ -19,6 +19,9 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
   target   <- as.numeric(target)
   variable <- as.numeric(variable)
   
+  if (!all(is.finite(variable))) stop("`variable` must be finite.")
+  if (!all(is.finite(target))) stop("`target` must be finite.")
+  
   if (!excess_ret && length(target) > 1) {
     return(.Call("_NNS_LPM_CPv", degree, target, variable))
   }
@@ -48,6 +51,9 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
   target   <- as.numeric(target)
   variable <- as.numeric(variable)
+  
+  if (!all(is.finite(variable))) stop("`variable` must be finite.")
+  if (!all(is.finite(target))) stop("`target` must be finite.")
   
   if (!excess_ret && length(target) > 1) {
     return(.Call("_NNS_UPM_CPv", degree, target, variable))
@@ -79,6 +85,9 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
   
+  if (!all(is.finite(data))) stop("`data` must be finite.")
+  if (!all(is.finite(target))) stop("`target` must be finite.")
+  
   .Call("_NNS_CoLPM_nD_RCPP", data, target, degree, norm)
 }
 
@@ -104,6 +113,9 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
   
+  if (!all(is.finite(data))) stop("`data` must be finite.")
+  if (!all(is.finite(target))) stop("`target` must be finite.")
+  
   .Call("_NNS_CoUPM_nD_RCPP", data, target, degree, norm)
 }
 
@@ -128,6 +140,9 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   target <- as.numeric(target)
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
+  
+  if (!all(is.finite(data))) stop("`data` must be finite.")
+  if (!all(is.finite(target))) stop("`target` must be finite.")
   
   .Call("_NNS_DPM_nD_RCPP", data, target, degree, norm)
 }
