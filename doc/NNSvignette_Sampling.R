@@ -204,7 +204,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 
 ## ----eval=FALSE---------------------------------------------------------------
 # # Apply bootstrap to each variable
-# new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 1, rho = .95))
+# new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 100, rho = .95))
 # 
 # # Reformat into vectors
 # boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble",]))
@@ -225,7 +225,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 # NNS.copula(new.boot.dep.matrix)
 # 
 # [1] 0.4743531
-# [1] 0.4931871
+# [1] 0.4517661
 
 ## ----eval=FALSE---------------------------------------------------------------
 # head(original.data)

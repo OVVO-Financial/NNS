@@ -363,6 +363,7 @@ c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 Stochastic dominance orders uncertain prospects for broad classes of risk‑averse utilities; partial moments supply practical, nonparametric estimators.
 
 **Headers.** 
+
 - `NNS.FSD.uni(x, y)`
 - `NNS.SSD.uni(x, y)`
 - `NNS.TSD.uni(x, y)` 
@@ -454,7 +455,7 @@ See NNS Vignette: [Getting Started with NNS: Clustering and Regression](https://
 See NNS Vignette: [Getting Started with NNS: Classification](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Classification.html)
 
 ## 6. Differentiation & Slope Measures
-- `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via partial moments.
+- `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via `NNS.reg`.
 - `dy.d_(x, Y, var)` — partial derivative of multivariate `Y` w.r.t. `var`.
 - `NNS.diff(x, y)` — derivative via secant projections.
 

@@ -65,13 +65,13 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 
 ## ----stackevalres, eval = FALSE-----------------------------------------------
 # Folds Remaining = 0
-# Current NNS.reg(... , threshold = 0.80 ) MAX Iterations Remaining = 1
-# Current NNS.reg(... , threshold = 0.40 ) MAX Iterations Remaining = 0
-# Current NNS.reg(. , n.best = 1 ) MAX Iterations Remaining = 12
-# Current NNS.reg(. , n.best = 2 ) MAX Iterations Remaining = 11
-# Current NNS.reg(. , n.best = 3 ) MAX Iterations Remaining = 10
-# Current NNS.reg(. , n.best = 4 ) MAX Iterations Remaining = 9
-# Current NNS.reg(. , n.best = 5 ) MAX Iterations Remaining = 8
+# Current NNS.reg(... , threshold = 0.9350 ) | eval(obj.fn) = 1.000000 | MAX Iterations Remaining = 2
+# Current NNS.reg(... , threshold = 0.7950 ) | eval(obj.fn) = 0.973684 | MAX Iterations Remaining = 1
+# Current NNS.reg(... , threshold = 0.4400 ) | eval(obj.fn) = 0.894737 | MAX Iterations Remaining = 0
+# Current NNS.reg(. , n.best = 1 ) | eval(obj.fn) = 0.868421 | MAX Iterations Remaining = 12
+# Current NNS.reg(. , n.best = 2 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 11
+# Current NNS.reg(. , n.best = 3 ) | eval(obj.fn) = 0.763158 | MAX Iterations Remaining = 10
+# Current NNS.reg(. , n.best = 4 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 9
 # $OBJfn.reg
 # [1] 0.9733333
 # 
@@ -79,13 +79,13 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 :
 # [1] 1
 # 
 # $probability.threshold
-# [1] 0.547
+# [1] 0.495
 # 
 # $OBJfn.dim.red
 # [1] 0.9666667
 # 
 # $NNS.dim.red.threshold
-# [1] 0.8
+# [1] 0.935
 # 
 # $reg
 #  [1] 1 1 1 1 1 1 1 1 1 1
