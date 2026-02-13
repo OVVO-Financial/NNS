@@ -25,10 +25,21 @@ NNS.FSD <- function(x, y, type = "discrete", plot = TRUE){
   type <- tolower(type)
 
   if(!any(type%in%c("discrete", "continuous"))) warning("type needs to be either 'discrete' or 'continuous'")
+  
+  to_numeric_vector <- function(v, arg_name){
+    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
+      if(!is.null(dim(v)) && ncol(v) > 1){
+        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
+      }
+      v <- as.vector(unlist(v, use.names = FALSE))
+    }
+    
+    as.numeric(v)
+  }
+  
+  x <- to_numeric_vector(x, "x")
+  y <- to_numeric_vector(y, "y")
 
-
-  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
 
   if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
 

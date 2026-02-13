@@ -19,34 +19,45 @@
 
 NNS.SSD <- function(x, y, plot = TRUE){
 
-    if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-    if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
-
-    if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
-
-    Combined_sort <- sort(c(x, y), decreasing = FALSE)
-
-    LPM_x_sort <- LPM(1, Combined_sort,x)
-    LPM_y_sort <- LPM(1, Combined_sort,y)
-
-    x.ssd.y <- any(LPM_x_sort > LPM_y_sort)
-
-    y.ssd.x <- any(LPM_y_sort > LPM_x_sort)
-
-
-    if(plot){
-      plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
-            ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
-
-      lines(Combined_sort, LPM_y_sort, type = "l", lwd = 3,col = "steelblue")
-      legend("topleft", c("X", "Y"), lwd = 10, col = c("red", "steelblue"))
+  to_numeric_vector <- function(v, arg_name){
+    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
+      if(!is.null(dim(v)) && ncol(v) > 1){
+        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
+      }
+      v <- as.vector(unlist(v, use.names = FALSE))
     }
+    
+    as.numeric(v)
+  }
+  
+  x <- to_numeric_vector(x, "x")
+  y <- to_numeric_vector(y, "y")
 
-    ifelse(!x.ssd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
-           "X SSD Y",
-            ifelse (!y.ssd.x && min(y) >= min(x) && mean(y) >= mean(x) && !identical(LPM_x_sort, LPM_y_sort),
-                    "Y SSD X",
-                    "NO SSD EXISTS"))
+  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+
+  Combined_sort <- sort(c(x, y), decreasing = FALSE)
+
+  LPM_x_sort <- LPM(1, Combined_sort,x)
+  LPM_y_sort <- LPM(1, Combined_sort,y)
+
+  x.ssd.y <- any(LPM_x_sort > LPM_y_sort)
+
+  y.ssd.x <- any(LPM_y_sort > LPM_x_sort)
+
+
+  if(plot){
+    plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red", main = "SSD", ylab = "Area of Cumulative Distribution",
+          ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
+
+    lines(Combined_sort, LPM_y_sort, type = "l", lwd = 3,col = "steelblue")
+    legend("topleft", c("X", "Y"), lwd = 10, col = c("red", "steelblue"))
+  }
+
+  ifelse(!x.ssd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
+         "X SSD Y",
+          ifelse (!y.ssd.x && min(y) >= min(x) && mean(y) >= mean(x) && !identical(LPM_x_sort, LPM_y_sort),
+                  "Y SSD X",
+                   "NO SSD EXISTS"))
 
 }
 

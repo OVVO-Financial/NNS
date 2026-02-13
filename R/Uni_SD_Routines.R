@@ -19,20 +19,30 @@
 #' @export
 
 NNS.FSD.uni <- function(x, y, type = "discrete"){
-    if(any(class(x)%in%c("tbl","data.table"))) { 
-      x <- as.vector(unlist(x))
+  to_numeric_vector <- function(v, arg_name){
+    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
+      if(!is.null(dim(v)) && ncol(v) > 1){
+        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
+      }
+      v <- as.vector(unlist(v, use.names = FALSE))
     }
-    if(any(class(y)%in%c("tbl","data.table"))) {
-      y <- as.vector(unlist(y))
-    }
-    if(anyNA(cbind(x,y))) {
-      stop("You have some missing values, please address.")
-    }
-    type <- tolower(type)
-    if(!any(type %in% c("discrete", "continuous"))) {
-      warning("type needs to be either discrete or continuous")
-    }
-    .Call(`_NNS_NNS_FSD_uni_cpp`, x, y, as.character(type))
+    
+    as.numeric(v)
+  }
+  
+  x <- to_numeric_vector(x, "x")
+  y <- to_numeric_vector(y, "y")
+  
+  if(anyNA(cbind(x,y))) {
+    stop("You have some missing values, please address.")
+  }
+  
+  type <- tolower(type)
+  
+  if(!any(type %in% c("discrete", "continuous"))) {
+    warning("type needs to be either discrete or continuous")
+  }
+  .Call(`_NNS_NNS_FSD_uni_cpp`, x, y, as.character(type))
 }
 
 #' NNS SSD Test uni-directional
@@ -52,15 +62,24 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
 #' @export
 
 NNS.SSD.uni <- function(x, y){
-    if(any(class(x) %in% c("tbl","data.table"))){
-	  x <- as.vector(unlist(x))
-	}
-    if(any(class(y) %in% c("tbl","data.table"))){
-	  y <- as.vector(unlist(y))
-	}
-    if(anyNA(cbind(x,y))){
-	  stop("You have some missing values, please address.")
-	}
+  to_numeric_vector <- function(v, arg_name){
+    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
+      if(!is.null(dim(v)) && ncol(v) > 1){
+        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
+      }
+      v <- as.vector(unlist(v, use.names = FALSE))
+    }
+    
+    as.numeric(v)
+  }
+  
+  x <- to_numeric_vector(x, "x")
+  y <- to_numeric_vector(y, "y")
+  
+  if(anyNA(cbind(x,y))) {
+    stop("You have some missing values, please address.")
+  }
+  
   .Call(`_NNS_NNS_SSD_uni_cpp`, x, y)
 }
 
@@ -82,14 +101,23 @@ NNS.SSD.uni <- function(x, y){
 #' @export
 
 NNS.TSD.uni <- function(x, y){
-    if(any(class(x)%in%c("tbl","data.table"))){
-	  x <- as.vector(unlist(x))
-	}
-    if(any(class(y)%in%c("tbl","data.table"))){
-	  y <- as.vector(unlist(y))
-	}
-    if(anyNA(cbind(x,y))){
-	  stop("You have some missing values, please address.")
-	}
+  to_numeric_vector <- function(v, arg_name){
+    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
+      if(!is.null(dim(v)) && ncol(v) > 1){
+        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
+      }
+      v <- as.vector(unlist(v, use.names = FALSE))
+    }
+    
+    as.numeric(v)
+  }
+  
+  x <- to_numeric_vector(x, "x")
+  y <- to_numeric_vector(y, "y")
+  
+  if(anyNA(cbind(x,y))) {
+    stop("You have some missing values, please address.")
+  }
+  
   .Call(`_NNS_NNS_TSD_uni_cpp`, x, y)
 }
