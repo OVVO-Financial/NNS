@@ -8,7 +8,7 @@
 <h2 style="margin: 0; padding: 0; border: none; height: 40px;"></h2>
 
 # NNS
-NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) that [asymptotically approximate the area under f(x)](https://doi.org/10.2139/ssrn.2186471) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.
+NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental [elements of variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md) that asymptotically approximate the area under f(x) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.
 
 NNS delivers a comprehensive suite of advanced statistical techniques, including:
   - Numerical Integration & Numerical Differentiation
