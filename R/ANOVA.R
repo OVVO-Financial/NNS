@@ -89,6 +89,7 @@ NNS.ANOVA <- function(
     plot = TRUE,
     robust = FALSE
 ){
+  # Standardize and validate tail-selection input used by CI calculations.
   # normalize tails to lower case for downstream functions
   tails <- tolower(tails)
   if (!any(tails %in% c("left","right","both"))) {
@@ -96,6 +97,7 @@ NNS.ANOVA <- function(
   }
   
   if (!missing(treatment) && !is.null(treatment)) {
+    # Two-sample path: directly compare control vs. treatment.
     # with treatment
     if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
     if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
@@ -104,6 +106,8 @@ NNS.ANOVA <- function(
       # ---------------------------
       # Robust path: resample pairs
       # ---------------------------
+      # Draw bootstrap-style index matrices with a common length so both groups
+      # are resampled on aligned indices for repeated certainty estimation.
       l <- min(length(treatment), length(control))
       treatment_p      <- replicate(100, sample.int(l, replace = TRUE))
       treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = FALSE)
@@ -173,6 +177,7 @@ NNS.ANOVA <- function(
       )
       
     } else {
+      # Fast/default path delegates to binary ANOVA implementation.
       # non-robust, binary ANOVA (already honors confidence.interval & tails)
       return(
         NNS.ANOVA.bin(
@@ -191,15 +196,18 @@ NNS.ANOVA <- function(
   # ------------------------------
   # Without treatment (k >= 2 vars)
   # ------------------------------
+  # Multi-sample path: treat each column/list element as a separate group.
   if (is.list(control)) n <- length(control) else n <- ncol(control)
   if (is.null(n) || n == 1)
     stop("supply both 'control' and 'treatment' or a matrix-like 'control', or a list 'control'")
   
   if (n >= 2) {
     if (any(class(control) %in% c("tbl","data.table"))) {
+      # Keep tabular inputs as data.frame for stable column-wise operations.
       A <- as.data.frame(control)
     } else {
       if (any(class(control) %in% "list")) {
+        # Pad unequal-length vectors to a rectangular matrix for pairwise scans.
         A <- do.call(cbind, lapply(control, `length<-`, max(lengths(control))))
       } else {
         A <- control
@@ -216,6 +224,7 @@ NNS.ANOVA <- function(
   }
   
   if (!pairwise) {
+    # Aggregate mode: compute one global certainty across all group pairs.
     # Continuous CDF for each variable from grand statistic
     if (medians) {
       LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, na.omit(unlist(A[, b]))))
@@ -230,6 +239,7 @@ NNS.ANOVA <- function(
     
     raw.certainties <- vector("list", n - 1)
     for (i in 1:(n - 1)) {
+      # Collect upper-triangle pairwise certainties, then average below.
       raw.certainties[[i]] <- sapply(
         (i + 1):n,
         function(b) NNS.ANOVA.bin(
