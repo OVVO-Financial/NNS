@@ -198,9 +198,9 @@ For total area, not just the definite integral, sum the partial moments and mult
 $$[UPM(1,0,f(x)) + LPM(1,0,f(x))] \cdot (b-a) \asymp \left|\int_a^b f(x)dx\right|$$
 
 ### Bayes' Theorem
-For example, when ascertaining the probability of an increase in `A` given an increase in `B`, set `target_x = 0`, `target_y = 0`, and `target = 0`.
+For example, when ascertaining the probability of an increase in $A$ given an increase in $B$, the `Co.UPM(degree, x, y, target_x, target_y)` target parameters are set to `target_x = 0` and `target_y = 0` and the `UPM(degree, target, variable)` target parameter is also set to `target = 0`.
 
-$$P(A|B)=\frac{Co.UPM(0,0,A,B,0,0)}{UPM(0,0,B)}$$
+$$P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$
 
 ### References
 - [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
