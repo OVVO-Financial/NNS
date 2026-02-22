@@ -203,6 +203,7 @@ For example, when ascertaining the probability of an increase in $A$ given an in
 $$P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$
 
 ### References
+- [Partial Moments as a Unifying Primitive: From Distribution and Moments to Expected Utility and Nonparametric Regression](https://doi.org/10.2139/ssrn.6249658)
 - [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 - [Cumulative Distribution Functions and UPM/LPM Analysis](https://doi.org/10.2139/ssrn.2148482)
 - [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
