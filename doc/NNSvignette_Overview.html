@@ -511,8 +511,8 @@ partial‑moment CDFs)</li>
 Partial‑moment dependence metrics respond to such structure.</p>
 <p><strong>Headers.</strong></p>
 <ul>
-<li><code>Co.LPM(degree, target, x, y)</code> / <code>Co.UPM(...)</code>
-(co‑partial moments)</li>
+<li><code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
+/ <code>Co.UPM(...)</code> (co‑partial moments)</li>
 <li><code>PM.matrix(l_degree, u_degree, target=NULL, variable, pop_adj=TRUE)</code></li>
 <li><code>NNS.dep(x, y)</code> (scalar dependence coefficient)</li>
 <li><code>NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)</code></li>
@@ -1042,10 +1042,10 @@ order <code>degree</code> at <code>target</code>.</li>
 gives CDF.</li>
 <li><code>LPM.VaR(p, degree, variable)</code> — partial-moment quantile
 at probability <code>p</code>.</li>
-<li><code>Co.LPM(degree, target, x, y)</code> — co-lower partial moment
-between two variables.</li>
-<li><code>Co.UPM(degree, target, x, y)</code> — co-upper partial moment
-between two variables.</li>
+<li><code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
+— co-lower partial moment between two variables.</li>
+<li><code>Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)</code>
+— co-upper partial moment between two variables.</li>
 <li><code>D.LPM(degree, target, variable)</code> — divergent lower
 partial moment (away from <code>target</code>).</li>
 <li><code>D.UPM(degree, target, variable)</code> — divergent upper

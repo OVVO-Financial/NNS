@@ -158,7 +158,7 @@ Pearson captures linear monotone relationships. Many structures (U‑shapes, sat
 
 **Headers.** 
 
-- `Co.LPM(degree, target, x, y)` / `Co.UPM(...)` (co‑partial moments) 
+- `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` / `Co.UPM(...)` (co‑partial moments) 
 - `PM.matrix(l_degree, u_degree, target=NULL, variable, pop_adj=TRUE)` 
 - `NNS.dep(x, y)` (scalar dependence coefficient) 
 - `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
@@ -415,8 +415,8 @@ Centering at $t=\mu_X$ yields the variance decomposition identity in Section 1.
 - `UPM(degree, target, variable)` — upper partial moment of order `degree` at `target`.
 - `LPM.ratio(degree, target, variable)`; `UPM.ratio(...)` — normalized shares; `degree=0` gives CDF.
 - `LPM.VaR(p, degree, variable)` — partial-moment quantile at probability `p`.
-- `Co.LPM(degree, target, x, y)` — co-lower partial moment between two variables.
-- `Co.UPM(degree, target, x, y)` — co-upper partial moment between two variables.
+- `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` — co-lower partial moment between two variables.
+- `Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)` — co-upper partial moment between two variables.
 - `D.LPM(degree, target, variable)` — divergent lower partial moment (away from `target`).
 - `D.UPM(degree, target, variable)` — divergent upper partial moment (away from `target`).
 - `NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)` — CDF from partial moments.
