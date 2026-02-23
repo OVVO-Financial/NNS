@@ -197,11 +197,13 @@ UPM.ratio <- function(degree, target, variable) {
 #' @description
 #'   Computes the co‑lower partial moment (lower‑left quadrant 4) between two
 #'   equal‑length numeric vectors at any degree and target.
-#' @param degree_lpm numeric; degree = 0 gives frequency, degree = 1 gives area.
+#' @param degree_lpm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
 #' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param degree_y numeric; optional degree for y. If omitted, `degree_lpm` is
+#'   used for both x and y.
 #' @return Numeric vector of co‑LPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
@@ -211,8 +213,14 @@ UPM.ratio <- function(degree, target, variable) {
 #'   x <- rnorm(100); y <- rnorm(100)
 #'   Co.LPM(0, x, y, mean(x), mean(y))
 #' @export
-Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, x, y, target_x, target_y)
+Co.LPM <- function(degree_lpm = NULL, x, y, target_x, target_y, degree_y = NULL) {
+    if (is.null(degree_lpm)) {
+        stop("degree_lpm must be supplied.")
+    }
+    if (is.null(degree_y)) {
+        degree_y <- degree_lpm
+    }
+    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, degree_y, x, y, target_x, target_y)
 }
 
 #' @name Co.UPM
@@ -220,11 +228,13 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #' @description
 #'   Computes the co‑upper partial moment (upper‑right quadrant 1) between two
 #'   equal‑length numeric vectors at any degree and target.
-#' @param degree_upm numeric; degree = 0 gives frequency, degree = 1 gives area.
+#' @param degree_upm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
 #' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param degree_y numeric; optional degree for y. If omitted, `degree_upm` is
+#'   used for both x and y.
 #' @return Numeric vector of co‑UPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
@@ -234,8 +244,14 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y) {
 #'   x <- rnorm(100); y <- rnorm(100)
 #'   Co.UPM(0, x, y, mean(x), mean(y))
 #' @export
-Co.UPM <- function(degree_upm, x, y, target_x, target_y) {
-    .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y)
+Co.UPM <- function(degree_upm = NULL, x, y, target_x, target_y, degree_y = NULL) {
+    if (is.null(degree_upm)) {
+        stop("degree_upm must be supplied.")
+    }
+    if (is.null(degree_y)) {
+        degree_y <- degree_upm
+    }
+    .Call(`_NNS_CoUPM_RCPP`, degree_upm, degree_y, x, y, target_x, target_y)
 }
 
 #' @name D.LPM

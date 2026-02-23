@@ -4,11 +4,13 @@
 \alias{Co.UPM}
 \title{Co‑Upper Partial Moment}
 \usage{
-Co.UPM(degree_upm, x, y, target_x, target_y)
+Co.UPM(degree_upm = NULL, x, y, target_x, target_y, degree_y = NULL)
 }
 \arguments{
-\item{degree_upm}{numeric; degree = 0 gives frequency, degree = 1 gives area.}
+\item{degree_upm}{numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area. Must be supplied in \code{Co.UPM()}.}
 
+
+\item{degree_y}{numeric; optional degree for y. If omitted, \code{degree_upm} is used for both x and y.}
 \item{x}{numeric vector of observations.}
 
 \item{y}{numeric vector of the same length as x.}
