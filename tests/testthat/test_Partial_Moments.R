@@ -186,7 +186,7 @@ test_that(
       pm$cupm + pm$clpm - pm$dlpm - pm$dupm,
       tolerance = 1e-10
     )
-    expect_equal(diag(pm$cov.matrix), rep(1, ncol(A)), tolerance = 1e-10)
+    expect_equal(unname(diag(pm$cov.matrix)), rep(1, ncol(A)), tolerance = 1e-10)
   }
 )
 

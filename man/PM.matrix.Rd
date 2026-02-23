@@ -31,6 +31,8 @@ Partial Moment Matrix
 \examples{
 set.seed(123)
 A <- cbind(rnorm(100), rnorm(100), rnorm(100))
-PM.matrix(1, 1, NULL, A, TRUE)          # uses norm = FALSE by default
-PM.matrix(1, 1, NULL, A, TRUE, TRUE)    # enable normalization
+PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE)                    # uses norm = FALSE by default
+PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE, norm = TRUE)       # enable normalization
+PM.matrix(1, 1, target = rep(0, ncol(A)), variable = A, pop_adj = TRUE)         # use 0's for targets
+PM.matrix(1, 1, target = apply(A, 2, "median"), variable = A, pop_adj = TRUE)   # use variable medians as targets
 }

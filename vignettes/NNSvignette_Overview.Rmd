@@ -159,7 +159,7 @@ Pearson captures linear monotone relationships. Many structures (U‑shapes, sat
 **Headers.** 
 
 - `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` / `Co.UPM(...)` (co‑partial moments) 
-- `PM.matrix(l_degree, u_degree, target=NULL, variable, pop_adj=TRUE)` 
+- `PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)` 
 - `NNS.dep(x, y)` (scalar dependence coefficient) 
 - `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
 
