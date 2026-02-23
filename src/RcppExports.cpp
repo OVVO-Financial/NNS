@@ -497,32 +497,32 @@ BEGIN_RCPP
 END_RCPP
 }
 // CoLPM_RCPP
-NumericVector CoLPM_RCPP(const double& degree_lpm, const double& degree_y, const RObject& x, const RObject& y, const RObject& target_x, const RObject& target_y);
-RcppExport SEXP _NNS_CoLPM_RCPP(SEXP degree_lpmSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector CoLPM_RCPP(const double& degree_lpm, const RObject& x, const RObject& y, const RObject& target_x, const RObject& target_y, const double& degree_y);
+RcppExport SEXP _NNS_CoLPM_RCPP(SEXP degree_lpmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP, SEXP degree_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const double& >::type degree_lpm(degree_lpmSEXP);
-    Rcpp::traits::input_parameter< const double& >::type degree_y(degree_ySEXP);
     Rcpp::traits::input_parameter< const RObject& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(CoLPM_RCPP(degree_lpm, degree_y, x, y, target_x, target_y));
+    Rcpp::traits::input_parameter< const double& >::type degree_y(degree_ySEXP);
+    rcpp_result_gen = Rcpp::wrap(CoLPM_RCPP(degree_lpm, x, y, target_x, target_y, degree_y));
     return rcpp_result_gen;
 END_RCPP
 }
 // CoUPM_RCPP
-NumericVector CoUPM_RCPP(const double& degree_upm, const double& degree_y, const RObject& x, const RObject& y, const RObject& target_x, const RObject& target_y);
-RcppExport SEXP _NNS_CoUPM_RCPP(SEXP degree_upmSEXP, SEXP degree_ySEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP) {
+NumericVector CoUPM_RCPP(const double& degree_upm, const RObject& x, const RObject& y, const RObject& target_x, const RObject& target_y, const double& degree_y);
+RcppExport SEXP _NNS_CoUPM_RCPP(SEXP degree_upmSEXP, SEXP xSEXP, SEXP ySEXP, SEXP target_xSEXP, SEXP target_ySEXP, SEXP degree_ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const double& >::type degree_upm(degree_upmSEXP);
-    Rcpp::traits::input_parameter< const double& >::type degree_y(degree_ySEXP);
     Rcpp::traits::input_parameter< const RObject& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target_x(target_xSEXP);
     Rcpp::traits::input_parameter< const RObject& >::type target_y(target_ySEXP);
-    rcpp_result_gen = Rcpp::wrap(CoUPM_RCPP(degree_upm, degree_y, x, y, target_x, target_y));
+    Rcpp::traits::input_parameter< const double& >::type degree_y(degree_ySEXP);
+    rcpp_result_gen = Rcpp::wrap(CoUPM_RCPP(degree_upm, x, y, target_x, target_y, degree_y));
     return rcpp_result_gen;
 END_RCPP
 }

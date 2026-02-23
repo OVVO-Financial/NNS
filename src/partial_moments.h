@@ -58,12 +58,12 @@ Rcpp::NumericVector UPM_ratio_CPv(const double &degree,
 // CoUPM / CoLPM / DUPM / DLPM
 // single thread
 double CoUPM_C(
-    const double &degree_lpm, const double &degree_upm,
+    const double &degree_x, const double &degree_y,
     const RcppParallel::RVector<double> &x, const RcppParallel::RVector<double> &y,
     const double &target_x, const double &target_y
 );
 double CoLPM_C(
-    const double &degree_lpm, const double &degree_upm,
+    const double &degree_x, const double &degree_y,
     const RcppParallel::RVector<double> &x, const RcppParallel::RVector<double> &y,
     const double &target_x, const double &target_y
 );

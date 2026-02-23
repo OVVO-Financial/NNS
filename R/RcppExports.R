@@ -220,7 +220,7 @@ Co.LPM <- function(degree_lpm = NULL, x, y, target_x, target_y, degree_y = NULL)
     if (is.null(degree_y)) {
         degree_y <- degree_lpm
     }
-    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, degree_y, x, y, target_x, target_y)
+    .Call(`_NNS_CoLPM_RCPP`, degree_lpm, x, y, target_x, target_y, degree_y)
 }
 
 #' @name Co.UPM
@@ -251,7 +251,7 @@ Co.UPM <- function(degree_upm = NULL, x, y, target_x, target_y, degree_y = NULL)
     if (is.null(degree_y)) {
         degree_y <- degree_upm
     }
-    .Call(`_NNS_CoUPM_RCPP`, degree_upm, degree_y, x, y, target_x, target_y)
+    .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y, degree_y)
 }
 
 #' @name D.LPM

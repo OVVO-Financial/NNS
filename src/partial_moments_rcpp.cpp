@@ -230,10 +230,11 @@ NumericVector UPM_RCPP(const double &degree,
 //'   Co.LPM(0, x, y, mean(x), mean(y))
 //' @export
 // [[Rcpp::export("Co.LPM", rng = false)]]
- NumericVector CoLPM_RCPP(
-     const double &degree_lpm, const double &degree_y,
+NumericVector CoLPM_RCPP(
+     const double &degree_lpm,
      const RObject &x, const RObject &y,
-     const RObject &target_x, const RObject &target_y
+     const RObject &target_x, const RObject &target_y,
+     const double &degree_y
  ) {
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
@@ -283,10 +284,11 @@ NumericVector UPM_RCPP(const double &degree,
 //'   Co.UPM(0, x, y, mean(x), mean(y))
 //' @export
 // [[Rcpp::export("Co.UPM", rng = false)]]
- NumericVector CoUPM_RCPP(
-     const double &degree_upm, const double &degree_y,
+NumericVector CoUPM_RCPP(
+     const double &degree_upm,
      const RObject &x, const RObject &y,
-     const RObject &target_x, const RObject &target_y
+     const RObject &target_x, const RObject &target_y,
+     const double &degree_y
  ) {
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);

@@ -356,7 +356,7 @@ NumericVector UPM_ratio_CPv(const double &degree, const NumericVector &target, c
 }
 
 double CoUPM_C(
-    const double &degree_lpm, const double &degree_upm,
+    const double &degree_x, const double &degree_y,
     const RVector<double> &x, const RVector<double> &y, 
     const double &target_x, const double &target_y 
 ){
@@ -369,10 +369,10 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool d_x_0=(degree_lpm==0);
-  bool d_y_0=(degree_upm==0);
-  bool x_is_int=isInteger(degree_lpm);
-  bool y_is_int=isInteger(degree_upm);
+  bool d_x_0=(degree_x==0);
+  bool d_y_0=(degree_y==0);
+  bool x_is_int=isInteger(degree_x);
+  bool y_is_int=isInteger(degree_y);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     double y1=(y[i]-target_y);
@@ -384,12 +384,12 @@ double CoUPM_C(
     else y1 = (y1 < 0 ? 0 : y1);
 
     if(!d_x_0){
-      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
-      else x1 = std::pow(x1, degree_lpm);
+      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
+      else x1 = std::pow(x1, degree_x);
     }
     if(!d_y_0){
-      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
-      else y1 = std::pow(y1, degree_upm);
+      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_y));
+      else y1 = std::pow(y1, degree_y);
     }
     out += x1 * y1;
   }
@@ -397,7 +397,7 @@ double CoUPM_C(
 }
 
 double CoLPM_C(
-    const double &degree_lpm, const double &degree_upm,
+    const double &degree_x, const double &degree_y,
     const RVector<double> &x, const RVector<double> &y, 
     const double &target_x, const double &target_y 
 ){
@@ -409,10 +409,10 @@ double CoLPM_C(
   if (min_size<=0)
     return 0;
   double out=0;
-  bool d_x_0=(degree_lpm==0);
-  bool d_y_0=(degree_upm==0);
-  bool x_is_int=isInteger(degree_lpm);
-  bool y_is_int=isInteger(degree_upm);
+  bool d_x_0=(degree_x==0);
+  bool d_y_0=(degree_y==0);
+  bool x_is_int=isInteger(degree_x);
+  bool y_is_int=isInteger(degree_y);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     double y1=(target_y-y[i]);
@@ -424,12 +424,12 @@ double CoLPM_C(
     else y1 = (y1 < 0 ? 0 : y1);
 
     if(!d_x_0){
-      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
-      else x1 = std::pow(x1, degree_lpm);
+      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
+      else x1 = std::pow(x1, degree_x);
     }
     if(!d_y_0){
-      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
-      else y1 = std::pow(y1, degree_upm);
+      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_y));
+      else y1 = std::pow(y1, degree_y);
     }
     out += x1 * y1;
   }
