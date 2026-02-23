@@ -176,6 +176,20 @@ test_that(
   }
 )
 
+test_that(
+  "NNS::PM.matrix - norm TRUE returns signed normalized covariance decomposition", {
+    A <- cbind(x, y, z)
+    pm <- NNS::PM.matrix(1, 1, NULL, A, pop_adj = TRUE, norm = TRUE)
+
+    expect_equal(
+      pm$cov.matrix,
+      pm$cupm + pm$clpm - pm$dlpm - pm$dupm,
+      tolerance = 1e-10
+    )
+    expect_equal(diag(pm$cov.matrix), rep(1, ncol(A)), tolerance = 1e-10)
+  }
+)
+
 #########################################################################
 # CDF
 

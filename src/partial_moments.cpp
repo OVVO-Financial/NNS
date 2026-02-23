@@ -634,6 +634,8 @@ List PMMatrix_CPv(
         } else {
           coUpm(i, j) = dUpm(i, j) = dLpm(i, j) = coLpm(i, j) = 0.0;
         }
+
+        covMat(i, j) = coUpm(i, j) + coLpm(i, j) - dUpm(i, j) - dLpm(i, j);
       }
     }
   }
