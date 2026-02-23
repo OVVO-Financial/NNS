@@ -29,12 +29,14 @@ Rcpp::NumericVector CoLPM_RCPP(const double &degree_lpm,
                                const Rcpp::RObject &x,
                                const Rcpp::RObject &y,
                                const Rcpp::RObject &target_x,
-                               const Rcpp::RObject &target_y);
+                               const Rcpp::RObject &target_y,
+                               const double &degree_y);
 Rcpp::NumericVector CoUPM_RCPP(const double &degree_upm,
                                const Rcpp::RObject &x,
                                const Rcpp::RObject &y,
                                const Rcpp::RObject &target_x,
-                               const Rcpp::RObject &target_y);
+                               const Rcpp::RObject &target_y,
+                               const double &degree_y);
 Rcpp::NumericVector DLPM_RCPP(const double &degree_lpm,
                               const double &degree_upm,
                               const Rcpp::RObject &x,

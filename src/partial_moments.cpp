@@ -356,7 +356,7 @@ NumericVector UPM_ratio_CPv(const double &degree, const NumericVector &target, c
 }
 
 double CoUPM_C(
-    const double &degree_lpm, const double &degree_upm, 
+    const double &degree_x, const double &degree_y,
     const RVector<double> &x, const RVector<double> &y, 
     const double &target_x, const double &target_y 
 ){
@@ -369,30 +369,35 @@ double CoUPM_C(
     return 0;
   
   double out=0;
-  bool d_upm_0=(degree_upm==0);
+  bool d_x_0=(degree_x==0);
+  bool d_y_0=(degree_y==0);
+  bool x_is_int=isInteger(degree_x);
+  bool y_is_int=isInteger(degree_y);
   for(size_t i=0; i<min_size; i++){
     double x1=(x[i]-target_x);
     double y1=(y[i]-target_y);
     
-    if(d_upm_0){
-      x1 = (x1 > 0 ? 1 : 0);
-      y1 = (y1 > 0 ? 1 : 0);
-    } else {
-      x1 = (x1 < 0 ? 0 : x1);
-      y1 = (y1 < 0 ? 0 : y1);
+    if(d_x_0) x1 = (x1 > 0 ? 1 : 0);
+    else x1 = (x1 < 0 ? 0 : x1);
+
+    if(d_y_0) y1 = (y1 > 0 ? 1 : 0);
+    else y1 = (y1 < 0 ? 0 : y1);
+
+    if(!d_x_0){
+      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
+      else x1 = std::pow(x1, degree_x);
     }
-    
-    if(isInteger(degree_upm)){
-      if(d_upm_0) out += x1 * y1; 
-      else
-        out += repeatMultiplication(x1, static_cast<int>(degree_upm)) * repeatMultiplication(y1, static_cast<int>(degree_upm));
-    } else out += std::pow(x1, degree_upm) * std::pow(y1, degree_upm);
+    if(!d_y_0){
+      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_y));
+      else y1 = std::pow(y1, degree_y);
+    }
+    out += x1 * y1;
   }
   return out/max_size;
 }
 
 double CoLPM_C(
-    const double &degree_lpm, const double &degree_upm, 
+    const double &degree_x, const double &degree_y,
     const RVector<double> &x, const RVector<double> &y, 
     const double &target_x, const double &target_y 
 ){
@@ -404,24 +409,29 @@ double CoLPM_C(
   if (min_size<=0)
     return 0;
   double out=0;
-  bool d_lpm_0=(degree_lpm==0);
+  bool d_x_0=(degree_x==0);
+  bool d_y_0=(degree_y==0);
+  bool x_is_int=isInteger(degree_x);
+  bool y_is_int=isInteger(degree_y);
   for(size_t i=0; i<min_size; i++){
     double x1=(target_x-x[i]);
     double y1=(target_y-y[i]);
     
-    if(d_lpm_0){
-      x1 = (x1 >= 0 ? 1 : 0);
-      y1 = (y1 >= 0 ? 1 : 0);
-    } else {
-      x1 = (x1 < 0 ? 0 : x1);
-      y1 = (y1 < 0 ? 0 : y1);
+    if(d_x_0) x1 = (x1 >= 0 ? 1 : 0);
+    else x1 = (x1 < 0 ? 0 : x1);
+
+    if(d_y_0) y1 = (y1 >= 0 ? 1 : 0);
+    else y1 = (y1 < 0 ? 0 : y1);
+
+    if(!d_x_0){
+      if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
+      else x1 = std::pow(x1, degree_x);
     }
-    
-    if(isInteger(degree_lpm)){
-      if(d_lpm_0) out += x1 * y1;
-      else
-        out += repeatMultiplication(x1, static_cast<int>(degree_lpm)) * repeatMultiplication(y1, static_cast<int>(degree_lpm));
-    } else out += std::pow(x1, degree_lpm) * std::pow(y1, degree_lpm);
+    if(!d_y_0){
+      if(y_is_int) y1 = repeatMultiplication(y1, static_cast<int>(degree_y));
+      else y1 = std::pow(y1, degree_y);
+    }
+    out += x1 * y1;
   }
   return out/max_size;
 }
@@ -519,18 +529,18 @@ WORKER_CLASS tmp_func(LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE, x, y, target_x, 
 parallelFor(0, output.size(), tmp_func);                                                            \
 return(output);
 NumericVector CoLPM_CPv(
-    const double &degree_lpm, 
-    const NumericVector &x, const NumericVector &y, 
+    const double &degree_x, const double &degree_y,
+    const NumericVector &x, const NumericVector &y,
     const NumericVector &target_x, const NumericVector &target_y
 ) {
-  NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(CoLPM_Worker, degree_lpm, degree_lpm);
+  NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(CoLPM_Worker, degree_x, degree_y);
 }
 NumericVector CoUPM_CPv(
-    const double &degree_upm, 
-    const NumericVector &x, const NumericVector &y, 
-    const NumericVector &target_x, const NumericVector &target_y 
+    const double &degree_x, const double &degree_y,
+    const NumericVector &x, const NumericVector &y,
+    const NumericVector &target_x, const NumericVector &target_y
 ) {
-  NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(CoUPM_Worker, degree_upm, degree_upm);
+  NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(CoUPM_Worker, degree_x, degree_y);
 }
 NumericVector DLPM_CPv(
     const double &degree_lpm, const double &degree_upm, 
@@ -566,8 +576,8 @@ void PMMatrix_Cv(
   RVector<double> x_rvec(x);
   RVector<double> y_rvec(y);
   
-  coLpm=CoLPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
-  coUpm=CoUPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
+  coLpm=CoLPM_C(degree_lpm, degree_lpm, x_rvec, y_rvec, target_x, target_y);
+  coUpm=CoUPM_C(degree_upm, degree_upm, x_rvec, y_rvec, target_x, target_y);
   dLpm=DLPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
   dUpm=DUPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
   covMat=0;
