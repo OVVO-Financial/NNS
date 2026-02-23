@@ -190,8 +190,7 @@ NNS.stack <- function(IVs.train,
     training <- training[complete.cases(training),]
     
     if (balance) {
-      DV.train <- as.numeric(as.factor(DV.train))
-      y_train  <- as.factor(as.character(DV.train))
+      y_train  <- as.factor(DV.train)
       
       ycol <- "Class"
       training_1 <- downSample(IVs.train, y_train, list = FALSE, yname = ycol)
@@ -200,13 +199,13 @@ NNS.stack <- function(IVs.train,
       training <- rbind.data.frame(training_1, training_2)
       
       IVs.train <- training[, setdiff(names(training), ycol), drop = FALSE]
-      DV.train  <- as.numeric(as.character(training[[ycol]]))
+      DV.train  <- as.numeric(as.factor(training[[ycol]]))
       
       colnames(IVs.test) <- colnames(IVs.train) 
     }
     
     CV.IVs.train <- data.frame(training[, -(ncol(training))])
-    CV.DV.train <- as.numeric(as.character(training[, ncol(training)]))
+    CV.DV.train <- as.numeric(as.factor(training[, ncol(training)]))
     
     
     # Dimension Reduction Regression Output
