@@ -119,8 +119,7 @@ NNS.boost <- function(IVs.train,
     
     # ---------- class balancing ----------
     if (balance) {
-      DV.train <- as.numeric(as.factor(DV.train))
-      y_train  <- as.factor(as.character(DV.train))
+      y_train  <- as.factor(DV.train)
       
       ycol <- "Class"
       training_1 <- downSample(IVs.train, y_train, list = FALSE, yname = ycol)
@@ -129,7 +128,7 @@ NNS.boost <- function(IVs.train,
       training <- rbind.data.frame(training_1, training_2)
       
       IVs.train <- training[, setdiff(names(training), ycol), drop = FALSE]
-      DV.train  <- as.numeric(as.character(training[[ycol]]))
+      DV.train  <- as.numeric(as.factor(training[[ycol]]))
       
       colnames(IVs.test) <- colnames(IVs.train)  
     }
@@ -396,25 +395,25 @@ return(list("results"           = estimates,
     error = function(e) {
       if (isTRUE(balance)) {
         warning("[retry] First attempt failed; retrying with balance = FALSE")
-        return(Recall(IVs.train = IVs.train,
-                      DV.train = DV.train,
-                      IVs.test = IVs.test,
-                      type = type,
-                      depth = depth,
-                      learner.trials = learner.trials,
-                      epochs = epochs,
-                      CV.size = CV.size,
-                      balance = FALSE,
-                      ts.test = ts.test,
-                      folds = folds,
-                      threshold = threshold,
-                      obj.fn = obj.fn,
-                      objective = objective,
-                      extreme = extreme,
-                      features.only = features.only,
-                      feature.importance = feature.importance,
-                      pred.int = pred.int,
-                      status = status))
+        return(NNS.boost(IVs.train = IVs.train,
+                         DV.train = DV.train,
+                         IVs.test = IVs.test,
+                         type = type,
+                         depth = depth,
+                         learner.trials = learner.trials,
+                         epochs = epochs,
+                         CV.size = CV.size,
+                         balance = FALSE,
+                         ts.test = ts.test,
+                         folds = folds,
+                         threshold = threshold,
+                         obj.fn = obj.fn,
+                         objective = objective,
+                         extreme = extreme,
+                         features.only = features.only,
+                         feature.importance = feature.importance,
+                         pred.int = pred.int,
+                         status = status))
       }
       stop(e)
     }
