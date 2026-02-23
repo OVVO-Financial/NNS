@@ -114,12 +114,12 @@ NNS_PM_TWO_VARIABLES_WORKER(CoUPM_Worker, CoUPM_C);
 NNS_PM_TWO_VARIABLES_WORKER(DLPM_Worker, DLPM_C);
 NNS_PM_TWO_VARIABLES_WORKER(DUPM_Worker, DUPM_C);
 Rcpp::NumericVector CoLPM_CPv(
-    const double &degree_lpm,
+    const double &degree_x, const double &degree_y,
     const Rcpp::NumericVector &x, const Rcpp::NumericVector &y,
     const Rcpp::NumericVector &target_x, const Rcpp::NumericVector &target_y
 );
 Rcpp::NumericVector CoUPM_CPv(
-    const double &degree_upm,
+    const double &degree_x, const double &degree_y,
     const Rcpp::NumericVector &x, const Rcpp::NumericVector &y,
     const Rcpp::NumericVector &target_x, const Rcpp::NumericVector &target_y
 );
