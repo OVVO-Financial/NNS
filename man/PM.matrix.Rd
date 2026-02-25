@@ -28,11 +28,29 @@ Builds a list containing CUPM, DUPM, DLPM, CLPM and the overall covariance matri
 \details{
 Partial Moment Matrix
 }
+\note{
+When \code{norm = TRUE}, each cell (i,j) of the four quadrant matrices
+is normalized so that their sum equals 1.  In this case, 
+\code{$cov.matrix} is computed as 
+\code{$cupm + $clpm - $dupm - $dlpm}, yielding a dimensionless,
+signed dependence measure bounded between -1 and 1.
+This representation discards magnitude information and is therefore
+a lossy nonlinear correlation matrix.  A higher fidelity nonlinear
+correlation matrix is available via the \code{NNS.dep} function.
+}
 \examples{
 set.seed(123)
 A <- cbind(rnorm(100), rnorm(100), rnorm(100))
-PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE)                    # uses norm = FALSE by default
-PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE, norm = TRUE)       # enable normalization
-PM.matrix(1, 1, target = rep(0, ncol(A)), variable = A, pop_adj = TRUE)         # use 0's for targets
-PM.matrix(1, 1, target = apply(A, 2, "median"), variable = A, pop_adj = TRUE)   # use variable medians as targets
+
+# Uses norm = FALSE by default
+PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE)
+
+# Enable normalization
+PM.matrix(1, 1, target = NULL, variable = A, pop_adj = TRUE, norm = TRUE)
+
+# Use 0's for targets
+PM.matrix(1, 1, target = rep(0, ncol(A)), variable = A, pop_adj = TRUE)        
+
+# Use variable medians as targets
+PM.matrix(1, 1, target = apply(A, 2, "median"), variable = A, pop_adj = TRUE)  
 }

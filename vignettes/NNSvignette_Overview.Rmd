@@ -8,18 +8,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r}
-#| label: setup
-#| include: true
+```{r, setup, message=FALSE}
 # Prereqs (uncomment if needed):
 # install.packages("NNS")
 # install.packages(c("data.table","xts","zoo","Rfast"))
 
-suppressPackageStartupMessages({
-  library(NNS)
-  library(data.table)
-})
-set.seed(42)
+library(NNS)
+library(data.table)
 ```
 
 
@@ -43,7 +38,8 @@ A complete, hands‑on curriculum for Nonlinear Nonparametric Statistics (NNS) u
 4. Hypothesis testing & ANOVA (LPM‑CDF) 
 5. Regression, boosting, stacking & causality 
 6. Time series & forecasting 
-7. Simulation (max‑entropy), Monte Carlo & risk‑neutral rescaling 
+7. Normalziation & Rescaling
+7. Simulation (max‑entropy) & Monte Carlo
 8. Portfolio & stochastic dominance
 
 **Notation.** 
@@ -89,6 +85,8 @@ This **is not** the same as splitting conditional variances around a threshold; 
 ## 1.3 Code: variance decomposition & CDF
 
 ```{r}
+set.seed(42)
+
 # Normal sample
 y <- rnorm(3000)
 mu <- mean(y)
@@ -200,9 +198,61 @@ rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 
 ------------------------------------------------------------------------
 
-# 4. Hypothesis Testing & ANOVA (LPM‑CDF)
+# 4. Normalization and Rescaling
 
-## 4.1 Concept
+NNS provides two main tools for scaling data while preserving rank structure and distributional shape. Both operate via deterministic affine transformations.
+
+
+
+## 4.1 Normalization
+`NNS.norm()` rescales variables to a common magnitude while preserving distributional structure. The method can be **linear** (all variables forced to have the same mean) or **nonlinear** (using dependence weights to produce a more nuanced scaling). In the nonlinear case, the degree of association between variables influences the final normalized values.
+
+**Header.** 
+
+- `NNS.norm(x, linear=TRUE, chart.type = NULL)`
+
+```{r}
+A <- rnorm(100, mean = 0, sd = 1)
+B <- rnorm(100, mean = 0, sd = 5)
+C <- rnorm(100, mean = 10, sd = 1)
+D <- rnorm(100, mean = 10, sd = 10)
+
+X <- data.frame(A, B, C, D)
+
+# Linear scaling
+lin_norm <- NNS.norm(X, linear = TRUE, chart.type=NULL, location=NULL)
+```
+
+
+**Interpretation.** `NNS.norm()` brings variables to a common scale without distorting their distributional shape. Linear mode equalizes means; nonlinear mode additionally weights each variable by its dependence with others, so more correlated variables exert greater influence on the final scaling.
+
+
+## 4.2 Risk‑neutral rescale (pricing context)
+
+`NNS.rescale()` performs one‑dimensional affine transformations.
+
+**Header.** 
+
+- `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
+
+```{r}
+px <- 100 + cumsum(rnorm(260, sd = 1))
+rn <- NNS.rescale(px, a=100, b=0.03, method="riskneutral", T=1, type="Terminal")
+c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
+```
+
+**Interpretation.** `riskneutral` shifts the mean to match $S_0 e^{rT}$ (Terminal) or $S_0$ (Discounted), preserving distributional shape.
+
+
+
+------------------------------------------------------------------------
+
+
+
+
+# 5. Hypothesis Testing & ANOVA (LPM‑CDF)
+
+## 5.1 Concept
 
 Instead of distributional assumptions, compare groups via **LPM‑based CDFs**. Output is a *degree of certainty* (not a p‑value) for equality of populations or means.
 
@@ -210,7 +260,7 @@ Instead of distributional assumptions, compare groups via **LPM‑based CDFs**. 
 
 - `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
 
-## 4.2 Code: two‑sample & multi‑group
+## 5.2 Code: two‑sample & multi‑group
 
 ```{r}
 ctrl <- rnorm(200, 0, 1)
@@ -225,9 +275,9 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 
 ------------------------------------------------------------------------
 
-# 5. Regression, Boosting, Stacking & Causality
+# 6. Regression, Boosting, Stacking & Causality
 
-## 5.1 Philosophy
+## 6.1 Philosophy
 
 `NNS.reg` learns **partitioned** relationships using partial‑moment weights — linear where appropriate, nonlinear where needed — avoiding fragile global parametric forms.
 
@@ -238,7 +288,7 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 - `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` 
 - `NNS.caus(x, y)` (directional causality score via conditional dependence)
 
-## 5.2 Code: classification via regression + ensembles
+## 6.2 Code: classification via regression + ensembles
 
 ```{r, fig.width=7, fig.height=5, fig.align='center'}
 # Example 1: Nonlinear regression
@@ -279,7 +329,7 @@ mean(stacked$stack == as.numeric(iris[test.set,5]))
 [1] 1
 ```
 
-## 5.3 Code: directional causality
+## 6.3 Code: directional causality
 
 ```{r}
 NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg
@@ -290,7 +340,7 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 
 ------------------------------------------------------------------------
 
-# 6. Time Series & Forecasting
+# 7. Time Series & Forecasting
 
 **Headers.**
 
@@ -315,9 +365,9 @@ NNS.ARMA.optim(z, h=48, seasonal.factor = seasonal_period$periods, plot = TRUE, 
 
 ------------------------------------------------------------------------
 
-# 7. Simulation, Bootstrap & Risk‑Neutral Rescaling
+# 8. Simulation & Bootstrap & Risk‑Neutral Rescaling
 
-## 7.1 Maximum entropy bootstrap (shape‑preserving)
+## 8.1 Maximum entropy bootstrap (shape‑preserving)
 
 **Header.** 
 
@@ -329,7 +379,7 @@ mb <- NNS.meboot(x_ts, reps=5, rho = 1)
 dim(mb["replicates", ]$replicates)
 ```
 
-## 7.2 Monte Carlo over the full correlation space
+## 8.2 Monte Carlo over the full correlation space
 
 **Header.** 
 
@@ -342,23 +392,11 @@ length(mc$ensemble); names(mc$replicates)
 head(mc$replicates$`rho = 0`)
 ```
 
-## 7.3 Risk‑neutral rescale (pricing context)
 
-**Header.** 
-
-- `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
-
-```{r}
-px <- 100 + cumsum(rnorm(260, sd = 1))
-rn <- NNS.rescale(px, a=100, b=0.03, method="riskneutral", T=1, type="Terminal")
-c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
-```
-
-**Interpretation.** `riskneutral` shifts the mean to match $S_0 e^{rT}$ (Terminal) or $S_0$ (Discounted), preserving distributional shape.
 
 ------------------------------------------------------------------------
 
-# 8. Portfolio & Stochastic Dominance
+# 9. Portfolio & Stochastic Dominance
 
 Stochastic dominance orders uncertain prospects for broad classes of risk‑averse utilities; partial moments supply practical, nonparametric estimators.
 
@@ -423,10 +461,10 @@ Centering at $t=\mu_X$ yields the variance decomposition identity in Section 1.
 - `NNS.moments(x)` — mean/var/skew/kurtosis via partial moments.
 
 ## 2. Descriptive Statistics & Distributions
-- `NNS.mode(x, multi=FALSE)` — nonparametric mode(s).
+- `NNS.mode(x, multi = FALSE)` — nonparametric mode(s).
 - `PM.matrix(l_degree, u_degree, target, variable, pop_adj)` — co-/divergent partial-moment matrices.
 - `NNS.gravity(x, w = NULL)` — partial-moment weighted location (gravity center).
-- `NNS.norm(x, method = "moment")` — normalization retaining target moments.
+
 
 See NNS Vignette: [Getting Started with NNS: Partial Moments](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Partial_Moments.html)
 
@@ -436,13 +474,19 @@ See NNS Vignette: [Getting Started with NNS: Partial Moments](https://CRAN.R-pro
 
 See NNS Vignette: [Getting Started with NNS: Correlation and Dependence](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Correlation_and_Dependence.html)
 
-## 4. Hypothesis Testing
+## 4. Normalization & Rescaling
+- `NNS.norm(x, linear=FALSE)` — normalization retaining target moments.
+- `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))` — risk-neutral or min–max rescaling.
+
+See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Overview.html)
+
+## 5. Hypothesis Testing
 - `NNS.ANOVA(control, treatment, ...)` — certainty of equality (distributions or means).
 
 See NNS Vignette: [Getting Started with NNS: Comparing Distributions](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Comparing_Distributions.html)
 
 
-## 5. Regression, Classification & Causality
+## 6. Regression, Classification & Causality
 - `NNS.part(x, y, ...)` — partition analysis for variable segmentation.
 - `NNS.reg(x, y, ...)` — partition-based regression/classification (`$Fitted.xy`, `$Point.est`).
 - `NNS.boost(IVs, DV, ...)`, `NNS.stack(IVs, DV, ...)` — ensembles using `NNS.reg` base learners.
@@ -454,12 +498,12 @@ See NNS Vignette: [Getting Started with NNS: Clustering and Regression](https://
 
 See NNS Vignette: [Getting Started with NNS: Classification](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Classification.html)
 
-## 6. Differentiation & Slope Measures
+## 7. Differentiation & Slope Measures
 - `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via `NNS.reg`.
 - `dy.d_(x, Y, var)` — partial derivative of multivariate `Y` w.r.t. `var`.
 - `NNS.diff(x, y)` — derivative via secant projections.
 
-## 7. Time Series & Forecasting
+## 8. Time Series & Forecasting
 - `NNS.ARMA(...)`, `NNS.ARMA.optim(...)` — nonlinear ARMA modeling.
 - `NNS.seas(...)` — detect seasonality.
 - `NNS.VAR(...)` — nonlinear VAR modeling.
@@ -467,14 +511,13 @@ See NNS Vignette: [Getting Started with NNS: Classification](https://CRAN.R-proj
 
 See NNS Vignette: [Getting Started with NNS: Forecasting](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Forecasting.html)
 
-## 8. Simulation, Bootstrap & Rescaling
+## 9. Simulation & Bootstrap 
 - `NNS.meboot(...)` — maximum entropy bootstrap.
 - `NNS.MC(...)` — Monte Carlo over correlation space.
-- `NNS.rescale(...)` — risk-neutral or min–max rescaling.
 
 See NNS Vignette: [Getting Started with NNS: Sampling and Simulation](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Sampling.html)
 
-## 9. Portfolio Analysis & Stochastic Dominance
+## 10. Portfolio Analysis & Stochastic Dominance
 - `NNS.FSD.uni(x, y)`, `NNS.SSD.uni(x, y)`, `NNS.TSD.uni(x, y)` — univariate stochastic dominance tests.
 - `NNS.SD.cluster(R)`, `NNS.SD.efficient.set(R)` — dominance-based portfolio sets.
 

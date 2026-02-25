@@ -39,7 +39,7 @@ NNS.norm <- function(X,
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
 
   if(any(class(X)%in%"list")){
-    if(sum(diff(sapply(X, length)))>0) linear <- TRUE
+    if(sum(diff(sapply(X, length))) != 0) linear <- TRUE
     m <- sapply(X, mean)
   } else { 
     X <- apply(X, 2, unlist)
@@ -51,6 +51,7 @@ NNS.norm <- function(X,
   RG <- m %o% (1 / m)
   
   if(!linear){
+    if(any(class(X)%in%"list")) do.call(cbind, X) else (X)
     if(length(m) < 10){
       scale.factor <- abs(cor(X))
     } else {

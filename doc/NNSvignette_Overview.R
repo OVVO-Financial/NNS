@@ -1,13 +1,10 @@
-## -----------------------------------------------------------------------------
+## ----setup, message=FALSE-----------------------------------------------------
 # Prereqs (uncomment if needed):
 # install.packages("NNS")
 # install.packages(c("data.table","xts","zoo","Rfast"))
 
-suppressPackageStartupMessages({
-  library(NNS)
-  library(data.table)
-})
-set.seed(42)
+library(NNS)
+library(data.table)
 
 ## ----include=FALSE, message=FALSE---------------------------------------------
 data.table::setDTthreads(1L)
@@ -16,6 +13,8 @@ RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## -----------------------------------------------------------------------------
+set.seed(42)
+
 # Normal sample
 y <- rnorm(3000)
 mu <- mean(y)
@@ -72,6 +71,22 @@ cop
 # 
 # # Plot
 # rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
+
+## -----------------------------------------------------------------------------
+A <- rnorm(100, mean = 0, sd = 1)
+B <- rnorm(100, mean = 0, sd = 5)
+C <- rnorm(100, mean = 10, sd = 1)
+D <- rnorm(100, mean = 10, sd = 10)
+
+X <- data.frame(A, B, C, D)
+
+# Linear scaling
+lin_norm <- NNS.norm(X, linear = TRUE, chart.type=NULL, location=NULL)
+
+## -----------------------------------------------------------------------------
+px <- 100 + cumsum(rnorm(260, sd = 1))
+rn <- NNS.rescale(px, a=100, b=0.03, method="riskneutral", T=1, type="Terminal")
+c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 
 ## -----------------------------------------------------------------------------
 ctrl <- rnorm(200, 0, 1)
@@ -142,11 +157,6 @@ mc <- NNS.MC(x_ts, reps=5, lower_rho=-1, upper_rho=1, by=.5, exp=1)
 length(mc$ensemble); names(mc$replicates)
 
 head(mc$replicates$`rho = 0`)
-
-## -----------------------------------------------------------------------------
-px <- 100 + cumsum(rnorm(260, sd = 1))
-rn <- NNS.rescale(px, a=100, b=0.03, method="riskneutral", T=1, type="Terminal")
-c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 
 ## -----------------------------------------------------------------------------
 RA <- rnorm(240, 0.005, 0.03)
