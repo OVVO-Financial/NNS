@@ -49,10 +49,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update
-          brew install xquartz
-          brew install fribidi
-          brew install gsl
-          # persist GSL flags for subsequent steps
+          brew install xquartz fribidi gsl
           echo "PKG_CPPFLAGS=-I$(brew --prefix gsl)/include" >> "$GITHUB_ENV"
           echo "PKG_LIBS=-L$(brew --prefix gsl)/lib -lgsl -lgslcblas -lm" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gsl/lib/pkgconfig" >> "$GITHUB_ENV"
@@ -63,7 +60,6 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      # Keep your original libjpeg bootstrap for macOS
       - name: Install CRAN libjpeg on macOS
         if: runner.os == 'macOS'
         run: |
@@ -78,34 +74,17 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install R packages
-        shell: Rscript {0}
-        run: |
-          install.packages(c("remotes", "rcmdcheck", "Rfast", "recipes"))
-          remotes::install_cran("rgl")
-          remotes::install_deps(dependencies = TRUE)
-
       - name: Check
-        shell: Rscript {0}
-        run: |
-          rcmdcheck::rcmdcheck(
-            args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"),
-            build_args = c("--no-manual", "--ignore-vignettes", "--no-build-vignettes"),
-            error_on = "error"
-          )
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--ignore-vignettes", "--no-build-vignettes")'
+          error-on: '"error"'
 
   ubsan-clang-docker:
     name: UBSAN clang (rocker r-devel-ubsan-clang)
     runs-on: ubuntu-latest
-    # Optional: uncomment to make UBSAN run only after standard checks pass
-    # needs: R-CMD-check
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Pull UBSAN image
-        run: |
-          docker pull --platform linux/x86_64 rocker/r-devel-ubsan-clang
 
       - name: Run UBSAN check inside container
         run: |
@@ -119,9 +98,12 @@ jobs:
 
               echo "::group::Install system dependencies"
               apt-get update -y
+              
+              # Fix for Debian Sid dependency conflicts
+              DEBIAN_FRONTEND=noninteractive apt-get install -y -f
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-                cmake \
-                libgsl-dev \
+                libgbm1 libegl-mesa0 libegl1 \
+                cmake libgsl-dev \
                 libcurl4-openssl-dev libssl-dev libxml2-dev \
                 libgl1-mesa-dev libglu1-mesa-dev \
                 libjpeg-dev libpng-dev libtiff5-dev \
@@ -129,7 +111,7 @@ jobs:
               echo "::endgroup::"
 
               echo "::group::Install R package dependencies"
-              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=parallel::detectCores())"
               RD -q -e "remotes::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\")"
               echo "::endgroup::"
 
@@ -147,16 +129,11 @@ jobs:
         run: |
           if [ -f ubsan_check.err ]; then
             if grep -iE "(runtime error|sanitizer)" ubsan_check.err; then
-              echo "::error::UBSAN detected runtime errors. Check the logs for details."
-              echo "::group::UBSAN errors found"
-              grep -iE "(runtime error|sanitizer)" ubsan_check.err || true
-              echo "::endgroup::"
+              echo "::error::UBSAN detected runtime errors."
               exit 1
             else
               echo "::notice::No UBSAN errors detected"
             fi
-          else
-            echo "::warning::UBSAN error log not found"
           fi
 
       - name: Upload UBSAN logs
@@ -168,4 +145,3 @@ jobs:
             ubsan_check.out
             ubsan_check.err
             *.Rcheck/
-          if-no-files-found: warn
