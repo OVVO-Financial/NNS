@@ -11,7 +11,6 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
     strategy:
       fail-fast: false
       matrix:
@@ -32,19 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ---- System deps (Ubuntu) ----
       - name: Install system libraries (Ubuntu)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libgsl-dev \
-            libjpeg-turbo8-dev libpng-dev libtiff5-dev \
-            libfreetype6-dev libharfbuzz-dev libfribidi-dev \
-            libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev \
-            xorg-dev
+          sudo apt-get install -y libgsl-dev libjpeg-turbo8-dev libpng-dev libtiff5-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev xorg-dev
 
-      # ---- System deps (macOS) ----
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
@@ -52,22 +44,10 @@ jobs:
           brew install xquartz fribidi gsl
           echo "PKG_CPPFLAGS=-I$(brew --prefix gsl)/include" >> "$GITHUB_ENV"
           echo "PKG_LIBS=-L$(brew --prefix gsl)/lib -lgsl -lgslcblas -lm" >> "$GITHUB_ENV"
-          echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig:$(brew --prefix)/opt/gsl/lib/pkgconfig" >> "$GITHUB_ENV"
 
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-          use-public-rspm: true
-
-      - name: Install CRAN libjpeg on macOS
-        if: runner.os == 'macOS'
-        run: |
-          ARCH=`uname -m`
-          if [ ! -e /opt/R/$ARCH ]; then sudo mkdir -p /opt/R/$ARCH; sudo chown -R $USER /opt/R; fi
-          sudo Rscript -e 'dep="jpeg"; source("https://mac.R-project.org/bin/install.R"); install.libs(dep)'
-          if ! echo $PATH | grep /opt/R/$ARCH/bin >/dev/null; then echo /opt/R/$ARCH/bin > newPATH; cat $GITHUB_PATH >> newPATH; cat newPATH > $GITHUB_PATH; fi
-        shell: bash
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -81,7 +61,7 @@ jobs:
           error-on: '"error"'
 
   ubsan-clang-docker:
-    name: UBSAN clang (rocker r-devel-ubsan-clang)
+    name: UBSAN clang
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,44 +76,36 @@ jobs:
             rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
 
-              echo "::group::Install system dependencies"
+              echo "::group::Update and Align System"
               apt-get update -y
-              
-              # Fix for Debian Sid dependency conflicts
-              DEBIAN_FRONTEND=noninteractive apt-get install -y -f
+              # This forces the image to sync its internal versions to avoid the libgbm1 conflict
+              DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y 
+              echo "::endgroup::"
+
+              echo "::group::Install system dependencies"
+              # Removed libgl1-mesa-dev and libglu1-mesa-dev to avoid the Sid conflict
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-                libgbm1 libegl-mesa0 libegl1 \
-                cmake libgsl-dev \
-                libcurl4-openssl-dev libssl-dev libxml2-dev \
-                libgl1-mesa-dev libglu1-mesa-dev \
-                libjpeg-dev libpng-dev libtiff5-dev \
-                libfreetype6-dev libharfbuzz-dev libfribidi-dev
+                cmake libgsl-dev libcurl4-openssl-dev libssl-dev libxml2-dev \
+                libjpeg-dev libpng-dev libtiff5-dev libfreetype6-dev \
+                libharfbuzz-dev libfribidi-dev
               echo "::endgroup::"
 
               echo "::group::Install R package dependencies"
-              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=parallel::detectCores())"
+              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
               RD -q -e "remotes::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\")"
               echo "::endgroup::"
 
               echo "::group::Run R CMD check with UBSAN"
-              RD CMD check --no-manual --ignore-vignettes --no-build-vignettes . \
-                > ubsan_check.out 2> ubsan_check.err || true
-              echo "::endgroup::"
-              
-              echo "::group::UBSAN output"
+              RD CMD check --no-manual --ignore-vignettes --no-build-vignettes . > ubsan_check.out 2> ubsan_check.err || true
               cat ubsan_check.err
               echo "::endgroup::"
             '
 
       - name: Check for UBSAN errors
         run: |
-          if [ -f ubsan_check.err ]; then
-            if grep -iE "(runtime error|sanitizer)" ubsan_check.err; then
-              echo "::error::UBSAN detected runtime errors."
-              exit 1
-            else
-              echo "::notice::No UBSAN errors detected"
-            fi
+          if grep -iE "(runtime error|sanitizer)" ubsan_check.err; then
+            echo "::error::UBSAN detected runtime errors."
+            exit 1
           fi
 
       - name: Upload UBSAN logs
