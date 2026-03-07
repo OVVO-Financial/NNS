@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Normalization and Rescaling</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS: Normalization and
+Rescaling</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>This vignette covers two related tools:</p>
+<ul>
+<li><code>NNS.norm()</code> for cross‑variable normalization when
+comparing multiple series.</li>
+<li><code>NNS.rescale()</code> for single‑vector rescaling with either
+min‑max or risk‑neutral targets.</li>
+</ul>
+<p>Both functions perform deterministic affine transformations that
+preserve rank structure while modifying scale.</p>
+<hr />
+</div>
+<div id="nns.norm-normalize-multiple-variables" class="section level1">
+<h1><code>NNS.norm()</code>: Normalize Multiple Variables</h1>
+<p><code>NNS.norm()</code> rescales variables to a common magnitude
+while preserving distributional structure. The method can be
+<strong>linear</strong> (all variables forced to have the same mean) or
+<strong>nonlinear</strong> (using dependence weights to produce a more
+nuanced scaling). In the nonlinear case, the degree of association
+between variables influences the final normalized values.</p>
+<div id="mathematical-structure" class="section level2">
+<h2>Mathematical Structure</h2>
+<p>Let <span class="math inline">\(X\)</span> be an <span class="math inline">\(n \times p\)</span> matrix of variables.</p>
+<div id="step-1-compute-mean-vector" class="section level3">
+<h3>Step 1: Compute Mean Vector</h3>
+<p><span class="math display">\[
+m_j = \text{mean}(X_{\cdot j})
+\]</span></p>
+<p>If any <span class="math inline">\(m_j = 0\)</span>, it is replaced
+with <span class="math inline">\(10^{-10}\)</span> to prevent division
+by zero.</p>
+<hr />
+</div>
+<div id="step-2-construct-mean-ratio-matrix" class="section level3">
+<h3>Step 2: Construct Mean Ratio Matrix</h3>
+<p><span class="math display">\[
+RG_{ij} = \frac{m_i}{m_j}
+\]</span></p>
+<p>In R this corresponds to:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>RG <span class="ot">&lt;-</span> <span class="fu">outer</span>(m, <span class="dv">1</span> <span class="sc">/</span> m)</span></code></pre></div>
+<hr />
+</div>
+<div id="step-3-dependence-weight-matrix" class="section level3">
+<h3>Step 3: Dependence Weight Matrix</h3>
+<p>If <code>linear = FALSE</code>:</p>
+<ul>
+<li>If number of variables <span class="math inline">\(p &lt;
+10\)</span>: <span class="math display">\[
+W = |\mathrm{cor}(X)|
+\]</span></li>
+<li>Otherwise: <span class="math display">\[
+W = |D| \quad \text{where } D = \text{NNS.dep}(X)\$Dependence
+\]</span> <code>NNS.dep()</code> returns a symmetric matrix of nonlinear
+dependence measures.</li>
+</ul>
+<p>If <code>linear = TRUE</code>, the weighting effectively becomes:</p>
+<p><span class="math display">\[
+W_{ij} = 1
+\]</span></p>
+<hr />
+</div>
+<div id="step-4-scaling-factors" class="section level3">
+<h3>Step 4: Scaling Factors</h3>
+<p><span class="math display">\[
+s_j = \frac{1}{p} \sum_{i=1}^{p} RG_{ij} W_{ij}
+\]</span></p>
+<p>Each column is scaled:</p>
+<p><span class="math display">\[
+X_{\cdot j}^{*} = s_j X_{\cdot j}
+\]</span></p>
+<hr />
+</div>
+</div>
+<div id="linear-case-proof" class="section level2">
+<h2>Linear Case Proof</h2>
+<p>If <span class="math inline">\(W_{ij} = 1\)</span>:</p>
+<p><span class="math display">\[
+s_j = \frac{1}{p} \sum_{i=1}^{p} \frac{m_i}{m_j}
+= \frac{\bar{m}}{m_j}
+\]</span></p>
+<p>Then:</p>
+<p><span class="math display">\[
+\text{mean}(X_{\cdot j}^{*}) = s_j m_j = \bar{m}
+\]</span></p>
+<p>All variables share the same mean.</p>
+<hr />
+</div>
+<div id="nonlinear-case-interpretation" class="section level2">
+<h2>Nonlinear Case Interpretation</h2>
+<p><span class="math display">\[
+\text{mean}(X_{\cdot j}^{*})
+=
+\frac{1}{p}
+\sum_{i=1}^{p}
+m_i W_{ij}
+\]</span></p>
+<p>Thus, the normalized mean becomes a dependence‑weighted average of
+original means. Variables more strongly dependent with higher‑mean
+variables scale upward more.</p>
+<hr />
+</div>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<div id="basic-multivariate-example" class="section level3">
+<h3>Basic Multivariate Example</h3>
+<p>This holds for any distribution type and can be applied to vectors of
+different lengths.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(A, B, C, D)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Linear scaling</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>lin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">TRUE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">head</span>(lin_norm)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>[<span class="dv">1</span>,]   <span class="sc">-</span><span class="fl">29.929719</span>    <span class="fl">31.889828</span>     <span class="fl">5.819152</span>    <span class="fl">1.4264014</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>[<span class="dv">2</span>,]   <span class="sc">-</span><span class="fl">12.291609</span>   <span class="sc">-</span><span class="fl">11.531393</span>     <span class="fl">5.396317</span>    <span class="fl">1.2388239</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="fl">83.235911</span>    <span class="fl">11.073887</span>     <span class="fl">4.643781</span>    <span class="fl">0.3078703</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>[<span class="dv">4</span>,]     <span class="fl">3.765188</span>    <span class="fl">15.601030</span>     <span class="fl">5.029380</span>   <span class="sc">-</span><span class="fl">0.2630481</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>[<span class="dv">5</span>,]     <span class="fl">6.904039</span>    <span class="fl">42.717726</span>     <span class="fl">4.572611</span>    <span class="fl">2.8193657</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="fl">91.585447</span>     <span class="fl">2.021274</span>     <span class="fl">4.543080</span>    <span class="fl">6.6681079</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co"># Verify means are equal</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="fu">apply</span>(lin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>mean     <span class="fl">4.827727</span>     <span class="fl">4.827727</span>    <span class="fl">4.8277270</span>     <span class="fl">4.827727</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>sd      <span class="fl">48.744888</span>    <span class="fl">43.407590</span>    <span class="fl">0.4531172</span>     <span class="fl">5.203436</span></span></code></pre></div>
+<p>Now compare with <strong>nonlinear scaling</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>nonlin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">FALSE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(nonlin_norm)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>[<span class="dv">1</span>,]   <span class="sc">-</span><span class="fl">2.7834653</span>   <span class="fl">0.32807768</span>     <span class="fl">3.178568</span>    <span class="fl">0.7439872</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>[<span class="dv">2</span>,]   <span class="sc">-</span><span class="fl">1.1431202</span>  <span class="sc">-</span><span class="fl">0.11863321</span>     <span class="fl">2.947605</span>    <span class="fl">0.6461499</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="fl">7.7409438</span>   <span class="fl">0.11392645</span>     <span class="fl">2.536550</span>    <span class="fl">0.1605800</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="fl">0.3501627</span>   <span class="fl">0.16050101</span>     <span class="fl">2.747174</span>   <span class="sc">-</span><span class="fl">0.1372015</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>[<span class="dv">5</span>,]    <span class="fl">0.6420759</span>   <span class="fl">0.43947344</span>     <span class="fl">2.497676</span>    <span class="fl">1.4705341</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="fl">8.5174510</span>   <span class="fl">0.02079456</span>     <span class="fl">2.481545</span>    <span class="fl">3.4779738</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">apply</span>(nonlin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>mean    <span class="fl">0.4489788</span>   <span class="fl">0.04966692</span>     <span class="fl">2.637026</span>     <span class="fl">2.518062</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>sd      <span class="fl">4.5332769</span>   <span class="fl">0.44657066</span>     <span class="fl">0.247504</span>     <span class="fl">2.714025</span></span></code></pre></div>
+<p>Note that the means differ and the standard deviations are smaller
+than in the linear case, reflecting the dependence structure.</p>
+<div id="normalize-list-of-unequal-vector-lengths" class="section level4">
+<h4>Normalize list of unequal vector lengths</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>vec1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>vec2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>vec3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">8</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>vec_list <span class="ot">&lt;-</span> <span class="fu">list</span>(vec1, vec2, vec3)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">NNS.norm</span>(vec_list)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_1 Normalized</span><span class="st">`</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a> [<span class="dv">1</span>]  <span class="fl">13.074058</span>  <span class="sc">-</span><span class="fl">3.004912</span> <span class="sc">-</span><span class="fl">11.745878</span>  <span class="fl">25.406891</span>  <span class="sc">-</span><span class="fl">4.647966</span>  <span class="sc">-</span><span class="fl">5.481229</span>   <span class="fl">6.225165</span>   <span class="fl">5.920719</span>   <span class="fl">6.113733</span>   <span class="fl">9.640242</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_2 Normalized</span><span class="st">`</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">2.875960212</span>  <span class="fl">0.008876158</span>  <span class="fl">1.230826150</span>  <span class="fl">5.855582361</span> <span class="fl">10.779166523</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_3 Normalized</span><span class="st">`</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">4.0749062</span>  <span class="fl">2.2395840</span>  <span class="fl">0.4067264</span>  <span class="fl">0.7457562</span> <span class="fl">15.6445780</span>  <span class="fl">5.1941416</span>  <span class="fl">2.3326665</span>  <span class="fl">2.5622994</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="quantile-normalization-comparison" class="section level3">
+<h3>Quantile Normalization Comparison</h3>
+<p>Quantile normalization forces distributions to be identical. This is
+literally the opposite intended effect of <code>NNS.norm</code>, which
+preserves individual distribution shapes while aligning ranges. The
+quantile normalized series become identical in distribution, while the
+<code>NNS</code> methods retain the original patterns.</p>
+<hr />
+</div>
+</div>
+<div id="practical-applications" class="section level2">
+<h2>Practical Applications</h2>
+<p>Normalization eliminates the need for multiple y‑axis charts and
+prevents their misuse. By placing variables on the same axes with shared
+ranges, we enable more relevant conditional probability analyses. This
+technique, combined with time normalization, is used in
+<code>NNS.caus()</code> to identify causal relationships between
+variables.</p>
+<hr />
+</div>
+</div>
+<div id="nns.rescale-distribution-rescaling" class="section level1">
+<h1><code>NNS.rescale()</code>: Distribution Rescaling</h1>
+<p><code>NNS.rescale()</code> performs one‑dimensional affine
+transformations.</p>
+<p>Function signature:</p>
+<pre><code>NNS.rescale(x, a, b, method = &quot;minmax&quot;, T = NULL, type = &quot;Terminal&quot;)</code></pre>
+<hr />
+<div id="min-max-scaling" class="section level2">
+<h2>1) Min-Max Scaling</h2>
+<p>If <code>method = &quot;minmax&quot;</code>:</p>
+<p><span class="math display">\[
+x^{*}
+=
+a
++
+(b - a)
+\frac{x - \min(x)}
+{\max(x) - \min(x)}
+\]</span></p>
+<p>Properties:</p>
+<ul>
+<li>Preserves order</li>
+<li>Maps support to <span class="math inline">\([a,b]\)</span></li>
+<li>Linear transformation</li>
+</ul>
+<hr />
+<div id="example" class="section level3">
+<h3>Example</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>raw_vals <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="fl">0.2</span>, <span class="fl">1.1</span>, <span class="fl">3.7</span>, <span class="fl">5.0</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>scaled_minmax <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">x =</span> raw_vals,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">a =</span> <span class="dv">5</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">b =</span> <span class="dv">10</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;minmax&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">T =</span> <span class="cn">NULL</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;Terminal&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="fu">cbind</span>(raw_vals, scaled_minmax)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt;      raw_vals scaled_minmax</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; [1,]     -2.5      5.000000</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; [2,]      0.2      6.800000</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; [3,]      1.1      7.400000</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; [4,]      3.7      9.133333</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; [5,]      5.0     10.000000</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="fu">range</span>(scaled_minmax)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; [1]  5 10</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="risk-neutral-scaling" class="section level2">
+<h2>2) Risk-Neutral Scaling</h2>
+<p>If <code>method = &quot;riskneutral&quot;</code>:</p>
+<p>Let:</p>
+<ul>
+<li><span class="math inline">\(S_0 = a\)</span></li>
+<li><span class="math inline">\(r = b\)</span></li>
+<li><span class="math inline">\(T\)</span> = time horizon</li>
+</ul>
+<div id="terminal-type" class="section level3">
+<h3>Terminal Type</h3>
+<p>Target:</p>
+<p><span class="math display">\[
+\mathbb{E}[S_T] = S_0 e^{rT}
+\]</span></p>
+<p>Transformation form:</p>
+<p><span class="math display">\[
+x^{*}
+=
+x
+\cdot
+\frac{S_0 e^{rT}}
+{\text{mean}(x)}
+\]</span></p>
+<p>This enforces the required expectation.</p>
+<hr />
+</div>
+<div id="discounted-type" class="section level3">
+<h3>Discounted Type</h3>
+<p>Target:</p>
+<p><span class="math display">\[
+\mathbb{E}[e^{-rT} S_T] = S_0
+\]</span></p>
+<p>Equivalent to:</p>
+<p><span class="math display">\[
+\mathbb{E}[S_T] = S_0 e^{rT}
+\]</span></p>
+<p>but the returned series is scaled so that its discounted mean equals
+<span class="math inline">\(S_0\)</span>. In practice, the function
+applies the same multiplicative factor as above, because:</p>
+<p><span class="math display">\[
+\text{mean}(e^{-rT} x^{*}) = e^{-rT} \cdot \text{mean}(x^{*}) = e^{-rT}
+\cdot S_0 e^{rT} = S_0.
+\]</span></p>
+<hr />
+</div>
+</div>
+<div id="risk-neutral-example" class="section level2">
+<h2>Risk-Neutral Example</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>S0 <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Simulate a price path</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>prices <span class="ot">&lt;-</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(<span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">250</span>, <span class="fl">0.0005</span>, <span class="fl">0.02</span>)))</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>rn_terminal <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">x =</span> prices,</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="at">a =</span> S0,</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="at">b =</span> r,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;riskneutral&quot;</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">T =</span> T,</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;Terminal&quot;</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>)</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="at">mean_original =</span> <span class="fu">mean</span>(prices),</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>  <span class="at">mean_rescaled =</span> <span class="fu">mean</span>(rn_terminal),</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  <span class="at">target =</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(r <span class="sc">*</span> T)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>)</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>mean_original mean_rescaled        target </span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>     <span class="fl">109.7019</span>      <span class="fl">105.1271</span>      <span class="fl">105.1271</span> </span></code></pre></div>
+<hr />
+</div>
+<div id="discounted-example" class="section level2">
+<h2>Discounted Example</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>rn_discounted <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">x =</span> prices,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">a =</span> S0,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">b =</span> r,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;riskneutral&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">T =</span> T,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;Discounted&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">mean_rescaled =</span> <span class="fu">mean</span>(rn_discounted),</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">target_discounted_mean =</span> S0</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>         mean_rescaled target_discounted_mean </span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>                   <span class="dv">100</span>                    <span class="dv">100</span> </span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="conceptual-summary" class="section level1">
+<h1>Conceptual Summary</h1>
+<div id="nns.norm" class="section level3">
+<h3><code>NNS.norm()</code></h3>
+<ul>
+<li>Multivariate</li>
+<li>Dependence‑aware scaling</li>
+<li>Equalizes means only in linear mode</li>
+<li>Preserves shape and order</li>
+</ul>
+</div>
+<div id="nns.rescale" class="section level3">
+<h3><code>NNS.rescale()</code></h3>
+<ul>
+<li>Univariate</li>
+<li>Affine transformation</li>
+<li>Either range‑targeted or expectation‑targeted</li>
+<li>Preserves rank structure</li>
+</ul>
+<p>Both functions maintain monotonicity and are therefore compatible
+with NNS copula and dependence modeling frameworks.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="dv">5</span>, <span class="dv">2</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(<span class="dv">1000</span>, <span class="dv">3</span>, <span class="dv">1</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co"># Combine variables</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x, y)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># NNS normalization</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>X_norm_lin <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>X_norm_nonlin <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co"># Standard min-max normalization</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>minmax <span class="ot">&lt;-</span> <span class="cf">function</span>(v) (v <span class="sc">-</span> <span class="fu">min</span>(v)) <span class="sc">/</span> (<span class="fu">max</span>(v) <span class="sc">-</span> <span class="fu">min</span>(v))</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>X_minmax <span class="ot">&lt;-</span> <span class="fu">apply</span>(X, <span class="dv">2</span>, minmax)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<hr />
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>If the user is so motivated, detailed arguments further examples are
+provided within the following:</p>
+<ul>
+<li><p><a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></p></li>
+<li><p><a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf">Nonlinear
+Scaling Normalization with NNS</a></p></li>
+<li><p><a href="https://doi.org/10.2139/ssrn.5742907">Distributional
+Equivalence in GBM: Outcome Transformation for Efficient Risk-Neutral
+Pricing</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
