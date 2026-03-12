@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Sampling and Simulation"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Sampling and Simulation}
+  %\VignetteIndexEntry{Getting Started with NNS: 05. Sampling}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
