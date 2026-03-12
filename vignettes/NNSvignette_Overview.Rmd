@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Overview"
 author: "Fred Viole"
 output: html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Overview}
+  %\VignetteIndexEntry{Getting Started with NNS: 01. Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

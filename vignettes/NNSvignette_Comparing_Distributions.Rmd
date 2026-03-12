@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Comparing Distributions"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Comparing Distributions}
+  %\VignetteIndexEntry{Getting Started with NNS: 06. Comparing Distributions}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

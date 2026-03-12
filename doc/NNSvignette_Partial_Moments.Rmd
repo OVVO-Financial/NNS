@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Partial Moments"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Partial Moments}
+  %\VignetteIndexEntry{Getting Started with NNS: 02. Partial Moments}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

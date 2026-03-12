@@ -1,0 +1,33 @@
+url: https://OVVO-Financial.github.io/NNS
+
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+development:
+  mode: auto
+
+articles:
+- title: "Getting Started"
+  contents:
+  - NNSvignette_Overview
+
+- title: "Foundations"
+  contents:
+  - NNSvignette_Partial_Moments
+  - NNSvignette_Correlation_and_Dependence
+  - NNSvignette_Normalization_and_Rescaling
+  - NNSvignette_Sampling
+
+- title: "Inference"
+  contents:
+  - NNSvignette_Comparing_Distributions
+
+- title: "Modeling"
+  contents:
+  - NNSvignette_Clustering_and_Regression
+  - NNSvignette_Classification
+
+- title: "Applications"
+  contents:
+  - NNSvignette_Forecasting
