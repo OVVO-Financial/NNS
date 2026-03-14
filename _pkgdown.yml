@@ -7,7 +7,7 @@ template:
 development:
   mode: auto
 
-articles:
+vignettes:
 - title: "Getting Started"
   contents:
   - NNSvignette_Overview
