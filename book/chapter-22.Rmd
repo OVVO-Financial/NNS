@@ -1,0 +1,697 @@
+# Classification
+
+Chapter 21 developed nonparametric regression in the NNS framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.
+
+This chapter turns to **classification**.
+
+In classification problems, the response is not a number to be predicted directly, but a **category to be assigned**. The task is to determine, from observed predictor variables, which class label is most appropriate for a new observation.
+
+Classical classification methods such as **logistic regression**, **linear discriminant analysis**, **support vector machines**, and **random forests** are widely used and often effective. But they inherit many of the structural limitations discussed throughout this book:
+
+- linearity assumptions,
+- symmetric treatment of deviations,
+- tuning dependence,
+- and difficulty adapting to nonlinear, asymmetric, or benchmark-relative class structure.
+
+The directional framework offers a different perspective.
+
+Rather than beginning with a global separating equation or a fixed geometric margin, NNS classification begins with **recursive benchmark-relative partitioning of the predictor space**. Classification then proceeds by assigning class labels according to the local structure of the resulting partitions.
+
+The central idea is simple:
+
+**classification is the categorical analogue of conditional expectation estimation.**
+
+Regression estimates
+
+\[
+E[Y \mid X=x].
+\]
+
+Classification estimates
+
+\[
+P(Y = c \mid X=x)
+\]
+
+for each class \(c\), and assigns the label corresponding to the largest conditional probability.
+
+This chapter develops that viewpoint.
+
+---
+
+## Classification as Conditional Probability Estimation
+
+Let \(X \in \mathbb{R}^d\) denote a predictor vector and let \(Y\) take values in a finite label set
+
+\[
+\mathcal{C} = \{1,2,\dots,K\}.
+\]
+
+A classifier is a rule
+
+\[
+g:\mathbb{R}^d \to \mathcal{C}
+\]
+
+that assigns a class label to each predictor point.
+
+The optimal classifier under zero-one loss is the **Bayes classifier**:
+
+\[
+g^*(x) = \arg\max_{c \in \mathcal{C}} P(Y=c \mid X=x).
+\]
+
+Thus the classification problem is fundamentally a conditional probability problem.
+
+This aligns naturally with the NNS framework developed earlier. Chapter 13 showed that conditional probabilities can be written in terms of partial moments and co-partial moments. Classification therefore fits directly into the same directional machinery:
+
+- partition the predictor space,
+- estimate local class probabilities,
+- assign the class with highest estimated local probability.
+
+So the statistical primitive does not change. Only the form of the response changes.
+
+---
+
+## Why Classical Classification Methods Can Fail
+
+Classical classification methods often perform well when class boundaries are smooth, approximately linear, and well separated. But many real datasets are not.
+
+### Linear decision boundaries
+
+Methods such as logistic regression and linear discriminant analysis impose global linear or quadratic boundary structure. When the true class geometry is nonlinear, these boundaries can misclassify substantial regions.
+
+### Symmetric distance assumptions
+
+Distance-based classifiers often treat deviations symmetrically around centers. But class structure may depend more on one side of a threshold than another.
+
+### Global parameterization
+
+Many classical methods summarize the full predictor space with a small number of global parameters. This can obscure local class structure.
+
+### Tuning dependence
+
+Support vector machines require kernel and penalty choices. Tree ensembles require tuning of depth, feature subsampling, and aggregation parameters. Performance can depend heavily on these choices.
+
+### Imbalance sensitivity
+
+In imbalanced settings, global classifiers may be dominated by the majority class unless explicitly reweighted.
+
+These limitations echo the broader theme of the book:
+
+**classical methods often begin with an aggregate geometric form, whereas directional methods begin with local benchmark-relative structure.**
+
+---
+
+## Directional Decision Regions
+
+The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 17–20.
+
+Suppose the predictor space is partitioned into cells
+
+\[
+A_1, A_2, \dots, A_M.
+\]
+
+Within each terminal cell, the local class probabilities are estimated empirically:
+
+\[
+\hat p_c(x)
+=
+\frac{\#\{i : X_i \in A(x),\, Y_i = c\}}
+{\#\{i : X_i \in A(x)\}},
+\]
+
+where \(A(x)\) denotes the terminal cell containing \(x\).
+
+The classifier is then
+
+\[
+\hat g(x) = \arg\max_{c \in \mathcal{C}} \hat p_c(x).
+\]
+
+This is the partition-based analogue of the Bayes rule.
+
+The crucial difference from classical methods is that the regions \(A(x)\) are not fixed by global parametric geometry. They are induced recursively by the data through benchmark-relative splits.
+
+In the binary case, the decision boundary is the set of points where the estimated conditional class probabilities are equal:
+
+\[
+\hat p_1(x) = \hat p_2(x).
+\]
+
+Equivalently,
+
+\[
+P(Y=1 \mid X=x) - P(Y=2 \mid X=x) = 0.
+\]
+
+Within NNS, this boundary is not imposed in advance. It emerges from the partition structure.
+
+---
+
+## Binary Classification
+
+Consider first the case
+
+\[
+Y \in \{1,2\}.
+\]
+
+For each partition cell \(A\), define
+
+\[
+\hat p(A) = \frac{1}{N_A}\sum_{i:X_i \in A} Y_i,
+\]
+
+where \(N_A\) is the number of observations in the cell.
+
+Since \(Y\) is binary, \(\hat p(A)\) is simply the empirical fraction of class-1 observations in the cell. Thus
+
+\[
+\hat p(A) \approx P(Y=1 \mid X \in A).
+\]
+
+The decision rule becomes
+
+\[
+\hat g(x)=
+\begin{cases}
+1 & \hat p(A(x)) > 1/2,\\
+2 & \hat p(A(x)) \le 1/2.
+\end{cases}
+\]
+
+This makes the analogy to regression immediate. In regression, the local average estimates the conditional mean. In binary classification, the local average of the binary label estimates the conditional class probability.
+
+So binary classification in the NNS framework is simply **partition-based probability estimation followed by thresholding**.
+
+> **Implementation note (important):** for `NNS.boost(..., type = "CLASS")` and related classification interfaces, class labels should start at `1` (not `0`). Recode `0/1` targets to `1/2` before fitting.
+
+---
+
+## Multiclass Classification
+
+Now suppose
+
+\[
+Y \in \{1,2,\dots,K\}
+\]
+
+with \(K>2\).
+
+For each class \(c\), define the local probability estimator
+
+\[
+\hat p_c(A) =
+\frac{\#\{i:X_i \in A,\ Y_i=c\}}{N_A}.
+\]
+
+Because the classes partition the response space,
+
+\[
+\sum_{c=1}^K \hat p_c(A)=1.
+\]
+
+The multiclass decision rule is
+
+\[
+\hat g(x)=\arg\max_{c} \hat p_c(A(x)).
+\]
+
+This yields a **piecewise-constant class probability surface** over the predictor space.
+
+The resulting decision regions need not be linear, convex, or globally smooth. They inherit the geometry of the recursive partition.
+
+This is one of the major strengths of the NNS classifier:
+
+- complex local structure can be captured,
+- multiple class regions can interleave nonlinearly,
+- and no prior assumption is imposed on the shape of the boundary.
+
+---
+
+## Recursive Mean-Split Classification Geometry
+
+The partition structure from the regression chapters remains central.
+
+At each stage of recursive partitioning, a region is split around local means. In joint partitioning, this creates benchmark-defined subregions corresponding to directional quadrants. In \(X\)-only partitioning, it creates recursive subdivisions of predictor space.
+
+For classification, these same regions become **local decision neighborhoods**.
+
+Each terminal cell stores:
+
+- its local predictor benchmark structure,
+- its class composition,
+- its estimated class probabilities,
+- and its dominant class label.
+
+The decision function is therefore interpretable geometrically.
+
+### Regional interpretation
+
+A class assignment is not produced by a hidden global optimization alone. It is produced because the new point falls into a particular benchmark-relative region whose observed class composition favors one label.
+
+### Boundary interpretation
+
+Decision boundaries are unions of partition edges separating regions with different dominant labels or different class-probability rankings.
+
+### Refinement interpretation
+
+Where class mixing remains high, further partitioning can sharpen the local probability estimate. Where classes are already well separated, coarser regions suffice.
+
+Thus the classifier adapts its complexity to the structure of the data.
+
+---
+
+## Directional Decision Boundaries
+
+The phrase **directional decision boundary** has a precise meaning in this framework.
+
+A classical linear classifier produces a boundary such as
+
+\[
+\beta_0 + \beta^\top x = 0,
+\]
+
+which divides the predictor space globally into two half-spaces.
+
+A directional classifier instead produces boundaries induced by recursive benchmark-relative partitions. These boundaries are directional in three senses.
+
+### They are benchmark-relative
+
+Each split is defined relative to a local benchmark, typically a mean vector.
+
+### They are locally adaptive
+
+Boundaries need not extend globally as a single hyperplane. They adapt region by region.
+
+### They preserve asymmetry
+
+If class separation is stronger on one side of a benchmark than another, the partition geometry reflects that asymmetry.
+
+This is important in applications where class identity depends on threshold behavior. For example:
+
+- default versus non-default beyond leverage thresholds,
+- disease state beyond biomarker cutoffs,
+- regime classification beyond volatility breaks,
+- operational alert states beyond service-level violations.
+
+In such settings, the meaningful structure is often directional before it is geometric.
+
+---
+
+## Probability Surfaces and Class Assignment
+
+Because classification in NNS is based on local probability estimation, it is useful to distinguish three related objects.
+
+### Local class probability surface
+
+For each class \(c\),
+
+\[
+x \mapsto \hat p_c(x)
+\]
+
+gives the estimated probability that \(x\) belongs to class \(c\).
+
+### Hard classification map
+
+\[
+x \mapsto \hat g(x)
+\]
+
+assigns the label with largest estimated local probability.
+
+### Classification certainty
+
+A useful summary in the binary case is
+
+\[
+\hat C(x) = |2\hat p_1(x)-1|.
+\]
+
+This lies in \([0,1]\).
+
+- \(\hat C(x)=0\) indicates maximal local ambiguity,
+- \(\hat C(x)=1\) indicates complete local separation.
+
+In the multiclass case, an analogous certainty measure is
+
+\[
+\hat C(x)= \hat p_{(1)}(x)-\hat p_{(2)}(x),
+\]
+
+where \(\hat p_{(1)}\) and \(\hat p_{(2)}\) are the largest and second-largest local class probabilities.
+
+This difference measures the local margin between the best and second-best labels.
+
+Thus the classifier naturally provides not only a label, but also a measure of how decisively that label is supported.
+
+---
+
+## Package Implementation Note
+
+In the NNS package, the classification logic described here is exposed most practically through the ensemble interfaces `NNS.boost()` and `NNS.stack()`, using `type = "CLASS"` to invoke class-label prediction rather than numeric conditional-mean prediction.
+
+The underlying partition logic remains the same: predictor space is decomposed into benchmark-relative regions, local class probabilities are estimated within those regions, and final assignment is made by dominant-label selection through
+
+\[
+\hat g(x)=\arg\max_c \hat p_c(x).
+\]
+
+The function `NNS.reg()` is useful for understanding the underlying partition-based estimation structure, and more generally the NNS framework supports classification through the same recursive partition machinery developed for regression. But in applied package use, classification is most naturally presented through the boosted and stacked interfaces, which stabilize the local decision rule and improve empirical performance.
+
+---
+
+## Boosting and Stacking in the NNS Framework
+
+The base partition classifier can be strengthened through ensemble methods.
+
+The NNS framework includes two especially important ensemble ideas:
+
+- **boosting**, and
+- **stacking**.
+
+These extend the partition-based classifier without abandoning the directional logic.
+
+### Boosting
+
+Boosting combines many classification models generated from resampled or reweighted data. Each model captures a slightly different local view of the class structure. Their outputs are then aggregated.
+
+Conceptually, if
+
+\[
+\hat g^{(1)}, \hat g^{(2)}, \dots, \hat g^{(B)}
+\]
+
+denote classifiers trained across bootstrap or resampled iterations, the boosted classifier aggregates them via voting or averaged class probabilities.
+
+This reduces instability in any single partition realization and improves classification robustness, especially when boundaries are irregular or the sample is noisy.
+
+### Stacking
+
+Stacking combines multiple candidate classifiers at a second stage. Instead of choosing a single best model class, stacking learns how to weight or combine them.
+
+If
+
+\[
+\hat p_c^{(1)}(x), \hat p_c^{(2)}(x), \dots, \hat p_c^{(m)}(x)
+\]
+
+are probability estimates from different base learners, a stacked classifier forms a combined estimate
+
+\[
+\hat p_c^{\text{stack}}(x)
+\]
+
+through optimized combination, then classifies by the largest combined probability.
+
+In the NNS setting, stacking is especially natural because class probabilities are already interpretable directional quantities. The second-stage learner therefore combines probability surfaces, not merely hard labels.
+
+These ensemble procedures preserve the core NNS strengths:
+
+- nonlinear boundaries,
+- local adaptivity,
+- and benchmark-relative interpretation,
+
+while often improving predictive accuracy.
+
+### Illustrative Workflow
+
+A practical classification workflow in NNS therefore proceeds in two layers.
+
+1. The partition-based learner defines local benchmark-relative class neighborhoods.
+2. The ensemble wrapper aggregates those local decisions across resamples or model combinations.
+
+Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first improves stability through repeated resampling and aggregation; the second combines candidate classifiers through an optimized second-stage rule.
+
+Thus the package implementation mirrors the theory exactly: local directional partitions generate class probabilities, and ensemble aggregation improves robustness of the final decision boundary.
+
+---
+
+## Why Ensemble Classification Helps
+
+The usefulness of boosting and stacking can be understood mathematically.
+
+Suppose each base classifier produces an estimated class probability
+
+\[
+\hat p_b(x) = p(x) + \varepsilon_b(x),
+\]
+
+where \(p(x)\) is the target probability and \(\varepsilon_b(x)\) is model-specific estimation error.
+
+Averaging over \(B\) such classifiers gives
+
+\[
+\bar p_B(x) = \frac{1}{B}\sum_{b=1}^B \hat p_b(x)
+= p(x) + \frac{1}{B}\sum_{b=1}^B \varepsilon_b(x).
+\]
+
+If the errors are centered and not perfectly dependent, then
+
+\[
+Var(\bar p_B(x))
+=
+\frac{1}{B^2}
+\sum_{b=1}^B Var(\varepsilon_b(x))
++
+\frac{2}{B^2}\sum_{b<j} Cov(\varepsilon_b(x),\varepsilon_j(x)).
+\]
+
+Thus aggregation reduces variance whenever the base learners are not perfectly collinear.
+
+This is the same bias–variance logic familiar from classical ensembles, but here applied to **directional partition classifiers**.
+
+Boosting and stacking therefore help because they stabilize local probability estimation while preserving nonlinear local structure.
+
+---
+
+## Performance Evaluation
+
+A classification method must be evaluated not only by whether it predicts correctly on average, but by how it behaves across classes and error types.
+
+### Accuracy
+
+The simplest measure is classification accuracy:
+
+\[
+\text{Accuracy}
+=
+\frac{\#\{i : \hat g(X_i)=Y_i\}}{n}.
+\]
+
+This is useful when classes are reasonably balanced.
+
+### Confusion matrix
+
+For multiclass problems, the confusion matrix records how often each true class is assigned to each predicted class.
+
+This reveals where misclassification occurs.
+
+### Precision and recall
+
+In binary classification, let class 1 denote the positive class.
+
+Then
+
+\[
+\text{Precision} = \frac{TP}{TP+FP},
+\qquad
+\text{Recall} = \frac{TP}{TP+FN}.
+\]
+
+These matter particularly when false positives and false negatives have different practical costs.
+
+### F-score
+
+The harmonic mean of precision and recall is
+
+\[
+F_1 = 2\frac{\text{Precision}\cdot\text{Recall}}
+{\text{Precision}+\text{Recall}}.
+\]
+
+### Probability calibration
+
+Because NNS classification produces class probabilities, one can also evaluate calibration: whether estimated probabilities correspond well to empirical class frequencies.
+
+This is an important advantage over classifiers that output only labels.
+
+### Directional error interpretation
+
+Within the NNS framework, classification errors can also be examined structurally:
+
+- in which benchmark-relative regions do errors cluster?
+- are errors concentrated near directional boundaries?
+- does misclassification arise in divergent regions where class overlap is structurally strongest?
+
+This connects performance evaluation back to the directional geometry of the model.
+
+---
+
+## Comparison with Random Forests and SVMs
+
+Two widely used nonlinear classifiers are **random forests** and **support vector machines**.
+
+The NNS classifier shares some strengths with both, but differs in important ways.
+
+### Random forests
+
+Random forests aggregate many decision trees and are highly flexible. They capture nonlinear boundaries and interactions effectively.
+
+But they also have limitations:
+
+- splits are chosen by impurity reduction rather than benchmark-relative directional logic,
+- local class geometry can be difficult to interpret,
+- and feature importance summaries are global rather than structurally local.
+
+The NNS classifier differs in that its partition geometry arises from recursive benchmark structure. This makes the resulting model more interpretable in directional terms.
+
+### Support vector machines
+
+SVMs classify by maximizing a margin, optionally in a kernel-transformed space. They can produce highly effective nonlinear boundaries.
+
+But they depend on:
+
+- kernel choice,
+- regularization choice,
+- and global geometric separation logic.
+
+Their fitted decision surface is often difficult to interpret directly in the original predictor space.
+
+The NNS classifier instead produces boundaries through local benchmark partitions and empirical class probabilities. It is therefore often easier to understand why a point is classified as it is.
+
+### Conceptual contrast
+
+- Random forests: impurity-based recursive partition ensembles.
+- SVMs: margin-based global geometric separation.
+- NNS classification: benchmark-relative recursive partition probability estimation.
+
+Each can perform well. But the NNS approach is distinctive in combining:
+
+- nonlinear flexibility,
+- local probability interpretation,
+- endogenous partition geometry,
+- and natural compatibility with boosting and stacking.
+
+---
+
+## Advantages of the Directional Classification View
+
+Several advantages emerge from the NNS perspective.
+
+### Nonparametric flexibility
+
+No global parametric boundary is imposed.
+
+### Local interpretability
+
+Class assignments arise from identifiable benchmark-relative regions.
+
+### Natural handling of nonlinearity
+
+Decision regions need not be linear or even globally smooth.
+
+### Compatibility with imbalance-aware probability analysis
+
+Because the method estimates local probabilities directly, class imbalance can be addressed explicitly through thresholding, weighting, or certainty-based analysis.
+
+### Structural continuity with the rest of the framework
+
+Classification is not an isolated add-on. It is another consequence of the same directional partition logic that generated:
+
+- partial moments,
+- dependence measures,
+- clustering,
+- and regression.
+
+This structural continuity is one of the conceptual strengths of the NNS framework.
+
+---
+
+## Limitations and Practical Considerations
+
+Like all nonparametric methods, directional classification has limitations.
+
+### High-dimensional sparsity
+
+As dimension grows, local partition cells can become sparse. This is another manifestation of the curse of dimensionality.
+
+### Sensitivity to occupancy thresholds
+
+If cells become too small too early, probability estimates can become unstable.
+
+### Computational cost
+
+Recursive partitioning and especially ensemble procedures such as boosting and stacking can become computationally intensive on very large datasets.
+
+### Boundary roughness
+
+Because the classifier is partition-based, the induced hard classification map may be piecewise and locally abrupt unless probability surfaces are smoothed or aggregated across ensembles.
+
+These limitations do not negate the method. They simply clarify where care is needed:
+
+- dimensionality control,
+- occupancy tuning,
+- and thoughtful ensemble design.
+
+---
+
+## Conceptual Interpretation
+
+This chapter completes a natural progression.
+
+- Chapter 20 used recursive partitions for **unsupervised grouping**.
+- Chapter 21 used them for **numeric prediction**.
+- This chapter uses them for **categorical prediction**.
+
+The same partition machinery supports all three.
+
+That is not an accident.
+
+In the NNS framework, the predictor space is first decomposed into benchmark-relative regions. Once those regions are formed, many tasks become possible:
+
+- clustering asks which observations belong together,
+- regression asks what local average response each region implies,
+- classification asks which class probability dominates in each region.
+
+Thus the directional partition is the common structural object, and the learning task is determined by what is summarized within each region.
+
+This is exactly consistent with the theme running throughout the book:
+
+**classical methods begin with symmetric aggregates and then try to recover structure.  
+Directional methods begin with structure and aggregate only afterward.**
+
+---
+
+## Summary
+
+This chapter developed classification in the NNS framework as **partition-based conditional probability estimation**.
+
+Its main contributions are sevenfold.
+
+First, it defined classification fundamentally as estimation of
+
+\[
+P(Y=c \mid X=x),
+\]
+
+with class assignment based on the largest local conditional probability.
+
+Second, it showed how recursive mean-split partitions produce **directional decision regions** whose geometry adapts to nonlinear and asymmetric class structure.
+
+Third, it distinguished **binary and multiclass classification**, showing that both arise from the same local probability logic.
+
+Fourth, it developed the idea of **directional decision boundaries**, emphasizing benchmark-relative and locally adaptive separation rather than a single global separating equation.
+
+Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed formally in Chapter 23, where their resampling and aggregation mechanics are treated in detail.
+
+Sixth, it introduced **boosting and stacking** as natural ensemble extensions of the NNS classifier, improving robustness and predictive accuracy while preserving directional interpretability.
+
+Seventh, it compared the NNS approach with **random forests and support vector machines**, highlighting the distinctive combination of nonlinear flexibility, local class-probability interpretation, and benchmark-relative partition geometry.
+
+Taken together, these results show that classification in the NNS framework is not a separate machine-learning module bolted onto the theory. It is another direct consequence of the same directional primitive that generated distribution theory, dependence, clustering, and regression.
+
+The next part of the book turns from machine learning toward broader applications and synthesis, showing how these directional tools combine in practice.

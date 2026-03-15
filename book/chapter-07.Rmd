@@ -1,0 +1,331 @@
+# Directional Descriptive Statistics
+
+Chapters 2–6 established the theoretical foundations of directional statistics.
+
+Directional deviation operators were introduced, partial moments were defined, classical moments were derived as aggregations of directional components, and the framework was shown to align naturally with measure-theoretic probability. These results demonstrated that many familiar statistical quantities arise from the same primitive structure: **directional deviations relative to a benchmark**.
+
+With the theoretical foundation in place, we now turn to **descriptive statistics**.
+
+Classical descriptive statistics summarize distributions using symmetric aggregates such as the mean, variance, skewness, and kurtosis. While these quantities are useful, they obscure directional structure because they combine positive and negative deviations into a single measure.
+
+Directional descriptive statistics retain the information that symmetric statistics discard. Rather than collapsing deviations into aggregates, they describe distributions in terms of **directional behavior relative to benchmarks**.
+
+---
+
+## Directional Mean Interpretation
+
+Recall from Chapter 5 that the mean can be expressed as the difference between directional partial moments:
+
+\[
+E[X] = U_1(0;X) - L_1(0;X).
+\]
+
+This identity shows that the mean is not a primitive quantity. It is the **net directional deviation relative to the benchmark \(t = 0\)**.
+
+More generally, for any benchmark \(t\),
+
+\[
+E[X - t] = U_1(t;X) - L_1(t;X).
+\]
+
+Thus the expectation of deviations relative to a benchmark equals the difference between
+
+- deviations **above the benchmark**, and  
+- deviations **below the benchmark**.
+
+If \(t = \mu\), then
+
+\[
+U_1(\mu;X) = L_1(\mu;X).
+\]
+
+In words, the mean is the point at which **expected upward and downward deviations balance**.
+
+Directional statistics therefore interprets the mean not simply as a central location but as a **balance point between directional deviations**.
+
+---
+
+## Directional Variance Decomposition
+
+Variance also has a natural directional interpretation.
+
+Chapter 5 showed that
+
+\[
+Var(X) = U_2(\mu;X) + L_2(\mu;X).
+\]
+
+This decomposition is exact for population variance. In implementation checks, remember that `var(x)` in R is the sample variance, so matching it requires multiplying `UPM(2, mean(x), x) + LPM(2, mean(x), x)` by \(n/(n-1)\).
+
+This is an **exact decomposition** relative to the global mean \(\mu\), not an approximation and not a conditional-variance identity.
+
+To avoid a common confusion, compare with the law of total variance for the split \(X\ge \mu\) versus \(X<\mu\):
+
+\[
+Var(X)=p\,Var(X\mid X\ge \mu)+(1-p)\,Var(X\mid X<\mu)+p(1-p)(\mu_{\ge}-\mu_{<})^2,
+\]
+
+where \(p=P(X\ge\mu)\), \(\mu_{\ge}=E[X\mid X\ge\mu]\), and \(\mu_{<}=E[X\mid X<\mu]\). Hence
+
+\[
+Var(X)\ge p\,Var(X\mid X\ge \mu)+(1-p)\,Var(X\mid X<\mu),
+\]
+
+because the between-group term is nonnegative. By contrast, partial moments already account for total variance around the **same global center** \(\mu\), so no extra between-group correction is missing:
+
+\[
+Var(X)=U_2(\mu;X)+L_2(\mu;X).
+\]
+
+Equivalently, \(L_2(\mu;X)\) is the (global-mean) downside semivariance and \(U_2(\mu;X)\) is the corresponding upside semivariance.
+
+Variance therefore consists of two directional components:
+
+- **upside variance**: \(U_2(\mu;X)\)
+- **downside variance**: \(L_2(\mu;X)\)
+
+Classical statistics reports only their sum.
+
+Directional descriptive statistics retain both quantities separately.
+
+This decomposition provides immediate insight into distributional structure.
+
+For example, two assets may share identical variance but differ dramatically in directional risk:
+
+| Distribution | \(U_2(\mu;X)\) | \(L_2(\mu;X)\) | Variance |
+|---|---|---|---|
+| A | 10 | 0 | 10 |
+| B | 5 | 5 | 10 |
+
+Variance alone cannot distinguish these cases.
+
+Directional variance reveals whether volatility arises primarily from **upside movements** or **downside movements**.
+
+This distinction is particularly important in finance, economics, and risk management where negative deviations are often evaluated differently than positive ones (a topic developed more fully in Part VIII).
+
+---
+
+## Benchmark-Relative Descriptive Statistics
+
+A key advantage of partial moments is that the benchmark \(t\) can be chosen externally.
+
+Classical descriptive statistics typically use internally determined reference points such as the mean or median. Directional statistics allows the analyst to describe distributions relative to **meaningful benchmarks**.
+
+Examples include
+
+- required returns in finance
+- policy thresholds in economics
+- forecast targets in operations
+- safety limits in engineering
+
+Suppose \(t\) represents a target value.
+
+Then the first-degree partial moments describe benchmark-relative behavior:
+
+\[
+U_1(t;X) = E[(X-t)_+]
+\]
+
+\[
+L_1(t;X) = E[(t-X)_+].
+\]
+
+These quantities measure
+
+- the **unconditional average excess above the benchmark**, and  
+- the **unconditional average shortfall below the benchmark**.¹
+
+Unlike symmetric statistics, these measures directly reflect the context in which outcomes are evaluated.
+
+To make this concrete, consider the sample
+
+\[
+x=\{-2,-1,0,3,5\}
+\]
+
+with benchmark \(t=1\). Then
+
+\[
+\hat{L}_1(1)=\frac{1}{5}(3+2+1+0+0)=1.2,
+\quad
+\hat{U}_1(1)=\frac{1}{5}(0+0+0+2+4)=1.2.
+\]
+
+Here the unconditional average shortfall below the benchmark equals the unconditional average excess above it, even though frequencies differ: three observations fall below \(t\), one equals \(t\), and two exceed \(t\). This illustrates how benchmark-relative directional moments separate **how often** outcomes fall on each side from **how far** they lie from the benchmark.
+
+---
+
+¹ These are unconditional averages over the full sample/population, not conditional expectations (e.g., not CVaR-style conditioning on tail events only). Because these quantities are expectations of deviations, they can be influenced by extreme observations within each region of the distribution. This tail sensitivity becomes particularly relevant when analyzing heavy-tailed distributions, as discussed later in Section 7.5.
+
+---
+
+## Directional Skewness
+
+Skewness measures asymmetry in distributions.
+
+The classical skewness coefficient is
+
+\[
+Skew(X)=
+\frac{E[(X-\mu)^3]}{Var(X)^{3/2}}.
+\]
+
+Using the directional decomposition,
+
+\[
+E[(X-\mu)^3] = U_3(\mu;X) - L_3(\mu;X).
+\]
+
+Thus skewness can be written as
+
+\[
+Skew(X)=
+\frac{U_3(\mu;X)-L_3(\mu;X)}
+{(U_2(\mu;X)+L_2(\mu;X))^{3/2}}.
+\]
+
+This expression provides a clear interpretation.
+
+- If \(U_3(\mu;X) > L_3(\mu;X)\), large positive deviations dominate and skewness is positive.
+- If \(L_3(\mu;X) > U_3(\mu;X)\), large negative deviations dominate and skewness is negative.
+
+In applied settings, **whether extreme outcomes occur on the upside or the downside is often more decision-relevant than the overall asymmetry coefficient alone**.
+
+For example, financial return distributions with positive skewness frequently reflect patterns of frequent small losses punctuated by occasional large gains. In directional terms this corresponds to
+
+\[
+U_3(\mu;X) \gg L_3(\mu;X).
+\]
+
+Conversely, strategies that produce steady small gains but occasionally experience large losses exhibit
+
+\[
+L_3(\mu;X) \gg U_3(\mu;X).
+\]
+
+Directional skewness therefore identifies **which side of the distribution generates extreme asymmetry**, a distinction that symmetric skewness coefficients alone cannot fully describe.
+
+---
+
+## Directional Kurtosis
+
+Kurtosis describes the magnitude of extreme deviations.
+
+Classically, kurtosis is often interpreted as a measure of **tail heaviness** (or sometimes distributional “peakedness”).
+
+The classical definition is
+
+\[
+Kurt(X)=
+\frac{E[(X-\mu)^4]}{Var(X)^2}.
+\]
+
+Using the directional representation,
+
+\[
+E[(X-\mu)^4] = U_4(\mu;X) + L_4(\mu;X).
+\]
+
+Thus kurtosis becomes
+
+\[
+Kurt(X)=
+\frac{U_4(\mu;X)+L_4(\mu;X)}
+{(U_2(\mu;X)+L_2(\mu;X))^2}.
+\]
+
+Directional statistics refines the classical interpretation.
+
+Instead of reporting only the total magnitude of extreme deviations, we may examine
+
+- **upper tail heaviness**: \(U_4(\mu;X)\)
+- **lower tail heaviness**: \(L_4(\mu;X)\)
+
+Suppose two distributions share identical kurtosis. Classical statistics would describe both as equally heavy-tailed.
+
+Directional kurtosis reveals whether extreme observations arise primarily from the **upper tail** or the **lower tail**.
+
+For example, venture-capital portfolios may exhibit large values of
+
+\[
+U_4(\mu;X)
+\]
+
+reflecting occasional extremely large gains, while certain credit portfolios may display large
+
+\[
+L_4(\mu;X)
+\]
+
+reflecting rare but severe losses.
+
+Although both portfolios might share similar classical kurtosis, their **directional tail structures—and therefore their risk characteristics—are fundamentally different.**
+
+---
+
+## Directional Distribution Profiles
+
+Combining directional partial moments across degrees produces a **directional profile of a distribution**.
+
+When using higher-order profiles, existence conditions matter: interpreting directional structure through order \(r\) requires the corresponding partial moments \(L_r(t;X)\) and \(U_r(t;X)\) to be finite.
+
+For a benchmark \(t\), the sequence
+
+\[
+L_0(t;X), L_1(t;X), L_2(t;X), \dots
+\]
+
+describes
+
+- probability mass below the benchmark  
+- mean deviation below the benchmark  
+- variance below the benchmark  
+- higher-order tail structure
+
+Similarly,
+
+\[
+U_0(t;X), U_1(t;X), U_2(t;X), \dots
+\]
+
+describe the corresponding properties **above the benchmark**.
+
+Together these sequences provide a detailed directional characterization of the distribution.
+
+To illustrate, consider a distribution with many small losses and occasional large gains.
+
+Relative to a benchmark \(t = 0\), such a distribution might exhibit
+
+\[
+L_0(t;X) \approx 0.60, \quad L_1(t;X)\text{ small}, \quad L_2(t;X)\text{ modest}
+\]
+
+but
+
+\[
+U_0(t;X) \approx 0.40, \quad U_1(t;X)\text{ moderate}, \quad U_2(t;X)\text{ large}.
+\]
+
+This directional profile indicates that losses occur more frequently, but gains—when they occur—are substantially larger.
+
+These profiles can also be visualized—for example, using bar charts of \(L_r\) and \(U_r\) across degrees \(r = 0,1,2,\dots\)—providing an intuitive graphical summary of directional distribution structure.
+
+Classical statistics might summarize the same distribution with a moderate mean and high variance. The directional profile reveals the **mechanism generating those aggregates**.
+
+Distributions that appear similar under symmetric statistics can therefore exhibit very different directional structures. Examining how deviations are distributed between the upper and lower regions often provides clearer insight into the sources of asymmetry and tail behavior.
+
+---
+
+## Summary
+
+This chapter developed descriptive statistics derived from directional partial moments.
+
+Classical descriptive statistics summarize distributions through symmetric aggregates such as the mean, variance, skewness, and kurtosis. The directional framework reveals that each of these quantities arises from a pair of directional components measuring deviations above and below a benchmark.
+
+Viewing descriptive statistics in this way clarifies several important ideas. The mean represents the point at which upward and downward deviations balance. Variance combines upside and downside variability that may arise from very different sources. Higher-order moments such as skewness and kurtosis reflect asymmetries in directional tail behavior.
+
+More importantly, partial moments allow descriptive statistics to be defined relative to **externally meaningful benchmarks**, enabling analysts to examine distributions in the context in which outcomes are actually evaluated.
+
+A final bridge to the next chapter is immediate: because the degree-zero lower partial moment recovers the cumulative distribution function, the same directional framework used here for descriptive decomposition also yields direct nonparametric distribution estimation.
+
+The next chapter builds on this descriptive framework by showing how **entire distributions can be estimated directly from partial moments**, providing a nonparametric alternative to traditional density estimation methods and avoiding the bandwidth selection problems discussed in Chapter 1.

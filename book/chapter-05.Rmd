@@ -1,0 +1,314 @@
+# Classical Moments as Directional Aggregates
+
+Chapters 2–4 introduced directional deviation operators and the partial moments constructed from them.
+
+These operators measure deviations relative to a benchmark separately above and below the reference point.  
+They therefore provide a directional description of distributional structure.
+
+This chapter shows that **classical symmetric moments arise as aggregations of these directional components**.
+
+Mean, variance, and higher-order moments do not introduce fundamentally new statistical objects.  
+Instead, they emerge as signed combinations of partial moments.
+
+Once this relationship is recognized, classical moment theory can be interpreted as a special case of the directional framework.
+
+---
+
+## Moments Relative to a Benchmark
+
+In classical statistics, the \(r\)-th moment of a random variable \(X\) relative to a benchmark \(t\) is defined as
+
+\[
+E[(X-t)^r].
+\]
+
+This expression represents the \(r\)-th moment about the point \(t\).
+
+When the benchmark equals the mean \(t=\mu\), the quantity becomes the **\(r\)-th central moment**.  
+Otherwise it represents a moment relative to an arbitrary reference point.
+
+Examples include
+
+- \(r=1\): mean deviation  
+- \(r=2\): variance when \(t=\mu\)  
+- \(r=3\): skewness-related moment  
+- \(r=4\): kurtosis-related moment  
+
+These quantities summarize distributions by aggregating deviations around a reference point.
+
+However, the deviation \(X-t\) combines positive and negative directions together.
+
+Directional statistics separates these components.
+
+---
+
+## Directional Moment Decomposition
+
+Recall the directional deviation operators
+
+\[
+(X-t)^+ = \max(X-t,0)
+\]
+
+\[
+(t-X)^+ = \max(t-X,0).
+\]
+
+These represent deviations above and below the benchmark.
+
+Raising these quantities to power \(r\) and taking expectations yields the partial moments
+
+\[
+U_r(t;X) = E[(X-t)_+^r]
+\]
+
+\[
+L_r(t;X) = E[(t-X)_+^r].
+\]
+
+Using the directional decomposition
+
+\[
+X-t = (X-t)^+ - (t-X)^+,
+\]
+
+one obtains the identity
+
+\[
+E[(X-t)^r] = U_r(t;X) + (-1)^r L_r(t;X).
+\]
+
+Thus **every classical moment can be written as a signed combination of directional partial moments**.
+
+---
+
+## Mean
+
+Setting \(r=1\) and \(t=0\) yields
+
+\[
+E[X] = U_1(0;X) - L_1(0;X).
+\]
+
+The mean can therefore be interpreted as the difference between
+
+- average upward deviations from the benchmark
+- average downward deviations from the benchmark.
+
+If the benchmark is chosen as the mean itself, \(t=\mu\), then
+
+\[
+E[X-\mu] = U_1(\mu;X) - L_1(\mu;X).
+\]
+
+But by definition \(E[X-\mu]=0\).  
+Therefore
+
+\[
+U_1(\mu;X)=L_1(\mu;X).
+\]
+
+This equality holds **only when the benchmark equals the mean**.  
+For other benchmarks, upward and downward deviations generally do not balance.
+
+Thus the classical property that deviations around the mean sum to zero has a natural directional interpretation.
+
+---
+
+## Variance
+
+Variance is defined as
+
+\[
+Var(X) = E[(X-\mu)^2].
+\]
+
+Applying the directional decomposition with \(t=\mu\) yields
+
+\[
+Var(X) = U_2(\mu;X) + L_2(\mu;X).
+\]
+
+As in Chapter 2, this is a population identity. When verifying numerically in R, use `UPM(2, mean(x), x) + LPM(2, mean(x), x)` for population variance, and multiply by \(n/(n-1)\) to match `var(x)`.
+
+This equality is exact because both terms are computed around the same global mean \(\mu\). It should not be confused with averaging conditional subgroup variances, which omits a nonnegative between-group term unless explicitly added.
+
+Variance therefore equals the sum of two directional components:
+
+- upward deviation relative to the mean
+- downward deviation relative to the mean.
+
+The classical statistic reports only their total magnitude.
+
+Two distributions may share identical variance while exhibiting very different directional structures.
+
+---
+
+## Higher-Order Moments
+
+Higher-order moments follow the same decomposition.
+
+### Third Moment
+
+\[
+E[(X-\mu)^3] = U_3(\mu;X) - L_3(\mu;X).
+\]
+
+This moment measures directional asymmetry.
+
+### Fourth Moment
+
+\[
+E[(X-\mu)^4] = U_4(\mu;X) + L_4(\mu;X).
+\]
+
+This moment reflects the magnitude of tail deviations regardless of direction.
+
+In each case, classical moments aggregate directional components into a single statistic.
+
+---
+
+## Standardized Skewness and Kurtosis
+
+In practice, third and fourth moments are normalized by variance to produce dimensionless statistics.
+
+Skewness is defined as
+
+\[
+Skew(X) =
+\frac{E[(X-\mu)^3]}{Var(X)^{3/2}}.
+\]
+
+Using the directional representation,
+
+\[
+Skew(X) =
+\frac{U_3(\mu;X) - L_3(\mu;X)}
+{(U_2(\mu;X)+L_2(\mu;X))^{3/2}}.
+\]
+
+A useful intuition follows immediately from this expression.  
+If a distribution has a longer right tail than left tail, large positive deviations dominate so that
+
+\[
+U_3(\mu;X) \gg L_3(\mu;X),
+\]
+
+producing positive skewness.
+
+Similarly, kurtosis is
+
+\[
+Kurt(X) =
+\frac{E[(X-\mu)^4]}{Var(X)^2}.
+\]
+
+Substituting the directional components gives
+
+\[
+Kurt(X) =
+\frac{U_4(\mu;X)+L_4(\mu;X)}
+{(U_2(\mu;X)+L_2(\mu;X))^2}.
+\]
+
+In finite samples, estimates based on third and fourth moments can be unstable because extreme observations are raised to high powers. The directional decomposition still applies, but empirical interpretation should account for this sensitivity.
+
+Thus the familiar standardized statistics also arise directly from directional partial moments.
+
+---
+
+## Information Loss in Symmetric Aggregation
+
+The mapping from partial moments to classical moments is **many-to-one**.
+
+Directional components determine the symmetric moment uniquely.
+
+However the symmetric moment does not determine the directional components.
+
+For example,
+
+\[
+Var(X) = U_2(\mu;X) + L_2(\mu;X)
+\]
+
+does not reveal how the total variance is distributed between the two sides of the distribution.
+
+Consider two distributions:
+
+| Distribution | \(U_2(\mu;X)\) | \(L_2(\mu;X)\) | \(Var(X)=U_2+L_2\) |
+|---|---:|---:|---:|
+| A | 10 | 0 | 10 |
+| B | 5 | 5 | 10 |
+
+Both produce
+
+\[
+Var(X)=10,
+\]
+
+yet their directional risk structures are completely different.
+
+
+A useful edge case is degenerate support: if all probability mass is concentrated at a single point, then both directional components are zero, \(U_2(\mu;X)=L_2(\mu;X)=0\), so variance is exactly zero. This confirms that the decomposition remains valid at the boundary and that nonzero variance requires at least one nonzero directional component.
+
+Symmetric moments therefore represent **projections of directional structure**.  
+Once aggregated, the original directional information cannot generally be recovered.
+
+---
+
+## Measure-Theoretic Interpretation
+
+The directional decomposition follows naturally from the partition of the sample space induced by the benchmark \(t\):
+
+- \(X>t\)
+- \(X\le t\)
+
+Expectation integrals can therefore be written as
+
+\[
+E[(X-t)^r]
+=
+\int_{x>t}(x-t)^r f(x)\,dx
++
+\int_{x\le t}(x-t)^r f(x)\,dx.
+\]
+
+These two integrals correspond exactly to the upper and lower partial moments.
+
+This representation also clarifies the variance example from the previous section.  
+Two distributions may share the same variance while producing different values of
+
+\[
+U_2(\mu;X)
+=
+\int_{x>\mu}(x-\mu)^2 f(x)\,dx.
+\]
+
+Distribution A places most of its squared deviations in the region \(x>\mu\), producing a large value of \(U_2\).  
+Distribution B distributes deviations more evenly across the two regions.
+
+Although the directional integrals differ, their sum
+
+\[
+U_2(\mu;X)+L_2(\mu;X)
+\]
+
+can still produce the same total variance.
+
+Thus the measure-theoretic decomposition explains precisely how symmetric aggregation hides directional structure.
+
+---
+
+## Implications
+
+The results of this chapter show that classical moment statistics arise from directional components rather than the other way around.
+
+Partial moments therefore provide a structural foundation from which several familiar constructs emerge:
+
+- probability distributions (degree \(r=0\)),
+- classical moments (degrees \(r\ge1\)),
+- standardized measures such as skewness and kurtosis.
+
+Seen from this perspective, symmetric statistics summarize directional information that is already present in the distribution.
+
+Chapter 6 develops the measure-theoretic foundation for this framework, and Part II extends the analysis to descriptive statistics derived from the directional perspective introduced here.

@@ -1,0 +1,538 @@
+# Ensemble Methods
+
+Chapters 20–22 developed the machine-learning side of the NNS framework from three complementary angles.
+
+- Chapter 20 treated recursive partitions as an unsupervised clustering device.
+- Chapter 21 used those same partitions for conditional expectation estimation.
+- Chapter 22 used them for local conditional probability estimation and classification.
+
+A natural next step is to combine multiple directional learners into a single predictive system.
+
+This is the role of **ensemble methods**.
+
+In classical machine learning, ensembles improve predictive performance by combining many imperfect models. Bagging reduces variance through aggregation. Boosting emphasizes informative learners. Stacking combines model outputs through a meta-model. Random forests, gradient boosting, and stacked generalization are all expressions of this general idea.
+
+The directional framework reaches the same destination by a different route.
+
+Rather than aggregating trees, margins, or globally specified basis functions, NNS ensembles aggregate **benchmark-relative nonparametric learners** built from recursive partition logic. The result is not an imported ensemble superstructure grafted onto a classical base learner. It is an extension of the same directional machinery already developed in this book.
+
+Two package routines operationalize this idea:
+
+- `NNS.boost`, which performs resampling, feature-subset screening, and aggregation of NNS learners,
+- `NNS.stack`, which uses the predictions of NNS base models as meta-features for an optimized stacked model.
+
+This chapter develops the conceptual role of ensembles in NNS, explains how boosting and stacking fit within the broader directional framework, and discusses practical issues of cross-validation, stability, and computational cost.
+
+---
+
+## Why Ensemble Learning Helps
+
+A nonparametric learner is flexible precisely because it does not impose a rigid functional form. That flexibility is a strength, but it also creates variability.
+
+When data are finite, noisy, imbalanced, or high-dimensional, different local partitions can emphasize different parts of the structure. One learner may capture an important threshold effect; another may be more stable in the center of the distribution; another may better recognize rare classes or tail behavior.
+
+No single learner is guaranteed to be uniformly best across all regions of the sample space.
+
+This motivates ensemble learning.
+
+The basic idea is simple:
+
+1. generate multiple candidate learners,
+2. allow them to capture different aspects of the data,
+3. combine them in a way that improves stability and accuracy.
+
+In classical language, ensembles often improve performance by reducing variance without increasing bias too severely, or by reducing bias through adaptive combinations of weak learners.
+
+The directional viewpoint sharpens this intuition.
+
+Because benchmark-relative partitions preserve local structure, different learners may disagree not randomly but **structurally**:
+
+- one learner may emphasize upper-tail behavior,
+- another may emphasize local neighborhood structure,
+- another may emphasize feature subsets with stronger nonlinear dependence,
+- another may perform better under class imbalance.
+
+An ensemble can therefore be interpreted as a way of aggregating **multiple local structural views** of the same problem.
+
+---
+
+## Ensemble Logic in the NNS Framework
+
+The conceptual continuity with earlier chapters is important.
+
+Throughout the book, the central move has been:
+
+- start with directional structure,
+- partition relative to benchmarks,
+- summarize within those regions,
+- aggregate only afterward.
+
+Ensemble learning in NNS follows exactly the same logic.
+
+A single NNS learner already performs a local structural decomposition of the data. An ensemble performs a second-level aggregation across many such decompositions.
+
+So the order of construction is
+
+1. **within-learner aggregation**: local averages or local class probabilities inside benchmark-relative partitions,
+2. **between-learner aggregation**: combining many directional learners into a final estimate.
+
+This two-level structure is why ensembles are natural in the NNS setting rather than auxiliary.
+
+The first level handles nonlinear local geometry.  
+The second level stabilizes that geometry across feature subsets, folds, and candidate model specifications.
+
+---
+
+## Base Learners: Recursive Partition Estimation
+
+Both `NNS.boost` and `NNS.stack` are built on the same base principle: prediction from the NNS regression engine.
+
+The package documentation for `NNS.stack` states that it is a prediction model using the predictions of the NNS base models as features, and the documentation for `NNS.boost` states that it is an ensemble method using NNS multivariate regression as the base learner rather than trees. In both cases, the base learner is therefore not a decision stump, not a CART tree, and not a linear model. It is the directional nonparametric estimator developed in earlier chapters.
+
+This matters conceptually.
+
+Classical boosting often improves performance by repeatedly combining learners that are individually simple but globally limited. In NNS, the base learner is already a flexible nonlinear estimator. Ensemble improvement does not arise because the base learner is deliberately weak. It arises because different directional views of the predictor space can still capture different useful structure.
+
+That distinction gives NNS ensembles a different flavor:
+
+- the individual learners are already nonlinear and locally adaptive,
+- ensemble gains come primarily from stabilization, feature engineering, and structural aggregation,
+- interpretation remains tied to local partitions rather than to abstract parameter updates.
+
+---
+
+## Resampling and Aggregation via `NNS.boost`
+
+The `NNS.boost` routine implements ensemble learning through a sequence of resampling, feature screening, threshold selection, and final aggregation.
+
+At the interface level, the routine accepts training predictors `IVs.train`, a response `DV.train`, optional test predictors `IVs.test`, learner controls such as `depth`, `learner.trials`, `epochs`, `CV.size`, and `folds`, and optimization controls such as `obj.fn`, `objective`, and `threshold`. It also supports class balancing through `balance`, time-series handling through `ts.test`, prediction intervals through `pred.int`, and feature-frequency summaries through `features.only` and `feature.importance`.
+
+The package description makes two points immediately clear.
+
+First, `NNS.boost` is not restricted to numeric regression; it can also be used for classification via `type = "CLASS"`.
+
+Second, the routine is not merely averaging many full-model fits on bootstrap resamples. It is also **learning which feature combinations are useful**.
+
+### Threshold-learning stage
+
+At an abstract level, the procedure begins by generating many candidate feature subsets and evaluating their predictive performance on resampled validation splits. Let
+
+\[
+\mathcal{F}_1,\mathcal{F}_2,\dots,\mathcal{F}_M
+\]
+
+denote the candidate feature subsets. For each subset \(\mathcal{F}_m\), a base learner produces predictions
+
+\[
+\hat y^{(m)}_i
+\]
+
+on held-out observations, and an objective function evaluates the result:
+
+\[
+J_m = \Phi\!\bigl(\hat y^{(m)}, y\bigr),
+\]
+
+where \(\Phi\) is the chosen objective.
+
+The package default for continuous targets is sum of squared errors,
+
+\[
+\Phi(\hat y,y)=\sum_i (\hat y_i-y_i)^2,
+\]
+
+while for classification the code automatically switches the default objective to accuracy when `type = "CLASS"`.
+
+The threshold is then learned from the empirical distribution of the candidate objective scores. In the default setting `extreme = FALSE`, the routine uses the upper hinge of the five-number summary for maximization problems and the lower hinge for minimization problems. If `extreme = TRUE`, it instead uses the literal maximum or minimum observed score. Feature subsets whose validation performance passes that threshold are retained for the ensemble.
+
+This is the first important NNS-specific departure from classical textbook boosting:
+
+**the algorithm is not reweighting observations sequentially in the AdaBoost sense; it is screening and aggregating feature-defined directional learners.**
+
+### User-specified objectives
+
+The objective need not be squared error or simple accuracy. The package allows any objective written as an expression in `predicted` and `actual`. Thus users may supply application-specific measures such as precision-weighted loss, F-score style criteria, percentage error, or other custom objectives.
+
+This is an important practical strength. It allows the ensemble to be aligned with the actual loss relevant to the application rather than with a default proxy.
+
+### Feature-frequency aggregation
+
+Once useful candidate subsets have been identified, the retained feature sets are aggregated by frequency. Features that appear often among successful learners receive greater weight in the final construction.
+
+This makes `NNS.boost` partly a prediction routine and partly a feature-stability routine.
+
+The ensemble is therefore interpretable in two linked ways:
+
+- through its predictions,
+- through the frequency with which features participate in successful directional learners.
+
+That second output is especially useful in nonlinear settings, where variable importance is often harder to read from a single local model.
+
+### Final estimate
+
+The final prediction stage passes the retained features into an NNS stacked learner with `stack = FALSE`, using the learned feature structure to produce a stabilized final estimate. In other words, `NNS.boost` does not end with a simple arithmetic mean of all candidate learners. It ends with a **filtered aggregation** followed by a final NNS prediction step.
+
+This is why the routine should be viewed as **resampling and aggregation of directional structure**, not as a direct clone of classical boosting.
+
+---
+
+## Optimized Stacking via `NNS.stack`
+
+If `NNS.boost` performs feature-based ensemble screening, `NNS.stack` performs **meta-learning from NNS predictions**.
+
+The package documentation describes `NNS.stack` as a prediction model using the predictions of NNS base models as features for the stacked model. That sentence captures the essential idea of stacking.
+
+Suppose that multiple base learners produce predictions
+
+\[
+\hat y^{(1)}(x),\hat y^{(2)}(x),\dots,\hat y^{(K)}(x).
+\]
+
+A stacked model does not choose one of them. It treats them as a new feature vector
+
+\[
+z(x)=\bigl(\hat y^{(1)}(x),\dots,\hat y^{(K)}(x)\bigr)
+\]
+
+and then learns a second-stage predictor
+
+\[
+\hat y_{\mathrm{stack}}(x)=G\!\bigl(z(x)\bigr).
+\]
+
+In the NNS setting, the base learners come from two main sources documented in the function interface:
+
+- direct `NNS.reg` prediction,
+- dimension-reduction regression built from synthetic predictor combinations.
+
+The `method` argument controls whether method 1, method 2, or both are used. The default `method = c(1, 2)` includes both, which means that the stacked system can combine ordinary NNS regression output with dimension-reduced NNS regression output.
+
+This is important because the two sources of prediction reflect different structural views of the same problem:
+
+- one stays closer to the original predictor geometry,
+- the other compresses the predictor space using dependence- or causation-based weighting.
+
+The `dim.red.method` argument allows those synthetic predictor weights to be determined by
+
+- `"cor"` for linear correlation,
+- `"NNS.dep"` for nonlinear dependence,
+- `"NNS.caus"` for directional causation,
+- `"equal"` for equal weighting,
+- `"all"` for averaging all methods.
+
+Thus the stacked learner can use not only multiple predictions, but multiple **structural weighting philosophies**. In particular, when `"NNS.caus"` is used, the weighting is directional rather than symmetric: the synthetic regressor is constructed from estimated causal influence rather than from a purely mutual dependence score.
+
+### Classification threshold optimization
+
+For classification problems, `NNS.stack` includes `optimize.threshold = TRUE` by default. This means the routine does not simply round probabilities at \(0.5\) in every case. Instead it searches a grid of candidate thresholds on validation predictions and chooses the threshold that maximizes the selected objective. The final classification threshold is then aggregated across folds into the reported `probability.threshold`.
+
+That is especially useful under class imbalance, where the optimal decision threshold may differ materially from one half.
+
+### Distance options
+
+The `dist` argument permits `"L1"`, `"L2"`, `"DTW"`, and `"FACTOR"` distances.
+
+This is another respect in which NNS stacking differs from generic stacking. The stacked system is not confined to Euclidean geometry. It can accommodate
+
+- Manhattan distance,
+- Euclidean distance,
+- dynamic time warping for temporal alignment,
+- factor-frequency style handling for discrete structures.
+
+So the meta-model is not merely combining predictions. It is combining predictions within a distance-aware, data-type-aware directional framework.
+
+---
+
+## Cross-Validation in Nonparametric Settings
+
+Cross-validation plays a central role in both `NNS.boost` and `NNS.stack`.
+
+This is not accidental. In nonparametric estimation, flexibility is high and parametric asymptotic approximations are often less informative. Validation by held-out prediction is therefore especially important.
+
+The package interface exposes this through
+
+- `CV.size`, the cross-validation proportion,
+- `folds`, the number of cross-validation folds,
+- and, in the case of `NNS.boost`, repeated learner trials and epochs.
+
+### Why cross-validation is particularly important here
+
+A classical parametric model may have only a few coefficients. Once fitted, its complexity is explicit.
+
+A directional nonparametric ensemble is different. Its effective complexity depends on
+
+- partition geometry,
+- feature subset choice,
+- class balancing,
+- dimension reduction,
+- and aggregation across learners.
+
+Cross-validation therefore does more than estimate out-of-sample error. It acts as the practical device that controls how much local structure the ensemble is allowed to trust.
+
+### General formulation
+
+Let a loss function be denoted by \(\ell(y,\hat y)\). If the sample is partitioned into folds
+
+\[
+\mathcal{I}_1,\dots,\mathcal{I}_K,
+\]
+
+then the \(K\)-fold cross-validation score for a model \(M\) is
+
+\[
+CV_K(M)
+=
+\frac{1}{K}
+\sum_{k=1}^K
+\frac{1}{|\mathcal{I}_k|}
+\sum_{i\in \mathcal{I}_k}
+\ell\bigl(y_i,\hat y_i^{(-k)}\bigr),
+\]
+
+where \(\hat y_i^{(-k)}\) denotes the prediction for observation \(i\) from the model trained without fold \(k\).
+
+This formula is standard, but its interpretation in NNS is worth emphasizing.
+
+Because the model is benchmark-relative and local, cross-validation is effectively checking whether the local structural decomposition generalizes beyond the particular sample partition that produced it.
+
+### Random versus temporal validation
+
+Both routines also include a `ts.test` option for time-series settings. This matters because ordinary random cross-validation can break temporal dependence and produce misleadingly optimistic results when data are ordered.
+
+In time-dependent settings, `ts.test` should be used so that validation preserves temporal ordering rather than random folds. This is the right way to adapt the ensemble logic to forecasting and other sequential applications.
+
+---
+
+## Ensemble Learning and the Bias–Variance Tradeoff
+
+The classical motivation for ensembles is often expressed through the bias–variance decomposition.
+
+If a predictor \(\hat f(x)\) is used for squared-error prediction, then at a fixed point \(x\),
+
+\[
+E\bigl[(Y-\hat f(x))^2 \mid X=x\bigr]
+=
+\sigma^2(x)
++
+\bigl(E[\hat f(x)]-f(x)\bigr)^2
++
+Var(\hat f(x)),
+\]
+
+where
+
+- \(\sigma^2(x)\) is irreducible noise,
+- the squared middle term is bias,
+- the final term is variance.
+
+Ensembles often help because averaging many unstable predictors can reduce the variance term.
+
+In the NNS context, this logic remains true but should be interpreted geometrically.
+
+A single learner depends on a particular partition, feature subset, and validation split. Different learners therefore generate different local geometric approximations to the regression or classification surface. Aggregating across them stabilizes the resulting estimate.
+
+So for NNS ensembles:
+
+- **variance reduction** comes from averaging across multiple local structural decompositions,
+- **bias reduction** may come from allowing multiple structural views that no single learner captures well,
+- **robustness** comes from filtering learners through validation rather than trusting one partition unconditionally.
+
+This is why ensembles are especially attractive in nonlinear, asymmetric, or heterogeneous data settings.
+
+---
+
+## Regression Ensembles and Classification Ensembles
+
+Both `NNS.boost` and `NNS.stack` support numeric or categorical targets, though the documentation for `NNS.boost` emphasizes classification and the code clearly adapts its objective behavior depending on `type`.
+
+This suggests a useful conceptual distinction.
+
+### Regression ensembles
+
+For continuous responses, the ensemble aims to estimate
+
+\[
+f(x)=E[Y\mid X=x]
+\]
+
+more accurately and more stably than a single learner.
+
+Here the relevant concerns are
+
+- local curvature,
+- heteroskedasticity,
+- feature interactions,
+- and out-of-sample squared or absolute loss.
+
+### Classification ensembles
+
+For categorical responses, the ensemble aims to estimate conditional class probabilities
+
+\[
+P(Y=c\mid X=x)
+\]
+
+or their decision-equivalent ranking more accurately and more stably.
+
+Here the relevant concerns are
+
+- class imbalance,
+- threshold optimization,
+- rare-class recognition,
+- and discrete decision accuracy.
+
+The distinction is not merely operational. It also changes the objective surface.
+
+In regression, averaging predictions often behaves smoothly.  
+In classification, small changes in the predicted score can move observations across a decision threshold. This is why threshold optimization and balancing options are especially important for classification ensembles.
+
+---
+
+## Relation to Classical Ensemble Methods
+
+The NNS ensemble framework overlaps with familiar classical methods, but it is not identical to any one of them.
+
+### Comparison with bagging
+
+Bagging stabilizes unstable learners by averaging across bootstrap samples.
+
+NNS boosting shares the spirit of stabilization through repeated resampled learning, but it is more selective: it screens learners by performance and tracks feature frequencies rather than averaging every learner equally.
+
+### Comparison with AdaBoost and gradient boosting
+
+Classical boosting methods often reweight observations sequentially or fit residuals stage by stage.
+
+`NNS.boost` is different. It is closer to a performance-thresholded ensemble over feature subsets and validation splits, using NNS regression as the base learner. It does not rely on the same additive stagewise residual-updating mechanism as gradient boosting.
+
+### Comparison with random forests
+
+Random forests combine tree learners built on bootstrap samples and random feature subsets.
+
+NNS ensembles share the idea of random or selective feature subsets, but the base learners are not trees. They are directional nonparametric regressors and classifiers based on recursive partition structure. Moreover, in `NNS.boost`, random feature subsets are not retained merely because they were sampled; they are screened by validation performance and then aggregated by frequency. This makes the feature-selection step partly stochastic and partly performance-driven.
+
+### Comparison with classical stacking
+
+Classical stacking uses predictions from multiple models as features for a meta-model.
+
+This is the closest analogue to `NNS.stack`. But even here the base models, the dimension-reduction options, the distance metrics, and the threshold optimization are specific to the NNS framework.
+
+So the correct interpretation is not that NNS simply reimplements classical ensemble methods with new names. It is that NNS develops **directional analogues of those ensemble principles**.
+
+---
+
+## Practical Performance Considerations
+
+Because ensemble methods combine multiple learners, practical considerations matter.
+
+### Computational cost
+
+Ensembles are more computationally intensive than single fits.
+
+This is especially true when
+
+- the number of predictors is large,
+- the candidate subset space is large,
+- many folds or trials are used,
+- time-series distance calculations such as DTW are involved.
+
+The price of flexibility is computation.
+
+### Feature dimensionality
+
+As dimension grows, the number of possible feature subsets grows combinatorially. If there are \(p\) predictors, then the total number of nonempty subsets is
+
+\[
+\sum_{k=1}^{p} \binom{p}{k} = 2^p - 1.
+\]
+
+This growth explains why exhaustive search becomes infeasible in high dimension and why threshold-based screening is practically valuable.
+
+In small dimensions, `NNS.boost` can evaluate all subsets deterministically. In larger dimensions, it instead samples feature combinations rather than enumerating the full subset space. Thus the procedure remains a guided stochastic search rather than a brute-force exhaustive one.
+
+### Class imbalance
+
+When classes are imbalanced, raw accuracy may be misleading. The `balance` option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. A more complete treatment of this imbalance-handling ensemble workflow appears in Chapter 25, where multivariate forecasting workflows use the same up/down-sampling logic under skewed classification-style targets.
+
+But balancing is not magic. It changes the empirical distribution seen by the learner, so it should be used thoughtfully and evaluated by appropriate out-of-sample criteria.
+
+### Missing data
+
+The package notes make clear that missing data should be handled before fitting. This is especially important for nonparametric ensembles, where local structure can be distorted badly by ad hoc missing-value handling.
+
+### Objective-function choice
+
+The user is not restricted to squared error. Any objective expressed in terms of `predicted` and `actual` can be supplied.
+
+This is an important strength of the NNS approach because it allows the ensemble to be tuned to the application’s actual loss function rather than to a generic default.
+
+If false negatives are more costly than false positives, or if percentage error is more relevant than squared error, the ensemble can be tuned to that objective directly.
+
+---
+
+## Interpretation of Ensemble Output
+
+One criticism often leveled at ensemble methods is that they improve prediction at the cost of interpretability.
+
+That criticism is less severe in the NNS setting than it is in many black-box systems.
+
+### Prediction interpretation
+
+The final output is still a benchmark-relative nonparametric estimate. It remains tied to the directional structure developed throughout the book.
+
+### Feature-frequency interpretation
+
+`NNS.boost` returns feature weights and feature frequencies. These summarize which predictors recur most often among successful learners.
+
+This does not provide the same interpretation as a linear coefficient, but it does provide a meaningful **stability-based importance profile**. In practice, these frequencies can be displayed as summary tables or visualized as feature-importance bar plots.
+
+### Structural interpretation
+
+Because the base learners are directional and partition-based, the ensemble still reflects local structural decomposition rather than an opaque hidden representation.
+
+So interpretability is not lost entirely. It changes form:
+
+- less coefficient interpretation,
+- more structural and stability interpretation.
+
+That is often the right trade in nonlinear settings.
+
+---
+
+## Conceptual Summary
+
+This chapter completes the machine-learning progression of Part VI.
+
+- Chapter 20 used recursive partitions for **unsupervised grouping**.
+- Chapter 21 used them for **numeric prediction**.
+- Chapter 22 used them for **categorical prediction**.
+- This chapter uses them in **aggregated form** to improve predictive stability and performance.
+
+The conceptual thread is unbroken.
+
+The same directional primitive that generated partial moments, dependence measures, causation, clustering, regression, and classification also supports ensemble learning.
+
+This continuity matters. In many statistical frameworks, machine-learning ensembles appear as a separate toolkit layered on top of unrelated base models. In NNS, ensembles arise organically from the same benchmark-relative logic as the rest of the theory.
+
+---
+
+## Summary
+
+This chapter developed ensemble learning in the NNS framework as **aggregation of directional nonparametric learners**.
+
+Its main contributions are fivefold.
+
+First, it explained **feature-subset screening based on predictive performance**. Rather than combining all sampled learners indiscriminately, `NNS.boost` retains those feature-defined learners whose validation performance passes a learned threshold.
+
+Second, it clarified **threshold learning** itself. In `NNS.boost`, the retention threshold is learned from the empirical distribution of validation scores, while in `NNS.stack`, classification thresholds are optimized over candidate rounding rules and then aggregated across folds.
+
+Third, it developed **dimension-reduction stacking with multiple dependence metrics**. Synthetic predictors may be constructed using linear correlation, nonlinear dependence, directional causation, equal weighting, or an average across all methods.
+
+Fourth, it showed that NNS stacking is a form of **distance-aware meta-learning**. The ensemble can combine predictions using Euclidean, Manhattan, dynamic time warping, or factor-based geometry, depending on the application.
+
+Fifth, it emphasized **cross-validation as the practical control of complexity** in nonparametric ensemble learning. Because flexibility arises from local structure, feature choice, and aggregation rather than from a small set of global parameters, validation is central to determining which learners should be trusted.
+
+Taken together, these results show that ensemble methods in NNS are not auxiliary add-ons. They are the natural machine-learning extension of the book’s central principle:
+
+**start with directional structure, preserve it locally, and aggregate only afterward.**
+
+The next part of the book turns to **time series**, where the same nonparametric and directional principles are extended to temporal dependence, forecasting, and multivariate dynamics.

@@ -1,0 +1,38 @@
+---
+title: "Nonlinear Nonparametric Statistics: Using Partial Moments"
+author: "Fred Viole"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+---
+
+# Preface {-}
+
+This book presents the **Nonlinear Nonparametric Statistics (NNS)** framework as a coherent toolkit for modeling dependence, uncertainty, prediction, and decision-making without imposing restrictive distributional assumptions.
+
+The chapters are organized to move from foundational concepts to practical modeling workflows:
+
+- first principles of nonlinear dependence and directional relationships,
+- nonparametric methods for regression, classification, and density-based tasks,
+- time-series forecasting frameworks for univariate and multivariate settings,
+- and implementation guidance for applied research and production analytics.
+
+The central theme is consistent throughout: when data are asymmetric, heavy-tailed, nonlinear, or regime-sensitive, useful structure can still be extracted directly from the data-generating process using directional and nonparametric methods.
+
+## Executive Summary {-}
+
+This book is designed for readers who want mathematically grounded methods that remain practical in real-world settings where classical assumptions can fail.
+
+At a high level, the NNS framework emphasizes:
+
+- **distribution-agnostic modeling** rather than strict parametric family selection,
+- **directional dependence and causation diagnostics** instead of purely symmetric association summaries,
+- **nonlinear predictive systems** that can adapt to heterogeneous signal structures,
+- and **modular workflows in R** so methods can be combined for exploratory analysis, forecasting, and risk assessment.
+
+Readers can use the text in two ways:
+
+1. **Sequentially**, as a complete conceptual arc from core definitions to advanced forecasting systems.
+2. **As a reference**, by jumping directly to method-specific chapters and accompanying implementation examples.
+
+Whether your domain is economics, finance, operations, policy, or scientific research, the goal is the same: to provide robust, interpretable, and applied nonparametric tools for difficult data.

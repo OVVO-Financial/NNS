@@ -1,0 +1,345 @@
+# Measure-Theoretic Interpretation
+
+Chapters 2–5 developed the directional framework from an algebraic perspective.  
+Directional deviation operators were introduced, partial moments were defined, and classical statistics was shown to arise as an aggregation of directional components.
+
+This chapter places that framework inside **measure-theoretic probability**.
+
+The goal is not to introduce new probability axioms.  
+Instead, we show that directional deviation operators align naturally with the core structures of probability theory:
+
+- measurable functions  
+- partitions of the sample space  
+- positive and negative function decompositions  
+- Lebesgue integration  
+
+Viewed from this perspective, partial moments are not merely convenient statistics.  
+They represent a **canonical measurable refinement** of symmetric statistical quantities.
+
+For reference, the key assumptions used throughout this chapter are:
+
+- \(X\) is measurable on \((\Omega,\mathcal{F},P)\),
+- the benchmark \(t\) is fixed (or measurable when data-dependent benchmarks are considered),
+- the relevant moments exist (e.g., \(X\in L^r\) for degree \(r\)).
+
+---
+
+## Probability Spaces
+
+Let
+
+\[
+(\Omega,\mathcal{F},P)
+\]
+
+denote a probability space where
+
+- \(\Omega\) is the sample space,  
+- \(\mathcal{F}\) is a σ-algebra of measurable events,  
+- \(P\) is a probability measure.
+
+A real-valued random variable is a measurable function
+
+\[
+X:\Omega \rightarrow \mathbb{R}.
+\]
+
+The cumulative distribution function of \(X\) is
+
+\[
+F_X(t) = P(X \le t).
+\]
+
+Expectations of measurable functions are defined through the Lebesgue integral
+
+\[
+E[g(X)] = \int_{\Omega} g(X(\omega))\, dP(\omega).
+\]
+
+This integral provides the foundation for statistical quantities such as moments, expectations, and risk measures.
+
+Directional statistics operates within exactly the same framework.  
+As we will see later in this chapter, the directional deviation operators introduced earlier align naturally with the positive and negative function decompositions used in Lebesgue integration.
+
+---
+
+## Benchmark-Induced Partitions
+
+Let \(t \in \mathbb{R}\) be a benchmark.
+
+The benchmark induces a natural measurable partition of the sample space:
+
+\[
+\Omega =
+\{\omega : X(\omega) \le t\}
+\cup
+\{\omega : X(\omega) > t\}.
+\]
+
+Equivalently, the real line is partitioned into two regions:
+
+- the **lower region** \(X \le t\)  
+- the **upper region** \(X > t\)
+
+This partition plays a central role in probability theory.  
+The cumulative distribution function itself is defined through it:
+
+\[
+F_X(t) = P(X \le t).
+\]
+
+Directional statistics extends this same partition structure to **magnitudes of deviation**.
+
+---
+
+## Positive and Negative Function Decomposition
+
+Measure theory frequently decomposes functions into positive and negative parts.
+
+For any real-valued function \(f\),
+
+\[
+f = f^{+} - f^{-}
+\]
+
+where
+
+\[
+f^{+} = \max(f,0), \qquad f^{-} = \max(-f,0).
+\]
+
+Both components are nonnegative measurable functions.
+
+Lebesgue integration then satisfies
+
+\[
+\int f\, d\mu =
+\int f^{+} d\mu
+-
+\int f^{-} d\mu.
+\]
+
+This decomposition ensures that integrals of arbitrary measurable functions can be constructed from integrals of nonnegative functions.
+
+Directional deviation operators follow exactly the same structure.
+
+Let
+
+\[
+f(X) = X - t.
+\]
+
+Then
+
+\[
+(X-t)^+ = \max(X-t,0)
+\]
+
+\[
+(t-X)^+ = \max(t-X,0).
+\]
+
+Thus
+
+\[
+X-t = (X-t)^+ - (t-X)^+.
+\]
+
+Directional deviations therefore correspond directly to the **positive and negative parts of the deviation function**.
+
+---
+
+## Partial Moments as Measurable Integrals
+
+Partial moments are expectations of these nonnegative measurable functions.
+
+For integer \(r \ge 0\),
+
+\[
+U_r(t;X) = E[(X-t)_+^r]
+\]
+
+\[
+L_r(t;X) = E[(t-X)_+^r].
+\]
+
+Assuming \(X \in L^r\) so that these expectations exist, partial moments are simply expectations of nonnegative measurable functions.
+
+Using the definition of expectation,
+
+\[
+U_r(t;X)
+=
+\int_{\Omega} (X(\omega)-t)_+^r \, dP(\omega)
+\]
+
+\[
+L_r(t;X)
+=
+\int_{\Omega} (t-X(\omega))_+^r \, dP(\omega).
+\]
+
+These integrals can be written explicitly over the benchmark partition:
+
+\[
+U_r(t;X)
+=
+\int_{X>t} (X-t)^r \, dP
+\]
+
+\[
+L_r(t;X)
+=
+\int_{X\le t} (t-X)^r \, dP.
+\]
+
+Thus partial moments are **Lebesgue integrals evaluated over measurable directional regions**.
+
+The benchmark \(t\) defines the partition, and the integrand measures deviation magnitude within each region.
+
+---
+
+## Recovery of Classical Moments
+
+From the positive–negative decomposition of deviations introduced in Section 6.3,
+
+\[
+X-t = (X-t)^+ - (t-X)^+,
+\]
+
+raising both sides to power \(r\) and integrating yields
+
+\[
+E[(X-t)^r] = U_r(t;X) + (-1)^r L_r(t;X).
+\]
+
+This identity holds for any integrable random variable.
+
+Classical symmetric moments therefore arise as **signed combinations of two directional integrals**.
+
+For example:
+
+### Mean
+
+\[
+E[X] = U_1(0;X) - L_1(0;X).
+\]
+
+### Variance
+
+\[
+Var(X) = U_2(\mu;X) + L_2(\mu;X).
+\]
+
+### Third Moment
+
+\[
+E[(X-\mu)^3] = U_3(\mu;X) - L_3(\mu;X).
+\]
+
+The symmetric moment is therefore an **aggregation operator applied to directional components**.
+
+---
+
+## Canonical Refinement of Symmetric Moments
+
+The mapping
+
+\[
+(U_r,L_r) \rightarrow E[(X-t)^r]
+\]
+
+is **many-to-one**.
+
+Directional components uniquely determine the symmetric moment, but the symmetric moment cannot generally recover the directional components.
+
+This implies a strict information hierarchy:
+
+\[
+(U_r,L_r) \quad \text{contains more information than} \quad E[(X-t)^r].
+\]
+
+In measure-theoretic terms, the directional decomposition represents a **refinement of the measurable structure** induced by symmetric aggregation.
+
+The symmetric moment collapses two measurable integrals into a single value.
+
+Directional moments preserve the contributions of each measurable region.
+
+---
+
+## Alignment with Probability Partitions
+
+Probability itself is defined through partitions.
+
+For any event \(A\),
+
+\[
+P(A) + P(A^c) = 1.
+\]
+
+Similarly, the cumulative distribution function partitions probability mass relative to a threshold \(t\):
+
+\[
+F_X(t) = P(X \le t)
+\]
+
+\[
+1 - F_X(t) = P(X > t).
+\]
+
+Directional deviation operators extend this same partition structure.
+
+Instead of measuring only probability mass in each region, they measure **magnitudes of deviation within those regions**.
+
+The degree-zero case recovers probability:
+
+\[
+L_0(t;X) = P(X \le t)
+\]
+
+\[
+U_0(t;X) = P(X > t).
+\]
+
+Higher degrees measure deviation magnitude within the same partition.
+
+---
+
+## Structural Interpretation
+
+From the measure-theoretic perspective, the directional framework reflects a deeper structural fact about probability.
+
+Every deviation relative to a benchmark induces a natural measurable partition of the sample space.  
+Lebesgue integration aggregates contributions across that partition.
+
+Directional partial moments simply retain the integrals over each region separately.
+
+Symmetric statistics combine those integrals into a single value.
+
+Thus the directional representation does not introduce new probability objects.  
+It reveals the **underlying structure that symmetric statistics aggregate away**.
+
+---
+
+## Implications
+
+The measure-theoretic interpretation clarifies the role of partial moments in statistical theory.  
+In particular, it shows that the directional framework is not a new probabilistic system but a refinement of the standard measure-theoretic structure already used throughout statistics.
+
+1. Directional deviation operators correspond to positive and negative function decompositions.
+
+2. Partial moments are Lebesgue integrals over measurable directional regions.
+
+3. Classical symmetric moments are aggregations of those integrals.
+
+4. Directional moments therefore preserve strictly more structural information about distributions.
+
+These structural properties explain why directional statistics can support the applied methods developed in the remainder of the book: the framework preserves the same probability foundations while retaining directional information that symmetric statistics discard.
+
+Operationally, this means the directional framework can be used without replacing standard probabilistic machinery. One can work with the same probability space, the same measurable-function toolkit, and the same integration rules, while reporting richer benchmark-relative diagnostics for risk, asymmetry, and tail behavior.
+
+---
+
+The next part of the book turns from theoretical foundations to **descriptive statistics derived from directional partial moments**.
+
+Part II develops descriptive statistics that retain the directional information preserved by this refined measurable structure. Rather than collapsing deviations into symmetric aggregates, these measures describe distributions in terms of their directional behavior relative to meaningful benchmarks.

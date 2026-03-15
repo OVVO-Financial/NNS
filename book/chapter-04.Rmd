@@ -1,0 +1,281 @@
+# Numerical Integration via Partial Moments
+
+Chapter 3 showed that the cumulative distribution function arises as the degree-zero partial moment.  
+Probability mass itself can therefore be represented through the directional deviation operators introduced earlier.
+
+The same idea extends naturally to **numerical integration**.
+
+Many quantities in probability, statistics, and economics are defined as definite integrals.  
+Expected values and risk measures both rely on integrating functions with respect to probability distributions.
+
+This chapter shows that partial moments provide a natural and flexible way to approximate such integrals.
+
+Rather than relying on classical quadrature formulas alone, we can represent integrals through expectations of directional deviations relative to benchmarks.
+
+---
+
+## Definite Integrals as Expectations
+
+Let \(X\) be a random variable with cumulative distribution function \(F_X\).
+
+For any measurable function \(g(x)\), the expectation of \(g(X)\) can be written as
+
+\[
+E[g(X)] = \int_{-\infty}^{\infty} g(x)\, dF_X(x).
+\]
+
+When \(X\) has density \(f(x)\), this becomes
+
+\[
+E[g(X)] = \int_{-\infty}^{\infty} g(x) f(x)\, dx.
+\]
+
+Thus expectations are **definite integrals weighted by probability**.
+
+This representation allows integrals to be estimated directly from sample data:
+
+\[
+E[g(X)] \approx \frac{1}{n}\sum_{i=1}^{n} g(x_i).
+\]
+
+In practice, many statistical quantities—including moments and risk measures—are simply special cases of this expectation integral.
+
+---
+
+## Integrals from Directional Deviations
+
+Consider the upper partial moment
+
+\[
+U_r(t;X) = E[(X-t)_+^r].
+\]
+
+Using the definition of expectation,
+
+\[
+U_r(t;X) = \int_{t}^{\infty} (x-t)^r f(x)\,dx.
+\]
+
+Similarly, the lower partial moment is
+
+\[
+L_r(t;X) = \int_{-\infty}^{t} (t-x)^r f(x)\,dx.
+\]
+
+Thus partial moments correspond directly to **definite integrals over directional regions** of the distribution.
+
+The integrand is the deviation magnitude relative to the benchmark \(t\).
+
+These integrals quantify how much probability mass lies above or below the benchmark and how far those observations lie from it.
+
+---
+
+## Approximation via Sample Partial Moments
+
+Suppose we observe a sample \(x_1,\dots,x_n\).
+
+The partial moments can be estimated empirically:
+
+\[
+\hat{U}_r(t) = \frac{1}{n}\sum_{i=1}^{n} (x_i-t)_+^r
+\]
+
+\[
+\hat{L}_r(t) = \frac{1}{n}\sum_{i=1}^{n} (t-x_i)_+^r.
+\]
+
+These quantities approximate the integrals
+
+\[
+\int_{t}^{\infty} (x-t)^r f(x)\,dx
+\]
+
+and
+
+\[
+\int_{-\infty}^{t} (t-x)^r f(x)\,dx.
+\]
+
+Unlike classical quadrature rules that rely on fixed grid points, the empirical partial moments use the observed data directly.
+
+This approach provides a **data-adaptive integration scheme**.
+
+---
+
+## Example: Estimating Downside Risk
+
+To illustrate, suppose we observe the returns
+
+\[
+x = \{-4,-2,-1,1,3,5\}.
+\]
+
+Let the benchmark return be
+
+\[
+t = 0.
+\]
+
+The lower partial moment of degree 1 is
+
+\[
+L_1(0;X) = E[(0-X)_+].
+\]
+
+Compute the directional deviations:
+
+| \(x_i\) | \((0-x_i)_+\) |
+|---|---|
+| -4 | 4 |
+| -2 | 2 |
+| -1 | 1 |
+| 1 | 0 |
+| 3 | 0 |
+| 5 | 0 |
+
+The empirical estimate becomes
+
+\[
+\hat{L}_1(0) =
+\frac{4+2+1}{6}
+=
+\frac{7}{6}
+\approx 1.17.
+\]
+
+This quantity measures the **unconditional average shortfall below the benchmark** (i.e., averaged over all observations, including zeros above the benchmark).
+
+The calculation approximates the integral
+
+\[
+\int_{-\infty}^{0} (0-x)f(x)\,dx
+\]
+
+using only the observed sample.
+
+This calculation is exactly the empirical estimator computed above in this section with \(r = 1\).  
+The example therefore illustrates how the general partial-moment estimator performs numerical integration directly from sample data.
+
+---
+
+## Relationship to Classical Quadrature
+
+Classical numerical integration methods approximate integrals using weighted sums of function values evaluated at predetermined nodes.
+
+Expectation integrals differ in an important way:
+
+\[
+E[g(X)] = \int g(x)\, dF_X(x).
+\]
+
+If \(X \sim \mathrm{Unif}(a,b)\), then
+
+\[
+E[f(X)] = \frac{1}{b-a}\int_a^b f(x)\,dx.
+\]
+
+So the interval integral is recovered by the explicit scale factor:
+
+\[
+\int_a^b f(x)\,dx = (b-a)E[f(X)].
+\]
+
+Using first-degree partial moments at benchmark \(t=0\) for \(Y=f(X)\),
+
+\[
+E[Y] = U_1(0;Y)-L_1(0;Y),
+\]
+
+hence
+
+\[
+\int_a^b f(x)\,dx \approx (b-a)\left(\hat U_1(0;Y)-\hat L_1(0;Y)\right).
+\]
+
+For unsigned (total) area,
+
+\[
+\int_a^b |f(x)|\,dx \approx (b-a)\left(\hat U_1(0;Y)+\hat L_1(0;Y)\right).
+\]
+
+The key accuracy point is that the \((b-a)\) term multiplies the partial-moment estimate whenever the domain is \([a,b]\) rather than a unit-length interval.
+
+Here the weighting measure is the distribution \(F_X\), not uniform measure in general.
+
+Empirical partial moments therefore approximate integrals using the observed data themselves as evaluation points. Regions with higher probability mass contribute more strongly to the approximation.
+
+In this sense, partial-moment integration is **distribution-adaptive**: the integration nodes are determined by the data rather than by a fixed grid.
+
+From a computational perspective, empirical partial moments are also simple to scale: for fixed \(r\) and benchmark \(t\), each estimate requires a single pass through the sample (\(O(n)\) operations). Classical quadrature can be very accurate for smooth low-dimensional integrands, but it depends on externally chosen nodes and weights and can become sensitive when mass is concentrated in tail regions. The partial-moment estimator trades closed-form quadrature weights for direct data weighting under \(F_X\), which is often numerically stable in statistical applications.
+
+---
+
+## Convergence Properties
+
+Under standard regularity conditions, empirical expectations converge to their population counterparts.
+
+By the law of large numbers,
+
+\[
+\hat{U}_r(t) \rightarrow U_r(t;X)
+\]
+
+and
+
+\[
+\hat{L}_r(t) \rightarrow L_r(t;X)
+\]
+
+as \(n \to \infty\).
+
+Thus the empirical partial moments provide consistent estimators of the corresponding integrals.
+
+Because the integration nodes are the observed data themselves, the approximation improves automatically as the sample grows.
+
+No externally chosen bandwidth or grid resolution is required.
+
+---
+
+## Applications
+
+The partial-moment representation of integrals has many applications.
+
+### Probability and Distribution Analysis
+
+Many distributional quantities can be written as integrals of deviation functions.
+
+Examples include:
+
+- unconditional partial-moment shortfall measures (distinct from conditional expected shortfall / CVaR)
+- tail risk measures
+- higher-order moments.
+
+### Risk Measurement
+
+In finance, downside risk measures often take the form
+
+\[
+E[(\tau-X)_+^r].
+\]
+
+These are precisely lower partial moments relative to a target return \(\tau\).
+
+Thus many risk measures are simply integrals of directional deviations.
+
+---
+
+## Summary
+
+This chapter established that partial moments naturally represent definite integrals over directional regions of a distribution.
+
+The key results are:
+
+1. Expectations are definite integrals with respect to probability distributions.
+2. Upper and lower partial moments correspond to integrals over directional deviation regions.
+3. Empirical partial moments provide data-adaptive approximations of these integrals.
+4. Convergence follows from standard laws of large numbers.
+5. Many statistical and economic quantities—including risk measures—can be expressed using this framework.
+
+Partial moments therefore act as **numerical integrators that aggregate directional deviations relative to benchmarks**.
+
+The next chapter shows how **classical symmetric moments arise as signed combinations of partial moments**, completing the bridge between directional statistics and traditional moment analysis.

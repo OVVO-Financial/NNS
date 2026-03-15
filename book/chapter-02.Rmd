@@ -1,0 +1,286 @@
+# Directional Deviation Operators
+
+Chapter 1 argued that many failures of classical statistics arise from **symmetric aggregation**.  
+Classical moments, covariance, and correlation collapse directional information into symmetric summaries before analysis begins.
+
+This chapter introduces the mathematical primitive that avoids that collapse:
+
+**directional deviation operators.**
+
+These operators measure deviations relative to a benchmark separately above and below the reference point. From this simple construction we will derive many familiar objects of statistics.
+
+The framework begins with a simple observation:
+
+**any deviation relative to a benchmark has a direction.**
+
+---
+
+## Deviations Relative to a Benchmark
+
+Let \(X\) be a real-valued random variable and let \(t \in \mathbb{R}\) denote a benchmark.
+
+Classical statistics measures deviations using
+
+\[
+X - t
+\]
+
+which mixes positive and negative deviations together.
+
+Directional statistics separates them.
+
+Define the **positive-part operator**
+
+\[
+x^{+} = \max(x,0).
+\]
+
+Using this operator we define two directional deviations:
+
+\[
+(X-t)^+ = \max(X-t,0)
+\]
+
+\[
+(t-X)^+ = \max(t-X,0).
+\]
+
+These represent
+
+- deviations **above the benchmark**
+- deviations **below the benchmark**
+
+Both quantities are nonnegative.
+
+Together they fully characterize the magnitude of deviation relative to \(t\).
+
+---
+
+## Directional Decomposition of Deviations
+
+Every deviation can be decomposed into directional components.
+
+For any real number \(x\),
+
+\[
+x = x^+ - (-x)^+.
+\]
+
+Applying this identity to \(X-t\) yields
+
+\[
+X-t = (X-t)^+ - (t-X)^+.
+\]
+
+Thus the classical deviation can be expressed as the **difference between two directional magnitudes**.
+
+The directional operators also reconstruct the magnitude of deviation:
+
+\[
+|X-t| = (X-t)^+ + (t-X)^+.
+\]
+
+Thus directional components fully determine both the signed deviation and its magnitude.
+
+The key implication is structural:
+
+**the symmetric deviation is an aggregation of directional components.**
+
+Classical statistics begins with the aggregate.  
+Directional statistics begins with the components.
+
+---
+
+## Directional Operators
+
+The functions
+
+\[
+(X-t)^+ , \quad (t-X)^+
+\]
+
+are called **directional deviation operators**.
+
+They induce a natural partition of the sample space:
+
+- \(X > t\)
+- \(X \le t\)
+
+Within each region the operators measure the magnitude of deviation from the benchmark.
+
+This partition is fundamental. Many real-world systems evaluate outcomes relative to targets:
+
+- profits relative to costs
+- returns relative to required benchmarks
+- losses relative to liabilities
+- forecast errors relative to expected demand
+
+Directional deviation operators formalize this benchmark-relative measurement.
+
+---
+
+## Partial Moments
+
+Once directional deviations are defined, their magnitudes can be summarized through expectations.
+
+For integer \(r \ge 0\), define the **lower partial moment**
+
+\[
+L_r(t;X) = E[(t-X)_+^r]
+\]
+
+and the **upper partial moment**
+
+\[
+U_r(t;X) = E[(X-t)_+^r].
+\]
+
+These quantities measure directional deviation magnitudes relative to the benchmark.
+
+For these expectations to be finite, it is sufficient that the corresponding directional powers are integrable (for example, \(E[|X|^r]<\infty\) for fixed \(r\)).
+
+The parameter \(r\) determines the type of deviation measured.
+
+| Degree \(r\) | Interpretation |
+|---|---|
+| 0 | probability mass |
+| 1 | directional mean deviation |
+| 2 | directional variance |
+| \(r>2\) | higher-order tail structure |
+
+Partial moments therefore generalize classical moments while preserving directional structure.
+
+
+## Notation Bridge: Theory to R Implementation
+
+The manuscript uses theoretical notation in proofs and function-style notation in implementation examples. The mapping is direct:
+
+| Theoretical object | Meaning | R implementation pattern |
+|---|---|---|
+| \(L_r(t;X)\) | lower partial moment of degree \(r\) at benchmark \(t\) | `LPM(r, t, X)` |
+| \(U_r(t;X)\) | upper partial moment of degree \(r\) at benchmark \(t\) | `UPM(r, t, X)` |
+| \(L_r(t;X)_{\text{ratio}}\) | normalized lower share \(L_r/(L_r+U_r)\) | `LPM.ratio(r, t, X)` |
+| \(U_r(t;X)_{\text{ratio}}\) | normalized upper share \(U_r/(L_r+U_r)\) | `UPM.ratio(r, t, X)` |
+| \(CoLPM\), \(CoUPM\), \(DLPM\), \(DUPM\) | concordant/divergent co-partial moments | `Co.LPM(...)`, `Co.UPM(...)`, `D.LPM(...)`, `D.UPM(...)` |
+
+Unless otherwise stated, later chapters use the mathematical form for derivations and the function-call form for reproducible examples.
+
+---
+
+## Benchmarks
+
+A distinctive feature of partial moments is the benchmark \(t\).
+
+In classical statistics, reference points are usually determined by the distribution itself.  
+The mean, median, and variance are all defined internally.
+
+Partial moments differ in an important way: the benchmark need not be determined by the distribution.
+
+Instead, \(t\) may represent an **externally meaningful reference point** chosen by the analyst or by the decision context.
+
+Examples include:
+
+- target returns in finance
+- policy thresholds in economics
+- forecast baselines in operations
+- safety limits in engineering
+- aspiration levels in behavioral decision theory
+
+The benchmark therefore embeds the context in which deviations matter.
+
+Directional statistics evaluates distributions relative to those contexts rather than purely distributional averages.
+
+---
+
+## Relationship to Classical Moments
+
+Classical moments arise as aggregations of partial moments.
+
+For integer \(r \ge 1\),
+
+\[
+E[(X-t)^r] = U_r(t;X) + (-1)^r L_r(t;X).
+\]
+
+This identity shows that symmetric moments are **signed combinations of directional components**.
+
+Several familiar quantities follow immediately.
+
+### Mean
+
+\[
+E[X] = U_1(0;X) - L_1(0;X)
+\]
+
+### Variance
+
+\[
+Var(X) = U_2(\mu;X) + L_2(\mu;X)
+\]
+
+This identity is the **population** variance decomposition. In R, `var(x)` returns the sample variance, so numerical checks against `UPM(2, mean(x), x) + LPM(2, mean(x), x)` should include the Bessel correction factor \(n/(n-1)\).
+
+### Third Central Moment
+
+\[
+E[(X-\mu)^3] = U_3(\mu;X) - L_3(\mu;X).
+\]
+
+Thus classical symmetric statistics do not introduce fundamentally new objects.  
+They aggregate directional ones.
+
+Importantly, the mapping from partial moments to symmetric moments is **many-to-one**.
+
+Directional components determine the symmetric moment uniquely, but the symmetric moment does not generally determine the directional components.
+
+Directional moments therefore contain strictly more information.
+
+---
+
+## Information Loss in Symmetric Aggregation
+
+Consider two distributions with identical variance.
+
+Distribution A may exhibit
+
+- large upside deviations
+- small downside deviations.
+
+Distribution B may exhibit
+
+- small upside deviations
+- large downside deviations.
+
+Both can produce the same value of
+
+\[
+Var(X).
+\]
+
+Variance alone cannot distinguish them.
+
+However the directional quantities
+
+\[
+U_2(\mu;X), \quad L_2(\mu;X)
+\]
+
+immediately reveal the asymmetry.
+
+Symmetric statistics therefore represent **projections of directional structure**.
+
+Once this projection occurs, the original directional information cannot generally be recovered.
+
+---
+
+## Directional Operators as a Statistical Primitive
+
+Directional deviation operators provide a foundation from which many statistical constructs can be derived.
+
+Rather than beginning with symmetric statistics and imposing directional interpretation afterward, the directional framework reverses the order: deviations relative to a benchmark are measured first, and symmetric statistics emerge only as aggregations of those directional components.
+
+The implications of this perspective are surprisingly broad.
+
+The next chapter begins with a result that illustrates the power of the framework:
+
+**the cumulative distribution function itself is a partial moment.**

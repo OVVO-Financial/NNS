@@ -1,0 +1,658 @@
+# Multivariate Forecasting
+
+Chapter 24 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
+
+But many forecasting problems are not univariate.
+
+Macroeconomic indicators move together.  
+Financial variables transmit shocks across markets.  
+Operational systems contain multiple indicators observed at different frequencies.  
+In all such cases, the future of one variable depends not only on its own past, but also on the lagged history of other variables.
+
+This chapter extends the forecasting framework from one time series to a **system of time series**.
+
+The package implementation is `NNS.VAR`, a **nonparametric vector autoregressive model incorporating `NNS.ARMA` estimates of variables into `NNS.reg` for a multivariate time-series forecast**. Its purpose is explicit: combine univariate nonlinear time-series forecasting with multivariate nonlinear regression so that each series can borrow information from the others while still retaining its own temporal structure.
+
+A second implementation, `NNS.nowcast`, wraps this framework for mixed-frequency macroeconomic forecasting and nowcasting, using a built-in panel of Federal Reserve style indicators and passing them to `NNS.VAR` with monthly alignment and a 12-lag structure.
+
+The key ideas of the chapter are therefore:
+
+- multivariate time-series dependence,
+- nonlinear vector autoregressive extensions,
+- directional cross-variable interactions,
+- mixed-frequency inputs,
+- and empirical forecasting systems built from these components.
+
+---
+
+## From Univariate to Multivariate Forecasting
+
+Let
+
+\[
+X_t =
+\begin{pmatrix}
+X_{1t}\\
+X_{2t}\\
+\vdots\\
+X_{pt}
+\end{pmatrix}
+\in \mathbb{R}^p
+\]
+
+denote a \(p\)-dimensional time series.
+
+In univariate forecasting, we model a future value as
+
+\[
+X_{t+h} = f(X_t, X_{t-1}, X_{t-2}, \dots) + \varepsilon_{t+h}.
+\]
+
+In the multivariate setting, each component may depend on the lagged history of every variable in the system:
+
+\[
+X_{j,t+h}
+=
+f_j\!\bigl(
+X_{1,t}, X_{1,t-1}, \dots,
+X_{2,t}, X_{2,t-1}, \dots,
+X_{p,t}, X_{p,t-1}, \dots
+\bigr)
++
+\varepsilon_{j,t+h},
+\qquad j=1,\dots,p.
+\]
+
+So the problem is no longer to forecast a single path in isolation. It is to estimate a **joint dynamic structure** in which variables affect one another through time.
+
+This is the motivation for vector autoregression.
+
+---
+
+## Classical VAR and Its Limits
+
+A classical vector autoregressive model of order \(k\), VAR\((k)\), is written
+
+\[
+X_t = c + A_1 X_{t-1} + A_2 X_{t-2} + \cdots + A_k X_{t-k} + \varepsilon_t,
+\]
+
+where \(c\) is a vector of intercepts, \(A_1,\dots,A_k\) are coefficient matrices, and \(\varepsilon_t\) is an innovation vector.
+
+This formulation is powerful because it allows each variable to depend on lagged values of all the others. But it also imposes several strong restrictions.
+
+### Linearity
+
+All effects enter linearly through the coefficient matrices. Threshold behavior, asymmetry, nonlinear interactions, and regime changes are not modeled directly.
+
+### Uniform lag structure
+
+Classical VAR usually imposes the same lag order across all variables, even when different variables operate naturally at different horizons.
+
+### Parametric residual thinking
+
+Forecast construction and inference are built around residual assumptions that may become fragile in heavy-tailed, asymmetric, or nonlinear environments.
+
+### Mixed-frequency difficulty
+
+Variables observed monthly, quarterly, weekly, or daily do not fit naturally into the same linear lag system without additional modeling layers.
+
+The NNS approach keeps the useful intuition of cross-variable lag forecasting while relaxing these structural restrictions.
+
+---
+
+## Nonparametric Vector Autoregression
+
+`NNS.VAR` reframes vector autoregression as a nonlinear nonparametric learning problem.
+
+The implementation has a clear architecture.
+
+### Stage 1: complete each series individually
+
+Each variable is first interpolated where values are missing and extrapolated forward using `NNS.ARMA`. The returned object explicitly includes
+
+- `interpolated_and_extrapolated`,
+- `univariate`,
+- `multivariate`,
+- `ensemble`,
+- and `relevant_variables`.
+
+This design is important. The multivariate forecast does not replace the univariate forecast. It is built on top of it.
+
+### Stage 2: construct lagged predictors
+
+The completed multivariate panel is transformed into a lag matrix.
+
+### Stage 3: reduce lagged predictors
+
+For each target variable, the lagged predictor set is screened using one of several relevance measures and a thresholding rule.
+
+### Stage 4: estimate nonlinear multivariate forecasts
+
+The retained lagged predictors are passed into the multivariate regression system through `NNS.stack` and `NNS.reg`.
+
+### Stage 5: combine univariate and multivariate information
+
+The final forecast is an ensemble of the univariate and multivariate components.
+
+So the “VAR” terminology remains conceptually appropriate, but the mechanism is no longer a linear matrix recursion. It is a **nonlinear regression surface over lagged multivariate data**.
+
+---
+
+## Lagged Predictor Geometry
+
+Suppose the observed system is stored in a matrix
+
+\[
+V =
+\begin{bmatrix}
+X_{11} & X_{21} & \cdots & X_{p1}\\
+X_{12} & X_{22} & \cdots & X_{p2}\\
+\vdots & \vdots & \ddots & \vdots\\
+X_{1T} & X_{2T} & \cdots & X_{pT}
+\end{bmatrix}.
+\]
+
+The first structural step is to generate lagged copies of each column. For a lag depth \(\tau\), these predictors include terms such as
+
+\[
+X_{j,t},\; X_{j,t-1},\; X_{j,t-2},\; \dots,\; X_{j,t-\tau}.
+\]
+
+A major advantage of `NNS.VAR` is that the lag argument `tau` is flexible.
+
+It may be
+
+- a single positive integer, applying the same lag depth to every variable,
+- a vector, assigning a single lag choice to each variable,
+- or a list, assigning multiple lags to each variable separately.
+
+Thus the lag structure need not be homogeneous.
+
+One variable may use only lag 1, another may use lags 1 through 6, and a third may use a sparse pattern such as \(1, 3, 12\). This flexibility is especially important in economic and financial systems, where different variables evolve over different time scales.
+
+Mathematically, the forecasting feature vector for one horizon may be written as
+
+\[
+Z_t
+=
+\bigl(
+X_{1,t}, X_{1,t-1}, \dots, X_{1,t-\tau_1},
+X_{2,t}, X_{2,t-1}, \dots, X_{2,t-\tau_2},
+\dots,
+X_{p,t}, X_{p,t-1}, \dots, X_{p,t-\tau_p}
+\bigr).
+\]
+
+The multivariate forecast for variable \(j\) is then
+
+\[
+\hat X_{j,t+h} = f_j(Z_t),
+\]
+
+with \(f_j\) estimated nonparametrically.
+
+---
+
+## Mixed-Frequency Inputs
+
+A central practical challenge in multivariate forecasting is **mixed-frequency data**.
+
+Examples include:
+
+- monthly inflation with quarterly GDP,
+- weekly claims with monthly industrial production,
+- daily market variables with monthly macroeconomic releases.
+
+If these series are aligned onto a common calendar, the lower-frequency variables necessarily contain missing entries at higher-frequency timestamps.
+
+Classical multivariate methods often require specialized machinery for this. The NNS framework instead treats the problem as a nonlinear interpolation and extrapolation task before multivariate estimation begins.
+
+Let
+
+\[
+V_t = (X_{1t},\dots,X_{pt}),
+\]
+
+with some entries unobserved because the reporting frequencies differ. `NNS.VAR` explicitly returns a matrix called `interpolated_and_extrapolated`, whose purpose is to replace missing values in the original panel using interpolation and univariate extrapolation. This is not an incidental preprocessing step. It is foundational to the mixed-frequency design of the method.
+
+Conceptually, the procedure is:
+
+1. place all series on a common index,
+2. fill interior gaps via interpolation,
+3. forecast trailing missing values using univariate nonlinear forecasting,
+4. build the lagged multivariate system on the completed panel.
+
+So mixed-frequency forecasting is handled natively, rather than being outsourced to a separate parametric state-space model.
+
+---
+
+## Dimension Reduction and Directional Relevance
+
+Once the lagged panel has been created, not all lagged predictors are equally informative for each target variable.
+
+`NNS.VAR` therefore applies a dimension-reduction step before forming the multivariate forecast. The user can choose among four relevance schemes:
+
+- `"cor"`: absolute Spearman correlation,
+- `"NNS.dep"`: nonlinear dependence weights,
+- `"NNS.caus"`: directional causation weights,
+- `"all"`: the average of the three relevance matrices.
+
+This is a substantive departure from classical VAR, where the usual practice is to include all lags up to the chosen order unless restrictions are imposed manually.
+
+Here the guiding question is:
+
+**Which lagged variables are actually relevant for forecasting this target?**
+
+The implementation answers this in two steps.
+
+### Step 1: compute relevance scores
+
+For a target variable \(Y\) and lagged predictors \(Z_1,\dots,Z_m\), a score \(r_\ell\) is computed for each predictor.
+
+Depending on `dim.red.method`, these are:
+
+\[
+r_\ell = |\rho_S(Y,Z_\ell)|,
+\]
+
+or the nonlinear dependence weight from `NNS.dep`, or the directional causation weight from `NNS.caus`, or their average.
+
+### Step 2: apply a threshold
+
+These relevance scores are then compared to the threshold selected by the preceding `NNS.stack` dimension-reduction step. A lagged predictor survives only if its score exceeds that threshold.
+
+So the selection rule is
+
+\[
+Z_\ell \text{ is retained}
+\quad \Longleftrightarrow \quad
+r_\ell > \theta,
+\]
+
+where \(\theta\) is the learned dimension-reduction threshold.
+
+If no lag exceeds the threshold, the implementation falls back to the full lagged predictor set rather than discarding the multivariate structure entirely.
+
+This deserves emphasis. The reduction step is not just “screening by method name.” It is a concrete thresholding rule applied to lag-specific relevance scores.
+
+---
+
+## Directional Cross-Variable Interactions
+
+Why are these relevance measures important?
+
+Because cross-variable forecasting effects are not generally linear, symmetric, or monotone.
+
+A lagged predictor may matter because:
+
+- it moves with the target linearly,
+- it influences the target nonlinearly,
+- or it exhibits directional causal strength that would be poorly summarized by a simple coefficient.
+
+The NNS framework is designed precisely for such cases.
+
+If variable \(X_k\) influences variable \(X_j\) only during downturns, only above a threshold, or only through asymmetric responses, then a linear VAR coefficient can understate or even obscure the relationship. By contrast, dependence weights from `NNS.dep` and directional weights from `NNS.caus` are built to recognize these nonlinear and asymmetric structures.
+
+So the multivariate forecasting problem becomes one of **discovering directional cross-variable interactions in lag space**.
+
+---
+
+## Multivariate Forecasting as Nonlinear Regression
+
+For each target variable \(X_j\), the forecasting problem can be written as
+
+\[
+X_{j,t+h} = f_j(Z_t),
+\]
+
+where \(Z_t\) is the selected lagged feature vector after dimension reduction.
+
+The surface \(f_j\) is estimated through the NNS regression framework rather than through a linear coefficient matrix. This is the conceptual heart of `NNS.VAR`.
+
+Multivariate autoregression is therefore reinterpreted as a supervised learning problem:
+
+- the response is the future value of one variable,
+- the predictors are lagged values of all variables,
+- the regression surface is estimated nonparametrically.
+
+This is still autoregression, but with nonlinear function estimation replacing linear matrix multiplication.
+
+---
+
+## Ensemble Construction
+
+One of the most important features of `NNS.VAR` is that the final output is not merely a multivariate forecast.
+
+For each target variable, the method returns:
+
+- a univariate forecast from `NNS.ARMA`,
+- a multivariate forecast from the nonlinear regression stack,
+- and an ensemble combining the two.
+
+Let
+
+\[
+\hat u_{j,t+h}
+\]
+
+denote the univariate forecast for variable \(j\), and let
+
+\[
+\hat m_{j,t+h}
+\]
+
+denote the multivariate forecast. The ensemble is
+
+\[
+\hat x_{j,t+h}
+=
+w^{(u)}_j \hat u_{j,t+h}
++
+w^{(m)}_j \hat m_{j,t+h},
+\qquad
+w^{(u)}_j + w^{(m)}_j = 1.
+\]
+
+If `naive.weights = TRUE`, the method uses equal weights:
+
+\[
+w^{(u)}_j = w^{(m)}_j = \frac12.
+\]
+
+If `naive.weights = FALSE`, the implementation is more precise than a simple “count of relevant variables.” It computes the proportion of selected lagged predictors that belong to the target variable itself.
+
+Let
+
+- \(n_{\text{own},j}\) be the number of retained lagged predictors for target \(j\) whose base variable is \(j\),
+- \(n_{\text{cross},j}\) be the number of retained lagged predictors whose base variable is not \(j\).
+
+Then
+
+\[
+w^{(u)}_j
+=
+\frac{n_{\text{own},j}}{n_{\text{own},j} + n_{\text{cross},j}},
+\qquad
+w^{(m)}_j
+=
+1 - w^{(u)}_j
+=
+\frac{n_{\text{cross},j}}{n_{\text{own},j} + n_{\text{cross},j}}.
+\]
+
+This is an elegant weighting rule.
+
+- If the selected structure is mostly own-lags, the forecast leans univariate.
+- If the selected structure is mostly cross-variable, the forecast leans multivariate.
+- If there is no usable distinction, the implementation falls back to equal weighting.
+
+So the ensemble is not arbitrary averaging. It is a structural weighting mechanism derived from the selected lag geometry.
+
+---
+
+## Relevant Variables as a Structural Map
+
+The output `relevant_variables` provides more than a convenience list. It gives a structural summary of the system learned by the model.
+
+For each target variable, it records the lagged predictors that survived the relevance threshold. This means the forecast comes with an interpretable dynamic footprint:
+
+- which own-lags matter,
+- which other variables matter,
+- and at which lag horizons they matter.
+
+This has an interpretation close to a learned nonlinear Granger map, but without restricting the analysis to linear coefficients or symmetric residual-based testing.
+
+The result is both predictive and explanatory.
+
+A variable may be forecast mainly by its own lagged history, by a sparse collection of related series, or by a broad network of interacting indicators. The model does not impose one of these patterns a priori; it discovers them from the data.
+
+---
+
+## A Small Synthetic Illustration
+
+Suppose we jointly forecast monthly inflation \(I_t\), unemployment \(U_t\), and industrial production \(P_t\), using lags through month 12.
+
+The full lag system would contain predictors such as
+
+\[
+I_{t-1}, I_{t-2}, \dots, I_{t-12},\;
+U_{t-1}, U_{t-2}, \dots, U_{t-12},\;
+P_{t-1}, P_{t-2}, \dots, P_{t-12}.
+\]
+
+But after dimension reduction, the retained structures for different targets need not look alike.
+
+For inflation, the model might retain mainly
+
+\[
+I_{t-1},\ I_{t-2},\ P_{t-1},
+\]
+
+indicating that short-run inflation persistence and recent production conditions are the dominant signals.
+
+For unemployment, the model might retain
+
+\[
+U_{t-1},\ U_{t-12},\ I_{t-3},
+\]
+
+suggesting a mixture of local persistence, annual seasonality, and delayed inflation spillover.
+
+This synthetic example illustrates the main point: the NNS system does not treat all targets as sharing the same lag law. Each response learns its own sparse multivariate structure.
+
+That is exactly what a nonlinear vector autoregression should do.
+
+---
+
+## Nowcasting with `NNS.nowcast`
+
+Nowcasting deserves special treatment because it is one of the most practical uses of the framework.
+
+`NNS.nowcast` is a wrapper built around `NNS.VAR`. It downloads a base panel of macroeconomic indicators, converts each to monthly frequency, merges them into a common panel, and then calls `NNS.VAR(econ_variables, h = h, tau = 12, nowcast = TRUE, naive.weights = naive.weights)`.
+
+This gives a ready-made mixed-frequency multivariate forecasting system.
+
+The built-in variable set includes indicators such as:
+
+- payroll employment,
+- job openings,
+- CPI and core CPI,
+- durable goods orders,
+- retail sales,
+- unemployment,
+- housing starts and permits,
+- industrial production,
+- personal income,
+- exports and imports,
+- construction spending,
+- unit labor cost,
+- real consumption spending,
+- real GDP,
+- weekly unemployment claims,
+- Treasury rates and yield spreads,
+- Federal Reserve balance sheet assets,
+- commodity prices,
+- federal funds,
+- producer prices,
+- labor force participation,
+- money supply,
+- and ADP payrolls.
+
+This is a practically meaningful nowcasting panel. It combines labor, inflation, output, rates, liquidity, spending, trade, and commodity signals in one monthly-aligned system.
+
+### What the nowcast output means
+
+The output of `NNS.nowcast` is not a single number. It returns the same five-part structure as `NNS.VAR`:
+
+- `interpolated_and_extrapolated`: the completed monthly panel after filling mixed-frequency gaps,
+- `relevant_variables`: the selected lagged predictors for each target,
+- `univariate`: the standalone `NNS.ARMA` forecasts,
+- `multivariate`: the nonlinear multivariate forecasts,
+- `ensemble`: the combined forecast.
+
+So in practice, nowcasting means more than “guess the current GDP number.” It means:
+
+1. align all indicators to the current monthly calendar,
+2. fill missing lower-frequency observations,
+3. estimate joint nonlinear lag relations,
+4. produce univariate, multivariate, and ensemble projections,
+5. inspect which variables were actually driving the current nowcast.
+
+This is a much richer object than a single real-time estimate.
+
+---
+
+## Prediction Intervals
+
+As in Chapter 16, point forecasts alone are not enough. Forecast uncertainty must also be quantified.
+
+The examples associated with both `NNS.VAR` and `NNS.nowcast` construct prediction intervals using `NNS.meboot`, `LPM.VaR`, and `UPM.VaR`.
+
+Suppose the forecasted path of a target series is
+
+\[
+\hat x_1,\hat x_2,\dots,\hat x_h.
+\]
+
+Bootstrap replicates are generated from the forecast path:
+
+\[
+\hat x^{*(1)}, \hat x^{*(2)}, \dots, \hat x^{*(B)}.
+\]
+
+Lower and upper forecast bounds are then obtained using partial-moment quantile operators:
+
+\[
+\text{Lower}_{\alpha}
+=
+\operatorname{LPM.VaR}(\alpha/2,\cdot),
+\qquad
+\text{Upper}_{\alpha}
+=
+\operatorname{UPM.VaR}(\alpha/2,\cdot).
+\]
+
+In the nowcasting examples, this is illustrated directly for GDP. The GDP ensemble path is bootstrapped with `NNS.meboot`, and lower and upper confidence bounds are then computed from `LPM.VaR` and `UPM.VaR`.
+
+The conceptual advantage is consistent with the rest of NNS:
+
+- no Gaussian residual assumption is required,
+- asymmetry is naturally allowed,
+- and dependence-preserving synthetic replicates can be generated rather than relying on iid residual resampling.
+
+---
+
+## Comparison with Classical VAR
+
+The difference between classical VAR and `NNS.VAR` can be summarized clearly.
+
+| Feature | Classical VAR | `NNS.VAR` |
+|---|---|---|
+| Functional form | Linear | Nonlinear nonparametric |
+| Lag structure | Usually common across variables | Scalar, vector, or list-based |
+| Missing mixed-frequency values | Requires extra modeling machinery | Built into interpolation and extrapolation |
+| Variable selection | Often manual or penalized | Built-in relevance screening with thresholding |
+| Multivariate dependence | Linear coefficients | Dependence and causation-aware feature selection |
+| Forecast output | One system forecast | Univariate, multivariate, relevant-variable map, and ensemble |
+| Ensemble weighting | Usually absent | Equal or structure-based own-lag versus cross-lag weighting |
+| Prediction intervals | Parametric or residual bootstrap | Partial-moment quantile intervals with `NNS.meboot` |
+
+The NNS version therefore preserves the idea that variables should be modeled jointly, but relaxes the linear and parametric restrictions around that idea.
+
+---
+
+## Why the Directional Framework Matters
+
+The contribution of the directional framework is not merely technical. It changes what multivariate forecasting can represent.
+
+### Nonlinearity is primary
+
+Forecast relationships do not need to be approximated by a global linear law.
+
+### Cross-variable effects can be asymmetric
+
+Dependence and causation can be directional, state-dependent, and nonlinear.
+
+### Mixed-frequency panels become tractable
+
+Incomplete higher-frequency panels are treated as a forecasting geometry problem rather than as a separate special case.
+
+### Univariate structure is preserved
+
+Each variable retains its own autoregressive signature through the univariate component.
+
+### Forecast combination is structural
+
+The ensemble reflects how much of the retained lag structure is own-history versus cross-variable history.
+
+These are not minor refinements. Together they turn vector autoregression into a flexible directional learning architecture.
+
+---
+
+## Empirical Applications
+
+The framework is naturally suited to systems in which variables move together, asymmetrically, and at different reporting frequencies.
+
+### Macroeconomics
+
+GDP, employment, inflation, industrial production, claims, rates, and spending variables are all natural candidates for mixed-frequency nonlinear nowcasting.
+
+### Finance
+
+Asset returns, volatility, spreads, rates, and macro variables often interact through threshold effects and asymmetric transmission.
+
+### Operations and supply chains
+
+Demand, inventories, labor, orders, and shipping activity may be observed on different calendars but still require joint forecasting.
+
+### Energy and commodities
+
+Production, inventories, spot prices, futures curves, and macro demand indicators evolve jointly but not linearly.
+
+In all these settings, the problem is not merely to fit a system. It is to discover how a dynamic system actually transmits information through time.
+
+---
+
+## Leakage-Safe Validation in Multivariate and Mixed-Frequency Settings
+
+Before evaluating forecast accuracy, the data pipeline itself must be audited for information timing and release-order integrity.
+
+In multivariate nowcasting/forecasting, leakage control is more delicate because indicators arrive asynchronously.
+
+Use the following rules:
+
+- **Vintage-consistent features**: at forecast origin `t`, include only indicator values actually released by `t`.
+- **Release-calendar alignment**: construct mixed-frequency regressors using publication timestamps, not finalized revised datasets.
+- **Origin-wise dimension reduction**: relevance screening/thresholding must be recomputed within each training window.
+- **Horizon-by-horizon evaluation**: report forecast and interval metrics by target horizon and by target variable.
+- **Stability diagnostics**: track how the `relevant_variables` set changes over origins to distinguish signal from selection noise.
+
+These rules make `NNS.VAR`/`NNS.nowcast` evaluations comparable to production conditions and prevent optimistic bias from look-ahead information.
+
+
+## Summary
+
+This chapter extended the NNS forecasting framework from univariate series to **multivariate forecasting**.
+
+The main results are:
+
+- A multivariate time series is treated as a nonlinear autoregression problem in lagged multivariate space.
+- `NNS.VAR` combines univariate `NNS.ARMA` forecasts with multivariate nonlinear regression forecasts.
+- The lag structure is flexible: `tau` may be a scalar, vector, or list.
+- Mixed-frequency inputs are handled through interpolation and extrapolation before constructing the lagged system.
+- Dimension reduction may be based on correlation, nonlinear dependence, directional causation, or their average.
+- A lagged predictor survives the reduction step only when its relevance score exceeds the learned threshold from the `NNS.stack` screening routine.
+- The ensemble forecast is either equally weighted or weighted according to the share of retained predictors that are own-lags versus cross-variable lags.
+- In classification-style forecasting tasks with skewed targets, NNS ensemble workflows can combine minority up-sampling and majority down-sampling across ensemble members to reduce imbalance bias.
+- The output `relevant_variables` provides a structural map of the learned dynamic system.
+- `NNS.nowcast` applies this architecture directly to a practical macroeconomic panel with mixed frequencies and monthly alignment.
+- Prediction intervals may be built nonparametrically using `NNS.meboot`, `LPM.VaR`, and `UPM.VaR`.
+
+Classical vector autoregression taught an important lesson: forecasting improves when variables are modeled jointly. The NNS framework retains that insight but frees it from linearity, common-frequency restrictions, and rigid parametric structure.
+
+The result is a forecasting system for nonlinear, asymmetric, mixed-frequency multivariate data:
+
+**nonparametric vector autoregression as directional multivariate learning through time.**
+
+---

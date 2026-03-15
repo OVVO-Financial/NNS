@@ -1,0 +1,476 @@
+# Recursive Mean-Split Estimation
+
+Part V of the book turns from probability representation and inference to **nonparametric estimation**.
+The goal of estimation is to recover unknown functional relationships from data without imposing a predetermined parametric form.
+
+A central object in many statistical problems is the **conditional mean function**
+
+\[
+f(x) = E[Y \mid X = x].
+\]
+
+Classical regression models estimate this relationship by specifying a functional form — linear, polynomial, or otherwise — and fitting parameters to the data.
+
+Nonparametric methods instead estimate \(f(x)\) directly from observations.
+Partition-based estimators are among the most intuitive approaches: the predictor space is divided into regions, and the conditional mean is estimated locally within each region.
+
+This chapter introduces the **recursive mean-split estimator**, the partition-based nonparametric method at the core of the NNS framework.
+The estimator recursively divides the data into regions based on conditional mean structure, producing a flexible estimator that adapts automatically to nonlinear relationships.
+
+Two distinct splitting modes are available. In **joint partitioning**, regions are defined by splitting simultaneously on both the predictor \(X\) and the response \(Y\) at their joint means, producing four partial-moment quadrants at each level. In **\(X\)-only partitioning**, regions are defined by splitting solely on the predictor mean, producing two subregions at each level. Both modes share the same limit condition and recursive logic; they differ in how region boundaries are located and how many subregions each split creates.
+
+The procedure reflects the same directional logic used throughout the book: just as variance decomposes into directional components relative to a benchmark, recursive mean splitting partitions the joint distribution according to deviations around conditional means.
+
+---
+
+## Motivation for Partition-Based Estimation
+
+Suppose we observe independent pairs
+
+\[
+(X_1, Y_1), \dots, (X_n, Y_n),
+\]
+
+where
+
+\[
+Y_i = f(X_i) + \varepsilon_i,
+\]
+
+and
+
+\[
+E[\varepsilon_i \mid X_i] = 0.
+\]
+
+The objective is to estimate the unknown regression function
+
+\[
+f(x) = E[Y \mid X = x].
+\]
+
+### Parametric approaches
+
+Parametric regression assumes a functional form such as
+
+\[
+f(x) = \beta_0 + \beta_1 x.
+\]
+
+While simple and interpretable, this assumption can be severely restrictive when the relationship between variables is nonlinear.
+
+### Nonparametric alternatives
+
+Nonparametric estimators relax these assumptions. Common examples include
+
+- kernel regression,
+- local polynomial regression,
+- partition estimators.
+
+Kernel methods estimate \(f(x)\) through weighted averages of nearby observations.
+However, they require selecting a **bandwidth parameter** that determines the smoothing scale, and the probability that any kernel function assigns positive mass to an exact observed value is zero — the estimate therefore cannot achieve an exact fit at all observations simultaneously.
+
+Partition estimators divide the predictor space into regions and compute averages within each region.
+The recursive mean-split method belongs to this class but differs from classical approaches through its **partial-moment splitting rule**, which anchors region boundaries directly to the geometry of the conditional mean.
+As the order parameter increases, the number of regions grows and the estimator converges to a perfect fit in finite steps.
+
+---
+
+## Conditional Mean Partitions
+
+Let \(P_n\) denote a partition of the data space into regions
+
+\[
+A_1, A_2, \dots, A_K.
+\]
+
+Within each region, the conditional mean is estimated by averaging the responses of observations whose predictors fall inside that region.
+
+For a predictor value \(x\), let
+
+\[
+A_n(x)
+\]
+
+be the cell containing \(x\). The partition estimator is
+
+\[
+\hat{f}_n(x)
+=
+\frac{1}{N_{n,x}}
+\sum_{i : X_i \in A_n(x)} Y_i,
+\]
+
+where
+
+\[
+N_{n,x} = \#\{ i : X_i \in A_n(x) \}
+\]
+
+is the number of observations in the cell.
+
+The estimate of \(f(x)\) is therefore the **average response within the region containing \(x\)**.
+
+This structure is flexible in three respects:
+
+- Regions adapt to nonlinear features of the conditional mean surface.
+- Local averages approximate the conditional expectation without a specified functional form.
+- Estimation is entirely data-driven.
+
+The **size and shape of regions determine the effective smoothing scale**: coarser regions produce smoother estimates; finer regions track local variation more closely.
+
+---
+
+## Recursive Splitting Algorithms
+
+The key design choice is how the regions \(A_k\) are constructed.
+
+The NNS recursive mean-split estimator builds partitions through an iterative procedure governed by an **order parameter** \(O\).
+At each order, each existing region is further subdivided.
+
+Two splitting modes are available, depending on whether regions are anchored to the joint distribution of \((X, Y)\) or to the marginal distribution of \(X\) alone.
+
+---
+
+## Joint Partitioning
+
+Joint partitioning defines regions by splitting simultaneously on both \(X\) and \(Y\) at their local means.
+
+### Initialization
+
+Begin with all \(n\) observations as a single region.
+
+### Splitting rule
+
+For a region \(R\) containing observations \(\{(X_i, Y_i)\}_{i \in I_R}\), compute the local means
+
+\[
+\bar{X}_R = \frac{1}{|I_R|} \sum_{i \in I_R} X_i,
+\qquad
+\bar{Y}_R = \frac{1}{|I_R|} \sum_{i \in I_R} Y_i.
+\]
+
+Partition the observations in \(R\) into four quadrants according to whether each observation lies above or below \(\bar{X}_R\) and \(\bar{Y}_R\):
+
+| Quadrant | Condition | Label |
+|----------|-----------|-------|
+| CoUPM | \(X_i > \bar{X}_R\) and \(Y_i > \bar{Y}_R\) | NE |
+| DUPM   | \(X_i \le \bar{X}_R\) and \(Y_i > \bar{Y}_R\) | NW |
+| DLPM   | \(X_i > \bar{X}_R\) and \(Y_i \le \bar{Y}_R\) | SE |
+| CoLPM  | \(X_i \le \bar{X}_R\) and \(Y_i \le \bar{Y}_R\) | SW |
+
+These four quadrants correspond directly to the four co-partial moment regions introduced in Chapter 10.
+The joint mean \((\bar{X}_R, \bar{Y}_R)\) is the point at which
+
+\[
+U_1(\bar{X}_R; X \mid R) = L_1(\bar{X}_R; X \mid R)
+\quad \text{and} \quad
+U_1(\bar{Y}_R; Y \mid R) = L_1(\bar{Y}_R; Y \mid R),
+\]
+
+so the split occurs precisely where the first-order upper and lower partial moments are balanced on both dimensions. Each observation is assigned to one of the four quadrants, with a **quadrant identification number** recorded at each level.
+
+### Recursion
+
+Within each nonempty quadrant, repeat the same procedure: compute local means and split into four subquadrants.
+Continuing to order \(O\) produces at most \(4^{O-1}\) nonempty regions.
+
+### Regression points
+
+The **regression points** of the partition are the local means \((\bar{X}_R, \bar{Y}_R)\) within each region.
+These points summarize the conditional mean surface and serve as the basis for prediction and curve fitting.
+
+---
+
+## \(X\)-Only Partitioning
+
+\(X\)-only partitioning defines regions by splitting solely on the mean of the predictor \(X\), without reference to \(Y\).
+
+### Initialization
+
+Begin with all \(n\) observations as a single region.
+
+### Splitting rule
+
+For a region \(R\) with observations \(\{(X_i, Y_i)\}_{i \in I_R}\), compute the local predictor mean
+
+\[
+\bar{X}_R = \frac{1}{|I_R|} \sum_{i \in I_R} X_i.
+\]
+
+Partition the observations into two subregions:
+
+\[
+R_L = \{ i \in I_R : X_i \le \bar{X}_R \},
+\qquad
+R_U = \{ i \in I_R : X_i > \bar{X}_R \}.
+\]
+
+Quadrant identifications in this mode are limited to the symbols 1 (left of the split) and 2 (right of the split).
+
+### Recursion
+
+Within each nonempty subregion, repeat the same procedure.
+Continuing to order \(O\) produces at most \(2^O\) nonempty regions.
+
+### Regression points
+
+The regression points are the local means \((\bar{X}_R, \bar{Y}_R)\) within each predictor-defined region.
+Because the region boundaries are determined by \(X\) alone, the regression points make use of the **full bandwidth** of the response values within each region for their \(Y\) coordinate.
+
+---
+
+## Comparison of Modes
+
+Both modes share the same conceptual foundation — recursive splitting at local means — and converge to a perfect fit as \(O\) grows. They differ in the following respects.
+
+| Property | Joint partitioning | \(X\)-only partitioning |
+|---|---|---|
+| Split dimensions | \(X\) and \(Y\) jointly | \(X\) only |
+| Subregions per split | 4 | 2 |
+| Regions at order \(O\) | at most \(4^{O-1}\) | at most \(2^O\) |
+| Quadrant IDs | digits 1–4 | digits 1–2 |
+| Region definition | Joint (X,Y) partial-moment quadrants | Predictor-space intervals |
+| Regression points | Joint quadrant means | Predictor-interval means |
+
+Joint partitioning converges faster due to exponential growth in regions and provides a richer representation of the joint distribution.
+\(X\)-only partitioning is more directly analogous to classical predictor-space partition estimators and is often preferred when a clear functional relationship \(Y = f(X)\) is the primary object of interest.
+
+### Stopping criteria
+
+Splitting terminates when any of the following conditions are met:
+
+- A region contains fewer than a user-specified minimum number of observations (minimum occupancy threshold).
+- The order parameter \(O\) reaches a user-specified maximum.
+
+The minimum occupancy threshold is quantitative and directly governs the coarsest admissible partition.
+This chapter establishes the consistency conditions on the order sequence and occupancy requirements that guarantee the estimator converges to \(f(x)\) as \(n \to \infty\).
+
+---
+
+## Partial-Moment Interpretation of Joint Partitioning
+
+The joint splitting rule has a precise interpretation in terms of the partial-moment framework developed in earlier chapters.
+
+Recall from Chapter 5 that variance decomposes into directional components:
+
+\[
+\text{Var}(X) = U_2(\mu_X; X) + L_2(\mu_X; X),
+\]
+
+where
+
+\[
+U_2(\mu_X; X) = E[(X - \mu_X)_+^2]
+\quad \text{and} \quad
+L_2(\mu_X; X) = E[(\mu_X - X)_+^2].
+\]
+
+Recursive joint splitting applies this logic at the level of the **conditional distribution within each region**.
+
+Each split separates observations into four directional groups defined by their co-partial-moment quadrant membership — the same four regions introduced in Chapter 10:
+
+- **CoUPM**: above \(\bar{X}_R\) and above \(\bar{Y}_R\),
+- **CoLPM**: below \(\bar{X}_R\) and below \(\bar{Y}_R\),
+- **DLPM**: above \(\bar{X}_R\) and below \(\bar{Y}_R\),
+- **DUPM**: below \(\bar{X}_R\) and above \(\bar{Y}_R\).
+
+The joint mean \((\bar{X}_R, \bar{Y}_R)\) is the unique point at which the first-order partial moments balance on both axes. Splitting at this point therefore exactly decomposes the local joint variability into its four directional components.
+
+By recursively applying this decomposition, the algorithm parses the joint distribution into regions of progressively refined directional structure.
+Areas where the conditional mean changes most rapidly — where the CoUPM and CoLPM quadrants are most unequal in their response means — are split more frequently as \(O\) increases, because the local means shift and the quadrant boundaries realign at each level.
+
+The resulting partition structure therefore reflects the geometry of the conditional mean surface, not an externally imposed grid.
+
+---
+
+## Multivariate Predictors
+
+For a predictor vector \(X_i \in \mathbb{R}^d\), the recursive mean-split procedure extends naturally.
+
+### Joint partitioning in \(\mathbb{R}^d\)
+
+In the multivariate joint case, the split at each region \(R\) uses the marginal means of each predictor dimension:
+
+\[
+\bar{X}_{R,j} = \frac{1}{|I_R|} \sum_{i \in I_R} X_{ij}, \quad j = 1, \dots, d.
+\]
+
+Observations are assigned to regions based on their position relative to \(\bar{X}_{R,j}\) on each predictor axis and relative to \(\bar{Y}_R\) on the response axis.
+
+### Regression point matrix
+
+For out-of-sample prediction with multiple predictors, the regression points are organized into a **regression point matrix (RPM)**. Each row of the RPM corresponds to one partition region; the columns record the local mean of each predictor dimension within that region.
+
+For a new observation \(x^* \in \mathbb{R}^d\), the prediction algorithm identifies the region in the RPM whose predictor means are closest to \(x^*\) along each dimension, then returns the corresponding local response mean as the prediction \(\hat{f}(x^*)\).
+
+Each observation receives a **multivariate NNS identifier** that encodes its region assignment across all predictor dimensions, with one index per predictor column in the RPM.
+
+---
+
+## Estimation Workflow
+
+In practice, recursive mean-split estimation follows a direct workflow.
+
+### Step 1 — Data preparation
+
+Collect paired observations
+
+\[
+(X_i, Y_i), \quad i = 1, \dots, n,
+\]
+
+with \(X_i \in \mathbb{R}^d\) for the multivariate case.
+
+### Step 2 — Select partitioning mode
+
+Choose joint partitioning (using both \(X\) and \(Y\) means) or \(X\)-only partitioning (using only the predictor mean), depending on the application.
+
+### Step 3 — Recursive mean splitting
+
+Iteratively apply the mean-split rule:
+
+1. Compute the local conditional means within the region.
+2. Divide observations according to their quadrant membership.
+3. Assign quadrant identifications and record regression points.
+4. Repeat within each subregion.
+
+### Step 4 — Stopping rule
+
+Terminate splitting when any region falls below the minimum occupancy threshold or when the order \(O\) reaches its maximum.
+
+### Step 5 — Prediction
+
+For a new predictor value \(x\):
+
+1. Identify the region \(A_n(x)\) containing \(x\) (univariate) or the matching row in the RPM (multivariate).
+2. Return the local response mean as the predicted value:
+
+\[
+\hat{f}_n(x)
+=
+\frac{1}{N_{n,x}}
+\sum_{i : X_i \in A_n(x)} Y_i.
+\]
+
+### Step 6 — Curve fitting (optional)
+
+The regression points at each order can be connected by **linear segments** to produce a piecewise-linear curve. This provides a smooth interpolating surface between partition means, supports well-defined interpolation and extrapolation, and reduces variance relative to a pure step-function estimator.
+
+---
+
+## Limit Condition and Perfect Fit
+
+A notable property of the recursive mean-split estimator is its **finite-order limit condition**.
+
+As the order \(O\) increases, the number of regions grows — exponentially in the joint case (\(4^{O-1}\)) or geometrically in the \(X\)-only case (\(2^O\)). At a finite order \(O^*\), every observation occupies its own region and becomes its own regression point. At this limit:
+
+\[
+\hat{f}_n(X_i) = Y_i \quad \text{for all } i = 1, \dots, n,
+\]
+
+and the \(R^2\) of the in-sample fit equals 1.
+
+This property distinguishes NNS from kernel regression, which cannot achieve an exact fit at all observations simultaneously due to the continuous support of the kernel function. The limit condition is reached in finite steps, not asymptotically.
+
+In practice, \(O\) is selected to balance fit quality against overfitting. Larger \(O\) reduces bias but increases variance; the appropriate order is determined by the signal-to-noise ratio of the data. The NNS dependence measure provides an objective criterion for this selection. This chapter formalizes the conditions under which the estimator is consistent for the true conditional mean \(f(x)\) as both \(n\) and \(O\) grow appropriately.
+
+---
+
+## Properties of the Recursive Mean-Split Estimator
+
+The recursive mean-split estimator possesses several important characteristics.
+
+### Nonparametric flexibility
+
+No functional form is imposed on the relationship between \(X\) and \(Y\).
+The estimator represents highly nonlinear relationships without specifying a parametric family.
+
+### Grounding in partial moments
+
+Region boundaries are defined by the same partial-moment structure — upper and lower deviations relative to a benchmark — that underlies the directional statistics developed throughout this book.
+The estimator is therefore not simply an ad hoc tree method but an application of the NNS partial-moment framework to the estimation of conditional expectations.
+
+### Data-adaptive partitions
+
+Regions are determined entirely by the data.
+Areas where the conditional mean changes rapidly receive finer partitions as \(O\) increases.
+
+### Implicit smoothing
+
+The order \(O\) governs the effective smoothing scale.
+Chapter 19 formalizes this by interpreting the partition cell diameter as a **dynamic bandwidth**, connecting the estimator to classical nonparametric smoothing theory.
+
+### Piecewise-linear interpolation
+
+Connecting regression points with line segments produces an interpolating surface that is stable, interpretable, and well-behaved for interpolation and extrapolation — properties that kernel-based nonparametric regressions do not generally share.
+
+### Finite limit condition
+
+At a finite order \(O^*\), every observation occupies its own region and the estimator achieves a perfect in-sample fit — \(\hat{f}_n(X_i) = Y_i\) for all \(i\). This property is not available to kernel or polynomial methods, which are intrinsically approximate. It provides a well-defined upper bound on approximation error and a principled spectrum of fits indexed by \(O\), from a single linear approximation at \(O = 1\) to exact interpolation at \(O = O^*\).
+
+---
+
+## Relationship to Other Methods
+
+The recursive mean-split estimator is related to several classical approaches but differs from each in important respects.
+
+### CART and decision trees
+
+CART algorithms select splits greedily to minimize impurity or squared prediction error, then apply pruning penalties to prevent overfitting.
+
+Recursive mean splitting differs in two key respects. First, the splitting criterion is the **conditional mean** of the data within the region, not an optimized impurity measure. Second, overfitting is controlled through the minimum occupancy threshold and the order parameter rather than through post-hoc pruning. The resulting partition structure follows the conditional mean geometry rather than an impurity landscape (Breiman et al., 1984).
+
+### Kernel regression
+
+Kernel estimators smooth data using a bandwidth parameter selected externally, often by cross-validation.
+
+Recursive mean-split estimation avoids explicit bandwidth selection: smoothing arises implicitly through the order parameter and the partition cell size. Chapter 19 makes this connection precise by showing that the cell diameter functions as a data-adaptive bandwidth.
+
+A further distinction concerns exactness of fit. Because all kernel functions are continuous probability distributions, the probability that a kernel function assigns positive mass to any exact observed value is zero. Consequently, the kernel estimate at any point is a weighted average over the surrounding distribution and can never exactly equal any single observation. The recursive mean-split estimator does not share this limitation: at finite order \(O^*\), it achieves an exact fit at every observed point simultaneously.
+
+### \(k\)-means clustering
+
+The NNS partition objective — minimizing within-quadrant sum of squares — is equivalent to the \(k\)-means objective when the number of clusters equals the number of partition regions. The key difference is that NNS does not require a pre-specified \(k\): the number of regions is determined by the order parameter \(O\) and the data, not by an externally supplied cluster count.
+
+### Fixed-grid estimators
+
+Uniform grids divide the predictor space into equally sized cells.
+Mean-split partitions are data-driven and adapt to the density and conditional mean geometry of the sample.
+
+---
+
+## Summary
+
+Recursive mean-split estimation provides a flexible, data-adaptive, nonparametric method for estimating conditional expectations.
+
+The key ideas developed in this chapter are:
+
+- Partition-based estimation of conditional means, using the local sample average within each region as the estimator.
+- Two splitting modes: joint \((X, Y)\) partitioning, which creates four partial-moment quadrants at each split, and \(X\)-only partitioning, which creates two predictor-interval subregions.
+- The joint splitting rule is grounded in the co-partial-moment structure of the NNS framework: region boundaries coincide with the joint conditional means, and the four quadrants correspond exactly to the CoUPM, CoLPM, DLPM, and DUPM regions.
+- An order parameter \(O\) governs partition depth; at a finite \(O^*\), the estimator achieves a perfect in-sample fit.
+- Multivariate predictors are handled via the regression point matrix (RPM), which assigns each observation a region identifier across all predictor dimensions.
+- Prediction connects regression points with local averages or piecewise-linear segments, supporting stable interpolation and extrapolation.
+
+These concepts provide the foundation for the next two chapters.
+
+This chapter establishes the **consistency of partition estimators**, showing that recursive mean-split estimation converges to the true conditional mean under standard regularity conditions on cell diameter and occupancy.
+
+Chapter 19 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing while preserving its data-adaptive character.
+
+---
+
+## References
+
+- Stone, C. J. (1977). *Consistent nonparametric regression*. *Annals of Statistics*, 5(4), 595–620.
+
+- Györfi, L., Kohler, M., Krzyżak, A., & Walk, H. (2002). *A Distribution-Free Theory of Nonparametric Regression*. Springer.
+
+- Breiman, L., Friedman, J. H., Olshen, R. A., & Stone, C. J. (1984). *Classification and Regression Trees*. Wadsworth.
+
+- Vinod, H. D., & Viole, F. (2018). Clustering and curve fitting by line segments. *Preprints*, 2018010090. https://doi.org/10.20944/preprints201801.0090.v1
+
+- Viole, F., & Nawrocki, D. (2012). Deriving nonlinear correlation coefficients from partial moments. *SSRN eLibrary*. https://doi.org/10.2139/ssrn.2148522
+
+- Viole, F. (2016). *NNS: Nonlinear nonparametric statistics*. R package. https://CRAN.R-project.org/package=NNS

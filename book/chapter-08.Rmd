@@ -1,0 +1,353 @@
+# Distribution Estimation
+
+Chapter 7 introduced directional descriptive statistics derived from partial moments.  
+Those statistics summarize distributions while preserving directional information relative to meaningful benchmarks.
+
+The next step is **distribution estimation**.
+
+Classical statistics typically represents distributions through either
+
+- parametric models (such as the normal distribution), or  
+- smoothed nonparametric estimators (such as kernel density estimation).
+
+Parametric models impose strong structural assumptions, while many nonparametric estimators require externally chosen smoothing parameters such as bandwidths.
+
+The directional framework provides a different approach. Because the cumulative distribution function is itself a partial moment, entire distributions can be estimated directly from **empirical partial moments** without parametric assumptions or externally chosen smoothing parameters.
+
+This chapter develops that approach.
+
+---
+
+## The Empirical Distribution Function
+
+Suppose we observe a sample
+
+\[
+x_1, x_2, \dots, x_n.
+\]
+
+The **empirical distribution function (EDF)** is defined as
+
+\[
+\hat{F}_n(t) =
+\frac{1}{n}\sum_{i=1}^{n} 1_{\{x_i \le t\}}.
+\]
+
+This quantity represents the proportion of observations less than or equal to the benchmark \(t\).
+
+The EDF is the classical nonparametric estimator of the cumulative distribution function.
+
+A fundamental property follows from the directional framework developed earlier. The cumulative distribution function can be written as a degree-zero partial moment:
+
+\[
+F_X(t) = L_0(t;X).
+\]
+
+Consequently, the empirical distribution function can be written as
+
+\[
+\hat{F}_n(t) =
+\frac{1}{n}\sum_{i=1}^{n} (t-x_i)_+^0.
+\]
+
+Thus the empirical distribution function is simply the **empirical degree-zero lower partial moment**.
+
+Distribution estimation therefore arises naturally within the directional framework.
+
+---
+
+## Empirical Partial Moment Estimators
+
+More generally, partial moments can be estimated directly from sample data.
+
+For degree \(r \ge 0\),
+
+\[
+\hat{L}_r(t) =
+\frac{1}{n}\sum_{i=1}^{n} (t-x_i)_+^r
+\]
+
+\[
+\hat{U}_r(t) =
+\frac{1}{n}\sum_{i=1}^{n} (x_i-t)_+^r.
+\]
+
+These estimators converge to the population partial moments
+
+\[
+L_r(t;X) = E[(t-X)_+^r]
+\]
+
+\[
+U_r(t;X) = E[(X-t)_+^r]
+\]
+
+by the law of large numbers.
+
+Thus empirical partial moments provide estimators of directional deviation structure that do not require specifying a parametric family.
+
+Importantly, the case \(r=0\) produces the empirical distribution function itself.
+
+---
+
+## Distribution Estimation from Partial Moments
+
+Because the cumulative distribution function equals the degree-zero partial moment,
+
+\[
+F_X(t) = L_0(t;X),
+\]
+
+estimating \(L_0\) directly estimates the distribution.
+
+The empirical estimator
+
+\[
+\hat{F}_n(t) =
+\frac{1}{n}\sum_{i=1}^{n} (t-x_i)_+^0
+\]
+
+therefore provides a **nonparametric estimate of the entire distribution**.
+
+This estimator has several desirable properties.
+
+### Nonparametric
+
+No parametric model is assumed, so the estimator applies broadly across distributional forms.
+
+### Data-Driven
+
+The estimate depends only on the observed sample.
+
+### Consistency
+
+By the **Glivenko–Cantelli theorem**,
+
+\[
+\sup_t |\hat{F}_n(t)-F_X(t)| \to 0.
+\]
+
+This theorem states that the empirical distribution converges uniformly to the true distribution. In practical terms, the **largest possible difference between the empirical and true cumulative distributions across all benchmarks becomes arbitrarily small as the sample size grows**. This result holds for all probability distributions under standard conditions, not only for continuous distributions.
+
+Thus the empirical distribution provides a reliable estimator of the entire probability distribution under the usual i.i.d. sampling framework.
+
+---
+
+## From Distribution to Density
+
+While the empirical distribution function estimates the cumulative distribution, analysts often wish to estimate the **probability density function**.
+
+For continuous distributions,
+
+\[
+f(t) = \frac{d}{dt}F_X(t).
+\]
+
+Because
+
+\[
+F_X(t) = L_0(t;X),
+\]
+
+this implies
+
+\[
+f(t) = \frac{d}{dt}L_0(t;X).
+\]
+
+In practice the empirical distribution function is a step function, so its derivative does not produce a smooth density estimate.
+
+This distinction is important: the EDF already gives a complete nonparametric estimate of the CDF, but obtaining a smooth density estimate typically requires additional regularity assumptions and/or smoothing choices.
+
+Classical statistics addresses this issue using **kernel density estimation**, which smooths the empirical distribution using a bandwidth parameter. Another common alternative is the **histogram estimator**, which approximates the density by counting observations within fixed intervals. However, histograms also require selecting a bin width, which plays a role analogous to the bandwidth in kernel density estimation.
+
+The directional framework approaches the problem differently. Rather than smoothing the distribution directly, it identifies structural features of the distribution—such as the **mode and local concentration of probability mass**—through data-adaptive procedures that do not require externally chosen smoothing parameters.
+
+These ideas are developed in the next chapter.
+
+---
+
+## Comparison with Kernel Density Estimation
+
+Kernel density estimation is one of the most widely used nonparametric density estimators.
+
+Given a kernel function \(K(\cdot)\) and bandwidth \(h\), the estimator is
+
+\[
+\hat{f}(t) =
+\frac{1}{nh}\sum_{i=1}^{n}
+K\left(\frac{t-x_i}{h}\right).
+\]
+
+The **kernel function** determines the shape of the local weighting (common choices include Gaussian, Epanechnikov, and uniform kernels), while the **bandwidth** controls the degree of smoothing.
+
+Bandwidth selection is critical.
+
+- If \(h\) is too small, the estimate becomes noisy.
+- If \(h\) is too large, important structure may be obscured.
+
+Selecting an appropriate bandwidth often requires cross-validation or heuristic rules.
+
+Empirical partial moment estimators avoid this issue for CDF estimation because they do not rely on smoothing parameters: the distribution estimate arises directly from the data. By contrast, smooth density estimation generally reintroduces smoothing or shape assumptions.
+
+---
+
+## Example: Empirical Partial Moments
+
+Consider the observations
+
+\[
+x = \{-3,-1,0,2,4\}.
+\]
+
+Let the benchmark be
+
+\[
+t = 1.
+\]
+
+The empirical distribution function becomes
+
+\[
+\hat{F}_n(1)=\frac{3}{5}=0.6
+\]
+
+since three observations are less than or equal to 1.
+
+Now compute the first-degree empirical partial moments.
+
+Lower partial moment:
+
+\[
+\hat{L}_1(1)=
+\frac{1}{5}\sum_{i=1}^{5}(1-x_i)_+
+\]
+
+\[
+=
+\frac{1}{5}(4+2+1+0+0)
+=
+1.4
+\]
+
+Upper partial moment:
+
+\[
+\hat{U}_1(1)=
+\frac{1}{5}\sum_{i=1}^{5}(x_i-1)_+
+\]
+
+\[
+=
+\frac{1}{5}(0+0+0+1+3)
+=
+0.8.
+\]
+
+These quantities describe the distribution relative to the benchmark \(t=1\):
+
+- 60% of observations lie below the benchmark  
+- the unconditional average shortfall below the benchmark is 1.4  
+- the unconditional average excess above the benchmark is 0.8
+
+Now compare with benchmark \(t=0\):
+
+\[
+\hat{F}_n(0)=\frac{3}{5}=0.6,
+\quad
+\hat{L}_1(0)=\frac{1}{5}(3+1+0+0+0)=0.8,
+\quad
+\hat{U}_1(0)=\frac{1}{5}(0+0+0+2+4)=1.2.
+\]
+
+At \(t=1\), unconditional shortfall dominates unconditional excess (1.4 vs 0.8); at \(t=0\), unconditional excess dominates unconditional shortfall (1.2 vs 0.8). This illustrates how directional conclusions can change with the benchmark, even for the same sample.
+
+Together, these statistics provide a directional description of the distribution that complements the empirical distribution function.
+
+---
+
+## Tail Sensitivity
+
+Because empirical partial moments aggregate deviations relative to benchmarks, they naturally reveal **tail structure**.
+
+Consider the first-degree lower partial moment
+
+\[
+\hat{L}_1(t) =
+\frac{1}{n}\sum_{i=1}^{n}(t-x_i)_+.
+\]
+
+This quantity measures the **unconditional average shortfall below the benchmark**.
+
+Similarly,
+
+\[
+\hat{U}_1(t) =
+\frac{1}{n}\sum_{i=1}^{n}(x_i-t)_+.
+\]
+
+measures the **unconditional average excess above the benchmark**.
+
+By examining these quantities across benchmarks \(t\), analysts can explore how deviations accumulate in the lower and upper regions of the distribution.
+
+The influence of extreme observations depends on the order of the partial moment. When \(r=0\) (the empirical distribution function), each observation contributes only through an indicator function and therefore influences the estimate equally regardless of magnitude. For \(r \ge 1\), however, deviations enter the calculation through powers of the distance from the benchmark. As the order \(r\) increases, extreme observations exert progressively greater influence on the estimate, reflecting the increasing emphasis on tail behavior.
+
+---
+
+## Robustness Properties
+
+Empirical distribution estimators possess several robustness advantages that follow directly from their nonparametric construction, while still inheriting standard finite-sample variability.
+
+First, they reduce **model risk**. Because no parametric distribution is imposed, misspecification from choosing an incorrect family is avoided.
+
+Second, the estimator is **transparent**. Each observation contributes directly to the estimate through the indicator function \(1_{\{x_i \le t\}}\), ensuring that the distribution estimate reflects the empirical data without additional smoothing or transformation.
+
+Third, the estimator improves **systematically with sample size**. As additional observations are collected, the empirical distribution converges uniformly to the true distribution.
+
+Because partial moments measure deviations relative to benchmarks, extreme observations influence the estimates in proportion to their deviation magnitude when \(r \ge 1\). In applications such as risk management, where extreme outcomes carry important information, this sensitivity can be desirable because it preserves tail behavior that smoothing-based estimators may dilute.
+
+---
+
+## Directional Distribution Analysis
+
+Combining empirical partial moments across benchmarks provides a detailed description of the distribution.
+
+For example, evaluating
+
+\[
+\hat{L}_0(t),\quad \hat{L}_1(t),\quad \hat{L}_2(t)
+\]
+
+across values of \(t\) reveals
+
+- probability mass below each benchmark,
+- average deviation below each benchmark,
+- variance contribution below each benchmark.
+
+Similarly,
+
+\[
+\hat{U}_0(t),\quad \hat{U}_1(t),\quad \hat{U}_2(t)
+\]
+
+describe corresponding behavior above the benchmark.
+
+Together these quantities form a **directional representation of the distribution**.
+
+Rather than summarizing the data with a few symmetric statistics, the directional framework allows analysts to examine how probability mass and deviation magnitudes accumulate across different regions of the distribution.
+
+---
+
+## Summary
+
+This chapter examined distribution estimation from the perspective of directional statistics.
+
+A key observation is that the cumulative distribution function itself is a partial moment. Consequently, empirical partial moments provide a natural nonparametric method for estimating entire probability distributions.
+
+Several conclusions follow.
+
+First, the empirical distribution function is the empirical degree-zero lower partial moment. Second, empirical partial moments provide consistent estimators of directional deviation structure. Third, distribution estimation can be performed without parametric assumptions or externally chosen smoothing parameters.
+
+While the empirical distribution function provides a complete description of the distribution, applied analysis also requires understanding how distributions interact across variables and across states of the sample space.
+
+The next chapter begins Part III on dependence by showing why classical correlation can fail under nonlinear and asymmetric structures, motivating directional dependence measures built from the same partial-moment foundation.

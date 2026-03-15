@@ -1,0 +1,552 @@
+# Clustering
+
+Chapters 17–19 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on **supervised estimation**, where a response variable \(Y\) is observed and the objective is to recover a conditional mean function.
+
+This chapter turns to **unsupervised learning**.
+
+In unsupervised learning there is no designated response variable. The goal is instead to discover **structure within the data itself**. Among the most fundamental unsupervised tasks is **clustering**: partitioning observations into groups whose members are more similar to one another than to members of other groups.
+
+Classical clustering methods such as **k-means** and **hierarchical clustering** are widely used, but they inherit familiar limitations:
+
+- k-means is driven by Euclidean distance and spherical-centroid geometry,
+- hierarchical clustering depends heavily on linkage rules,
+- both can obscure nonlinear, asymmetric, and benchmark-relative structure.
+
+The directional framework developed throughout this book suggests a different perspective.
+
+Rather than defining similarity purely by geometric distance, we can define it through **directional behavior relative to local benchmarks**. In this view, clustering is not merely grouping by proximity. It is grouping by **shared directional structure**.
+
+This chapter develops that idea using the partition machinery introduced in Chapters 17–19 and connects it to the NNS clustering procedure.
+
+---
+
+## What Clustering Seeks to Recover
+
+Suppose we observe multivariate data
+
+\[
+X_1, X_2, \dots, X_n \in \mathbb{R}^d.
+\]
+
+A clustering algorithm seeks a partition of the index set
+
+\[
+\{1,2,\dots,n\}
+=
+C_1 \cup C_2 \cup \cdots \cup C_K,
+\qquad
+C_j \cap C_\ell = \varnothing \text{ for } j \ne \ell,
+\]
+
+where each set \(C_k\) is interpreted as a **cluster**.
+
+The ideal is that observations within the same cluster share a common structural pattern, while observations in different clusters do not.
+
+But this raises an immediate question:
+
+**What does “similar” mean?**
+
+Different clustering methods answer this differently.
+
+- Euclidean methods define similarity through geometric closeness.
+- Density methods define similarity through connected regions of high probability mass.
+- Model-based methods define similarity through shared latent distributions.
+- Directional methods define similarity through shared benchmark-relative structure.
+
+The directional definition is particularly natural when the variables exhibit asymmetry, nonlinear dependence, or tail-specific behavior.
+
+---
+
+## Why Distance Alone Can Mislead
+
+The simplest clustering intuition is geometric distance.
+
+If two observations \(x_i\) and \(x_j\) are close in Euclidean norm,
+
+\[
+\|x_i - x_j\|,
+\]
+
+they are regarded as similar.
+
+This works well when clusters are compact, approximately spherical, and separated mainly by location.
+
+But many real datasets violate these conditions.
+
+### Nonlinear shape
+
+Two observations can lie on the same curved manifold and be structurally similar even if their straight-line distance is not especially small.
+
+### Asymmetric spread
+
+Clusters may have very different directional variability: wide in one direction, narrow in another.
+
+### Benchmark-relative structure
+
+Two points may be similar because they lie on the same side of a threshold across several variables, even if their raw coordinates differ.
+
+### Tail co-movement
+
+Observations may be grouped naturally by whether they occur jointly in extreme regions rather than by ordinary central distance.
+
+Distance alone therefore treats all directions symmetrically and all dimensions uniformly unless ad hoc reweighting is imposed.
+
+The directional framework instead asks whether observations share common **sign and magnitude of deviation** relative to meaningful benchmarks.
+
+---
+
+## Partition-Based Clustering
+
+The recursive mean-split machinery from Chapter 18 provides a natural unsupervised clustering mechanism.
+
+In supervised estimation, partition cells were used to approximate a regression surface. In clustering, the same recursive partitions can be interpreted directly as **unsupervised groupings of the data cloud**.
+
+Let \(R\subset \mathbb{R}^d\) denote a region containing a subset of observations. Define the local centroid
+
+\[
+\bar X_R = \frac{1}{|I_R|}\sum_{i\in I_R} X_i,
+\]
+
+where \(I_R\) indexes the observations in region \(R\).
+
+The directional idea is to partition the region relative to this local benchmark.
+
+In two dimensions this creates four quadrants. In \(d\) dimensions it creates up to \(2^d\) directional subregions, depending on which coordinates lie above or below their local means.
+
+At each stage:
+
+1. compute the local benchmark vector,
+2. assign each observation according to its directional deviation pattern,
+3. recurse within each nonempty subregion.
+
+This yields a tree of increasingly refined directional cells.
+
+The terminal cells form a clustering of the data.
+
+Unlike k-means, these clusters are not required to be spherical, convex, or globally separable by Voronoi boundaries. They arise from repeated local directional refinement.
+
+---
+
+## Directional Similarity
+
+To formalize the idea, let \(x_i, x_j \in \mathbb{R}^d\) be two observations and let \(t \in \mathbb{R}^d\) denote a benchmark vector.
+
+For each coordinate \(m = 1,\dots,d\), define the directional signs
+
+\[
+s_m(x_i;t) =
+\begin{cases}
+-1 & x_{im} \le t_m,\\
++1 & x_{im} > t_m.
+\end{cases}
+\]
+
+The vector
+
+\[
+s(x_i;t) = \bigl(s_1(x_i;t),\dots,s_d(x_i;t)\bigr)
+\]
+
+records the directional region occupied by \(x_i\) relative to the benchmark.
+
+Two observations are **directionally concordant** at benchmark \(t\) if
+
+\[
+s(x_i;t) = s(x_j;t).
+\]
+
+They are **directionally discordant** if they occupy different sign regions.
+
+This already gives a coarse notion of similarity: observations falling into the same directional cell share the same pattern of benchmark-relative deviations.
+
+A richer notion includes magnitudes. Define the directional deviation vectors
+
+\[
+u(x_i;t) = \bigl((x_{i1}-t_1)_+,\dots,(x_{id}-t_d)_+\bigr),
+\]
+
+\[
+\ell(x_i;t) = \bigl((t_1-x_{i1})_+,\dots,(t_d-x_{id})_+\bigr).
+\]
+
+These separate upward and downward deviations coordinatewise. Two observations can then be judged similar not only because they lie in the same directional region, but because their directional deviation magnitudes are similar.
+
+This is the unsupervised analogue of the partial-moment logic used throughout the book.
+
+---
+
+## Recursive Mean Splits as Unsupervised Structure Discovery
+
+The recursive clustering logic can be understood most clearly in low dimension.
+
+### Two-dimensional case
+
+Suppose each observation is a pair
+
+\[
+X_i = (X_{i1}, X_{i2}).
+\]
+
+Within a region \(R\), compute the local mean vector
+
+\[
+(\bar X_{R,1}, \bar X_{R,2}).
+\]
+
+This mean induces four directional regions:
+
+| Region | Condition |
+|---|---|
+| lower-lower | \(X_{i1}\le \bar X_{R,1}\), \(X_{i2}\le \bar X_{R,2}\) |
+| lower-upper | \(X_{i1}\le \bar X_{R,1}\), \(X_{i2}> \bar X_{R,2}\) |
+| upper-lower | \(X_{i1}> \bar X_{R,1}\), \(X_{i2}\le \bar X_{R,2}\) |
+| upper-upper | \(X_{i1}> \bar X_{R,1}\), \(X_{i2}> \bar X_{R,2}\) |
+
+Each nonempty region is then split again using its own local mean.
+
+This process produces a nested partition of the data cloud.
+
+### Higher-dimensional case
+
+In \(d\) dimensions the same principle applies, though the number of directional subregions per split can grow to \(2^d\). In practice one often works with lower-dimensional projections, selected variable subsets, or stopping rules that prevent excessive fragmentation.
+
+The core idea remains unchanged:
+
+**cluster structure is revealed by repeated directional partitioning around local benchmarks.**
+
+This is unsupervised because no response variable is needed. The geometry of the predictor cloud is itself the object of analysis.
+
+---
+
+## Relationship to Partial Moments
+
+The connection to partial moments is more than intuitive.
+
+Recall from earlier chapters that benchmark-relative structure is encoded by directional deviation operators. In clustering, those same operators summarize the local spread of each candidate cluster.
+
+For a region \(R\) and coordinate \(m\), define local partial moments about the regional mean \(t_m = \bar X_{R,m}\):
+
+\[
+U_r^{(R,m)} = \frac{1}{|I_R|}\sum_{i\in I_R}(X_{im}-\bar X_{R,m})_+^r,
+\]
+
+\[
+L_r^{(R,m)} = \frac{1}{|I_R|}\sum_{i\in I_R}(\bar X_{R,m}-X_{im})_+^r.
+\]
+
+These quantities describe the directional spread of the cluster in each coordinate.
+
+A region with balanced and small directional moments is relatively compact around its centroid. A region with large or highly asymmetric directional moments is more diffuse and may warrant further splitting.
+
+Thus recursive clustering can be interpreted as repeatedly refining regions whose directional spread remains structurally heterogeneous.
+
+In this way, clustering is tied directly to the same benchmark-relative decomposition that generated classical moments and dependence measures earlier in the book.
+
+---
+
+## Comparison with k-Means
+
+The most common partition-based clustering method is **k-means**.
+
+Given a desired number of clusters \(K\), k-means minimizes the within-cluster sum of squared Euclidean distances:
+
+\[
+\sum_{k=1}^K \sum_{i\in C_k} \|x_i - \mu_k\|^2,
+\]
+
+where \(\mu_k\) is the centroid of cluster \(C_k\).
+
+This objective has several advantages:
+
+- computational simplicity,
+- interpretability,
+- good performance for compact spherical clusters.
+
+But it also has well-known limitations.
+
+### Prespecified \(K\)
+
+The number of clusters must be chosen in advance.
+
+### Euclidean symmetry
+
+The method is driven by squared symmetric distance and therefore inherits the same aggregation logic criticized in earlier chapters.
+
+### Shape restriction
+
+Voronoi partitions are best suited to roughly spherical clusters.
+
+### Sensitivity to initialization
+
+Different random starts can produce different solutions.
+
+The directional partition approach differs in all four respects.
+
+1. It can generate a hierarchy of clusters without requiring a fixed \(K\) at the outset.
+2. It partitions by directional benchmark-relative structure rather than global squared distance alone.
+3. It accommodates irregular, asymmetric, and locally nonlinear cluster geometry.
+4. Its recursion is deterministic once the splitting rule and stopping criteria are specified.
+
+This does not imply that directional clustering dominates k-means in every setting. If the true cluster structure is spherical and centroid-based, k-means is efficient and appropriate. The point is that many real datasets are not.
+
+---
+
+## Comparison with Hierarchical Clustering
+
+Hierarchical clustering constructs nested groupings either by
+
+- **agglomeration**: successively merging points or clusters, or
+- **division**: successively splitting them.
+
+Its main attraction is that it yields a dendrogram rather than a single partition.
+
+However, hierarchical clustering also depends heavily on the chosen linkage rule:
+
+- single linkage,
+- complete linkage,
+- average linkage,
+- Ward’s method.
+
+Different linkage rules can produce very different cluster structures on the same data.
+
+The directional recursive partition procedure is also hierarchical, but its hierarchy is built from **local benchmark splits** rather than pairwise merge criteria.
+
+This yields several conceptual differences.
+
+### Geometry
+
+Hierarchical distance methods are governed by pairwise distances. Directional recursion is governed by local benchmark-relative partitions.
+
+### Interpretation
+
+Dendrogram merges may be difficult to interpret substantively. Directional splits are interpretable as above-below benchmark separations along specific coordinates or regions.
+
+### Local adaptivity
+
+Directional recursion recomputes local means inside each region, allowing the geometry to adapt as the partition deepens.
+
+Thus directional clustering can be viewed as a **benchmark-driven divisive hierarchical method**.
+
+---
+
+## Stopping Rules and Practical Cluster Formation
+
+A recursive partition procedure requires a stopping rule. Otherwise it eventually isolates individual observations.
+
+Several stopping criteria are natural.
+
+### Minimum cell size
+
+Stop splitting when a region contains fewer than some threshold number of observations.
+
+### Maximum order
+
+Stop after a fixed recursion depth.
+
+### Directional compactness
+
+Stop when local directional partial moments are sufficiently small, indicating that the region is already internally coherent.
+
+### Stability criteria
+
+Stop when further splits do not materially change the cluster assignments.
+
+These choices play a role analogous to model complexity control elsewhere in nonparametric estimation.
+
+In practice, one often combines them. For example:
+
+- split until order \(O\),
+- but do not split cells with fewer than \(m\) observations,
+- and stop early if directional spread falls below a tolerance.
+
+The terminal cells are then interpreted as clusters. Neighboring terminal cells can also be merged post hoc if a coarser partition is desired.
+
+---
+
+## Worked Example
+
+Consider the two-dimensional sample
+
+\[
+(-4,-3),\ (-3,-2),\ (-2,-1),\ (2,3),\ (3,4),\ (4,5),\ (8,-2),\ (9,-3).
+\]
+
+The global mean is
+
+\[
+\bar X_1 = \frac{-4-3-2+2+3+4+8+9}{8} = 2.125,
+\]
+
+\[
+\bar X_2 = \frac{-3-2-1+3+4+5-2-3}{8} = 0.125.
+\]
+
+The first split relative to \((2.125,0.125)\) produces three nonempty directional regions:
+
+- lower-lower: \((-4,-3), (-3,-2), (-2,-1)\)
+- upper-upper: \((3,4), (4,5)\)
+- upper-lower: \((8,-2), (9,-3)\)
+
+The point \((2,3)\) lies below the first coordinate benchmark and above the second, so it occupies the lower-upper region.
+
+Already the structure is visible:
+
+1. a lower-left cluster,
+2. an upper-right cluster,
+3. a right-lower cluster,
+4. a bridging point in the lower-upper region.
+
+A Euclidean method such as k-means with \(K=3\) might merge the bridge point with one of the dense groups depending on initialization and centroid geometry. The directional partition, however, recognizes immediately that the point has a distinct benchmark-relative sign pattern.
+
+If one recurses within the nonempty regions, the dense groups remain coherent while the bridge point either remains singleton or joins a nearby region depending on the stopping rule.
+
+This illustrates the central point:
+
+**directional clustering is sensitive to structural position relative to local benchmarks, not merely raw geometric distance.**
+
+---
+
+## Directional Similarity Matrices
+
+The clustering logic can also be expressed through a similarity matrix.
+
+For observations \(x_i\) and \(x_j\), define a directional similarity score
+
+\[
+S_{ij}(t)
+=
+\sum_{m=1}^d
+1_{\{s_m(x_i;t)=s_m(x_j;t)\}},
+\]
+
+which counts the number of coordinates for which the two observations lie on the same side of the benchmark.
+
+A normalized version is
+
+\[
+\tilde S_{ij}(t) = \frac{1}{d} S_{ij}(t),
+\qquad 0 \le \tilde S_{ij}(t) \le 1.
+\]
+
+This gives a benchmark-relative concordance measure.
+
+One may refine it by including magnitudes:
+
+\[
+S_{ij}^{(r)}(t)
+=
+\sum_{m=1}^d
+\left[
+1_{\{s_m(x_i;t)=s_m(x_j;t)\}}
+\cdot
+\exp\!\left(
+-\bigl|
+|x_{im}-t_m|^r - |x_{jm}-t_m|^r
+\bigr|
+\right)
+\right].
+\]
+
+The precise form can vary, but the principle is clear: similarity depends jointly on
+
+- side of benchmark,
+- magnitude of directional deviation.
+
+Such matrices can be used for visualization, graph-based clustering, or post-processing of recursive partitions.
+
+---
+
+## Unsupervised Learning Structures
+
+Clustering is often only the first step in unsupervised learning.
+
+Once a directional partition has been constructed, it supports several additional tasks.
+
+### Cluster prototypes
+
+Each cluster can be summarized by its local mean vector and directional spread profile.
+
+### Anomaly detection
+
+Observations falling into tiny or highly isolated terminal cells may be treated as anomalies.
+
+### Regime identification
+
+In time-indexed multivariate data, recurring visits to the same cluster can be interpreted as regimes or states.
+
+### Preprocessing for supervised learning
+
+Clusters can serve as features or as local neighborhoods for later regression and classification.
+
+Thus the partition is not just a grouping. It is a structural summary of the data cloud.
+
+This is especially important in the NNS framework, where the same recursive partitions reappear in estimation, dependence analysis, and machine learning.
+
+---
+
+## Applications
+
+Directional clustering is useful whenever structure is asymmetric, benchmark-relative, or nonlinear.
+
+### Finance
+
+Assets or time periods can be clustered by joint directional behavior, such as upside co-movement versus downside co-movement, rather than by symmetric return distance alone.
+
+### Economics
+
+Cross-sectional units can be grouped by shared threshold behavior relative to policy benchmarks, inflation targets, or growth regimes.
+
+### Risk management
+
+Scenarios can be clustered by tail-region structure, distinguishing ordinary variation from extreme co-occurring losses.
+
+### Operations
+
+Demand profiles can be grouped relative to service thresholds, stockout regions, or capacity limits.
+
+### Biostatistics
+
+Patients may cluster more meaningfully by benchmark-relative biomarker patterns than by raw Euclidean distance when thresholds matter clinically.
+
+In each case the essential advantage is the same: the clustering respects **direction and context**, not merely distance.
+
+---
+
+## Conceptual Interpretation
+
+Classical clustering often begins with a notion of “center” and measures how far each point lies from that center.
+
+The directional approach begins one level deeper.
+
+It asks:
+
+- on which side of the benchmark does the observation lie?
+- how far does it lie there?
+- does it share that directional structure with neighboring observations?
+- does further partitioning reveal additional heterogeneity?
+
+This mirrors the conceptual arc of the entire book.
+
+Classical statistics begins with symmetric aggregates.  
+Directional statistics begins with the components.
+
+Classical clustering begins with global distance.  
+Directional clustering begins with benchmark-relative structure.
+
+---
+
+## Summary
+
+This chapter introduced clustering as an unsupervised extension of the directional partition framework developed in earlier chapters. Its main contributions are fourfold.
+
+First, it defined **directional similarity**: observations are regarded as similar not merely when they are close in Euclidean distance, but when they share common benchmark-relative structure, including the sign and magnitude of their directional deviations.
+
+Second, it developed **recursive partition clustering** as a natural unsupervised use of mean-split partitioning. By repeatedly dividing the data cloud according to local benchmark-relative structure, the method produces clusters that adapt to asymmetry, irregular geometry, and nonlinear organization.
+
+Third, it established the **connection to partial moments**. Local upper and lower partial moments describe directional spread within each candidate cluster, providing a natural way to interpret coherence, heterogeneity, and the need for further refinement.
+
+Fourth, it compared the directional approach with **classical clustering methods** such as k-means and hierarchical clustering. Unlike k-means, the directional method does not rely solely on symmetric Euclidean centroid geometry; unlike standard hierarchical methods, it is driven by local benchmark splits rather than arbitrary linkage criteria.
+
+Taken together, these results show that clustering in the NNS framework is not simply a distance-based grouping exercise. It is a benchmark-relative structural decomposition of the data, consistent with the broader theme of the book: classical methods begin with symmetric aggregates, while directional methods begin with their components.
+
+The next chapter turns from unsupervised grouping to **nonparametric regression**, where these same partition structures are used to estimate conditional relationships directly from data.

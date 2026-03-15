@@ -1,0 +1,382 @@
+# Directional Dependence
+
+Chapter 9 showed that classical covariance and correlation arise from **aggregations of directional co-partial moments**. While correlation summarizes joint variation with a single symmetric statistic, many real-world relationships are **nonlinear, asymmetric, or concentrated in extreme events**.
+
+A familiar example occurs in financial markets. During ordinary periods, many assets appear weakly correlated. Yet during crises, losses often occur simultaneously across markets. Correlation averages across all observations and therefore may fail to capture this type of **asymmetric tail dependence**.
+
+Directional statistics addresses this limitation by examining how variables move relative to **benchmarks for each variable simultaneously**. Instead of collapsing joint behavior into a single number, the directional framework partitions the joint distribution and measures deviations within each region separately.
+
+This chapter develops **directional dependence** using co-partial moments. These statistics preserve the directional structure of the joint distribution and reveal nonlinear and asymmetric relationships that classical correlation can obscure.
+
+---
+
+## Directional Benchmarks
+
+Let \(X\) and \(Y\) be random variables with benchmarks \(t_X\) and \(t_Y\).
+
+Benchmarks may be chosen in several ways depending on the application:
+
+- **Internal benchmarks**, such as the mean or median.
+- **External benchmarks**, such as target returns or policy thresholds.
+- **Context-specific benchmarks**, reflecting operational constraints or decision thresholds.
+
+The benchmarks partition the joint distribution into four directional regions:
+
+\[
+X \le t_X, \quad Y \le t_Y
+\]
+
+\[
+X \le t_X, \quad Y > t_Y
+\]
+
+\[
+X > t_X, \quad Y \le t_Y
+\]
+
+\[
+X > t_X, \quad Y > t_Y
+\]
+
+These four regions represent combinations of directional deviations for the two variables.
+
+| | \(Y \le t_Y\) | \(Y > t_Y\) |
+|---|---|---|
+| \(X \le t_X\) | **CoLPM region** | **DUPM region** |
+| \(X > t_X\) | **DLPM region** | **CoUPM region** |
+
+Each quadrant corresponds directly to one of the four directional co-partial moments.
+
+---
+
+## Co-Partial Moments
+
+Let the positive-part operator be
+
+\[
+(x)^+ = \max(x,0).
+\]
+
+Directional co-partial moments measure joint deviations relative to the benchmarks.
+
+### Co-Lower Partial Moment
+
+\[
+CoLPM_{r,s}(X,Y)
+=
+E[(t_X-X)_+^r (t_Y-Y)_+^s]
+\]
+
+Joint deviations **below both benchmarks**.
+
+### Co-Upper Partial Moment
+
+\[
+CoUPM_{r,s}(X,Y)
+=
+E[(X-t_X)_+^r (Y-t_Y)_+^s]
+\]
+
+Joint deviations **above both benchmarks**.
+
+### Divergent Lower Partial Moment
+
+\[
+DLPM_{r,s}(X,Y)
+=
+E[(X-t_X)_+^r (t_Y-Y)_+^s]
+\]
+
+\(X\) above its benchmark while \(Y\) falls below.
+
+### Divergent Upper Partial Moment
+
+\[
+DUPM_{r,s}(X,Y)
+=
+E[(t_X-X)_+^r (Y-t_Y)_+^s]
+\]
+
+\(X\) below its benchmark while \(Y\) exceeds its benchmark.
+
+Together these four quantities provide a **directional decomposition of joint dependence**.
+
+---
+
+## Worked Example
+
+Consider the sample
+
+\[
+(X,Y) =
+(-3,-2), (-1,-1), (0,1), (2,4), (3,5).
+\]
+
+Let the benchmarks be
+
+\[
+t_X = 0, \quad t_Y = 0.
+\]
+
+Compute first-degree co-partial moments.
+
+### CoLPM
+
+\[
+CoLPM_{1,1}
+=
+\frac{1}{5}(3\cdot2 + 1\cdot1 + 0 + 0 + 0)
+=
+\frac{7}{5}
+=
+1.4
+\]
+
+### CoUPM
+
+\[
+CoUPM_{1,1}
+=
+\frac{1}{5}(0 + 0 + 0 + 2\cdot4 + 3\cdot5)
+=
+\frac{23}{5}
+=
+4.6
+\]
+
+### DLPM
+
+\[
+DLPM_{1,1} = 0
+\]
+
+### DUPM
+
+\[
+DUPM_{1,1} = 0
+\]
+
+The interpretation is immediate.
+
+- Downside dependence exists but is modest.
+- Upside deviations occur together strongly.
+- Divergent movements do not occur.
+
+In this dataset, whenever \(X\) is above its benchmark, \(Y\) is also above its benchmark, and whenever \(X\) is below its benchmark, \(Y\) is also below its benchmark. Consequently observations never fall into divergent regions.
+
+Boundary observations contribute zero to all co-partial moments. For example, the point \((0,1)\) lies exactly on the \(X\) benchmark, so both \((X-t_X)_+\) and \((t_X-X)_+\) equal zero.
+
+Real datasets rarely exhibit such perfect alignment, and in practice the divergent moments capture regions where one variable rises while the other falls.
+
+---
+
+## Dependence Versus Correlation
+
+Covariance aggregates directional components:
+
+\[
+Cov(X,Y)
+=
+CoUPM_{1,1}
++
+CoLPM_{1,1}
+-
+DLPM_{1,1}
+-
+DUPM_{1,1}.
+\]
+
+Correlation further standardizes covariance.
+
+\[
+(CoLPM,CoUPM,DLPM,DUPM)
+\rightarrow
+Cov(X,Y)
+\rightarrow
+Corr(X,Y)
+\]
+
+Directional statistics therefore preserves structural information lost through aggregation.
+
+---
+
+## Nonlinear Dependence Detection
+
+Directional dependence can reveal nonlinear relationships that correlation cannot detect.
+
+Consider
+
+\[
+Y = X^2
+\]
+
+with \(X\) symmetrically distributed around zero.
+
+In this case
+
+\[
+Corr(X,Y)=0.
+\]
+
+Despite zero correlation, the variables are perfectly dependent.
+
+Directional moments reveal the structure.
+
+When \(X>0\), both \(X\) and \(Y=X^2\) exceed their benchmarks, producing contributions to the **CoUPM region**.
+
+When \(X<0\), \(X\) lies below its benchmark while \(Y=X^2\) remains positive and therefore above its benchmark. These observations fall into the **DUPM region**, capturing the mirrored dependence structure.
+
+Thus the directional decomposition exposes dependence that the symmetric aggregation in correlation cancels.
+
+---
+
+## Asymmetric Dependence
+
+Many systems exhibit **asymmetric dependence**, where relationships differ between positive and negative deviations.
+
+Financial markets provide a common example.
+
+Assets may behave largely independently during rising markets but move strongly together during market crashes.
+
+In such cases
+
+\[
+CoLPM_{1,1} \gg CoUPM_{1,1}.
+\]
+
+A replicable simulation makes this asymmetry explicit. In the construction below, **negative shocks are shared** between both variables, while positive-side behavior is generated independently:
+
+```r
+set.seed(42)
+n <- 500
+shock <- rnorm(n)
+
+x <- ifelse(shock < 0, shock, rnorm(n))
+y <- ifelse(shock < 0, shock + rnorm(n, 0, 0.1), rnorm(n))
+
+NNS::Co.LPM(1, x, y, mean(x), mean(y))
+NNS::Co.UPM(1, x, y, mean(x), mean(y))
+NNS::D.LPM(1, 1, x, y, mean(x), mean(y))
+NNS::D.UPM(1, 1, x, y, mean(x), mean(y))
+```
+
+In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.
+
+Correlation averages across all regions and may therefore appear moderate even when downside dependence dominates.
+
+---
+
+## Tail-Sensitive Dependence
+
+Higher-order co-partial moments emphasize extreme deviations.
+
+Increasing the orders \(r\) and \(s\) increases sensitivity to large observations.
+
+\[
+CoLPM_{r,s}, \quad CoUPM_{r,s}
+\]
+
+measure **tail dependence**.
+
+For example, a risk manager concerned with extreme joint losses may examine \(CoLPM_{2,2}\) or higher orders rather than \(CoLPM_{1,1}\), since larger powers place greater weight on large deviations.
+
+---
+
+## Empirical Estimation
+
+Directional co-partial moments can be estimated from data.
+
+For observations
+
+\[
+(x_i,y_i), i=1,\dots,n
+\]
+
+the empirical estimators are
+
+\[
+\widehat{CoLPM}_{r,s}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(t_X-x_i)_+^r (t_Y-y_i)_+^s
+\]
+
+\[
+\widehat{CoUPM}_{r,s}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(x_i-t_X)_+^r (y_i-t_Y)_+^s
+\]
+
+\[
+\widehat{DLPM}_{r,s}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(x_i-t_X)_+^r (t_Y-y_i)_+^s
+\]
+
+\[
+\widehat{DUPM}_{r,s}
+=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(t_X-x_i)_+^r (y_i-t_Y)_+^s
+\]
+
+These converge to population values by the law of large numbers.
+
+Statistical inference for these estimators—including bootstrap procedures—is discussed later in the book when directional dependence measures are applied in empirical analysis.
+
+In practice these quantities are implemented in the **Nonlinear Nonparametric Statistics (NNS)** framework, which computes empirical co-partial moment matrices and nonlinear dependence measures.
+
+---
+
+## Directional Dependence Profiles
+
+Directional dependence can be studied across **multiple moment orders**.
+
+\[
+CoLPM_{1,1},CoLPM_{2,2},CoLPM_{3,3},\dots
+\]
+
+\[
+CoUPM_{1,1},CoUPM_{2,2},CoUPM_{3,3},\dots
+\]
+
+These sequences describe how dependence changes across the distribution.
+
+Example:
+
+| Order | CoLPM | CoUPM |
+|---|---|---|
+| 1 | 1.2 | 1.1 |
+| 2 | 3.9 | 1.4 |
+| 3 | 8.5 | 1.8 |
+
+Moderate deviations appear symmetric, but higher orders reveal increasing **downside dependence**.
+
+Directional profiles therefore show **how dependence evolves from ordinary fluctuations to extreme events**.
+
+---
+
+## Summary
+
+This chapter introduced directional dependence using co-partial moments.
+
+Key ideas:
+
+1. Joint distributions partition into four directional regions.
+2. Co-partial moments measure deviations within those regions.
+3. Covariance and correlation arise as **aggregations** of directional components.
+4. Directional statistics reveals nonlinear, asymmetric, and tail-specific dependence.
+5. Empirical estimators can be computed directly from data.
+6. Dependence profiles show how relationships evolve across deviation magnitudes.
+
+Correlation therefore represents only a limited summary of joint behavior.
+
+Directional dependence provides a richer representation of relationships between variables.
+
+The next chapter connects this framework to **copula interpretation**, linking directional partial moments with rank-based dependence structures used in multivariate statistics.

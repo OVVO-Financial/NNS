@@ -1,0 +1,622 @@
+# Dynamic Bandwidth Interpretation
+
+Chapters 17 and 18 established the recursive mean-split estimator as a **partition-based nonparametric regression method** and showed that, under standard regularity conditions, it is consistent for the true conditional mean function.
+
+A central idea now comes into focus:
+
+**the partition cell itself plays the role of a bandwidth.**
+
+In classical nonparametric estimation, smoothing is controlled by a user-chosen parameter.  
+In kernel regression this parameter is the bandwidth \(h\).  
+In histogram methods it is the bin width.  
+In splines it is the smoothing penalty.
+
+These quantities determine the scale over which observations are averaged.
+
+The recursive mean-split estimator also averages observations locally. But it does so without requiring the analyst to choose an external smoothing scale in the same way. Instead, the smoothing scale is induced by the partition:
+
+- large cells produce coarse smoothing,
+- small cells produce fine smoothing.
+
+This chapter interprets the partition diameter as a **dynamic, stochastic, location-dependent bandwidth**, and uses that interpretation to connect recursive mean-split estimation to the broader theory of nonparametric smoothing.
+
+---
+
+## Bandwidth in Classical Nonparametric Estimation
+
+The notion of bandwidth is central to classical nonparametric methods.
+
+In kernel regression, the Nadaraya–Watson estimator takes the form
+
+\[
+\hat f_h(x)
+=
+\frac{\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)Y_i}
+{\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)}.
+\]
+
+Here:
+
+- \(K(\cdot)\) is a kernel function,  
+- \(h>0\) is the bandwidth.
+
+The bandwidth determines how quickly weights decay as observations move away from \(x\).
+
+If \(h\) is small, only very nearby observations influence the estimate.  
+If \(h\) is large, distant observations receive substantial weight.
+
+Thus bandwidth governs the bias–variance tradeoff:
+
+- **small bandwidth** \(\rightarrow\) low bias, high variance,
+- **large bandwidth** \(\rightarrow\) high bias, low variance.
+
+The same logic appears in histogram regression and fixed-grid estimators.  
+There the analogue of \(h\) is the cell width.
+
+Although classical methods differ in form, they share a common structure:
+
+**they smooth by averaging observations over neighborhoods whose size is controlled by a tuning parameter.**
+
+This parameter is usually chosen by cross-validation, plug-in rules, or asymptotic heuristics.
+
+That choice is often difficult, unstable, and highly consequential.
+
+---
+
+## Local Averaging in the Recursive Mean-Split Estimator
+
+Recall from Chapter 18 that the recursive mean-split estimator has the form
+
+\[
+\hat f_n(x)
+=
+\frac{1}{N_{n,x}}
+\sum_{i:X_i\in A_n(x)} Y_i,
+\]
+
+where
+
+- \(A_n(x)\) is the terminal cell containing \(x\),
+- \(N_{n,x}\) is the number of observations in that cell.
+
+This is again a **local average**.
+
+The only difference is how the local neighborhood is defined.
+
+In kernel regression, the neighborhood is determined by a distance-weighting rule around \(x\).  
+In recursive mean-split estimation, the neighborhood is the partition cell \(A_n(x)\).
+
+So the estimator already has the essential structure of a smoother:
+
+1. identify a local region around \(x\),
+2. average the responses inside that region.
+
+The smoothing scale is therefore determined by the **size of the cell containing \(x\)**.
+
+This suggests the natural bandwidth analogue
+
+\[
+h_n(x) := \operatorname{diam}(A_n(x)),
+\]
+
+where \(\operatorname{diam}(A_n(x))\) denotes the diameter of the cell.
+
+This quantity depends on
+
+- the sample,
+- the recursive splitting path,
+- the predictor location \(x\),
+- the stopping rule.
+
+It is therefore **data-adaptive and location-specific**.
+
+---
+
+## Partition Diameter as Stochastic Bandwidth
+
+The interpretation
+
+\[
+h_n(x) := \operatorname{diam}(A_n(x))
+\]
+
+makes the connection precise.
+
+The recursive mean-split estimator can be viewed as a **local-constant smoother with random bandwidth \(h_n(x)\)**.
+
+This bandwidth differs from the classical kernel bandwidth in three important ways.
+
+### It is stochastic
+
+The cells are determined by the observed sample, so \(h_n(x)\) is random.
+
+### It is location-dependent
+
+Different regions of the predictor space can have different cell sizes:
+
+\[
+h_n(x_1) \neq h_n(x_2)
+\]
+
+in general.
+
+### It is endogenous
+
+The bandwidth is not imposed externally.  
+It emerges from the recursive mean-split geometry itself.
+
+This is the key conceptual shift.
+
+Classical bandwidth methods ask:
+
+**What smoothing scale should we choose?**
+
+The recursive mean-split framework instead asks:
+
+**What smoothing scale does the data imply through repeated mean-based partitioning?**
+
+The answer is encoded in the partition diameter.
+
+---
+
+## Adaptive Smoothing Mechanisms
+
+Why does the induced bandwidth adapt to data structure?
+
+Because the recursive mean-split rule repeatedly partitions the data around local means.
+
+In regions where the conditional mean function changes rapidly, successive splits generate finer cells.  
+In regions where the conditional mean is comparatively flat, fewer effective refinements are needed and cells remain larger.
+
+Thus the smoothing scale contracts more aggressively where the signal is more complex.
+
+This adaptivity is the geometric content of the estimator.
+
+To see the intuition, consider three stylized regions of a regression surface.
+
+### Flat region
+
+Suppose \(f(x)\) is nearly constant on some interval.  
+A large cell still produces a good approximation because averaging over that region introduces little bias.
+
+### Moderately curved region
+
+If \(f(x)\) changes gradually, recursive splitting creates smaller cells so that local averages track the curvature more closely.
+
+### Sharp structural change
+
+If \(f(x)\) changes abruptly, the partition must refine more aggressively to avoid pooling observations across substantively different conditional means.
+
+So the induced bandwidth is not globally fixed.  
+It contracts where localization is most needed.
+
+This is exactly what one wants from a nonparametric smoother.
+
+---
+
+## Relation to the Consistency Conditions
+
+Chapter 18 established that consistency requires two conditions:
+
+\[
+\operatorname{diam}(A_n(x)) \to 0
+\qquad\text{and}\qquad
+N_{n,x}\to\infty.
+\]
+
+Under the bandwidth interpretation, these become directly analogous to the standard kernel conditions
+
+\[
+h_n(x)\to 0
+\qquad\text{and}\qquad
+n_{\text{eff}}(x)\to\infty.
+\]
+
+The first condition says the local neighborhood must shrink, so that the estimator becomes localized and bias vanishes.
+
+The second says the number of observations used in the local average must grow, so that variance vanishes.
+
+Thus the recursive mean-split estimator satisfies the same asymptotic logic as classical nonparametric smoothing, but with the neighborhood size determined by partition geometry rather than by analyst choice.
+
+In this sense, Chapter 18 can be re-read entirely through the bandwidth lens:
+
+- shrinking cell diameter = shrinking bandwidth,
+- growing occupancy = growing effective local sample size.
+
+The bias–variance decomposition from Chapter 18 then becomes
+
+\[
+\hat f_n(x)-f(x)
+=
+\bigl(\hat f_n(x)-\bar f_n(x)\bigr)
++
+\bigl(\bar f_n(x)-f(x)\bigr),
+\]
+
+where the variance term is controlled by occupancy and the bias term is controlled by the dynamic bandwidth \(h_n(x)\).
+
+---
+
+## Local Averaging Interpretation
+
+The bandwidth interpretation also clarifies what the estimator is doing pointwise.
+
+For any \(x\), the recursive mean-split estimator averages over the region \(A_n(x)\):
+
+\[
+\hat f_n(x)
+=
+E_n[Y\mid X\in A_n(x)],
+\]
+
+where \(E_n\) denotes the empirical average.
+
+Thus \(\hat f_n(x)\) is the empirical conditional mean over a neighborhood whose diameter is \(h_n(x)\).
+
+This is exactly analogous to a local averaging estimator with adaptive window width.
+
+The distinction is that the “window” need not be symmetric, fixed-width, or even Euclidean in the simplistic kernel sense.  
+It is determined by recursive partition membership.
+
+This yields two useful perspectives.
+
+### Piecewise-constant view
+
+The estimator is constant within each terminal cell.  
+So the partition defines a locally constant regression surface.
+
+### Piecewise-linear view
+
+As Chapter 17 emphasized, connecting regression points by line segments yields a piecewise-linear representation.  
+This can be interpreted as smoothing the cellwise local averages into a continuous interpolation while preserving the same adaptive partition geometry.
+
+In either case, the underlying localization scale is still determined by the cell diameter.
+
+---
+
+## Comparison with Kernel Regression
+
+Kernel regression and recursive mean-split estimation share an essential principle:
+
+**both estimate \(f(x)\) by averaging responses from a local neighborhood around \(x\).**
+
+But they differ in how that neighborhood is defined.
+
+### Kernel regression
+
+Neighborhood influence is determined by weights
+
+\[
+K\!\left(\frac{x-X_i}{h}\right),
+\]
+
+with a user-specified bandwidth \(h\).
+
+### Recursive mean-split estimation
+
+Neighborhood influence is determined by membership in the terminal cell \(A_n(x)\), whose effective width is
+
+\[
+h_n(x)=\operatorname{diam}(A_n(x)).
+\]
+
+The contrast is important.
+
+#### External versus endogenous smoothing
+
+Kernel regression requires an externally chosen bandwidth.
+
+Recursive mean splitting generates its bandwidth from the data.
+
+#### Global versus local scale
+
+Kernel bandwidth is often global, unless one explicitly uses variable-bandwidth methods.
+
+Recursive mean splitting is inherently variable-bandwidth because cell sizes differ across locations.
+
+#### Weight decay versus region membership
+
+Kernel methods use continuously decaying weights.  
+Partition methods use discrete inclusion within a cell.
+
+#### Exact fit limit
+
+Kernel estimators remain weighted averages over continuous neighborhoods and do not achieve exact interpolation at all observed points simultaneously.
+
+Recursive mean-split estimation reaches a finite order \(O^*\) at which every point forms its own region and
+
+\[
+\hat f_n(X_i)=Y_i
+\]
+
+for all observed \(i\).
+
+Thus the recursive mean-split estimator spans a spectrum from coarse smoothing to exact interpolation through the order parameter and occupancy rule.
+
+---
+
+## Comparison with Fixed-Grid Estimators
+
+Fixed-grid partition methods divide the predictor space into prespecified intervals or cells.
+
+These methods have a bandwidth analogue as well: the grid width.
+
+But they suffer from a major limitation:
+
+**the grid is chosen before seeing the geometry of the data.**
+
+As a result:
+
+- dense regions may be oversmoothed,
+- sparse regions may be undersmoothed,
+- boundaries may cut across important nonlinear structure.
+
+Recursive mean-split estimation avoids this problem by generating the partition from the observed sample.
+
+So while both methods can be written as local averages over cells, only the recursive mean-split approach makes the bandwidth
+
+- stochastic,
+- endogenous,
+- responsive to conditional mean geometry.
+
+This is why the phrase **dynamic bandwidth** is appropriate: the smoothing scale changes with the data, the location, and the recursive structure of the estimator.
+
+---
+
+## Comparison with CART and Tree-Based Methods
+
+CART and related tree methods also induce adaptive partitions.
+
+This makes them the closest classical relatives of recursive mean-split estimation.
+
+But the source of adaptivity differs.
+
+### CART
+
+Splits are selected greedily to optimize impurity reduction or squared-error reduction, usually followed by pruning or complexity penalties.
+
+### Recursive mean splitting
+
+Splits are anchored to the **local mean structure** of the data itself.
+
+This distinction matters because it changes the meaning of the induced bandwidth.
+
+In CART, cell size reflects the outcome of a greedy optimization path under a chosen impurity criterion.
+
+In recursive mean splitting, cell size reflects repeated partitioning around benchmark-relative local means. The bandwidth is therefore connected to the same directional benchmark logic developed throughout the book.
+
+So although both methods are adaptive partition estimators, the recursive mean-split bandwidth is structurally tied to the directional framework rather than merely to greedy optimization.
+
+---
+
+## A Simple Illustrative Example
+
+Consider the univariate sample
+
+\[
+(X,Y)=
+(1,2), (2,3), (3,3), (6,8), (7,9), (8,9).
+\]
+
+Suppose the first split occurs at the predictor mean
+
+\[
+\bar X = \frac{1+2+3+6+7+8}{6}=4.5.
+\]
+
+This creates two predictor regions:
+
+- left cell: \(X \le 4.5\),
+- right cell: \(X > 4.5\).
+
+The cellwise means are
+
+\[
+\hat f_{\text{left}} = \frac{2+3+3}{3}=\frac{8}{3},
+\qquad
+\hat f_{\text{right}} = \frac{8+9+9}{3}=\frac{26}{3}.
+\]
+
+At this stage, the effective bandwidths are roughly the cell diameters:
+
+\[
+h_{\text{left}} \approx 3-1 = 2,
+\qquad
+h_{\text{right}} \approx 8-6 = 2.
+\]
+
+So both regions use a relatively coarse smoothing scale.
+
+Now suppose the right cell is split again because its internal structure warrants further refinement.  
+Then two smaller subcells are created, each with smaller diameter. Their corresponding bandwidths contract.
+
+The estimate in that region becomes more local.
+
+This simple example illustrates the principle:
+
+**every additional split reduces the effective bandwidth in the affected region.**
+
+Unlike a kernel estimator, which changes smoothness by altering a global numeric parameter \(h\), the recursive mean-split estimator changes smoothness by refining the partition itself.
+
+---
+
+## The Order Parameter as Global Smoothing Control
+
+Although the bandwidth is local and stochastic, the order parameter \(O\) still plays an important global role.
+
+Increasing \(O\):
+
+- increases the number of potential regions,
+- decreases typical cell diameter,
+- reduces bias,
+- increases variance,
+- pushes the estimator toward exact interpolation.
+
+So \(O\) functions as a global control on the *capacity* of the partition, while the realized bandwidths \(h_n(x)\) provide the local smoothing scales.
+
+This is an important distinction.
+
+- \(O\) is not itself the bandwidth.
+- Rather, \(O\) regulates how small the bandwidths are allowed to become.
+
+In that sense, the recursive mean-split estimator combines
+
+- a **global refinement control** through \(O\), and
+- **local adaptive smoothing** through \(h_n(x)=\operatorname{diam}(A_n(x))\).
+
+This dual structure helps explain why the method can be both flexible and interpretable.
+
+---
+
+## Multivariate Interpretation
+
+The bandwidth interpretation extends naturally to multivariate predictors.
+
+If \(X \in \mathbb{R}^d\), then each terminal region \(A_n(x)\) is a subset of \(d\)-dimensional predictor space. Its diameter may be defined as
+
+\[
+\operatorname{diam}(A_n(x))
+=
+\sup_{u,v\in A_n(x)} \|u-v\|.
+\]
+
+Then
+
+\[
+h_n(x) := \operatorname{diam}(A_n(x))
+\]
+
+again acts as the effective smoothing scale.
+
+The same logic applies:
+
+- large multivariate cells imply broader smoothing,
+- small multivariate cells imply finer localization.
+
+Of course, as in all nonparametric methods, higher dimension makes localization more difficult.  
+This is another form of the curse of dimensionality.
+
+But the dynamic-bandwidth interpretation remains valid:
+
+the recursive mean-split estimator is still a local averaging method whose neighborhood size is determined by the geometry of the terminal cell.
+
+---
+
+## Advantages of the Dynamic Bandwidth View
+
+Interpreting recursive mean-split estimation through bandwidth offers several conceptual advantages.
+
+### It links NNS to classical smoothing theory
+
+The estimator is not an isolated procedure.  
+It belongs to the same family of local averaging methods as kernels and histograms.
+
+### It clarifies the consistency proof
+
+The shrinking-diameter condition from Chapter 18 is simply the shrinking-bandwidth condition in disguise.
+
+### It explains adaptivity
+
+Because the bandwidth is generated by the data, smoothing automatically varies across regions.
+
+### It avoids arbitrary external tuning in the classical sense
+
+Rather than choosing a bandwidth directly, the analyst controls partition refinement and occupancy, while the local smoothing scale emerges endogenously.
+
+### It preserves interpretability
+
+Each bandwidth corresponds to an actual region of the observed data, not merely to a tuning number in a weighting formula.
+
+---
+
+## Limitations of the Interpretation
+
+The bandwidth analogy is powerful, but it should not be overstated.
+
+The recursive mean-split estimator is **not literally a kernel estimator**.
+
+Several differences remain.
+
+### Discrete rather than continuous weighting
+
+Partition estimators assign observations to cells; kernel estimators assign smoothly varying weights.
+
+### Geometry depends on recursive splitting path
+
+The induced bandwidth reflects the history of the partition algorithm, not just raw Euclidean distance.
+
+### Rate theory is less developed
+
+Classical kernel estimators have a deeply developed optimal-rate theory. For recursive mean-split estimation, the main established result is consistency. Comparable rate-optimality results would require stronger assumptions and additional analysis.
+
+### High-dimensional sparsity remains
+
+Dynamic bandwidth does not eliminate the curse of dimensionality. It only makes the smoothing scale adaptive within that constraint.
+
+So the correct conclusion is not that recursive mean splitting replaces kernel methods in every respect, but that it provides a **different adaptive smoothing mechanism** grounded in directional partition geometry.
+
+---
+
+## Structural Interpretation within NNS
+
+This chapter also completes an important conceptual arc in the book.
+
+Earlier chapters showed that directional deviation operators generate:
+
+- cumulative distribution functions,
+- classical moments,
+- nonlinear dependence measures,
+- benchmark-relative probability statements.
+
+Chapters 17 and 18 then showed that recursive mean splitting uses benchmark-relative geometry to define estimation regions and produces a consistent estimator.
+
+This chapter adds the final interpretation:
+
+**those same deviation-defined regions induce a stochastic bandwidth.**
+
+So the NNS estimator is not merely a partition rule.
+
+It is an adaptive smoothing procedure whose local scale is generated by recursive benchmark-relative decomposition.
+
+The structural message is therefore unified:
+
+- directional deviations define probability mass,
+- directional deviations decompose moments,
+- directional deviations reveal dependence,
+- directional deviations generate estimation regions,
+- and those regions determine the local smoothing scale.
+
+Bandwidth, in this framework, is not an external input.
+
+It is an emergent property of the directional partition itself.
+
+---
+
+## Summary
+
+The main ideas of this chapter are:
+
+- Classical nonparametric methods smooth by averaging over neighborhoods whose size is controlled by a bandwidth or bin width.
+- The recursive mean-split estimator is also a local averaging estimator, but its neighborhood is the terminal partition cell \(A_n(x)\).
+- The natural bandwidth analogue is the cell diameter
+
+\[
+h_n(x)=\operatorname{diam}(A_n(x)).
+\]
+
+- This bandwidth is **stochastic, location-dependent, and endogenous**.
+- Regions where the conditional mean varies more sharply receive finer partitions and therefore smaller effective bandwidths.
+- The consistency conditions from Chapter 18 become the direct analogues of shrinking-bandwidth conditions in kernel regression.
+- Recursive mean-split estimation therefore belongs to the broader family of adaptive smoothing methods, while preserving the directional benchmark logic of the NNS framework.
+
+The next chapter turns from the smoothing interpretation of recursive mean splitting to one of its major practical consequences:
+
+**clustering**.
+
+If recursive partitioning can define local estimation neighborhoods, it can also define groups of structurally similar observations.
+
+
+## References
+
+- Wand, M. P., and Jones, M. C. (1995). *Kernel Smoothing*. Chapman and Hall.
+- Fan, J., and Gijbels, I. (1996). *Local Polynomial Modelling and Its Applications*. Chapman and Hall.

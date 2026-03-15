@@ -1,0 +1,53 @@
+# Appendix: Notation and Function Reference
+
+This appendix consolidates the notation used across the book and maps each object to its primary R implementation pattern. It is intended as a quick lookup for readers moving between theoretical sections and code-first workflows.
+
+Unless otherwise noted, all functions in this appendix come from the **NNS** package. In executable code, load the package once and then call functions directly as shown in the table entries below.
+
+```r
+library(NNS)
+```
+
+## Core directional operators and partial moments
+
+| Symbol | Definition | Interpretation | R function / pattern |
+|---|---|---|---|
+| $x^+$ | $\max(x,0)$ | Positive-part operator | `pmax(x, 0)` |
+| $(X-t)^+$ | $\max(X-t,0)$ | Deviation above benchmark $t$ | internal to `UPM(...)` |
+| $(t-X)^+$ | $\max(t-X,0)$ | Deviation below benchmark $t$ | internal to `LPM(...)` |
+| $L_r(t;X)$ | $E[(t-X)_+^r]$ | Lower partial moment, degree $r$ | `LPM(r, t, X)` |
+| $U_r(t;X)$ | $E[(X-t)_+^r]$ | Upper partial moment, degree $r$ | `UPM(r, t, X)` |
+| $L_r/(L_r+U_r)$ | Degree-$r$ lower ratio | Directional CDF-style probability below $t$ | `LPM.ratio(r, t, X)` |
+| $U_r/(L_r+U_r)$ | Degree-$r$ upper ratio | Directional probability above $t$ | `UPM.ratio(r, t, X)` |
+
+## Co-partial moments, dependence, and causation
+
+| Symbol | Definition / role | R function |
+|---|---|---|
+| $CoLPM, CoUPM$ | Concordant lower/upper co-partial moments | `Co.LPM(...)`, `Co.UPM(...)` |
+| $DLPM, DUPM$ | Divergent lower/upper co-partial moments | `D.LPM(...)`, `D.UPM(...)` |
+| $NNS.dep(X,Y)$ | Global nonlinear dependence measure | `NNS.dep(x, y)` |
+| $NNS.copula(X,Y)$ | Nonparametric dependence geometry / copula view | `NNS.copula(x, y)` |
+| $NNS.caus(X,Y)$ | Directional causation diagnostic | `NNS.caus(x, y)` |
+
+## Distribution comparison, dominance, and interval objects
+
+| Symbol | Definition / role | R function |
+|---|---|---|
+| $F^{(0)}(t)$ | Degree-zero empirical CDF (step measure) | `ecdf(x)(t)` or `LPM.ratio(0, t, x)` |
+| $F^{(1)}(t)$ | Degree-one continuous CDF-style ratio | `LPM.ratio(1, t, x)` |
+| $p = P(X' > Y')$ | Directional exceedance probability for pairwise comparison | estimated by cross-sample indicator averages |
+| $\text{Certainty}_{\text{ANOVA}}$ | NNS ANOVA agreement certainty from CDF benchmark deviations ($1$ = strongest agreement) | `NNS.ANOVA(...)` |
+| FSD / SSD / TSD | First-, second-, third-order stochastic dominance | `NNS.FSD(...)`, `NNS.SSD(...)`, `NNS.TSD(...)` |
+| $Q^-_{d}(\alpha)$ | Lower degree-$d$ quantile | `LPM.VaR(alpha, degree = d, x)` |
+| $Q^+_{d}(\alpha)$ | Upper degree-$d$ quantile | `UPM.VaR(alpha, degree = d, x)` |
+| PI$_{1-\alpha}$ | Prediction interval $[Q^-_d(\alpha/2),Q^+_d(\alpha/2)]$ | `LPM.VaR(...)` + `UPM.VaR(...)` |
+
+## Regression and forecasting workflow objects
+
+| Symbol | Definition / role | R function |
+|---|---|---|
+| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` |
+| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs |
+| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` |
+| Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows |

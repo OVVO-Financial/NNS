@@ -1,0 +1,397 @@
+# Conditional Probability and Bayes' Theorem
+
+Chapters 9–11 established the directional framework for analyzing relationships between variables. A central missing ingredient for inference is **conditional probability**: how the probability of one event changes when information about another event becomes available.
+
+Classical statistics defines conditional probability through probability ratios. The directional framework provides a deeper interpretation: conditional probabilities arise directly from **degree-zero co-partial moments**, and Bayes' theorem follows as a simple algebraic identity within this structure. Moreover, degree-one co-partial moments go further — they are not merely risk metrics but **distributional generators** from which the full joint law can be recovered through differentiation.
+
+This chapter develops the directional formulation of conditional probability, derives Bayes' theorem from partial-moment relationships, and connects degree-zero and degree-one co-partial moments to establish their joint role in inference.
+
+---
+
+## Classical Conditional Probability
+
+Let \(A\) and \(B\) be events with \(P(B) > 0\).
+
+The classical definition of conditional probability is
+
+\[
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}.
+\]
+
+The numerator represents the probability that both events occur simultaneously. The denominator represents the probability that the conditioning event occurs.
+
+Conditional probability therefore measures the **relative frequency of \(A\) within the subset of outcomes where \(B\) occurs**.
+
+This definition leads directly to the **multiplication rule**
+
+\[
+P(A \cap B) = P(A \mid B)\,P(B).
+\]
+
+The directional framework reproduces these relationships naturally through partial moments — and in doing so, reveals their geometric origin in the joint distribution.
+
+---
+
+## Events as Degree-Zero Partial Moments
+
+From Chapter 3, the cumulative distribution function can be written as a degree-zero lower partial moment:
+
+\[
+F_X(t) = L_0(t;\,X) = P(X \le t).
+\]
+
+Events defined by inequalities correspond directly to degree-zero partial moments. For two variables \(X\) and \(Y\),
+
+\[
+P(X \le t_X) = L_0(t_X;\,X), \qquad P(Y \le t_Y) = L_0(t_Y;\,Y).
+\]
+
+Symmetrically, the survival function from Chapter 3 gives
+
+\[
+P(X > t_X) = U_0(t_X;\,X), \qquad P(Y > t_Y) = U_0(t_Y;\,Y).
+\]
+
+The joint events across all four quadrants defined by benchmarks \((t_X, t_Y)\) correspond to the four **degree-zero co-partial moments**:
+
+\[
+\mathrm{CoLPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y \le t_Y),
+\]
+
+\[
+\mathrm{CoUPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y > t_Y),
+\]
+
+\[
+\mathrm{DLPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y > t_Y),
+\]
+
+\[
+\mathrm{DUPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y \le t_Y).
+\]
+
+The concordant moments, CoLPM and CoUPM, capture joint movement in the same directional region. The **divergent moments**, DLPM and DUPM, capture the two cross-quadrant regions where \(X\) and \(Y\) move in opposite directions relative to their benchmarks — directly parallel to the divergent co-partial moment structure developed in Chapter 10. All four are degree-zero specializations of the general co-partial moment framework.
+
+---
+
+## The Four-Quadrant Probability Partition
+
+Benchmarks \((t_X, t_Y)\) partition the joint distribution into four mutually exclusive regions:
+
+|                  | \(Y \le t_Y\)        | \(Y > t_Y\)          |
+|------------------|----------------------|----------------------|
+| \(X \le t_X\)    | CoLPM\(_{0,0}\)      | DLPM\(_{0,0}\)       |
+| \(X > t_X\)      | DUPM\(_{0,0}\)       | CoUPM\(_{0,0}\)      |
+
+Because these four regions partition the joint distribution completely,
+
+\[
+\mathrm{CoLPM}_{0,0}
++ \mathrm{CoUPM}_{0,0}
++ \mathrm{DLPM}_{0,0}
++ \mathrm{DUPM}_{0,0}
+= 1.
+\]
+
+This is the **degree-zero partition of unity**: each observation contributes exactly one unit of probability mass to exactly one quadrant. It is a complete nonparametric probability representation of the joint distribution relative to any pair of benchmarks.
+
+In NNS R-package notation:
+
+\[
+1 =
+\underbrace{\texttt{Co.UPM}(0,X,Y,t_X,t_Y)}_{P(X>t_X,\,Y>t_Y)}
++\;
+\underbrace{\texttt{D.UPM}(0,0,X,Y,t_X,t_Y)}_{P(X>t_X,\,Y\le t_Y)}
++\;
+\underbrace{\texttt{D.LPM}(0,0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y>t_Y)}
++\;
+\underbrace{\texttt{Co.LPM}(0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y\le t_Y)}.
+\]
+
+Conditional probabilities are simply **relative weights of these regions after conditioning on one of the marginals**.
+
+---
+
+## Conditional Probability from Co-Partial Moments
+
+All eight conditional probabilities arising from the four-quadrant partition can be expressed as ratios of a co-partial moment to a marginal partial moment. We organize them by quadrant.
+
+## Concordant lower-tail conditioning
+
+\[
+P(Y \le t_Y \mid X \le t_X)
+= \frac{\mathrm{CoLPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
+P(X \le t_X \mid Y \le t_Y)
+= \frac{\mathrm{CoLPM}_{0,0}(t_X,t_Y)}{L_0(t_Y;\,Y)}.
+\]
+
+## Concordant upper-tail conditioning
+
+\[
+P(Y > t_Y \mid X > t_X)
+= \frac{\mathrm{CoUPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}, \qquad
+P(X > t_X \mid Y > t_Y)
+= \frac{\mathrm{CoUPM}_{0,0}(t_X,t_Y)}{U_0(t_Y;\,Y)}.
+\]
+
+## Discordant conditioning
+
+\[
+P(Y > t_Y \mid X \le t_X)
+= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
+P(Y \le t_Y \mid X > t_X)
+= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}.
+\]
+
+Each formula follows from the same logic: the joint probability of the relevant quadrant divided by the marginal probability of the conditioning event. Together, these eight expressions **complete the four-quadrant conditional probability picture** — every conditional probability involving thresholds on \(X\) and \(Y\) is a ratio of a degree-zero co-partial moment to a marginal degree-zero partial moment.
+
+In NNS notation, letting \(A = \{X > t_X\}\) and \(B = \{Y > t_Y\}\):
+
+\[
+P(A) = \texttt{UPM}(0,t_X,X), \qquad
+P(B) = \texttt{UPM}(0,t_Y,Y),
+\]
+
+\[
+P(B \mid A) = \frac{\texttt{Co.UPM}(0,X,Y,t_X,t_Y)}{\texttt{UPM}(0,t_X,X)}, \qquad
+P(A \mid B) = \frac{\texttt{Co.UPM}(0,X,Y,t_X,t_Y)}{\texttt{UPM}(0,t_Y,Y)}.
+\]
+
+---
+
+## Bayes' Theorem
+
+Bayes' theorem describes how conditional probabilities relate when the conditioning direction is reversed.
+
+Starting from the multiplication rule,
+
+\[
+P(A \cap B) = P(A \mid B)\,P(B) = P(B \mid A)\,P(A).
+\]
+
+Equating the two expressions and solving for \(P(A \mid B)\) yields Bayes' theorem:
+
+\[
+P(A \mid B)
+=
+\frac{P(B \mid A)\,P(A)}{P(B)}.
+\]
+
+This identity allows probabilities to be updated when new information becomes available. The directional framework reveals that this is not merely an algebraic manipulation of probability ratios — it is a direct consequence of the symmetry of co-partial moments.
+
+---
+
+## Bayes' Theorem from Partial Moments
+
+Using the directional framework, Bayes' theorem follows immediately from co-partial moment identities.
+
+## Lower-tail derivation
+
+Let \(A = \{X \le t_X\}\) and \(B = \{Y \le t_Y\}\). From Section 13.4,
+
+\[
+P(B \mid A) = \frac{\mathrm{CoLPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
+P(A \mid B) = \frac{\mathrm{CoLPM}_{0,0}(t_X,t_Y)}{L_0(t_Y;\,Y)}.
+\]
+
+Rearranging the first equation gives
+
+\[
+\mathrm{CoLPM}_{0,0}(t_X,t_Y) = P(B \mid A)\,L_0(t_X;\,X).
+\]
+
+Substituting into the second equation,
+
+\[
+P(A \mid B)
+= \frac{P(B \mid A)\,L_0(t_X;\,X)}{L_0(t_Y;\,Y)}.
+\]
+
+Since \(L_0(t_X;\,X) = P(A)\) and \(L_0(t_Y;\,Y) = P(B)\),
+
+\[
+\boxed{P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)}.}
+\]
+
+## Upper-tail derivation
+
+The identical derivation holds in the upper region. Let \(A = \{X > t_X\}\) and \(B = \{Y > t_Y\}\). Replacing CoLPM with CoUPM and \(L_0\) with \(U_0\) throughout,
+
+\[
+P(B \mid A) = \frac{\mathrm{CoUPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}, \qquad
+P(A \mid B) = \frac{\mathrm{CoUPM}_{0,0}(t_X,t_Y)}{U_0(t_Y;\,Y)},
+\]
+
+which yields the same Bayes identity by the same algebra. **Bayes' theorem holds symmetrically across all four directional regions**, reflecting the structural symmetry of the co-partial moment framework rather than any special property of the lower tail.
+
+---
+
+## Posterior Probability Interpretation
+
+Bayesian inference interprets probabilities as quantities that update when new information becomes available.
+
+Let
+
+- \(P(A)\) be the **prior probability**,
+- \(P(B \mid A)\) the **likelihood**,
+- \(P(A \mid B)\) the **posterior probability**.
+
+Within the directional framework:
+
+- **priors** correspond to marginal degree-zero partial moments — the probability mass of a directional region before conditioning,
+- **likelihoods** correspond to conditional probabilities derived from co-partial moments — how that mass concentrates when the other variable is observed,
+- **posteriors** represent **updated directional probabilities after conditioning** — the renormalized weight of one quadrant given information from another.
+
+Bayesian updating therefore corresponds to **redistributing probability weight across the four directional regions of the joint distribution**. The four-quadrant partition of Section 13.3 is the geometric object being operated on; Bayes' theorem is the renormalization rule.
+
+---
+
+## Example
+
+Suppose a dataset contains observations of two variables \(X\) and \(Y\). Let the benchmarks be
+
+\[
+t_X = 0, \qquad t_Y = 0.
+\]
+
+Assume empirical probabilities are
+
+\[
+P(X \le 0) = 0.4, \qquad P(Y \le 0) = 0.5, \qquad P(X \le 0,\; Y \le 0) = 0.3.
+\]
+
+Then
+
+\[
+P(Y \le 0 \mid X \le 0) = \frac{0.3}{0.4} = 0.75, \qquad
+P(X \le 0 \mid Y \le 0) = \frac{0.3}{0.5} = 0.6.
+\]
+
+Applying Bayes' theorem as a check:
+
+\[
+P(X \le 0 \mid Y \le 0)
+= \frac{P(Y \le 0 \mid X \le 0)\,P(X \le 0)}{P(Y \le 0)}
+= \frac{0.75 \times 0.4}{0.5} = 0.6. \checkmark
+\]
+
+The directional framework identifies \(\mathrm{CoLPM}_{0,0}(0,0) = 0.3\) as the probability mass in the joint lower-left region. Conditional probabilities are relative frequencies within that region, computed directly from partial-moment ratios without distributional assumptions.
+
+---
+
+## The Degree-One Extension: Co-Partial Moments as Distributional Generators
+
+The analysis so far has operated at degree zero, where co-partial moments are indicator-level probability masses. A natural question arises: what additional structure is carried by **degree-one co-partial moments**?
+
+## The hinge surface
+
+Define the **degree-one lower co-partial moment surface**
+
+\[
+H(t_X, t_Y) = E\!\bigl[(t_X - X)_+\,(t_Y - Y)_+\bigr].
+\]
+
+This replaces indicator contributions with **hinge magnitudes** — continuous functions of how far each variable falls below its benchmark. Unlike degree-zero moments, which record whether an observation lands in a quadrant, degree-one moments record **how far into that quadrant it lies**.
+
+## Continuous partition of unity
+
+Degree-one co-partial moments form a continuous partition of unity over the same four-quadrant geometry as degree zero. Defining concordant and divergent degree-one quantities
+
+\[
+C^{--}(t_X,t_Y) = E[(t_X-X)_+(t_Y-Y)_+], \quad
+C^{++}(t_X,t_Y) = E[(X-t_X)_+(Y-t_Y)_+],
+\]
+
+\[
+D^{+-}(t_X,t_Y) = E[(X-t_X)_+(t_Y-Y)_+], \quad
+D^{-+}(t_X,t_Y) = E[(t_X-X)_+(Y-t_Y)_+],
+\]
+
+and total magnitude \(S = C^{--} + C^{++} + D^{+-} + D^{-+}\), the normalized weights
+
+\[
+w^{--} = \frac{C^{--}}{S}, \quad w^{++} = \frac{C^{++}}{S}, \quad w^{+-} = \frac{D^{+-}}{S}, \quad w^{-+} = \frac{D^{-+}}{S}
+\]
+
+satisfy \(w^{--} + w^{++} + w^{+-} + w^{-+} = 1\) with all weights non-negative whenever \(S > 0\). The case \(S = 0\) is degenerate: since all four hinge products are non-negative, \(S = 0\) implies each term is zero, which in turn requires that for every observation, \(X = t_X\) or \(Y = t_Y\) (or both). This is a measure-zero event under any absolutely continuous distribution but can arise in discrete data; in practice one simply avoids placing benchmarks at point masses. In the limit as degree approaches zero, the normalized weights collapse to the hard quadrant probabilities of Section 13.3.
+
+## Distributional recovery
+
+The hinge surface carries more information than its degree-zero counterpart. The following result shows that \(H\) is a complete representation of the joint law.
+
+**Theorem** (Distributional Recovery). Assume \((X, Y)\) is integrable and differentiation under the expectation is valid (e.g., by dominated convergence). Then at all continuity points of the joint CDF \(F_{X,Y}\),
+
+\[
+\frac{\partial^2 H}{\partial t_X\,\partial t_Y}(t_X, t_Y) = F_{X,Y}(t_X, t_Y).
+\]
+
+If \(F_{X,Y}\) is absolutely continuous with sufficiently smooth density \(f_{X,Y}\), then
+
+\[
+\frac{\partial^4 H}{\partial t_X^2\,\partial t_Y^2}(t_X, t_Y) = f_{X,Y}(t_X, t_Y).
+\]
+
+Consequently, \(H(\cdot,\cdot)\) over all threshold pairs uniquely determines the joint law and, when it exists, the joint density. The qualification "at all continuity points of \(F_{X,Y}\)" is essential: for discrete distributions, the CDF has jump discontinuities and the derivative identities hold only at points where \(F_{X,Y}\) is continuous.
+
+**Proof sketch.** To justify differentiation under the expectation, assume there exists an integrable envelope dominating the local difference quotients of the hinge terms in a neighborhood of \((t_X,t_Y)\); this is exactly the dominated-convergence qualification in the theorem statement. Using \(\partial_{t_X}(t_X - X)_+ = \mathbf{1}\{X \le t_X\}\) and \(\partial_{t_Y}(t_Y - Y)_+ = \mathbf{1}\{Y \le t_Y\}\) almost everywhere,
+
+\[
+\frac{\partial H}{\partial t_X}(t_X,t_Y) = E\!\bigl[\mathbf{1}\{X \le t_X\}(t_Y - Y)_+\bigr],
+\]
+
+and therefore
+
+\[
+\frac{\partial^2 H}{\partial t_X\,\partial t_Y}(t_X,t_Y)
+= E\!\bigl[\mathbf{1}\{X \le t_X\}\,\mathbf{1}\{Y \le t_Y\}\bigr]
+= P(X \le t_X,\; Y \le t_Y)
+= F_{X,Y}(t_X,t_Y). \qquad\square
+\]
+
+The surface \(H\) is directly estimable from data by averaging hinge products. Mixed second derivatives recover the joint CDF numerically via finite differences; further differentiation recovers the density, though this is noisier due to higher-order amplification of sampling variation.
+
+## Hierarchy across degrees
+
+This result establishes a natural hierarchy:
+
+- **Degree 0**: Indicator-level probability partition — the four-quadrant decomposition of Sections 13.3–13.6.
+- **Degree 1**: Continuous hinge partition of unity and complete distributional recovery — the minimal degree at which partial moments become full distributional generators.
+- **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degree one already provides. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
+
+Thus **degree one is the completeness threshold**: the minimal order at which the full joint law is captured.
+
+---
+
+## Partial Moments as a Bridge Between Bayesian and Frequentist Inference
+
+A deeper consequence of the distributional recovery theorem is that partial moments provide a **law-invariant bridge** between Bayesian and frequentist statistical frameworks.
+
+A functional is **law-invariant** if its value depends only on the distribution of the random variable, not on the specific probability space or the process that generated it. Partial moments are law-invariant in precisely this sense: \(L_n(t;\,X)\) and \(U_n(t;\,X)\) depend only on the distribution of \(X\), not on how that distribution was constructed.
+
+The central distinction between Bayesian and frequentist perspectives is how the probability measure \(P\) is constructed: Bayesians form a **posterior predictive distribution** by updating a prior with data; frequentists approximate the **data-generating measure** directly with the empirical distribution. Both pipelines ultimately produce a probability measure for outcomes \(X\), and once that measure is specified, partial-moment operators act on it identically.
+
+Formally:
+
+- **Bayesian path**: prior \(\pi(\theta)\) → likelihood \(L(D \mid \theta)\) → posterior \(\pi(\theta \mid D)\) → posterior predictive \(P_B = \int P_\theta\,\pi(d\theta \mid D)\) → compute \(L_n(t;\,X)\), \(U_n(t;\,X)\) with \(X \sim P_B\).
+
+- **Frequentist path**: empirical law \(\hat{P}_n = \frac{1}{n}\sum_{i=1}^n \delta_{X_i}\) → compute \(L_n(t;\,X)\), \(U_n(t;\,X)\) with \(X \sim \hat{P}_n\).
+
+Because both pipelines reduce to the same partial-moment operators applied to different input distributions, **any two models that agree on the distribution of \(X\) will produce identical partial moments** — not just the normalized degree-one weights, but all partial moments of all degrees. The formula stays the same; only the input distribution changes. This is the formal sense in which partial moments are a practical lingua franca between Bayesian and frequentist workflows.
+
+The directional formulation of Bayes' theorem in Sections 13.5–13.6 is therefore paradigm-agnostic: it holds whether the joint distribution is constructed from a posterior predictive, an empirical distribution, or any other probability measure fed into the co-partial moment operators.
+
+---
+
+## Summary
+
+Conditional probability and Bayes' theorem arise naturally and completely from the partial-moment framework. Key results include:
+
+- Degree-zero partial moments represent **probabilities of directional events**, recovering the CDF and survival function as special cases.
+- Degree-zero co-partial moments represent **joint event probabilities** and partition the joint distribution into four mutually exclusive regions — two concordant (CoLPM, CoUPM) and two divergent (DLPM, DUPM) — summing to one.
+- **All eight conditional probabilities** from the four-quadrant partition are ratios of a degree-zero co-partial moment to a marginal partial moment.
+- **Bayes' theorem follows directly from co-partial moment identities**, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.
+- **Bayesian updating corresponds to renormalizing the four-quadrant probability partition** after conditioning on one marginal.
+- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree one is the completeness threshold.
+- **Partial moments are law-invariant**: they depend only on the induced distribution of \(X\), making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.
+
+The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.

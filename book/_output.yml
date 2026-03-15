@@ -1,0 +1,13 @@
+bookdown::gitbook:
+  css: style.css
+  split_by: chapter
+  config:
+    toc:
+      collapse: subsection
+      before: |
+        <li><a href="./">NNS Book</a></li>
+
+bookdown::pdf_book:
+  keep_tex: true
+
+bookdown::epub_book: default
