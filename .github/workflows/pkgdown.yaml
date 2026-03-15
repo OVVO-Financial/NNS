@@ -33,12 +33,24 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          extra-packages: any::pkgdown, any::bookdown, local::.
           needs: website
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+
+      - name: Build book
+        run: |
+          old <- setwd("book")
+          on.exit(setwd(old), add = TRUE)
+          bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook")
+        shell: Rscript {0}
+
+      - name: Stage book for Pages
+        run: |
+          mkdir -p docs/book
+          rsync -a --delete book/_book/ docs/book/
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
