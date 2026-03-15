@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 24 Nonparametric Time Series Models | Nonlinear Nonparametric Statistics: Using Partial Moments</title>
+  <meta name="description" content="Chapter 24 Nonparametric Time Series Models | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 24 Nonparametric Time Series Models | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 24 Nonparametric Time Series Models | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  
+  
+  
+
+<meta name="author" content="Fred Viole" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="ensemble-methods.html"/>
+<link rel="next" href="multivariate-forecasting.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">NNS Book</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#executive-summary"><i class="fa fa-check"></i>Executive Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html"><i class="fa fa-check"></i><b>1</b> Why Classical Statistics Breaks</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#the-hidden-assumption-of-symmetry"><i class="fa fa-check"></i><b>1.1</b> The Hidden Assumption of Symmetry</a></li>
+<li class="chapter" data-level="1.2" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#aggregation-before-observation"><i class="fa fa-check"></i><b>1.2</b> Aggregation Before Observation</a></li>
+<li class="chapter" data-level="1.3" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#the-problem-with-linear-dependence"><i class="fa fa-check"></i><b>1.3</b> The Problem with Linear Dependence</a></li>
+<li class="chapter" data-level="1.4" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#parametric-comfort-and-model-risk"><i class="fa fa-check"></i><b>1.4</b> Parametric Comfort and Model Risk</a></li>
+<li class="chapter" data-level="1.5" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#the-limits-of-traditional-nonparametrics"><i class="fa fa-check"></i><b>1.5</b> The Limits of Traditional Nonparametrics</a></li>
+<li class="chapter" data-level="1.6" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#a-different-primitive"><i class="fa fa-check"></i><b>1.6</b> A Different Primitive</a></li>
+<li class="chapter" data-level="1.7" data-path="why-classical-statistics-breaks.html"><a href="why-classical-statistics-breaks.html#from-symmetric-statistics-to-directional-statistics"><i class="fa fa-check"></i><b>1.7</b> From Symmetric Statistics to Directional Statistics</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html"><i class="fa fa-check"></i><b>2</b> Directional Deviation Operators</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#deviations-relative-to-a-benchmark"><i class="fa fa-check"></i><b>2.1</b> Deviations Relative to a Benchmark</a></li>
+<li class="chapter" data-level="2.2" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#directional-decomposition-of-deviations"><i class="fa fa-check"></i><b>2.2</b> Directional Decomposition of Deviations</a></li>
+<li class="chapter" data-level="2.3" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#directional-operators"><i class="fa fa-check"></i><b>2.3</b> Directional Operators</a></li>
+<li class="chapter" data-level="2.4" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#partial-moments"><i class="fa fa-check"></i><b>2.4</b> Partial Moments</a></li>
+<li class="chapter" data-level="2.5" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#notation-bridge-theory-to-r-implementation"><i class="fa fa-check"></i><b>2.5</b> Notation Bridge: Theory to R Implementation</a></li>
+<li class="chapter" data-level="2.6" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#benchmarks"><i class="fa fa-check"></i><b>2.6</b> Benchmarks</a></li>
+<li class="chapter" data-level="2.7" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#relationship-to-classical-moments"><i class="fa fa-check"></i><b>2.7</b> Relationship to Classical Moments</a>
+<ul>
+<li class="chapter" data-level="2.7.1" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#mean"><i class="fa fa-check"></i><b>2.7.1</b> Mean</a></li>
+<li class="chapter" data-level="2.7.2" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#variance"><i class="fa fa-check"></i><b>2.7.2</b> Variance</a></li>
+<li class="chapter" data-level="2.7.3" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#third-central-moment"><i class="fa fa-check"></i><b>2.7.3</b> Third Central Moment</a></li>
+</ul></li>
+<li class="chapter" data-level="2.8" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#information-loss-in-symmetric-aggregation"><i class="fa fa-check"></i><b>2.8</b> Information Loss in Symmetric Aggregation</a></li>
+<li class="chapter" data-level="2.9" data-path="directional-deviation-operators.html"><a href="directional-deviation-operators.html#directional-operators-as-a-statistical-primitive"><i class="fa fa-check"></i><b>2.9</b> Directional Operators as a Statistical Primitive</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html"><i class="fa fa-check"></i><b>3</b> Distribution Theory from Partial Moments</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#degree-zero-partial-moments"><i class="fa fa-check"></i><b>3.1</b> Degree-Zero Partial Moments</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#theorem-3.1-cdf-representation"><i class="fa fa-check"></i><b>3.1.1</b> Theorem 3.1 (CDF Representation)</a></li>
+<li class="chapter" data-level="3.1.2" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#empirical-cdf-equivalence-in-r"><i class="fa fa-check"></i><b>3.1.2</b> Empirical CDF Equivalence in R</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#complementary-directional-probability"><i class="fa fa-check"></i><b>3.2</b> Complementary Directional Probability</a></li>
+<li class="chapter" data-level="3.3" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#the-survival-function"><i class="fa fa-check"></i><b>3.3</b> The Survival Function</a></li>
+<li class="chapter" data-level="3.4" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#hazard-rates"><i class="fa fa-check"></i><b>3.4</b> Hazard Rates</a></li>
+<li class="chapter" data-level="3.5" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#quantile-functions"><i class="fa fa-check"></i><b>3.5</b> Quantile Functions</a></li>
+<li class="chapter" data-level="3.6" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#probability-integral-transform"><i class="fa fa-check"></i><b>3.6</b> Probability Integral Transform</a></li>
+<li class="chapter" data-level="3.7" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#distribution-theory-as-directional-measurement"><i class="fa fa-check"></i><b>3.7</b> Distribution Theory as Directional Measurement</a></li>
+<li class="chapter" data-level="3.8" data-path="distribution-theory-from-partial-moments.html"><a href="distribution-theory-from-partial-moments.html#structural-implications"><i class="fa fa-check"></i><b>3.8</b> Structural Implications</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html"><i class="fa fa-check"></i><b>4</b> Numerical Integration via Partial Moments</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#definite-integrals-as-expectations"><i class="fa fa-check"></i><b>4.1</b> Definite Integrals as Expectations</a></li>
+<li class="chapter" data-level="4.2" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#integrals-from-directional-deviations"><i class="fa fa-check"></i><b>4.2</b> Integrals from Directional Deviations</a></li>
+<li class="chapter" data-level="4.3" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#approximation-via-sample-partial-moments"><i class="fa fa-check"></i><b>4.3</b> Approximation via Sample Partial Moments</a></li>
+<li class="chapter" data-level="4.4" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#example-estimating-downside-risk"><i class="fa fa-check"></i><b>4.4</b> Example: Estimating Downside Risk</a></li>
+<li class="chapter" data-level="4.5" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#relationship-to-classical-quadrature"><i class="fa fa-check"></i><b>4.5</b> Relationship to Classical Quadrature</a></li>
+<li class="chapter" data-level="4.6" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#convergence-properties"><i class="fa fa-check"></i><b>4.6</b> Convergence Properties</a></li>
+<li class="chapter" data-level="4.7" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#applications"><i class="fa fa-check"></i><b>4.7</b> Applications</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#probability-and-distribution-analysis"><i class="fa fa-check"></i><b>4.7.1</b> Probability and Distribution Analysis</a></li>
+<li class="chapter" data-level="4.7.2" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#risk-measurement"><i class="fa fa-check"></i><b>4.7.2</b> Risk Measurement</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="numerical-integration-via-partial-moments.html"><a href="numerical-integration-via-partial-moments.html#summary"><i class="fa fa-check"></i><b>4.8</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html"><i class="fa fa-check"></i><b>5</b> Classical Moments as Directional Aggregates</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#moments-relative-to-a-benchmark"><i class="fa fa-check"></i><b>5.1</b> Moments Relative to a Benchmark</a></li>
+<li class="chapter" data-level="5.2" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#directional-moment-decomposition"><i class="fa fa-check"></i><b>5.2</b> Directional Moment Decomposition</a></li>
+<li class="chapter" data-level="5.3" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#mean-1"><i class="fa fa-check"></i><b>5.3</b> Mean</a></li>
+<li class="chapter" data-level="5.4" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#variance-1"><i class="fa fa-check"></i><b>5.4</b> Variance</a></li>
+<li class="chapter" data-level="5.5" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#higher-order-moments"><i class="fa fa-check"></i><b>5.5</b> Higher-Order Moments</a>
+<ul>
+<li class="chapter" data-level="5.5.1" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#third-moment"><i class="fa fa-check"></i><b>5.5.1</b> Third Moment</a></li>
+<li class="chapter" data-level="5.5.2" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#fourth-moment"><i class="fa fa-check"></i><b>5.5.2</b> Fourth Moment</a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#standardized-skewness-and-kurtosis"><i class="fa fa-check"></i><b>5.6</b> Standardized Skewness and Kurtosis</a></li>
+<li class="chapter" data-level="5.7" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#information-loss-in-symmetric-aggregation-1"><i class="fa fa-check"></i><b>5.7</b> Information Loss in Symmetric Aggregation</a></li>
+<li class="chapter" data-level="5.8" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#measure-theoretic-interpretation"><i class="fa fa-check"></i><b>5.8</b> Measure-Theoretic Interpretation</a></li>
+<li class="chapter" data-level="5.9" data-path="classical-moments-as-directional-aggregates.html"><a href="classical-moments-as-directional-aggregates.html#implications"><i class="fa fa-check"></i><b>5.9</b> Implications</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html"><i class="fa fa-check"></i><b>6</b> Measure-Theoretic Interpretation</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#probability-spaces"><i class="fa fa-check"></i><b>6.1</b> Probability Spaces</a></li>
+<li class="chapter" data-level="6.2" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#benchmark-induced-partitions"><i class="fa fa-check"></i><b>6.2</b> Benchmark-Induced Partitions</a></li>
+<li class="chapter" data-level="6.3" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#positive-and-negative-function-decomposition"><i class="fa fa-check"></i><b>6.3</b> Positive and Negative Function Decomposition</a></li>
+<li class="chapter" data-level="6.4" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#partial-moments-as-measurable-integrals"><i class="fa fa-check"></i><b>6.4</b> Partial Moments as Measurable Integrals</a></li>
+<li class="chapter" data-level="6.5" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#recovery-of-classical-moments"><i class="fa fa-check"></i><b>6.5</b> Recovery of Classical Moments</a>
+<ul>
+<li class="chapter" data-level="6.5.1" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#mean-2"><i class="fa fa-check"></i><b>6.5.1</b> Mean</a></li>
+<li class="chapter" data-level="6.5.2" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#variance-2"><i class="fa fa-check"></i><b>6.5.2</b> Variance</a></li>
+<li class="chapter" data-level="6.5.3" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#third-moment-1"><i class="fa fa-check"></i><b>6.5.3</b> Third Moment</a></li>
+</ul></li>
+<li class="chapter" data-level="6.6" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#canonical-refinement-of-symmetric-moments"><i class="fa fa-check"></i><b>6.6</b> Canonical Refinement of Symmetric Moments</a></li>
+<li class="chapter" data-level="6.7" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#alignment-with-probability-partitions"><i class="fa fa-check"></i><b>6.7</b> Alignment with Probability Partitions</a></li>
+<li class="chapter" data-level="6.8" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#structural-interpretation"><i class="fa fa-check"></i><b>6.8</b> Structural Interpretation</a></li>
+<li class="chapter" data-level="6.9" data-path="measure-theoretic-interpretation-1.html"><a href="measure-theoretic-interpretation-1.html#implications-1"><i class="fa fa-check"></i><b>6.9</b> Implications</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html"><i class="fa fa-check"></i><b>7</b> Directional Descriptive Statistics</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#directional-mean-interpretation"><i class="fa fa-check"></i><b>7.1</b> Directional Mean Interpretation</a></li>
+<li class="chapter" data-level="7.2" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#directional-variance-decomposition"><i class="fa fa-check"></i><b>7.2</b> Directional Variance Decomposition</a></li>
+<li class="chapter" data-level="7.3" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#benchmark-relative-descriptive-statistics"><i class="fa fa-check"></i><b>7.3</b> Benchmark-Relative Descriptive Statistics</a></li>
+<li class="chapter" data-level="7.4" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#directional-skewness"><i class="fa fa-check"></i><b>7.4</b> Directional Skewness</a></li>
+<li class="chapter" data-level="7.5" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#directional-kurtosis"><i class="fa fa-check"></i><b>7.5</b> Directional Kurtosis</a></li>
+<li class="chapter" data-level="7.6" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#directional-distribution-profiles"><i class="fa fa-check"></i><b>7.6</b> Directional Distribution Profiles</a></li>
+<li class="chapter" data-level="7.7" data-path="directional-descriptive-statistics.html"><a href="directional-descriptive-statistics.html#summary-1"><i class="fa fa-check"></i><b>7.7</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="distribution-estimation.html"><a href="distribution-estimation.html"><i class="fa fa-check"></i><b>8</b> Distribution Estimation</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="distribution-estimation.html"><a href="distribution-estimation.html#the-empirical-distribution-function"><i class="fa fa-check"></i><b>8.1</b> The Empirical Distribution Function</a></li>
+<li class="chapter" data-level="8.2" data-path="distribution-estimation.html"><a href="distribution-estimation.html#empirical-partial-moment-estimators"><i class="fa fa-check"></i><b>8.2</b> Empirical Partial Moment Estimators</a></li>
+<li class="chapter" data-level="8.3" data-path="distribution-estimation.html"><a href="distribution-estimation.html#distribution-estimation-from-partial-moments"><i class="fa fa-check"></i><b>8.3</b> Distribution Estimation from Partial Moments</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="distribution-estimation.html"><a href="distribution-estimation.html#nonparametric"><i class="fa fa-check"></i><b>8.3.1</b> Nonparametric</a></li>
+<li class="chapter" data-level="8.3.2" data-path="distribution-estimation.html"><a href="distribution-estimation.html#data-driven"><i class="fa fa-check"></i><b>8.3.2</b> Data-Driven</a></li>
+<li class="chapter" data-level="8.3.3" data-path="distribution-estimation.html"><a href="distribution-estimation.html#consistency"><i class="fa fa-check"></i><b>8.3.3</b> Consistency</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="distribution-estimation.html"><a href="distribution-estimation.html#from-distribution-to-density"><i class="fa fa-check"></i><b>8.4</b> From Distribution to Density</a></li>
+<li class="chapter" data-level="8.5" data-path="distribution-estimation.html"><a href="distribution-estimation.html#comparison-with-kernel-density-estimation"><i class="fa fa-check"></i><b>8.5</b> Comparison with Kernel Density Estimation</a></li>
+<li class="chapter" data-level="8.6" data-path="distribution-estimation.html"><a href="distribution-estimation.html#example-empirical-partial-moments"><i class="fa fa-check"></i><b>8.6</b> Example: Empirical Partial Moments</a></li>
+<li class="chapter" data-level="8.7" data-path="distribution-estimation.html"><a href="distribution-estimation.html#tail-sensitivity"><i class="fa fa-check"></i><b>8.7</b> Tail Sensitivity</a></li>
+<li class="chapter" data-level="8.8" data-path="distribution-estimation.html"><a href="distribution-estimation.html#robustness-properties"><i class="fa fa-check"></i><b>8.8</b> Robustness Properties</a></li>
+<li class="chapter" data-level="8.9" data-path="distribution-estimation.html"><a href="distribution-estimation.html#directional-distribution-analysis"><i class="fa fa-check"></i><b>8.9</b> Directional Distribution Analysis</a></li>
+<li class="chapter" data-level="8.10" data-path="distribution-estimation.html"><a href="distribution-estimation.html#summary-2"><i class="fa fa-check"></i><b>8.10</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html"><i class="fa fa-check"></i><b>9</b> Why Correlation Fails</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#classical-dependence-measures"><i class="fa fa-check"></i><b>9.1</b> Classical Dependence Measures</a></li>
+<li class="chapter" data-level="9.2" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#directional-co-partial-moments"><i class="fa fa-check"></i><b>9.2</b> Directional Co-Partial Moments</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#co-lower-partial-moment"><i class="fa fa-check"></i><b>9.2.1</b> Co-Lower Partial Moment</a></li>
+<li class="chapter" data-level="9.2.2" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#co-upper-partial-moment"><i class="fa fa-check"></i><b>9.2.2</b> Co-Upper Partial Moment</a></li>
+<li class="chapter" data-level="9.2.3" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#divergent-lower-partial-moment"><i class="fa fa-check"></i><b>9.2.3</b> Divergent Lower Partial Moment</a></li>
+<li class="chapter" data-level="9.2.4" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#divergent-upper-partial-moment"><i class="fa fa-check"></i><b>9.2.4</b> Divergent Upper Partial Moment</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-from-co-partial-moments"><i class="fa fa-check"></i><b>9.3</b> Covariance from Co-Partial Moments</a></li>
+<li class="chapter" data-level="9.4" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices"><i class="fa fa-check"></i><b>9.4</b> Covariance Matrices from Partial-Moment Matrices</a></li>
+<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.5</b> Correlation as a Normalized Covariance</a></li>
+<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.6</b> Nonlinear Dependence</a></li>
+<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.7</b> Asymmetric Dependence</a></li>
+<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.8</b> Tail Dependence</a></li>
+<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.9</b> Information Loss in Aggregation</a></li>
+<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.10</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="example-dataset.html"><a href="example-dataset.html"><i class="fa fa-check"></i><b>10</b> Example Dataset</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="example-dataset.html"><a href="example-dataset.html#data-generating-process"><i class="fa fa-check"></i><b>10.1</b> Data-generating process</a></li>
+<li class="chapter" data-level="10.2" data-path="example-dataset.html"><a href="example-dataset.html#intended-use-by-part"><i class="fa fa-check"></i><b>10.2</b> Intended use by part</a></li>
+<li class="chapter" data-level="10.3" data-path="example-dataset.html"><a href="example-dataset.html#reproducible-split"><i class="fa fa-check"></i><b>10.3</b> Reproducible split</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="directional-dependence.html"><a href="directional-dependence.html"><i class="fa fa-check"></i><b>11</b> Directional Dependence</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="directional-dependence.html"><a href="directional-dependence.html#directional-benchmarks"><i class="fa fa-check"></i><b>11.1</b> Directional Benchmarks</a></li>
+<li class="chapter" data-level="11.2" data-path="directional-dependence.html"><a href="directional-dependence.html#co-partial-moments"><i class="fa fa-check"></i><b>11.2</b> Co-Partial Moments</a>
+<ul>
+<li class="chapter" data-level="11.2.1" data-path="directional-dependence.html"><a href="directional-dependence.html#co-lower-partial-moment-1"><i class="fa fa-check"></i><b>11.2.1</b> Co-Lower Partial Moment</a></li>
+<li class="chapter" data-level="11.2.2" data-path="directional-dependence.html"><a href="directional-dependence.html#co-upper-partial-moment-1"><i class="fa fa-check"></i><b>11.2.2</b> Co-Upper Partial Moment</a></li>
+<li class="chapter" data-level="11.2.3" data-path="directional-dependence.html"><a href="directional-dependence.html#divergent-lower-partial-moment-1"><i class="fa fa-check"></i><b>11.2.3</b> Divergent Lower Partial Moment</a></li>
+<li class="chapter" data-level="11.2.4" data-path="directional-dependence.html"><a href="directional-dependence.html#divergent-upper-partial-moment-1"><i class="fa fa-check"></i><b>11.2.4</b> Divergent Upper Partial Moment</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="directional-dependence.html"><a href="directional-dependence.html#worked-example"><i class="fa fa-check"></i><b>11.3</b> Worked Example</a>
+<ul>
+<li class="chapter" data-level="11.3.1" data-path="directional-dependence.html"><a href="directional-dependence.html#colpm"><i class="fa fa-check"></i><b>11.3.1</b> CoLPM</a></li>
+<li class="chapter" data-level="11.3.2" data-path="directional-dependence.html"><a href="directional-dependence.html#coupm"><i class="fa fa-check"></i><b>11.3.2</b> CoUPM</a></li>
+<li class="chapter" data-level="11.3.3" data-path="directional-dependence.html"><a href="directional-dependence.html#dlpm"><i class="fa fa-check"></i><b>11.3.3</b> DLPM</a></li>
+<li class="chapter" data-level="11.3.4" data-path="directional-dependence.html"><a href="directional-dependence.html#dupm"><i class="fa fa-check"></i><b>11.3.4</b> DUPM</a></li>
+</ul></li>
+<li class="chapter" data-level="11.4" data-path="directional-dependence.html"><a href="directional-dependence.html#dependence-versus-correlation"><i class="fa fa-check"></i><b>11.4</b> Dependence Versus Correlation</a></li>
+<li class="chapter" data-level="11.5" data-path="directional-dependence.html"><a href="directional-dependence.html#nonlinear-dependence-detection"><i class="fa fa-check"></i><b>11.5</b> Nonlinear Dependence Detection</a></li>
+<li class="chapter" data-level="11.6" data-path="directional-dependence.html"><a href="directional-dependence.html#asymmetric-dependence-1"><i class="fa fa-check"></i><b>11.6</b> Asymmetric Dependence</a></li>
+<li class="chapter" data-level="11.7" data-path="directional-dependence.html"><a href="directional-dependence.html#tail-sensitive-dependence"><i class="fa fa-check"></i><b>11.7</b> Tail-Sensitive Dependence</a></li>
+<li class="chapter" data-level="11.8" data-path="directional-dependence.html"><a href="directional-dependence.html#empirical-estimation"><i class="fa fa-check"></i><b>11.8</b> Empirical Estimation</a></li>
+<li class="chapter" data-level="11.9" data-path="directional-dependence.html"><a href="directional-dependence.html#directional-dependence-profiles"><i class="fa fa-check"></i><b>11.9</b> Directional Dependence Profiles</a></li>
+<li class="chapter" data-level="11.10" data-path="directional-dependence.html"><a href="directional-dependence.html#summary-4"><i class="fa fa-check"></i><b>11.10</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="copula-interpretation.html"><a href="copula-interpretation.html"><i class="fa fa-check"></i><b>12</b> Copula Interpretation</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="copula-interpretation.html"><a href="copula-interpretation.html#copula-fundamentals"><i class="fa fa-check"></i><b>12.1</b> Copula Fundamentals</a></li>
+<li class="chapter" data-level="12.2" data-path="copula-interpretation.html"><a href="copula-interpretation.html#directional-statistics-and-probability-space"><i class="fa fa-check"></i><b>12.2</b> Directional Statistics and Probability Space</a></li>
+<li class="chapter" data-level="12.3" data-path="copula-interpretation.html"><a href="copula-interpretation.html#directional-regions-in-copula-space"><i class="fa fa-check"></i><b>12.3</b> Directional Regions in Copula Space</a></li>
+<li class="chapter" data-level="12.4" data-path="copula-interpretation.html"><a href="copula-interpretation.html#co-partial-moments-as-weighted-copula-regions"><i class="fa fa-check"></i><b>12.4</b> Co-Partial Moments as Weighted Copula Regions</a></li>
+<li class="chapter" data-level="12.5" data-path="copula-interpretation.html"><a href="copula-interpretation.html#copula-representation-of-co-partial-moments"><i class="fa fa-check"></i><b>12.5</b> Copula Representation of Co-Partial Moments</a></li>
+<li class="chapter" data-level="12.6" data-path="copula-interpretation.html"><a href="copula-interpretation.html#example-directional-dependence-surface-and-copula-transformation"><i class="fa fa-check"></i><b>12.6</b> Example: Directional Dependence Surface and Copula Transformation</a></li>
+<li class="chapter" data-level="12.7" data-path="copula-interpretation.html"><a href="copula-interpretation.html#tail-dependence-and-directional-moments"><i class="fa fa-check"></i><b>12.7</b> Tail Dependence and Directional Moments</a></li>
+<li class="chapter" data-level="12.8" data-path="copula-interpretation.html"><a href="copula-interpretation.html#comparison-with-classical-copula-models"><i class="fa fa-check"></i><b>12.8</b> Comparison with Classical Copula Models</a>
+<ul>
+<li class="chapter" data-level="12.8.1" data-path="copula-interpretation.html"><a href="copula-interpretation.html#nonparametric-structure"><i class="fa fa-check"></i><b>12.8.1</b> Nonparametric Structure</a></li>
+<li class="chapter" data-level="12.8.2" data-path="copula-interpretation.html"><a href="copula-interpretation.html#sensitivity-to-extreme-deviations"><i class="fa fa-check"></i><b>12.8.2</b> Sensitivity to Extreme Deviations</a></li>
+<li class="chapter" data-level="12.8.3" data-path="copula-interpretation.html"><a href="copula-interpretation.html#benchmark-flexibility"><i class="fa fa-check"></i><b>12.8.3</b> Benchmark Flexibility</a></li>
+</ul></li>
+<li class="chapter" data-level="12.9" data-path="copula-interpretation.html"><a href="copula-interpretation.html#multivariate-extension"><i class="fa fa-check"></i><b>12.9</b> Multivariate Extension</a></li>
+<li class="chapter" data-level="12.10" data-path="copula-interpretation.html"><a href="copula-interpretation.html#structural-interpretation-1"><i class="fa fa-check"></i><b>12.10</b> Structural Interpretation</a></li>
+<li class="chapter" data-level="12.11" data-path="copula-interpretation.html"><a href="copula-interpretation.html#summary-5"><i class="fa fa-check"></i><b>12.11</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html"><i class="fa fa-check"></i><b>13</b> Conditional Probability and Bayes’ Theorem</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#classical-conditional-probability"><i class="fa fa-check"></i><b>13.1</b> Classical Conditional Probability</a></li>
+<li class="chapter" data-level="13.2" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#events-as-degree-zero-partial-moments"><i class="fa fa-check"></i><b>13.2</b> Events as Degree-Zero Partial Moments</a></li>
+<li class="chapter" data-level="13.3" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#the-four-quadrant-probability-partition"><i class="fa fa-check"></i><b>13.3</b> The Four-Quadrant Probability Partition</a></li>
+<li class="chapter" data-level="13.4" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#conditional-probability-from-co-partial-moments"><i class="fa fa-check"></i><b>13.4</b> Conditional Probability from Co-Partial Moments</a></li>
+<li class="chapter" data-level="13.5" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#concordant-lower-tail-conditioning"><i class="fa fa-check"></i><b>13.5</b> Concordant lower-tail conditioning</a></li>
+<li class="chapter" data-level="13.6" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#concordant-upper-tail-conditioning"><i class="fa fa-check"></i><b>13.6</b> Concordant upper-tail conditioning</a></li>
+<li class="chapter" data-level="13.7" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#discordant-conditioning"><i class="fa fa-check"></i><b>13.7</b> Discordant conditioning</a></li>
+<li class="chapter" data-level="13.8" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#bayes-theorem"><i class="fa fa-check"></i><b>13.8</b> Bayes’ Theorem</a></li>
+<li class="chapter" data-level="13.9" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#bayes-theorem-from-partial-moments"><i class="fa fa-check"></i><b>13.9</b> Bayes’ Theorem from Partial Moments</a></li>
+<li class="chapter" data-level="13.10" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#lower-tail-derivation"><i class="fa fa-check"></i><b>13.10</b> Lower-tail derivation</a></li>
+<li class="chapter" data-level="13.11" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#upper-tail-derivation"><i class="fa fa-check"></i><b>13.11</b> Upper-tail derivation</a></li>
+<li class="chapter" data-level="13.12" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#posterior-probability-interpretation"><i class="fa fa-check"></i><b>13.12</b> Posterior Probability Interpretation</a></li>
+<li class="chapter" data-level="13.13" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#example"><i class="fa fa-check"></i><b>13.13</b> Example</a></li>
+<li class="chapter" data-level="13.14" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#the-degree-one-extension-co-partial-moments-as-distributional-generators"><i class="fa fa-check"></i><b>13.14</b> The Degree-One Extension: Co-Partial Moments as Distributional Generators</a></li>
+<li class="chapter" data-level="13.15" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#the-hinge-surface"><i class="fa fa-check"></i><b>13.15</b> The hinge surface</a></li>
+<li class="chapter" data-level="13.16" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#continuous-partition-of-unity"><i class="fa fa-check"></i><b>13.16</b> Continuous partition of unity</a></li>
+<li class="chapter" data-level="13.17" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#distributional-recovery"><i class="fa fa-check"></i><b>13.17</b> Distributional recovery</a></li>
+<li class="chapter" data-level="13.18" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#hierarchy-across-degrees"><i class="fa fa-check"></i><b>13.18</b> Hierarchy across degrees</a></li>
+<li class="chapter" data-level="13.19" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#partial-moments-as-a-bridge-between-bayesian-and-frequentist-inference"><i class="fa fa-check"></i><b>13.19</b> Partial Moments as a Bridge Between Bayesian and Frequentist Inference</a></li>
+<li class="chapter" data-level="13.20" data-path="conditional-probability-and-bayes-theorem.html"><a href="conditional-probability-and-bayes-theorem.html#summary-6"><i class="fa fa-check"></i><b>13.20</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="directional-causation.html"><a href="directional-causation.html"><i class="fa fa-check"></i><b>14</b> Directional Causation</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="directional-causation.html"><a href="directional-causation.html#limitations-of-classical-granger-causality"><i class="fa fa-check"></i><b>14.1</b> Limitations of Classical Granger Causality</a></li>
+<li class="chapter" data-level="14.2" data-path="directional-causation.html"><a href="directional-causation.html#theoretical-foundations-three-axioms"><i class="fa fa-check"></i><b>14.2</b> Theoretical Foundations: Three Axioms</a></li>
+<li class="chapter" data-level="14.3" data-path="directional-causation.html"><a href="directional-causation.html#lagged-co-partial-moments"><i class="fa fa-check"></i><b>14.3</b> Lagged Co-Partial Moments</a></li>
+<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#removing-internal-dynamics"><i class="fa fa-check"></i><b>14.4</b> Removing Internal Dynamics</a></li>
+<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#joint-rangespace-normalization"><i class="fa fa-check"></i><b>14.5</b> Joint Rangespace Normalization</a></li>
+<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.6</b> Conditional Probability via Partial Moments</a></li>
+<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.7</b> Asymmetric Directional Dependence</a></li>
+<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.8</b> The Raw Directional Causation Statistic</a></li>
+<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.9</b> Bidirectional Normalization</a></li>
+<li class="chapter" data-level="14.10" data-path="directional-causation.html"><a href="directional-causation.html#summary-7"><i class="fa fa-check"></i><b>14.10</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="distribution-comparison.html"><a href="distribution-comparison.html"><i class="fa fa-check"></i><b>15</b> Distribution Comparison</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="distribution-comparison.html"><a href="distribution-comparison.html#block-i-theory-and-foundational-comparisons"><i class="fa fa-check"></i><b>15.1</b> Block I — Theory and foundational comparisons</a>
+<ul>
+<li class="chapter" data-level="15.1.1" data-path="distribution-comparison.html"><a href="distribution-comparison.html#classical-hypothesis-testing"><i class="fa fa-check"></i><b>15.1.1</b> Classical Hypothesis Testing</a></li>
+<li class="chapter" data-level="15.1.2" data-path="distribution-comparison.html"><a href="distribution-comparison.html#kolmogorovsmirnov-test"><i class="fa fa-check"></i><b>15.1.2</b> Kolmogorov–Smirnov Test</a></li>
+<li class="chapter" data-level="15.1.3" data-path="distribution-comparison.html"><a href="distribution-comparison.html#mannwhitney-test"><i class="fa fa-check"></i><b>15.1.3</b> Mann–Whitney Test</a></li>
+<li class="chapter" data-level="15.1.4" data-path="distribution-comparison.html"><a href="distribution-comparison.html#parametric-tests"><i class="fa fa-check"></i><b>15.1.4</b> Parametric Tests</a></li>
+<li class="chapter" data-level="15.1.5" data-path="distribution-comparison.html"><a href="distribution-comparison.html#nonparametric-distribution-comparison"><i class="fa fa-check"></i><b>15.1.5</b> Nonparametric Distribution Comparison</a></li>
+<li class="chapter" data-level="15.1.6" data-path="distribution-comparison.html"><a href="distribution-comparison.html#directional-probability-and-effect-size"><i class="fa fa-check"></i><b>15.1.6</b> Directional Probability and Effect Size</a></li>
+<li class="chapter" data-level="15.1.7" data-path="distribution-comparison.html"><a href="distribution-comparison.html#directional-probability-comparisons"><i class="fa fa-check"></i><b>15.1.7</b> Directional Probability Comparisons</a></li>
+<li class="chapter" data-level="15.1.8" data-path="distribution-comparison.html"><a href="distribution-comparison.html#the-discretecontinuous-cdf-distinction-and-bias-elimination"><i class="fa fa-check"></i><b>15.1.8</b> The Discrete–Continuous CDF Distinction and Bias Elimination</a></li>
+</ul></li>
+<li class="chapter" data-level="15.2" data-path="distribution-comparison.html"><a href="distribution-comparison.html#block-ii-estimation-mechanics"><i class="fa fa-check"></i><b>15.2</b> Block II — Estimation mechanics</a>
+<ul>
+<li class="chapter" data-level="15.2.1" data-path="distribution-comparison.html"><a href="distribution-comparison.html#empirical-estimation-1"><i class="fa fa-check"></i><b>15.2.1</b> Empirical Estimation</a></li>
+</ul></li>
+<li class="chapter" data-level="15.3" data-path="distribution-comparison.html"><a href="distribution-comparison.html#block-iii-diagnostics-and-dominance-analysis"><i class="fa fa-check"></i><b>15.3</b> Block III — Diagnostics and dominance analysis</a>
+<ul>
+<li class="chapter" data-level="15.3.1" data-path="distribution-comparison.html"><a href="distribution-comparison.html#directional-dominance-curves"><i class="fa fa-check"></i><b>15.3.1</b> Directional Dominance Curves</a></li>
+</ul></li>
+<li class="chapter" data-level="15.4" data-path="distribution-comparison.html"><a href="distribution-comparison.html#block-iv-applied-workflow-and-practical-inference"><i class="fa fa-check"></i><b>15.4</b> Block IV — Applied workflow and practical inference</a>
+<ul>
+<li class="chapter" data-level="15.4.1" data-path="distribution-comparison.html"><a href="distribution-comparison.html#example-1"><i class="fa fa-check"></i><b>15.4.1</b> Example</a></li>
+<li class="chapter" data-level="15.4.2" data-path="distribution-comparison.html"><a href="distribution-comparison.html#nns-anova-cdf-based-distribution-comparison"><i class="fa fa-check"></i><b>15.4.2</b> NNS ANOVA: CDF-Based Distribution Comparison</a></li>
+<li class="chapter" data-level="15.4.3" data-path="distribution-comparison.html"><a href="distribution-comparison.html#stochastic-dominance"><i class="fa fa-check"></i><b>15.4.3</b> Stochastic Dominance</a></li>
+<li class="chapter" data-level="15.4.4" data-path="distribution-comparison.html"><a href="distribution-comparison.html#practical-inference-without-parametric-assumptions"><i class="fa fa-check"></i><b>15.4.4</b> Practical Inference Without Parametric Assumptions</a></li>
+<li class="chapter" data-level="15.4.5" data-path="distribution-comparison.html"><a href="distribution-comparison.html#example-dataset-workflow-parts-iiiv"><i class="fa fa-check"></i><b>15.4.5</b> Example Dataset Workflow (Parts III–V)</a></li>
+<li class="chapter" data-level="15.4.6" data-path="distribution-comparison.html"><a href="distribution-comparison.html#summary-8"><i class="fa fa-check"></i><b>15.4.6</b> Summary</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="prediction-intervals.html"><a href="prediction-intervals.html"><i class="fa fa-check"></i><b>16</b> Prediction Intervals</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="prediction-intervals.html"><a href="prediction-intervals.html#confidence-intervals-versus-prediction-intervals"><i class="fa fa-check"></i><b>16.1</b> Confidence Intervals versus Prediction Intervals</a></li>
+<li class="chapter" data-level="16.2" data-path="prediction-intervals.html"><a href="prediction-intervals.html#the-discretecontinuous-distinction-recap-and-application-to-intervals"><i class="fa fa-check"></i><b>16.2</b> The Discrete–Continuous Distinction: Recap and Application to Intervals</a></li>
+<li class="chapter" data-level="16.3" data-path="prediction-intervals.html"><a href="prediction-intervals.html#prediction-as-a-quantile-problem"><i class="fa fa-check"></i><b>16.3</b> Prediction as a Quantile Problem</a></li>
+<li class="chapter" data-level="16.4" data-path="prediction-intervals.html"><a href="prediction-intervals.html#partial-moment-quantile-functions-lpm.var-and-upm.var"><i class="fa fa-check"></i><b>16.4</b> Partial-Moment Quantile Functions: LPM.VaR and UPM.VaR</a></li>
+<li class="chapter" data-level="16.5" data-path="prediction-intervals.html"><a href="prediction-intervals.html#link-to-stochastic-dominance-chapter-15"><i class="fa fa-check"></i><b>16.5</b> Link to Stochastic Dominance (Chapter 15)</a></li>
+<li class="chapter" data-level="16.6" data-path="prediction-intervals.html"><a href="prediction-intervals.html#comparison-with-bootstrap-confidence-intervals"><i class="fa fa-check"></i><b>16.6</b> Comparison with Bootstrap Confidence Intervals</a></li>
+<li class="chapter" data-level="16.7" data-path="prediction-intervals.html"><a href="prediction-intervals.html#degree-zero-partial-moment-intervals"><i class="fa fa-check"></i><b>16.7</b> Degree-Zero Partial Moment Intervals</a></li>
+<li class="chapter" data-level="16.8" data-path="prediction-intervals.html"><a href="prediction-intervals.html#degree-one-partial-moment-intervals"><i class="fa fa-check"></i><b>16.8</b> Degree-One Partial Moment Intervals</a></li>
+<li class="chapter" data-level="16.9" data-path="prediction-intervals.html"><a href="prediction-intervals.html#distribution-free-prediction-intervals"><i class="fa fa-check"></i><b>16.9</b> Distribution-Free Prediction Intervals</a></li>
+<li class="chapter" data-level="16.10" data-path="prediction-intervals.html"><a href="prediction-intervals.html#example-2"><i class="fa fa-check"></i><b>16.10</b> Example</a></li>
+<li class="chapter" data-level="16.11" data-path="prediction-intervals.html"><a href="prediction-intervals.html#interpretation-and-coverage"><i class="fa fa-check"></i><b>16.11</b> Interpretation and Coverage</a></li>
+<li class="chapter" data-level="16.12" data-path="prediction-intervals.html"><a href="prediction-intervals.html#conditional-prediction-intervals-via-nns-regression"><i class="fa fa-check"></i><b>16.12</b> Conditional Prediction Intervals via NNS Regression</a></li>
+<li class="chapter" data-level="16.13" data-path="prediction-intervals.html"><a href="prediction-intervals.html#advantages-of-the-directional-approach"><i class="fa fa-check"></i><b>16.13</b> Advantages of the Directional Approach</a></li>
+<li class="chapter" data-level="16.14" data-path="prediction-intervals.html"><a href="prediction-intervals.html#summary-9"><i class="fa fa-check"></i><b>16.14</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html"><i class="fa fa-check"></i><b>17</b> Synthetic Data and Maximum Entropy Bootstrap</a>
+<ul>
+<li class="chapter" data-level="17.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#bootstrap-methods"><i class="fa fa-check"></i><b>17.1</b> Bootstrap Methods</a></li>
+<li class="chapter" data-level="17.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#limitations-of-classical-bootstrap-for-time-series"><i class="fa fa-check"></i><b>17.2</b> Limitations of Classical Bootstrap for Time Series</a>
+<ul>
+<li class="chapter" data-level="17.2.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#block-bootstrap"><i class="fa fa-check"></i><b>17.2.1</b> Block Bootstrap</a></li>
+<li class="chapter" data-level="17.2.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#model-based-bootstrap"><i class="fa fa-check"></i><b>17.2.2</b> Model-Based Bootstrap</a></li>
+<li class="chapter" data-level="17.2.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#the-iid-correlation-constraint"><i class="fa fa-check"></i><b>17.2.3</b> The iid Correlation Constraint</a></li>
+</ul></li>
+<li class="chapter" data-level="17.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#maximum-entropy-principle"><i class="fa fa-check"></i><b>17.3</b> Maximum Entropy Principle</a></li>
+<li class="chapter" data-level="17.4" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#maximum-entropy-bootstrap-for-time-series"><i class="fa fa-check"></i><b>17.4</b> Maximum Entropy Bootstrap for Time Series</a>
+<ul>
+<li class="chapter" data-level="17.4.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#step-1-order-statistics"><i class="fa fa-check"></i><b>17.4.1</b> Step 1: Order Statistics</a></li>
+<li class="chapter" data-level="17.4.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#step-2-interval-construction"><i class="fa fa-check"></i><b>17.4.2</b> Step 2: Interval Construction</a></li>
+<li class="chapter" data-level="17.4.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#step-3-maximum-entropy-density"><i class="fa fa-check"></i><b>17.4.3</b> Step 3: Maximum Entropy Density</a></li>
+<li class="chapter" data-level="17.4.4" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#step-4-random-sampling"><i class="fa fa-check"></i><b>17.4.4</b> Step 4: Random Sampling</a></li>
+<li class="chapter" data-level="17.4.5" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#step-5-time-ordering"><i class="fa fa-check"></i><b>17.4.5</b> Step 5: Time Ordering</a></li>
+</ul></li>
+<li class="chapter" data-level="17.5" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#dependence-preserving-resampling"><i class="fa fa-check"></i><b>17.5</b> Dependence-Preserving Resampling</a>
+<ul>
+<li class="chapter" data-level="17.5.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#theoretical-basis-for-rank-matching"><i class="fa fa-check"></i><b>17.5.1</b> Theoretical Basis for Rank Matching</a></li>
+</ul></li>
+<li class="chapter" data-level="17.6" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#arbitrary-spearman-rank-correlation-the-rho-parameter"><i class="fa fa-check"></i><b>17.6</b> Arbitrary Spearman Rank Correlation: The <code>rho</code> Parameter</a>
+<ul>
+<li class="chapter" data-level="17.6.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#how-rank-targeting-works"><i class="fa fa-check"></i><b>17.6.1</b> How Rank Targeting Works</a></li>
+<li class="chapter" data-level="17.6.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#dependence-metric-options"><i class="fa fa-check"></i><b>17.6.2</b> Dependence Metric Options</a></li>
+<li class="chapter" data-level="17.6.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#simulation-evidence"><i class="fa fa-check"></i><b>17.6.3</b> Simulation Evidence</a></li>
+</ul></li>
+<li class="chapter" data-level="17.7" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#trend-decomposition-and-drift-control"><i class="fa fa-check"></i><b>17.7</b> Trend Decomposition and Drift Control</a>
+<ul>
+<li class="chapter" data-level="17.7.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#drift-arguments"><i class="fa fa-check"></i><b>17.7.1</b> Drift Arguments</a></li>
+</ul></li>
+<li class="chapter" data-level="17.8" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#synthetic-time-series-generation-with-nns.meboot"><i class="fa fa-check"></i><b>17.8</b> Synthetic Time-Series Generation with <code>NNS.meboot</code></a>
+<ul>
+<li class="chapter" data-level="17.8.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#basic-usage"><i class="fa fa-check"></i><b>17.8.1</b> Basic Usage</a></li>
+<li class="chapter" data-level="17.8.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#return-object"><i class="fa fa-check"></i><b>17.8.2</b> Return Object</a></li>
+<li class="chapter" data-level="17.8.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#vectorized-rho"><i class="fa fa-check"></i><b>17.8.3</b> Vectorized <code>rho</code></a></li>
+</ul></li>
+<li class="chapter" data-level="17.9" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#improved-monte-carlo-simulation"><i class="fa fa-check"></i><b>17.9</b> Improved Monte Carlo Simulation</a>
+<ul>
+<li class="chapter" data-level="17.9.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#the-limitation-of-standard-iid-mcs"><i class="fa fa-check"></i><b>17.9.1</b> The Limitation of Standard iid MCS</a></li>
+<li class="chapter" data-level="17.9.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#expanded-simulation-via-vectorized-rho"><i class="fa fa-check"></i><b>17.9.2</b> Expanded Simulation via Vectorized <code>rho</code></a></li>
+</ul></li>
+<li class="chapter" data-level="17.10" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#applications-in-forecasting-and-risk-analysis"><i class="fa fa-check"></i><b>17.10</b> Applications in Forecasting and Risk Analysis</a>
+<ul>
+<li class="chapter" data-level="17.10.1" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#financial-risk-management-value-at-risk-and-expected-shortfall"><i class="fa fa-check"></i><b>17.10.1</b> Financial Risk Management: Value at Risk and Expected Shortfall</a></li>
+<li class="chapter" data-level="17.10.2" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#forecast-model-evaluation"><i class="fa fa-check"></i><b>17.10.2</b> Forecast Model Evaluation</a></li>
+<li class="chapter" data-level="17.10.3" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#stationarity-transformation"><i class="fa fa-check"></i><b>17.10.3</b> Stationarity Transformation</a></li>
+</ul></li>
+<li class="chapter" data-level="17.11" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#relationship-to-the-nns-framework"><i class="fa fa-check"></i><b>17.11</b> Relationship to the NNS Framework</a></li>
+<li class="chapter" data-level="17.12" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#summary-10"><i class="fa fa-check"></i><b>17.12</b> Summary</a></li>
+<li class="chapter" data-level="17.13" data-path="synthetic-data-and-maximum-entropy-bootstrap.html"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#references"><i class="fa fa-check"></i><b>17.13</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html"><i class="fa fa-check"></i><b>18</b> Recursive Mean-Split Estimation</a>
+<ul>
+<li class="chapter" data-level="18.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#motivation-for-partition-based-estimation"><i class="fa fa-check"></i><b>18.1</b> Motivation for Partition-Based Estimation</a>
+<ul>
+<li class="chapter" data-level="18.1.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#parametric-approaches"><i class="fa fa-check"></i><b>18.1.1</b> Parametric approaches</a></li>
+<li class="chapter" data-level="18.1.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#nonparametric-alternatives"><i class="fa fa-check"></i><b>18.1.2</b> Nonparametric alternatives</a></li>
+</ul></li>
+<li class="chapter" data-level="18.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#conditional-mean-partitions"><i class="fa fa-check"></i><b>18.2</b> Conditional Mean Partitions</a></li>
+<li class="chapter" data-level="18.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#recursive-splitting-algorithms"><i class="fa fa-check"></i><b>18.3</b> Recursive Splitting Algorithms</a></li>
+<li class="chapter" data-level="18.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#joint-partitioning"><i class="fa fa-check"></i><b>18.4</b> Joint Partitioning</a>
+<ul>
+<li class="chapter" data-level="18.4.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#initialization"><i class="fa fa-check"></i><b>18.4.1</b> Initialization</a></li>
+<li class="chapter" data-level="18.4.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#splitting-rule"><i class="fa fa-check"></i><b>18.4.2</b> Splitting rule</a></li>
+<li class="chapter" data-level="18.4.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#recursion"><i class="fa fa-check"></i><b>18.4.3</b> Recursion</a></li>
+<li class="chapter" data-level="18.4.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#regression-points"><i class="fa fa-check"></i><b>18.4.4</b> Regression points</a></li>
+</ul></li>
+<li class="chapter" data-level="18.5" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#x-only-partitioning"><i class="fa fa-check"></i><b>18.5</b> <span class="math inline">\(X\)</span>-Only Partitioning</a>
+<ul>
+<li class="chapter" data-level="18.5.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#initialization-1"><i class="fa fa-check"></i><b>18.5.1</b> Initialization</a></li>
+<li class="chapter" data-level="18.5.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#splitting-rule-1"><i class="fa fa-check"></i><b>18.5.2</b> Splitting rule</a></li>
+<li class="chapter" data-level="18.5.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#recursion-1"><i class="fa fa-check"></i><b>18.5.3</b> Recursion</a></li>
+<li class="chapter" data-level="18.5.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#regression-points-1"><i class="fa fa-check"></i><b>18.5.4</b> Regression points</a></li>
+</ul></li>
+<li class="chapter" data-level="18.6" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#comparison-of-modes"><i class="fa fa-check"></i><b>18.6</b> Comparison of Modes</a>
+<ul>
+<li class="chapter" data-level="18.6.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#stopping-criteria"><i class="fa fa-check"></i><b>18.6.1</b> Stopping criteria</a></li>
+</ul></li>
+<li class="chapter" data-level="18.7" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#partial-moment-interpretation-of-joint-partitioning"><i class="fa fa-check"></i><b>18.7</b> Partial-Moment Interpretation of Joint Partitioning</a></li>
+<li class="chapter" data-level="18.8" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#multivariate-predictors"><i class="fa fa-check"></i><b>18.8</b> Multivariate Predictors</a>
+<ul>
+<li class="chapter" data-level="18.8.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#joint-partitioning-in-mathbbrd"><i class="fa fa-check"></i><b>18.8.1</b> Joint partitioning in <span class="math inline">\(\mathbb{R}^d\)</span></a></li>
+<li class="chapter" data-level="18.8.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#regression-point-matrix"><i class="fa fa-check"></i><b>18.8.2</b> Regression point matrix</a></li>
+</ul></li>
+<li class="chapter" data-level="18.9" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#estimation-workflow"><i class="fa fa-check"></i><b>18.9</b> Estimation Workflow</a>
+<ul>
+<li class="chapter" data-level="18.9.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-1-data-preparation"><i class="fa fa-check"></i><b>18.9.1</b> Step 1 — Data preparation</a></li>
+<li class="chapter" data-level="18.9.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-2-select-partitioning-mode"><i class="fa fa-check"></i><b>18.9.2</b> Step 2 — Select partitioning mode</a></li>
+<li class="chapter" data-level="18.9.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-3-recursive-mean-splitting"><i class="fa fa-check"></i><b>18.9.3</b> Step 3 — Recursive mean splitting</a></li>
+<li class="chapter" data-level="18.9.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-4-stopping-rule"><i class="fa fa-check"></i><b>18.9.4</b> Step 4 — Stopping rule</a></li>
+<li class="chapter" data-level="18.9.5" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-5-prediction"><i class="fa fa-check"></i><b>18.9.5</b> Step 5 — Prediction</a></li>
+<li class="chapter" data-level="18.9.6" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#step-6-curve-fitting-optional"><i class="fa fa-check"></i><b>18.9.6</b> Step 6 — Curve fitting (optional)</a></li>
+</ul></li>
+<li class="chapter" data-level="18.10" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#limit-condition-and-perfect-fit"><i class="fa fa-check"></i><b>18.10</b> Limit Condition and Perfect Fit</a></li>
+<li class="chapter" data-level="18.11" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#properties-of-the-recursive-mean-split-estimator"><i class="fa fa-check"></i><b>18.11</b> Properties of the Recursive Mean-Split Estimator</a>
+<ul>
+<li class="chapter" data-level="18.11.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#nonparametric-flexibility"><i class="fa fa-check"></i><b>18.11.1</b> Nonparametric flexibility</a></li>
+<li class="chapter" data-level="18.11.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#grounding-in-partial-moments"><i class="fa fa-check"></i><b>18.11.2</b> Grounding in partial moments</a></li>
+<li class="chapter" data-level="18.11.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#data-adaptive-partitions"><i class="fa fa-check"></i><b>18.11.3</b> Data-adaptive partitions</a></li>
+<li class="chapter" data-level="18.11.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#implicit-smoothing"><i class="fa fa-check"></i><b>18.11.4</b> Implicit smoothing</a></li>
+<li class="chapter" data-level="18.11.5" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#piecewise-linear-interpolation"><i class="fa fa-check"></i><b>18.11.5</b> Piecewise-linear interpolation</a></li>
+<li class="chapter" data-level="18.11.6" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#finite-limit-condition"><i class="fa fa-check"></i><b>18.11.6</b> Finite limit condition</a></li>
+</ul></li>
+<li class="chapter" data-level="18.12" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#relationship-to-other-methods"><i class="fa fa-check"></i><b>18.12</b> Relationship to Other Methods</a>
+<ul>
+<li class="chapter" data-level="18.12.1" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#cart-and-decision-trees"><i class="fa fa-check"></i><b>18.12.1</b> CART and decision trees</a></li>
+<li class="chapter" data-level="18.12.2" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#kernel-regression"><i class="fa fa-check"></i><b>18.12.2</b> Kernel regression</a></li>
+<li class="chapter" data-level="18.12.3" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#k-means-clustering"><i class="fa fa-check"></i><b>18.12.3</b> <span class="math inline">\(k\)</span>-means clustering</a></li>
+<li class="chapter" data-level="18.12.4" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#fixed-grid-estimators"><i class="fa fa-check"></i><b>18.12.4</b> Fixed-grid estimators</a></li>
+</ul></li>
+<li class="chapter" data-level="18.13" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#summary-11"><i class="fa fa-check"></i><b>18.13</b> Summary</a></li>
+<li class="chapter" data-level="18.14" data-path="recursive-mean-split-estimation.html"><a href="recursive-mean-split-estimation.html#references-1"><i class="fa fa-check"></i><b>18.14</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="19" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html"><i class="fa fa-check"></i><b>19</b> Dynamic Bandwidth Interpretation</a>
+<ul>
+<li class="chapter" data-level="19.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#bandwidth-in-classical-nonparametric-estimation"><i class="fa fa-check"></i><b>19.1</b> Bandwidth in Classical Nonparametric Estimation</a></li>
+<li class="chapter" data-level="19.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#local-averaging-in-the-recursive-mean-split-estimator"><i class="fa fa-check"></i><b>19.2</b> Local Averaging in the Recursive Mean-Split Estimator</a></li>
+<li class="chapter" data-level="19.3" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#partition-diameter-as-stochastic-bandwidth"><i class="fa fa-check"></i><b>19.3</b> Partition Diameter as Stochastic Bandwidth</a>
+<ul>
+<li class="chapter" data-level="19.3.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-is-stochastic"><i class="fa fa-check"></i><b>19.3.1</b> It is stochastic</a></li>
+<li class="chapter" data-level="19.3.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-is-location-dependent"><i class="fa fa-check"></i><b>19.3.2</b> It is location-dependent</a></li>
+<li class="chapter" data-level="19.3.3" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-is-endogenous"><i class="fa fa-check"></i><b>19.3.3</b> It is endogenous</a></li>
+</ul></li>
+<li class="chapter" data-level="19.4" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#adaptive-smoothing-mechanisms"><i class="fa fa-check"></i><b>19.4</b> Adaptive Smoothing Mechanisms</a>
+<ul>
+<li class="chapter" data-level="19.4.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#flat-region"><i class="fa fa-check"></i><b>19.4.1</b> Flat region</a></li>
+<li class="chapter" data-level="19.4.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#moderately-curved-region"><i class="fa fa-check"></i><b>19.4.2</b> Moderately curved region</a></li>
+<li class="chapter" data-level="19.4.3" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#sharp-structural-change"><i class="fa fa-check"></i><b>19.4.3</b> Sharp structural change</a></li>
+</ul></li>
+<li class="chapter" data-level="19.5" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#relation-to-the-consistency-conditions"><i class="fa fa-check"></i><b>19.5</b> Relation to the Consistency Conditions</a></li>
+<li class="chapter" data-level="19.6" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#local-averaging-interpretation"><i class="fa fa-check"></i><b>19.6</b> Local Averaging Interpretation</a>
+<ul>
+<li class="chapter" data-level="19.6.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#piecewise-constant-view"><i class="fa fa-check"></i><b>19.6.1</b> Piecewise-constant view</a></li>
+<li class="chapter" data-level="19.6.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#piecewise-linear-view"><i class="fa fa-check"></i><b>19.6.2</b> Piecewise-linear view</a></li>
+</ul></li>
+<li class="chapter" data-level="19.7" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#comparison-with-kernel-regression"><i class="fa fa-check"></i><b>19.7</b> Comparison with Kernel Regression</a>
+<ul>
+<li class="chapter" data-level="19.7.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#kernel-regression-1"><i class="fa fa-check"></i><b>19.7.1</b> Kernel regression</a></li>
+<li class="chapter" data-level="19.7.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#recursive-mean-split-estimation-1"><i class="fa fa-check"></i><b>19.7.2</b> Recursive mean-split estimation</a></li>
+</ul></li>
+<li class="chapter" data-level="19.8" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#comparison-with-fixed-grid-estimators"><i class="fa fa-check"></i><b>19.8</b> Comparison with Fixed-Grid Estimators</a></li>
+<li class="chapter" data-level="19.9" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#comparison-with-cart-and-tree-based-methods"><i class="fa fa-check"></i><b>19.9</b> Comparison with CART and Tree-Based Methods</a>
+<ul>
+<li class="chapter" data-level="19.9.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#cart"><i class="fa fa-check"></i><b>19.9.1</b> CART</a></li>
+<li class="chapter" data-level="19.9.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#recursive-mean-splitting"><i class="fa fa-check"></i><b>19.9.2</b> Recursive mean splitting</a></li>
+</ul></li>
+<li class="chapter" data-level="19.10" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#a-simple-illustrative-example"><i class="fa fa-check"></i><b>19.10</b> A Simple Illustrative Example</a></li>
+<li class="chapter" data-level="19.11" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#the-order-parameter-as-global-smoothing-control"><i class="fa fa-check"></i><b>19.11</b> The Order Parameter as Global Smoothing Control</a></li>
+<li class="chapter" data-level="19.12" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#multivariate-interpretation"><i class="fa fa-check"></i><b>19.12</b> Multivariate Interpretation</a></li>
+<li class="chapter" data-level="19.13" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#advantages-of-the-dynamic-bandwidth-view"><i class="fa fa-check"></i><b>19.13</b> Advantages of the Dynamic Bandwidth View</a>
+<ul>
+<li class="chapter" data-level="19.13.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-links-nns-to-classical-smoothing-theory"><i class="fa fa-check"></i><b>19.13.1</b> It links NNS to classical smoothing theory</a></li>
+<li class="chapter" data-level="19.13.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-clarifies-the-consistency-proof"><i class="fa fa-check"></i><b>19.13.2</b> It clarifies the consistency proof</a></li>
+<li class="chapter" data-level="19.13.3" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-explains-adaptivity"><i class="fa fa-check"></i><b>19.13.3</b> It explains adaptivity</a></li>
+<li class="chapter" data-level="19.13.4" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-avoids-arbitrary-external-tuning-in-the-classical-sense"><i class="fa fa-check"></i><b>19.13.4</b> It avoids arbitrary external tuning in the classical sense</a></li>
+<li class="chapter" data-level="19.13.5" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#it-preserves-interpretability"><i class="fa fa-check"></i><b>19.13.5</b> It preserves interpretability</a></li>
+</ul></li>
+<li class="chapter" data-level="19.14" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#limitations-of-the-interpretation"><i class="fa fa-check"></i><b>19.14</b> Limitations of the Interpretation</a>
+<ul>
+<li class="chapter" data-level="19.14.1" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#discrete-rather-than-continuous-weighting"><i class="fa fa-check"></i><b>19.14.1</b> Discrete rather than continuous weighting</a></li>
+<li class="chapter" data-level="19.14.2" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#geometry-depends-on-recursive-splitting-path"><i class="fa fa-check"></i><b>19.14.2</b> Geometry depends on recursive splitting path</a></li>
+<li class="chapter" data-level="19.14.3" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#rate-theory-is-less-developed"><i class="fa fa-check"></i><b>19.14.3</b> Rate theory is less developed</a></li>
+<li class="chapter" data-level="19.14.4" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#high-dimensional-sparsity-remains"><i class="fa fa-check"></i><b>19.14.4</b> High-dimensional sparsity remains</a></li>
+</ul></li>
+<li class="chapter" data-level="19.15" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#structural-interpretation-within-nns"><i class="fa fa-check"></i><b>19.15</b> Structural Interpretation within NNS</a></li>
+<li class="chapter" data-level="19.16" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#summary-12"><i class="fa fa-check"></i><b>19.16</b> Summary</a></li>
+<li class="chapter" data-level="19.17" data-path="dynamic-bandwidth-interpretation.html"><a href="dynamic-bandwidth-interpretation.html#references-2"><i class="fa fa-check"></i><b>19.17</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="20" data-path="clustering.html"><a href="clustering.html"><i class="fa fa-check"></i><b>20</b> Clustering</a>
+<ul>
+<li class="chapter" data-level="20.1" data-path="clustering.html"><a href="clustering.html#what-clustering-seeks-to-recover"><i class="fa fa-check"></i><b>20.1</b> What Clustering Seeks to Recover</a></li>
+<li class="chapter" data-level="20.2" data-path="clustering.html"><a href="clustering.html#why-distance-alone-can-mislead"><i class="fa fa-check"></i><b>20.2</b> Why Distance Alone Can Mislead</a>
+<ul>
+<li class="chapter" data-level="20.2.1" data-path="clustering.html"><a href="clustering.html#nonlinear-shape"><i class="fa fa-check"></i><b>20.2.1</b> Nonlinear shape</a></li>
+<li class="chapter" data-level="20.2.2" data-path="clustering.html"><a href="clustering.html#asymmetric-spread"><i class="fa fa-check"></i><b>20.2.2</b> Asymmetric spread</a></li>
+<li class="chapter" data-level="20.2.3" data-path="clustering.html"><a href="clustering.html#benchmark-relative-structure"><i class="fa fa-check"></i><b>20.2.3</b> Benchmark-relative structure</a></li>
+<li class="chapter" data-level="20.2.4" data-path="clustering.html"><a href="clustering.html#tail-co-movement"><i class="fa fa-check"></i><b>20.2.4</b> Tail co-movement</a></li>
+</ul></li>
+<li class="chapter" data-level="20.3" data-path="clustering.html"><a href="clustering.html#partition-based-clustering"><i class="fa fa-check"></i><b>20.3</b> Partition-Based Clustering</a></li>
+<li class="chapter" data-level="20.4" data-path="clustering.html"><a href="clustering.html#directional-similarity"><i class="fa fa-check"></i><b>20.4</b> Directional Similarity</a></li>
+<li class="chapter" data-level="20.5" data-path="clustering.html"><a href="clustering.html#recursive-mean-splits-as-unsupervised-structure-discovery"><i class="fa fa-check"></i><b>20.5</b> Recursive Mean Splits as Unsupervised Structure Discovery</a>
+<ul>
+<li class="chapter" data-level="20.5.1" data-path="clustering.html"><a href="clustering.html#two-dimensional-case"><i class="fa fa-check"></i><b>20.5.1</b> Two-dimensional case</a></li>
+<li class="chapter" data-level="20.5.2" data-path="clustering.html"><a href="clustering.html#higher-dimensional-case"><i class="fa fa-check"></i><b>20.5.2</b> Higher-dimensional case</a></li>
+</ul></li>
+<li class="chapter" data-level="20.6" data-path="clustering.html"><a href="clustering.html#relationship-to-partial-moments"><i class="fa fa-check"></i><b>20.6</b> Relationship to Partial Moments</a></li>
+<li class="chapter" data-level="20.7" data-path="clustering.html"><a href="clustering.html#comparison-with-k-means"><i class="fa fa-check"></i><b>20.7</b> Comparison with k-Means</a>
+<ul>
+<li class="chapter" data-level="20.7.1" data-path="clustering.html"><a href="clustering.html#prespecified-k"><i class="fa fa-check"></i><b>20.7.1</b> Prespecified <span class="math inline">\(K\)</span></a></li>
+<li class="chapter" data-level="20.7.2" data-path="clustering.html"><a href="clustering.html#euclidean-symmetry"><i class="fa fa-check"></i><b>20.7.2</b> Euclidean symmetry</a></li>
+<li class="chapter" data-level="20.7.3" data-path="clustering.html"><a href="clustering.html#shape-restriction"><i class="fa fa-check"></i><b>20.7.3</b> Shape restriction</a></li>
+<li class="chapter" data-level="20.7.4" data-path="clustering.html"><a href="clustering.html#sensitivity-to-initialization"><i class="fa fa-check"></i><b>20.7.4</b> Sensitivity to initialization</a></li>
+</ul></li>
+<li class="chapter" data-level="20.8" data-path="clustering.html"><a href="clustering.html#comparison-with-hierarchical-clustering"><i class="fa fa-check"></i><b>20.8</b> Comparison with Hierarchical Clustering</a>
+<ul>
+<li class="chapter" data-level="20.8.1" data-path="clustering.html"><a href="clustering.html#geometry"><i class="fa fa-check"></i><b>20.8.1</b> Geometry</a></li>
+<li class="chapter" data-level="20.8.2" data-path="clustering.html"><a href="clustering.html#interpretation"><i class="fa fa-check"></i><b>20.8.2</b> Interpretation</a></li>
+<li class="chapter" data-level="20.8.3" data-path="clustering.html"><a href="clustering.html#local-adaptivity"><i class="fa fa-check"></i><b>20.8.3</b> Local adaptivity</a></li>
+</ul></li>
+<li class="chapter" data-level="20.9" data-path="clustering.html"><a href="clustering.html#stopping-rules-and-practical-cluster-formation"><i class="fa fa-check"></i><b>20.9</b> Stopping Rules and Practical Cluster Formation</a>
+<ul>
+<li class="chapter" data-level="20.9.1" data-path="clustering.html"><a href="clustering.html#minimum-cell-size"><i class="fa fa-check"></i><b>20.9.1</b> Minimum cell size</a></li>
+<li class="chapter" data-level="20.9.2" data-path="clustering.html"><a href="clustering.html#maximum-order"><i class="fa fa-check"></i><b>20.9.2</b> Maximum order</a></li>
+<li class="chapter" data-level="20.9.3" data-path="clustering.html"><a href="clustering.html#directional-compactness"><i class="fa fa-check"></i><b>20.9.3</b> Directional compactness</a></li>
+<li class="chapter" data-level="20.9.4" data-path="clustering.html"><a href="clustering.html#stability-criteria"><i class="fa fa-check"></i><b>20.9.4</b> Stability criteria</a></li>
+</ul></li>
+<li class="chapter" data-level="20.10" data-path="clustering.html"><a href="clustering.html#worked-example-1"><i class="fa fa-check"></i><b>20.10</b> Worked Example</a></li>
+<li class="chapter" data-level="20.11" data-path="clustering.html"><a href="clustering.html#directional-similarity-matrices"><i class="fa fa-check"></i><b>20.11</b> Directional Similarity Matrices</a></li>
+<li class="chapter" data-level="20.12" data-path="clustering.html"><a href="clustering.html#unsupervised-learning-structures"><i class="fa fa-check"></i><b>20.12</b> Unsupervised Learning Structures</a>
+<ul>
+<li class="chapter" data-level="20.12.1" data-path="clustering.html"><a href="clustering.html#cluster-prototypes"><i class="fa fa-check"></i><b>20.12.1</b> Cluster prototypes</a></li>
+<li class="chapter" data-level="20.12.2" data-path="clustering.html"><a href="clustering.html#anomaly-detection"><i class="fa fa-check"></i><b>20.12.2</b> Anomaly detection</a></li>
+<li class="chapter" data-level="20.12.3" data-path="clustering.html"><a href="clustering.html#regime-identification"><i class="fa fa-check"></i><b>20.12.3</b> Regime identification</a></li>
+<li class="chapter" data-level="20.12.4" data-path="clustering.html"><a href="clustering.html#preprocessing-for-supervised-learning"><i class="fa fa-check"></i><b>20.12.4</b> Preprocessing for supervised learning</a></li>
+</ul></li>
+<li class="chapter" data-level="20.13" data-path="clustering.html"><a href="clustering.html#applications-1"><i class="fa fa-check"></i><b>20.13</b> Applications</a>
+<ul>
+<li class="chapter" data-level="20.13.1" data-path="clustering.html"><a href="clustering.html#finance"><i class="fa fa-check"></i><b>20.13.1</b> Finance</a></li>
+<li class="chapter" data-level="20.13.2" data-path="clustering.html"><a href="clustering.html#economics"><i class="fa fa-check"></i><b>20.13.2</b> Economics</a></li>
+<li class="chapter" data-level="20.13.3" data-path="clustering.html"><a href="clustering.html#risk-management"><i class="fa fa-check"></i><b>20.13.3</b> Risk management</a></li>
+<li class="chapter" data-level="20.13.4" data-path="clustering.html"><a href="clustering.html#operations"><i class="fa fa-check"></i><b>20.13.4</b> Operations</a></li>
+<li class="chapter" data-level="20.13.5" data-path="clustering.html"><a href="clustering.html#biostatistics"><i class="fa fa-check"></i><b>20.13.5</b> Biostatistics</a></li>
+</ul></li>
+<li class="chapter" data-level="20.14" data-path="clustering.html"><a href="clustering.html#conceptual-interpretation"><i class="fa fa-check"></i><b>20.14</b> Conceptual Interpretation</a></li>
+<li class="chapter" data-level="20.15" data-path="clustering.html"><a href="clustering.html#summary-13"><i class="fa fa-check"></i><b>20.15</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="21" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html"><i class="fa fa-check"></i><b>21</b> Nonparametric Regression</a>
+<ul>
+<li class="chapter" data-level="21.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#regression-as-conditional-expectation"><i class="fa fa-check"></i><b>21.1</b> Regression as Conditional Expectation</a></li>
+<li class="chapter" data-level="21.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#why-classical-regression-can-fail"><i class="fa fa-check"></i><b>21.2</b> Why Classical Regression Can Fail</a>
+<ul>
+<li class="chapter" data-level="21.2.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#functional-rigidity"><i class="fa fa-check"></i><b>21.2.1</b> Functional rigidity</a></li>
+<li class="chapter" data-level="21.2.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#global-averaging"><i class="fa fa-check"></i><b>21.2.2</b> Global averaging</a></li>
+<li class="chapter" data-level="21.2.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#symmetric-error-treatment"><i class="fa fa-check"></i><b>21.2.3</b> Symmetric error treatment</a></li>
+<li class="chapter" data-level="21.2.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#parametric-dependence"><i class="fa fa-check"></i><b>21.2.4</b> Parametric dependence</a></li>
+</ul></li>
+<li class="chapter" data-level="21.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#partition-based-regression-in-the-nns-framework"><i class="fa fa-check"></i><b>21.3</b> Partition-Based Regression in the NNS Framework</a></li>
+<li class="chapter" data-level="21.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#from-conditional-means-to-nonlinear-regression-surfaces"><i class="fa fa-check"></i><b>21.4</b> From Conditional Means to Nonlinear Regression Surfaces</a>
+<ul>
+<li class="chapter" data-level="21.4.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#piecewise-constant-surface"><i class="fa fa-check"></i><b>21.4.1</b> Piecewise-constant surface</a></li>
+<li class="chapter" data-level="21.4.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#piecewise-linear-surface"><i class="fa fa-check"></i><b>21.4.2</b> Piecewise-linear surface</a></li>
+</ul></li>
+<li class="chapter" data-level="21.5" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#piecewise-estimation-from-partition-clusters"><i class="fa fa-check"></i><b>21.5</b> Piecewise Estimation from Partition Clusters</a></li>
+<li class="chapter" data-level="21.6" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#interpretation-of-the-estimated-model"><i class="fa fa-check"></i><b>21.6</b> Interpretation of the Estimated Model</a>
+<ul>
+<li class="chapter" data-level="21.6.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#local-benchmark-interpretation"><i class="fa fa-check"></i><b>21.6.1</b> Local benchmark interpretation</a></li>
+<li class="chapter" data-level="21.6.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#regional-interpretation"><i class="fa fa-check"></i><b>21.6.2</b> Regional interpretation</a></li>
+<li class="chapter" data-level="21.6.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#surface-interpretation"><i class="fa fa-check"></i><b>21.6.3</b> Surface interpretation</a></li>
+<li class="chapter" data-level="21.6.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#complexity-interpretation"><i class="fa fa-check"></i><b>21.6.4</b> Complexity interpretation</a></li>
+</ul></li>
+<li class="chapter" data-level="21.7" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#bias-variance-and-adaptive-smoothing"><i class="fa fa-check"></i><b>21.7</b> Bias, Variance, and Adaptive Smoothing</a></li>
+<li class="chapter" data-level="21.8" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#comparison-with-classical-regression-models"><i class="fa fa-check"></i><b>21.8</b> Comparison with Classical Regression Models</a>
+<ul>
+<li class="chapter" data-level="21.8.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#linear-regression"><i class="fa fa-check"></i><b>21.8.1</b> Linear regression</a></li>
+<li class="chapter" data-level="21.8.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#polynomial-regression"><i class="fa fa-check"></i><b>21.8.2</b> Polynomial regression</a></li>
+<li class="chapter" data-level="21.8.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#generalized-additive-models"><i class="fa fa-check"></i><b>21.8.3</b> Generalized additive models</a></li>
+<li class="chapter" data-level="21.8.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#cart-and-regression-trees"><i class="fa fa-check"></i><b>21.8.4</b> CART and regression trees</a></li>
+<li class="chapter" data-level="21.8.5" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#kernel-regression-2"><i class="fa fa-check"></i><b>21.8.5</b> Kernel regression</a></li>
+</ul></li>
+<li class="chapter" data-level="21.9" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#exact-fit-interpolation-and-extrapolation"><i class="fa fa-check"></i><b>21.9</b> Exact Fit, Interpolation, and Extrapolation</a></li>
+<li class="chapter" data-level="21.10" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#multivariate-regression-surfaces"><i class="fa fa-check"></i><b>21.10</b> Multivariate Regression Surfaces</a>
+<ul>
+<li class="chapter" data-level="21.10.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#regression-point-compression-and-k-nearest-prediction"><i class="fa fa-check"></i><b>21.10.1</b> Regression-Point Compression and k-Nearest Prediction</a></li>
+</ul></li>
+<li class="chapter" data-level="21.11" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#dimension-reduction-via-synthetic-predictors"><i class="fa fa-check"></i><b>21.11</b> Dimension Reduction via Synthetic Predictors</a>
+<ul>
+<li class="chapter" data-level="21.11.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#weighting-options"><i class="fa fa-check"></i><b>21.11.1</b> Weighting options</a></li>
+<li class="chapter" data-level="21.11.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#variable-selection-through-thresholding"><i class="fa fa-check"></i><b>21.11.2</b> Variable selection through thresholding</a></li>
+<li class="chapter" data-level="21.11.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#regression-after-reduction"><i class="fa fa-check"></i><b>21.11.3</b> Regression after reduction</a></li>
+<li class="chapter" data-level="21.11.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#conceptual-tradeoff"><i class="fa fa-check"></i><b>21.11.4</b> Conceptual tradeoff</a></li>
+<li class="chapter" data-level="21.11.5" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#why-this-can-work-well"><i class="fa fa-check"></i><b>21.11.5</b> Why this can work well</a></li>
+<li class="chapter" data-level="21.11.6" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#relation-to-the-curse-of-dimensionality"><i class="fa fa-check"></i><b>21.11.6</b> Relation to the curse of dimensionality</a></li>
+</ul></li>
+<li class="chapter" data-level="21.12" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#practical-perspective-on-nns-regression"><i class="fa fa-check"></i><b>21.12</b> Practical Perspective on NNS Regression</a>
+<ul>
+<li class="chapter" data-level="21.12.1" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#it-is-nonparametric"><i class="fa fa-check"></i><b>21.12.1</b> It is nonparametric</a></li>
+<li class="chapter" data-level="21.12.2" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#it-is-nonlinear"><i class="fa fa-check"></i><b>21.12.2</b> It is nonlinear</a></li>
+<li class="chapter" data-level="21.12.3" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#it-is-adaptive"><i class="fa fa-check"></i><b>21.12.3</b> It is adaptive</a></li>
+<li class="chapter" data-level="21.12.4" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#it-is-interpretable"><i class="fa fa-check"></i><b>21.12.4</b> It is interpretable</a></li>
+<li class="chapter" data-level="21.12.5" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#it-is-flexible-in-how-it-handles-dimensionality"><i class="fa fa-check"></i><b>21.12.5</b> It is flexible in how it handles dimensionality</a></li>
+</ul></li>
+<li class="chapter" data-level="21.13" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#relationship-to-the-broader-nns-program"><i class="fa fa-check"></i><b>21.13</b> Relationship to the Broader NNS Program</a></li>
+<li class="chapter" data-level="21.14" data-path="nonparametric-regression.html"><a href="nonparametric-regression.html#summary-14"><i class="fa fa-check"></i><b>21.14</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="22" data-path="classification.html"><a href="classification.html"><i class="fa fa-check"></i><b>22</b> Classification</a>
+<ul>
+<li class="chapter" data-level="22.1" data-path="classification.html"><a href="classification.html#classification-as-conditional-probability-estimation"><i class="fa fa-check"></i><b>22.1</b> Classification as Conditional Probability Estimation</a></li>
+<li class="chapter" data-level="22.2" data-path="classification.html"><a href="classification.html#why-classical-classification-methods-can-fail"><i class="fa fa-check"></i><b>22.2</b> Why Classical Classification Methods Can Fail</a>
+<ul>
+<li class="chapter" data-level="22.2.1" data-path="classification.html"><a href="classification.html#linear-decision-boundaries"><i class="fa fa-check"></i><b>22.2.1</b> Linear decision boundaries</a></li>
+<li class="chapter" data-level="22.2.2" data-path="classification.html"><a href="classification.html#symmetric-distance-assumptions"><i class="fa fa-check"></i><b>22.2.2</b> Symmetric distance assumptions</a></li>
+<li class="chapter" data-level="22.2.3" data-path="classification.html"><a href="classification.html#global-parameterization"><i class="fa fa-check"></i><b>22.2.3</b> Global parameterization</a></li>
+<li class="chapter" data-level="22.2.4" data-path="classification.html"><a href="classification.html#tuning-dependence"><i class="fa fa-check"></i><b>22.2.4</b> Tuning dependence</a></li>
+<li class="chapter" data-level="22.2.5" data-path="classification.html"><a href="classification.html#imbalance-sensitivity"><i class="fa fa-check"></i><b>22.2.5</b> Imbalance sensitivity</a></li>
+</ul></li>
+<li class="chapter" data-level="22.3" data-path="classification.html"><a href="classification.html#directional-decision-regions"><i class="fa fa-check"></i><b>22.3</b> Directional Decision Regions</a></li>
+<li class="chapter" data-level="22.4" data-path="classification.html"><a href="classification.html#binary-classification"><i class="fa fa-check"></i><b>22.4</b> Binary Classification</a></li>
+<li class="chapter" data-level="22.5" data-path="classification.html"><a href="classification.html#multiclass-classification"><i class="fa fa-check"></i><b>22.5</b> Multiclass Classification</a></li>
+<li class="chapter" data-level="22.6" data-path="classification.html"><a href="classification.html#recursive-mean-split-classification-geometry"><i class="fa fa-check"></i><b>22.6</b> Recursive Mean-Split Classification Geometry</a>
+<ul>
+<li class="chapter" data-level="22.6.1" data-path="classification.html"><a href="classification.html#regional-interpretation-1"><i class="fa fa-check"></i><b>22.6.1</b> Regional interpretation</a></li>
+<li class="chapter" data-level="22.6.2" data-path="classification.html"><a href="classification.html#boundary-interpretation"><i class="fa fa-check"></i><b>22.6.2</b> Boundary interpretation</a></li>
+<li class="chapter" data-level="22.6.3" data-path="classification.html"><a href="classification.html#refinement-interpretation"><i class="fa fa-check"></i><b>22.6.3</b> Refinement interpretation</a></li>
+</ul></li>
+<li class="chapter" data-level="22.7" data-path="classification.html"><a href="classification.html#directional-decision-boundaries"><i class="fa fa-check"></i><b>22.7</b> Directional Decision Boundaries</a>
+<ul>
+<li class="chapter" data-level="22.7.1" data-path="classification.html"><a href="classification.html#they-are-benchmark-relative"><i class="fa fa-check"></i><b>22.7.1</b> They are benchmark-relative</a></li>
+<li class="chapter" data-level="22.7.2" data-path="classification.html"><a href="classification.html#they-are-locally-adaptive"><i class="fa fa-check"></i><b>22.7.2</b> They are locally adaptive</a></li>
+<li class="chapter" data-level="22.7.3" data-path="classification.html"><a href="classification.html#they-preserve-asymmetry"><i class="fa fa-check"></i><b>22.7.3</b> They preserve asymmetry</a></li>
+</ul></li>
+<li class="chapter" data-level="22.8" data-path="classification.html"><a href="classification.html#probability-surfaces-and-class-assignment"><i class="fa fa-check"></i><b>22.8</b> Probability Surfaces and Class Assignment</a>
+<ul>
+<li class="chapter" data-level="22.8.1" data-path="classification.html"><a href="classification.html#local-class-probability-surface"><i class="fa fa-check"></i><b>22.8.1</b> Local class probability surface</a></li>
+<li class="chapter" data-level="22.8.2" data-path="classification.html"><a href="classification.html#hard-classification-map"><i class="fa fa-check"></i><b>22.8.2</b> Hard classification map</a></li>
+<li class="chapter" data-level="22.8.3" data-path="classification.html"><a href="classification.html#classification-certainty"><i class="fa fa-check"></i><b>22.8.3</b> Classification certainty</a></li>
+</ul></li>
+<li class="chapter" data-level="22.9" data-path="classification.html"><a href="classification.html#package-implementation-note"><i class="fa fa-check"></i><b>22.9</b> Package Implementation Note</a></li>
+<li class="chapter" data-level="22.10" data-path="classification.html"><a href="classification.html#boosting-and-stacking-in-the-nns-framework"><i class="fa fa-check"></i><b>22.10</b> Boosting and Stacking in the NNS Framework</a>
+<ul>
+<li class="chapter" data-level="22.10.1" data-path="classification.html"><a href="classification.html#boosting"><i class="fa fa-check"></i><b>22.10.1</b> Boosting</a></li>
+<li class="chapter" data-level="22.10.2" data-path="classification.html"><a href="classification.html#stacking"><i class="fa fa-check"></i><b>22.10.2</b> Stacking</a></li>
+<li class="chapter" data-level="22.10.3" data-path="classification.html"><a href="classification.html#illustrative-workflow"><i class="fa fa-check"></i><b>22.10.3</b> Illustrative Workflow</a></li>
+</ul></li>
+<li class="chapter" data-level="22.11" data-path="classification.html"><a href="classification.html#why-ensemble-classification-helps"><i class="fa fa-check"></i><b>22.11</b> Why Ensemble Classification Helps</a></li>
+<li class="chapter" data-level="22.12" data-path="classification.html"><a href="classification.html#performance-evaluation"><i class="fa fa-check"></i><b>22.12</b> Performance Evaluation</a>
+<ul>
+<li class="chapter" data-level="22.12.1" data-path="classification.html"><a href="classification.html#accuracy"><i class="fa fa-check"></i><b>22.12.1</b> Accuracy</a></li>
+<li class="chapter" data-level="22.12.2" data-path="classification.html"><a href="classification.html#confusion-matrix"><i class="fa fa-check"></i><b>22.12.2</b> Confusion matrix</a></li>
+<li class="chapter" data-level="22.12.3" data-path="classification.html"><a href="classification.html#precision-and-recall"><i class="fa fa-check"></i><b>22.12.3</b> Precision and recall</a></li>
+<li class="chapter" data-level="22.12.4" data-path="classification.html"><a href="classification.html#f-score"><i class="fa fa-check"></i><b>22.12.4</b> F-score</a></li>
+<li class="chapter" data-level="22.12.5" data-path="classification.html"><a href="classification.html#probability-calibration"><i class="fa fa-check"></i><b>22.12.5</b> Probability calibration</a></li>
+<li class="chapter" data-level="22.12.6" data-path="classification.html"><a href="classification.html#directional-error-interpretation"><i class="fa fa-check"></i><b>22.12.6</b> Directional error interpretation</a></li>
+</ul></li>
+<li class="chapter" data-level="22.13" data-path="classification.html"><a href="classification.html#comparison-with-random-forests-and-svms"><i class="fa fa-check"></i><b>22.13</b> Comparison with Random Forests and SVMs</a>
+<ul>
+<li class="chapter" data-level="22.13.1" data-path="classification.html"><a href="classification.html#random-forests"><i class="fa fa-check"></i><b>22.13.1</b> Random forests</a></li>
+<li class="chapter" data-level="22.13.2" data-path="classification.html"><a href="classification.html#support-vector-machines"><i class="fa fa-check"></i><b>22.13.2</b> Support vector machines</a></li>
+<li class="chapter" data-level="22.13.3" data-path="classification.html"><a href="classification.html#conceptual-contrast"><i class="fa fa-check"></i><b>22.13.3</b> Conceptual contrast</a></li>
+</ul></li>
+<li class="chapter" data-level="22.14" data-path="classification.html"><a href="classification.html#advantages-of-the-directional-classification-view"><i class="fa fa-check"></i><b>22.14</b> Advantages of the Directional Classification View</a>
+<ul>
+<li class="chapter" data-level="22.14.1" data-path="classification.html"><a href="classification.html#nonparametric-flexibility-1"><i class="fa fa-check"></i><b>22.14.1</b> Nonparametric flexibility</a></li>
+<li class="chapter" data-level="22.14.2" data-path="classification.html"><a href="classification.html#local-interpretability"><i class="fa fa-check"></i><b>22.14.2</b> Local interpretability</a></li>
+<li class="chapter" data-level="22.14.3" data-path="classification.html"><a href="classification.html#natural-handling-of-nonlinearity"><i class="fa fa-check"></i><b>22.14.3</b> Natural handling of nonlinearity</a></li>
+<li class="chapter" data-level="22.14.4" data-path="classification.html"><a href="classification.html#compatibility-with-imbalance-aware-probability-analysis"><i class="fa fa-check"></i><b>22.14.4</b> Compatibility with imbalance-aware probability analysis</a></li>
+<li class="chapter" data-level="22.14.5" data-path="classification.html"><a href="classification.html#structural-continuity-with-the-rest-of-the-framework"><i class="fa fa-check"></i><b>22.14.5</b> Structural continuity with the rest of the framework</a></li>
+</ul></li>
+<li class="chapter" data-level="22.15" data-path="classification.html"><a href="classification.html#limitations-and-practical-considerations"><i class="fa fa-check"></i><b>22.15</b> Limitations and Practical Considerations</a>
+<ul>
+<li class="chapter" data-level="22.15.1" data-path="classification.html"><a href="classification.html#high-dimensional-sparsity"><i class="fa fa-check"></i><b>22.15.1</b> High-dimensional sparsity</a></li>
+<li class="chapter" data-level="22.15.2" data-path="classification.html"><a href="classification.html#sensitivity-to-occupancy-thresholds"><i class="fa fa-check"></i><b>22.15.2</b> Sensitivity to occupancy thresholds</a></li>
+<li class="chapter" data-level="22.15.3" data-path="classification.html"><a href="classification.html#computational-cost"><i class="fa fa-check"></i><b>22.15.3</b> Computational cost</a></li>
+<li class="chapter" data-level="22.15.4" data-path="classification.html"><a href="classification.html#boundary-roughness"><i class="fa fa-check"></i><b>22.15.4</b> Boundary roughness</a></li>
+</ul></li>
+<li class="chapter" data-level="22.16" data-path="classification.html"><a href="classification.html#conceptual-interpretation-1"><i class="fa fa-check"></i><b>22.16</b> Conceptual Interpretation</a></li>
+<li class="chapter" data-level="22.17" data-path="classification.html"><a href="classification.html#summary-15"><i class="fa fa-check"></i><b>22.17</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="23" data-path="ensemble-methods.html"><a href="ensemble-methods.html"><i class="fa fa-check"></i><b>23</b> Ensemble Methods</a>
+<ul>
+<li class="chapter" data-level="23.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#why-ensemble-learning-helps"><i class="fa fa-check"></i><b>23.1</b> Why Ensemble Learning Helps</a></li>
+<li class="chapter" data-level="23.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#ensemble-logic-in-the-nns-framework"><i class="fa fa-check"></i><b>23.2</b> Ensemble Logic in the NNS Framework</a></li>
+<li class="chapter" data-level="23.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#base-learners-recursive-partition-estimation"><i class="fa fa-check"></i><b>23.3</b> Base Learners: Recursive Partition Estimation</a></li>
+<li class="chapter" data-level="23.4" data-path="ensemble-methods.html"><a href="ensemble-methods.html#resampling-and-aggregation-via-nns.boost"><i class="fa fa-check"></i><b>23.4</b> Resampling and Aggregation via <code>NNS.boost</code></a>
+<ul>
+<li class="chapter" data-level="23.4.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#threshold-learning-stage"><i class="fa fa-check"></i><b>23.4.1</b> Threshold-learning stage</a></li>
+<li class="chapter" data-level="23.4.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#user-specified-objectives"><i class="fa fa-check"></i><b>23.4.2</b> User-specified objectives</a></li>
+<li class="chapter" data-level="23.4.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#feature-frequency-aggregation"><i class="fa fa-check"></i><b>23.4.3</b> Feature-frequency aggregation</a></li>
+<li class="chapter" data-level="23.4.4" data-path="ensemble-methods.html"><a href="ensemble-methods.html#final-estimate"><i class="fa fa-check"></i><b>23.4.4</b> Final estimate</a></li>
+</ul></li>
+<li class="chapter" data-level="23.5" data-path="ensemble-methods.html"><a href="ensemble-methods.html#optimized-stacking-via-nns.stack"><i class="fa fa-check"></i><b>23.5</b> Optimized Stacking via <code>NNS.stack</code></a>
+<ul>
+<li class="chapter" data-level="23.5.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#classification-threshold-optimization"><i class="fa fa-check"></i><b>23.5.1</b> Classification threshold optimization</a></li>
+<li class="chapter" data-level="23.5.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#distance-options"><i class="fa fa-check"></i><b>23.5.2</b> Distance options</a></li>
+</ul></li>
+<li class="chapter" data-level="23.6" data-path="ensemble-methods.html"><a href="ensemble-methods.html#cross-validation-in-nonparametric-settings"><i class="fa fa-check"></i><b>23.6</b> Cross-Validation in Nonparametric Settings</a>
+<ul>
+<li class="chapter" data-level="23.6.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#why-cross-validation-is-particularly-important-here"><i class="fa fa-check"></i><b>23.6.1</b> Why cross-validation is particularly important here</a></li>
+<li class="chapter" data-level="23.6.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#general-formulation"><i class="fa fa-check"></i><b>23.6.2</b> General formulation</a></li>
+<li class="chapter" data-level="23.6.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#random-versus-temporal-validation"><i class="fa fa-check"></i><b>23.6.3</b> Random versus temporal validation</a></li>
+</ul></li>
+<li class="chapter" data-level="23.7" data-path="ensemble-methods.html"><a href="ensemble-methods.html#ensemble-learning-and-the-biasvariance-tradeoff"><i class="fa fa-check"></i><b>23.7</b> Ensemble Learning and the Bias–Variance Tradeoff</a></li>
+<li class="chapter" data-level="23.8" data-path="ensemble-methods.html"><a href="ensemble-methods.html#regression-ensembles-and-classification-ensembles"><i class="fa fa-check"></i><b>23.8</b> Regression Ensembles and Classification Ensembles</a>
+<ul>
+<li class="chapter" data-level="23.8.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#regression-ensembles"><i class="fa fa-check"></i><b>23.8.1</b> Regression ensembles</a></li>
+<li class="chapter" data-level="23.8.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#classification-ensembles"><i class="fa fa-check"></i><b>23.8.2</b> Classification ensembles</a></li>
+</ul></li>
+<li class="chapter" data-level="23.9" data-path="ensemble-methods.html"><a href="ensemble-methods.html#relation-to-classical-ensemble-methods"><i class="fa fa-check"></i><b>23.9</b> Relation to Classical Ensemble Methods</a>
+<ul>
+<li class="chapter" data-level="23.9.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#comparison-with-bagging"><i class="fa fa-check"></i><b>23.9.1</b> Comparison with bagging</a></li>
+<li class="chapter" data-level="23.9.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#comparison-with-adaboost-and-gradient-boosting"><i class="fa fa-check"></i><b>23.9.2</b> Comparison with AdaBoost and gradient boosting</a></li>
+<li class="chapter" data-level="23.9.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#comparison-with-random-forests"><i class="fa fa-check"></i><b>23.9.3</b> Comparison with random forests</a></li>
+<li class="chapter" data-level="23.9.4" data-path="ensemble-methods.html"><a href="ensemble-methods.html#comparison-with-classical-stacking"><i class="fa fa-check"></i><b>23.9.4</b> Comparison with classical stacking</a></li>
+</ul></li>
+<li class="chapter" data-level="23.10" data-path="ensemble-methods.html"><a href="ensemble-methods.html#practical-performance-considerations"><i class="fa fa-check"></i><b>23.10</b> Practical Performance Considerations</a>
+<ul>
+<li class="chapter" data-level="23.10.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#computational-cost-1"><i class="fa fa-check"></i><b>23.10.1</b> Computational cost</a></li>
+<li class="chapter" data-level="23.10.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#feature-dimensionality"><i class="fa fa-check"></i><b>23.10.2</b> Feature dimensionality</a></li>
+<li class="chapter" data-level="23.10.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#class-imbalance"><i class="fa fa-check"></i><b>23.10.3</b> Class imbalance</a></li>
+<li class="chapter" data-level="23.10.4" data-path="ensemble-methods.html"><a href="ensemble-methods.html#missing-data"><i class="fa fa-check"></i><b>23.10.4</b> Missing data</a></li>
+<li class="chapter" data-level="23.10.5" data-path="ensemble-methods.html"><a href="ensemble-methods.html#objective-function-choice"><i class="fa fa-check"></i><b>23.10.5</b> Objective-function choice</a></li>
+</ul></li>
+<li class="chapter" data-level="23.11" data-path="ensemble-methods.html"><a href="ensemble-methods.html#interpretation-of-ensemble-output"><i class="fa fa-check"></i><b>23.11</b> Interpretation of Ensemble Output</a>
+<ul>
+<li class="chapter" data-level="23.11.1" data-path="ensemble-methods.html"><a href="ensemble-methods.html#prediction-interpretation"><i class="fa fa-check"></i><b>23.11.1</b> Prediction interpretation</a></li>
+<li class="chapter" data-level="23.11.2" data-path="ensemble-methods.html"><a href="ensemble-methods.html#feature-frequency-interpretation"><i class="fa fa-check"></i><b>23.11.2</b> Feature-frequency interpretation</a></li>
+<li class="chapter" data-level="23.11.3" data-path="ensemble-methods.html"><a href="ensemble-methods.html#structural-interpretation-2"><i class="fa fa-check"></i><b>23.11.3</b> Structural interpretation</a></li>
+</ul></li>
+<li class="chapter" data-level="23.12" data-path="ensemble-methods.html"><a href="ensemble-methods.html#conceptual-summary"><i class="fa fa-check"></i><b>23.12</b> Conceptual Summary</a></li>
+<li class="chapter" data-level="23.13" data-path="ensemble-methods.html"><a href="ensemble-methods.html#summary-16"><i class="fa fa-check"></i><b>23.13</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="24" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html"><i class="fa fa-check"></i><b>24</b> Nonparametric Time Series Models</a>
+<ul>
+<li class="chapter" data-level="24.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#time-series-as-ordered-nonparametric-data"><i class="fa fa-check"></i><b>24.1</b> Time Series as Ordered Nonparametric Data</a></li>
+<li class="chapter" data-level="24.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#why-classical-time-series-models-can-fail"><i class="fa fa-check"></i><b>24.2</b> Why Classical Time-Series Models Can Fail</a>
+<ul>
+<li class="chapter" data-level="24.2.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#linearity"><i class="fa fa-check"></i><b>24.2.1</b> Linearity</a></li>
+<li class="chapter" data-level="24.2.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#stationarity-requirements"><i class="fa fa-check"></i><b>24.2.2</b> Stationarity requirements</a></li>
+<li class="chapter" data-level="24.2.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#parametric-identification"><i class="fa fa-check"></i><b>24.2.3</b> Parametric identification</a></li>
+<li class="chapter" data-level="24.2.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#symmetric-error-treatment-1"><i class="fa fa-check"></i><b>24.2.4</b> Symmetric error treatment</a></li>
+</ul></li>
+<li class="chapter" data-level="24.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#autoregression-as-a-subset-regression-problem"><i class="fa fa-check"></i><b>24.3</b> Autoregression as a Subset Regression Problem</a></li>
+<li class="chapter" data-level="24.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#seasonal-decomposition-without-parametric-filters"><i class="fa fa-check"></i><b>24.4</b> Seasonal Decomposition Without Parametric Filters</a></li>
+<li class="chapter" data-level="24.5" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#seasonal-detection-by-predictive-power"><i class="fa fa-check"></i><b>24.5</b> Seasonal Detection by Predictive Power</a>
+<ul>
+<li class="chapter" data-level="24.5.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#a-worked-illustration"><i class="fa fa-check"></i><b>24.5.1</b> A worked illustration</a></li>
+</ul></li>
+<li class="chapter" data-level="24.6" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#multiple-seasonalities"><i class="fa fa-check"></i><b>24.6</b> Multiple Seasonalities</a></li>
+<li class="chapter" data-level="24.7" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#nonlinear-autoregressive-structures"><i class="fa fa-check"></i><b>24.7</b> Nonlinear Autoregressive Structures</a></li>
+<li class="chapter" data-level="24.8" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#directional-temporal-dependence"><i class="fa fa-check"></i><b>24.8</b> Directional Temporal Dependence</a></li>
+<li class="chapter" data-level="24.9" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#forecasting-from-component-regressions"><i class="fa fa-check"></i><b>24.9</b> Forecasting from Component Regressions</a>
+<ul>
+<li class="chapter" data-level="24.9.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#step-1-select-candidate-seasonal-lags"><i class="fa fa-check"></i><b>24.9.1</b> Step 1: Select candidate seasonal lags</a></li>
+<li class="chapter" data-level="24.9.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#step-2-form-component-series"><i class="fa fa-check"></i><b>24.9.2</b> Step 2: Form component series</a></li>
+<li class="chapter" data-level="24.9.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#step-3-regress-each-component-forward"><i class="fa fa-check"></i><b>24.9.3</b> Step 3: Regress each component forward</a></li>
+<li class="chapter" data-level="24.9.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#step-4-weight-and-aggregate"><i class="fa fa-check"></i><b>24.9.4</b> Step 4: Weight and aggregate</a></li>
+<li class="chapter" data-level="24.9.5" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#step-5-iterate-if-forecasting-multiple-steps-ahead"><i class="fa fa-check"></i><b>24.9.5</b> Step 5: Iterate if forecasting multiple steps ahead</a></li>
+</ul></li>
+<li class="chapter" data-level="24.10" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#dynamic-updating-and-recursive-forecast-paths"><i class="fa fa-check"></i><b>24.10</b> Dynamic Updating and Recursive Forecast Paths</a>
+<ul>
+<li class="chapter" data-level="24.10.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#static-seasonal-structure"><i class="fa fa-check"></i><b>24.10.1</b> Static seasonal structure</a></li>
+<li class="chapter" data-level="24.10.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#dynamic-seasonal-structure"><i class="fa fa-check"></i><b>24.10.2</b> Dynamic seasonal structure</a></li>
+</ul></li>
+<li class="chapter" data-level="24.11" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#prediction-intervals-for-forecasts"><i class="fa fa-check"></i><b>24.11</b> Prediction Intervals for Forecasts</a></li>
+<li class="chapter" data-level="24.12" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#relation-to-earlier-nns-chapters"><i class="fa fa-check"></i><b>24.12</b> Relation to Earlier NNS Chapters</a>
+<ul>
+<li class="chapter" data-level="24.12.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#from-chapter-18"><i class="fa fa-check"></i><b>24.12.1</b> From Chapter 18</a></li>
+<li class="chapter" data-level="24.12.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#from-chapter-19"><i class="fa fa-check"></i><b>24.12.2</b> From Chapter 19</a></li>
+<li class="chapter" data-level="24.12.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#from-chapter-21"><i class="fa fa-check"></i><b>24.12.3</b> From Chapter 21</a></li>
+<li class="chapter" data-level="24.12.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#from-chapter-23"><i class="fa fa-check"></i><b>24.12.4</b> From Chapter 23</a></li>
+</ul></li>
+<li class="chapter" data-level="24.13" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#comparison-with-arima"><i class="fa fa-check"></i><b>24.13</b> Comparison with ARIMA</a>
+<ul>
+<li class="chapter" data-level="24.13.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#structural-form"><i class="fa fa-check"></i><b>24.13.1</b> Structural form</a></li>
+<li class="chapter" data-level="24.13.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#stationarity"><i class="fa fa-check"></i><b>24.13.2</b> Stationarity</a></li>
+<li class="chapter" data-level="24.13.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#identification-burden"><i class="fa fa-check"></i><b>24.13.3</b> Identification burden</a></li>
+<li class="chapter" data-level="24.13.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#nonlinearity"><i class="fa fa-check"></i><b>24.13.4</b> Nonlinearity</a></li>
+</ul></li>
+<li class="chapter" data-level="24.14" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#comparison-with-ets-models"><i class="fa fa-check"></i><b>24.14</b> Comparison with ETS Models</a>
+<ul>
+<li class="chapter" data-level="24.14.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#component-meaning"><i class="fa fa-check"></i><b>24.14.1</b> Component meaning</a></li>
+<li class="chapter" data-level="24.14.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#smoothing-mechanism"><i class="fa fa-check"></i><b>24.14.2</b> Smoothing mechanism</a></li>
+<li class="chapter" data-level="24.14.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#parametric-structure"><i class="fa fa-check"></i><b>24.14.3</b> Parametric structure</a></li>
+<li class="chapter" data-level="24.14.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#nonlinear-interactions"><i class="fa fa-check"></i><b>24.14.4</b> Nonlinear interactions</a></li>
+</ul></li>
+<li class="chapter" data-level="24.15" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#when-the-nns-approach-is-especially-useful"><i class="fa fa-check"></i><b>24.15</b> When the NNS Approach Is Especially Useful</a></li>
+<li class="chapter" data-level="24.16" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#limitations"><i class="fa fa-check"></i><b>24.16</b> Limitations</a>
+<ul>
+<li class="chapter" data-level="24.16.1" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#primarily-univariate-in-this-chapter"><i class="fa fa-check"></i><b>24.16.1</b> Primarily univariate in this chapter</a></li>
+<li class="chapter" data-level="24.16.2" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#data-requirements"><i class="fa fa-check"></i><b>24.16.2</b> Data requirements</a></li>
+<li class="chapter" data-level="24.16.3" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#computational-cost-2"><i class="fa fa-check"></i><b>24.16.3</b> Computational cost</a></li>
+<li class="chapter" data-level="24.16.4" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#interpretability-of-dynamics"><i class="fa fa-check"></i><b>24.16.4</b> Interpretability of dynamics</a></li>
+</ul></li>
+<li class="chapter" data-level="24.17" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#leakage-safe-backtesting-protocol"><i class="fa fa-check"></i><b>24.17</b> Leakage-Safe Backtesting Protocol</a></li>
+<li class="chapter" data-level="24.18" data-path="nonparametric-time-series-models.html"><a href="nonparametric-time-series-models.html#summary-17"><i class="fa fa-check"></i><b>24.18</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="25" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html"><i class="fa fa-check"></i><b>25</b> Multivariate Forecasting</a>
+<ul>
+<li class="chapter" data-level="25.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#from-univariate-to-multivariate-forecasting"><i class="fa fa-check"></i><b>25.1</b> From Univariate to Multivariate Forecasting</a></li>
+<li class="chapter" data-level="25.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#classical-var-and-its-limits"><i class="fa fa-check"></i><b>25.2</b> Classical VAR and Its Limits</a>
+<ul>
+<li class="chapter" data-level="25.2.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#linearity-1"><i class="fa fa-check"></i><b>25.2.1</b> Linearity</a></li>
+<li class="chapter" data-level="25.2.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#uniform-lag-structure"><i class="fa fa-check"></i><b>25.2.2</b> Uniform lag structure</a></li>
+<li class="chapter" data-level="25.2.3" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#parametric-residual-thinking"><i class="fa fa-check"></i><b>25.2.3</b> Parametric residual thinking</a></li>
+<li class="chapter" data-level="25.2.4" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#mixed-frequency-difficulty"><i class="fa fa-check"></i><b>25.2.4</b> Mixed-frequency difficulty</a></li>
+</ul></li>
+<li class="chapter" data-level="25.3" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#nonparametric-vector-autoregression"><i class="fa fa-check"></i><b>25.3</b> Nonparametric Vector Autoregression</a>
+<ul>
+<li class="chapter" data-level="25.3.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#stage-1-complete-each-series-individually"><i class="fa fa-check"></i><b>25.3.1</b> Stage 1: complete each series individually</a></li>
+<li class="chapter" data-level="25.3.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#stage-2-construct-lagged-predictors"><i class="fa fa-check"></i><b>25.3.2</b> Stage 2: construct lagged predictors</a></li>
+<li class="chapter" data-level="25.3.3" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#stage-3-reduce-lagged-predictors"><i class="fa fa-check"></i><b>25.3.3</b> Stage 3: reduce lagged predictors</a></li>
+<li class="chapter" data-level="25.3.4" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#stage-4-estimate-nonlinear-multivariate-forecasts"><i class="fa fa-check"></i><b>25.3.4</b> Stage 4: estimate nonlinear multivariate forecasts</a></li>
+<li class="chapter" data-level="25.3.5" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#stage-5-combine-univariate-and-multivariate-information"><i class="fa fa-check"></i><b>25.3.5</b> Stage 5: combine univariate and multivariate information</a></li>
+</ul></li>
+<li class="chapter" data-level="25.4" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#lagged-predictor-geometry"><i class="fa fa-check"></i><b>25.4</b> Lagged Predictor Geometry</a></li>
+<li class="chapter" data-level="25.5" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#mixed-frequency-inputs"><i class="fa fa-check"></i><b>25.5</b> Mixed-Frequency Inputs</a></li>
+<li class="chapter" data-level="25.6" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#dimension-reduction-and-directional-relevance"><i class="fa fa-check"></i><b>25.6</b> Dimension Reduction and Directional Relevance</a>
+<ul>
+<li class="chapter" data-level="25.6.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#step-1-compute-relevance-scores"><i class="fa fa-check"></i><b>25.6.1</b> Step 1: compute relevance scores</a></li>
+<li class="chapter" data-level="25.6.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#step-2-apply-a-threshold"><i class="fa fa-check"></i><b>25.6.2</b> Step 2: apply a threshold</a></li>
+</ul></li>
+<li class="chapter" data-level="25.7" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#directional-cross-variable-interactions"><i class="fa fa-check"></i><b>25.7</b> Directional Cross-Variable Interactions</a></li>
+<li class="chapter" data-level="25.8" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#multivariate-forecasting-as-nonlinear-regression"><i class="fa fa-check"></i><b>25.8</b> Multivariate Forecasting as Nonlinear Regression</a></li>
+<li class="chapter" data-level="25.9" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#ensemble-construction"><i class="fa fa-check"></i><b>25.9</b> Ensemble Construction</a></li>
+<li class="chapter" data-level="25.10" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#relevant-variables-as-a-structural-map"><i class="fa fa-check"></i><b>25.10</b> Relevant Variables as a Structural Map</a></li>
+<li class="chapter" data-level="25.11" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#a-small-synthetic-illustration"><i class="fa fa-check"></i><b>25.11</b> A Small Synthetic Illustration</a></li>
+<li class="chapter" data-level="25.12" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#nowcasting-with-nns.nowcast"><i class="fa fa-check"></i><b>25.12</b> Nowcasting with <code>NNS.nowcast</code></a>
+<ul>
+<li class="chapter" data-level="25.12.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#what-the-nowcast-output-means"><i class="fa fa-check"></i><b>25.12.1</b> What the nowcast output means</a></li>
+</ul></li>
+<li class="chapter" data-level="25.13" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#prediction-intervals-1"><i class="fa fa-check"></i><b>25.13</b> Prediction Intervals</a></li>
+<li class="chapter" data-level="25.14" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#comparison-with-classical-var"><i class="fa fa-check"></i><b>25.14</b> Comparison with Classical VAR</a></li>
+<li class="chapter" data-level="25.15" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#why-the-directional-framework-matters"><i class="fa fa-check"></i><b>25.15</b> Why the Directional Framework Matters</a>
+<ul>
+<li class="chapter" data-level="25.15.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#nonlinearity-is-primary"><i class="fa fa-check"></i><b>25.15.1</b> Nonlinearity is primary</a></li>
+<li class="chapter" data-level="25.15.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#cross-variable-effects-can-be-asymmetric"><i class="fa fa-check"></i><b>25.15.2</b> Cross-variable effects can be asymmetric</a></li>
+<li class="chapter" data-level="25.15.3" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#mixed-frequency-panels-become-tractable"><i class="fa fa-check"></i><b>25.15.3</b> Mixed-frequency panels become tractable</a></li>
+<li class="chapter" data-level="25.15.4" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#univariate-structure-is-preserved"><i class="fa fa-check"></i><b>25.15.4</b> Univariate structure is preserved</a></li>
+<li class="chapter" data-level="25.15.5" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#forecast-combination-is-structural"><i class="fa fa-check"></i><b>25.15.5</b> Forecast combination is structural</a></li>
+</ul></li>
+<li class="chapter" data-level="25.16" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#empirical-applications"><i class="fa fa-check"></i><b>25.16</b> Empirical Applications</a>
+<ul>
+<li class="chapter" data-level="25.16.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#macroeconomics"><i class="fa fa-check"></i><b>25.16.1</b> Macroeconomics</a></li>
+<li class="chapter" data-level="25.16.2" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#finance-1"><i class="fa fa-check"></i><b>25.16.2</b> Finance</a></li>
+<li class="chapter" data-level="25.16.3" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#operations-and-supply-chains"><i class="fa fa-check"></i><b>25.16.3</b> Operations and supply chains</a></li>
+<li class="chapter" data-level="25.16.4" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#energy-and-commodities"><i class="fa fa-check"></i><b>25.16.4</b> Energy and commodities</a></li>
+</ul></li>
+<li class="chapter" data-level="25.17" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#leakage-safe-validation-in-multivariate-and-mixed-frequency-settings"><i class="fa fa-check"></i><b>25.17</b> Leakage-Safe Validation in Multivariate and Mixed-Frequency Settings</a></li>
+<li class="chapter" data-level="25.18" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#summary-18"><i class="fa fa-check"></i><b>25.18</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="26" data-path="conclusion-and-next-steps.html"><a href="conclusion-and-next-steps.html"><i class="fa fa-check"></i><b>26</b> Conclusion and Next Steps</a>
+<ul>
+<li class="chapter" data-level="26.1" data-path="conclusion-and-next-steps.html"><a href="conclusion-and-next-steps.html#what-the-framework-has-achieved"><i class="fa fa-check"></i><b>26.1</b> What the Framework Has Achieved</a></li>
+<li class="chapter" data-level="26.2" data-path="conclusion-and-next-steps.html"><a href="conclusion-and-next-steps.html#open-problems-and-research-directions"><i class="fa fa-check"></i><b>26.2</b> Open Problems and Research Directions</a></li>
+<li class="chapter" data-level="26.3" data-path="conclusion-and-next-steps.html"><a href="conclusion-and-next-steps.html#further-resources"><i class="fa fa-check"></i><b>26.3</b> Further Resources</a></li>
+</ul></li>
+<li class="chapter" data-level="27" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html"><i class="fa fa-check"></i><b>27</b> Appendix: Notation and Function Reference</a>
+<ul>
+<li class="chapter" data-level="27.1" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#core-directional-operators-and-partial-moments"><i class="fa fa-check"></i><b>27.1</b> Core directional operators and partial moments</a></li>
+<li class="chapter" data-level="27.2" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#co-partial-moments-dependence-and-causation"><i class="fa fa-check"></i><b>27.2</b> Co-partial moments, dependence, and causation</a></li>
+<li class="chapter" data-level="27.3" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#distribution-comparison-dominance-and-interval-objects"><i class="fa fa-check"></i><b>27.3</b> Distribution comparison, dominance, and interval objects</a></li>
+<li class="chapter" data-level="27.4" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#regression-and-forecasting-workflow-objects"><i class="fa fa-check"></i><b>27.4</b> Regression and forecasting workflow objects</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Nonlinear Nonparametric Statistics: Using Partial Moments</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="nonparametric-time-series-models" class="section level1 hasAnchor" number="24">
+<h1><span class="header-section-number">Chapter 24</span> Nonparametric Time Series Models<a href="nonparametric-time-series-models.html#nonparametric-time-series-models" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Part VII turns the directional framework toward <strong>time</strong>.</p>
+<p>Previous chapters developed nonparametric estimation, clustering, regression, classification, and ensemble learning using recursive partitioning, local averaging, and benchmark-relative structure. Those methods treated observations as unordered or cross-sectional. Time-series analysis adds a new constraint:</p>
+<p><strong>the observations arrive in sequence, and that ordering matters.</strong></p>
+<p>A time series is not merely a set of values. It is a structured sequence in which the past may influence the future, seasonal patterns may recur, and dependence may change across time.</p>
+<p>Classical time-series analysis addresses these problems through models such as <strong>ARIMA</strong>, <strong>ETS</strong>, and <strong>state-space methods</strong>. These are often effective, but they inherit familiar limitations:</p>
+<ul>
+<li>linear autoregressive structure,</li>
+<li>parametric error assumptions,</li>
+<li>explicit stationarity requirements,</li>
+<li>and model identification choices that must be imposed before estimation.</li>
+</ul>
+<p>The NNS framework approaches time series differently.</p>
+<p>At its heart, time-series modeling is treated as a <strong>subset regression problem</strong>: a sequence is decomposed into lagged component series, and future values are forecast by applying the same nonlinear nonparametric regression logic developed earlier in the book to those components. In this view, autoregression is not abandoned. It is generalized.</p>
+<p>Rather than beginning with a linear dynamic equation, NNS begins with a simpler principle:</p>
+<p><strong>forecast the future by learning the structure of the past without imposing a parametric law for that structure.</strong></p>
+<p>This chapter develops that idea.</p>
+<hr />
+<div id="time-series-as-ordered-nonparametric-data" class="section level2 hasAnchor" number="24.1">
+<h2><span class="header-section-number">24.1</span> Time Series as Ordered Nonparametric Data<a href="nonparametric-time-series-models.html#time-series-as-ordered-nonparametric-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let</p>
+<p><span class="math display">\[
+\{X_t\}_{t=1}^T
+\]</span></p>
+<p>denote a real-valued time series.</p>
+<p>In classical analysis, a time series is often modeled through a difference equation such as</p>
+<p><span class="math display">\[
+X_t = \phi_1 X_{t-1} + \cdots + \phi_p X_{t-p} + \varepsilon_t,
+\]</span></p>
+<p>possibly after differencing, detrending, or seasonal adjustment.</p>
+<p>That formulation assumes from the outset that the dynamic relation is linear in the lagged values.</p>
+<p>The directional framework takes a broader view.</p>
+<p>A time series can be written as a regression problem in which the response is the future observation and the predictors are functions of the past:</p>
+<p><span class="math display">\[
+X_t = f(X_{t-1}, X_{t-2}, \dots) + \varepsilon_t.
+\]</span></p>
+<p>The task is then to estimate the unknown dynamic map <span class="math inline">\(f\)</span> nonparametrically.</p>
+<p>This places time-series analysis inside the same framework developed in Chapters 17–22:</p>
+<ul>
+<li>identify informative local structure,</li>
+<li>partition or decompose the data,</li>
+<li>estimate conditionally,</li>
+<li>and aggregate only afterward.</li>
+</ul>
+<p>The only additional element is temporal order.</p>
+<hr />
+</div>
+<div id="why-classical-time-series-models-can-fail" class="section level2 hasAnchor" number="24.2">
+<h2><span class="header-section-number">24.2</span> Why Classical Time-Series Models Can Fail<a href="nonparametric-time-series-models.html#why-classical-time-series-models-can-fail" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The central models of classical forecasting are powerful, but they are built around structural assumptions that many real series violate.</p>
+<div id="linearity" class="section level3 hasAnchor" number="24.2.1">
+<h3><span class="header-section-number">24.2.1</span> Linearity<a href="nonparametric-time-series-models.html#linearity" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ARIMA and related autoregressive models assume that the next observation depends linearly on lagged values, perhaps after transformation. But many series exhibit threshold effects, asymmetric responses, cyclical distortions, or nonlinear seasonal interactions.</p>
+</div>
+<div id="stationarity-requirements" class="section level3 hasAnchor" number="24.2.2">
+<h3><span class="header-section-number">24.2.2</span> Stationarity requirements<a href="nonparametric-time-series-models.html#stationarity-requirements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The Box–Jenkins framework is built around stationarity. In practice, many observed series are not stationary in level, variance, or seasonal structure. Transformations and differencing may help, but they also alter the object being modeled.</p>
+</div>
+<div id="parametric-identification" class="section level3 hasAnchor" number="24.2.3">
+<h3><span class="header-section-number">24.2.3</span> Parametric identification<a href="nonparametric-time-series-models.html#parametric-identification" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Classical modeling requires choosing model orders, differencing levels, seasonal terms, and error structures. These decisions can materially change the forecast.</p>
+</div>
+<div id="symmetric-error-treatment-1" class="section level3 hasAnchor" number="24.2.4">
+<h3><span class="header-section-number">24.2.4</span> Symmetric error treatment<a href="nonparametric-time-series-models.html#symmetric-error-treatment-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Least-squares fitting treats positive and negative forecast errors symmetrically, even in contexts where underprediction and overprediction have different consequences.</p>
+<p>The directional nonparametric approach seeks to preserve the useful idea of autoregression while relaxing these restrictions.</p>
+<hr />
+</div>
+</div>
+<div id="autoregression-as-a-subset-regression-problem" class="section level2 hasAnchor" number="24.3">
+<h2><span class="header-section-number">24.3</span> Autoregression as a Subset Regression Problem<a href="nonparametric-time-series-models.html#autoregression-as-a-subset-regression-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The NNS time-series framework begins from a simple decomposition.</p>
+<p>Suppose a series exhibits a seasonal or cyclical lag <span class="math inline">\(m\)</span>. Then observations separated by that lag belong to a common component series:</p>
+<p><span class="math display">\[
+\{X_1, X_{1+m}, X_{1+2m}, \dots\},
+\quad
+\{X_2, X_{2+m}, X_{2+2m}, \dots\},
+\quad \dots
+\quad
+\{X_m, X_{2m}, X_{3m}, \dots\}.
+\]</span></p>
+<p>Each component series is itself a smaller time series indexed by occurrence number within that phase.</p>
+<p>Forecasting then becomes a regression problem on each component series separately.</p>
+<p>For a given component series with index vector</p>
+<p><span class="math display">\[
+z = 1,2,\dots,n_j
+\]</span></p>
+<p>and values</p>
+<p><span class="math display">\[
+y^{(j)}_1, y^{(j)}_2, \dots, y^{(j)}_{n_j},
+\]</span></p>
+<p>we estimate the next value through either linear or nonlinear regression:</p>
+<p><span class="math display">\[
+y^{(j)}_{n_j+1} \approx \hat f_j(n_j+1).
+\]</span></p>
+<p>The final forecast aggregates these component forecasts using weights determined by predictive strength.</p>
+<p>This is why time series in NNS are best viewed as a subset regression problem:</p>
+<ul>
+<li>the original series is partitioned into lag-defined subsets,</li>
+<li>each subset is modeled with NNS regression,</li>
+<li>and the subset forecasts are recombined.</li>
+</ul>
+<p>Autoregression is therefore retained, but its mechanism is generalized from linear lag equations to <strong>nonparametric lag-structure estimation</strong>.</p>
+<p>A small implementation detail is worth noting. If the total series length <span class="math inline">\(T\)</span> is not an exact multiple of <span class="math inline">\(m\)</span>, then the component series need not all have the same length. Some phases will contain one more observation than others. This creates no conceptual difficulty, but it matters in practice because shorter component series provide less information and therefore should generally receive less effective influence in the forecast aggregation.</p>
+<hr />
+</div>
+<div id="seasonal-decomposition-without-parametric-filters" class="section level2 hasAnchor" number="24.4">
+<h2><span class="header-section-number">24.4</span> Seasonal Decomposition Without Parametric Filters<a href="nonparametric-time-series-models.html#seasonal-decomposition-without-parametric-filters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A major strength of the NNS approach is that seasonality is handled directly through component decomposition rather than through fixed harmonic terms or pre-imposed smoothing filters.</p>
+<p>Classical methods often represent seasonality through:</p>
+<ul>
+<li>seasonal ARIMA operators,</li>
+<li>trigonometric terms,</li>
+<li>moving-average filters,</li>
+<li>or exponential smoothing recursions.</li>
+</ul>
+<p>The NNS approach instead asks a simpler question:</p>
+<p><strong>At which lag lengths does the series become more predictable when split into component sequences?</strong></p>
+<p>This is operationalized through a seasonality test based on the <strong>coefficient of variation</strong> of each component series relative to the coefficient of variation of the full series.</p>
+<p>If a lag <span class="math inline">\(m\)</span> produces component series with lower coefficient of variation than the original series, then the lag reveals recurring structure. Intuitively:</p>
+<ul>
+<li>a lower component-series coefficient of variation means tighter local behavior,</li>
+<li>tighter local behavior means greater predictability,</li>
+<li>and greater predictability indicates seasonality or cyclic structure.</li>
+</ul>
+<p>Thus seasonality is not defined through a parametric frequency-domain object. It is defined through <strong>predictive concentration in lag-defined subsets</strong>.</p>
+<hr />
+</div>
+<div id="seasonal-detection-by-predictive-power" class="section level2 hasAnchor" number="24.5">
+<h2><span class="header-section-number">24.5</span> Seasonal Detection by Predictive Power<a href="nonparametric-time-series-models.html#seasonal-detection-by-predictive-power" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let the full series have coefficient of variation</p>
+<p><span class="math display">\[
+CV(X) = \frac{\sigma_X}{|\mu_X|},
+\]</span></p>
+<p>assuming the mean is nonzero.</p>
+<p>For a candidate lag <span class="math inline">\(m\)</span>, construct the <span class="math inline">\(m\)</span> component series. Let their representative predictive concentration be summarized through their component coefficients of variation.</p>
+<p>If these component coefficients are systematically lower than the overall series coefficient of variation, then the lag <span class="math inline">\(m\)</span> is informative.</p>
+<p>The interpretation is immediate:</p>
+<ul>
+<li>lower <span class="math inline">\(CV\)</span> means less dispersion relative to level,</li>
+<li>less dispersion means more stable phase-specific structure,</li>
+<li>more stable phase-specific structure means improved forecastability.</li>
+</ul>
+<p>This gives a nonparametric test for seasonality grounded in prediction rather than in harmonic decomposition.</p>
+<p>The chapter’s conceptual point is broader than the specific diagnostic:</p>
+<p><strong>seasonality is treated as recurring conditional structure, not as a parametric periodic law.</strong></p>
+<div id="a-worked-illustration" class="section level3 hasAnchor" number="24.5.1">
+<h3><span class="header-section-number">24.5.1</span> A worked illustration<a href="nonparametric-time-series-models.html#a-worked-illustration" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Consider the toy quarterly series</p>
+<p><span class="math display">\[
+X = (10, 18, 11, 21, 12, 20, 13, 23).
+\]</span></p>
+<p>The overall mean is</p>
+<p><span class="math display">\[
+\bar X = \frac{10+18+11+21+12+20+13+23}{8} = 16,
+\]</span></p>
+<p>and the sample standard deviation is approximately</p>
+<p><span class="math display">\[
+s_X \approx 5.345.
+\]</span></p>
+<p>Hence the overall coefficient of variation is</p>
+<p><span class="math display">\[
+CV(X) \approx \frac{5.345}{16} = 0.334.
+\]</span></p>
+<p>Now test lag <span class="math inline">\(m=2\)</span>. The component series are</p>
+<p><span class="math display">\[
+(10,11,12,13)
+\quad\text{and}\quad
+(18,21,20,23).
+\]</span></p>
+<p>For the first component,</p>
+<p><span class="math display">\[
+\bar X_1 = 11.5,\qquad s_1 \approx 1.291,\qquad CV_1 \approx \frac{1.291}{11.5}=0.112.
+\]</span></p>
+<p>For the second,</p>
+<p><span class="math display">\[
+\bar X_2 = 20.5,\qquad s_2 \approx 2.082,\qquad CV_2 \approx \frac{2.082}{20.5}=0.102.
+\]</span></p>
+<p>Both component coefficients of variation are far below the overall value <span class="math inline">\(0.334\)</span>. That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag <span class="math inline">\(2\)</span> reveals meaningful recurring structure.</p>
+<p>By contrast, consider lag <span class="math inline">\(m=3\)</span>. The three component series are</p>
+<p><span class="math display">\[
+(10,21,13),\qquad (18,12,23),\qquad (11,20).
+\]</span></p>
+<p>These exhibit much larger within-component variation, so their component coefficients of variation are not uniformly smaller than the full-series value. In this case lag <span class="math inline">\(3\)</span> is not as predictive as lag <span class="math inline">\(2\)</span>.</p>
+<p>This simple example shows exactly how the test works in practice. One computes the overall coefficient of variation, computes the component-series coefficients of variation for each candidate lag, and prefers those lags for which the component series become materially tighter than the original sequence.</p>
+<p>Mathematically, the logic is straightforward: if</p>
+<p><span class="math display">\[
+CV_j(m) &lt; CV(X)
+\quad \text{for component series } j=1,\dots,m,
+\]</span></p>
+<p>then conditioning on phase within lag <span class="math inline">\(m\)</span> reduces relative dispersion. Reduced relative dispersion means more concentrated conditional behavior, and more concentrated conditional behavior implies improved forecastability.</p>
+<p>In applications one usually needs an operational aggregation rule. A natural choice is a weighted average of component coefficients of variation,</p>
+<p><span class="math display">\[
+\overline{CV}(m)
+=
+\sum_{j=1}^{m} w_j\,CV_j(m),
+\qquad
+w_j \ge 0,
+\qquad
+\sum_{j=1}^{m} w_j = 1,
+\]</span></p>
+<p>where <span class="math inline">\(w_j\)</span> may be proportional to component length or to some predictive-strength measure. Then lag <span class="math inline">\(m\)</span> is favored when</p>
+<p><span class="math display">\[
+\overline{CV}(m) &lt; CV(X).
+\]</span></p>
+<p>An even stricter rule requires most, or all, component CVs to lie below the full-series CV. The exact rule is a modeling choice, but the guiding principle is unchanged: a good seasonal lag is one that produces tighter conditional distributions than the unpartitioned series.</p>
+<p>A technical caveat is also important. If <span class="math inline">\(\mu_X \approx 0\)</span>, then <span class="math inline">\(CV(X)\)</span> can become unstable because the denominator is near zero. In such cases the analyst may instead compare component standard deviations directly, center the series at a more stable scale, or regularize the denominator by adding a small constant. The predictive logic remains the same even if the raw coefficient of variation is numerically unreliable.</p>
+<hr />
+</div>
+</div>
+<div id="multiple-seasonalities" class="section level2 hasAnchor" number="24.6">
+<h2><span class="header-section-number">24.6</span> Multiple Seasonalities<a href="nonparametric-time-series-models.html#multiple-seasonalities" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Many real series have more than one recurring period.</p>
+<p>Examples include:</p>
+<ul>
+<li>monthly data with annual and multi-year cycles,</li>
+<li>hourly data with daily and weekly cycles,</li>
+<li>sales data with weekly, monthly, and promotional rhythms.</li>
+</ul>
+<p>Classical models often struggle when multiple seasonalities interact, especially when the interactions are nonlinear or when the seasonal periods are not cleanly nested.</p>
+<p>The NNS framework handles this naturally by allowing multiple candidate lags:</p>
+<p><span class="math display">\[
+m_1, m_2, \dots, m_K.
+\]</span></p>
+<p>Each lag defines its own component decomposition and its own forecast. These lag-specific forecasts can then be combined using weights reflecting both:</p>
+<ul>
+<li>the predictive tightness of the corresponding component series,</li>
+<li>and the amount of information available within each lag structure.</li>
+</ul>
+<p>This is a central advantage of the nonparametric formulation: multiple seasonal patterns need not be forced into one rigid dynamic equation. They can be estimated as separate predictive structures and then aggregated.</p>
+<hr />
+</div>
+<div id="nonlinear-autoregressive-structures" class="section level2 hasAnchor" number="24.7">
+<h2><span class="header-section-number">24.7</span> Nonlinear Autoregressive Structures<a href="nonparametric-time-series-models.html#nonlinear-autoregressive-structures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The classical AR model is linear in lagged values. NNS replaces this with a more general dynamic relation.</p>
+<p>If <span class="math inline">\(X_t\)</span> depends on past observations through a nonlinear rule, then there is no reason to insist that the forecast be generated by a straight line fitted to lagged values.</p>
+<p>Suppose, conceptually, that</p>
+<p><span class="math display">\[
+X_t = f(X_{t-m}) + \varepsilon_t
+\]</span></p>
+<p>for some unknown nonlinear function <span class="math inline">\(f\)</span>.</p>
+<p>The NNS framework estimates <span class="math inline">\(f\)</span> by applying the nonparametric regression machinery from earlier chapters to each component series. This allows the method to capture:</p>
+<ul>
+<li>turning points,</li>
+<li>diminishing effects,</li>
+<li>local curvature,</li>
+<li>asymmetric phase behavior,</li>
+<li>and regime-like transitions.</li>
+</ul>
+<p>The importance of this step cannot be overstated.</p>
+<p>A component series may itself be nonlinear even when the original series looks smooth. If the local phase-specific dynamics are nonlinear, a linear subseries regression can point in the wrong direction entirely. Nonparametric regression is therefore not a cosmetic addition. It is the mechanism that allows autoregression to remain autoregressive without remaining linear.</p>
+<hr />
+</div>
+<div id="directional-temporal-dependence" class="section level2 hasAnchor" number="24.8">
+<h2><span class="header-section-number">24.8</span> Directional Temporal Dependence<a href="nonparametric-time-series-models.html#directional-temporal-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Time-series dependence is not merely contemporaneous dependence shifted through time. It has direction:</p>
+<ul>
+<li>earlier values may help predict later values,</li>
+<li>later values cannot influence earlier ones,</li>
+<li>and positive versus negative deviations may propagate differently across time.</li>
+</ul>
+<p>Within the broader NNS framework, this suggests a temporal analogue of the co-partial-moment decomposition developed in Chapters 11, 12, and 14. For a lag <span class="math inline">\(\tau \ge 1\)</span>, one can study lagged co-partial moments formed from aligned pairs such as <span class="math inline">\((X_{t-\tau}, X_t)\)</span>, separating concordant movement from divergent movement across time.</p>
+<p>In that interpretation, one class of lagged moments captures persistence in the same directional regime, while another captures reversals between periods. The distinction is useful because many time series are dynamically asymmetric even when their unconditional summaries appear mild.</p>
+<p>For example:</p>
+<ul>
+<li>volatility clusters after large shocks,</li>
+<li>downturns may persist longer than upswings,</li>
+<li>inventory shortages may propagate differently than surpluses,</li>
+<li>and demand spikes may reverse more sharply than demand collapses.</li>
+</ul>
+<p>Directional temporal dependence therefore generalizes classical autocorrelation by preserving regime-specific information that linear autocovariance averages away.</p>
+<p>It is important, however, to place this idea correctly within the NNS framework. In the current univariate forecasting routines, time dependence is operationalized primarily through lag-defined component regression and seasonality detection, not through a standalone directional-autocorrelation statistic. The lagged co-partial-moment construction belongs most naturally to the theory developed for asymmetric dependence and causation, where temporal ordering is analyzed explicitly rather than only through forecast generation. Readers can map this directly to Chapters 11, 12, and 14: Chapter 11 supplies asymmetric directional dependence, Chapter 12 supplies copula-space normalization intuition, and Chapter 14 supplies directional-causation asymmetry.</p>
+<hr />
+</div>
+<div id="forecasting-from-component-regressions" class="section level2 hasAnchor" number="24.9">
+<h2><span class="header-section-number">24.9</span> Forecasting from Component Regressions<a href="nonparametric-time-series-models.html#forecasting-from-component-regressions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The NNS forecasting workflow can now be stated clearly.</p>
+<div id="step-1-select-candidate-seasonal-lags" class="section level3 hasAnchor" number="24.9.1">
+<h3><span class="header-section-number">24.9.1</span> Step 1: Select candidate seasonal lags<a href="nonparametric-time-series-models.html#step-1-select-candidate-seasonal-lags" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Identify one or more plausible lag lengths, either from domain knowledge or from the predictive seasonality test.</p>
+</div>
+<div id="step-2-form-component-series" class="section level3 hasAnchor" number="24.9.2">
+<h3><span class="header-section-number">24.9.2</span> Step 2: Form component series<a href="nonparametric-time-series-models.html#step-2-form-component-series" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For each lag <span class="math inline">\(m\)</span>, partition the original series into <span class="math inline">\(m\)</span> phase-specific subseries.</p>
+</div>
+<div id="step-3-regress-each-component-forward" class="section level3 hasAnchor" number="24.9.3">
+<h3><span class="header-section-number">24.9.3</span> Step 3: Regress each component forward<a href="nonparametric-time-series-models.html#step-3-regress-each-component-forward" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For each component series, estimate the next observation using either:</p>
+<ul>
+<li>linear regression,</li>
+<li>nonlinear NNS regression,</li>
+<li>both, or</li>
+<li>mean-based shrinkage variants.</li>
+</ul>
+</div>
+<div id="step-4-weight-and-aggregate" class="section level3 hasAnchor" number="24.9.4">
+<h3><span class="header-section-number">24.9.4</span> Step 4: Weight and aggregate<a href="nonparametric-time-series-models.html#step-4-weight-and-aggregate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Combine component forecasts using weights that reflect predictive concentration and sample support.</p>
+</div>
+<div id="step-5-iterate-if-forecasting-multiple-steps-ahead" class="section level3 hasAnchor" number="24.9.5">
+<h3><span class="header-section-number">24.9.5</span> Step 5: Iterate if forecasting multiple steps ahead<a href="nonparametric-time-series-models.html#step-5-iterate-if-forecasting-multiple-steps-ahead" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For multi-step forecasting, append the newly predicted value and repeat. Seasonal factors may be kept fixed or updated dynamically as the forecast path evolves.</p>
+<p>This procedure preserves the definition of autoregression:</p>
+<p>the forecast is still generated from the series’ own past.</p>
+<p>But it does so without imposing stationarity, without requiring Box–Jenkins identification, and without restricting the lag relation to a linear map.</p>
+<p>A brief clarification of the mean-based option is useful. In some component series the fitted regression may be unstable because the component is short, noisy, or nearly flat. In that case a practical alternative is to shrink the regression estimate toward the component mean, or even to use the component mean directly. This sacrifices some responsiveness in exchange for stability. Conceptually, it is a local bias-variance tradeoff: when the estimated slope or nonlinear fit is unreliable, the component average can act as a robust anchor.</p>
+<hr />
+</div>
+</div>
+<div id="dynamic-updating-and-recursive-forecast-paths" class="section level2 hasAnchor" number="24.10">
+<h2><span class="header-section-number">24.10</span> Dynamic Updating and Recursive Forecast Paths<a href="nonparametric-time-series-models.html#dynamic-updating-and-recursive-forecast-paths" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A one-step forecast is rarely the end goal. In practice, analysts often require</p>
+<p><span class="math display">\[
+h = 1,2,\dots,H
+\]</span></p>
+<p>steps ahead.</p>
+<p>In the NNS framework, multi-step forecasting proceeds recursively.</p>
+<p>If <span class="math inline">\(\hat X_{T+1}\)</span> is forecast first, then it is appended to the series and treated as part of the evolving path when forecasting <span class="math inline">\(\hat X_{T+2}\)</span>, and so on.</p>
+<p>This creates two natural modes.</p>
+<div id="static-seasonal-structure" class="section level3 hasAnchor" number="24.10.1">
+<h3><span class="header-section-number">24.10.1</span> Static seasonal structure<a href="nonparametric-time-series-models.html#static-seasonal-structure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The seasonal lags and weights are estimated once from the historical sample and then held fixed for all future steps.</p>
+</div>
+<div id="dynamic-seasonal-structure" class="section level3 hasAnchor" number="24.10.2">
+<h3><span class="header-section-number">24.10.2</span> Dynamic seasonal structure<a href="nonparametric-time-series-models.html#dynamic-seasonal-structure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The seasonal structure is recomputed as the forecast path grows, allowing the decomposition itself to evolve.</p>
+<p>The static approach favors stability.
+The dynamic approach favors adaptability.</p>
+<p>But that distinction can be made more precise.</p>
+<p>Static updating is generally preferable when:</p>
+<ul>
+<li>the dominant seasonal pattern is well known in advance,</li>
+<li>the series is long enough that seasonal weights are already stable,</li>
+<li>the forecast horizon is short relative to the seasonal period,</li>
+<li>or the analyst values interpretability and reproducibility over rapid adaptation.</li>
+</ul>
+<p>In such cases, recomputing the lag structure at every step may add noise rather than information. If the underlying periodic structure is persistent, then a fixed decomposition acts as a stabilizer.</p>
+<p>Dynamic recomputation is preferable when the data suggest that the seasonal structure itself is moving. Typical signals include:</p>
+<ul>
+<li>abrupt level shifts,</li>
+<li>changing amplitudes of recurring cycles,</li>
+<li>newly emerging or fading periodicities,</li>
+<li>strong structural breaks,</li>
+<li>or forecast errors that begin to cluster by phase.</li>
+</ul>
+<p>For example, a retail series may historically be dominated by an annual pattern, yet after a major platform change or supply shock, shorter promotional cycles may become more predictive than the old annual rhythm. In that case, holding the original seasonal factor fixed can lock the forecast into an outdated regime. Dynamic updating allows the decomposition to respond as the series evolves.</p>
+<p>So the practical decision is not merely “stability versus adaptability.” It is a question of whether the analyst believes the lag structure is itself part of the stable signal or part of the changing environment.</p>
+<p>A useful empirical guide is out-of-sample validation. One may reserve a holdout period, compare static and dynamic forecasts over that window, and select the updating rule that yields better predictive accuracy. In that sense, the static-versus-dynamic decision is not purely philosophical. It can be treated as a forecasting design choice subject to cross-validation.</p>
+<hr />
+</div>
+</div>
+<div id="prediction-intervals-for-forecasts" class="section level2 hasAnchor" number="24.11">
+<h2><span class="header-section-number">24.11</span> Prediction Intervals for Forecasts<a href="nonparametric-time-series-models.html#prediction-intervals-for-forecasts" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Point forecasts are only one part of the forecasting problem. Analysts also need measures of uncertainty.</p>
+<p>Because the NNS framework is nonparametric, forecast intervals are constructed without Gaussian error assumptions. Instead, uncertainty can be propagated using the maximum entropy bootstrap machinery developed in Chapter 17.</p>
+<p>The logic is straightforward:</p>
+<ol style="list-style-type: decimal">
+<li>generate replicates consistent with the forecast path and dependence structure,</li>
+<li>compute the implied distribution of future outcomes,</li>
+<li>extract lower and upper predictive bounds from directional quantiles.</li>
+</ol>
+<p>This produces prediction intervals that are aligned with the empirical distributional shape of the series rather than with a parametric error law.</p>
+<p>Thus the directional framework provides not only nonlinear point forecasts, but also <strong>distribution-free forecast uncertainty quantification</strong>.</p>
+<p>A bit more concretely, suppose the fitted model yields a forecast path</p>
+<p><span class="math display">\[
+\hat X_{T+1}, \dots, \hat X_{T+H}.
+\]</span></p>
+<p>The bootstrap procedure does not assume i.i.d. Gaussian residuals around that path. Instead, it constructs synthetic continuations that preserve the rank structure and dependence features of the observed series as closely as possible. Each bootstrap replicate yields an alternative future trajectory, and the collection of such trajectories forms an empirical predictive distribution at each horizon.</p>
+<p>If the series is asymmetric, heavy-tailed, or exhibits occasional bursts, those features can appear in the predictive distribution instead of being averaged away by a normal approximation. Directional lower and upper tail functionals can then be used to extract forecast bands. In this sense, the interval forecast is not an accessory to the point forecast. It is the distributional analogue of the same nonparametric logic: preserve the observed structure first, summarize uncertainty second.</p>
+<p>In practice, one might generate a large number of bootstrap replicates, often on the order of hundreds or thousands, then evaluate the empirical future distribution at each horizon. If a central <span class="math inline">\(100(1-\alpha)\%\)</span> interval is desired, the lower and upper bounds can be extracted from directional quantiles corresponding to <span class="math inline">\(\alpha/2\)</span> and <span class="math inline">\(1-\alpha/2\)</span>. The exact number of replicates is an accuracy-versus-computation choice, but the principle is always the same: empirical resampled paths replace parametric error formulas.</p>
+<hr />
+</div>
+<div id="relation-to-earlier-nns-chapters" class="section level2 hasAnchor" number="24.12">
+<h2><span class="header-section-number">24.12</span> Relation to Earlier NNS Chapters<a href="nonparametric-time-series-models.html#relation-to-earlier-nns-chapters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Time-series modeling in NNS is not an isolated technique. It is a direct extension of earlier ideas.</p>
+<div id="from-chapter-18" class="section level3 hasAnchor" number="24.12.1">
+<h3><span class="header-section-number">24.12.1</span> From Chapter 18<a href="nonparametric-time-series-models.html#from-chapter-18" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The forecast engine is built from recursive conditional estimation.</p>
+</div>
+<div id="from-chapter-19" class="section level3 hasAnchor" number="24.12.2">
+<h3><span class="header-section-number">24.12.2</span> From Chapter 19<a href="nonparametric-time-series-models.html#from-chapter-19" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The local regression on component series inherits the data-adaptive bandwidth logic of partition estimators.</p>
+</div>
+<div id="from-chapter-21" class="section level3 hasAnchor" number="24.12.3">
+<h3><span class="header-section-number">24.12.3</span> From Chapter 21<a href="nonparametric-time-series-models.html#from-chapter-21" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Forecasting is just regression where the predictor is lagged time index or lagged structure and the response is the next component value.</p>
+</div>
+<div id="from-chapter-23" class="section level3 hasAnchor" number="24.12.4">
+<h3><span class="header-section-number">24.12.4</span> From Chapter 23<a href="nonparametric-time-series-models.html#from-chapter-23" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Aggregation across multiple lag structures is an ensemble of directional learners.</p>
+<p>So the time-series framework is not an exception to the book’s theory. It is one of its most natural applications.</p>
+<hr />
+</div>
+</div>
+<div id="comparison-with-arima" class="section level2 hasAnchor" number="24.13">
+<h2><span class="header-section-number">24.13</span> Comparison with ARIMA<a href="nonparametric-time-series-models.html#comparison-with-arima" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>ARIMA remains one of the benchmark tools of time-series forecasting.</p>
+<p>Its strengths are well known:</p>
+<ul>
+<li>interpretable lag operators,</li>
+<li>strong theory under stationarity,</li>
+<li>effective performance on linear stochastic dynamics.</li>
+</ul>
+<p>But its limitations are equally clear when viewed through the directional lens.</p>
+<div id="structural-form" class="section level3 hasAnchor" number="24.13.1">
+<h3><span class="header-section-number">24.13.1</span> Structural form<a href="nonparametric-time-series-models.html#structural-form" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ARIMA assumes a linear dependence structure after differencing. NNS does not.</p>
+</div>
+<div id="stationarity" class="section level3 hasAnchor" number="24.13.2">
+<h3><span class="header-section-number">24.13.2</span> Stationarity<a href="nonparametric-time-series-models.html#stationarity" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ARIMA is built around stationarity and invertibility conditions. NNS forecasting does not require the series to satisfy a stationary parametric model in level.</p>
+</div>
+<div id="identification-burden" class="section level3 hasAnchor" number="24.13.3">
+<h3><span class="header-section-number">24.13.3</span> Identification burden<a href="nonparametric-time-series-models.html#identification-burden" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ARIMA requires order selection and specification diagnostics. NNS shifts the task from parametric identification to predictive lag decomposition.</p>
+</div>
+<div id="nonlinearity" class="section level3 hasAnchor" number="24.13.4">
+<h3><span class="header-section-number">24.13.4</span> Nonlinearity<a href="nonparametric-time-series-models.html#nonlinearity" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ARIMA can approximate some nonlinear behavior through transformations or hybridization, but nonlinearity is not native to the model. In NNS, it is native.</p>
+<p>This does not mean ARIMA is obsolete. It means that ARIMA is best understood as a special, linear, tightly structured case of a broader forecasting problem.</p>
+<p>For balance, however, NNS does not eliminate modeling choices. It replaces ARIMA’s order-identification problem with choices about lag selection, regression method, aggregation weights, and updating scheme. The difference is methodological rather than absolute: in NNS, these choices are naturally evaluated by predictive performance rather than by adherence to a pre-specified parametric identification protocol.</p>
+<hr />
+</div>
+</div>
+<div id="comparison-with-ets-models" class="section level2 hasAnchor" number="24.14">
+<h2><span class="header-section-number">24.14</span> Comparison with ETS Models<a href="nonparametric-time-series-models.html#comparison-with-ets-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>ETS methods model time series through combinations of</p>
+<ul>
+<li>error,</li>
+<li>trend,</li>
+<li>and seasonality,</li>
+</ul>
+<p>typically using exponential smoothing recursions and state-space interpretations.</p>
+<p>These methods are often highly effective, especially on business forecasting problems with stable level, trend, and seasonal components.</p>
+<p>Relative to ETS, the NNS approach differs in several ways.</p>
+<div id="component-meaning" class="section level3 hasAnchor" number="24.14.1">
+<h3><span class="header-section-number">24.14.1</span> Component meaning<a href="nonparametric-time-series-models.html#component-meaning" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ETS decomposes the series into latent level, trend, and seasonality states.
+NNS decomposes it into lag-defined predictive subsets.</p>
+</div>
+<div id="smoothing-mechanism" class="section level3 hasAnchor" number="24.14.2">
+<h3><span class="header-section-number">24.14.2</span> Smoothing mechanism<a href="nonparametric-time-series-models.html#smoothing-mechanism" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ETS uses recursive smoothing equations.
+NNS uses local regression and weighted aggregation across component series.</p>
+</div>
+<div id="parametric-structure" class="section level3 hasAnchor" number="24.14.3">
+<h3><span class="header-section-number">24.14.3</span> Parametric structure<a href="nonparametric-time-series-models.html#parametric-structure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ETS specifies an updating architecture in advance.
+NNS lets the predictive structure emerge from the data.</p>
+</div>
+<div id="nonlinear-interactions" class="section level3 hasAnchor" number="24.14.4">
+<h3><span class="header-section-number">24.14.4</span> Nonlinear interactions<a href="nonparametric-time-series-models.html#nonlinear-interactions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>ETS can adapt smoothly, but it is not inherently designed for rich nonlinear autoregressive geometry.
+NNS is.</p>
+<p>The practical difference is conceptual:</p>
+<p>ETS smooths a presumed component architecture.
+NNS learns a predictive architecture from subset behavior.</p>
+<p>A further distinction is distributional. Many ETS formulations are estimated in likelihood-based frameworks tied to specific error models, often Gaussian or close variants. The NNS approach imposes no such distributional law on the series or on the forecast errors.</p>
+<hr />
+</div>
+</div>
+<div id="when-the-nns-approach-is-especially-useful" class="section level2 hasAnchor" number="24.15">
+<h2><span class="header-section-number">24.15</span> When the NNS Approach Is Especially Useful<a href="nonparametric-time-series-models.html#when-the-nns-approach-is-especially-useful" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The nonparametric time-series framework is particularly attractive when one or more of the following hold:</p>
+<ul>
+<li>the series exhibits nonlinear cyclic behavior,</li>
+<li>multiple seasonalities are present,</li>
+<li>model stationarity is doubtful,</li>
+<li>lag effects are structurally asymmetric,</li>
+<li>parametric identification is fragile,</li>
+<li>or prediction accuracy matters more than adherence to a classical stochastic specification.</li>
+</ul>
+<p>Examples include:</p>
+<ul>
+<li>retail and transaction flows,</li>
+<li>cyclical economic indicators,</li>
+<li>energy demand,</li>
+<li>financial and commodity time series,</li>
+<li>and operational processes with threshold-driven dynamics.</li>
+</ul>
+<p>These are precisely the settings where local structure matters more than global parametric elegance.</p>
+<hr />
+</div>
+<div id="limitations" class="section level2 hasAnchor" number="24.16">
+<h2><span class="header-section-number">24.16</span> Limitations<a href="nonparametric-time-series-models.html#limitations" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A nonparametric forecasting method is not free of tradeoffs.</p>
+<div id="primarily-univariate-in-this-chapter" class="section level3 hasAnchor" number="24.16.1">
+<h3><span class="header-section-number">24.16.1</span> Primarily univariate in this chapter<a href="nonparametric-time-series-models.html#primarily-univariate-in-this-chapter" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The methods developed here focus on a single series. Cross-series interactions are deferred to Chapter 25.</p>
+</div>
+<div id="data-requirements" class="section level3 hasAnchor" number="24.16.2">
+<h3><span class="header-section-number">24.16.2</span> Data requirements<a href="nonparametric-time-series-models.html#data-requirements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Because prediction is learned from historical structure, sparse component series may limit reliability for very large lag lengths.</p>
+</div>
+<div id="computational-cost-2" class="section level3 hasAnchor" number="24.16.3">
+<h3><span class="header-section-number">24.16.3</span> Computational cost<a href="nonparametric-time-series-models.html#computational-cost-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Searching many seasonal combinations and fitting nonlinear regressions can be more computationally intensive than fitting a simple linear ARIMA.</p>
+</div>
+<div id="interpretability-of-dynamics" class="section level3 hasAnchor" number="24.16.4">
+<h3><span class="header-section-number">24.16.4</span> Interpretability of dynamics<a href="nonparametric-time-series-models.html#interpretability-of-dynamics" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A fitted ARIMA equation provides direct coefficients. NNS instead provides a predictive mechanism based on component regressions and weights. This is often more flexible, but less compact as a closed-form law.</p>
+<p>These limitations are real. But they are the cost of avoiding the stronger assumptions of parametric time-series models.</p>
+<p>The multivariate extension is natural in principle, but not automatic in implementation. Once several series enter, one must distinguish self-dependence from cross-dependence, align potentially different frequencies, and account for lead-lag structure across variables. Those complications motivate the next chapter.</p>
+<hr />
+</div>
+</div>
+<div id="leakage-safe-backtesting-protocol" class="section level2 hasAnchor" number="24.17">
+<h2><span class="header-section-number">24.17</span> Leakage-Safe Backtesting Protocol<a href="nonparametric-time-series-models.html#leakage-safe-backtesting-protocol" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Forecasting performance must be assessed with strict time-order preservation. A leakage-safe protocol is:</p>
+<ul>
+<li><strong>Rolling-origin evaluation</strong>: choose an initial training window <code>[1, T_0]</code>.</li>
+<li><strong>Forecast horizon definition</strong>: for each origin <code>t</code>, produce forecasts for <code>t+h</code> without using observations after <code>t</code>.</li>
+<li><strong>Expanding or sliding refit</strong>:
+<ul>
+<li>expanding window: train on <code>[1, t]</code>, or</li>
+<li>sliding window: train on <code>[t-w+1, t]</code>.</li>
+</ul></li>
+<li><strong>No future-informed preprocessing</strong>: any scaling, interpolation, imputation, or feature construction must be computed using data available at origin <code>t</code> only.</li>
+<li><strong>Horizon-specific scoring</strong>: report MAE/RMSE/coverage separately for each horizon <code>h</code> rather than pooling all horizons.</li>
+<li><strong>Interval calibration check</strong>: compare nominal vs empirical coverage for prediction intervals across horizons.</li>
+</ul>
+<p>For seasonal component construction, lag selection must also be origin-specific; selecting global lags from the full sample before backtesting constitutes leakage.</p>
+</div>
+<div id="summary-17" class="section level2 hasAnchor" number="24.18">
+<h2><span class="header-section-number">24.18</span> Summary<a href="nonparametric-time-series-models.html#summary-17" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This chapter developed nonparametric time-series modeling in the NNS framework.</p>
+<p>Its main contributions are fivefold.</p>
+<p>First, it reframed <strong>time series as a subset regression problem</strong>. Forecasting is treated as conditional estimation on lag-defined component series rather than as fitting a single global linear recursion.</p>
+<p>Second, it developed <strong>seasonal decomposition by predictive concentration</strong>. Seasonal structure is detected through reductions in coefficient of variation across component series, linking seasonality directly to forecastability.</p>
+<p>Third, it established <strong>nonlinear autoregressive forecasting</strong>. Component series are projected forward using nonparametric regression, allowing local curvature and asymmetric dynamics to enter the forecast natively.</p>
+<p>Fourth, it clarified how the book’s broader dependence framework extends into time. Lagged directional structure can be studied theoretically through co-partial-moment ideas, even though the chapter’s main forecasting routines operationalize time dependence through component regression and seasonality rather than through a standalone directional-autocorrelation statistic.</p>
+<p>Fifth, it clarified the chapter’s relationship to classical methods. ARIMA and ETS remain important special-purpose tools, but they impose structural assumptions that the NNS framework avoids.</p>
+<p>Taken together, these results show that the directional nonparametric framework extends naturally from cross-sectional estimation to temporal prediction.</p>
+<p>But the framework developed here remains fundamentally univariate. Once other series matter, the main difficulty is no longer just whether the past of <span class="math inline">\(X_t\)</span> predicts its future, but whether lagged values of <span class="math inline">\(Y_t\)</span>, <span class="math inline">\(Z_t\)</span>, and other related processes alter that forecast in nonlinear and asymmetric ways. In that setting, univariate decomposition can miss cross-series lead-lag effects, common shocks, and mixed-frequency structure.</p>
+<p>The next chapter therefore generalizes the same ideas to <strong>multivariate forecasting</strong>, where multiple time series interact through directional dependence, lagged cross-variable structure, and mixed-frequency information.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="ensemble-methods.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="multivariate-forecasting.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
