@@ -419,6 +419,7 @@ kernel-regression-2
 exact-fit-interpolation-and-extrapolation
 multivariate-regression-surfaces
 regression-point-compression-and-k-nearest-prediction
+adaptive-order-selection-dependence-driven-partition-depth
 dimension-reduction-via-synthetic-predictors
 weighting-options
 variable-selection-through-thresholding
@@ -620,3 +621,4 @@ core-directional-operators-and-partial-moments
 co-partial-moments-dependence-and-causation
 distribution-comparison-dominance-and-interval-objects
 regression-and-forecasting-workflow-objects
+a.3-technical-note-adaptive-order-and-consistency-conditions
