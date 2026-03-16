@@ -1061,17 +1061,18 @@ P(X &gt; t_X) = U_0(t_X;\,X), \qquad P(Y &gt; t_Y) = U_0(t_Y;\,Y).
 \]</span></p>
 <p>This is the <strong>degree-zero partition of unity</strong>: each observation contributes exactly one unit of probability mass to exactly one quadrant. It is a complete nonparametric probability representation of the joint distribution relative to any pair of benchmarks.</p>
 <p>In NNS R-package notation:</p>
-<p><span class="math display">\[
-1 =
-\underbrace{\texttt{Co.UPM}(0,X,Y,t_X,t_Y)}_{P(X&gt;t_X,\,Y&gt;t_Y)}
-+\;
-\underbrace{\texttt{D.UPM}(0,0,X,Y,t_X,t_Y)}_{P(X&gt;t_X,\,Y\le t_Y)}
-+\;
-\underbrace{\texttt{D.LPM}(0,0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y&gt;t_Y)}
-+\;
-\underbrace{\texttt{Co.LPM}(0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y\le t_Y)}.
-\]</span></p>
-<p>Conditional probabilities are simply <strong>relative weights of these regions after conditioning on one of the marginals</strong>.</p>
+<span class="math display">\[\begin{aligned}
+1 &amp;= \texttt{Co.UPM}(0,X,Y,t_X,t_Y)
+   + \texttt{D.UPM}(0,0,X,Y,t_X,t_Y) \\
+  &amp;\quad + \texttt{D.LPM}(0,0,X,Y,t_X,t_Y)
+   + \texttt{Co.LPM}(0,X,Y,t_X,t_Y).
+\end{aligned}\]</span>
+<p>where the four terms correspond respectively to
+<span class="math inline">\(P(X&gt;t_X,\,Y&gt;t_Y)\)</span>,
+<span class="math inline">\(P(X&gt;t_X,\,Y\le t_Y)\)</span>,
+<span class="math inline">\(P(X\le t_X,\,Y&gt;t_Y)\)</span>, and
+<span class="math inline">\(P(X\le t_X,\,Y\le t_Y)\)</span>.
+Conditional probabilities are simply <strong>relative weights of these regions after conditioning on one of the marginals</strong>.</p>
 <hr />
 </div>
 <div id="conditional-probability-from-co-partial-moments" class="section level2 hasAnchor" number="13.4">

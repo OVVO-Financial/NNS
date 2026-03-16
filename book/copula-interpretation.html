@@ -1181,7 +1181,7 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 <span id="cb9-2"><a href="copula-interpretation.html#cb9-2" tabindex="-1"></a>z3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(x))</span>
 <span id="cb9-3"><a href="copula-interpretation.html#cb9-3" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="copula-interpretation.html#cb9-4" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z3), <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">independence.overlay =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-5"><a href="copula-interpretation.html#cb9-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.302</span></span></code></pre></div>
+<span id="cb9-5"><a href="copula-interpretation.html#cb9-5" tabindex="-1"></a><span class="do">## [1] 0.302</span></span></code></pre></div>
 <p>The return value is a single scalar in <span class="math inline">\([0,1]\)</span> for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, <code>continuous = TRUE</code> can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.</p>
 <hr />
 </div>

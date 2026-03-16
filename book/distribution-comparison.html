@@ -1170,20 +1170,20 @@ F_1(\bar{x};\, X) = 0.5
 <span id="cb10-5"><a href="distribution-comparison.html#cb10-5" tabindex="-1"></a></span>
 <span id="cb10-6"><a href="distribution-comparison.html#cb10-6" tabindex="-1"></a><span class="co"># Discrete CDF at the mean — biased</span></span>
 <span id="cb10-7"><a href="distribution-comparison.html#cb10-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x), x)</span>
-<span id="cb10-8"><a href="distribution-comparison.html#cb10-8" tabindex="-1"></a><span class="co"># [1] 0.44</span></span>
+<span id="cb10-8"><a href="distribution-comparison.html#cb10-8" tabindex="-1"></a><span class="do">## [1] 0.44</span></span>
 <span id="cb10-9"><a href="distribution-comparison.html#cb10-9" tabindex="-1"></a></span>
 <span id="cb10-10"><a href="distribution-comparison.html#cb10-10" tabindex="-1"></a><span class="co"># Continuous (area-based) probability at the mean — unbiased</span></span>
 <span id="cb10-11"><a href="distribution-comparison.html#cb10-11" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x), x)</span>
-<span id="cb10-12"><a href="distribution-comparison.html#cb10-12" tabindex="-1"></a><span class="co"># [1] 0.5</span></span></code></pre></div>
+<span id="cb10-12"><a href="distribution-comparison.html#cb10-12" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 <p>With 100 observations, the discrete CDF places only 44% of mass below the sample mean. The degree-one ratio returns exactly 0.5. Increasing to 500 observations closes the gap but never eliminates it for the discrete version:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="distribution-comparison.html#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
 <span id="cb11-2"><a href="distribution-comparison.html#cb11-2" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
 <span id="cb11-3"><a href="distribution-comparison.html#cb11-3" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="distribution-comparison.html#cb11-4" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># discrete — still biased</span></span>
-<span id="cb11-5"><a href="distribution-comparison.html#cb11-5" tabindex="-1"></a><span class="co"># [1] 0.496</span></span>
+<span id="cb11-5"><a href="distribution-comparison.html#cb11-5" tabindex="-1"></a><span class="do">## [1] 0.496</span></span>
 <span id="cb11-6"><a href="distribution-comparison.html#cb11-6" tabindex="-1"></a></span>
 <span id="cb11-7"><a href="distribution-comparison.html#cb11-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># continuous — exact</span></span>
-<span id="cb11-8"><a href="distribution-comparison.html#cb11-8" tabindex="-1"></a><span class="co"># [1] 0.5</span></span></code></pre></div>
+<span id="cb11-8"><a href="distribution-comparison.html#cb11-8" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 <p>Tracking both measures sequentially across every observation confirms that the degree-zero ratio oscillates around 0.5 and converges only in the limit, while the degree-one ratio is pinned at exactly 0.5 throughout:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="distribution-comparison.html#cb12-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
 <span id="cb12-2"><a href="distribution-comparison.html#cb12-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>)</span>
@@ -1317,15 +1317,16 @@ F_1(\bar{z}; X), \qquad F_1(\bar{z}; Y).
 <p>Four additional terms are computed at upper and lower quantile targets. The upper 25% target is the average of the 75th upper partial moment quantile of each group, and the lower 25% target is the average of the 75th lower partial moment quantile; analogous targets are constructed at the 12.5% level. At each target <span class="math inline">\(q\)</span>, the deviation <span class="math inline">\(\delta_q\)</span> is defined as the maximum absolute departure of either group’s partial moment ratio from the expected null value <span class="math inline">\(q\)</span>, capped at <span class="math inline">\(q\)</span>.</p>
 <p>The full-distribution certainty statistic is then</p>
 <p><span class="math display">\[
-\text{Certainty}_{\text{ANOVA, raw}} =
-\frac{1}{2.5}
-\left[
+\begin{aligned}
+\text{Certainty}_{\text{ANOVA, raw}}
+&amp;= \frac{1}{2.5} \Bigg[
 \frac{(0.5 - \delta_0)^2}{0.25}
-+ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{U})^2}{0.0625}
-+ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{L})^2}{0.0625}
-+ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{U})^2}{0.015625}
-+ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{L})^2}{0.015625}
-\right].
++ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{U})^2}{0.0625} \\
+&amp;\qquad + 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{L})^2}{0.0625}
++ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{U})^2}{0.015625} \\
+&amp;\qquad + 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{L})^2}{0.015625}
+\Bigg].
+\end{aligned}
 \]</span></p>
 <p>Each term is a squared relative deviation from its null value, weighted by benchmark coverage so central benchmarks dominate the score while outer-tail benchmarks remain contributory but less influential. The mean benchmark receives weight 1 because it is the primary location anchor; each 25% tail benchmark receives 0.5 because it targets one-quarter tail regions on each side; and each 12.5% extreme-tail benchmark receives 0.25 to avoid overweighting sparse extremes. The sum is normalized by total weight 2.5. In means-only mode, only the first term is used and divided by 1 rather than 2.5.</p>
 <p>When medians rather than means are the comparison target, the CDF evaluation uses the degree-zero partial moment ratio <span class="math inline">\(LPM_0(\bar{z}; X) / (LPM_0(\bar{z}; X) + UPM_0(\bar{z}; X))\)</span>, which counts frequency mass rather than area mass, in place of the degree-one ratio.</p>
