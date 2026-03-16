@@ -25,7 +25,9 @@ Companion R-package and datasets to: \#### Viole, F. and Nawrocki, D.
 (2013) “*Nonlinear Nonparametric Statistics: Using Partial Moments*”
 (ISBN: 1490523995)
 
-#### For a quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
+2nd edition available here: <https://ovvo-financial.github.io/NNS/book/>
+
+#### For a direct quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
 
 ## Current Version
 
