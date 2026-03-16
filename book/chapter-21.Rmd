@@ -553,3 +553,6 @@ Sixth, it introduced **dimension reduction via synthetic predictors**. Predictor
 Seventh, it compared the NNS approach with classical regression models — linear, polynomial, additive, tree-based, and kernel-based — highlighting the distinctive combination of nonparametric flexibility, endogenous bandwidth, adaptive nearest-neighbor localization, partition-based interpretability, and optional synthetic-index reduction.
 
 The next chapter turns from conditional mean estimation to **classification**, where the same directional partition structures are used not to predict a numeric response, but to assign observations to classes.
+
+> **Further Reading / Examples**
+> For hands-on regression applications, including multivariate and noisy data examples, see the [NNS Regression Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#2-regression).

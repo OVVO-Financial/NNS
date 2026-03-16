@@ -36,3 +36,19 @@ Readers can use the text in two ways:
 2. **As a reference**, by jumping directly to method-specific chapters and accompanying implementation examples.
 
 Whether your domain is economics, finance, operations, policy, or scientific research, the goal is the same: to provide robust, interpretable, and applied nonparametric tools for difficult data.
+
+## About the Examples Repository {-}
+
+This book is designed to be used alongside the companion examples repository:
+
+- <https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>
+
+The repository is organized as a practical application layer. Conceptual and theoretical development lives in the book, while reproducible scripts and end-to-end demonstrations live in the examples.
+
+A useful way to navigate both resources together is:
+
+1. Read the chapter for the theoretical framework and notation.
+2. Open the matching section in `examples/README.md` for runnable code patterns.
+3. Adapt those scripts to your own data and evaluate with your domain constraints.
+
+The examples repository is intended for hands-on implementation, not as a substitute for the proofs and derivations developed in the text. Keep the repository disclaimer in mind when applying any script directly to production or policy settings; examples are instructional templates and should be validated, stress-tested, and context-calibrated before operational use.

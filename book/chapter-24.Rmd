@@ -677,3 +677,6 @@ Taken together, these results show that the directional nonparametric framework 
 But the framework developed here remains fundamentally univariate. Once other series matter, the main difficulty is no longer just whether the past of \(X_t\) predicts its future, but whether lagged values of \(Y_t\), \(Z_t\), and other related processes alter that forecast in nonlinear and asymmetric ways. In that setting, univariate decomposition can miss cross-series lead-lag effects, common shocks, and mixed-frequency structure.
 
 The next chapter therefore generalizes the same ideas to **multivariate forecasting**, where multiple time series interact through directional dependence, lagged cross-variable structure, and mixed-frequency information.
+
+> **Further Reading / Examples**
+> For forecasting applications, including the tidal data example, see the [NNS Time-Series Forecasting Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#4-time-series-forecasting). This behavior is illustrated in the [tidal forecasting example](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html), where the seasonal decomposition captures the dominant 12-month cycle.

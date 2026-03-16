@@ -695,3 +695,6 @@ Seventh, it compared the NNS approach with **random forests and support vector m
 Taken together, these results show that classification in the NNS framework is not a separate machine-learning module bolted onto the theory. It is another direct consequence of the same directional primitive that generated distribution theory, dependence, clustering, and regression.
 
 The next part of the book turns from machine learning toward broader applications and synthesis, showing how these directional tools combine in practice.
+
+> **Further Reading / Examples**
+> For machine learning applications, including the MNIST classification example, see the [NNS Machine Learning Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#3-machine-learning).
