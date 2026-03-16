@@ -51,3 +51,25 @@ library(NNS)
 | Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs |
 | $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` |
 | Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows |
+
+## A.3 Technical Note: Adaptive Order and Consistency Conditions
+
+Chapter 18 established two core consistency conditions for recursive mean-split regression:
+
+1. **Shrinking cell diameter** at each target location so local bias vanishes,
+2. **Growing cell occupancy** so local sample averages stabilize.
+
+When `order = NULL`, the implementation determines effective recursion depth per regressor from directional dependence with the response (`NNS.dep`-style logic). This modifies how quickly local cells contract across predictors, but it does not alter the fundamental structure of the consistency argument.
+
+High-dependence predictors are allocated deeper partitioning, so their local diameters contract faster in regions where signal is strong. Low-dependence predictors are partitioned more conservatively, preserving broader local averaging where aggressive refinement would primarily amplify noise. Occupancy control remains enforced through the minimum cell-size rule.
+
+The resulting estimator is therefore **locally adaptive in rate**:
+
+- in high-signal regions, convergence tracks a faster path closer to an oracle fixed-order choice for that local structure;
+- in low-signal regions, the estimator intentionally retains coarser cells, exchanging some local bias for improved stability.
+
+A concise takeaway is:
+
+> Under the Chapter 18 regularity conditions (shrinking local diameters and diverging local occupancy), dependence-driven order allocation preserves the same bias–variance decomposition used for consistency arguments, while allowing refinement to concentrate where dependence signal is stronger.
+
+The key practical point is that internal adaptive order selection keeps the same consistency checklist for users—control occupancy and ensure progressive local refinement—while often improving finite-sample stability by avoiding unnecessary depth in weak-signal coordinates.

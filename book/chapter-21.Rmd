@@ -359,6 +359,25 @@ A further adaptive feature is that the number of neighbors is itself dependence-
 
 For this reason, the multivariate NNS regression may be viewed as a hybrid of partition estimation and nearest-neighbor prediction: partitioning creates a denoised regression-point geometry, and nearest-neighbor search over that geometry supplies the final local prediction.
 
+## Adaptive Order Selection: Dependence-Driven Partition Depth
+
+When the user leaves `order = NULL` (the default), `NNS.reg` does not apply one global partition depth uniformly across all predictors. Instead, it computes a directional dependence score between each regressor and the response using the same partial-moment machinery developed earlier (`NNS.dep`-style dependence), then allocates recursion depth per regressor accordingly.
+
+Regressors with stronger directional dependence receive deeper recursive partitioning (higher realized effective order for that predictor), enabling finer local approximation where signal is most evident. Regressors with weak dependence receive shallower partitioning, yielding broader smoothing and reducing the chance of overfitting noise-dominant inputs.
+
+This is the concrete implementation of the dynamic-bandwidth interpretation from Chapter 19: partition cell diameter is not only data-adaptive, but dependence-adaptive. Smoothing granularity is therefore endogenously assigned by signal strength rather than fixed through a single hand-tuned global parameter.
+
+In practice, the realized depth profile can be inspected after fitting:
+
+```r
+fit <- NNS.reg(x, y)   # order = NULL by default
+fit$rhs.partitions     # realized partition depth per regressor
+```
+
+Interpretation is relative: predictors with higher directional dependence typically receive finer partitioning than predictors with weaker dependence in the same fit. The exact realized depths depend on the sample, occupancy constraints, and other fitting controls.
+
+The main practical consequence is that per-variable manual tuning is often reduced in exploratory workflows, while full control remains available when needed (`order = 5`, `order = "max"`, and related settings).
+
 ---
 
 ## Dimension Reduction via Synthetic Predictors

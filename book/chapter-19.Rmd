@@ -464,6 +464,8 @@ In that sense, the recursive mean-split estimator combines
 - a **global refinement control** through \(O\), and
 - **local adaptive smoothing** through \(h_n(x)=\operatorname{diam}(A_n(x))\).
 
+In the default implementation, this global control is deployed locally as well: when `order = NULL`, each regressor receives its own effective order based on its directional dependence strength with the response. Bandwidth therefore becomes not only stochastic and location-dependent, but also signal-dependent, allocating finer resolution where directional dependence is strongest and broader smoothing where evidence is weaker.
+
 This dual structure helps explain why the method can be both flexible and interpretable.
 
 ---

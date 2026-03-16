@@ -127,6 +127,7 @@ The key design choice is how the regions \(A_k\) are constructed.
 
 The NNS recursive mean-split estimator builds partitions through an iterative procedure governed by an **order parameter** \(O\).
 At each order, each existing region is further subdivided.
+When left unspecified in the package interface (`order = NULL`), recursion depth is determined internally for each regressor according to its directional dependence with the response; Chapter 21 formalizes this dependence-driven adaptivity in the regression workflow.
 
 Two splitting modes are available, depending on whether regions are anchored to the joint distribution of \((X, Y)\) or to the marginal distribution of \(X\) alone.
 
