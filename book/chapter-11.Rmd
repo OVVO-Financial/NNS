@@ -247,6 +247,7 @@ CoLPM_{1,1} \gg CoUPM_{1,1}.
 A replicable simulation makes this asymmetry explicit. In the construction below, **negative shocks are shared** between both variables, while positive-side behavior is generated independently:
 
 ```r
+library(NNS)
 set.seed(42)
 n <- 500
 shock <- rnorm(n)
@@ -254,10 +255,10 @@ shock <- rnorm(n)
 x <- ifelse(shock < 0, shock, rnorm(n))
 y <- ifelse(shock < 0, shock + rnorm(n, 0, 0.1), rnorm(n))
 
-NNS::Co.LPM(1, x, y, mean(x), mean(y))
-NNS::Co.UPM(1, x, y, mean(x), mean(y))
-NNS::D.LPM(1, 1, x, y, mean(x), mean(y))
-NNS::D.UPM(1, 1, x, y, mean(x), mean(y))
+Co.LPM(1, x, y, mean(x), mean(y))
+Co.UPM(1, x, y, mean(x), mean(y))
+D.LPM(1, 1, x, y, mean(x), mean(y))
+D.UPM(1, 1, x, y, mean(x), mean(y))
 ```
 
 In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.

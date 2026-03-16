@@ -262,7 +262,7 @@ set.seed(123)
 z3 <- rnorm(length(x))
 
 NNS.copula(cbind(x, y, z3), plot = TRUE, independence.overlay = TRUE)
-[1] 0.302
+## [1] 0.302
 ```
 
 The return value is a single scalar in \([0,1]\) for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, `continuous = TRUE` can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.

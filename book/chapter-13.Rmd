@@ -97,17 +97,19 @@ This is the **degree-zero partition of unity**: each observation contributes exa
 
 In NNS R-package notation:
 
-\[
-1 =
-\underbrace{\texttt{Co.UPM}(0,X,Y,t_X,t_Y)}_{P(X>t_X,\,Y>t_Y)}
-+\;
-\underbrace{\texttt{D.UPM}(0,0,X,Y,t_X,t_Y)}_{P(X>t_X,\,Y\le t_Y)}
-+\;
-\underbrace{\texttt{D.LPM}(0,0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y>t_Y)}
-+\;
-\underbrace{\texttt{Co.LPM}(0,X,Y,t_X,t_Y)}_{P(X\le t_X,\,Y\le t_Y)}.
-\]
+\begin{aligned}
+1 &= \texttt{Co.UPM}(0,X,Y,t_X,t_Y)
+   + \texttt{D.UPM}(0,0,X,Y,t_X,t_Y) \\
+  &\quad + \texttt{D.LPM}(0,0,X,Y,t_X,t_Y)
+   + \texttt{Co.LPM}(0,X,Y,t_X,t_Y).
+\end{aligned}
 
+
+where the four terms correspond respectively to
+\(P(X>t_X,\,Y>t_Y)\),
+\(P(X>t_X,\,Y\le t_Y)\),
+\(P(X\le t_X,\,Y>t_Y)\), and
+\(P(X\le t_X,\,Y\le t_Y)\).
 Conditional probabilities are simply **relative weights of these regions after conditioning on one of the marginals**.
 
 ---

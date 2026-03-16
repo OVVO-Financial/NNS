@@ -273,11 +273,11 @@ x <- rnorm(100, mean = 5, sd = 1)
 
 # Discrete CDF at the mean — biased
 LPM.ratio(0, mean(x), x)
-# [1] 0.44
+## [1] 0.44
 
 # Continuous (area-based) probability at the mean — unbiased
 LPM.ratio(1, mean(x), x)
-# [1] 0.5
+## [1] 0.5
 ```
 
 With 100 observations, the discrete CDF places only 44% of mass below the sample mean. The degree-one ratio returns exactly 0.5. Increasing to 500 observations closes the gap but never eliminates it for the discrete version:
@@ -287,10 +287,10 @@ set.seed(12345)
 x2 <- rnorm(500, mean = 5, sd = 1)
 
 LPM.ratio(0, mean(x2), x2)   # discrete — still biased
-# [1] 0.496
+## [1] 0.496
 
 LPM.ratio(1, mean(x2), x2)   # continuous — exact
-# [1] 0.5
+## [1] 0.5
 ```
 
 Tracking both measures sequentially across every observation confirms that the degree-zero ratio oscillates around 0.5 and converges only in the limit, while the degree-one ratio is pinned at exactly 0.5 throughout:
@@ -472,15 +472,16 @@ Four additional terms are computed at upper and lower quantile targets. The uppe
 The full-distribution certainty statistic is then
 
 $$
-\text{Certainty}_{\text{ANOVA, raw}} =
-\frac{1}{2.5}
-\left[
+\begin{aligned}
+\text{Certainty}_{\text{ANOVA, raw}}
+&= \frac{1}{2.5} \Bigg[
 \frac{(0.5 - \delta_0)^2}{0.25}
-+ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{U})^2}{0.0625}
-+ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{L})^2}{0.0625}
-+ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{U})^2}{0.015625}
-+ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{L})^2}{0.015625}
-\right].
++ 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{U})^2}{0.0625} \\
+&\qquad + 0.5 \cdot \frac{(0.25 - \delta_{0.25}^{L})^2}{0.0625}
++ 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{U})^2}{0.015625} \\
+&\qquad + 0.25 \cdot \frac{(0.125 - \delta_{0.125}^{L})^2}{0.015625}
+\Bigg].
+\end{aligned}
 $$
 
 Each term is a squared relative deviation from its null value, weighted by benchmark coverage so central benchmarks dominate the score while outer-tail benchmarks remain contributory but less influential. The mean benchmark receives weight 1 because it is the primary location anchor; each 25% tail benchmark receives 0.5 because it targets one-quarter tail regions on each side; and each 12.5% extreme-tail benchmark receives 0.25 to avoid overweighting sparse extremes. The sum is normalized by total weight 2.5. In means-only mode, only the first term is used and divided by 1 rather than 2.5.

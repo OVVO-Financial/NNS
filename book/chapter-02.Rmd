@@ -155,7 +155,7 @@ Partial moments therefore generalize classical moments while preserving directio
 
 The manuscript uses theoretical notation in proofs and function-style notation in implementation examples. The mapping is direct:
 
-| Theoretical object | Meaning | R implementation pattern |
+| Theoretical object | Meaning | R implementation pattern (Using `NNS` Package) |
 |---|---|---|
 | \(L_r(t;X)\) | lower partial moment of degree \(r\) at benchmark \(t\) | `LPM(r, t, X)` |
 | \(U_r(t;X)\) | upper partial moment of degree \(r\) at benchmark \(t\) | `UPM(r, t, X)` |
