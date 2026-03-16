@@ -26,8 +26,10 @@ NNS delivers a comprehensive suite of advanced statistical techniques, including
 Companion R-package and datasets to: 
 #### Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" (ISBN: 1490523995)
 
+2nd edition available here: https://ovvo-financial.github.io/NNS/book/
 
-#### For a quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
+
+#### For a direct quantitative finance implementation of NNS, see [OVVO Labs](https://www.ovvolabs.com)
 
 
 ## Current Version
@@ -62,3 +64,4 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
 ## Thank you for your interest in NNS!
 ![](https://cranlogs.r-pkg.org/badges/NNS)
 ![](https://cranlogs.r-pkg.org/badges/grand-total/NNS)
+
