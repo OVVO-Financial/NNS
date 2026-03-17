@@ -57,7 +57,7 @@ X_t = f(X_{t-1}, X_{t-2}, \dots) + \varepsilon_t.
 
 The task is then to estimate the unknown dynamic map \(f\) nonparametrically.
 
-This places time-series analysis inside the same framework developed in Chapters 17–22:
+This places time-series analysis inside the same framework developed in Chapters 19–24:
 
 - identify informative local structure,
 - partition or decompose the data,
@@ -464,7 +464,7 @@ A useful empirical guide is out-of-sample validation. One may reserve a holdout 
 
 Point forecasts are only one part of the forecasting problem. Analysts also need measures of uncertainty.
 
-Because the NNS framework is nonparametric, forecast intervals are constructed without Gaussian error assumptions. Instead, uncertainty can be propagated using the maximum entropy bootstrap machinery developed in Chapter 17.
+Because the NNS framework is nonparametric, forecast intervals are constructed without Gaussian error assumptions. Instead, uncertainty can be propagated using the maximum entropy bootstrap machinery developed in Chapter 18.
 
 The logic is straightforward:
 
@@ -494,19 +494,19 @@ In practice, one might generate a large number of bootstrap replicates, often on
 
 Time-series modeling in NNS is not an isolated technique. It is a direct extension of earlier ideas.
 
-### From Chapter 18
+### From Chapter 19
 
 The forecast engine is built from recursive conditional estimation.
 
-### From Chapter 19
+### From Chapter 20
 
 The local regression on component series inherits the data-adaptive bandwidth logic of partition estimators.
 
-### From Chapter 21
+### From Chapter 22
 
 Forecasting is just regression where the predictor is lagged time index or lagged structure and the response is the next component value.
 
-### From Chapter 23
+### From Chapter 24
 
 Aggregation across multiple lag structures is an ensemble of directional learners.
 
@@ -620,7 +620,7 @@ A nonparametric forecasting method is not free of tradeoffs.
 
 ### Primarily univariate in this chapter
 
-The methods developed here focus on a single series. Cross-series interactions are deferred to Chapter 25.
+The methods developed here focus on a single series. Cross-series interactions are deferred to Chapter 26.
 
 ### Data requirements
 

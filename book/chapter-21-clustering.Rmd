@@ -1,6 +1,6 @@
 # Clustering
 
-Chapters 17–19 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on **supervised estimation**, where a response variable \(Y\) is observed and the objective is to recover a conditional mean function.
+Chapters 19–20 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on **supervised estimation**, where a response variable \(Y\) is observed and the objective is to recover a conditional mean function.
 
 This chapter turns to **unsupervised learning**.
 
@@ -16,7 +16,7 @@ The directional framework developed throughout this book suggests a different pe
 
 Rather than defining similarity purely by geometric distance, we can define it through **directional behavior relative to local benchmarks**. In this view, clustering is not merely grouping by proximity. It is grouping by **shared directional structure**.
 
-This chapter develops that idea using the partition machinery introduced in Chapters 17–19 and connects it to the NNS clustering procedure.
+This chapter develops that idea using the partition machinery introduced in Chapters 19–20 and connects it to the NNS clustering procedure.
 
 ---
 
@@ -97,7 +97,7 @@ The directional framework instead asks whether observations share common **sign 
 
 ## Partition-Based Clustering
 
-The recursive mean-split machinery from Chapter 18 provides a natural unsupervised clustering mechanism.
+The recursive mean-split machinery from Chapter 19 provides a natural unsupervised clustering mechanism.
 
 In supervised estimation, partition cells were used to approximate a regression surface. In clustering, the same recursive partitions can be interpreted directly as **unsupervised groupings of the data cloud**.
 

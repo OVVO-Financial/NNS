@@ -342,7 +342,7 @@ Unlike parametric prediction intervals, neither variant depends on distributiona
 
 ## Conditional Prediction Intervals via NNS Regression
 
-Conditional intervals derived from `NNS.reg` are developed in detail in Chapter 21, where the regression estimator is introduced formally and interpreted geometrically.
+Conditional intervals derived from `NNS.reg` are developed in detail in Chapter 22, where the regression estimator is introduced formally and interpreted geometrically.
 
 For continuity, the key idea is that `NNS.reg(..., confidence.interval = ...)` builds local intervals from partition-specific empirical distributions. In this chapter, we focus on the unconditional interval mechanics (`LPM.VaR` / `UPM.VaR`) that those later conditional constructions rely on.
 

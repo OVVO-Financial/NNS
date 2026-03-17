@@ -22,15 +22,15 @@ rmd_files:
   - chapter-14-directional-causation.Rmd
   - chapter-15-distribution-comparison.Rmd
   - chapter-16-prediction-intervals.Rmd
-  - chapter-17a-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd
-  - chapter-17-synthetic-data-and-maximum-entropy-bootstrap.Rmd
-  - chapter-18-recursive-mean-split-estimation.Rmd
-  - chapter-19-dynamic-bandwidth-interpretation.Rmd
-  - chapter-20-clustering.Rmd
-  - chapter-21-nonparametric-regression.Rmd
-  - chapter-22-classification.Rmd
-  - chapter-23-ensemble-methods.Rmd
-  - chapter-24-nonparametric-time-series-models.Rmd
-  - chapter-25-multivariate-forecasting.Rmd
-  - chapter-26-conclusion-and-next-steps.Rmd
-  - chapter-27-appendix-notation-and-function-reference.Rmd
+  - chapter-17-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd
+  - chapter-18-synthetic-data-and-maximum-entropy-bootstrap.Rmd
+  - chapter-19-recursive-mean-split-estimation.Rmd
+  - chapter-20-dynamic-bandwidth-interpretation.Rmd
+  - chapter-21-clustering.Rmd
+  - chapter-22-nonparametric-regression.Rmd
+  - chapter-23-classification.Rmd
+  - chapter-24-ensemble-methods.Rmd
+  - chapter-25-nonparametric-time-series-models.Rmd
+  - chapter-26-multivariate-forecasting.Rmd
+  - chapter-27-conclusion-and-next-steps.Rmd
+  - chapter-28-appendix-notation-and-function-reference.Rmd

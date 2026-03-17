@@ -1,6 +1,6 @@
 # Dynamic Bandwidth Interpretation
 
-Chapters 17 and 18 established the recursive mean-split estimator as a **partition-based nonparametric regression method** and showed that, under standard regularity conditions, it is consistent for the true conditional mean function.
+Chapter 19 established the recursive mean-split estimator as a **partition-based nonparametric regression method** and showed that, under standard regularity conditions, it is consistent for the true conditional mean function.
 
 A central idea now comes into focus:
 
@@ -65,7 +65,7 @@ That choice is often difficult, unstable, and highly consequential.
 
 ## Local Averaging in the Recursive Mean-Split Estimator
 
-Recall from Chapter 18 that the recursive mean-split estimator has the form
+Recall from Chapter 19 that the recursive mean-split estimator has the form
 
 \[
 \hat f_n(x)
@@ -196,7 +196,7 @@ This is exactly what one wants from a nonparametric smoother.
 
 ## Relation to the Consistency Conditions
 
-Chapter 18 established that consistency requires two conditions:
+Chapter 19 established that consistency requires two conditions:
 
 \[
 \operatorname{diam}(A_n(x)) \to 0
@@ -218,12 +218,12 @@ The second says the number of observations used in the local average must grow, 
 
 Thus the recursive mean-split estimator satisfies the same asymptotic logic as classical nonparametric smoothing, but with the neighborhood size determined by partition geometry rather than by analyst choice.
 
-In this sense, Chapter 18 can be re-read entirely through the bandwidth lens:
+In this sense, Chapter 19 can be re-read entirely through the bandwidth lens:
 
 - shrinking cell diameter = shrinking bandwidth,
 - growing occupancy = growing effective local sample size.
 
-The bias–variance decomposition from Chapter 18 then becomes
+The bias–variance decomposition from Chapter 19 then becomes
 
 \[
 \hat f_n(x)-f(x)
@@ -267,7 +267,7 @@ So the partition defines a locally constant regression surface.
 
 ### Piecewise-linear view
 
-As Chapter 17 emphasized, connecting regression points by line segments yields a piecewise-linear representation.  
+As Chapter 19 emphasized, connecting regression points by line segments yields a piecewise-linear representation.  
 This can be interpreted as smoothing the cellwise local averages into a continuous interpolation while preserving the same adaptive partition geometry.
 
 In either case, the underlying localization scale is still determined by the cell diameter.
@@ -515,7 +515,7 @@ It belongs to the same family of local averaging methods as kernels and histogra
 
 ### It clarifies the consistency proof
 
-The shrinking-diameter condition from Chapter 18 is simply the shrinking-bandwidth condition in disguise.
+The shrinking-diameter condition from Chapter 19 is simply the shrinking-bandwidth condition in disguise.
 
 ### It explains adaptivity
 
@@ -570,7 +570,7 @@ Earlier chapters showed that directional deviation operators generate:
 - nonlinear dependence measures,
 - benchmark-relative probability statements.
 
-Chapters 17 and 18 then showed that recursive mean splitting uses benchmark-relative geometry to define estimation regions and produces a consistent estimator.
+Chapter 19 then showed that recursive mean splitting uses benchmark-relative geometry to define estimation regions and produces a consistent estimator.
 
 This chapter adds the final interpretation:
 
@@ -608,7 +608,7 @@ h_n(x)=\operatorname{diam}(A_n(x)).
 
 - This bandwidth is **stochastic, location-dependent, and endogenous**.
 - Regions where the conditional mean varies more sharply receive finer partitions and therefore smaller effective bandwidths.
-- The consistency conditions from Chapter 18 become the direct analogues of shrinking-bandwidth conditions in kernel regression.
+- The consistency conditions from Chapter 19 become the direct analogues of shrinking-bandwidth conditions in kernel regression.
 - Recursive mean-split estimation therefore belongs to the broader family of adaptive smoothing methods, while preserving the directional benchmark logic of the NNS framework.
 
 The next chapter turns from the smoothing interpretation of recursive mean splitting to one of its major practical consequences:

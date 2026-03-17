@@ -1,6 +1,6 @@
 # Multivariate Forecasting
 
-Chapter 24 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
+Chapter 25 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
 
 But many forecasting problems are not univariate.
 

@@ -1,6 +1,6 @@
 # Nonparametric Regression
 
-Chapters 18–20 developed the partition-based estimation framework that underlies the NNS approach to machine learning. Chapter 18 introduced recursive mean-split estimation as a nonparametric estimator of the conditional mean and established its consistency under standard shrinking-diameter and occupancy conditions. Chapter 19 interpreted the induced partition diameter as a dynamic bandwidth. Chapter 20 then showed that the same recursive partitions can be used for unsupervised clustering.
+Chapters 19–21 developed the partition-based estimation framework that underlies the NNS approach to machine learning. Chapter 19 introduced recursive mean-split estimation as a nonparametric estimator of the conditional mean and established its consistency under standard shrinking-diameter and occupancy conditions. Chapter 20 interpreted the induced partition diameter as a dynamic bandwidth. Chapter 21 then showed that the same recursive partitions can be used for unsupervised clustering.
 
 This chapter brings those strands together under the familiar label of **regression**.
 
@@ -161,7 +161,7 @@ The crucial point is that both arise from the same partition geometry.
 
 ## Piecewise Estimation from Partition Clusters
 
-Chapter 19 showed that recursive mean-split partitioning can be interpreted as clustering. The same result has a direct regression interpretation.
+Chapter 21 showed that recursive mean-split partitioning can be interpreted as clustering. The same result has a direct regression interpretation.
 
 Each terminal partition cell can be viewed as a **local cluster of observations** sharing similar benchmark-relative structure. Once that structure is identified, regression proceeds by fitting the conditional mean locally inside each cluster.
 
@@ -214,7 +214,7 @@ This makes the estimator interpretable in a way that is both statistical and geo
 
 ## Bias, Variance, and Adaptive Smoothing
 
-Chapters 18 and 19 already established the asymptotic logic of the estimator. In regression language, the same result can be restated simply.
+Chapters 19 and 20 already established the asymptotic logic of the estimator. In regression language, the same result can be restated simply.
 
 At any point \(x\), the estimator averages the responses within a cell \(A_n(x)\). Two conditions determine its quality:
 
@@ -365,7 +365,7 @@ When the user leaves `order = NULL` (the default), `NNS.reg` does not apply one 
 
 Regressors with stronger directional dependence receive deeper recursive partitioning (higher realized effective order for that predictor), enabling finer local approximation where signal is most evident. Regressors with weak dependence receive shallower partitioning, yielding broader smoothing and reducing the chance of overfitting noise-dominant inputs.
 
-This is the concrete implementation of the dynamic-bandwidth interpretation from Chapter 19: partition cell diameter is not only data-adaptive, but dependence-adaptive. Smoothing granularity is therefore endogenously assigned by signal strength rather than fixed through a single hand-tuned global parameter.
+This is the concrete implementation of the dynamic-bandwidth interpretation from Chapter 20: partition cell diameter is not only data-adaptive, but dependence-adaptive. Smoothing granularity is therefore endogenously assigned by signal strength rather than fixed through a single hand-tuned global parameter.
 
 In practice, the realized depth profile can be inspected after fitting:
 
@@ -516,7 +516,7 @@ Earlier chapters showed that directional deviation operators generate
 - conditional probabilities,
 - stochastic dominance diagnostics.
 
-Chapters 17–19 then showed that the same directional logic induces a consistent adaptive estimator through recursive mean splitting.
+Chapters 19–20 then showed that the same directional logic induces a consistent adaptive estimator through recursive mean splitting.
 
 This chapter reframes that estimator in its most familiar applied form: **nonparametric regression**.
 

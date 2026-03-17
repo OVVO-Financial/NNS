@@ -1,10 +1,10 @@
 # Ensemble Methods
 
-Chapters 20–22 developed the machine-learning side of the NNS framework from three complementary angles.
+Chapters 21–23 developed the machine-learning side of the NNS framework from three complementary angles.
 
-- Chapter 20 treated recursive partitions as an unsupervised clustering device.
-- Chapter 21 used those same partitions for conditional expectation estimation.
-- Chapter 22 used them for local conditional probability estimation and classification.
+- Chapter 21 treated recursive partitions as an unsupervised clustering device.
+- Chapter 22 used those same partitions for conditional expectation estimation.
+- Chapter 23 used them for local conditional probability estimation and classification.
 
 A natural next step is to combine multiple directional learners into a single predictive system.
 
@@ -451,7 +451,7 @@ In small dimensions, `NNS.boost` can evaluate all subsets deterministically. In 
 
 ### Class imbalance
 
-When classes are imbalanced, raw accuracy may be misleading. The `balance` option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. A more complete treatment of this imbalance-handling ensemble workflow appears in Chapter 25, where multivariate forecasting workflows use the same up/down-sampling logic under skewed classification-style targets.
+When classes are imbalanced, raw accuracy may be misleading. The `balance` option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. A more complete treatment of this imbalance-handling ensemble workflow appears in Chapter 26, where multivariate forecasting workflows use the same up/down-sampling logic under skewed classification-style targets.
 
 But balancing is not magic. It changes the empirical distribution seen by the learner, so it should be used thoughtfully and evaluated by appropriate out-of-sample criteria.
 
@@ -502,9 +502,9 @@ That is often the right trade in nonlinear settings.
 
 This chapter completes the machine-learning progression of Part VI.
 
-- Chapter 20 used recursive partitions for **unsupervised grouping**.
-- Chapter 21 used them for **numeric prediction**.
-- Chapter 22 used them for **categorical prediction**.
+- Chapter 21 used recursive partitions for **unsupervised grouping**.
+- Chapter 22 used them for **numeric prediction**.
+- Chapter 23 used them for **categorical prediction**.
 - This chapter uses them in **aggregated form** to improve predictive stability and performance.
 
 The conceptual thread is unbroken.

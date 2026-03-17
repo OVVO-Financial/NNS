@@ -1,0 +1,326 @@
+# Directional Tail Thresholds, Probability Bounds, and Estimation Error
+
+Previous chapters developed the directional framework for probability, dependence, distribution comparison, and prediction. A natural next step is threshold analysis.
+
+In many practical settings, the analyst is not interested only in a central interval for future observations. The analyst also wants to understand how a process behaves near adverse regions of its distribution: how often a benchmark is crossed, how severe the benchmark violations are once they occur, how conservative tail-probability statements remain under weak assumptions, and how stable the resulting estimates are in finite samples.
+
+These questions arise in many domains:
+
+- forecast errors relative to a service target,
+- inventory levels relative to a replenishment threshold,
+- reliability metrics relative to a safety margin,
+- environmental measurements relative to a policy limit,
+- financial returns relative to a minimum acceptable outcome.
+
+The common structure is benchmark-relative tail analysis. The same directional operators that generated distribution functions and quantile intervals in earlier chapters also generate threshold rules, directional probability bounds, and finite-sample diagnostics. This chapter develops that connection.
+
+The main thesis is simple:
+
+1. degree-0 partial moments recover the usual lower-tail probability and quantile threshold,
+2. higher-degree partial moments generate severity-weighted threshold rules,
+3. semivariance and higher lower partial moments yield distribution-free upper bounds for tail probabilities,
+4. and the practical usefulness of these quantities depends on their estimation stability.
+
+Thus quantiles, semivariance, lower partial moments, and estimation error are not separate topics. They are manifestations of the same benchmark-relative geometry.
+
+---
+
+## Why Threshold Analysis Needs More Than Quantiles
+
+A lower-tail quantile identifies where adverse observations begin to accumulate. If \(X\) is a random variable and \(\alpha \in (0,1)\), the lower \(\alpha\)-quantile is
+
+\[
+Q_X(\alpha)=\inf\{t : F_X(t)\ge \alpha\}.
+\]
+
+This is already enough to partition a chosen fraction of lower-tail probability mass.
+
+But quantiles alone do not answer two additional questions that matter in practice.
+
+First, how conservative is the selected threshold if the data are skewed, heavy-tailed, or otherwise poorly described by a parametric model?
+
+Second, how stable is the threshold estimate in finite samples?
+
+The first question is about probability control. A threshold may appear numerically precise, but if it relies on a misspecified model then its practical interpretation can be fragile exactly where decisions are most sensitive.
+
+The second question is about sample sensitivity. Any statistic used in a decision system must stabilize as information accumulates. A threshold or directional probability measure that behaves erratically under modest sample variation may be mathematically elegant but operationally weak.
+
+The purpose of this chapter is therefore broader than quantile selection alone. It is to show that the directional framework supports:
+
+- threshold selection,
+- severity-weighted thresholding,
+- directional probability bounds,
+- and finite-sample estimation diagnostics
+
+within one common structure.
+
+---
+
+## Degree-Zero Thresholds and Their Directional Meaning
+
+A foundational identity of the directional framework is
+
+\[
+L_0(t;X)=P(X\le t)=F_X(t).
+\]
+
+That result means the cumulative distribution function is not external to the partial-moment framework. It is the degree-0 lower partial moment itself.
+
+Therefore the lower-tail threshold at probability level \(\alpha\) is
+
+\[
+t_\alpha^{(0)}=\inf\{t : L_0(t;X)\ge \alpha\}.
+\]
+
+This is simply the ordinary lower quantile written in directional form.
+
+In finance this degree-0 threshold is often called Value-at-Risk, but the mathematical object is more general than that label. The same degree-0 threshold can represent:
+
+- a maximum tolerated forecast shortfall,
+- a minimum service threshold,
+- a lower safety boundary,
+- or any analyst-defined adverse benchmark.
+
+The structural meaning is identical in every case:
+
+\[
+t_\alpha^{(0)}
+\]
+
+is the benchmark at which an \(\alpha\) fraction of observations lies at or below the threshold.
+
+Thus degree 0 is the **frequency-calibrated** threshold rule.
+
+---
+
+## From Frequency to Severity: Higher-Degree Thresholds
+
+Degree-0 thresholds count adverse events, but they do not distinguish between small and large deviations once the threshold is crossed.
+
+That limitation is exactly what higher-order partial moments correct.
+
+For degree \(d \ge 1\), define the lower and upper directional masses
+
+\[
+L_d(t;X)=E[(t-X)_+^d], \qquad U_d(t;X)=E[(X-t)_+^d].
+\]
+
+A normalized lower share is then
+
+\[
+F_d(t;X)=\frac{L_d(t;X)}{L_d(t;X)+U_d(t;X)}.
+\]
+
+When \(d=0\), this reduces to the ordinary probability partition. When \(d=1\), observations are weighted by the magnitude of their deviation from the benchmark. When \(d=2\), large deviations receive quadratic emphasis.
+
+This yields a family of generalized thresholds:
+
+\[
+t_\alpha^{(d)}=\inf\{t : F_d(t;X)\ge \alpha\}.
+\]
+
+The interpretation changes by degree:
+
+\[
+d=0 \rightarrow \text{event frequency},
+\]
+
+\[
+d=1 \rightarrow \text{aggregate adverse magnitude},
+\]
+
+\[
+d=2 \rightarrow \text{extreme-deviation sensitivity}.
+\]
+
+So the correct conceptual reading is not that partial moments add extra domain-specific measures. It is that quantile calibration itself can be performed in different geometries:
+
+- raw counting geometry at degree 0,
+- linear severity geometry at degree 1,
+- quadratic severity geometry at degree 2.
+
+---
+
+## Directional Probability Bounds
+
+Threshold selection is only part of the problem. Analysts also want distribution-free upper bounds on the probability of threshold violation.
+
+Suppose \(g < \mu\), where \(\mu = E[X]\), and consider the lower-tail event
+
+\[
+X \le g.
+\]
+
+A classical one-sided Chebyshev argument bounds this probability using only the mean and variance:
+
+\[
+P(X \le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
+\]
+
+A directional refinement replaces symmetric standard deviation with semideviation:
+
+\[
+P(X \le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
+\]
+
+where \(\sigma_-\) measures only downside dispersion.
+
+A more general bound uses lower partial moments of degree \(\alpha\). Define
+
+\[
+\theta(t,\alpha)=\left(E[(t-X)_+^\alpha]\right)^{1/\alpha}.
+\]
+
+Then, for \(g \le t\),
+
+\[
+P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
+\]
+
+So the directional hierarchy of probability control is
+
+\[
+\text{symmetric variance bound} \to \text{semivariance bound} \to \text{general lower-partial-moment bound}.
+\]
+
+Each step aligns the bound more closely with the side of the distribution that matters for the decision.
+
+---
+
+## Severity-Weighted Thresholds as Early-Intervention Rules
+
+Once higher-degree thresholds are viewed as severity-weighted quantiles, an important practical feature becomes clear.
+
+A degree-1 or degree-2 threshold can be less extreme than the degree-0 threshold and yet still produce milder realized tail behavior.
+
+This is not a contradiction. It occurs because higher-degree thresholds are calibrated in weighted directional mass, not in raw event counts.
+
+Mathematically, this makes sense. The degree-2 rule assigns much more weight to large adverse deviations than to small ones. If a 10-unit shortfall contributes \(10^2\) units of quadratic severity while a 1-unit shortfall contributes only \(1^2\), then the threshold naturally shifts toward earlier intervention.
+
+The same logic applies across domains:
+
+- in forecasting, the rule intervenes before very large misses accumulate,
+- in operations, it triggers replenishment before deep shortages form,
+- in engineering, it signals action before large safety-margin breaches dominate the lower tail.
+
+Thus higher-degree thresholds are best interpreted as **early-intervention rules under asymmetric cost**.
+
+---
+
+## Model Misspecification and Robustness
+
+Directional thresholds are especially useful when parametric models misrepresent the lower tail.
+
+The chapter-level lesson is general. Parametric misspecification is often most consequential exactly in the tail region where decision costs are highest.
+
+The directional framework responds in two ways.
+
+First, it estimates thresholds directly from empirical directional structure via degree-0 or higher-degree partial-moment quantiles.
+
+Second, it supplements those empirical thresholds with distribution-free probability bounds that remain valid under far weaker assumptions than a fully specified parametric family.
+
+This is particularly important under skewness, heavy tails, and asymmetric adverse regions, where symmetric models can understate the severity of rare but important events.
+
+---
+
+## Estimation Error and Sample-Size Sensitivity
+
+A directional statistic is only operationally useful if it stabilizes as sample size grows.
+
+Estimation error is therefore not a peripheral concern. It is central to any threshold-based or benchmark-driven decision process. If a statistic is unstable, then even a mathematically correct threshold rule can become unreliable in practice.
+
+The key empirical question is whether partial moments behave at least as well as classical mean-variance quantities under regular conditions and whether they improve upon them when the data are asymmetric or heavy-tailed.
+
+This matters well beyond portfolio optimization. Any benchmark-driven procedure depends on stable estimation of lower-tail structure. If lower partial moments and semideviation remain well behaved under skewness and heavy tails, then they are not only conceptually aligned with directional asymmetry. They are also strong candidates for practical nonparametric measurement when classical symmetric summaries are fragile.
+
+In particular, the stability of degree-0 partial moments reinforces the result that the cdf itself is a partial moment. The cdf is not merely a theoretical building block; it is also a stable empirical object within the directional system.
+
+---
+
+## Utility, Decision Context, and Why Degree Matters
+
+The correct threshold degree depends on the decision problem.
+
+In general benchmark-relative terms, the lesson is:
+
+- if the main concern is **how often** a threshold is crossed, degree 0 is appropriate;
+- if the concern is **how much aggregate damage** accumulates below the threshold, degree 1 is more natural;
+- if the concern is **rare but severe violations**, degree 2 or higher can be more appropriate.
+
+A benchmark may be a target return, a policy threshold, a forecast baseline, a service minimum, or a safety limit. The degree determines how adverse deviation relative to that benchmark is measured.
+
+So the framework is not one-threshold-fits-all. It is a family of threshold rules indexed by the geometry of the adverse region.
+
+---
+
+## Practical Workflow
+
+A general workflow for directional tail analysis is:
+
+1. **Choose a benchmark context.**  
+   Identify the lower threshold region that matters substantively.
+
+2. **Estimate the degree-0 threshold.**  
+   Compute
+
+   \[
+   t_\alpha^{(0)}=\inf\{t:L_0(t;X)\ge \alpha\}.
+   \]
+
+   This yields the frequency-calibrated threshold.
+
+3. **Estimate higher-degree thresholds.**  
+   Compute degree-1 and degree-2 threshold rules through normalized directional mass:
+
+   \[
+   t_\alpha^{(d)}=\inf\{t:F_d(t;X)\ge \alpha\}.
+   \]
+
+4. **Bound lower-tail probability conservatively.**  
+   Use one-sided Chebyshev, semivariance, and Atwood-style lower-partial-moment bounds to assess worst-case violation probabilities.
+
+5. **Compare with parametric approximations if relevant.**  
+   Large discrepancies indicate model risk in the tail.
+
+6. **Assess finite-sample stability.**  
+   Use resampling or bootstrap-style procedures, especially when the threshold will feed a larger decision or optimization system.
+
+This workflow makes clear why threshold analysis, probability bounds, and estimation error belong together.
+
+---
+
+## Summary
+
+This chapter extended the directional framework from interval estimation to full tail-threshold analysis.
+
+The key ideas are:
+
+- The lower-tail quantile is the degree-0 partial-moment threshold because
+
+  \[
+  L_0(t;X)=F_X(t).
+  \]
+
+- Higher-degree thresholds are severity-weighted calibrations of the lower tail, not merely alternative labels.
+
+- Semivariance and higher lower partial moments yield distribution-free upper bounds on threshold-violation probabilities.
+
+- Severity-weighted thresholds can act as early-intervention rules because they respond to adverse magnitude, not just event counts.
+
+- Parametric misspecification matters most in the tail, so empirical directional thresholds and probability bounds provide complementary robustness.
+
+- Partial moments form a coherent nonparametric language for threshold selection, probability control, and finite-sample decision support.
+
+In that sense, quantiles, semivariance, lower partial moments, and estimation error belong together. They are generated by the same benchmark-relative primitives and serve the same broader purpose: to make probability, thresholds, and adverse deviation analysis interpretable without relying on restrictive symmetry or parametric assumptions.
+
+---
+
+## References
+
+- Berck, P., & Hihn, J. (1982). *Using the Semivariance to Estimate Safety-First Rules*. *American Journal of Agricultural Economics*, May 1982, 298-300.
+- Atwood, M. (1985). *Demonstration of the Use of Lower Partial Moments to Improve Safety-First Probability Limits*. *American Journal of Agricultural Economics*, 67(4), 880-886. DOI: 10.2307/1241818.
+- Rockafellar, R. T., & Uryasev, S. (2000). *Optimization of Conditional Value-at-Risk*. *Journal of Risk*, 2(3), 21-41.
+- Chebyshev, P. L. (1867). *Des valeurs moyennes*. *Journal de Mathématiques Pures et Appliquées*, 12, 177-184.
+- Viole, F., & Nawrocki, D. (2012). *Cumulative Distribution Functions and UPM/LPM Analysis*. SSRN. DOI: https://dx.doi.org/10.2139/ssrn.2148482
+- Viole, F. (2025). *Value-at-Risk (VaR) and Probability Bounds Analysis* (June 18, 2025). SSRN. Available at: https://ssrn.com/abstract=5310345. DOI: http://dx.doi.org/10.2139/ssrn.5310345
+- Nawrocki, D., & Viole, F. (2024). *Estimation error and partial moments*. *International Review of Financial Analysis*, 95, Part B, 103443. DOI: https://doi.org/10.1016/j.irfa.2024.103443

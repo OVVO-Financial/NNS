@@ -758,7 +758,7 @@ Then apply this chapter's comparison workflow in sequence:
 1. Estimate directional dominance probability `P(A > B)` (or the reverse, depending on target variable orientation).
 2. Compute directional probability effect-size summaries.
 3. Run `NNS.ANOVA` with the continuous CDF option for full-distribution comparison.
-4. Archive the effect-size outputs for later comparison with Chapter 18 predictive performance diagnostics.
+4. Archive the effect-size outputs for later comparison with Chapter 19 predictive performance diagnostics.
 
 Using the same data object across chapters keeps interpretation stable: dependence findings from Part III map directly to distribution-comparison in Part IV and then to estimator behavior in Part V.
 

@@ -1,6 +1,6 @@
 # Classification
 
-Chapter 21 developed nonparametric regression in the NNS framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.
+Chapter 22 developed nonparametric regression in the NNS framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.
 
 This chapter turns to **classification**.
 
@@ -105,7 +105,7 @@ These limitations echo the broader theme of the book:
 
 ## Directional Decision Regions
 
-The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 17–20.
+The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 19–22.
 
 Suppose the predictor space is partitioned into cells
 
@@ -643,8 +643,8 @@ These limitations do not negate the method. They simply clarify where care is ne
 
 This chapter completes a natural progression.
 
-- Chapter 20 used recursive partitions for **unsupervised grouping**.
-- Chapter 21 used them for **numeric prediction**.
+- Chapter 21 used recursive partitions for **unsupervised grouping**.
+- Chapter 22 used them for **numeric prediction**.
 - This chapter uses them for **categorical prediction**.
 
 The same partition machinery supports all three.
@@ -686,7 +686,7 @@ Third, it distinguished **binary and multiclass classification**, showing that b
 
 Fourth, it developed the idea of **directional decision boundaries**, emphasizing benchmark-relative and locally adaptive separation rather than a single global separating equation.
 
-Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed formally in Chapter 23, where their resampling and aggregation mechanics are treated in detail.
+Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed formally in Chapter 24, where their resampling and aggregation mechanics are treated in detail.
 
 Sixth, it introduced **boosting and stacking** as natural ensemble extensions of the NNS classifier, improving robustness and predictive accuracy while preserving directional interpretability.
 
