@@ -389,7 +389,6 @@ Key results:
 - Degree-one intervals match or exceed bias-corrected bootstrap intervals without the need for double resampling.
 - Conditional prediction intervals from `NNS.reg` adapt automatically to local nonlinearity and heteroskedasticity.
 
-These ideas complete the core framework for **nonparametric statistical inference using directional statistics**. The next chapter extends the methodology to **synthetic data generation and bootstrap methods**, enabling uncertainty quantification and simulation in complex nonlinear systems.
+These ideas complete the core framework for **nonparametric statistical inference using directional statistics**. The next chapter turns to **directional tail thresholds, probability bounds, and estimation error**, extending interval logic into benchmark-driven tail-risk decisions before Chapter 18 develops synthetic data generation and bootstrap methods for uncertainty quantification.
 
 ---
-
