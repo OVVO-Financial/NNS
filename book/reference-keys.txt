@@ -27,6 +27,7 @@ complementary-directional-probability
 the-survival-function
 hazard-rates
 quantile-functions
+lower-tail-thresholds-as-degree-zero-partial-moment-quantiles
 probability-integral-transform
 distribution-theory-as-directional-measurement
 structural-implications
@@ -40,6 +41,8 @@ convergence-properties
 applications
 probability-and-distribution-analysis
 risk-measurement
+directional-probability-bounds
+threshold-analysis-and-directional-dispersion
 summary
 classical-moments-as-directional-aggregates
 moments-relative-to-a-benchmark
@@ -192,7 +195,9 @@ block-ii-estimation-mechanics
 empirical-estimation-1
 block-iii-diagnostics-and-dominance-analysis
 directional-dominance-curves
+severity-weighted-distribution-comparison
 block-iv-applied-workflow-and-practical-inference
+practical-threshold-comparison-across-degrees
 example-1
 nns-anova-cdf-based-distribution-comparison
 the-lpm-based-continuous-cdf
@@ -218,16 +223,29 @@ confidence-intervals-versus-prediction-intervals
 the-discretecontinuous-distinction-recap-and-application-to-intervals
 prediction-as-a-quantile-problem
 partial-moment-quantile-functions-lpm.var-and-upm.var
+generalized-threshold-operators
 link-to-stochastic-dominance-chapter-15
 comparison-with-bootstrap-confidence-intervals
 degree-zero-partial-moment-intervals
 degree-one-partial-moment-intervals
 distribution-free-prediction-intervals
 example-2
+worked-threshold-example-frequency-versus-severity
 interpretation-and-coverage
 conditional-prediction-intervals-via-nns-regression
 advantages-of-the-directional-approach
 summary-9
+directional-tail-thresholds-probability-bounds-and-estimation-error
+why-threshold-analysis-needs-more-than-quantiles
+degree-zero-thresholds-and-their-directional-meaning
+directional-probability-bounds-1
+severity-weighted-thresholds
+early-intervention-interpretation
+model-misspecification-and-robustness
+estimation-error-and-sample-size-sensitivity
+historical-and-decision-theoretic-positioning
+practical-workflow
+summary-10
 synthetic-data-and-maximum-entropy-bootstrap
 bootstrap-methods
 limitations-of-classical-bootstrap-for-time-series
@@ -261,7 +279,7 @@ financial-risk-management-value-at-risk-and-expected-shortfall
 forecast-model-evaluation
 stationarity-transformation
 relationship-to-the-nns-framework
-summary-10
+summary-11
 references
 recursive-mean-split-estimation
 motivation-for-partition-based-estimation
@@ -305,7 +323,7 @@ cart-and-decision-trees
 kernel-regression
 k-means-clustering
 fixed-grid-estimators
-summary-11
+summary-12
 references-1
 dynamic-bandwidth-interpretation
 bandwidth-in-classical-nonparametric-estimation
@@ -348,7 +366,7 @@ geometry-depends-on-recursive-splitting-path
 rate-theory-is-less-developed
 high-dimensional-sparsity-remains
 structural-interpretation-within-nns
-summary-12
+summary-13
 references-2
 clustering
 what-clustering-seeks-to-recover
@@ -391,7 +409,7 @@ risk-management
 operations
 biostatistics
 conceptual-interpretation
-summary-13
+summary-14
 nonparametric-regression
 regression-as-conditional-expectation
 why-classical-regression-can-fail
@@ -434,7 +452,7 @@ it-is-adaptive
 it-is-interpretable
 it-is-flexible-in-how-it-handles-dimensionality
 relationship-to-the-broader-nns-program
-summary-14
+summary-15
 classification
 classification-as-conditional-probability-estimation
 why-classical-classification-methods-can-fail
@@ -487,7 +505,7 @@ sensitivity-to-occupancy-thresholds
 computational-cost
 boundary-roughness
 conceptual-interpretation-1
-summary-15
+summary-16
 ensemble-methods
 why-ensemble-learning-helps
 ensemble-logic-in-the-nns-framework
@@ -524,7 +542,7 @@ prediction-interpretation
 feature-frequency-interpretation
 structural-interpretation-2
 conceptual-summary
-summary-16
+summary-17
 nonparametric-time-series-models
 time-series-as-ordered-nonparametric-data
 why-classical-time-series-models-can-fail
@@ -571,7 +589,7 @@ data-requirements
 computational-cost-2
 interpretability-of-dynamics
 leakage-safe-backtesting-protocol
-summary-17
+summary-18
 multivariate-forecasting
 from-univariate-to-multivariate-forecasting
 classical-var-and-its-limits
@@ -611,7 +629,7 @@ finance-1
 operations-and-supply-chains
 energy-and-commodities
 leakage-safe-validation-in-multivariate-and-mixed-frequency-settings
-summary-18
+summary-19
 conclusion-and-next-steps
 what-the-framework-has-achieved
 open-problems-and-research-directions
