@@ -13,6 +13,8 @@ This chapter extends the forecasting framework from one time series to a **syste
 
 The package implementation is `NNS.VAR`, a **nonparametric vector autoregressive model incorporating `NNS.ARMA` estimates of variables into `NNS.reg` for a multivariate time-series forecast**. Its purpose is explicit: combine univariate nonlinear time-series forecasting with multivariate nonlinear regression so that each series can borrow information from the others while still retaining its own temporal structure.
 
+Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 19: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support.
+
 A second implementation, `NNS.nowcast`, wraps this framework for mixed-frequency macroeconomic forecasting and nowcasting, using a built-in panel of Federal Reserve style indicators and passing them to `NNS.VAR` with monthly alignment and a 12-lag structure.
 
 The key ideas of the chapter are therefore:
