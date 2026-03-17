@@ -70,7 +70,7 @@ To maintain continuity with Chapter 23's directional decision-region framing, th
 | Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 17 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
 | Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
 | Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Directionality can be nonlinear and state dependent. |
-| **Copula / Joint Tail Dependency** | **Joint probability of concurrent outcomes** | `Co.LPM(degree, target.x, target.y, x, y)` / `Co.UPM(degree, target.x, target.y, x, y)` | **Chapter 4** | **Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events.** |
+| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree, target.x, target.y, x, y)` / `Co.UPM(degree, target.x, target.y, x, y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
 | Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapters 16–17 | Produces directional prediction intervals without normality assumptions. |
 
 
