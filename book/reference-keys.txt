@@ -638,5 +638,6 @@ appendix-notation-and-function-reference
 core-directional-operators-and-partial-moments
 co-partial-moments-dependence-and-causation
 distribution-comparison-dominance-and-interval-objects
+directional-decision-regions-crosswalk-classical-nns
 regression-and-forecasting-workflow-objects
 a.3-technical-note-adaptive-order-and-consistency-conditions

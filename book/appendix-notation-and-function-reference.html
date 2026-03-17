@@ -984,8 +984,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="28.1" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#core-directional-operators-and-partial-moments"><i class="fa fa-check"></i><b>28.1</b> Core directional operators and partial moments</a></li>
 <li class="chapter" data-level="28.2" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#co-partial-moments-dependence-and-causation"><i class="fa fa-check"></i><b>28.2</b> Co-partial moments, dependence, and causation</a></li>
 <li class="chapter" data-level="28.3" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#distribution-comparison-dominance-and-interval-objects"><i class="fa fa-check"></i><b>28.3</b> Distribution comparison, dominance, and interval objects</a></li>
-<li class="chapter" data-level="28.4" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#regression-and-forecasting-workflow-objects"><i class="fa fa-check"></i><b>28.4</b> Regression and forecasting workflow objects</a></li>
-<li class="chapter" data-level="28.5" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#a.3-technical-note-adaptive-order-and-consistency-conditions"><i class="fa fa-check"></i><b>28.5</b> A.3 Technical Note: Adaptive Order and Consistency Conditions</a></li>
+<li class="chapter" data-level="28.4" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#directional-decision-regions-crosswalk-classical-nns"><i class="fa fa-check"></i><b>28.4</b> Directional Decision Regions Crosswalk (Classical → NNS)</a></li>
+<li class="chapter" data-level="28.5" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#regression-and-forecasting-workflow-objects"><i class="fa fa-check"></i><b>28.5</b> Regression and forecasting workflow objects</a></li>
+<li class="chapter" data-level="28.6" data-path="appendix-notation-and-function-reference.html"><a href="appendix-notation-and-function-reference.html#a.3-technical-note-adaptive-order-and-consistency-conditions"><i class="fa fa-check"></i><b>28.6</b> A.3 Technical Note: Adaptive Order and Consistency Conditions</a></li>
 </ul></li>
 </ul>
 
@@ -1186,19 +1187,94 @@ In finance, the degree-zero case is commonly called VaR, but the operator is mor
 <p><code>UPM.VaR(percentile, degree, variable)</code>
 Upper-tail analog of <code>LPM.VaR</code>, used for right-tail threshold selection and interval construction.</p>
 </div>
-<div id="regression-and-forecasting-workflow-objects" class="section level2 hasAnchor" number="28.4">
-<h2><span class="header-section-number">28.4</span> Regression and forecasting workflow objects<a href="appendix-notation-and-function-reference.html#regression-and-forecasting-workflow-objects" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="directional-decision-regions-crosswalk-classical-nns" class="section level2 hasAnchor" number="28.4">
+<h2><span class="header-section-number">28.4</span> Directional Decision Regions Crosswalk (Classical → NNS)<a href="appendix-notation-and-function-reference.html#directional-decision-regions-crosswalk-classical-nns" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>To maintain continuity with Chapter 23’s directional decision-region framing, the table below maps common classical statistics and procedures to their directional NNS counterparts.</p>
 <table>
 <colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Classical statistic / workflow</th>
+<th>Typical classical role</th>
+<th>Directional NNS counterpart</th>
+<th>Reference chapter</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pearson correlation</td>
+<td>Linear association summary</td>
+<td><code>NNS.dep(x, y)</code></td>
+<td>Chapter 11</td>
+<td>Captures nonlinear and asymmetric dependence, not only linear co-movement.</td>
+</tr>
+<tr class="even">
+<td>Parametric VaR / empirical quantile VaR</td>
+<td>Tail-loss thresholding</td>
+<td><code>LPM.VaR(alpha, degree, x)</code> <em>(degree-dependent)</em></td>
+<td>Chapter 17</td>
+<td>Degree controls sensitivity to tail severity beyond degree-0 quantiles.</td>
+</tr>
+<tr class="odd">
+<td>Upper-tail quantile threshold</td>
+<td>Right-tail risk/opportunity cutoff</td>
+<td><code>UPM.VaR(alpha, degree, x)</code> <em>(degree-dependent)</em></td>
+<td>Chapter 17</td>
+<td>Upper-tail analog to <code>LPM.VaR</code> for asymmetric interval construction.</td>
+</tr>
+<tr class="even">
+<td>Classical ANOVA (mean-comparison test)</td>
+<td>Group-level location comparison</td>
+<td><code>NNS.ANOVA(...)</code> <em>(degree-dependent CDF benchmarking)</em></td>
+<td>Chapter 15</td>
+<td>Agreement certainty is benchmarked through directional CDF-style deviations.</td>
+</tr>
+<tr class="odd">
+<td>Linear Granger-style directional inference</td>
+<td>Lead-lag direction under linear structure</td>
+<td><code>NNS.caus(x, y)</code></td>
+<td>Chapter 14</td>
+<td>Directionality can be nonlinear and state dependent.</td>
+</tr>
+<tr class="even">
+<td><strong>Copula / Joint Tail Dependency</strong></td>
+<td><strong>Joint probability of concurrent outcomes</strong></td>
+<td><code>Co.LPM(degree, target.x, target.y, x, y)</code> / <code>Co.UPM(degree, target.x, target.y, x, y)</code></td>
+<td><strong>Chapter 4</strong></td>
+<td><strong>Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events.</strong></td>
+</tr>
+<tr class="odd">
+<td>Mean-variance interval heuristics</td>
+<td>Uncertainty bands under Gaussian assumptions</td>
+<td><code>LPM.VaR(...)</code> + <code>UPM.VaR(...)</code> <em>(degree-dependent bounds)</em></td>
+<td>Chapters 16–17</td>
+<td>Produces directional prediction intervals without normality assumptions.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="regression-and-forecasting-workflow-objects" class="section level2 hasAnchor" number="28.5">
+<h2><span class="header-section-number">28.5</span> Regression and forecasting workflow objects<a href="appendix-notation-and-function-reference.html#regression-and-forecasting-workflow-objects" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>Symbol</th>
 <th>Definition / role</th>
 <th>R function</th>
+<th>Reference chapter</th>
 </tr>
 </thead>
 <tbody>
@@ -1206,27 +1282,31 @@ Upper-tail analog of <code>LPM.VaR</code>, used for right-tail threshold selecti
 <td><span class="math inline">\(\hat y = \hat E[Y\mid X]\)</span></td>
 <td>NNS conditional mean estimate</td>
 <td><code>NNS.reg(x, y)</code></td>
+<td>Chapter 22</td>
 </tr>
 <tr class="even">
 <td>Residual local distribution</td>
 <td>Partition-level error distribution</td>
 <td>via <code>NNS.reg(...)$Fitted.xy$residuals</code> outputs</td>
+<td>Chapter 22</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\widehat{PI}(x_0)\)</span></td>
 <td>Conditional prediction interval at <span class="math inline">\(x_0\)</span></td>
 <td><code>NNS.reg(..., point.est = x0, confidence.interval = ...)</code></td>
+<td>Chapter 16</td>
 </tr>
 <tr class="even">
 <td>Regime-specific directional dependence</td>
 <td>Time-local / state-local dependence</td>
 <td><code>NNS.dep(...)</code> on rolling/segmented windows</td>
+<td>Chapter 11</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="a.3-technical-note-adaptive-order-and-consistency-conditions" class="section level2 hasAnchor" number="28.5">
-<h2><span class="header-section-number">28.5</span> A.3 Technical Note: Adaptive Order and Consistency Conditions<a href="appendix-notation-and-function-reference.html#a.3-technical-note-adaptive-order-and-consistency-conditions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="a.3-technical-note-adaptive-order-and-consistency-conditions" class="section level2 hasAnchor" number="28.6">
+<h2><span class="header-section-number">28.6</span> A.3 Technical Note: Adaptive Order and Consistency Conditions<a href="appendix-notation-and-function-reference.html#a.3-technical-note-adaptive-order-and-consistency-conditions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Chapter 19 established two core consistency conditions for recursive mean-split regression:</p>
 <ol style="list-style-type: decimal">
 <li><strong>Shrinking cell diameter</strong> at each target location so local bias vanishes,</li>
