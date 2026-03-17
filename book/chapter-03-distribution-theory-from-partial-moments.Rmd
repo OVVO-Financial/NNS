@@ -262,6 +262,47 @@ Quantiles therefore correspond to **benchmarks that partition probability mass**
 
 This interpretation aligns naturally with the directional framework, which evaluates distributions relative to benchmark thresholds.
 
+
+
+### Lower-Tail Thresholds as Degree-Zero Partial-Moment Quantiles
+
+A lower-tail threshold is often introduced in application-specific language, but within the directional framework it is simply a quantile of the degree-zero lower partial moment.
+
+Let
+\[
+F_X(t)=P(X\le t).
+\]
+By the result established earlier in this chapter,
+\[
+F_X(t)=L_0(t;X).
+\]
+Therefore the lower-tail quantile at probability level \(\alpha\) may be written as
+\[
+Q_X(\alpha)=\inf\{t\in\mathbb{R}:F_X(t)\ge \alpha\}
+=\inf\{t\in\mathbb{R}:L_0(t;X)\ge \alpha\}.
+\]
+
+This identity is general. It does not depend on whether \(X\) represents returns, forecast errors, waiting times, deviations from a quality target, or distances below a safety threshold. In every case, the degree-zero lower partial moment answers the same question: what proportion of observations fall below the benchmark \(t\)?
+
+In some fields, especially finance, the lower-tail quantile
+\[
+\inf\{t:F_X(t)\ge \alpha\}
+\]
+is called Value-at-Risk. But the mathematical object is broader than that label. It is the benchmark value that partitions a chosen fraction \(\alpha\) of lower-tail mass.
+
+This observation matters because it shows that threshold analysis is not an external application added onto the theory of distributions. It is already contained in the degree-zero directional representation of probability. The estimation-error literature makes the same point explicitly by identifying \(LPM_0\) with the cumulative distribution function and hence with the probability-of-loss object used in applied risk work.
+
+A second implication will become important later. Degree zero partitions observations by frequency alone. Higher degrees retain the same threshold logic while reweighting observations by the severity of their deviations from the benchmark. Thus quantile thinking extends naturally from event frequency to severity-weighted directional mass.
+
+**Proposition 3.1A.** For any random variable \(X\) and any \(\alpha\in(0,1)\),
+
+\[
+Q_X(\alpha)=\inf\{t:L_0(t;X)\ge \alpha\}.
+\]
+
+**Proof.** Since \(L_0(t;X)=F_X(t)\), the result follows directly from the definition of the lower quantile.
+
+
 ---
 
 ## Probability Integral Transform

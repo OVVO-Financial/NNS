@@ -9,5 +9,8 @@ bookdown::gitbook:
 
 bookdown::pdf_book:
   keep_tex: true
+  latex_engine: xelatex
+  pandoc_args:
+    - "--pdf-engine-opt=-8bit"
 
 bookdown::epub_book: default

@@ -1,0 +1,135 @@
+# Directional Tail Thresholds, Probability Bounds, and Estimation Error
+
+## Why Threshold Analysis Needs More Than Quantiles
+
+A lower-tail quantile identifies where adverse observations begin to accumulate, but quantiles alone do not answer two further questions that often matter in practice.
+
+First, how conservative is the threshold when the distribution is unknown or misspecified?
+
+Second, how stable is the estimated threshold in finite samples?
+
+The directional framework is well suited to both questions. Because quantiles, semivariance, higher-order partial moments, and directional probability ratios all arise from the same benchmark-relative operators, threshold selection, probability bounds, and estimation diagnostics can be studied within one structure rather than treated as unrelated topics.
+
+## Degree-Zero Thresholds and Their Directional Meaning
+
+At degree zero, the lower partial moment is the cumulative distribution function:
+\[
+L_0(t;X)=P(X\le t)=F_X(t).
+\]
+Hence the \(\alpha\)-level lower-tail threshold is
+\[
+t_\alpha^{(0)}=\inf\{t:L_0(t;X)\ge \alpha\}.
+\]
+
+This is the most basic threshold operator in the framework. It partitions the lower tail by frequency alone. In application-specific settings, it may be called by different names, but mathematically it is simply the lower quantile implied by the degree-zero directional probability representation.
+
+The estimation-error literature states explicitly that \(LPM_0\) is equivalent to the cumulative distribution function and also notes the connection of \(LPM_1\) to conditional lower-tail summaries.
+
+This is the first key message of the chapter: threshold analysis is not foreign to the NNS framework. It is already contained in the directional representation of probability itself.
+
+## Directional Probability Bounds
+
+Threshold selection is often followed by a second question: how large can the probability of threshold violation be, even under weak distributional knowledge?
+
+Classical one-sided Chebyshev reasoning provides the symmetric answer:
+\[
+P(X\le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
+\]
+A directional refinement uses semivariance:
+\[
+P(X\le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2.
+\]
+The estimation-error literature emphasizes that semivariance has a strong boundary equivalence to Chebyshev-type probability reasoning.
+
+A more general bound uses lower partial moments of degree \(\alpha\):
+\[
+\theta(t,\alpha)=\big(E[(t-X)_+^\alpha]\big)^{1/\alpha},
+\qquad
+P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
+\]
+The probability-bounds literature presents this bound as an Atwood-style inequality and interprets \(\theta(t,\alpha)\) as generalized directional dispersion.
+
+Thus the progression is:
+\[
+\text{variance bound} \to \text{semivariance bound} \to \text{general partial-moment bound}.
+\]
+Each step aligns the probability bound more closely with the side of the distribution that matters for the decision.
+
+## Severity-Weighted Thresholds
+
+Traditional lower-tail quantiles count observations equally. But a directional framework also allows thresholds to be defined by severity-weighted mass.
+
+Consider the ratio
+\[
+\frac{L_\alpha(t;X)}{L_\alpha(t;X)+U_\alpha(t;X)}.
+\]
+For \(\alpha=0\), this reduces to ordinary counting probability. For \(\alpha=1\), it partitions observations by aggregate adverse magnitude. For \(\alpha=2\), it penalizes large adverse deviations quadratically.
+
+The generalized threshold \(t_\alpha^{(d)}\) therefore depends on the geometry in which the calibration is performed:
+
+* degree 0 for frequency,
+* degree 1 for aggregate adverse magnitude,
+* degree 2 for extreme-deviation sensitivity.
+
+This provides not one threshold, but a family of thresholds matched to different decision problems.
+
+## Early-Intervention Interpretation
+
+A severity-weighted threshold can be less extreme than a degree-zero quantile threshold while still yielding milder realized tail behavior. This is not a contradiction. It is a consequence of calibrating the threshold in weighted directional mass rather than in raw event counts.
+
+The probability-bounds literature demonstrates this empirically in finance settings. The broader interpretation is that higher-degree thresholds can act as early-intervention rules: they respond before the most severe lower-tail realizations dominate the sample.
+
+This logic is general:
+
+* in a forecasting system, intervention begins before very large misses accumulate,
+* in operations, action begins before deep shortages form,
+* in engineering, mitigation begins before large safety-margin breaches dominate the adverse region.
+
+## Model Misspecification and Robustness
+
+Threshold analysis is highly sensitive to how the distribution is represented. Parametric models can mischaracterize lower-tail behavior, particularly under skewness or heavy tails.
+
+Probability-bounds examples illustrate Gaussian and \(t\)-distribution comparisons against empirical thresholds and conditional lower-tail means. The chapter-level lesson is general: when the lower tail matters, misspecification is most costly exactly where decisions are most sensitive.
+
+Directional methods help address this in two ways. First, they work directly with empirical directional structure. Second, they supplement empirical thresholds with probability bounds that remain valid under weak assumptions.
+
+## Estimation Error and Sample-Size Sensitivity
+
+A threshold or directional statistic is useful only if it stabilizes with increasing sample size.
+
+The estimation-error literature frames this as the long-standing input-stability problem in applied decision systems. Its central empirical argument is that partial moments exhibit asymptotic behavior comparable to classical moment summaries under normality and often superior behavior under skewed, leptokurtic distributions. In particular, it reports strong stability for degree-zero directional probabilities and competitive or superior behavior for semideviation and related partial-moment measures.
+
+This matters beyond finance. Any threshold-based procedure depends on stable estimation of lower-tail structure. If partial moments retain stability under asymmetric or heavy-tailed data, then they are not merely conceptually attractive. They are operationally preferable in exactly the settings where classical symmetric assumptions are most fragile.
+
+## Historical and Decision-Theoretic Positioning
+
+The estimation-error literature also clarifies the deeper lineage of the subject. Partial moments connect to Chebyshev-type probability reasoning, semivariance, safety-first analysis, expected utility, and stochastic dominance.
+
+This history supports a broader methodological point. Degree-zero thresholds and conditional lower-tail summaries are informative descriptive statistics, but they are not automatically the right objective functions for all decisions. In many applications the goal is not merely to count threshold violations, but to model asymmetric costs, nonlinear penalties, or benchmark-relative tradeoffs. Higher-degree partial moments are often better aligned with those aims because they represent directional asymmetry directly.
+
+This point should be presented generally, not only through portfolio language.
+
+## Practical Workflow
+
+A general directional workflow for threshold analysis is:
+
+1. estimate an empirical lower-tail threshold using degree zero,
+2. compute degree-one and degree-two severity-weighted thresholds,
+3. evaluate directional probability bounds using variance, semivariance, and partial moments,
+4. compare empirical thresholds against parametric benchmarks when relevant,
+5. assess finite-sample stability through resampling,
+6. choose the threshold degree that matches the decision problem.
+
+The correct degree is application-dependent:
+
+* degree 0 for frequency control,
+* degree 1 for aggregate adverse-magnitude control,
+* degree 2 for extreme-deviation control.
+
+## Summary
+
+Thresholds, probability bounds, semivariance, and estimation error belong together because they are all generated by the same directional primitives.
+
+Degree zero recovers the usual lower-tail quantile through the CDF. Higher degrees reweight the lower tail by adverse severity. Semivariance and higher-order lower partial moments yield directional probability bounds. Estimation-error analysis explains why these objects matter in practice, especially under asymmetric and heavy-tailed data.
+
+Taken together, they show that partial moments are not ad hoc summaries from a single application area. They form a coherent nonparametric language for threshold selection, probability control, and finite-sample decision support.

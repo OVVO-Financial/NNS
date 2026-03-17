@@ -384,7 +384,59 @@ Directional dominance curves therefore provide a detailed nonparametric comparis
 
 ---
 
+
+
+### Severity-Weighted Distribution Comparison
+
+Distribution comparison need not stop at asking which sample places more probability mass below a threshold. The directional framework allows a stronger question: how quickly does adverse severity accumulate below that threshold?
+
+For a benchmark \(t\), degree-zero comparison evaluates
+\[
+L_0(t;X)=P(X\le t),
+\]
+which is purely frequency-based. Degree one evaluates
+\[
+L_1(t;X)=E[(t-X)_+],
+\]
+which aggregates the total adverse deviation below the benchmark. Degree two evaluates
+\[
+L_2(t;X)=E[(t-X)_+^2],
+\]
+which penalizes larger deviations disproportionately.
+
+These degrees therefore define a general hierarchy:
+\[
+\text{degree 0} \to \text{event frequency},
+\]
+\[
+\text{degree 1} \to \text{aggregate adverse magnitude},
+\]
+\[
+\text{degree 2} \to \text{extreme-deviation sensitivity}.
+\]
+
+This hierarchy is useful in any setting where two distributions can have similar lower-tail frequency but very different lower-tail severity. A system may violate a benchmark only slightly more often than another system, yet do so with much larger deviations once the benchmark is crossed. Frequency alone would miss that distinction; higher-degree partial moments make it visible.
+
+The probability-bounds literature uses this same logic in discussions of partial-moment-ratio thresholds, though often in finance terminology. Here the broader point is more important than the label: a threshold comparison can be performed either in count space or in severity-weighted space.
+
+
 ## Block IV — Applied workflow and practical inference
+
+
+### Practical Threshold Comparison Across Degrees
+
+A practical directional workflow for comparing distributions is therefore to evaluate lower-tail structure degree by degree.
+
+First, compare degree-zero lower-tail probabilities to assess how often observations fall below the benchmark. This recovers the familiar CDF-based comparison.
+
+Second, compare degree-one lower partial moments to assess how much aggregate adverse magnitude accumulates below the benchmark.
+
+Third, compare degree-two lower partial moments when larger deviations deserve disproportionate emphasis.
+
+This layered comparison is useful across domains. In forecasting, it distinguishes models that miss a target equally often but differ in the magnitude of their misses. In operations, it distinguishes supply systems that stock out with similar frequency but very different shortage depth. In reliability, it distinguishes designs whose failure margins are crossed with similar probability but different severity once crossed.
+
+This section also clarifies why the degree-one continuous probability representation matters. Chapter 15 established that the degree-one partial-moment ratio removes the discrete-CDF bias at the mean in finite samples. That same area-based logic provides a smoother and more interpretable path from event counting to severity-weighted comparison.
+
 
 ### Example
 

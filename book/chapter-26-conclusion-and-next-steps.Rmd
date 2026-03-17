@@ -22,6 +22,12 @@ Across the text, several practical outcomes recur.
 
 These capabilities matter most in real data settings where asymmetry, tail risk, and regime changes are central rather than exceptional.
 
+**Directional threshold analysis.** The framework has shown that the same lower and upper partial-moment operators generate not only distribution functions and quantiles, but also benchmark-sensitive threshold rules for adverse events. Degree zero recovers event-frequency calibration, while higher degrees permit calibration by adverse magnitude and extreme-deviation sensitivity.
+
+**Distribution-free probability control.** Partial moments support conservative tail-probability bounds through semivariance and higher-order directional dispersion measures. This connects descriptive nonparametrics to decision support without requiring strict distributional assumptions.
+
+**Finite-sample relevance under non-normality.** Partial moments are not merely conceptually distribution-free. They also provide a plausible route to improved stability when the underlying data are skewed, heavy-tailed, or otherwise asymmetric.
+
 ## Open Problems and Research Directions
 
 The framework is intentionally modular, leaving many directions open for extension.
@@ -31,6 +37,10 @@ The framework is intentionally modular, leaving many directions open for extensi
 - **Decision-theoretic integration**: explicit utility-weighted objectives built directly on partial-moment geometry.
 - **Domain-specific benchmarks**: principled benchmark selection rules for policy, finance, biomedical, and engineering contexts.
 - **Theoretical rates under dependence**: finite-sample and asymptotic guarantees in strongly dependent or nonstationary settings.
+- **Finite-sample theory for severity-weighted thresholds**: sharper nonasymptotic guarantees for higher-degree threshold estimators remain to be developed.
+- **Directional probability bounds under dependence**: extending semivariance-based and partial-moment-based bounds rigorously beyond i.i.d. settings is a natural next step.
+- **Threshold degree selection**: formal rules for matching degree choice to decision cost, asymmetry, and intervention timing remain an open problem.
+- **Benchmark selection**: since partial moments are benchmark-relative by construction, principled methods for choosing benchmarks across forecasting, operations, policy, and engineering remain an important research frontier.
 
 ## Further Resources
 

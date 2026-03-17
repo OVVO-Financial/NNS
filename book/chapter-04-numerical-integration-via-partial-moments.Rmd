@@ -262,6 +262,77 @@ These are precisely lower partial moments relative to a target return \(\tau\).
 
 Thus many risk measures are simply integrals of directional deviations.
 
+
+### Directional Probability Bounds
+
+Partial moments do more than approximate benchmark-relative integrals numerically. They also support conservative bounds on tail probabilities. This is important because threshold-based decisions often require guarantees that remain valid even when the underlying distribution is unknown or misspecified.
+
+Suppose \(g<\mu\) is a lower benchmark and the event of interest is
+\[
+X\le g.
+\]
+A classical one-sided Chebyshev argument bounds this lower-tail probability using symmetric dispersion:
+\[
+P(X\le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
+\]
+This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations.
+
+A directional refinement replaces symmetric variance with semivariance:
+\[
+P(X\le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
+\]
+where \(\sigma_-\) measures dispersion only on the adverse side of the benchmark. The estimation-error literature highlights the importance of this refinement through the Berck–Hihn result, which links semivariance directly to a strong boundary form of Chebyshev’s inequality.
+
+A further generalization uses lower partial moments of degree \(\alpha\). Define
+\[
+\theta(t,\alpha)=\big(E[(t-X)_+^\alpha]\big)^{1/\alpha}.
+\]
+Then, for \(g\le t\),
+\[
+P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
+\]
+The probability-bounds literature presents this as an Atwood-style lower-partial-moment inequality and interprets \(\theta(t,\alpha)\) as generalized downside dispersion.
+
+These bounds form a directional hierarchy:
+\[
+\text{symmetric variance} \to \text{directional second moment} \to \text{general directional degree } \alpha.
+\]
+The central theme is that tail-probability control need not be built from a separate theory. It can be generated from the same benchmark-relative operators that already define the directional framework.
+
+### Threshold Analysis and Directional Dispersion
+
+Probability bounds become especially meaningful when interpreted as threshold-analysis tools.
+
+In many applied settings, the analyst cares about whether a process falls below a critical level. Examples include:
+
+* a forecast undershooting a service target,
+* an inventory position dropping below a replenishment threshold,
+* a reliability metric falling below a safety margin,
+* or a return falling below an acceptable performance benchmark.
+
+In each case the relevant question is the same:
+\[
+P(X\le g)?
+\]
+Classical methods answer this using symmetric dispersion summaries. The directional framework answers it more precisely by measuring deviations on the relevant side of the benchmark.
+
+The quantity
+\[
+L_\alpha(t;X)=E[(t-X)_+^\alpha]
+\]
+therefore serves three roles simultaneously:
+\[
+\text{directional integral},
+\quad
+\text{benchmark-relative dispersion summary},
+\quad
+\text{engine of a probability bound}.
+\]
+That multi-use structure is one of the framework’s main advantages. It reduces the gap between descriptive measurement, numerical integration, and decision support.
+
+The estimation-error literature places this in a broader historical context: semivariance and related partial moments are not ad hoc devices, but directional statistics with direct links to probability inequalities, utility-sensitive modeling, and nonparametric analysis.
+
+
 ---
 
 ## Summary

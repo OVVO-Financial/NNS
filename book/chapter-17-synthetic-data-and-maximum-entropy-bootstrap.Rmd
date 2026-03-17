@@ -1,6 +1,6 @@
 # Synthetic Data and Maximum Entropy Bootstrap
 
-Previous chapters developed the directional framework for statistical inference and prediction. Chapter 15 introduced distribution comparison methods based on directional probability structures, and Chapter 16 developed distribution-free prediction intervals derived directly from partial moments.
+The previous chapter showed that threshold selection, directional probability bounds, and finite-sample stability are linked problems. These concerns naturally motivate resampling procedures that preserve empirical structure while generating synthetic realizations for robustness analysis. This chapter therefore turns to maximum entropy bootstrap and related synthetic-data methods as computational tools for the estimation and threshold-analysis problems developed in Chapter 17.
 
 In many practical situations, however, analysts require not only statistical summaries of existing data but also **synthetic data generation**. Synthetic data can be used for simulation, risk analysis, forecasting evaluation, and Monte Carlo experiments.
 

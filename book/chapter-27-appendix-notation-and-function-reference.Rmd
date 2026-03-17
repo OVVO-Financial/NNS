@@ -43,6 +43,21 @@ library(NNS)
 | $Q^+_{d}(\alpha)$ | Upper degree-$d$ quantile | `UPM.VaR(alpha, degree = d, x)` |
 | PI$_{1-\alpha}$ | Prediction interval $[Q^-_d(\alpha/2),Q^+_d(\alpha/2)]$ | `LPM.VaR(...)` + `UPM.VaR(...)` |
 
+
+
+`LPM.VaR(percentile, degree, variable)`
+Lower-tail threshold operator obtained by inverting the degree-specific lower partial-moment probability representation.
+Interpretation by degree:
+
+* `degree = 0`: empirical-CDF lower quantile,
+* `degree = 1`: severity-weighted lower threshold based on directional magnitude,
+* `degree = 2`: extreme-deviation-sensitive lower threshold.
+  In finance, the degree-zero case is commonly called VaR, but the operator is more general than that label.
+
+`UPM.VaR(percentile, degree, variable)`
+Upper-tail analog of `LPM.VaR`, used for right-tail threshold selection and interval construction.
+
+
 ## Regression and forecasting workflow objects
 
 | Symbol | Definition / role | R function |

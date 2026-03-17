@@ -96,14 +96,14 @@ Because these four regions partition the joint distribution completely,
 This is the **degree-zero partition of unity**: each observation contributes exactly one unit of probability mass to exactly one quadrant. It is a complete nonparametric probability representation of the joint distribution relative to any pair of benchmarks.
 
 In NNS R-package notation:
-
+\[
 \begin{aligned}
 1 &= \texttt{Co.UPM}(0,X,Y,t_X,t_Y)
    + \texttt{D.UPM}(0,0,X,Y,t_X,t_Y) \\
   &\quad + \texttt{D.LPM}(0,0,X,Y,t_X,t_Y)
    + \texttt{Co.LPM}(0,X,Y,t_X,t_Y).
 \end{aligned}
-
+\]
 
 where the four terms correspond respectively to
 \(P(X>t_X,\,Y>t_Y)\),
