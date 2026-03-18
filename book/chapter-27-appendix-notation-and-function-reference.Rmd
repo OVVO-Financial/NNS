@@ -61,15 +61,15 @@ Upper-tail analog of `LPM.VaR`, used for right-tail threshold selection and inte
 
 ## Directional Decision Regions Crosswalk (Classical → NNS)
 
-To maintain continuity with Chapter 22's directional decision-region framing, the table below maps common classical statistics and procedures to their directional NNS counterparts.
+To maintain continuity with Chapter 23's directional decision-region framing, the table below maps common classical statistics and procedures to their directional NNS counterparts.
 
 | Classical statistic / workflow | Typical classical role | Directional NNS counterpart | Reference chapter | Notes |
 |---|---|---|---|---|
-| Pearson correlation | Linear association summary | `NNS.dep(x, y)` | Chapter 10 | Captures nonlinear and asymmetric dependence, not only linear co-movement. |
-| Parametric VaR / empirical quantile VaR | Tail-loss thresholding | `LPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Degree controls sensitivity to tail severity beyond degree-0 quantiles. |
-| Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
-| Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 14 | Agreement certainty is benchmarked through directional CDF-style deviations. |
-| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 13 | Directionality can be nonlinear and state dependent. |
+| Pearson correlation | Linear association summary | `NNS.dep(x, y)` | Chapter 11 | Captures nonlinear and asymmetric dependence, not only linear co-movement. |
+| Parametric VaR / empirical quantile VaR | Tail-loss thresholding | `LPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 17 | Degree controls sensitivity to tail severity beyond degree-0 quantiles. |
+| Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 17 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
+| Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
+| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Directionality can be nonlinear and state dependent. |
 | Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree, target.x, target.y, x, y)` / `Co.UPM(degree, target.x, target.y, x, y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
 | Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapters 16–17 | Produces directional prediction intervals without normality assumptions. |
 
@@ -78,14 +78,14 @@ To maintain continuity with Chapter 22's directional decision-region framing, th
 
 | Symbol | Definition / role | R function | Reference chapter |
 |---|---|---|---|
-| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` | Chapter 21 |
-| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 21 |
-| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 15 |
-| Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows | Chapter 10 |
+| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` | Chapter 22 |
+| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 22 |
+| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 16 |
+| Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows | Chapter 11 |
 
 ## A.3 Technical Note: Adaptive Order and Consistency Conditions
 
-Chapter 18 established two core consistency conditions for recursive mean-split regression:
+Chapter 19 established two core consistency conditions for recursive mean-split regression:
 
 1. **Shrinking cell diameter** at each target location so local bias vanishes,
 2. **Growing cell occupancy** so local sample averages stabilize.
@@ -101,6 +101,6 @@ The resulting estimator is therefore **locally adaptive in rate**:
 
 A concise takeaway is:
 
-> Under the Chapter 18 regularity conditions (shrinking local diameters and diverging local occupancy), dependence-driven order allocation preserves the same bias–variance decomposition used for consistency arguments, while allowing refinement to concentrate where dependence signal is stronger.
+> Under the Chapter 19 regularity conditions (shrinking local diameters and diverging local occupancy), dependence-driven order allocation preserves the same bias–variance decomposition used for consistency arguments, while allowing refinement to concentrate where dependence signal is stronger.
 
 The key practical point is that internal adaptive order selection keeps the same consistency checklist for users—control occupancy and ensure progressive local refinement—while often improving finite-sample stability by avoiding unnecessary depth in weak-signal coordinates.
