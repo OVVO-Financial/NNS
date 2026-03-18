@@ -256,9 +256,13 @@ x <- ifelse(shock < 0, shock, rnorm(n))
 y <- ifelse(shock < 0, shock + rnorm(n, 0, 0.1), rnorm(n))
 
 Co.LPM(1, x, y, mean(x), mean(y))
+## [1] 0.2770795
 Co.UPM(1, x, y, mean(x), mean(y))
+## [1] 0.2103299
 D.LPM(1, 1, x, y, mean(x), mean(y))
+## [1] 0.06191035
 D.UPM(1, 1, x, y, mean(x), mean(y))
+## [1] 0.08481611
 ```
 
 In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.

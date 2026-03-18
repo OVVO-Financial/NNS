@@ -435,7 +435,7 @@ Third, compare degree-two lower partial moments when larger deviations deserve d
 
 This layered comparison is useful across domains. In forecasting, it distinguishes models that miss a target equally often but differ in the magnitude of their misses. In operations, it distinguishes supply systems that stock out with similar frequency but very different shortage depth. In reliability, it distinguishes designs whose failure margins are crossed with similar probability but different severity once crossed.
 
-This section also clarifies why the degree-one continuous probability representation matters. Chapter 15 established that the degree-one partial-moment ratio removes the discrete-CDF bias at the mean in finite samples. That same area-based logic provides a smoother and more interpretable path from event counting to severity-weighted comparison.
+This section also clarifies why the degree-one continuous probability representation matters. Chapter 14 established that the degree-one partial-moment ratio removes the discrete-CDF bias at the mean in finite samples. That same area-based logic provides a smoother and more interpretable path from event counting to severity-weighted comparison.
 
 
 ### Example
@@ -678,7 +678,7 @@ $$
 
 These equivalences mean that **stochastic dominance tests are partial moment comparisons** evaluated across the full support of the data. The NNS framework implements all three levels directly through empirical partial moment estimates.
 
-This is also the bridge to Chapter 16: the degree-one quantile objects used for bias-corrected prediction intervals (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional probability representation.
+This is also the bridge to Chapter 15: the degree-one quantile objects used for bias-corrected prediction intervals (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional probability representation.
 
 #### Empirical Stochastic Dominance Tests
 
@@ -758,7 +758,7 @@ Then apply this chapter's comparison workflow in sequence:
 1. Estimate directional dominance probability `P(A > B)` (or the reverse, depending on target variable orientation).
 2. Compute directional probability effect-size summaries.
 3. Run `NNS.ANOVA` with the continuous CDF option for full-distribution comparison.
-4. Archive the effect-size outputs for later comparison with Chapter 19 predictive performance diagnostics.
+4. Archive the effect-size outputs for later comparison with Chapter 18 predictive performance diagnostics.
 
 Using the same data object across chapters keeps interpretation stable: dependence findings from Part III map directly to distribution-comparison in Part IV and then to estimator behavior in Part V.
 
@@ -785,3 +785,8 @@ Key ideas developed in this chapter include:
 These tools provide a flexible and interpretable method for comparing distributions without parametric assumptions.
 
 The next chapter develops **prediction intervals**, showing how the degree-one partial moment CDF and its quantile functions extend the bias-elimination framework to interval estimation for future observations.
+
+## References
+
+- Viole, F., & Nawrocki, D. (2016). LPM density functions for the computation of the SD efficient set. *Journal of Mathematical Finance*, **6**(1), 105–126. https://doi.org/10.4236/jmf.2016.61012
+- Viole, F. (2016). NNS: Nonlinear nonparametric statistics. R package. https://cran.r-project.org/package=NNS

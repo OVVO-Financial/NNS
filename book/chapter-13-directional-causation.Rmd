@@ -146,7 +146,7 @@ Because the two series may differ in scale, units, and distributional shape, dir
 L_0(t; X) = P(X \le t).
 \]
 
-Mapping both variables jointly through their empirical CDFs places them on a shared \([0,1]\) scale while preserving their relative positions within the joint distribution. Chapter 11 showed that this is precisely the probability integral transform that defines copula space.
+Mapping both variables jointly through their empirical CDFs places them on a shared \([0,1]\) scale while preserving their relative positions within the joint distribution. Chapter 10 showed that this is precisely the probability integral transform that defines copula space.
 
 The directional framework applies this idea jointly to the lag-adjusted variables:
 
@@ -156,7 +156,7 @@ The directional framework applies this idea jointly to the lag-adjusted variable
 \texttt{NNS.norm}\!\bigl(\bigl[X_t^{*},\; Y_t^{*}\bigr]\bigr).
 \]
 
-The resulting \(X_t^{**}\) and \(Y_t^{**}\) are copula-like transforms of the lag-adjusted series. Their degree-zero partial moments are approximately uniformly distributed on \([0,1]\), connecting to the copula interpretation of Chapter 11. All subsequent probability and dependence calculations are therefore performed on variables that are simultaneously free of internal dynamics and free of scale differences.
+The resulting \(X_t^{**}\) and \(Y_t^{**}\) are copula-like transforms of the lag-adjusted series. Their degree-zero partial moments are approximately uniformly distributed on \([0,1]\), connecting to the copula interpretation of Chapter 10. All subsequent probability and dependence calculations are therefore performed on variables that are simultaneously free of internal dynamics and free of scale differences.
 
 ---
 

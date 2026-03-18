@@ -97,7 +97,7 @@ The directional framework instead asks whether observations share common **sign 
 
 ## Partition-Based Clustering
 
-The recursive mean-split machinery from Chapter 19 provides a natural unsupervised clustering mechanism.
+The recursive mean-split machinery from Chapter 18 provides a natural unsupervised clustering mechanism.
 
 In supervised estimation, partition cells were used to approximate a regression surface. In clustering, the same recursive partitions can be interpreted directly as **unsupervised groupings of the data cloud**.
 

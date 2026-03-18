@@ -367,7 +367,7 @@ CoLPM_{r,s}, \quad CoUPM_{r,s}.
 
 Increasing \(r\) and \(s\) increases sensitivity to extreme observations.
 
-This concept is closely related to **tail dependence in copula theory**, which Chapter 11 examines in detail.
+This concept is closely related to **tail dependence in copula theory**, which Chapter 10 examines in detail.
 
 ---
 
@@ -399,4 +399,4 @@ Key observations include:
 
 Directional statistics therefore provides a richer representation of dependence structure.
 
-The following chapter introduces the shared dataset used throughout the rest of the book, after which Chapter 11 develops directional dependence measures.
+The following chapter develops directional dependence measures built from directional co-partial moments.

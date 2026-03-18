@@ -127,7 +127,7 @@ The key design choice is how the regions \(A_k\) are constructed.
 
 The NNS recursive mean-split estimator builds partitions through an iterative procedure governed by an **order parameter** \(O\).
 At each order, each existing region is further subdivided.
-When left unspecified in the package interface (`order = NULL`), recursion depth is determined internally for each regressor according to its directional dependence with the response; Chapter 22 formalizes this dependence-driven adaptivity in the regression workflow.
+When left unspecified in the package interface (`order = NULL`), recursion depth is determined internally for each regressor according to its directional dependence with the response; Chapter 21 formalizes this dependence-driven adaptivity in the regression workflow.
 
 Two splitting modes are available, depending on whether regions are anchored to the joint distribution of \((X, Y)\) or to the marginal distribution of \(X\) alone.
 
@@ -400,7 +400,7 @@ Areas where the conditional mean changes rapidly receive finer partitions as \(O
 ### Implicit smoothing
 
 The order \(O\) governs the effective smoothing scale.
-Chapter 20 formalizes this by interpreting the partition cell diameter as a **dynamic bandwidth**, connecting the estimator to classical nonparametric smoothing theory.
+Chapter 19 formalizes this by interpreting the partition cell diameter as a **dynamic bandwidth**, connecting the estimator to classical nonparametric smoothing theory.
 
 ### Piecewise-linear interpolation
 
@@ -426,7 +426,7 @@ Recursive mean splitting differs in two key respects. First, the splitting crite
 
 Kernel estimators smooth data using a bandwidth parameter selected externally, often by cross-validation.
 
-Recursive mean-split estimation avoids explicit bandwidth selection: smoothing arises implicitly through the order parameter and the partition cell size. Chapter 20 makes this connection precise by showing that the cell diameter functions as a data-adaptive bandwidth.
+Recursive mean-split estimation avoids explicit bandwidth selection: smoothing arises implicitly through the order parameter and the partition cell size. Chapter 19 makes this connection precise by showing that the cell diameter functions as a data-adaptive bandwidth.
 
 A further distinction concerns exactness of fit. Because all kernel functions are continuous probability distributions, the probability that a kernel function assigns positive mass to any exact observed value is zero. Consequently, the kernel estimate at any point is a weighted average over the surrounding distribution and can never exactly equal any single observation. The recursive mean-split estimator does not share this limitation: at finite order \(O^*\), it achieves an exact fit at every observed point simultaneously.
 
@@ -458,7 +458,7 @@ These concepts provide the foundation for the next two chapters.
 
 This chapter establishes the **consistency of partition estimators**, showing that recursive mean-split estimation converges to the true conditional mean under standard regularity conditions on cell diameter and occupancy.
 
-Chapter 20 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing while preserving its data-adaptive character.
+Chapter 19 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing while preserving its data-adaptive character.
 
 ---
 
@@ -474,4 +474,4 @@ Chapter 20 interprets the partition cell diameter as a **dynamic bandwidth**, li
 
 - Viole, F., & Nawrocki, D. (2012). Deriving nonlinear correlation coefficients from partial moments. *SSRN eLibrary*. https://doi.org/10.2139/ssrn.2148522
 
-- Viole, F. (2016). *NNS: Nonlinear nonparametric statistics*. R package. https://CRAN.R-project.org/package=NNS
+- Viole, F. (2016). NNS: Nonlinear nonparametric statistics. R package. https://cran.r-project.org/package=NNS

@@ -1,6 +1,6 @@
 # Multivariate Forecasting
 
-Chapter 25 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
+Chapter 24 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
 
 But many forecasting problems are not univariate.
 
@@ -13,7 +13,7 @@ This chapter extends the forecasting framework from one time series to a **syste
 
 The package implementation is `NNS.VAR`, a **nonparametric vector autoregressive model incorporating `NNS.ARMA` estimates of variables into `NNS.reg` for a multivariate time-series forecast**. Its purpose is explicit: combine univariate nonlinear time-series forecasting with multivariate nonlinear regression so that each series can borrow information from the others while still retaining its own temporal structure.
 
-Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 19: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support.
+Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 18: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support.
 
 A second implementation, `NNS.nowcast`, wraps this framework for mixed-frequency macroeconomic forecasting and nowcasting, using a built-in panel of Federal Reserve style indicators and passing them to `NNS.VAR` with monthly alignment and a 12-lag structure.
 
@@ -507,7 +507,7 @@ This is a much richer object than a single real-time estimate.
 
 ## Prediction Intervals
 
-As in Chapter 16, point forecasts alone are not enough. Forecast uncertainty must also be quantified.
+As in Chapter 15, point forecasts alone are not enough. Forecast uncertainty must also be quantified.
 
 The examples associated with both `NNS.VAR` and `NNS.nowcast` construct prediction intervals using `NNS.meboot`, `LPM.VaR`, and `UPM.VaR`.
 

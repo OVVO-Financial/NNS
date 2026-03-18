@@ -1,6 +1,6 @@
 # Synthetic Data and Maximum Entropy Bootstrap
 
-The previous chapter showed that threshold selection, directional probability bounds, and finite-sample stability are linked problems. These concerns naturally motivate resampling procedures that preserve empirical structure while generating synthetic realizations for robustness analysis. This chapter therefore turns to maximum entropy bootstrap and related synthetic-data methods as computational tools for the estimation and threshold-analysis problems developed in Chapter 17.
+The previous chapter showed that threshold selection, directional probability bounds, and finite-sample stability are linked problems. These concerns naturally motivate resampling procedures that preserve empirical structure while generating synthetic realizations for robustness analysis. This chapter therefore turns to maximum entropy bootstrap and related synthetic-data methods as computational tools for the estimation and threshold-analysis problems developed in Chapter 16.
 
 In many practical situations, however, analysts require not only statistical summaries of existing data but also **synthetic data generation**. Synthetic data can be used for simulation, risk analysis, forecasting evaluation, and Monte Carlo experiments.
 
@@ -178,7 +178,7 @@ The `type` argument controls which dependence measure is targeted:
 | `"NNScor"`    | NNS nonlinear correlation             |
 | `"NNSdep"`    | NNS nonlinear dependence              |
 
-The `"NNScor"` and `"NNSdep"` options integrate the NNS co-partial-moment framework directly into the bootstrap loop, allowing dependence targeting that captures nonlinear relationships. `"NNScor"` corresponds to the NNS nonlinear correlation coefficient introduced in Chapter 11, which detects monotonic and non-monotonic associations through co-partial moments; `"NNSdep"` corresponds to the directional dependence measure from Chapter 11, which quantifies the strength of dependence independently of its direction or functional form.
+The `"NNScor"` and `"NNSdep"` options integrate the NNS co-partial-moment framework directly into the bootstrap loop, allowing dependence targeting that captures nonlinear relationships. `"NNScor"` corresponds to the NNS nonlinear correlation coefficient introduced in Chapter 10, which detects monotonic and non-monotonic associations through co-partial moments; `"NNSdep"` corresponds to the directional dependence measure from Chapter 10, which quantifies the strength of dependence independently of its direction or functional form.
 
 ### Simulation Evidence
 
@@ -434,4 +434,4 @@ Together with the prediction and inference methods developed in earlier chapters
 - Vinod, H. D. (2013). *Maximum entropy bootstrap algorithm enhancements* (SSRN Working Paper 2285041). https://doi.org/10.2139/ssrn.2285041
 - Vinod, H. D., & López-de-Lacalle, J. (2009). Maximum entropy bootstrap for time series: The meboot R package. *Journal of Statistical Software*, **29**(5), 1–19.
 - Vinod, H. D., & Viole, F. (2020). *Arbitrary Spearman's rank correlations in maximum entropy bootstrap and improved Monte Carlo simulations* (SSRN Working Paper 3621614). https://doi.org/10.2139/ssrn.3621614
-- Viole, F. (2016). *NNS: Nonlinear nonparametric statistics* (R package version 0.5.3). https://CRAN.R-project.org/package=NNS
+- Viole, F. (2016). NNS: Nonlinear nonparametric statistics. R package. https://cran.r-project.org/package=NNS
