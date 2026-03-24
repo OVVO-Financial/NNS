@@ -1168,6 +1168,39 @@ DUPM_{1,1}(X,Y).
 <p><span class="math display">\[
 Var(X)=U_2(\mu;X)+L_2(\mu;X).
 \]</span></p>
+<hr />
+</div>
+<div id="covariance-matrices-from-partial-moment-matrices" class="section level2 hasAnchor" number="9.4">
+<h2><span class="header-section-number">9.4</span> Covariance Matrices from Partial-Moment Matrices<a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For a system of <span class="math inline">\(n\)</span> variables, directional co-partial moments form matrices.</p>
+<p>Define</p>
+<p><span class="math display">\[
+CLPM_{ij}=CoLPM_{1,1}(X_i,X_j)
+\]</span></p>
+<p><span class="math display">\[
+CUPM_{ij}=CoUPM_{1,1}(X_i,X_j)
+\]</span></p>
+<p><span class="math display">\[
+DLPM_{ij}=DLPM_{1,1}(X_i,X_j)
+\]</span></p>
+<p><span class="math display">\[
+DUPM_{ij}=DUPM_{1,1}(X_i,X_j)
+\]</span></p>
+<p>Each matrix captures directional co-movement across the variables.</p>
+<p>The classical covariance matrix can be written as</p>
+<p><span class="math display">\[
+\Sigma = CLPM + CUPM - DLPM - DUPM.
+\]</span></p>
+<p>The diagonal elements satisfy</p>
+<p><span class="math display">\[
+\Sigma_{ii}=Var(X_i).
+\]</span></p>
+<p>This follows because when <span class="math inline">\(i=j\)</span>, the divergent partial moments <span class="math inline">\(DLPM\)</span> and <span class="math inline">\(DUPM\)</span> vanish, leaving only the lower and upper components.<br />
+The expression therefore reduces to the variance decomposition derived earlier:</p>
+<p><span class="math display">\[
+Var(X_i)=U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
+\]</span></p>
+<p>Like their univariate counterparts, these directional matrices can be <strong>estimated empirically from sample data</strong> using sample co-partial moments.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="why-correlation-fails.html#cb2-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
 <span id="cb2-2"><a href="why-correlation-fails.html#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb2-3"><a href="why-correlation-fails.html#cb2-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>) </span>
@@ -1216,39 +1249,6 @@ Var(X)=U_2(\mu;X)+L_2(\mu;X).
 <span id="cb2-46"><a href="why-correlation-fails.html#cb2-46" tabindex="-1"></a><span class="do">##             x           y</span></span>
 <span id="cb2-47"><a href="why-correlation-fails.html#cb2-47" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
 <span id="cb2-48"><a href="why-correlation-fails.html#cb2-48" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span></code></pre></div>
-<hr />
-</div>
-<div id="covariance-matrices-from-partial-moment-matrices" class="section level2 hasAnchor" number="9.4">
-<h2><span class="header-section-number">9.4</span> Covariance Matrices from Partial-Moment Matrices<a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>For a system of <span class="math inline">\(n\)</span> variables, directional co-partial moments form matrices.</p>
-<p>Define</p>
-<p><span class="math display">\[
-CLPM_{ij}=CoLPM_{1,1}(X_i,X_j)
-\]</span></p>
-<p><span class="math display">\[
-CUPM_{ij}=CoUPM_{1,1}(X_i,X_j)
-\]</span></p>
-<p><span class="math display">\[
-DLPM_{ij}=DLPM_{1,1}(X_i,X_j)
-\]</span></p>
-<p><span class="math display">\[
-DUPM_{ij}=DUPM_{1,1}(X_i,X_j)
-\]</span></p>
-<p>Each matrix captures directional co-movement across the variables.</p>
-<p>The classical covariance matrix can be written as</p>
-<p><span class="math display">\[
-\Sigma = CLPM + CUPM - DLPM - DUPM.
-\]</span></p>
-<p>The diagonal elements satisfy</p>
-<p><span class="math display">\[
-\Sigma_{ii}=Var(X_i).
-\]</span></p>
-<p>This follows because when <span class="math inline">\(i=j\)</span>, the divergent partial moments <span class="math inline">\(DLPM\)</span> and <span class="math inline">\(DUPM\)</span> vanish, leaving only the lower and upper components.<br />
-The expression therefore reduces to the variance decomposition derived earlier:</p>
-<p><span class="math display">\[
-Var(X_i)=U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
-\]</span></p>
-<p>Like their univariate counterparts, these directional matrices can be <strong>estimated empirically from sample data</strong> using sample co-partial moments.</p>
 <hr />
 </div>
 <div id="correlation-as-a-normalized-covariance" class="section level2 hasAnchor" number="9.5">
