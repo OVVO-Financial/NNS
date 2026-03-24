@@ -1312,24 +1312,24 @@ X_t = f(X_{t-m}) + \varepsilon_t
 <p>the forecast is still generated from the series’ own past.</p>
 <p>But it does so without imposing stationarity, without requiring Box–Jenkins identification, and without restricting the lag relation to a linear map.</p>
 <p>A brief clarification of the mean-based option is useful. In some component series the fitted regression may be unstable because the component is short, noisy, or nearly flat. In that case a practical alternative is to shrink the regression estimate toward the component mean, or even to use the component mean directly. This sacrifices some responsiveness in exchange for stability. Conceptually, it is a local bias-variance tradeoff: when the estimated slope or nonlinear fit is unreliable, the component average can act as a robust anchor.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="nonparametric-time-series-models.html#cb28-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
-<span id="cb28-2"><a href="nonparametric-time-series-models.html#cb28-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
-<span id="cb28-3"><a href="nonparametric-time-series-models.html#cb28-3" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="nonparametric-time-series-models.html#cb28-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
-<span id="cb28-5"><a href="nonparametric-time-series-models.html#cb28-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb28-6"><a href="nonparametric-time-series-models.html#cb28-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span>
-<span id="cb28-7"><a href="nonparametric-time-series-models.html#cb28-7" tabindex="-1"></a></span>
-<span id="cb28-8"><a href="nonparametric-time-series-models.html#cb28-8" tabindex="-1"></a><span class="do">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
-<span id="cb28-9"><a href="nonparametric-time-series-models.html#cb28-9" tabindex="-1"></a><span class="do">## 1     99                0.5122054                      1.168502e+17</span></span>
-<span id="cb28-10"><a href="nonparametric-time-series-models.html#cb28-10" tabindex="-1"></a><span class="do">## 2    147                0.5256021                      1.168502e+17</span></span>
-<span id="cb28-11"><a href="nonparametric-time-series-models.html#cb28-11" tabindex="-1"></a><span class="do">## 3    100                0.5598477                      1.168502e+17</span></span>
-<span id="cb28-12"><a href="nonparametric-time-series-models.html#cb28-12" tabindex="-1"></a><span class="do">## 4    146                0.5618687                      1.168502e+17</span></span>
-<span id="cb28-13"><a href="nonparametric-time-series-models.html#cb28-13" tabindex="-1"></a><span class="do">## 5    199                0.5766158                      1.168502e+17</span></span>
-<span id="cb28-14"><a href="nonparametric-time-series-models.html#cb28-14" tabindex="-1"></a><span class="do">## 6     98                0.5801409                      1.168502e+17</span></span>
-<span id="cb28-15"><a href="nonparametric-time-series-models.html#cb28-15" tabindex="-1"></a></span>
-<span id="cb28-16"><a href="nonparametric-time-series-models.html#cb28-16" tabindex="-1"></a></span>
-<span id="cb28-17"><a href="nonparametric-time-series-models.html#cb28-17" tabindex="-1"></a><span class="co"># Validate seasonal periods and forecast</span></span>
-<span id="cb28-18"><a href="nonparametric-time-series-models.html#cb28-18" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="nonparametric-time-series-models.html#cb29-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
+<span id="cb29-2"><a href="nonparametric-time-series-models.html#cb29-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
+<span id="cb29-3"><a href="nonparametric-time-series-models.html#cb29-3" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="nonparametric-time-series-models.html#cb29-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
+<span id="cb29-5"><a href="nonparametric-time-series-models.html#cb29-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb29-6"><a href="nonparametric-time-series-models.html#cb29-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span>
+<span id="cb29-7"><a href="nonparametric-time-series-models.html#cb29-7" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="nonparametric-time-series-models.html#cb29-8" tabindex="-1"></a><span class="do">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
+<span id="cb29-9"><a href="nonparametric-time-series-models.html#cb29-9" tabindex="-1"></a><span class="do">## 1     99                0.5122054                      1.168502e+17</span></span>
+<span id="cb29-10"><a href="nonparametric-time-series-models.html#cb29-10" tabindex="-1"></a><span class="do">## 2    147                0.5256021                      1.168502e+17</span></span>
+<span id="cb29-11"><a href="nonparametric-time-series-models.html#cb29-11" tabindex="-1"></a><span class="do">## 3    100                0.5598477                      1.168502e+17</span></span>
+<span id="cb29-12"><a href="nonparametric-time-series-models.html#cb29-12" tabindex="-1"></a><span class="do">## 4    146                0.5618687                      1.168502e+17</span></span>
+<span id="cb29-13"><a href="nonparametric-time-series-models.html#cb29-13" tabindex="-1"></a><span class="do">## 5    199                0.5766158                      1.168502e+17</span></span>
+<span id="cb29-14"><a href="nonparametric-time-series-models.html#cb29-14" tabindex="-1"></a><span class="do">## 6     98                0.5801409                      1.168502e+17</span></span>
+<span id="cb29-15"><a href="nonparametric-time-series-models.html#cb29-15" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="nonparametric-time-series-models.html#cb29-16" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="nonparametric-time-series-models.html#cb29-17" tabindex="-1"></a><span class="co"># Validate seasonal periods and forecast</span></span>
+<span id="cb29-18"><a href="nonparametric-time-series-models.html#cb29-18" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch24_uni_ts.png" alt="Figure 24.1. NNS.ARMA(..., h = 45, seasonal.factor = c(12,24,36)) forecast output with fitted trajectory and uncertainty structure." />

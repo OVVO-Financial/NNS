@@ -1168,6 +1168,54 @@ DUPM_{1,1}(X,Y).
 <p><span class="math display">\[
 Var(X)=U_2(\mu;X)+L_2(\mu;X).
 \]</span></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="why-correlation-fails.html#cb2-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb2-2"><a href="why-correlation-fails.html#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-3"><a href="why-correlation-fails.html#cb2-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>) </span>
+<span id="cb2-4"><a href="why-correlation-fails.html#cb2-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb2-5"><a href="why-correlation-fails.html#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="why-correlation-fails.html#cb2-6" tabindex="-1"></a>cov.mtx <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(<span class="at">LPM_degree =</span> <span class="dv">1</span>, <span class="at">UPM_degree =</span> <span class="dv">1</span>, <span class="at">target =</span> <span class="st">&#39;mean&#39;</span>, <span class="at">variable =</span> <span class="fu">cbind</span>(x, y), <span class="at">pop_adj =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-7"><a href="why-correlation-fails.html#cb2-7" tabindex="-1"></a>cov.mtx</span>
+<span id="cb2-8"><a href="why-correlation-fails.html#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="why-correlation-fails.html#cb2-9" tabindex="-1"></a><span class="do">## $cupm</span></span>
+<span id="cb2-10"><a href="why-correlation-fails.html#cb2-10" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb2-11"><a href="why-correlation-fails.html#cb2-11" tabindex="-1"></a><span class="do">## x 0.4299250 0.1033601</span></span>
+<span id="cb2-12"><a href="why-correlation-fails.html#cb2-12" tabindex="-1"></a><span class="do">## y 0.1033601 0.5411626</span></span>
+<span id="cb2-13"><a href="why-correlation-fails.html#cb2-13" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-14"><a href="why-correlation-fails.html#cb2-14" tabindex="-1"></a><span class="do">## $dupm</span></span>
+<span id="cb2-15"><a href="why-correlation-fails.html#cb2-15" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb2-16"><a href="why-correlation-fails.html#cb2-16" tabindex="-1"></a><span class="do">## x 0.0000000 0.1469182</span></span>
+<span id="cb2-17"><a href="why-correlation-fails.html#cb2-17" tabindex="-1"></a><span class="do">## y 0.1560924 0.0000000</span></span>
+<span id="cb2-18"><a href="why-correlation-fails.html#cb2-18" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-19"><a href="why-correlation-fails.html#cb2-19" tabindex="-1"></a><span class="do">## $dlpm</span></span>
+<span id="cb2-20"><a href="why-correlation-fails.html#cb2-20" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb2-21"><a href="why-correlation-fails.html#cb2-21" tabindex="-1"></a><span class="do">## x 0.0000000 0.1560924</span></span>
+<span id="cb2-22"><a href="why-correlation-fails.html#cb2-22" tabindex="-1"></a><span class="do">## y 0.1469182 0.0000000</span></span>
+<span id="cb2-23"><a href="why-correlation-fails.html#cb2-23" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-24"><a href="why-correlation-fails.html#cb2-24" tabindex="-1"></a><span class="do">## $clpm</span></span>
+<span id="cb2-25"><a href="why-correlation-fails.html#cb2-25" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb2-26"><a href="why-correlation-fails.html#cb2-26" tabindex="-1"></a><span class="do">## x 0.4033078 0.1559295</span></span>
+<span id="cb2-27"><a href="why-correlation-fails.html#cb2-27" tabindex="-1"></a><span class="do">## y 0.1559295 0.3939005</span></span>
+<span id="cb2-28"><a href="why-correlation-fails.html#cb2-28" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb2-29"><a href="why-correlation-fails.html#cb2-29" tabindex="-1"></a><span class="do">## $cov.matrix</span></span>
+<span id="cb2-30"><a href="why-correlation-fails.html#cb2-30" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb2-31"><a href="why-correlation-fails.html#cb2-31" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb2-32"><a href="why-correlation-fails.html#cb2-32" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
+<span id="cb2-33"><a href="why-correlation-fails.html#cb2-33" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="why-correlation-fails.html#cb2-34" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="why-correlation-fails.html#cb2-35" tabindex="-1"></a><span class="co"># Reassembled Covariance Matrix</span></span>
+<span id="cb2-36"><a href="why-correlation-fails.html#cb2-36" tabindex="-1"></a>cov.mtx<span class="sc">$</span>clpm <span class="sc">+</span> cov.mtx<span class="sc">$</span>cupm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dlpm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dupm</span>
+<span id="cb2-37"><a href="why-correlation-fails.html#cb2-37" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="why-correlation-fails.html#cb2-38" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb2-39"><a href="why-correlation-fails.html#cb2-39" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb2-40"><a href="why-correlation-fails.html#cb2-40" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
+<span id="cb2-41"><a href="why-correlation-fails.html#cb2-41" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="why-correlation-fails.html#cb2-42" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="why-correlation-fails.html#cb2-43" tabindex="-1"></a><span class="co"># Standard Covariance Matrix</span></span>
+<span id="cb2-44"><a href="why-correlation-fails.html#cb2-44" tabindex="-1"></a><span class="fu">cov</span>(<span class="fu">cbind</span>(x, y))</span>
+<span id="cb2-45"><a href="why-correlation-fails.html#cb2-45" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="why-correlation-fails.html#cb2-46" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb2-47"><a href="why-correlation-fails.html#cb2-47" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb2-48"><a href="why-correlation-fails.html#cb2-48" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span></code></pre></div>
 <hr />
 </div>
 <div id="covariance-matrices-from-partial-moment-matrices" class="section level2 hasAnchor" number="9.4">

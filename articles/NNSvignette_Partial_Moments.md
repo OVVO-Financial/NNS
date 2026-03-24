@@ -154,7 +154,7 @@ moments matrices less the divergent partial moments matrices.
 $$\Sigma = CLPM + CUPM - DLPM - DUPM$$
 
 ``` r
-cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1,target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
+cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1, target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
 cov.mtx
 ```
 

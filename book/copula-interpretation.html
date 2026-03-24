@@ -1168,24 +1168,24 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 <h2><span class="header-section-number">11.6</span> Example: Directional Dependence Surface and Copula Transformation<a href="copula-interpretation.html#example-directional-dependence-surface-and-copula-transformation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following illustration uses functions from the <strong>NNS R package</strong> introduced earlier. In particular, <code>Co.LPM()</code> computes co-lower partial moments and <code>LPM.ratio()</code> produces the probability transform used for directional ranking.</p>
 <p>Generate correlated Gaussian observations:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="copula-interpretation.html#cb3-1" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
-<span id="cb3-2"><a href="copula-interpretation.html#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="copula-interpretation.html#cb3-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb3-4"><a href="copula-interpretation.html#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="copula-interpretation.html#cb3-5" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.7</span>,<span class="fl">0.7</span>,<span class="dv">1</span>),<span class="dv">2</span>,<span class="dv">2</span>)</span>
-<span id="cb3-6"><a href="copula-interpretation.html#cb3-6" tabindex="-1"></a>xy <span class="ot">&lt;-</span> <span class="fu">mvrnorm</span>(<span class="dv">100</span>,<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>),Sigma)</span>
-<span id="cb3-7"><a href="copula-interpretation.html#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="copula-interpretation.html#cb3-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> xy[,<span class="dv">1</span>]</span>
-<span id="cb3-9"><a href="copula-interpretation.html#cb3-9" tabindex="-1"></a>y <span class="ot">&lt;-</span> xy[,<span class="dv">2</span>]</span>
-<span id="cb3-10"><a href="copula-interpretation.html#cb3-10" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="copula-interpretation.html#cb3-11" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(x,y)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="copula-interpretation.html#cb4-1" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb4-2"><a href="copula-interpretation.html#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="copula-interpretation.html#cb4-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-4"><a href="copula-interpretation.html#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="copula-interpretation.html#cb4-5" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.7</span>,<span class="fl">0.7</span>,<span class="dv">1</span>),<span class="dv">2</span>,<span class="dv">2</span>)</span>
+<span id="cb4-6"><a href="copula-interpretation.html#cb4-6" tabindex="-1"></a>xy <span class="ot">&lt;-</span> <span class="fu">mvrnorm</span>(<span class="dv">100</span>,<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>),Sigma)</span>
+<span id="cb4-7"><a href="copula-interpretation.html#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="copula-interpretation.html#cb4-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> xy[,<span class="dv">1</span>]</span>
+<span id="cb4-9"><a href="copula-interpretation.html#cb4-9" tabindex="-1"></a>y <span class="ot">&lt;-</span> xy[,<span class="dv">2</span>]</span>
+<span id="cb4-10"><a href="copula-interpretation.html#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="copula-interpretation.html#cb4-11" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(x,y)</span></code></pre></div>
 <p>Plot the <strong>Co-Lower Partial Moment surface</strong> relative to benchmark <span class="math inline">\(t_X=t_Y=0\)</span>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="copula-interpretation.html#cb4-1" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(</span>
-<span id="cb4-2"><a href="copula-interpretation.html#cb4-2" tabindex="-1"></a>  z[,<span class="dv">1</span>],</span>
-<span id="cb4-3"><a href="copula-interpretation.html#cb4-3" tabindex="-1"></a>  z[,<span class="dv">2</span>],</span>
-<span id="cb4-4"><a href="copula-interpretation.html#cb4-4" tabindex="-1"></a>  <span class="fu">Co.LPM</span>(<span class="dv">0</span>,z[,<span class="dv">1</span>],z[,<span class="dv">2</span>],z[,<span class="dv">1</span>],z[,<span class="dv">2</span>]),</span>
-<span id="cb4-5"><a href="copula-interpretation.html#cb4-5" tabindex="-1"></a>  <span class="at">col=</span><span class="st">&quot;red&quot;</span></span>
-<span id="cb4-6"><a href="copula-interpretation.html#cb4-6" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="copula-interpretation.html#cb5-1" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(</span>
+<span id="cb5-2"><a href="copula-interpretation.html#cb5-2" tabindex="-1"></a>  z[,<span class="dv">1</span>],</span>
+<span id="cb5-3"><a href="copula-interpretation.html#cb5-3" tabindex="-1"></a>  z[,<span class="dv">2</span>],</span>
+<span id="cb5-4"><a href="copula-interpretation.html#cb5-4" tabindex="-1"></a>  <span class="fu">Co.LPM</span>(<span class="dv">0</span>,z[,<span class="dv">1</span>],z[,<span class="dv">2</span>],z[,<span class="dv">1</span>],z[,<span class="dv">2</span>]),</span>
+<span id="cb5-5"><a href="copula-interpretation.html#cb5-5" tabindex="-1"></a>  <span class="at">col=</span><span class="st">&quot;red&quot;</span></span>
+<span id="cb5-6"><a href="copula-interpretation.html#cb5-6" tabindex="-1"></a>)</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch11_raw_copula.png" alt="Figure 11.1. Co-LPM surface in original (x,y) space (red), visualizing joint downside structure before copula transformation." />
@@ -1195,17 +1195,17 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 <p>In the call <code>Co.LPM(0, z[,1], z[,2], z[,1], z[,2])</code>, the argument order is <code>(degree, x, y, target.x, target.y)</code>. Setting <code>degree = 0</code> produces the probability-level co-lower partial moment, and reusing <code>z[,1]</code>/<code>z[,2]</code> as both variables and targets evaluates the surface over the full grid of benchmark pairs. The visualization uses <code>rgl::plot3d</code>, which produces an interactive three-dimensional plot.</p>
 <p>This surface represents the magnitude of <strong>joint downside deviations</strong> in the original variable space.</p>
 <p>Next transform the variables into probability space:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="copula-interpretation.html#cb5-1" tabindex="-1"></a>u_x <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,x,x)</span>
-<span id="cb5-2"><a href="copula-interpretation.html#cb5-2" tabindex="-1"></a>u_y <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,y,y)</span>
-<span id="cb5-3"><a href="copula-interpretation.html#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="copula-interpretation.html#cb5-4" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(u_x,u_y)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="copula-interpretation.html#cb6-1" tabindex="-1"></a>u_x <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,x,x)</span>
+<span id="cb6-2"><a href="copula-interpretation.html#cb6-2" tabindex="-1"></a>u_y <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,y,y)</span>
+<span id="cb6-3"><a href="copula-interpretation.html#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="copula-interpretation.html#cb6-4" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(u_x,u_y)</span></code></pre></div>
 <p>Plotting the same directional statistic in probability space gives</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="copula-interpretation.html#cb6-1" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(</span>
-<span id="cb6-2"><a href="copula-interpretation.html#cb6-2" tabindex="-1"></a>  z[,<span class="dv">1</span>],</span>
-<span id="cb6-3"><a href="copula-interpretation.html#cb6-3" tabindex="-1"></a>  z[,<span class="dv">2</span>],</span>
-<span id="cb6-4"><a href="copula-interpretation.html#cb6-4" tabindex="-1"></a>  <span class="fu">Co.LPM</span>(<span class="dv">0</span>,z[,<span class="dv">1</span>],z[,<span class="dv">2</span>],z[,<span class="dv">1</span>],z[,<span class="dv">2</span>]),</span>
-<span id="cb6-5"><a href="copula-interpretation.html#cb6-5" tabindex="-1"></a>  <span class="at">col=</span><span class="st">&quot;blue&quot;</span></span>
-<span id="cb6-6"><a href="copula-interpretation.html#cb6-6" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="copula-interpretation.html#cb7-1" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(</span>
+<span id="cb7-2"><a href="copula-interpretation.html#cb7-2" tabindex="-1"></a>  z[,<span class="dv">1</span>],</span>
+<span id="cb7-3"><a href="copula-interpretation.html#cb7-3" tabindex="-1"></a>  z[,<span class="dv">2</span>],</span>
+<span id="cb7-4"><a href="copula-interpretation.html#cb7-4" tabindex="-1"></a>  <span class="fu">Co.LPM</span>(<span class="dv">0</span>,z[,<span class="dv">1</span>],z[,<span class="dv">2</span>],z[,<span class="dv">1</span>],z[,<span class="dv">2</span>]),</span>
+<span id="cb7-5"><a href="copula-interpretation.html#cb7-5" tabindex="-1"></a>  <span class="at">col=</span><span class="st">&quot;blue&quot;</span></span>
+<span id="cb7-6"><a href="copula-interpretation.html#cb7-6" tabindex="-1"></a>)</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch11_transformed_copula.png" alt="Figure 11.2. Co-LPM surface in copula/probability space [0,1]^2 (blue), showing the same dependence geometry after marginal probability transformation." />
@@ -1219,11 +1219,11 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 \]</span></p>
 <p>changes the coordinate system but preserves the dependence structure.</p>
 <p>For a direct multivariate dependence summary in the package, <code>NNS.copula()</code> can be called on a matrix of variables:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="copula-interpretation.html#cb7-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb7-2"><a href="copula-interpretation.html#cb7-2" tabindex="-1"></a>z3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(x))</span>
-<span id="cb7-3"><a href="copula-interpretation.html#cb7-3" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="copula-interpretation.html#cb7-4" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z3), <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">independence.overlay =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb7-5"><a href="copula-interpretation.html#cb7-5" tabindex="-1"></a><span class="do">## [1] 0.302</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="copula-interpretation.html#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb8-2"><a href="copula-interpretation.html#cb8-2" tabindex="-1"></a>z3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(x))</span>
+<span id="cb8-3"><a href="copula-interpretation.html#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="copula-interpretation.html#cb8-4" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z3), <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">independence.overlay =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-5"><a href="copula-interpretation.html#cb8-5" tabindex="-1"></a><span class="do">## [1] 0.302</span></span></code></pre></div>
 <p>The return value is a single scalar in <span class="math inline">\([0,1]\)</span> for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, <code>continuous = TRUE</code> can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.</p>
 <hr />
 </div>
