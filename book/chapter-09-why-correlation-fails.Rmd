@@ -212,6 +212,55 @@ Var(X)=U_2(\mu;X)+L_2(\mu;X).
 \]
 
 
+---
+
+## Covariance Matrices from Partial-Moment Matrices
+
+For a system of \(n\) variables, directional co-partial moments form matrices.
+
+Define
+
+\[
+CLPM_{ij}=CoLPM_{1,1}(X_i,X_j)
+\]
+
+\[
+CUPM_{ij}=CoUPM_{1,1}(X_i,X_j)
+\]
+
+\[
+DLPM_{ij}=DLPM_{1,1}(X_i,X_j)
+\]
+
+\[
+DUPM_{ij}=DUPM_{1,1}(X_i,X_j)
+\]
+
+Each matrix captures directional co-movement across the variables.
+
+The classical covariance matrix can be written as
+
+\[
+\Sigma = CLPM + CUPM - DLPM - DUPM.
+\]
+
+The diagonal elements satisfy
+
+\[
+\Sigma_{ii}=Var(X_i).
+\]
+
+This follows because when \(i=j\), the divergent partial moments \(DLPM\) and \(DUPM\) vanish, leaving only the lower and upper components.  
+The expression therefore reduces to the variance decomposition derived earlier:
+
+\[
+Var(X_i)=U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
+\]
+
+Like their univariate counterparts, these directional matrices can be **estimated empirically from sample data** using sample co-partial moments.
+
+
+
 ```r
 library(NNS)
 set.seed(123)
@@ -263,54 +312,6 @@ cov(cbind(x, y))
 ## y -0.04372107  0.93506310
 
 ```
-
-
----
-
-## Covariance Matrices from Partial-Moment Matrices
-
-For a system of \(n\) variables, directional co-partial moments form matrices.
-
-Define
-
-\[
-CLPM_{ij}=CoLPM_{1,1}(X_i,X_j)
-\]
-
-\[
-CUPM_{ij}=CoUPM_{1,1}(X_i,X_j)
-\]
-
-\[
-DLPM_{ij}=DLPM_{1,1}(X_i,X_j)
-\]
-
-\[
-DUPM_{ij}=DUPM_{1,1}(X_i,X_j)
-\]
-
-Each matrix captures directional co-movement across the variables.
-
-The classical covariance matrix can be written as
-
-\[
-\Sigma = CLPM + CUPM - DLPM - DUPM.
-\]
-
-The diagonal elements satisfy
-
-\[
-\Sigma_{ii}=Var(X_i).
-\]
-
-This follows because when \(i=j\), the divergent partial moments \(DLPM\) and \(DUPM\) vanish, leaving only the lower and upper components.  
-The expression therefore reduces to the variance decomposition derived earlier:
-
-\[
-Var(X_i)=U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
-\]
-
-Like their univariate counterparts, these directional matrices can be **estimated empirically from sample data** using sample co-partial moments.
 
 ---
 

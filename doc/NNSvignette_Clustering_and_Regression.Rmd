@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Clustering and Regression"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Clustering and Regression}
+  %\VignetteIndexEntry{Getting Started with NNS: 07. Clustering and Regression}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -355,16 +355,16 @@ legend("topleft",
 # References
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
+-  [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
-* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
+-  [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 
-* [Nonparametric Regression Using Clusters](https://doi.org/10.1007/s10614-017-9713-5)
+-  [Nonparametric Regression Using Clusters](https://doi.org/10.1007/s10614-017-9713-5)
 
-* [Clustering and Curve Fitting by Line Segments](https://doi.org/10.2139/ssrn.2861339)
+-  [Clustering and Curve Fitting by Line Segments](https://doi.org/10.2139/ssrn.2861339)
 
-* [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
+-  [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
 
-* [Partitional Estimation Using Partial Moments](https://doi.org/10.2139/ssrn.3592491)
+-  [Partitional Estimation Using Partial Moments](https://doi.org/10.2139/ssrn.3592491)
 
 

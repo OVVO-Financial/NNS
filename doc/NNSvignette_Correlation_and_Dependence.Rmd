@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Correlation and Dependence"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: Correlation and Dependence}
+  %\VignetteIndexEntry{Getting Started with NNS: 03. Correlation and Dependence}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
