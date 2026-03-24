@@ -592,11 +592,6 @@ Bandwidth, in this framework, is not an external input.
 
 It is an emergent property of the directional partition itself.
 
----
-
-## Vignette Figure: Order-Driven Bandwidth Contraction
-
-![Figure 19.1. `NNS.reg` across increasing orders (including `order = \"max\"`), showing shrinking effective cell diameter and increasingly local fit.](../vignettes/images/overview_reg.png)
 
 ---
 
