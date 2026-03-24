@@ -3,7 +3,7 @@ title: 'Getting Started with NNS: Classification'
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 08. Classification}
+  %\VignetteIndexEntry{Getting Started with NNS: Classification}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -163,7 +163,7 @@ mean( b$stack == as.numeric(iris[test.set, 5]) )
 
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
--   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
 -   [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 

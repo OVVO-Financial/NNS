@@ -3,9 +3,14 @@
 #' This function generates a univariate lower partial moment for any degree or target.
 #'
 #' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)
-#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param excess_ret logical; \code{FALSE} (default)
+#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be.
+#'   When \code{excess_ret = FALSE}, this can be a scalar or a vectorized target for the standard partial moment calculation.
+#'   When \code{excess_ret = TRUE}, it is interpreted element-wise as the benchmark/threshold relative to \code{variable}.
+#' @param variable a numeric vector. \link{data.frame} or \link{list} type objects are not permissible.
+#' @param excess_ret logical; \code{FALSE} (default). If \code{TRUE}, switches from the standard vectorized-target
+#'   partial moment to an element-wise excess-deviation calculation. For \code{LPM}, this computes
+#'   \code{pmax(target - variable, 0)} raised to \code{degree} and averaged. In this mode, \code{target}
+#'   must have length 1 or the same length as \code{variable}.
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
@@ -36,9 +41,14 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' This function generates a univariate upper partial moment for any degree or target.
 #'
 #' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be. (Vectorized)#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param variable a numeric vector.   \link{data.frame} or \link{list} type objects are not permissible.
-#' @param excess_ret logical; \code{FALSE} (default)
+#' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be.
+#'   When \code{excess_ret = FALSE}, this can be a scalar or a vectorized target for the standard partial moment calculation.
+#'   When \code{excess_ret = TRUE}, it is interpreted element-wise as the benchmark/threshold relative to \code{variable}.
+#' @param variable a numeric vector. \link{data.frame} or \link{list} type objects are not permissible.
+#' @param excess_ret logical; \code{FALSE} (default). If \code{TRUE}, switches from the standard vectorized-target
+#'   partial moment to an element-wise excess-deviation calculation. For \code{UPM}, this computes
+#'   \code{pmax(variable - target, 0)} raised to \code{degree} and averaged. In this mode, \code{target}
+#'   must have length 1 or the same length as \code{variable}.
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)

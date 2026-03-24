@@ -212,8 +212,6 @@ These are computed from the asymmetric directional dependence matrix of the join
 
 Implementation detail: `asym = TRUE` turns on asymmetric dependence, but **direction is determined by argument order**. In practice, `NNS.dep(x, y, asym = TRUE)` and `NNS.dep(y, x, asym = TRUE)` generally differ; the first quantifies directional dependence of `y` on `x`, while the second quantifies the reverse direction.
 
-![Figure 13.1. Asymmetric `NNS.dep` output (Dependence and Correlation components) illustrating directional non-equivalence under argument reversal.](../vignettes/images/CDFs_2.png)
-
 Define the **excess directional dependence** of \(Y\) on \(X\) as
 
 \[

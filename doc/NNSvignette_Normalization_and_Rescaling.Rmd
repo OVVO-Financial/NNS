@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Normalization and Rescaling"
 author: "Fred Viole"
 output: html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 04. Normalization and Rescaling}
+  %\VignetteIndexEntry{Getting Started with NNS: Normalization and Rescaling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -509,7 +509,7 @@ hist(X_minmax[,2],
 
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
--   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
 -   [Nonlinear Scaling Normalization with NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 

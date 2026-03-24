@@ -141,9 +141,11 @@ NNS.SD.cluster(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, dendrogram = T
 
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-*   [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
-*   [A Note on Stochastic Dominance](https://doi.org/10.2139/ssrn.3002675)
+-   [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
 
-*   [LPM Density Functions for the Computation of the SD Efficient Set](http://dx.doi.org/10.4236/jmf.2016.61012)
+-   [A Note on Stochastic Dominance](https://doi.org/10.2139/ssrn.3002675)
+
+-   [LPM Density Functions for the Computation of the SD Efficient Set](http://dx.doi.org/10.4236/jmf.2016.61012)
 

@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Correlation and Dependence"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 03. Correlation and Dependence}
+  %\VignetteIndexEntry{Getting Started with NNS: Correlation and Dependence}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -148,11 +148,11 @@ NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+-  [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
-* [Nonlinear Correlation and Dependence Using NNS](https://doi.org/10.2139/ssrn.3010414)
+-  [Nonlinear Correlation and Dependence Using NNS](https://doi.org/10.2139/ssrn.3010414)
 
-* [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
+-  [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 
-* [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://doi.org/10.2139/ssrn.2745308)
+-  [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://doi.org/10.2139/ssrn.2745308)
 

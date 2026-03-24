@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Clustering and Regression"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 07. Clustering and Regression}
+  %\VignetteIndexEntry{Getting Started with NNS: Clustering and Regression}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -355,7 +355,7 @@ legend("topleft",
 # References
 If the user is so motivated, detailed arguments further examples are provided within the following:
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
 * [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
 

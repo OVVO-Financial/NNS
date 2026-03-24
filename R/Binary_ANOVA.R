@@ -15,9 +15,11 @@ NNS.ANOVA.bin <- function(control, treatment,
   # Calculate grand statistic if not provided
   if(is.null(mean.of.means)) {
     if(medians) {
-      mean.of.means <- median(c(median(control), median(treatment)))
+      mean.of.means <- (length(control) * median(control) + length(treatment) * median(treatment)) /
+        (length(control) + length(treatment))
     } else {
-      mean.of.means <- mean(c(mean(control), mean(treatment)))
+      mean.of.means <- (length(control) * mean(control) + length(treatment) * mean(treatment)) /
+        (length(control) + length(treatment))
     }
   }
   
@@ -45,19 +47,16 @@ NNS.ANOVA.bin <- function(control, treatment,
   # Calculate partial moment ratios at thresholds
   Upper_25_ratio.1 <- UPM.ratio(1, upper.25.target, control)
   Upper_25_ratio.2 <- UPM.ratio(1, upper.25.target, treatment)
-  Upper_25_ratio <- mean(c(Upper_25_ratio.1, Upper_25_ratio.2))
   
   Lower_25_ratio.1 <- LPM.ratio(1, lower.25.target, control)
   Lower_25_ratio.2 <- LPM.ratio(1, lower.25.target, treatment)
-  Lower_25_ratio <- mean(c(Lower_25_ratio.1, Lower_25_ratio.2))
   
   Upper_125_ratio.1 <- UPM.ratio(1, upper.125.target, control)
   Upper_125_ratio.2 <- UPM.ratio(1, upper.125.target, treatment)
-  Upper_125_ratio <- mean(c(Upper_125_ratio.1, Upper_125_ratio.2))
   
   Lower_125_ratio.1 <- LPM.ratio(1, lower.125.target, control)
   Lower_125_ratio.2 <- LPM.ratio(1, lower.125.target, treatment)
-  Lower_125_ratio <- mean(c(Lower_125_ratio.1, Lower_125_ratio.2))
+  
   
   # Calculate CDF deviations
   MAD.CDF <- min(0.5, max(c(abs(LPM_ratio.1 - 0.5), abs(LPM_ratio.2 - 0.5))))

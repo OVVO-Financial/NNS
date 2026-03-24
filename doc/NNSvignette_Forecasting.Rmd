@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Forecasting"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 09. Forecasting}
+  %\VignetteIndexEntry{Getting Started with NNS: Forecasting}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -270,7 +270,7 @@ The extension to a generalized multivariate instance is provided in the followin
 
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
--   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
 -   [Forecasting Using NNS](https://doi.org/10.2139/ssrn.3382300)
 

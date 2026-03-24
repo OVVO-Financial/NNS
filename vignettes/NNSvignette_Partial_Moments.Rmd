@@ -3,7 +3,7 @@ title: "Getting Started with NNS: Partial Moments"
 author: "Fred Viole"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started with NNS: 02. Partial Moments}
+  %\VignetteIndexEntry{Getting Started with NNS: Partial Moments}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -175,15 +175,15 @@ $$P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$
 # References
 If the user is so motivated, detailed arguments and proofs are provided within the following:
 
-* [Partial Moments as a Unifying Primitive: Distributional Structure, Benchmark-Relative Utility, Adaptive Estimation, and Learned Neural Nonlinearities](https://doi.org/10.2139/ssrn.6249658)
+-   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
-* [Nonlinear Nonparametric Statistics: Using Partial Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+-   [Partial Moments as a Unifying Primitive: Distributional Structure, Benchmark-Relative Utility, Adaptive Estimation, and Learned Neural Nonlinearities](https://doi.org/10.2139/ssrn.6249658)
 
-* [Cumulative Distribution Functions and UPM/LPM Analysis](https://doi.org/10.2139/ssrn.2148482)
+-   [Cumulative Distribution Functions and UPM/LPM Analysis](https://doi.org/10.2139/ssrn.2148482)
 
-* [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
+-   [Continuous CDFs and ANOVA with NNS](https://doi.org/10.2139/ssrn.3007373)
 
-* [f(Newton)](https://doi.org/10.2139/ssrn.2186471)
+-   [f(Newton)](https://doi.org/10.2139/ssrn.2186471)
 
-* [Bayes' Theorem From Partial Moments](https://doi.org/10.2139/ssrn.3457377)
+-   [Bayes' Theorem From Partial Moments](https://doi.org/10.2139/ssrn.3457377)
 
