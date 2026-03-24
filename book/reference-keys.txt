@@ -364,7 +364,6 @@ geometry-depends-on-recursive-splitting-path
 rate-theory-is-less-developed
 high-dimensional-sparsity-remains
 structural-interpretation-within-nns
-vignette-figure-order-driven-bandwidth-contraction
 summary-13
 references-4
 clustering
@@ -633,7 +632,6 @@ finance-1
 operations-and-supply-chains
 energy-and-commodities
 leakage-safe-validation-in-multivariate-and-mixed-frequency-settings
-vignette-figures-multivariate-forecasting-and-nowcasting
 summary-19
 conclusion-and-next-steps
 what-the-framework-has-achieved
