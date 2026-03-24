@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">11.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -440,16 +440,16 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <span><span class="co">## [1] 0.2771257</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Grand_Statistic</span></span>
-<span><span class="co">## [1] 0.1664041</span></span>
+<span><span class="co">## [1] 0.1605767</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Control_CDF</span></span>
-<span><span class="co">## [1] 0.570727</span></span>
+<span><span class="co">## [1] 0.5670595</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Treatment_CDF</span></span>
-<span><span class="co">## [1] 0.441579</span></span>
+<span><span class="co">## [1] 0.4385169</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Certainty</span></span>
-<span><span class="co">## [1] 0.6855102</span></span>
+<span><span class="co">## [1] 0.6905166</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Effect_Size_LB</span></span>
 <span><span class="co">##        2.5% </span></span>
@@ -502,18 +502,18 @@ conditional dependence)</li>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example 1: Nonlinear regression</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">x_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">200</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">y_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">pi</span> <span class="op">*</span> <span class="va">x_train</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span>, sd <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
+<span><span class="va">x_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">y_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="va">pi</span> <span class="op">*</span> <span class="va">x_train</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, sd <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">x_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_train</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">y_train</span>, order <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_train</span>, y <span class="op">=</span> <span class="va">y_train</span>, order <span class="op">=</span> <span class="cn">NULL</span>, point.est <span class="op">=</span> <span class="va">x_test</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_Overview_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 0.9311519</span></span>
+<span><span class="co">## [1] 0.9276761</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $SE</span></span>
-<span><span class="co">## [1] 0.2026925</span></span>
+<span><span class="co">## [1] 0.2015258</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Prediction.Accuracy</span></span>
 <span><span class="co">## NULL</span></span>
@@ -527,81 +527,133 @@ conditional dependence)</li>
 <span><span class="co">## $derivative</span></span>
 <span><span class="co">##     Coefficient X.Lower.Range X.Upper.Range</span></span>
 <span><span class="co">##           &lt;num&gt;         &lt;num&gt;         &lt;num&gt;</span></span>
-<span><span class="co">##  1:   1.2434405   -1.99750091   -1.73845327</span></span>
-<span><span class="co">##  2:   1.0742631   -1.73845327   -1.44607946</span></span>
-<span><span class="co">##  3:  -1.7569574   -1.44607946   -1.15089951</span></span>
-<span><span class="co">##  4:  -2.8177481   -1.15089951   -0.92639490</span></span>
-<span><span class="co">##  5:  -2.7344640   -0.92639490   -0.71353077</span></span>
-<span><span class="co">##  6:  -0.9100977   -0.71353077   -0.48670931</span></span>
-<span><span class="co">##  7:   0.9413676   -0.48670931   -0.26368123</span></span>
-<span><span class="co">##  8:   3.1046330   -0.26368123   -0.07056066</span></span>
-<span><span class="co">##  9:   2.3015348   -0.07056066    0.09052852</span></span>
-<span><span class="co">## 10:   3.1725079    0.09052852    0.25161770</span></span>
-<span><span class="co">## 11:   1.3891814    0.25161770    0.45309215</span></span>
-<span><span class="co">## 12:  -1.2585111    0.45309215    0.66464355</span></span>
-<span><span class="co">## 13:  -2.5182434    0.66464355    1.01253792</span></span>
-<span><span class="co">## 14:  -2.9012891    1.01253792    1.23520889</span></span>
-<span><span class="co">## 15:  -0.7677850    1.23520889    1.53007549</span></span>
-<span><span class="co">## 16:   1.8706437    1.53007549    1.63683301</span></span>
-<span><span class="co">## 17:   2.2033668    1.63683301    1.84911541</span></span>
-<span><span class="co">## 18:   2.5081594    1.84911541    1.97707911</span></span>
+<span><span class="co">##  1:   3.0485215  -1.998138604  -1.934370540</span></span>
+<span><span class="co">##  2:   3.5169373  -1.934370540  -1.804387149</span></span>
+<span><span class="co">##  3:   1.8605016  -1.804387149  -1.692769075</span></span>
+<span><span class="co">##  4:   0.6783073  -1.692769075  -1.590915710</span></span>
+<span><span class="co">##  5:   0.4272848  -1.590915710  -1.465816449</span></span>
+<span><span class="co">##  6:  -0.5144026  -1.465816449  -1.376464546</span></span>
+<span><span class="co">##  7:  -1.9381128  -1.376464546  -1.229726997</span></span>
+<span><span class="co">##  8:  -3.0106084  -1.229726997  -1.110428636</span></span>
+<span><span class="co">##  9:  -2.5210796  -1.110428636  -0.976623793</span></span>
+<span><span class="co">## 10:  -3.7347021  -0.976623793  -0.870193992</span></span>
+<span><span class="co">## 11:  -2.0861598  -0.870193992  -0.754706576</span></span>
+<span><span class="co">## 12:  -2.1796417  -0.754706576  -0.636846031</span></span>
+<span><span class="co">## 13:  -0.9300308  -0.636846031  -0.533099369</span></span>
+<span><span class="co">## 14:   1.0359249  -0.533099369  -0.417818767</span></span>
+<span><span class="co">## 15:   0.9115004  -0.417818767  -0.323764665</span></span>
+<span><span class="co">## 16:   2.3250859  -0.323764665  -0.184330858</span></span>
+<span><span class="co">## 17:   3.0769180  -0.184330858  -0.132632209</span></span>
+<span><span class="co">## 18:   3.3162510  -0.132632209  -0.080933560</span></span>
+<span><span class="co">## 19:   3.5323950  -0.080933560  -0.004108338</span></span>
+<span><span class="co">## 20:   2.1862481  -0.004108338   0.121863569</span></span>
+<span><span class="co">## 21:   3.4805229   0.121863569   0.216987038</span></span>
+<span><span class="co">## 22:   1.8001452   0.216987038   0.336388996</span></span>
+<span><span class="co">## 23:   0.2295375   0.336388996   0.516729182</span></span>
+<span><span class="co">## 24:  -0.5625172   0.516729182   0.668479078</span></span>
+<span><span class="co">## 25:  -2.5532272   0.668479078   0.830264570</span></span>
+<span><span class="co">## 26:  -2.4765129   0.830264570   0.988320504</span></span>
+<span><span class="co">## 27:  -3.1248612   0.988320504   1.083380900</span></span>
+<span><span class="co">## 28:  -2.9622550   1.083380900   1.218812429</span></span>
+<span><span class="co">## 29:  -1.5047059   1.218812429   1.279773569</span></span>
+<span><span class="co">## 30:  -1.5723118   1.279773569   1.445979675</span></span>
+<span><span class="co">## 31:   0.1804598   1.445979675   1.571628940</span></span>
+<span><span class="co">## 32:   0.8726461   1.571628940   1.689536565</span></span>
+<span><span class="co">## 33:   3.4198918   1.689536565   1.860999223</span></span>
+<span><span class="co">## 34:   1.5206901   1.860999223   1.997618112</span></span>
+<span><span class="co">##     Coefficient X.Lower.Range X.Upper.Range</span></span>
+<span><span class="co">##           &lt;num&gt;         &lt;num&gt;         &lt;num&gt;</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
-<span><span class="co">## NULL</span></span>
+<span><span class="co">##   [1]  0.01571202  0.10442684  0.23470933  0.37680781  0.51890629  0.65039140</span></span>
+<span><span class="co">##   [7]  0.72556318  0.80073496  0.85698998  0.88439634  0.91180269  0.93033285</span></span>
+<span><span class="co">##  [13]  0.94759688  0.96486091  0.95248720  0.93170326  0.87827479  0.79996720</span></span>
+<span><span class="co">##  [19]  0.72165961  0.64335202  0.52449573  0.40285499  0.28121424  0.17901835</span></span>
+<span><span class="co">##  [25]  0.07715655 -0.02470525 -0.15949123 -0.31038828 -0.45880078 -0.54309006</span></span>
+<span><span class="co">##  [31] -0.62737935 -0.71234468 -0.80041101 -0.88847734 -0.96331853 -1.00089554</span></span>
+<span><span class="co">##  [37] -1.03847254 -1.02090671 -0.97905116 -0.93719561 -0.89956805 -0.86273975</span></span>
+<span><span class="co">##  [43] -0.79660165 -0.70265879 -0.60871593 -0.51288396 -0.38856404 -0.25667590</span></span>
+<span><span class="co">##  [49] -0.11829230  0.02443074  0.13442845  0.22276171  0.31109496  0.42473203</span></span>
+<span><span class="co">##  [55]  0.56535922  0.69718932  0.76992246  0.84265560  0.90432326  0.91359751</span></span>
+<span><span class="co">##  [61]  0.92287175  0.93214599  0.94142023  0.92794242  0.90521445  0.88248648</span></span>
+<span><span class="co">##  [67]  0.85975852  0.76020581  0.65704511  0.55388442  0.45072372  0.35051056</span></span>
+<span><span class="co">##  [73]  0.25044944  0.15038831  0.04930377 -0.07695325 -0.20321027 -0.32495818</span></span>
+<span><span class="co">##  [79] -0.44464525 -0.56433232 -0.66432673 -0.72512293 -0.78817431 -0.85170206</span></span>
+<span><span class="co">##  [85] -0.91522981 -0.97875756 -0.99186193 -0.98457062 -0.97727932 -0.95314667</span></span>
+<span><span class="co">##  [91] -0.91788824 -0.88262981 -0.77697785 -0.63880041 -0.50062296 -0.36244551</span></span>
+<span><span class="co">##  [97] -0.25805231 -0.19661029 -0.13516826 -0.07526941</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $pred.int</span></span>
 <span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $regression.points</span></span>
-<span><span class="co">##               x           y</span></span>
-<span><span class="co">##           &lt;num&gt;       &lt;num&gt;</span></span>
-<span><span class="co">##  1: -1.99750091  0.30256920</span></span>
-<span><span class="co">##  2: -1.73845327  0.62467954</span></span>
-<span><span class="co">##  3: -1.44607946  0.93876593</span></span>
-<span><span class="co">##  4: -1.15089951  0.42014733</span></span>
-<span><span class="co">##  5: -0.92639490 -0.21245010</span></span>
-<span><span class="co">##  6: -0.71353077 -0.79451941</span></span>
-<span><span class="co">##  7: -0.48670931 -1.00094909</span></span>
-<span><span class="co">##  8: -0.26368123 -0.79099767</span></span>
-<span><span class="co">##  9: -0.07056066 -0.19142920</span></span>
-<span><span class="co">## 10:  0.09052852  0.17932316</span></span>
-<span><span class="co">## 11:  0.25161770  0.69037987</span></span>
-<span><span class="co">## 12:  0.45309215  0.97026443</span></span>
-<span><span class="co">## 13:  0.66464355  0.70402465</span></span>
-<span><span class="co">## 14:  1.01253792 -0.17205805</span></span>
-<span><span class="co">## 15:  1.23520889 -0.81809091</span></span>
-<span><span class="co">## 16:  1.53007549 -1.04448505</span></span>
-<span><span class="co">## 17:  1.63683301 -0.84477976</span></span>
-<span><span class="co">## 18:  1.84911541 -0.37704378</span></span>
-<span><span class="co">## 19:  1.97707911 -0.05609043</span></span>
+<span><span class="co">##                x           y</span></span>
+<span><span class="co">##            &lt;num&gt;       &lt;num&gt;</span></span>
+<span><span class="co">##  1: -1.998138604 -0.01307124</span></span>
+<span><span class="co">##  2: -1.934370540  0.18132707</span></span>
+<span><span class="co">##  3: -1.804387149  0.63847051</span></span>
+<span><span class="co">##  4: -1.692769075  0.84613612</span></span>
+<span><span class="co">##  5: -1.590915710  0.91522399</span></span>
+<span><span class="co">##  6: -1.465816449  0.96867700</span></span>
+<span><span class="co">##  7: -1.376464546  0.92271416</span></span>
+<span><span class="co">##  8: -1.229726997  0.63832023</span></span>
+<span><span class="co">##  9: -1.110428636  0.27915958</span></span>
+<span><span class="co">## 10: -0.976623793 -0.05817308</span></span>
+<span><span class="co">## 11: -0.870193992 -0.45565668</span></span>
+<span><span class="co">## 12: -0.754706576 -0.69658188</span></span>
+<span><span class="co">## 13: -0.636846031 -0.95347564</span></span>
+<span><span class="co">## 14: -0.533099369 -1.04996323</span></span>
+<span><span class="co">## 15: -0.417818767 -0.93054118</span></span>
+<span><span class="co">## 16: -0.323764665 -0.84481083</span></span>
+<span><span class="co">## 17: -0.184330858 -0.52061525</span></span>
+<span><span class="co">## 18: -0.132632209 -0.36154275</span></span>
+<span><span class="co">## 19: -0.080933560 -0.19009705</span></span>
+<span><span class="co">## 20: -0.004108338  0.08127998</span></span>
+<span><span class="co">## 21:  0.121863569  0.35668582</span></span>
+<span><span class="co">## 22:  0.216987038  0.68776523</span></span>
+<span><span class="co">## 23:  0.336388996  0.90270609</span></span>
+<span><span class="co">## 24:  0.516729182  0.94410093</span></span>
+<span><span class="co">## 25:  0.668479078  0.85873901</span></span>
+<span><span class="co">## 26:  0.830264570  0.44566388</span></span>
+<span><span class="co">## 27:  0.988320504  0.05423632</span></span>
+<span><span class="co">## 28:  1.083380900 -0.24281423</span></span>
+<span><span class="co">## 29:  1.218812429 -0.64399694</span></span>
+<span><span class="co">## 30:  1.279773569 -0.73572553</span></span>
+<span><span class="co">## 31:  1.445979675 -0.99705336</span></span>
+<span><span class="co">## 32:  1.571628940 -0.97437872</span></span>
+<span><span class="co">## 33:  1.689536565 -0.87148709</span></span>
+<span><span class="co">## 34:  1.860999223 -0.28510334</span></span>
+<span><span class="co">## 35:  1.997618112 -0.07734835</span></span>
+<span><span class="co">##                x           y</span></span>
+<span><span class="co">##            &lt;num&gt;       &lt;num&gt;</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Fitted.xy</span></span>
-<span><span class="co">##             x.x          y      y.hat NNS.ID   gradient    residuals</span></span>
-<span><span class="co">##           &lt;num&gt;      &lt;num&gt;      &lt;num&gt; &lt;char&gt;      &lt;num&gt;        &lt;num&gt;</span></span>
-<span><span class="co">##   1: -0.8496899 -0.5969396 -0.4221971 q11222 -2.7344640  0.174742446</span></span>
-<span><span class="co">##   2:  1.1532205 -0.4116052 -0.5802190 q21222 -2.9012891 -0.168613758</span></span>
-<span><span class="co">##   3: -0.3640923 -0.9595645 -0.8855214 q12122  0.9413676  0.074043066</span></span>
-<span><span class="co">##   4:  1.5320696 -1.0644376 -1.0407547 q22122  1.8706437  0.023682815</span></span>
-<span><span class="co">##   5:  1.7618691 -0.8705785 -0.5692793 q22212  2.2033668  0.301299171</span></span>
-<span><span class="co">##  ---                                                                </span></span>
-<span><span class="co">## 196: -0.1338692 -0.3949338 -0.3879789 q12221  3.1046330  0.006954855</span></span>
-<span><span class="co">## 197: -0.3726696 -0.5476828 -0.8935958 q12122  0.9413676 -0.345913048</span></span>
-<span><span class="co">## 198:  0.6369213  0.6387223  0.7389134 q21211 -1.2585111  0.100191135</span></span>
-<span><span class="co">## 199: -1.3906135  0.9457286  0.8413147 q11122 -1.7569574 -0.104413995</span></span>
-<span><span class="co">## 200:  0.2914682  1.0429566  0.7457395 q21112  1.3891814 -0.297217109</span></span>
-<span><span class="co">##      standard.errors</span></span>
-<span><span class="co">##                &lt;num&gt;</span></span>
-<span><span class="co">##   1:       0.2830616</span></span>
-<span><span class="co">##   2:       0.1682392</span></span>
-<span><span class="co">##   3:       0.2096766</span></span>
-<span><span class="co">##   4:       0.1380874</span></span>
-<span><span class="co">##   5:       0.2328510</span></span>
-<span><span class="co">##  ---                </span></span>
-<span><span class="co">## 196:       0.1281159</span></span>
-<span><span class="co">## 197:       0.2096766</span></span>
-<span><span class="co">## 198:       0.2474949</span></span>
-<span><span class="co">## 199:       0.2329677</span></span>
-<span><span class="co">## 200:       0.2435048</span></span></code></pre>
+<span><span class="co">##                x          y      y.hat  NNS.ID   gradient    residuals</span></span>
+<span><span class="co">##            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;  &lt;char&gt;      &lt;num&gt;        &lt;num&gt;</span></span>
+<span><span class="co">##    1: -0.8496899 -0.5752368 -0.4984314 q121122 -2.0861598  0.076805376</span></span>
+<span><span class="co">##    2:  1.1532205 -0.6617217 -0.4496971 q221122 -2.9622550  0.212024652</span></span>
+<span><span class="co">##    3: -0.3640923 -0.7048691 -0.8815695 q122122  0.9115004 -0.176700402</span></span>
+<span><span class="co">##    4:  1.5320696 -0.8447168 -0.9815176 q222121  0.1804598 -0.136800802</span></span>
+<span><span class="co">##    5:  1.7618691 -0.9820881 -0.6241175 q222212  3.4198918  0.357970569</span></span>
+<span><span class="co">##   ---                                                                 </span></span>
+<span><span class="co">##  996:  1.3184955 -0.7988901 -0.7966085 q221222 -1.5723118  0.002281548</span></span>
+<span><span class="co">##  997:  0.5684553  1.1554781  0.9150041 q212122 -0.5625172 -0.240473993</span></span>
+<span><span class="co">##  998: -0.4340050 -0.7748325 -0.9473089 q122121  1.0359249 -0.172476359</span></span>
+<span><span class="co">##  999:  0.8383194  0.7041960  0.4257159 q212222 -2.4765129 -0.278480031</span></span>
+<span><span class="co">## 1000: -1.5647037  0.9467853  0.9264240 q111222  0.4272848 -0.020361366</span></span>
+<span><span class="co">##       standard.errors</span></span>
+<span><span class="co">##                 &lt;num&gt;</span></span>
+<span><span class="co">##    1:       0.1769692</span></span>
+<span><span class="co">##    2:       0.1783713</span></span>
+<span><span class="co">##    3:       0.1905081</span></span>
+<span><span class="co">##    4:       0.2044300</span></span>
+<span><span class="co">##    5:       0.2636784</span></span>
+<span><span class="co">##   ---                </span></span>
+<span><span class="co">##  996:       0.1971693</span></span>
+<span><span class="co">##  997:       0.2137362</span></span>
+<span><span class="co">##  998:       0.1831159</span></span>
+<span><span class="co">##  999:       0.2108312</span></span>
+<span><span class="co">## 1000:       0.2078031</span></span></code></pre>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
 <span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a> </span>
@@ -662,46 +714,42 @@ drivers.</p>
 <span><span class="va">seasonal_period</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.seas.html">NNS.seas</a></span><span class="op">(</span><span class="va">z</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seasonal_period</span><span class="op">$</span><span class="va">all.periods</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
-<span><span class="co">## 1     99                0.5122054                      1.168502e+17</span></span>
-<span><span class="co">## 2    147                0.5256021                      1.168502e+17</span></span>
-<span><span class="co">## 3    100                0.5598477                      1.168502e+17</span></span>
-<span><span class="co">## 4    146                0.5618687                      1.168502e+17</span></span>
-<span><span class="co">## 5    199                0.5766158                      1.168502e+17</span></span>
-<span><span class="co">## 6     98                0.5801409                      1.168502e+17</span></span></code></pre>
+<span><span class="co">## 1    200                0.4267885                      8.540159e+16</span></span>
+<span><span class="co">## 2     96                0.4425880                      8.540159e+16</span></span>
+<span><span class="co">## 3     49                0.4615546                      8.540159e+16</span></span>
+<span><span class="co">## 4    198                0.4812956                      8.540159e+16</span></span>
+<span><span class="co">## 5    199                0.4885608                      8.540159e+16</span></span>
+<span><span class="co">## 6    146                0.4901054                      8.540159e+16</span></span></code></pre>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate seasonal periods</span></span>
-<span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">z</span>, h<span class="op">=</span><span class="fl">48</span>, seasonal.factor <span class="op">=</span> <span class="va">seasonal_period</span><span class="op">$</span><span class="va">periods</span>, plot <span class="op">=</span> <span class="cn">TRUE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">z</span>, h <span class="op">=</span> <span class="fl">48</span>, seasonal.factor <span class="op">=</span> <span class="va">seasonal_period</span><span class="op">$</span><span class="va">periods</span>, plot <span class="op">=</span> <span class="cn">TRUE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "CURRNET METHOD: lin"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 52 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.449145584053097"</span></span>
-<span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 52, 49 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.364719193840196"</span></span>
-<span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 52, 49, 50 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.303033712560494"</span></span>
-<span><span class="co">## [1] "BEST method = 'lin', seasonal.factor = c( 52, 49, 50 )"</span></span>
-<span><span class="co">## [1] "BEST lin OBJECTIVE FUNCTION = 0.303033712560494"</span></span>
+<span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 51 ) ...)"</span></span>
+<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.398327414917885"</span></span>
+<span><span class="co">## [1] "BEST method = 'lin', seasonal.factor = c( 51 )"</span></span>
+<span><span class="co">## [1] "BEST lin OBJECTIVE FUNCTION = 0.398327414917885"</span></span>
 <span><span class="co">## [1] "CURRNET METHOD: nonlin"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span><span class="co">## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 52, 49, 50 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 1.58350102101444"</span></span>
-<span><span class="co">## [1] "BEST method = 'nonlin' PATH MEMBER = c( 52, 49, 50 )"</span></span>
-<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 1.58350102101444"</span></span>
+<span><span class="co">## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 51 ) ...)"</span></span>
+<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.75408671013046"</span></span>
+<span><span class="co">## [1] "BEST method = 'nonlin' PATH MEMBER = c( 51 )"</span></span>
+<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.75408671013046"</span></span>
 <span><span class="co">## [1] "CURRNET METHOD: both"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span><span class="co">## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 52, 49, 50 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.44738816518873"</span></span>
-<span><span class="co">## [1] "BEST method = 'both' PATH MEMBER = c( 52, 49, 50 )"</span></span>
-<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.44738816518873"</span></span></code></pre>
+<span><span class="co">## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 51 ) ...)"</span></span>
+<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.778172239627562"</span></span>
+<span><span class="co">## [1] "BEST method = 'both' PATH MEMBER = c( 51 )"</span></span>
+<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.778172239627562"</span></span></code></pre>
 <p><img src="NNSvignette_Overview_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $periods</span></span>
-<span><span class="co">## [1] 52 49 50</span></span>
+<span><span class="co">## [1] 51</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $weights</span></span>
 <span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $obj.fn</span></span>
-<span><span class="co">## [1] 0.3030337</span></span>
+<span><span class="co">## [1] 0.3983274</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $method</span></span>
 <span><span class="co">## [1] "lin"</span></span>
@@ -713,55 +761,61 @@ drivers.</p>
 <span><span class="co">## [1] FALSE</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $bias.shift</span></span>
-<span><span class="co">## [1] 0.1079018</span></span>
+<span><span class="co">## [1] 0.01738357</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $errors</span></span>
-<span><span class="co">##  [1]  0.06841911 -0.23650978  0.23306891 -0.31474170 -0.16347937  0.56078801</span></span>
-<span><span class="co">##  [7] -0.19340157 -0.54788961 -0.34463351 -0.04971714  0.81131522 -1.04034772</span></span>
-<span><span class="co">## [13] -0.01124973  0.18532001  0.42228850  0.77875534  0.21204992  0.75989291</span></span>
-<span><span class="co">## [19]  0.03648050 -0.12410190  0.78169808 -0.37190642  0.04673305  0.22143951</span></span>
-<span><span class="co">## [25]  0.21784535 -0.36207177  0.06303110  0.27494889  0.61355674 -0.36588877</span></span>
-<span><span class="co">## [31] -0.53670212 -0.59710016 -0.33562214  0.52319489 -0.28558752 -0.06318330</span></span>
-<span><span class="co">## [37]  0.46174079  0.85423779 -0.17957169  0.88745345 -0.22575406 -0.65533631</span></span>
-<span><span class="co">## [43] -0.50769155 -0.18710610 -0.19702948 -0.61676209 -0.64456532 -0.60764796</span></span>
-<span><span class="co">## [49]  0.39155766 -0.99138140 -0.58599672 -0.41332955 -0.35110299 -0.31785231</span></span>
-<span><span class="co">## [55] -0.33368188 -0.79321483 -0.67548303 -0.29994123 -1.40951519 -0.23496159</span></span>
-<span><span class="co">## [61] -0.11326961  0.93761236 -1.12638974  0.56134385 -0.82647659 -0.15698867</span></span>
-<span><span class="co">## [67] -0.66092883 -0.23941287 -0.11793511 -0.13131032  0.23980082  0.11145491</span></span>
-<span><span class="co">## [73] -0.29324462  0.20996125  1.18368703  0.39817389  0.11233666  0.18104853</span></span>
-<span><span class="co">## [79] -0.34704039  1.00778283 -0.12855809 -0.44890273 -0.16127326  0.23878907</span></span>
-<span><span class="co">## [85]  0.08958084 -0.42127816  0.83025782  0.21535622  0.18499525  0.55580864</span></span>
-<span><span class="co">## [91] -0.63033063 -1.18279040  0.01593275 -0.38943895 -0.73303803  0.24461725</span></span>
+<span><span class="co">##  [1] -0.4754897523 -0.4609730867 -0.3018876142  0.0439513384 -0.1128600832</span></span>
+<span><span class="co">##  [6]  0.9193835234  0.0160010547 -0.7516578805 -0.8195384972 -0.1274709629</span></span>
+<span><span class="co">## [11] -0.0093477175  0.1480424491  0.0345888303  0.0009331215 -0.2819915138</span></span>
+<span><span class="co">## [16] -0.3474821395 -1.2543849202 -0.5442948705 -0.0049610072 -0.4702036102</span></span>
+<span><span class="co">## [21]  0.1846614137  1.6541950586 -0.2046795992  0.9691745476  1.1460606178</span></span>
+<span><span class="co">## [26] -0.5141738440 -1.3562787956  0.3853973272 -0.3364881552 -0.5604890777</span></span>
+<span><span class="co">## [31] -0.3175309175 -0.1677932189 -0.1511705981  0.4541183441 -0.1377055180</span></span>
+<span><span class="co">## [36]  0.4279932502  1.3576081283 -0.0645315976  1.1430476887  0.1399600873</span></span>
+<span><span class="co">## [41]  0.0874395694 -0.3703494531  0.3046994756  0.2057574931 -0.7602832912</span></span>
+<span><span class="co">## [46]  0.6902933417  0.2238850985 -0.2775974238 -0.8250763050  0.5817787408</span></span>
+<span><span class="co">## [51] -0.8733350647  0.2906911996  0.1863210948 -0.2484232855  0.1444232735</span></span>
+<span><span class="co">## [56]  1.1655644133  0.0821221969 -0.2813315730 -0.7959981329 -0.3601165470</span></span>
+<span><span class="co">## [61] -0.4617740020 -0.0593491905  0.0143389607  0.1016580238  0.0300275332</span></span>
+<span><span class="co">## [66] -1.7237406556 -0.0930802461 -0.9348574200 -0.7189682901  0.0700766333</span></span>
+<span><span class="co">## [71] -0.3547205444  0.2333233909  0.6840012123 -0.0779445509  0.8409902584</span></span>
+<span><span class="co">## [76]  0.0130711684  0.8074727217 -1.1462424589  0.0926963526 -0.4674150054</span></span>
+<span><span class="co">## [81]  0.1308248298 -0.6493713604  0.0713668583  0.4889233461  0.4293197750</span></span>
+<span><span class="co">## [86] -0.4397639878  0.4261287370  0.7556075116  0.6016698079 -0.1086690282</span></span>
+<span><span class="co">## [91]  0.6426872057 -0.4175612763  0.0250816728  0.9344147185  0.5444153587</span></span>
+<span><span class="co">## [96] -0.8746369897</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $results</span></span>
-<span><span class="co">##  [1] -0.48668691 -1.12897072 -1.19746701 -1.08366883 -1.17430589 -1.09503747</span></span>
-<span><span class="co">##  [7] -1.27716033 -1.53097703 -1.12872199 -1.25223633 -1.03806114 -1.03996796</span></span>
-<span><span class="co">## [13] -0.86012134 -0.85334076 -1.29205205 -0.41549038 -0.43645317 -0.70613650</span></span>
-<span><span class="co">## [19] -0.12979825 -0.20838439 -0.43674783  0.04939343  0.21128735  0.41848130</span></span>
-<span><span class="co">## [25]  0.58665881  0.65204679  1.11856457  0.81855013  1.33909393  1.17188036</span></span>
-<span><span class="co">## [31]  1.53195554  1.09195702  1.71916462  1.49064664  1.62340003  1.71600851</span></span>
-<span><span class="co">## [37]  1.54806110  1.34095102  1.16533567  1.08567248  0.73267472  0.82949748</span></span>
-<span><span class="co">## [43]  0.65297434  0.09082443  0.55476313  0.53988329 -0.09198186 -0.18380226</span></span>
+<span><span class="co">##  [1] -0.495145166 -0.629911085 -0.423647703 -1.217211533 -1.313660334</span></span>
+<span><span class="co">##  [6] -1.507558621 -1.512809568 -1.244102492 -0.765300445 -2.402307464</span></span>
+<span><span class="co">## [11] -1.325990243 -0.928756118 -1.819067479 -0.855732188 -1.152690586</span></span>
+<span><span class="co">## [16] -1.039006594 -0.562011496 -1.103503510 -0.685097085 -0.727417601</span></span>
+<span><span class="co">## [21] -0.044018500 -0.030435409  0.002633325 -0.314902491  0.232587264</span></span>
+<span><span class="co">## [26]  1.030889038  0.556722546  0.680351082  1.101193382  0.941245213</span></span>
+<span><span class="co">## [31]  1.648626820  1.225992916  1.806473740  0.964372963  1.627354696</span></span>
+<span><span class="co">## [36]  0.460925955  1.318674310  1.692295367  0.854538440  0.768654797</span></span>
+<span><span class="co">## [41]  0.739228654  1.582319086  0.402156303  0.902802567  0.718513288</span></span>
+<span><span class="co">## [46]  0.086635865  0.193748286  0.283357285</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $lower.pred.int</span></span>
-<span><span class="co">##  [1] -1.51339152 -2.15567532 -2.22417162 -2.11037344 -2.20101050 -2.12174208</span></span>
-<span><span class="co">##  [7] -2.30386494 -2.55768164 -2.15542660 -2.27894094 -2.06476575 -2.06667256</span></span>
-<span><span class="co">## [13] -1.88682595 -1.88004537 -2.31875666 -1.44219499 -1.46315778 -1.73284111</span></span>
-<span><span class="co">## [19] -1.15650286 -1.23508900 -1.46345244 -0.97731118 -0.81541725 -0.60822331</span></span>
-<span><span class="co">## [25] -0.44004579 -0.37465782  0.09185996 -0.20815448  0.31238932  0.14517575</span></span>
-<span><span class="co">## [31]  0.50525093  0.06525242  0.69246002  0.46394203  0.59669542  0.68930391</span></span>
-<span><span class="co">## [37]  0.52135649  0.31424642  0.13863106  0.05896787 -0.29402989 -0.19720713</span></span>
-<span><span class="co">## [43] -0.37373026 -0.93588018 -0.47194148 -0.48682132 -1.11868647 -1.21050687</span></span>
+<span><span class="co">##  [1] -1.67077922 -1.80554514 -1.59928176 -2.39284559 -2.48929439 -2.68319268</span></span>
+<span><span class="co">##  [7] -2.68844363 -2.41973655 -1.94093450 -3.57794152 -2.50162430 -2.10439018</span></span>
+<span><span class="co">## [13] -2.99470154 -2.03136624 -2.32832464 -2.21464065 -1.73764555 -2.27913757</span></span>
+<span><span class="co">## [19] -1.86073114 -1.90305166 -1.21965256 -1.20606947 -1.17300073 -1.49053655</span></span>
+<span><span class="co">## [25] -0.94304679 -0.14474502 -0.61891151 -0.49528298 -0.07444068 -0.23438884</span></span>
+<span><span class="co">## [31]  0.47299276  0.05035886  0.63083968 -0.21126109  0.45172064 -0.71470810</span></span>
+<span><span class="co">## [37]  0.14304025  0.51666131 -0.32109562 -0.40697926 -0.43640540  0.40668503</span></span>
+<span><span class="co">## [43] -0.77347775 -0.27283149 -0.45712077 -1.08899819 -0.98188577 -0.89227677</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $upper.pred.int</span></span>
-<span><span class="co">##  [1]  0.54001770 -0.10226611 -0.17076240 -0.05696423 -0.14760128 -0.06833286</span></span>
-<span><span class="co">##  [7] -0.25045572 -0.50427242 -0.10201738 -0.22553172 -0.01135653 -0.01326335</span></span>
-<span><span class="co">## [13]  0.16658327  0.17336385 -0.26534744  0.61121423  0.59025144  0.32056811</span></span>
-<span><span class="co">## [19]  0.89690636  0.81832022  0.58995678  1.07609804  1.23799196  1.44518591</span></span>
-<span><span class="co">## [25]  1.61336342  1.67875140  2.14526918  1.84525474  2.36579853  2.19858497</span></span>
-<span><span class="co">## [31]  2.55866015  2.11866163  2.74586923  2.51735125  2.65010464  2.74271312</span></span>
-<span><span class="co">## [37]  2.57476571  2.36765563  2.19204028  2.11237709  1.75937933  1.85620209</span></span>
-<span><span class="co">## [43]  1.67967895  1.11752903  1.58146774  1.56658789  0.93472275  0.84290235</span></span></code></pre>
+<span><span class="co">##  [1]  0.68048889  0.54572297  0.75198635 -0.04157748 -0.13802628 -0.33192456</span></span>
+<span><span class="co">##  [7] -0.33717551 -0.06846843  0.41033361 -1.22667341 -0.15035619  0.24687794</span></span>
+<span><span class="co">## [13] -0.64343342  0.31990187  0.02294347  0.13662746  0.61362256  0.07213055</span></span>
+<span><span class="co">## [19]  0.49053697  0.44821646  1.13161556  1.14519865  1.17826738  0.86073157</span></span>
+<span><span class="co">## [25]  1.40822132  2.20652310  1.73235660  1.85598514  2.27682744  2.11687927</span></span>
+<span><span class="co">## [31]  2.82426088  2.40162697  2.98210780  2.14000702  2.80298875  1.63656001</span></span>
+<span><span class="co">## [37]  2.49430837  2.86792942  2.03017250  1.94428885  1.91486271  2.75795314</span></span>
+<span><span class="co">## [43]  1.57779036  2.07843662  1.89414735  1.26226992  1.36938234  1.45899134</span></span></code></pre>
 <p><strong>Notes.</strong> NNS seasonality uses coefficient of variation
 instead of ACF/PACFs, and NNS ARMA blends multiple seasonal periods into
 the linear or nonlinear regression forecasts.</p>
@@ -798,12 +852,12 @@ the linear or nonlinear regression forecasts.</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">$</span><span class="va">`rho = 0`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5</span></span>
-<span><span class="co">## [1,]   -6.097304   -0.246557   -4.427608   -2.153337   -5.050326</span></span>
-<span><span class="co">## [2,]   -6.582158    0.343863   -2.445919   -3.175586   -4.777579</span></span>
-<span><span class="co">## [3,]   -4.393280    0.548543   -1.822378   -2.637809   -4.708166</span></span>
-<span><span class="co">## [4,]   -6.134514   -0.584076   -6.920453   -1.800864   -4.861689</span></span>
-<span><span class="co">## [5,]   -5.270871    1.095869   -1.964841   -1.204533   -1.626527</span></span>
-<span><span class="co">## [6,]   -5.627466    1.128039   -3.351027   -2.736647   -0.587572</span></span></code></pre>
+<span><span class="co">## [1,]    8.561720   11.097841   12.140974    3.478574    16.25845</span></span>
+<span><span class="co">## [2,]    4.989649    9.142348    6.298598    2.573488    11.23749</span></span>
+<span><span class="co">## [3,]    5.489892   11.635826    9.151404    4.146175    13.61840</span></span>
+<span><span class="co">## [4,]    7.175210   13.194315   11.614209    5.906763    19.23707</span></span>
+<span><span class="co">## [5,]    8.443500   12.157572   13.263425    4.369562    13.40513</span></span>
+<span><span class="co">## [6,]    7.386515   10.979258   11.705842    2.410838    15.31133</span></span></code></pre>
 <hr>
 </div>
 </div>
@@ -839,11 +893,11 @@ estimators.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.cluster.html">NNS.SD.cluster</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Clusters</span></span>
 <span><span class="co">## $Clusters$Cluster_1</span></span>
-<span><span class="co">## [1] "C" "B" "A"</span></span></code></pre>
+<span><span class="co">## [1] "C" "A" "B"</span></span></code></pre>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.efficient.set.html">NNS.SD.efficient.set</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Checking 1 of 2Checking 2 of 2</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "C" "B" "A"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "C" "A" "B"</span></span></code></pre>
 <hr>
 </div>
 <div class="section level2">
@@ -888,6 +942,14 @@ yields the variance decomposition identity in Section 1.</p>
 <div class="section level2">
 <h2 id="appendix-b-quick-reference-grouped-by-topic">Appendix B — Quick Reference (Grouped by Topic)<a class="anchor" aria-label="anchor" href="#appendix-b-quick-reference-grouped-by-topic"></a>
 </h2>
+<div class="section level3">
+<h3 id="overall-theory">Overall Theory<a class="anchor" aria-label="anchor" href="#overall-theory"></a>
+</h3>
+<ul>
+<li><a href="https://ovvo-financial.github.io/NNS/book/" class="external-link">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></li>
+</ul>
+</div>
 <div class="section level3">
 <h3 id="partial-moments-ratios">1. Partial Moments &amp; Ratios<a class="anchor" aria-label="anchor" href="#partial-moments-ratios"></a>
 </h3>
@@ -966,7 +1028,7 @@ target moments.</li>
 <code>NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))</code>
 — risk-neutral or min–max rescaling.</li>
 </ul>
-<p>See NNS Vignette: <a href="https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Overview.html" class="external-link">Getting
+<p>See NNS Vignette: <a href="https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Normalization_and_Rescaling.html" class="external-link">Getting
 Started with NNS: Normalization and Rescaling</a></p>
 </div>
 <div class="section level3">

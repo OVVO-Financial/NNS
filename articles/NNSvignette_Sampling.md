@@ -332,6 +332,9 @@ ensemble6  1.3984978  1.1881374 -0.5295386  1.5326055
 If the user is so motivated, detailed arguments and proofs are provided
 within the following:
 
+- [Nonlinear Nonparametric Statistics: Using Partial
+  Moments](https://ovvo-financial.github.io/NNS/book/)
+
 - [Continuous CDFs and ANOVA with
   NNS](https://doi.org/10.2139/ssrn.3007373)
 

@@ -2,7 +2,7 @@
 
 ![](articles/images/NNS_hex_sticker.png)
 
-[![packageversion](https://img.shields.io/badge/NNS%20version-11.6.5-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)
+[![packageversion](https://img.shields.io/badge/NNS%20version-12.0-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)
 [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## 
@@ -68,7 +68,7 @@ learning and econometrics examples.
         title = {NNS: Nonlinear Nonparametric Statistics},
         author = {Fred Viole},
         year = {2016},
-        note = {R package version 11.6.5},
+        note = {R package version 12.0},
         url = {https://CRAN.R-project.org/package=NNS},
       }
 

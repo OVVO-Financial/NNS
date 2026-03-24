@@ -1158,10 +1158,6 @@ U_r(t; X)_{\text{ratio}}
 \]</span></p>
 <p>These are computed from the asymmetric directional dependence matrix of the jointly normalized variables — exactly the structure developed in Chapter 10 — using <span class="math inline">\(\texttt{NNS.dep}(\cdot, \texttt{asym} = \texttt{TRUE})\)</span>.</p>
 <p>Implementation detail: <code>asym = TRUE</code> turns on asymmetric dependence, but <strong>direction is determined by argument order</strong>. In practice, <code>NNS.dep(x, y, asym = TRUE)</code> and <code>NNS.dep(y, x, asym = TRUE)</code> generally differ; the first quantifies directional dependence of <code>y</code> on <code>x</code>, while the second quantifies the reverse direction.</p>
-<div class="float">
-<img src="../vignettes/images/CDFs_2.png" alt="Figure 13.1. Asymmetric NNS.dep output (Dependence and Correlation components) illustrating directional non-equivalence under argument reversal." />
-<div class="figcaption">Figure 13.1. Asymmetric <code>NNS.dep</code> output (Dependence and Correlation components) illustrating directional non-equivalence under argument reversal.</div>
-</div>
 <p>Define the <strong>excess directional dependence</strong> of <span class="math inline">\(Y\)</span> on <span class="math inline">\(X\)</span> as</p>
 <p><span class="math display">\[
 \Delta\rho = \rho_{X^{**} \to Y^{**}} - \rho_{Y^{**} \to X^{**}}.

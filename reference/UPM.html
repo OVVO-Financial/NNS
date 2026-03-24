@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">11.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,15 +51,20 @@
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
-<dd><p>numeric; Set to <code>target = mean(variable)</code> for classical equivalences, but does not have to be. (Vectorized)#' @param variable a numeric vector.   <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> or <a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> type objects are not permissible.</p></dd>
+<dd><p>numeric; Set to <code>target = mean(variable)</code> for classical equivalences, but does not have to be.
+When <code>excess_ret = FALSE</code>, this can be a scalar or a vectorized target for the standard partial moment calculation.
+When <code>excess_ret = TRUE</code>, it is interpreted element-wise as the benchmark/threshold relative to <code>variable</code>.</p></dd>
 
 
 <dt id="arg-variable">variable<a class="anchor" aria-label="anchor" href="#arg-variable"></a></dt>
-<dd><p>a numeric vector.   <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> or <a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> type objects are not permissible.</p></dd>
+<dd><p>a numeric vector. <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> or <a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> type objects are not permissible.</p></dd>
 
 
 <dt id="arg-excess-ret">excess_ret<a class="anchor" aria-label="anchor" href="#arg-excess-ret"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default)</p></dd>
+<dd><p>logical; <code>FALSE</code> (default). If <code>TRUE</code>, switches from the standard vectorized-target
+partial moment to an element-wise excess-deviation calculation. For <code>UPM</code>, this computes
+<code>pmax(variable - target, 0)</code> raised to <code>degree</code> and averaged. In this mode, <code>target</code>
+must have length 1 or the same length as <code>variable</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

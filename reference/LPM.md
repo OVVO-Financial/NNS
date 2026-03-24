@@ -18,7 +18,10 @@ LPM(degree, target, variable, excess_ret = FALSE)
 - target:
 
   numeric; Set to `target = mean(variable)` for classical equivalences,
-  but does not have to be. (Vectorized)
+  but does not have to be. When `excess_ret = FALSE`, this can be a
+  scalar or a vectorized target for the standard partial moment
+  calculation. When `excess_ret = TRUE`, it is interpreted element-wise
+  as the benchmark/threshold relative to `variable`.
 
 - variable:
 
@@ -28,7 +31,11 @@ LPM(degree, target, variable, excess_ret = FALSE)
 
 - excess_ret:
 
-  logical; `FALSE` (default)
+  logical; `FALSE` (default). If `TRUE`, switches from the standard
+  vectorized-target partial moment to an element-wise excess-deviation
+  calculation. For `LPM`, this computes `pmax(target - variable, 0)`
+  raised to `degree` and averaged. In this mode, `target` must have
+  length 1 or the same length as `variable`.
 
 ## Value
 

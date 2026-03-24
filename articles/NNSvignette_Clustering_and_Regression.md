@@ -688,7 +688,7 @@ If the user is so motivated, detailed arguments further examples are
 provided within the following:
 
 - [Nonlinear Nonparametric Statistics: Using Partial
-  Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
+  Moments](https://ovvo-financial.github.io/NNS/book/)
 
 - [Deriving Nonlinear Correlation Coefficients from Partial
   Moments](https://doi.org/10.2139/ssrn.2148522)

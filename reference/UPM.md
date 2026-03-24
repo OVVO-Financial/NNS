@@ -18,10 +18,10 @@ UPM(degree, target, variable, excess_ret = FALSE)
 - target:
 
   numeric; Set to `target = mean(variable)` for classical equivalences,
-  but does not have to be. (Vectorized)#' @param variable a numeric
-  vector. [data.frame](https://rdrr.io/r/base/data.frame.html) or
-  [list](https://rdrr.io/r/base/list.html) type objects are not
-  permissible.
+  but does not have to be. When `excess_ret = FALSE`, this can be a
+  scalar or a vectorized target for the standard partial moment
+  calculation. When `excess_ret = TRUE`, it is interpreted element-wise
+  as the benchmark/threshold relative to `variable`.
 
 - variable:
 
@@ -31,7 +31,11 @@ UPM(degree, target, variable, excess_ret = FALSE)
 
 - excess_ret:
 
-  logical; `FALSE` (default)
+  logical; `FALSE` (default). If `TRUE`, switches from the standard
+  vectorized-target partial moment to an element-wise excess-deviation
+  calculation. For `UPM`, this computes `pmax(variable - target, 0)`
+  raised to `degree` and averaged. In this mode, `target` must have
+  length 1 or the same length as `variable`.
 
 ## Value
 

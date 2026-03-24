@@ -51,16 +51,16 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
     ## [1] 24.39231
     ## 
     ## $Grand_Statistic
-    ## [1] 20.76984
+    ## [1] 20.09063
     ## 
     ## $Control_CDF
-    ## [1] 0.9152794
+    ## [1] 0.8708501
     ## 
     ## $Treatment_CDF
-    ## [1] 0.1670107
+    ## [1] 0.1294878
     ## 
     ## $Certainty
-    ## [1] 0.01009348
+    ## [1] 0.02345583
     ## 
     ## $`Effect_Size_LB.2.5%`
     ## [1] 2.651417
@@ -373,6 +373,9 @@ NNS.SD.cluster(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, dendrogram = T
 
 If the user is so motivated, detailed arguments and proofs are provided
 within the following:
+
+- [Nonlinear Nonparametric Statistics: Using Partial
+  Moments](https://ovvo-financial.github.io/NNS/book/)
 
 - [Continuous CDFs and ANOVA with
   NNS](https://doi.org/10.2139/ssrn.3007373)

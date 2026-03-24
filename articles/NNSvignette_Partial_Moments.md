@@ -302,12 +302,12 @@ $$P\left( A|B \right) = \frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$
 If the user is so motivated, detailed arguments and proofs are provided
 within the following:
 
+- [Nonlinear Nonparametric Statistics: Using Partial
+  Moments](https://ovvo-financial.github.io/NNS/book/)
+
 - [Partial Moments as a Unifying Primitive: Distributional Structure,
   Benchmark-Relative Utility, Adaptive Estimation, and Learned Neural
   Nonlinearities](https://doi.org/10.2139/ssrn.6249658)
-
-- [Nonlinear Nonparametric Statistics: Using Partial
-  Moments](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md)
 
 - [Cumulative Distribution Functions and UPM/LPM
   Analysis](https://doi.org/10.2139/ssrn.2148482)
