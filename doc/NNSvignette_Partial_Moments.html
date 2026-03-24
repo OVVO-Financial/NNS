@@ -440,7 +440,7 @@ distributions as well as recognizing multiple modes.</p>
 is equal to the sum of the co-partial moments matrices less the
 divergent partial moments matrices. <span class="math display">\[ \Sigma
 = CLPM + CUPM - DLPM - DUPM \]</span></p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>cov.mtx <span class="ot">=</span> <span class="fu">PM.matrix</span>(<span class="at">LPM_degree =</span> <span class="dv">1</span>, <span class="at">UPM_degree =</span> <span class="dv">1</span>,<span class="at">target =</span> <span class="st">&#39;mean&#39;</span>, <span class="at">variable =</span> <span class="fu">cbind</span>(x, y), <span class="at">pop_adj =</span> <span class="cn">TRUE</span>)</span>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>cov.mtx <span class="ot">=</span> <span class="fu">PM.matrix</span>(<span class="at">LPM_degree =</span> <span class="dv">1</span>, <span class="at">UPM_degree =</span> <span class="dv">1</span>, <span class="at">target =</span> <span class="st">&#39;mean&#39;</span>, <span class="at">variable =</span> <span class="fu">cbind</span>(x, y), <span class="at">pop_adj =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>cov.mtx</span></code></pre></div>
 <pre><code>## $cupm
 ##           x         y
