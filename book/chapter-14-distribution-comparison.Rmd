@@ -316,6 +316,10 @@ legend("topright", legend = c("LPM degree 0 (discrete)",
        col = c("red", "blue"), lwd = 2, bty = "n")
 ```
 
+<center>
+![Figure 14.1. Degree-0 versus degree-1 LPM ratio convergence at the sample mean: degree-0 wanders while degree-1 remains pinned at 0.5.](images/ch14_lpm0_lpm1_diff.png)
+</center>
+
 The red line wanders; the blue line is flat at 0.5 for every $n \ge 1$.
 
 #### Implications for Distribution Comparison
@@ -605,6 +609,7 @@ The NNS ANOVA framework extends naturally to **multiple groups**. When more than
 
 This multi-group capability directly parallels classical one-way ANOVA, but without the assumption of normality or equal variance across groups.
 
+
 ---
 
 ### Stochastic Dominance
@@ -694,6 +699,7 @@ Second- and third-order tests proceed analogously, replacing the empirical CDF w
 
 The NNS implementations `NNS.FSD()`, `NNS.SSD()`, and `NNS.TSD()` perform these evaluations directly and return which distribution, if any, dominates at each order.
 
+
 #### Stochastic Dominant Efficient Sets
 
 When comparing more than two distributions simultaneously, the concept of dominance generalizes to the notion of an **efficient set**: the collection of distributions that are not dominated by any other distribution at the specified order.
@@ -715,6 +721,7 @@ An extension of the efficient set concept groups distributions into **stochastic
 Within a cluster, no member dominates any other at the specified order. Across clusters, members of higher-ranked clusters tend to dominate members of lower-ranked clusters.
 
 The `NNS.SD.cluster()` function implements this procedure and can render results as a **dendrogram** showing hierarchical dominance relationships. This visualization reveals which groups of distributions are interchangeable in the preference order and which are strictly ranked relative to others.
+
 
 ---
 

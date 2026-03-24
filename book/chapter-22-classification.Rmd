@@ -105,7 +105,7 @@ These limitations echo the broader theme of the book:
 
 ## Directional Decision Regions
 
-The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 19–22.
+The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 18–20.
 
 Suppose the predictor space is partitioned into cells
 
@@ -663,6 +663,7 @@ This is exactly consistent with the theme running throughout the book:
 
 **classical methods begin with symmetric aggregates and then try to recover structure.  
 Directional methods begin with structure and aggregate only afterward.**
+
 
 ---
 

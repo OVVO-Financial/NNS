@@ -346,6 +346,17 @@ Conditional intervals derived from `NNS.reg` are developed in detail in Chapter 
 
 For continuity, the key idea is that `NNS.reg(..., confidence.interval = ...)` builds local intervals from partition-specific empirical distributions. In this chapter, we focus on the unconditional interval mechanics (`LPM.VaR` / `UPM.VaR`) that those later conditional constructions rely on.
 
+```r
+set.seed(12345)
+x <- runif(1000, -2, 2)
+y <- sin(pi * x_train) + rnorm(1000, sd = 0.2)
+
+NNS.reg(x = x_train, y = y_train, order = NULL, confidence.interval = .95)
+```
+
+<center>
+![Figure 15.1. `NNS.reg(..., confidence.interval = 0.95)` visualization with nonlinear fit and interval bands estimated from local partitions.](images/ch15_reg_conf_int.png)
+</center>
 
 ## Advantages of the Directional Approach
 

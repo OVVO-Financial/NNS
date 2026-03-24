@@ -404,6 +404,33 @@ But it does so without imposing stationarity, without requiring Box–Jenkins id
 
 A brief clarification of the mean-based option is useful. In some component series the fitted regression may be unstable because the component is short, noisy, or nearly flat. In that case a practical alternative is to shrink the regression estimate toward the component mean, or even to use the component mean directly. This sacrifices some responsiveness in exchange for stability. Conceptually, it is a local bias-variance tradeoff: when the estimated slope or nonlinear fit is unreliable, the component average can act as a robust anchor.
 
+```r
+# Univariate nonlinear ARMA
+z <- as.numeric(scale(sin(1:480/8) + rnorm(480, sd=.35)))
+
+# Seasonality detection (prints a summary)
+seasonal_period <- NNS.seas(z, plot = FALSE)
+head(seasonal_period$all.periods)
+
+##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1     99                0.5122054                      1.168502e+17
+## 2    147                0.5256021                      1.168502e+17
+## 3    100                0.5598477                      1.168502e+17
+## 4    146                0.5618687                      1.168502e+17
+## 5    199                0.5766158                      1.168502e+17
+## 6     98                0.5801409                      1.168502e+17
+
+
+# Validate seasonal periods and forecast
+NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE, ncores = 1)
+```
+
+
+<center>
+![Figure 24.1. `NNS.ARMA(..., h = 45, seasonal.factor = c(12,24,36))` forecast output with fitted trajectory and uncertainty structure.](images/ch24_uni_ts.png)
+</center>
+
+
 ---
 
 ## Dynamic Updating and Recursive Forecast Paths
@@ -654,6 +681,8 @@ Forecasting performance must be assessed with strict time-order preservation. A 
 - **Interval calibration check**: compare nominal vs empirical coverage for prediction intervals across horizons.
 
 For seasonal component construction, lag selection must also be origin-specific; selecting global lags from the full sample before backtesting constitutes leakage.
+
+---
 
 
 ## Summary

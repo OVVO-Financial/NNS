@@ -235,6 +235,11 @@ lines(boots["ensemble", ]$ensemble, lwd = 3)
 lines(1:length(AirPassengers), AirPassengers, lwd = 3, col = "red")
 ```
 
+<center>
+![Figure 17.1. `NNS.meboot` replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths.](images/ch17_meboot_orig.png)
+</center>
+
+
 ### Return Object
 
 `NNS.meboot` returns a named list with the following elements:
@@ -300,6 +305,11 @@ hist(cor(X, xt),
      xlab = "Correlation")
 ```
 
+<center>
+![Figure 17.2. Standard iid Monte Carlo correlation histogram (`cor(X, x_t)`), typically concentrated near zero.](images/ch17_iid_mc_sim.png)
+</center>
+
+
 The resulting histogram is tightly centered on zero, confirming that standard MCS cannot generate strongly correlated or anti-correlated scenario paths.
 
 ### Expanded Simulation via Vectorized `rho`
@@ -328,6 +338,11 @@ hist(cor(do.call(cbind, new_MCS), xt),
      main = "NNS.meboot Simulation\n10,000 Iterations",
      xlab = "Correlation")
 ```
+
+<center>
+![Figure 17.3. `NNS.meboot` Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider \([-1,1]\) range.](images/ch17_meboot_mc_sim.png)
+</center>
+
 
 The resulting distribution of correlations is approximately uniform across $[-1, 1]$, confirming that the `rho`-vectorized approach provides a fundamentally richer simulation basis than standard iid MCS.
 
@@ -405,6 +420,8 @@ Directional methods emphasize distributional structure relative to benchmarks, w
 The `type = "NNScor"` and `type = "NNSdep"` options close this loop explicitly: the bootstrap targeting criterion is itself computed using NNS co-partial moments, so the resampling respects the same nonlinear dependence geometry as the rest of the NNS toolkit.
 
 By combining entropy-based resampling with directional statistical measures, analysts obtain a fully **nonparametric workflow for simulation and inference**.
+
+
 
 ---
 

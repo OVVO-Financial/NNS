@@ -8,43 +8,36 @@ In classical statistics, regression is often identified with a fitted equation: 
 
 **the estimation of conditional expectation from data without imposing a predetermined functional form.**
 
-The NNS approach treats regression as the recovery of a nonlinear surface by recursive local averaging over benchmark-defined regions. The resulting estimator may be viewed as
+The NNS approach treats regression as the recovery of a nonlinear surface by recursive local averaging over benchmark-defined regions. The univariate case and the multivariate case, however, operate through meaningfully different prediction mechanisms:
 
-- a **piecewise-constant conditional expectation estimator**,
-- a **piecewise-linear interpolating surface** formed from regression points, or
-- a **data-adaptive partition model** whose geometry is induced by the sample itself.
+- In the **univariate case**, the estimator is a piecewise-constant conditional expectation surface, with optional piecewise-linear interpolation across regression points.
+- In the **multivariate case**, the estimator is not piecewise-linear. It operates as a nearest-neighbor search over a compressed set of regression points — local conditional means derived from the partition — rather than over the raw observations themselves.
 
-This chapter develops that perspective.
+This distinction matters and is developed carefully below.
 
 ---
 
 ## Regression as Conditional Expectation
 
-Let \(X \in \mathbb{R}^d\) denote a predictor vector and let \(Y \in \mathbb{R}\) denote a response variable.
+Let $X \in \mathbb{R}^d$ denote a predictor vector and let $Y \in \mathbb{R}$ denote a response variable.
 
 The central object of regression is the **conditional mean function**
 
-\[
-f(x) = E[Y \mid X = x].
-\]
+$$f(x) = E[Y \mid X = x].$$
 
 This function gives the expected value of the response at each predictor location.
 
-Classical regression estimates \(f\) by restricting it to a family such as
+Classical regression estimates $f$ by restricting it to a family such as
 
-\[
-f(x) = \beta_0 + \beta^\top x
-\]
+$$f(x) = \beta_0 + \beta^\top x$$
 
 or
 
-\[
-f(x) = \beta_0 + \beta_1 x + \beta_2 x^2 + \cdots .
-\]
+$$f(x) = \beta_0 + \beta_1 x + \beta_2 x^2 + \cdots.$$
 
 Such models can be useful when the functional form is approximately correct. But when the underlying relationship is nonlinear, threshold-driven, piecewise, or asymmetric, a parametric family can distort the structure it aims to estimate.
 
-Nonparametric regression removes this restriction. Rather than specifying the shape of \(f\) in advance, it estimates the function directly from the data.
+Nonparametric regression removes this restriction. Rather than specifying the shape of $f$ in advance, it estimates the function directly from the data.
 
 The directional framework does this by recursively partitioning the data into regions and estimating the local conditional mean inside each region.
 
@@ -82,26 +75,17 @@ The NNS regression framework begins with the recursive mean-split estimator intr
 
 Suppose we observe
 
-\[
-(X_1,Y_1), \dots, (X_n,Y_n).
-\]
+$$(X_1,Y_1), \dots, (X_n,Y_n).$$
 
 A partition of the predictor space produces regions
 
-\[
-A_1, A_2, \dots, A_K.
-\]
+$$A_1, A_2, \dots, A_K.$$
 
 Within each region, the regression function is estimated by the local sample average:
 
-\[
-\hat f(x)
-=
-\frac{1}{N(x)}
-\sum_{i : X_i \in A(x)} Y_i,
-\]
+$$\hat f(x) = \frac{1}{N(x)} \sum_{i : X_i \in A(x)} Y_i,$$
 
-where \(A(x)\) is the region containing \(x\) and \(N(x)\) is the number of observations in that region.
+where $A(x)$ is the region containing $x$ and $N(x)$ is the number of observations in that region.
 
 This is the basic NNS regression rule:
 
@@ -113,49 +97,56 @@ The partition is generated recursively from local means. Each split creates benc
 
 ---
 
-## From Conditional Means to Nonlinear Regression Surfaces
+## From Conditional Means to Regression Points
 
-The recursive partition yields a collection of local mean points, often called **regression points**.
+The recursive partition yields a collection of local mean points, called **regression points**.
 
 In the univariate case, these are pairs
 
-\[
-(\bar X_R,\bar Y_R)
-\]
+$$(\bar X_R, \bar Y_R)$$
 
-for each region \(R\), where
+for each region $R$, where
 
-\[
-\bar X_R = \frac{1}{|I_R|}\sum_{i \in I_R} X_i,
-\qquad
-\bar Y_R = \frac{1}{|I_R|}\sum_{i \in I_R} Y_i.
-\]
+$$\bar X_R = \frac{1}{|I_R|}\sum_{i \in I_R} X_i, \qquad \bar Y_R = \frac{1}{|I_R|}\sum_{i \in I_R} Y_i.$$
 
-In higher dimensions, \(\bar X_R\) becomes a local mean vector in predictor space.
+In higher dimensions, $\bar X_R$ becomes a local mean vector in predictor space.
 
-These local means can be interpreted in two complementary ways.
+These regression points play a different role in the univariate and multivariate cases, and it is important to keep that distinction clear.
+
+---
+
+## The Univariate Case: Piecewise Estimation
+
+In the univariate case, the regression points can be interpreted in two complementary ways.
 
 ### Piecewise-constant surface
 
 Within each terminal cell, the estimate is constant:
 
-\[
-\hat f(x) = \bar Y_R
-\qquad \text{for } x \in R.
-\]
+$$\hat f(x) = \bar Y_R \qquad \text{for } x \in R.$$
 
 This yields a stepwise approximation to the conditional mean surface.
 
 ### Piecewise-linear surface
 
-If neighboring regression points are connected by line segments in one dimension, or by local simplicial or segment-based interpolation in higher dimensions, the result is a continuous piecewise surface.
-
-This gives the NNS regression estimator two useful faces:
+If neighboring regression points are connected by line segments, the result is a continuous piecewise-linear surface. This gives the NNS univariate regression estimator two useful faces:
 
 - a **local averaging estimator** for theory,
-- an **interpolating surface** for visualization and prediction.
+- a **piecewise-linear interpolating surface** for visualization and prediction.
 
-The crucial point is that both arise from the same partition geometry.
+Both arise from the same partition geometry. The piecewise-linear representation provides a transparent interpolation and extrapolation rule: between any two adjacent regression points, the surface varies linearly, while the regression points themselves remain anchored to empirical local conditional means.
+
+```r
+x <- seq(-5, 5, .05)
+y <- x ^ 3
+
+for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY")
+                NNS.reg(x, y, order = i, ncores = 1)}
+```
+
+<center>
+![Figure 21.1. `NNS.reg` univariate fit on $y = x^3$ at orders 1–3, alongside the corresponding `NNS.part` X-only partitions. Each panel shows the piecewise-linear regression surface formed by connecting regression points, with progressively finer partition cells at higher order.](images/ch21_part_reg.png)
+</center>
 
 ---
 
@@ -169,13 +160,13 @@ This interpretation clarifies why the method is effective on nonlinear data.
 
 A single global line may fit badly because observations that belong to fundamentally different local regimes are forced into one equation. Partition-based regression instead allows the data to decompose into structurally coherent regions before averaging.
 
-In this sense, NNS regression is **piecewise conditional expectation estimation from partition clusters**.
+In this sense, NNS univariate regression is **piecewise conditional expectation estimation from partition clusters**, with linear interpolation between the resulting regression points.
 
 The procedure is:
 
 - recursively partition the sample into locally coherent regions,
 - compute the local regression point within each region,
-- use those local means as the basis for estimation, interpolation, and extrapolation.
+- connect adjacent regression points with line segments to form a continuous interpolating surface.
 
 Thus clustering and regression are not separate operations. In the NNS framework, they are two views of the same recursive structure.
 
@@ -189,7 +180,7 @@ Classical black-box machine-learning methods can predict well while making it di
 
 ### Local benchmark interpretation
 
-Each split occurs at a local mean. So the partition tree records how the data separate relative to conditional benchmarks.
+Each split occurs at a local mean. The partition tree records how the data separate relative to conditional benchmarks.
 
 ### Regional interpretation
 
@@ -214,11 +205,11 @@ This makes the estimator interpretable in a way that is both statistical and geo
 
 ## Bias, Variance, and Adaptive Smoothing
 
-Chapters 19 and 20 already established the asymptotic logic of the estimator. In regression language, the same result can be restated simply.
+Chapters 18 and 19 already established the asymptotic logic of the estimator. In regression language, the same result can be restated simply.
 
-At any point \(x\), the estimator averages the responses within a cell \(A_n(x)\). Two conditions determine its quality:
+At any point $x$, the estimator averages the responses within a cell $A_n(x)$. Two conditions determine its quality:
 
-- the cell must be **small enough** that \(f\) is nearly constant inside it,
+- the cell must be **small enough** that $f$ is nearly constant inside it,
 - the cell must contain **enough observations** that the local average is stable.
 
 These are the usual bias–variance requirements.
@@ -228,9 +219,7 @@ If the cell is too small too early, the estimate has high variance because the l
 
 The NNS partition addresses this through recursive refinement. Its effective bandwidth is the cell diameter
 
-\[
-h_n(x) = \operatorname{diam}(A_n(x)).
-\]
+$$h_n(x) = \operatorname{diam}(A_n(x)).$$
 
 This bandwidth is not chosen externally. It is induced by the recursive geometry of the data.
 
@@ -244,41 +233,27 @@ The differences between NNS regression and classical models can now be stated di
 
 ### Linear regression
 
-Ordinary least squares assumes a single global hyperplane.
-
-\[
-Y = \beta_0 + \beta^\top X + \varepsilon.
-\]
-
-This is efficient when the relationship is approximately linear, but restrictive when it is not.
-
-NNS regression imposes no global linearity. It estimates the conditional mean locally and allows the shape to vary across regions.
+Ordinary least squares assumes a single global hyperplane $Y = \beta_0 + \beta^\top X + \varepsilon$. This is efficient when the relationship is approximately linear, but restrictive when it is not. NNS regression imposes no global linearity and allows the shape to vary across regions.
 
 ### Polynomial regression
 
-Polynomial models allow curvature, but only of a prespecified algebraic form. High-order polynomials can oscillate and extrapolate poorly.
-
-NNS regression does not require choosing a polynomial degree. Curvature emerges from recursive local refinement instead.
+Polynomial models allow curvature, but only of a prespecified algebraic form. High-order polynomials can oscillate and extrapolate poorly. NNS regression does not require choosing a polynomial degree; curvature emerges from recursive local refinement.
 
 ### Generalized additive models
 
-Additive models allow nonlinear marginal effects but often assume additive separability across predictors.
-
-NNS regression does not require additive separability. Interactions can appear naturally through the partition geometry.
+Additive models allow nonlinear marginal effects but often assume additive separability across predictors. NNS regression does not require additive separability; interactions can appear naturally through the partition geometry.
 
 ### CART and regression trees
 
-Tree methods also partition the predictor space, so they are perhaps the closest classical analogue.
-
-But CART chooses splits greedily to optimize impurity or squared error reduction, then relies on pruning and complexity penalties. NNS regression instead anchors partitions to local mean structure itself. Its geometry follows recursive benchmark-relative splitting rather than a greedy impurity search.
+Tree methods also partition the predictor space and are the closest classical analogue. But CART chooses splits greedily to optimize impurity or squared error reduction and then relies on pruning penalties. NNS regression anchors partitions to local mean structure itself; its geometry follows recursive benchmark-relative splitting rather than a greedy impurity search.
 
 ### Kernel regression
 
-Kernel estimators average nearby observations using weights determined by a bandwidth \(h\).
+Kernel estimators average nearby observations using weights determined by a bandwidth $h$. They are classical and flexible but require explicit bandwidth selection, and their local neighborhoods are imposed by a weighting rule rather than generated by recursive structure. NNS regression avoids explicit bandwidth tuning and obtains localization through partition diameter instead.
 
-They are classical and flexible, but require explicit bandwidth selection. Their local neighborhoods are imposed by a weighting rule rather than generated by recursive structure.
+### k-nearest-neighbor regression
 
-NNS regression avoids explicit bandwidth tuning and obtains localization through partition diameter instead.
+Standard kNN regression predicts by averaging the $k$ observed responses whose predictor values lie closest to the query point. It searches over the raw observation cloud of size $n$. The multivariate NNS regression is superficially similar but mechanistically different: it searches over a compressed set of **regression points** — local conditional means — rather than over raw observations. This distinction is developed in full in the multivariate section below.
 
 ---
 
@@ -286,193 +261,140 @@ NNS regression avoids explicit bandwidth tuning and obtains localization through
 
 An important feature of recursive mean-split regression is its finite limit behavior.
 
-At a sufficiently high partition order \(O^*\), each observation occupies its own terminal region. At that point,
+At a sufficiently high partition order $O^*$, each observation occupies its own terminal region. At that point,
 
-\[
-\hat f(X_i) = Y_i
-\qquad \text{for all } i.
-\]
+$$\hat f(X_i) = Y_i \qquad \text{for all } i.$$
 
 This identifies the finite interpolation limit of the estimator, but it is also a warning sign: in practice, the preferred partition order is chosen before this limit, typically by cross-validation, in order to balance local fidelity against overfitting.
 
-This means the estimator spans a full spectrum:
+The estimator spans a full spectrum:
 
 - coarse global approximation at low order,
 - increasingly local nonlinear fit at intermediate order,
 - exact in-sample interpolation at finite maximal order.
 
-This property is useful conceptually because it places all fits on a continuous complexity path indexed by partition depth.
-
-It is also useful practically because prediction may be based either on
-
-- the piecewise-constant local mean in a terminal cell, or
-- a piecewise-linear interpolation across regression points.
-
-The first emphasizes stability.  
-The second emphasizes smooth prediction and geometric interpretability.
-
-Unlike many smoothing methods, the NNS framework therefore has a natural interpolation mechanism tied directly to its partition structure.
-
-Extrapolation remains more delicate, as in all nonparametric methods. But the piecewise-linear representation provides a more transparent extrapolation rule than kernel smoothers, whose weights are intrinsically local and can degrade rapidly near the boundary.
+In the univariate case, prediction may be based either on the piecewise-constant local mean within a terminal cell, or on the piecewise-linear interpolation across adjacent regression points. In the multivariate case, neither of these descriptions applies — prediction proceeds instead by nearest-neighbor lookup over the regression-point matrix, as described in the following section.
 
 ---
 
-## Multivariate Regression Surfaces
+## Multivariate Regression: Regression-Point Nearest-Neighbor Prediction
 
-The regression logic extends directly to multivariate predictors.
+The multivariate case requires a separate treatment. The piecewise-linear interpolation available in the univariate case does not generalize cleanly to $d > 1$: there is no natural ordering of regression points in high-dimensional predictor space, and connecting them by line segments is neither well-defined nor computationally tractable.
 
-Let
+Instead, multivariate `NNS.reg` operates through a three-stage procedure that is best understood as **nearest-neighbor regression over a compressed regression-point geometry** — not over the raw observations.
 
-\[
-X = (X^{(1)}, \dots, X^{(d)}).
-\]
+### Stage 1: Per-variable regression points
 
-The goal remains to estimate
+Each predictor $X^{(j)}$ is subjected to a univariate recursive regression against the response $Y$. This produces a set of local regression points for that predictor — conditional means associated with partition cells, not the original raw observations. Each predictor axis is therefore replaced by a lower-complexity, denoised set of benchmark-relative coordinates.
 
-\[
-f(x_1,\dots,x_d) = E[Y \mid X^{(1)}=x_1,\dots,X^{(d)}=x_d].
-\]
+These per-variable regression points form the columns of a **regression-point matrix (RPM)**. Each row of the RPM corresponds to one occupied joint cell in the multivariate partition; the columns record the local mean of each predictor within that cell, and an additional column records the corresponding local mean response.
 
-The recursive partition now divides the predictor space into local cells in \(\mathbb{R}^d\). Each terminal cell has a local mean predictor vector and a local mean response value. The fitted regression surface is therefore assembled from a collection of local patches rather than a single global equation.
+### Stage 2: Joint cell assignment
 
-This is especially useful when the response depends on interactions among predictors in ways that are not additive, monotone, or easily parameterized.
+Observations are assigned to multivariate cells by intersecting the interval memberships induced by the per-variable regression points. The result is a joint partition structure in which each occupied cell represents a coherent local regime of the predictor space — a cluster of observations sharing similar benchmark-relative positioning across all predictors simultaneously.
 
-But within the class of tabular multivariate problems, the recursive mean-split geometry offers a flexible compromise between interpretability and nonlinear adaptivity. In the package implementation, this adaptivity is sharpened further by performing prediction over a regression-point matrix rather than over the raw observation cloud. When dimensionality becomes burdensome, a second path is also available: collapse the predictors to a synthetic index and run the standard univariate regression on that reduced representation.
+### Stage 3: Nearest-neighbor search over regression points
+
+For a new observation $x^* \in \mathbb{R}^d$, prediction proceeds by identifying the rows of the RPM whose predictor means lie closest to $x^*$ and returning the weighted average of the corresponding local response means.
+
+This is a nearest-neighbor search, but the neighbors are **regression points, not observations**. The distinction is fundamental:
+
+- In standard kNN regression, the $n$ raw observations are the search space. Neighborhood sparsity deteriorates rapidly as $d$ grows because observations spread thinly across the predictor volume.
+- In multivariate NNS regression, the search space is the occupied subset of the RPM — typically far smaller than $n$ — and each candidate neighbor is already a local conditional mean, smoothed over a cluster of observations.
+
+If predictor $j$ generates $K_j$ partition locations, the candidate search set is governed by the occupied subset of the product structure $K_1 \times K_2 \times \cdots \times K_d$. In practice this is much smaller than $n$, and each element carries far less noise than an individual observation because it already represents an average over a cluster.
+
+The effect is twofold. First, the search space is compressed relative to standard kNN. Second, the candidate neighbors have been denoised through local averaging before the distance calculation is performed. The method therefore partially mitigates the curse of dimensionality not by avoiding it, but by reducing both the size and the noise level of the effective search space.
+
+**This is why multivariate NNS regression is not piecewise-linear.** There is no line segment drawn between regression points in $\mathbb{R}^d$. The final prediction is a distance-weighted average of regression-point response means — a smooth nearest-neighbor interpolation over a compressed, denoised geometry. The surface shape is determined by the distribution of regression points and the distance weighting, not by linear segments connecting them.
+
+### Dependence-sensitive neighbor count
+
+A further adaptive feature is that the number of neighbors used in the final averaging step is itself dependence-sensitive. The dependence measure is the nonlinear directional dependence developed in Chapter 10 and implemented through `NNS.dep`, which quantifies the strength of association on $[0,1]$ without requiring linearity, monotonicity, or a fixed parametric form.
+
+When estimated dependence is high, the local regression surface is more coherent, and fewer neighbors suffice for a stable prediction. When dependence is lower, broader averaging over more neighbors improves stability. Localization is therefore adjusted not only by partition geometry, but also by the estimated strength of the multivariate signal.
+
+The multivariate NNS regression is thus best understood as a **regression-point nearest-neighbor estimator**: partitioning creates a denoised, compressed geometry of local conditional means, and nearest-neighbor search over that geometry — with dependence-adaptive neighbor count — supplies the final prediction.
 
 ---
-
-### Regression-Point Compression and k-Nearest Prediction
-
-The multivariate implementation admits a more precise interpretation than a generic partition estimator. It is not a nearest-neighbor search over the raw observation cloud. Instead, it proceeds in three conceptually distinct stages.
-
-First, each predictor is subjected to a univariate recursive regression that produces a set of local regression points. These are conditional means associated with partition cells, not the original raw observations. Each predictor axis is therefore replaced by a lower-complexity set of denoised benchmark-relative coordinates.
-
-Second, observations are assigned to multivariate cells by intersecting the interval memberships induced by those per-variable regression points. The result is a joint partition structure in which each occupied cell represents a local regime of the predictor space rather than a single observation.
-
-Third, prediction is performed by a nearest-neighbor search over the resulting regression-point matrix. Thus the search is conducted over a compressed collection of local conditional means rather than over all raw sample points.
-
-This distinction matters. In standard k-nearest-neighbor regression, the search space consists of the original sample of size \(n\), so neighborhood sparsity deteriorates rapidly as dimension increases. In the NNS implementation, the effective search space is reduced to the occupied joint regression points. If predictor \(j\) generates \(K_j\) partition locations, then the candidate search set is governed by the occupied subset of the product structure \(K_1 \times K_2 \times \cdots \times K_d\), which is typically far smaller than the original observation count and far less noisy. Each neighbor is therefore not a single raw data point, but a representative local conditional mean summarizing a cluster of observations.
-
-The effect is twofold. First, the search space is compressed. Second, the candidate neighbors are already smoothed through local averaging before the distance calculation is performed. This does not eliminate the curse of dimensionality, but it does partially mitigate it relative to classical k-nearest-neighbor regression, where both sparsity and noise operate directly at the observation level.
-
-A further adaptive feature is that the number of neighbors is itself dependence-sensitive. The dependence measure used here is the nonlinear directional dependence developed in Chapter 10 and implemented through `NNS.dep`, which quantifies the strength of association on \([0,1]\) without requiring linearity, monotonicity, or a fixed parametric form. When estimated dependence is high, fewer neighbors are required because the local regression surface is more coherent. When dependence is lower, broader averaging is used. Thus localization is adjusted not only by partition geometry, but also by the estimated strength of multivariate structure.
-
-For this reason, the multivariate NNS regression may be viewed as a hybrid of partition estimation and nearest-neighbor prediction: partitioning creates a denoised regression-point geometry, and nearest-neighbor search over that geometry supplies the final local prediction.
 
 ## Adaptive Order Selection: Dependence-Driven Partition Depth
 
-When the user leaves `order = NULL` (the default), `NNS.reg` does not apply one global partition depth uniformly across all predictors. Instead, it computes a directional dependence score between each regressor and the response using the same partial-moment machinery developed earlier (`NNS.dep`-style dependence), then allocates recursion depth per regressor accordingly.
+When the user leaves `order = NULL` (the default), `NNS.reg` does not apply one global partition depth uniformly across all predictors. Instead, it computes a directional dependence score between each regressor and the response using `NNS.dep`-style dependence, then allocates recursion depth per regressor accordingly.
 
-Regressors with stronger directional dependence receive deeper recursive partitioning (higher realized effective order for that predictor), enabling finer local approximation where signal is most evident. Regressors with weak dependence receive shallower partitioning, yielding broader smoothing and reducing the chance of overfitting noise-dominant inputs.
+Regressors with stronger directional dependence receive deeper recursive partitioning, enabling finer local approximation where signal is most evident. Regressors with weak dependence receive shallower partitioning, yielding broader smoothing and reducing the chance of overfitting noise-dominant inputs.
 
-This is the concrete implementation of the dynamic-bandwidth interpretation from Chapter 19: partition cell diameter is not only data-adaptive, but dependence-adaptive. Smoothing granularity is therefore endogenously assigned by signal strength rather than fixed through a single hand-tuned global parameter.
-
-In practice, the realized depth profile can be inspected after fitting:
+This is the concrete implementation of the dynamic-bandwidth interpretation from Chapter 19: partition cell diameter is not only data-adaptive but dependence-adaptive. Smoothing granularity is therefore endogenously assigned by signal strength rather than fixed through a single hand-tuned global parameter.
 
 ```r
 fit <- NNS.reg(x, y)   # order = NULL by default
 fit$rhs.partitions     # realized partition depth per regressor
 ```
 
-Interpretation is relative: predictors with higher directional dependence typically receive finer partitioning than predictors with weaker dependence in the same fit. The exact realized depths depend on the sample, occupancy constraints, and other fitting controls.
+The realized depth profile is relative: predictors with higher directional dependence typically receive finer partitioning than predictors with weaker dependence in the same fit. The exact realized depths depend on the sample, occupancy constraints, and other fitting controls.
 
-The main practical consequence is that per-variable manual tuning is often reduced in exploratory workflows, while full control remains available when needed (`order = 5`, `order = "max"`, and related settings).
+The main practical consequence is that per-variable manual tuning is often unnecessary in exploratory workflows, while full control remains available when needed (`order = 5`, `order = "max"`, and related settings).
 
 ---
 
 ## Dimension Reduction via Synthetic Predictors
 
-The package implementation also provides a qualitatively different way to address multivariate regression when dimensionality becomes burdensome. Rather than preserving the full joint predictor geometry, the predictors may be collapsed into a single **synthetic index** and the standard univariate NNS regression can then be applied to that index.
+The package also provides a qualitatively different way to address multivariate regression when dimensionality becomes burdensome. Rather than preserving the full joint predictor geometry, the predictors may be collapsed into a single **synthetic index** and standard univariate NNS regression applied to that index.
 
-Let the predictors be \(X^{(1)},\dots,X^{(d)}\). After rescaling each predictor to the unit interval, write the normalized predictors as
+Let the predictors be $X^{(1)},\dots,X^{(d)}$. After rescaling each predictor to the unit interval, write the normalized predictors as $\tilde X^{(1)},\dots,\tilde X^{(d)} \in [0,1]$. The synthetic predictor is
 
-\[
-\tilde X^{(1)},\dots,\tilde X^{(d)} \in [0,1].
-\]
+$$X^* = \frac{\sum_{j=1}^{d} w_j \tilde X^{(j)}}{\sum_{j=1}^{d} \mathbf{1}[w_j\neq 0]},$$
 
-The synthetic predictor is then formed as
+where $w_j$ is the weight assigned to predictor $j$.
 
-\[
-X^*
-=
-\frac{\sum_{j=1}^{d} w_j \tilde X^{(j)}}{\sum_{j=1}^{d} \mathbf{1}[w_j\neq 0]},
-\]
-
-where \(w_j\) is the weight assigned to predictor \(j\).
-
-This construction is conceptually important. It replaces a \(d\)-dimensional predictor vector with a single composite variable, allowing the full univariate recursive mean-split machinery to be reused directly.
+This replaces a $d$-dimensional predictor vector with a single composite variable, allowing the full univariate recursive mean-split machinery — including piecewise-linear interpolation — to be reused directly.
 
 ### Weighting options
 
-The weights \(w_j\) may be determined in several ways, depending on the analyst’s objective.
+The weights $w_j$ may be determined in several ways:
 
 - **Equal weighting** assigns all included predictors the same weight.
-- **Correlation weighting** (`dim.red.method = "cor"`) uses signed correlation coefficients from the package implementation; coefficients can be positive or negative, so this is not a rank-only Spearman weighting scheme.
-- **Directional dependence weighting** uses `NNS.dep`, connecting the reduction step directly to the nonlinear dependence framework developed in Chapter 10.
+- **Correlation weighting** (`dim.red.method = "cor"`) uses signed correlation coefficients; coefficients can be positive or negative, so this is not a rank-only Spearman scheme.
+- **Directional dependence weighting** uses `NNS.dep`, connecting the reduction step to the nonlinear dependence framework developed in Chapter 10.
 - **Directional causation weighting** uses `NNS.caus`, allowing predictors with stronger causal evidence to receive greater weight.
 - **Ensemble weighting** combines multiple weighting schemes into a single composite score.
 
-Thus dimension reduction is not a purely geometric projection. It is a **structure-aware aggregation of predictors**, where the weights themselves may be derived from directional measures developed earlier in the book.
+Dimension reduction is therefore not a purely geometric projection. It is a **structure-aware aggregation of predictors**, where the weights themselves may be derived from directional measures developed earlier in the book.
 
 ### Variable selection through thresholding
 
-The `threshold` parameter adds an important additional feature. Predictors whose weights fall below the threshold are assigned zero weight and therefore excluded from the synthetic index.
+The `threshold` parameter excludes predictors whose weights fall below a chosen value $\tau$:
 
-This turns the reduction step into more than mere averaging. It is also a form of **variable selection**.
+$$w_j < \tau \implies \text{predictor } j \text{ excluded from } X^*.$$
 
-If
-
-\[
-w_j < \tau,
-\]
-
-for a chosen threshold \(\tau\), then predictor \(j\) does not contribute to \(X^*\). The resulting synthetic predictor therefore retains only those variables with sufficient marginal relevance under the chosen weighting rule.
+This turns the reduction step into a form of **variable selection** as well as aggregation.
 
 ### Regression after reduction
 
-Once \(X^*\) is formed, the regression problem becomes univariate:
+Once $X^*$ is formed, the regression problem becomes univariate:
 
-\[
-f^*(x^*) = E[Y \mid X^* = x^*].
-\]
+$$f^*(x^*) = E[Y \mid X^* = x^*].$$
 
-The standard univariate NNS regression is then applied to \((X^*, Y)\), producing the familiar recursive partition, regression points, interpolation path, and local conditional means.
+Standard univariate NNS regression is then applied to $(X^*, Y)$, producing the familiar recursive partition, regression points, piecewise-linear interpolation path, and local conditional means.
 
-So the multivariate reduction pipeline is:
+The multivariate reduction pipeline is therefore:
 
 1. rescale each predictor,
 2. compute directional or correlation-based weights,
 3. threshold weak predictors if desired,
-4. form the synthetic predictor \(X^*\),
-5. run univariate NNS regression on \(X^*\) against \(Y\).
+4. form the synthetic predictor $X^*$,
+5. run univariate NNS regression on $X^*$ against $Y$.
 
 ### Conceptual tradeoff
 
-This route differs fundamentally from the regression-point-matrix approach of Section 21.10.1.
+The dimension-reduction path and the regression-point nearest-neighbor path address dimensionality through opposite strategies.
 
-- The **full multivariate path** preserves the joint predictor structure and mitigates dimensionality by searching over compressed conditional means.
-- The **dimension-reduction path** collapses the predictor space entirely and delegates the problem to a univariate nonlinear regression.
+- The **regression-point nearest-neighbor path** preserves the joint predictor structure. It mitigates dimensionality by searching over a compressed set of local conditional means rather than raw observations, and by adapting neighbor count to estimated dependence strength. Prediction is a smooth weighted average over regression points — not a piecewise-linear surface.
+- The **dimension-reduction path** collapses the predictor space entirely, trading interaction structure for parsimony. Once the synthetic index is formed, univariate NNS regression applies — and its piecewise-linear interpolation is again available.
 
-The tradeoff is clear.
+For some problems, especially when predictors are numerous and noisy, the synthetic-index approach can be an advantage rather than a liability. Simple weighted composites often generalize well out of sample, and the univariate path offers stability, interpretability, and straightforward visualization that the full multivariate path cannot match.
 
-The full multivariate method preserves interactions and local joint geometry, but it must still operate in a high-dimensional predictor space. The synthetic-index method sacrifices interaction structure in exchange for parsimony, interpretability, and a far simpler search problem.
-
-### Why this can work well
-
-This strategy also connects naturally to an older but important idea in predictive modeling: simple weighted composites often generalize surprisingly well out of sample. In this sense, the synthetic predictor is not merely a computational shortcut. It is an explicit modeling choice that favors **stability, shrinkage, and interpretability** over full interaction recovery.
-
-For some problems, especially when predictors are numerous and noisy, this can be an advantage rather than a liability.
-
-### Relation to the curse of dimensionality
-
-The curse of dimensionality appears in nonparametric regression because local neighborhoods thin out rapidly as dimension grows. The synthetic-index approach addresses this directly by replacing a multivariate neighborhood problem with a univariate one.
-
-It therefore offers a second remedy to dimensionality within the NNS framework:
-
-- **compression without collapse** through regression-point k-nearest prediction, and
-- **collapse by construction** through synthetic-predictor dimension reduction.
-
-The two strategies are worth keeping distinct.
+The two strategies are worth keeping distinct — in particular because the prediction mechanism differs between them.
 
 ---
 
@@ -496,35 +418,25 @@ The effective smoothing scale varies by region rather than being imposed globall
 
 The fitted model can be understood through local means, partition regions, and regression points.
 
-### It is flexible in how it handles dimensionality
+### Its prediction mechanism depends on dimensionality
 
-The framework can either preserve joint multivariate structure through regression-point compression or reduce the predictor space to a synthetic index when parsimony is preferable.
+In the univariate case, prediction uses piecewise-linear interpolation across ordered regression points. In the multivariate case, prediction uses nearest-neighbor search over the regression-point matrix — a fundamentally different mechanism that does not produce a piecewise-linear surface, but instead a smooth weighted average over compressed, denoised local conditional means.
 
-This combination is unusual. Many methods offer flexibility but little interpretability, or interpretability but little flexibility. The partition-based directional framework aims to preserve both.
+This distinction is unusual to make explicit, but it matters for understanding what `NNS.reg` is doing and why its multivariate behavior differs from its univariate behavior beyond merely adding more predictors.
 
 ---
 
 ## Relationship to the Broader NNS Program
 
-This chapter also completes an important conceptual arc.
+This chapter completes an important conceptual arc.
 
-Earlier chapters showed that directional deviation operators generate
+Earlier chapters showed that directional deviation operators generate distribution functions, moment decompositions, dependence measures, conditional probabilities, and stochastic dominance diagnostics.
 
-- distribution functions,
-- moment decompositions,
-- dependence measures,
-- conditional probabilities,
-- stochastic dominance diagnostics.
-
-Chapters 19–20 then showed that the same directional logic induces a consistent adaptive estimator through recursive mean splitting.
+Chapters 18–20 then showed that the same directional logic induces a consistent adaptive estimator through recursive mean splitting.
 
 This chapter reframes that estimator in its most familiar applied form: **nonparametric regression**.
 
-So the point is not merely that NNS provides another regression algorithm.
-
-The deeper point is that regression itself can be understood as another consequence of the same benchmark-relative directional primitive that generated the earlier parts of the book.
-
-Distribution theory, dependence, clustering, and regression are not separate constructions here. They are structurally linked through recursive directional decomposition.
+The deeper point is that regression itself can be understood as another consequence of the same benchmark-relative directional primitive that generated the earlier parts of the book. Distribution theory, dependence, clustering, and regression are not separate constructions here. They are structurally linked through recursive directional decomposition.
 
 ---
 
@@ -534,25 +446,21 @@ This chapter developed nonparametric regression in the NNS framework as **condit
 
 Its main contributions are sevenfold.
 
-First, it defined regression at its most fundamental level as estimation of the conditional mean function
+**First**, it defined regression at its most fundamental level as estimation of the conditional mean function $f(x) = E[Y \mid X = x]$.
 
-\[
-f(x)=E[Y\mid X=x].
-\]
+**Second**, it showed how recursive mean-split partitions produce **nonlinear regression surfaces** by forming local conditional averages over data-adaptive regions.
 
-Second, it showed how recursive mean-split partitions produce **nonlinear regression surfaces** by forming local conditional averages over data-adaptive regions.
+**Third**, it interpreted those regions as **partition clusters**, so that regression becomes piecewise estimation from locally coherent structural groupings.
 
-Third, it interpreted those regions as **partition clusters**, so that regression becomes piecewise estimation from locally coherent structural groupings.
+**Fourth**, it distinguished clearly between the univariate and multivariate prediction mechanisms. In the univariate case, regression points are connected by line segments to produce a **piecewise-linear interpolating surface**. In the multivariate case, this description does not apply: there is no piecewise-linear surface. Instead, prediction is performed by **nearest-neighbor search over the regression-point matrix** — a compressed set of local conditional means — yielding a smooth weighted average rather than a linear interpolation.
 
-Fourth, it emphasized the **interpretability** of the fitted model through local means, regional geometry, and adaptive smoothing scale.
+**Fifth**, it clarified the key distinction between multivariate NNS regression and standard kNN regression. Both use nearest-neighbor search, but they differ fundamentally in what constitutes a neighbor. Standard kNN searches over the $n$ raw observations. Multivariate NNS regression searches over the occupied regression points in the RPM — each of which is a local conditional mean summarizing a cluster of observations, not a single raw data point. The search space is smaller, and each candidate neighbor carries less noise because it has already been smoothed through local averaging.
 
-Fifth, it clarified three key methodological innovations of the multivariate implementation: **regression-point compression**, **k-nearest prediction over denoised local means**, and **dependence-sensitive neighbor selection**. Prediction is therefore performed over a compressed regression-point matrix rather than over the raw observation cloud, with each candidate neighbor representing a local conditional mean for a cluster of observations. The number of neighbors is then adjusted according to the estimated nonlinear directional dependence, allowing stronger relationships to be fit more locally and weaker relationships to be smoothed more broadly.
+**Sixth**, it introduced **dimension reduction via synthetic predictors** as an alternative multivariate path. Predictors are rescaled, weighted by directional relevance, thresholded for variable selection, and collapsed into a single composite index $X^*$, after which standard univariate NNS regression — including piecewise-linear interpolation — applies directly.
 
-Sixth, it introduced **dimension reduction via synthetic predictors**. Predictors may be rescaled, weighted by linear or directional relevance measures, thresholded for variable selection, and collapsed into a single composite index \(X^*\), after which standard univariate NNS regression is applied. This provides a second way to address dimensionality: not by preserving the full joint geometry, but by replacing it with a parsimonious weighted representation.
-
-Seventh, it compared the NNS approach with classical regression models — linear, polynomial, additive, tree-based, and kernel-based — highlighting the distinctive combination of nonparametric flexibility, endogenous bandwidth, adaptive nearest-neighbor localization, partition-based interpretability, and optional synthetic-index reduction.
+**Seventh**, it compared the NNS approach with classical regression models — linear, polynomial, additive, tree-based, kernel-based, and kNN — highlighting the distinctive combination of nonparametric flexibility, endogenous bandwidth, regression-point nearest-neighbor prediction, dependence-adaptive localization, and optional synthetic-index reduction.
 
 The next chapter turns from conditional mean estimation to **classification**, where the same directional partition structures are used not to predict a numeric response, but to assign observations to classes.
 
-> **Further Reading / Examples**
+> **Further Reading / Examples**  
 > For hands-on regression applications, including multivariate and noisy data examples, see the [NNS Regression Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#2-regression).

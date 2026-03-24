@@ -632,6 +632,14 @@ Use the following rules:
 
 These rules make `NNS.VAR`/`NNS.nowcast` evaluations comparable to production conditions and prevent optimistic bias from look-ahead information.
 
+## Vignette Figures: Multivariate Forecasting and Nowcasting
+
+![Figure 25.1. `NNS.VAR`-style multivariate forecast visualization with component paths and ensemble structure.](../vignettes/images/multi_impute.png)
+
+![Figure 25.2. `NNS.nowcast`-style macro nowcast chart with ensemble trajectory and interval context.](../vignettes/images/overview_arma.png)
+
+---
+
 
 ## Summary
 

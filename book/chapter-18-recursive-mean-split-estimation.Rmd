@@ -181,6 +181,17 @@ Continuing to order \(O\) produces at most \(4^{O-1}\) nonempty regions.
 The **regression points** of the partition are the local means \((\bar{X}_R, \bar{Y}_R)\) within each region.
 These points summarize the conditional mean surface and serve as the basis for prediction and curve fitting.
 
+```r
+x <- seq(-5, 5, .05)
+y <- x ^ 3
+
+for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
+```
+
+<center>
+![Figure 18.1. `NNS.part` joint partitioning for orders 1–4 (Voronoi view), showing progressive recursive refinement.](images/ch18_part_1.png)
+</center>
+
 ---
 
 ## \(X\)-Only Partitioning
@@ -218,6 +229,17 @@ Continuing to order \(O\) produces at most \(2^O\) nonempty regions.
 
 The regression points are the local means \((\bar{X}_R, \bar{Y}_R)\) within each predictor-defined region.
 Because the region boundaries are determined by \(X\) alone, the regression points make use of the **full bandwidth** of the response values within each region for their \(Y\) coordinate.
+
+```r
+x <- seq(-5, 5, .05)
+y <- x ^ 3
+
+for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE, obs.req = 0)}
+```
+
+<center>
+![Figure 18.2. `NNS.part(..., type = "XONLY")` predictor-only partitioning across recursive splits.](images/ch18_part_2.png)
+</center>
 
 ---
 
@@ -440,6 +462,7 @@ Uniform grids divide the predictor space into equally sized cells.
 Mean-split partitions are data-driven and adapt to the density and conditional mean geometry of the sample.
 
 ---
+
 
 ## Summary
 

@@ -221,6 +221,10 @@ rgl::plot3d(
 )
 ```
 
+<center>
+![Figure 11.1. Co-LPM surface in original \((x,y)\) space (red), visualizing joint downside structure before copula transformation.](images/ch11_raw_copula.png)
+</center>
+
 In the call `Co.LPM(0, z[,1], z[,2], z[,1], z[,2])`, the argument order is `(degree, x, y, target.x, target.y)`. Setting `degree = 0` produces the probability-level co-lower partial moment, and reusing `z[,1]`/`z[,2]` as both variables and targets evaluates the surface over the full grid of benchmark pairs. The visualization uses `rgl::plot3d`, which produces an interactive three-dimensional plot.
 
 This surface represents the magnitude of **joint downside deviations** in the original variable space.
@@ -244,6 +248,11 @@ rgl::plot3d(
   col="blue"
 )
 ```
+
+<center>
+![Figure 11.2. Co-LPM surface in copula/probability space \([0,1]^2\) (blue), showing the same dependence geometry after marginal probability transformation.](images/ch11_transformed_copula.png)
+
+</center>
 
 The resulting surface lies within the unit square \([0,1]^2\), which represents the **copula domain**.
 
