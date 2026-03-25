@@ -26,8 +26,7 @@ These capabilities matter most in real data settings where asymmetry, tail risk,
 
 **Distribution-free probability control.** Partial moments support conservative tail-probability bounds through semivariance and higher-order directional dispersion measures. This connects descriptive nonparametrics to decision support without requiring strict distributional assumptions.
 
-**Finite-sample relevance under non-normality.** Partial moments are not merely conceptually distribution-free. They also provide a plausible route to improved stability when the underlying data are skewed, heavy-tailed, or otherwise asymmetric.
-
+**Finite-sample relevance under non-normality.** Partial moments are not merely conceptually distribution-free; they demonstrate improved finite-sample stability when data are skewed, heavy-tailed, or otherwise asymmetric.
 
 ## Further Resources
 
