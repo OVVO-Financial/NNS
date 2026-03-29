@@ -24,13 +24,9 @@ See the following for NNS detailed examples and specific applications:
    
    1.4 [Bias and Confidence Intervals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bias_and_CI.html)
 
-   1.5 [Correlation and Dependence](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_correlation_and_dependence.html)
-   
-   1.6 [Correlation and Dependence (paper)](https://ssrn.com/abstract=3010414)
-   
-   1.7 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+   1.5 [Correlation and Dependence](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Correlation_and_Dependence.html)
 
-   1.8 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+   1.6 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
 
 # 2. Regression
