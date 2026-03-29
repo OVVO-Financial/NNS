@@ -2,7 +2,7 @@
 
 
 # NNS
-Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://ssrn.com/abstract=2186471).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
+Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://ovvo-financial.github.io/NNS/book/numerical-integration-via-partial-moments.html).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
 
 NNS offers: 
   - Numerical Integration & Numerical Differentiation
@@ -27,15 +27,9 @@ See the following for NNS detailed examples and specific applications:
    
    1.4 [Bias and Confidence Intervals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bias_and_CI.html)
 
-   1.5 [Correlation and Dependence](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_correlation_and_dependence.html)
-   
-   1.6 [Correlation and Dependence (paper)](https://ssrn.com/abstract=3010414)
-   
-   1.7 [Multivariate Dependence](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_vs_multivariance.pdf)
-   
-   1.8 [Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities](https://ssrn.com/abstract=2745308)
+   1.5 [Correlation and Dependence](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Correlation_and_Dependence.html)
 
-   1.9 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+   1.6 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
 
 # 2. Regression
@@ -57,7 +51,7 @@ See the following for NNS detailed examples and specific applications:
    
 
 # 3. Machine Learning
-   3.1 [Partitional Based Estimation Using Partial Moments](https://ssrn.com/abstract=3592491)
+   3.1 [Partitional Estimation Using Partial Moments](https://ssrn.com/abstract=3592491)
 
    3.2 [NNS Regression in Machine Learning](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Machine_Learning.pdf)
 
@@ -82,7 +76,7 @@ See the following for NNS detailed examples and specific applications:
 
    4.3 [NNS vs. prophet](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/prophet_NNS_comparison.html)
    
-   4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)
+   4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)   
 
 
 # 5. Econometrics
@@ -96,6 +90,7 @@ See the following for NNS detailed examples and specific applications:
    5.4 [Causal Analysis](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/PWT.html)
    
    5.5 [Federal Reserve Causal Analysis](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html)
+   
    
 
 # References
