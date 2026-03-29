@@ -97,7 +97,7 @@ See the following for NNS detailed examples and specific applications:
 
 The previous examples are just that...examples.  They are not meant to serve as proofs or intended to be exhaustive demonstrations, rather the hands-on application of a robust nonparametric regression in many different types of common machine learning problems.
 
-See the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356), if you'd like to learn *why* & *how* NNS does what it does.
+See the [book](https://ovvo-financial.github.io/NNS/book/), if you'd like to learn *why* & *how* NNS does what it does.
 
 
 # Thank you for your interest in NNS! 
