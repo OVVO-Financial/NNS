@@ -31,6 +31,8 @@ See the following for NNS detailed examples and specific applications:
 
    1.6 [Normalization](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
 
+   1.7 [Partial Moments Estimation Error](https://github.com/OVVO-Financial/Finance/blob/main/Data/Estimation_Error_Replication.md)
+
 
 # 2. Regression
    
