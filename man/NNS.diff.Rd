@@ -4,31 +4,48 @@
 \alias{NNS.diff}
 \title{NNS Numerical Differentiation}
 \usage{
-NNS.diff(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = FALSE)
+NNS.diff(
+  f,
+  point,
+  h = 0.1,
+  tol = 1e-10,
+  max.iter = NULL,
+  digits = 12,
+  print.trace = FALSE,
+  plot = FALSE
+)
 }
 \arguments{
 \item{f}{an expression or call or a formula with no lhs.}
 
 \item{point}{numeric; Point to be evaluated for derivative of a given function \code{f}.}
 
-\item{h}{numeric [0, ...]; Initial step for secant projection.  Defaults to \code{(h = 0.1)}.}
+\item{h}{numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = 0.1)}.}
 
-\item{tol}{numeric; Sets the tolerance for the stopping condition of the inferred \code{h}.  Defaults to \code{(tol = 1e-10)}.}
+\item{tol}{numeric; Sets the tolerance for the stopping condition of the inferred \code{h}. Defaults to \code{(tol = 1e-10)}.}
 
-\item{digits}{numeric; Sets the number of digits specification of the output.  Defaults to \code{(digits = 12)}.}
+\item{max.iter}{integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.}
+
+\item{digits}{numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.}
 
 \item{print.trace}{logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.}
+
+\item{plot}{logical; plots range, secant lines and y-intercept convergence.}
 }
 \value{
 Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
 }
 \description{
-Determines numerical derivative of a given univariate function using projected secant lines on the y-axis.  These projected points infer finite steps \code{h}, in the finite step method.
+Determines numerical derivative of a given univariate function using projected secant lines on the y-axis. These projected points infer finite steps \code{h}, in the finite step method.
 }
 \examples{
 \dontrun{
 f <- function(x) sin(x) / x
 NNS.diff(f, 4.1)
+
+## Noisy function with explicit iteration cap
+f_noisy <- function(x) sin(x) + rnorm(1, 0, 0.001)
+NNS.diff(f_noisy, 1.0, max.iter = 100)
 }
 }
 \references{

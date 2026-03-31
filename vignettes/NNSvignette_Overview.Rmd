@@ -480,7 +480,7 @@ See NNS Vignette: [Getting Started with NNS: Correlation and Dependence](https:/
 - `NNS.norm(x, linear=FALSE)` — normalization retaining target moments.
 - `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))` — risk-neutral or min–max rescaling.
 
-See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Normalization_and_Rescaling.html)
+See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Normalization_and_Rescaling.html)
 
 ## 5. Hypothesis Testing
 - `NNS.ANOVA(control, treatment, ...)` — certainty of equality (distributions or means).
