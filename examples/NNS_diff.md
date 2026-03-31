@@ -115,7 +115,8 @@ In clean analytic functions the search converges quickly to a tiny `h*`, often a
 
 This is the key innovation: `NNS.diff` converts the step-size problem into a **stable geometric bisection**.
 
----
+<img src="/examples/secants.png"  style="border: none; outline: none; margin: 0; padding: 0; display: block;"/>
+
 
 ## 3. What the updated implementation actually does
 
