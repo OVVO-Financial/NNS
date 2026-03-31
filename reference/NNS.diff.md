@@ -7,7 +7,16 @@ finite steps `h`, in the finite step method.
 ## Usage
 
 ``` r
-NNS.diff(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = FALSE)
+NNS.diff(
+  f,
+  point,
+  h = 0.1,
+  tol = 1e-10,
+  max.iter = NULL,
+  digits = 12,
+  print.trace = FALSE,
+  plot = FALSE
+)
 ```
 
 ## Arguments
@@ -30,6 +39,12 @@ NNS.diff(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = FALSE)
   numeric; Sets the tolerance for the stopping condition of the inferred
   `h`. Defaults to `(tol = 1e-10)`.
 
+- max.iter:
+
+  integer; `NULL` (default) Maximum number of bisection iterations.
+  `NULL` sets the limit to `100L`. For noisy functions the bisection may
+  stall before `tol` is reached; `max.iter` provides a hard upper bound.
+
 - digits:
 
   numeric; Sets the number of digits specification of the output.
@@ -39,6 +54,10 @@ NNS.diff(f, point, h = 0.1, tol = 1e-10, digits = 12, print.trace = FALSE)
 
   logical; `FALSE` (default) Displays each iteration, lower y-intercept,
   upper y-intercept and inferred `h`.
+
+- plot:
+
+  logical; plots range, secant lines and y-intercept convergence.
 
 ## Value
 
@@ -60,5 +79,9 @@ Fred Viole, OVVO Financial Systems
 if (FALSE) { # \dontrun{
 f <- function(x) sin(x) / x
 NNS.diff(f, 4.1)
+
+## Noisy function with explicit iteration cap
+f_noisy <- function(x) sin(x) + rnorm(1, 0, 0.001)
+NNS.diff(f_noisy, 1.0, max.iter = 100)
 } # }
 ```

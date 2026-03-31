@@ -939,7 +939,7 @@ Dependence](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Correla
   — risk-neutral or min–max rescaling.
 
 See NNS Vignette: [Getting Started with NNS: Normalization and
-Rescaling](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Normalization_and_Rescaling.html)
+Rescaling](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Normalization_and_Rescaling.html)
 
 ### 5. Hypothesis Testing
 
