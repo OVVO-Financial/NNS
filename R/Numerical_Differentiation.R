@@ -4,7 +4,7 @@
 #'
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
-#' @param h numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = 0.1)}.
+#' @param h numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.01 + 0.01)}.
 #' @param tol numeric; Sets the tolerance for the stopping condition of the inferred \code{h}. Defaults to \code{(tol = 1e-10)}.
 #' @param max.iter integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.
 #' @param digits numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.
@@ -24,7 +24,7 @@
 #' }
 #' @export
 
-NNS.diff <- function(f, point, h = 0.1, tol = 1e-10, max.iter = NULL,
+NNS.diff <- function(f, point, h = abs(point) * 0.01 + 0.01, tol = 1e-10, max.iter = NULL,
                      digits = 12, print.trace = FALSE, plot = FALSE){
   
   if(!is.function(f)) stop("'f' must be a function.")
