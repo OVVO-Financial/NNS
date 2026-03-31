@@ -1,4 +1,4 @@
-# NNS.diff for Noisy Gradients: History, Innovation, and Why `Complex Step Derivative (Inferred h)` Is Useful
+# `NNS.diff` for Noisy Gradients
 
 ## Executive Summary
 
@@ -59,11 +59,11 @@ grad <- out["DERIVATIVE", 1]
 
 ## 1. Where `NNS.diff` sits inside NNS
 
-`NNS.diff` is not an isolated add-on. In the official manual it appears as a named core routine within the NNS package, alongside other NNS procedures such as `NNS.dep`, `NNS.reg`, `NNS.ARMA`, and `NNS.copula`. The manual indexes `NNS.diff` as its own documented entry and defines it as **“NNS Numerical Differentiation.”** fileciteturn41file0
+`NNS.diff` is not an isolated add-on. In the official manual it appears as a named core routine within the NNS package, alongside other NNS procedures such as `NNS.dep`, `NNS.reg`, `NNS.ARMA`, and `NNS.copula`. The manual indexes `NNS.diff` as its own documented entry and defines it as **“NNS Numerical Differentiation.”**
 
 The documented description is specific:
 
-> “Determines numerical derivative of a given univariate function using projected secant lines on the y-axis. These projected points infer finite steps `h`, in the finite step method.” fileciteturn41file0
+> “Determines numerical derivative of a given univariate function using projected secant lines on the y-axis. These projected points infer finite steps `h`, in the finite step method.”
 
 The original interface was:
 
@@ -79,7 +79,7 @@ The current implementation adds `max.iter` and `plot`, and returns a matrix cont
 - convergence diagnostics
 - the termination code
 
-That makes `NNS.diff` better understood as a **small diagnostic framework for local differentiation**, not just a single derivative formula. fileciteturn41file0
+That makes `NNS.diff` better understood as a **small diagnostic framework for local differentiation**, not just a single derivative formula.
 
 ---
 
@@ -502,6 +502,7 @@ That yields two distinct but complementary strengths:
 So the full conclusion is:
 
 > `NNS.diff` is not just a derivative routine. It is a geometry-based local-scale inference method whose output should be chosen by regime. The complex-step row is the best endpoint for analytic functions, while `NNS_Proj` is the all-terrain estimator that makes the method broadly useful on real-world black-box surfaces.
+
 
 ### Experiments
 
