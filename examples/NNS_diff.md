@@ -25,7 +25,7 @@ So `NNS.diff` has a two-regime interpretation:
 out <- NNS.diff(
   f = f,
   point = x0,
-  h = 0.1,
+  h = abs(point) * 0.1 + 0.01,
   tol = 1e-10,
   max.iter = 1000,
   digits = 12,
@@ -42,7 +42,7 @@ grad <- out["Complex Step Derivative (Inferred h)", 1]
 out <- NNS.diff(
   f = f,
   point = x0,
-  h = 0.1,
+  h = abs(point) * 0.1 + 0.01,
   tol = 1e-10,
   max.iter = 1000,
   digits = 12,
