@@ -10,7 +10,7 @@ finite steps `h`, in the finite step method.
 NNS.diff(
   f,
   point,
-  h = abs(point) * 0.01 + 0.01,
+  h = abs(point) * 0.1 + 0.01,
   tol = 1e-10,
   max.iter = NULL,
   digits = 12,
@@ -32,7 +32,7 @@ NNS.diff(
 - h:
 
   numeric \[0, ...\]; Initial step for secant projection. Defaults to
-  `(h = abs(point) * 0.01 + 0.01)`.
+  `(h = abs(point) * 0.1 + 0.01)`.
 
 - tol:
 

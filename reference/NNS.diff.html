@@ -42,7 +42,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">NNS.diff</span><span class="op">(</span></span>
 <span>  <span class="va">f</span>,</span>
 <span>  <span class="va">point</span>,</span>
-<span>  h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">point</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.01</span> <span class="op">+</span> <span class="fl">0.01</span>,</span>
+<span>  h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">point</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.1</span> <span class="op">+</span> <span class="fl">0.01</span>,</span>
 <span>  tol <span class="op">=</span> <span class="fl">1e-10</span>,</span>
 <span>  max.iter <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  digits <span class="op">=</span> <span class="fl">12</span>,</span>
@@ -64,7 +64,7 @@
 
 
 <dt id="arg-h">h<a class="anchor" aria-label="anchor" href="#arg-h"></a></dt>
-<dd><p>numeric [0, ...]; Initial step for secant projection. Defaults to <code>(h = abs(point) * 0.01 + 0.01)</code>.</p></dd>
+<dd><p>numeric [0, ...]; Initial step for secant projection. Defaults to <code>(h = abs(point) * 0.1 + 0.01)</code>.</p></dd>
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
