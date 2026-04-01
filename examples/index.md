@@ -80,6 +80,8 @@ See the following for NNS detailed examples and specific applications:
    
    4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)   
 
+   4.5 [NNS vs. N-HiTS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS.ARMA%20vs%20N-Hits.md)
+
 
 # 5. Econometrics
 
