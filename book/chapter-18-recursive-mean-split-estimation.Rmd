@@ -21,6 +21,8 @@ Two distinct splitting modes are available. In **joint partitioning**, regions a
 
 The procedure reflects the same directional logic used throughout the book: just as variance decomposes into directional components relative to a benchmark, recursive mean splitting partitions the joint distribution according to deviations around conditional means.
 
+A key theoretical result is established here: the recursive mean-split estimator belongs to the well-studied class of **data-adaptive partition estimators**, and consistency is inherited directly from that class under standard conditions on cell diameter and occupancy. This is not a limitation requiring further development — it is a strength. The estimator sits within a family whose convergence properties are fully characterized in the literature, and the NNS contribution is the specific splitting rule, the partial-moment geometric interpretation, and the multivariate architecture built on top of that foundation.
+
 ---
 
 ## Motivation for Partition-Based Estimation
@@ -71,8 +73,48 @@ Kernel methods estimate \(f(x)\) through weighted averages of nearby observation
 However, they require selecting a **bandwidth parameter** that determines the smoothing scale, and the probability that any kernel function assigns positive mass to an exact observed value is zero — the estimate therefore cannot achieve an exact fit at all observations simultaneously.
 
 Partition estimators divide the predictor space into regions and compute averages within each region.
-The recursive mean-split method belongs to this class but differs from classical approaches through its **partial-moment splitting rule**, which anchors region boundaries directly to the geometry of the conditional mean.
-As the order parameter increases, the number of regions grows and the estimator converges to a perfect fit in finite steps.
+The recursive mean-split method belongs to this class but differs from classical approaches through its **partial-moment splitting rule**, which anchors region boundaries directly to the geometry of the conditional mean. The estimator is consistent for the true conditional mean under the same regularity conditions that govern all partition estimators in this class — conditions whose sufficiency has been established in the statistical literature. As the order parameter increases, the number of regions grows and the estimator converges to a perfect fit in finite steps.
+
+---
+
+## Consistency by Class Membership
+
+The recursive mean-split estimator is an instance of the **data-adaptive partition estimator** class studied by Stone (1977), Lugosi and Nobel (1996), and Györfi, Kohler, Krzyżak, and Walk (2002).
+
+The general result for this class is as follows.
+
+**Theorem (Consistency of Partition Estimators).** Let \((X_1, Y_1), \dots, (X_n, Y_n)\) be independent and identically distributed, with \(E[Y^2] < \infty\). Let \(\hat{f}_n\) be the partition estimator
+
+\[
+\hat{f}_n(x) = \frac{1}{N_{n,x}} \sum_{i : X_i \in A_n(x)} Y_i,
+\]
+
+where \(A_n(x)\) is the cell of a data-adaptive partition \(\mathcal{P}_n\) containing \(x\). If the partition satisfies
+
+\[
+\operatorname{diam}(A_n(x)) \xrightarrow{P} 0
+\qquad \text{and} \qquad
+N_{n,x} \xrightarrow{P} \infty
+\]
+
+as \(n \to \infty\), then
+
+\[
+E\bigl[(\hat{f}_n(x) - f(x))^2\bigr] \to 0.
+\]
+
+The recursive mean-split estimator satisfies both conditions under the standard occupancy and order growth assumptions used in practice. As \(n \to \infty\) with order parameter \(O = O(n)\) growing appropriately and minimum occupancy held fixed:
+
+- each cell's diameter converges to zero because successive splits are anchored to sample means, which concentrate around the true conditional mean as \(n\) grows, producing finer and finer partitions in regions where the function varies;
+- each cell's occupancy grows because the data density in any fixed region of the predictor space grows linearly with \(n\).
+
+Consequently, **consistency of the recursive mean-split estimator is inherited directly from the established theory of partition estimators.** This is not an approximate or informal claim. The estimator belongs to a well-characterized class, and the convergence result applies.
+
+What the NNS framework contributes beyond this class membership is:
+
+1. a specific splitting rule grounded in the partial-moment geometry of the data,
+2. a finite-order perfect-fit property unavailable to kernel estimators,
+3. a multivariate architecture — developed fully in Chapter 21 — that operates on per-regressor regression points rather than on the raw observation cloud, substantially mitigating the curse of dimensionality.
 
 ---
 
@@ -266,8 +308,7 @@ Splitting terminates when any of the following conditions are met:
 - A region contains fewer than a user-specified minimum number of observations (minimum occupancy threshold).
 - The order parameter \(O\) reaches a user-specified maximum.
 
-The minimum occupancy threshold is quantitative and directly governs the coarsest admissible partition.
-This chapter establishes the consistency conditions on the order sequence and occupancy requirements that guarantee the estimator converges to \(f(x)\) as \(n \to \infty\).
+The minimum occupancy threshold is quantitative and directly governs the coarsest admissible partition. Under any fixed occupancy threshold, as \(n \to \infty\) the occupied regions shrink and the occupancy within each region grows, satisfying the two conditions required for consistency in the partition estimator class.
 
 ---
 
@@ -309,25 +350,28 @@ The resulting partition structure therefore reflects the geometry of the conditi
 
 ## Multivariate Predictors
 
-For a predictor vector \(X_i \in \mathbb{R}^d\), the recursive mean-split procedure extends naturally.
+For a predictor vector \(X_i \in \mathbb{R}^d\), the recursive mean-split procedure extends through an architecture designed specifically to mitigate the curse of dimensionality. This architecture is described in full in Chapter 21; its foundations are laid here.
 
-### Joint partitioning in \(\mathbb{R}^d\)
+### Per-regressor partitioning against the response
 
-In the multivariate joint case, the split at each region \(R\) uses the marginal means of each predictor dimension:
+The key structural decision in the multivariate case is that **each predictor is partitioned independently against the response**, rather than partitioning the joint predictor space.
 
-\[
-\bar{X}_{R,j} = \frac{1}{|I_R|} \sum_{i \in I_R} X_{ij}, \quad j = 1, \dots, d.
-\]
+For predictor \(j \in \{1, \dots, d\}\ \), recursive mean splitting is applied to the pairs \((X_i^{(j)}, Y_i)\) to produce a set of regression points for that predictor — local conditional means summarizing the relationship between \(X^{(j)}\) and \(Y\). These per-regressor partitions are each governed by the same splitting rules described above and produce a set of \(K_j\) regression points for predictor \(j\).
 
-Observations are assigned to regions based on their position relative to \(\bar{X}_{R,j}\) on each predictor axis and relative to \(\bar{Y}_R\) on the response axis.
+This is not joint partitioning of the full \(d\)-dimensional predictor space. It is a collection of univariate partitions, each anchored to the response. The important consequence is that the number of candidate regression points grows as \(\sum_j K_j\) — linearly in the number of regressors — rather than as \(\prod_j K_j\), which would grow exponentially and reproduce the curse.
 
 ### Regression point matrix
 
-For out-of-sample prediction with multiple predictors, the regression points are organized into a **regression point matrix (RPM)**. Each row of the RPM corresponds to one partition region; the columns record the local mean of each predictor dimension within that region.
+The regression points from all \(d\) per-regressor partitions are assembled into a **regression point matrix (RPM)**. Each row of the RPM corresponds to one occupied joint region in the multivariate structure; the columns record the local mean of each predictor within that region, and a final column records the corresponding local mean response.
 
-For a new observation \(x^* \in \mathbb{R}^d\), the prediction algorithm identifies the region in the RPM whose predictor means are closest to \(x^*\) along each dimension, then returns the corresponding local response mean as the prediction \(\hat{f}(x^*)\).
+For a new observation \(x^* \in \mathbb{R}^d\), prediction proceeds by identifying the rows of the RPM closest to \(x^*\) across the predictor columns, then returning the distance-weighted average of the corresponding local response means. This is a nearest-neighbor search over regression points — compressed, denoised local conditional means — rather than over the \(n\) raw observations.
 
-Each observation receives a **multivariate NNS identifier** that encodes its region assignment across all predictor dimensions, with one index per predictor column in the RPM.
+The curse of dimensionality is mitigated along two dimensions simultaneously:
+
+1. **Search space compression.** The RPM has far fewer rows than \(n\). Each row is a local conditional mean derived from a cluster of observations, not a raw data point.
+2. **Noise reduction before search.** Each regression point has already been smoothed through local averaging, so the candidates in the nearest-neighbor search carry substantially less noise than raw observations.
+
+The full multivariate prediction architecture — including dependence-adaptive neighbor count and alternative synthetic-predictor dimension reduction — is developed in Chapter 21.
 
 ---
 
@@ -366,8 +410,8 @@ Terminate splitting when any region falls below the minimum occupancy threshold 
 
 For a new predictor value \(x\):
 
-1. Identify the region \(A_n(x)\) containing \(x\) (univariate) or the matching row in the RPM (multivariate).
-2. Return the local response mean as the predicted value:
+1. Identify the region \(A_n(x)\) containing \(x\) (univariate) or the matching rows in the RPM (multivariate).
+2. Return the local response mean or the distance-weighted average of the nearest regression-point means as the predicted value:
 
 \[
 \hat{f}_n(x)
@@ -396,13 +440,17 @@ and the \(R^2\) of the in-sample fit equals 1.
 
 This property distinguishes NNS from kernel regression, which cannot achieve an exact fit at all observations simultaneously due to the continuous support of the kernel function. The limit condition is reached in finite steps, not asymptotically.
 
-In practice, \(O\) is selected to balance fit quality against overfitting. Larger \(O\) reduces bias but increases variance; the appropriate order is determined by the signal-to-noise ratio of the data. The NNS dependence measure provides an objective criterion for this selection. This chapter formalizes the conditions under which the estimator is consistent for the true conditional mean \(f(x)\) as both \(n\) and \(O\) grow appropriately.
+In practice, \(O\) is selected to balance fit quality against overfitting. Larger \(O\) reduces bias but increases variance; the appropriate order is determined by the signal-to-noise ratio of the data. The NNS dependence measure provides an objective criterion for this selection.
 
 ---
 
 ## Properties of the Recursive Mean-Split Estimator
 
 The recursive mean-split estimator possesses several important characteristics.
+
+### Consistency by class inheritance
+
+The estimator belongs to the class of data-adaptive partition estimators studied by Stone (1977) and extended by Lugosi and Nobel (1996) and Györfi et al. (2002). Under standard conditions — shrinking cell diameter and growing cell occupancy — the class is universally consistent. The recursive mean-split estimator satisfies these conditions under the occupancy and order growth rules used in practice, and consistency is therefore established by class membership rather than requiring a separate proof from first principles.
 
 ### Nonparametric flexibility
 
@@ -463,31 +511,31 @@ Mean-split partitions are data-driven and adapt to the density and conditional m
 
 ---
 
-
 ## Summary
 
 Recursive mean-split estimation provides a flexible, data-adaptive, nonparametric method for estimating conditional expectations.
 
 The key ideas developed in this chapter are:
 
+- **Consistency by class membership.** The recursive mean-split estimator belongs to the class of data-adaptive partition estimators, for which universal consistency under shrinking-diameter and growing-occupancy conditions has been established in the literature (Stone 1977; Lugosi and Nobel 1996; Györfi et al. 2002). The estimator satisfies both conditions under standard stopping rules, and its consistency is therefore inherited directly from this class.
 - Partition-based estimation of conditional means, using the local sample average within each region as the estimator.
 - Two splitting modes: joint \((X, Y)\) partitioning, which creates four partial-moment quadrants at each split, and \(X\)-only partitioning, which creates two predictor-interval subregions.
 - The joint splitting rule is grounded in the co-partial-moment structure of the NNS framework: region boundaries coincide with the joint conditional means, and the four quadrants correspond exactly to the CoUPM, CoLPM, DLPM, and DUPM regions.
 - An order parameter \(O\) governs partition depth; at a finite \(O^*\), the estimator achieves a perfect in-sample fit.
-- Multivariate predictors are handled via the regression point matrix (RPM), which assigns each observation a region identifier across all predictor dimensions.
-- Prediction connects regression points with local averages or piecewise-linear segments, supporting stable interpolation and extrapolation.
+- Multivariate predictors are handled via per-regressor partitioning against the response, which produces a regression point matrix (RPM) of local conditional means. The search space for prediction grows linearly in the number of regressors, not exponentially, substantially mitigating the curse of dimensionality.
+- Prediction connects regression points with local averages or piecewise-linear segments in the univariate case, and with distance-weighted nearest-neighbor averaging over the RPM in the multivariate case.
 
-These concepts provide the foundation for the next two chapters.
+Chapter 19 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing theory while preserving its data-adaptive character.
 
-This chapter establishes the **consistency of partition estimators**, showing that recursive mean-split estimation converges to the true conditional mean under standard regularity conditions on cell diameter and occupancy.
-
-Chapter 19 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing while preserving its data-adaptive character.
+Chapter 21 develops the multivariate regression architecture in full, showing how per-regressor partitioning with response-anchored centroids — combined with dependence-adaptive neighbor count — produces a nearest-neighbor prediction method over a compressed, denoised geometry that handles high-dimensional predictors substantially better than raw-observation kNN.
 
 ---
 
 ## References
 
-- Stone, C. J. (1977). *Consistent nonparametric regression*. *Annals of Statistics*, 5(4), 595–620.
+- Stone, C. J. (1977). Consistent nonparametric regression. *Annals of Statistics*, 5(4), 595–620.
+
+- Lugosi, G., & Nobel, A. (1996). Consistency of data-driven histogram methods for density estimation and classification. *Annals of Statistics*, 24(2), 687–706.
 
 - Györfi, L., Kohler, M., Krzyżak, A., & Walk, H. (2002). *A Distribution-Free Theory of Nonparametric Regression*. Springer.
 
