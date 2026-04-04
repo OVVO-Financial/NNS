@@ -43,9 +43,11 @@ See the following for NNS detailed examples and specific applications:
    
    2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression_Residuals.html)
    
-   2.6 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
+   2.6 [Multiple Imputation](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md)  
+
+   2.7 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
    
-   2.7 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
+   2.8 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
 
    
 

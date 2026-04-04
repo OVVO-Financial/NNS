@@ -46,9 +46,11 @@ See the following for NNS detailed examples and specific applications:
    
    2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression_Residuals.html)
    
-   2.6 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
+   2.6 [Multiple Imputation](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md)  
+
+   2.7 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
    
-   2.7 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
+   2.8 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
 
    
 
@@ -78,7 +80,7 @@ See the following for NNS detailed examples and specific applications:
 
    4.3 [NNS vs. prophet](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/prophet_NNS_comparison.html)
    
-   4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)   
+   4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)
 
    4.5 [NNS vs. N-HiTS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS.ARMA%20vs%20N-Hits.md)
 
@@ -95,7 +97,7 @@ See the following for NNS detailed examples and specific applications:
    
    5.5 [Federal Reserve Causal Analysis](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html)
    
-   
+    
 
 # References
 
@@ -104,5 +106,6 @@ The previous examples are just that...examples.  They are not meant to serve as 
 See the [book](https://ovvo-financial.github.io/NNS/book/) or the [papers available on SSRN](https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356), if you'd like to learn *why* & *how* NNS does what it does.
 
 
-# Thank you for your interest in NNS! 
+# Thank you for your interest in NNS!
+
 
