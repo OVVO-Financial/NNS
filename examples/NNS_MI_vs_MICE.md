@@ -82,7 +82,7 @@ impute_bootstrap <- function(data_complete, data_missing, seed_offset = 0) {
 
 ### The Increasing Dimensions Trick
 
-A subtle but important detail: the predictor `x` is passed as `cbind(x, x)` — duplicated into a two-column matrix. This is not redundant. As documented in the NNS regression vignette, operating in a nominally higher-dimensional space sharpens the distance metric underlying the nearest-neighbor search in the regression point matrix. For univariate imputation, this effectively converts the problem into a 2D nearest-neighbor problem, producing more precise donor selection and more accurate imputed values. It is a practical implementation insight specific to NNS that has no direct analogue in classical imputation methods.
+A subtle but important detail: the predictor `x` is passed as `cbind(x, x)` — duplicated into a two-column matrix. This is not redundant. As documented in the [NNS regression vignette](https://ovvo-financial.github.io/NNS/articles/NNSvignette_Clustering_and_Regression.html#increasing-dimensions), operating in a nominally higher-dimensional space sharpens the distance metric underlying the nearest-neighbor search in the regression point matrix. For univariate imputation, this effectively converts the problem into a 2D nearest-neighbor problem, producing more precise donor selection and more accurate imputed values. It is a practical implementation insight specific to NNS that has no direct analogue in classical imputation methods.
 
 ---
 
