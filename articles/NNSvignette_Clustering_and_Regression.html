@@ -734,6 +734,25 @@ procedure.</p>
 <p><img src="images/multi_impute.png" width="600" height="600"></p>
 </center>
 </div>
+<div class="section level3">
+<h3 id="a-note-on-uncertainty-propagation">A Note on Uncertainty Propagation<a class="anchor" aria-label="anchor" href="#a-note-on-uncertainty-propagation"></a>
+</h3>
+<p>A common concern with local imputation methods is whether imputation
+uncertainty propagates correctly into downstream inference.
+<code>NNS</code> addresses this through bootstrap multiple imputation:
+resampling complete cases across <code>m</code> iterations generates
+between-imputation variance that flows through standard Rubin’s rules
+pooling identically to any classical procedure.</p>
+<p>Empirically, <code>NNS</code> bootstrap MI outperforms MICE with
+predictive mean matching on nonlinear data — producing a pooled estimate
+closer to the true parameter with a smaller pooled SE. The advantage
+comes not from compressing uncertainty but from a more accurate
+imputation model, which reduces between-imputation variance driven by
+model error rather than genuine data uncertainty.</p>
+<p>See <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md" class="external-link">NNS
+Multiple Imputation vs MICE</a> for the full reproducible
+comparison.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
