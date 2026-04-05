@@ -50,7 +50,6 @@
 <span>  CV.size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  balance <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ts.test <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  folds <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">actual</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  objective <span class="op">=</span> <span class="st">"min"</span>,</span>
@@ -104,10 +103,6 @@
 
 <dt id="arg-ts-test">ts.test<a class="anchor" aria-label="anchor" href="#arg-ts-test"></a></dt>
 <dd><p>integer; NULL (default) Sets the length of the test set for time-series data; typically <code>2*h</code> parameter value from <a href="NNS.ARMA.html">NNS.ARMA</a> or double known periods to forecast.</p></dd>
-
-
-<dt id="arg-folds">folds<a class="anchor" aria-label="anchor" href="#arg-folds"></a></dt>
-<dd><p>integer; 5 (default) Sets the number of <code>folds</code> in the <a href="NNS.stack.html">NNS.stack</a> procedure for optimal <code>n.best</code> parameter.</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>

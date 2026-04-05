@@ -18,7 +18,6 @@ NNS.boost(
   CV.size = NULL,
   balance = FALSE,
   ts.test = NULL,
-  folds = 5,
   threshold = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
@@ -91,12 +90,6 @@ NNS.boost(
   time-series data; typically `2*h` parameter value from
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
   or double known periods to forecast.
-
-- folds:
-
-  integer; 5 (default) Sets the number of `folds` in the
-  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
-  procedure for optimal `n.best` parameter.
 
 - threshold:
 
