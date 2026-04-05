@@ -101,39 +101,39 @@ allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span>,<span class="fl">5</span><span class="op">]</span>, residual.plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">rhs.partitions</span></span></code></pre></div>
-<pre><code><span><span class="co">##           V1       V2       V3        V4</span></span>
-<span><span class="co">##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">##  1: 4.300000 2.000000 1.000000 0.1000000</span></span>
-<span><span class="co">##  2: 4.381250 2.829734 1.050000 0.2000000</span></span>
-<span><span class="co">##  3: 4.577396 3.358016 1.200000 0.3000000</span></span>
-<span><span class="co">##  4: 4.700000 4.400000 1.300000 0.4083333</span></span>
-<span><span class="co">##  5: 4.800000       NA 1.400000 1.0630397</span></span>
-<span><span class="co">##  6: 4.900000       NA 1.500000 1.3742424</span></span>
-<span><span class="co">##  7: 5.000000       NA 1.600000 1.7789810</span></span>
-<span><span class="co">##  8: 5.100000       NA 1.700000 2.2285885</span></span>
-<span><span class="co">##  9: 5.205000       NA 1.900000 2.5000000</span></span>
-<span><span class="co">## 10: 5.400000       NA 3.416305        NA</span></span>
-<span><span class="co">## 11: 5.500000       NA 3.834865        NA</span></span>
-<span><span class="co">## 12: 5.600000       NA 4.000000        NA</span></span>
-<span><span class="co">## 13: 5.700000       NA 4.184722        NA</span></span>
-<span><span class="co">## 14: 5.800000       NA 4.400000        NA</span></span>
-<span><span class="co">## 15: 5.900000       NA 4.500000        NA</span></span>
-<span><span class="co">## 16: 6.000000       NA 4.670803        NA</span></span>
-<span><span class="co">## 17: 6.100000       NA 4.863889        NA</span></span>
-<span><span class="co">## 18: 6.200000       NA 5.000000        NA</span></span>
-<span><span class="co">## 19: 6.300000       NA 5.100000        NA</span></span>
-<span><span class="co">## 20: 6.400000       NA 5.200000        NA</span></span>
-<span><span class="co">## 21: 6.500000       NA 5.337500        NA</span></span>
-<span><span class="co">## 22: 6.600000       NA 5.500000        NA</span></span>
-<span><span class="co">## 23: 6.700000       NA 5.617708        NA</span></span>
-<span><span class="co">## 24: 6.800000       NA 5.849554        NA</span></span>
-<span><span class="co">## 25: 6.900000       NA 6.336875        NA</span></span>
-<span><span class="co">## 26: 7.050000       NA 6.900000        NA</span></span>
-<span><span class="co">## 27: 7.224375       NA       NA        NA</span></span>
-<span><span class="co">## 28: 7.687079       NA       NA        NA</span></span>
-<span><span class="co">## 29: 7.900000       NA       NA        NA</span></span>
-<span><span class="co">##           V1       V2       V3        V4</span></span>
-<span><span class="co">##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;     &lt;num&gt;</span></span></code></pre>
+<pre><code><span><span class="co">##           V1       V2       V3       V4</span></span>
+<span><span class="co">##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;</span></span>
+<span><span class="co">##  1: 4.300000 2.000000 1.000000 0.100000</span></span>
+<span><span class="co">##  2: 4.381250 2.645276 1.050000 0.200000</span></span>
+<span><span class="co">##  3: 4.577396 2.980556 1.200000 0.300000</span></span>
+<span><span class="co">##  4: 4.700000 3.181155 1.300000 0.400000</span></span>
+<span><span class="co">##  5: 4.800000 3.552439 1.400000 0.500000</span></span>
+<span><span class="co">##  6: 4.900000 4.400000 1.500000 0.600000</span></span>
+<span><span class="co">##  7: 5.000000       NA 1.600000 1.000000</span></span>
+<span><span class="co">##  8: 5.100000       NA 1.700000 1.100000</span></span>
+<span><span class="co">##  9: 5.205000       NA 1.900000 1.200000</span></span>
+<span><span class="co">## 10: 5.400000       NA 3.416305 1.300000</span></span>
+<span><span class="co">## 11: 5.500000       NA 3.834865 1.400000</span></span>
+<span><span class="co">## 12: 5.600000       NA 4.000000 1.500000</span></span>
+<span><span class="co">## 13: 5.700000       NA 4.184722 1.600000</span></span>
+<span><span class="co">## 14: 5.800000       NA 4.400000 1.700000</span></span>
+<span><span class="co">## 15: 5.900000       NA 4.500000 1.800000</span></span>
+<span><span class="co">## 16: 6.000000       NA 4.670803 1.900000</span></span>
+<span><span class="co">## 17: 6.100000       NA 4.863889 2.000000</span></span>
+<span><span class="co">## 18: 6.200000       NA 5.000000 2.117708</span></span>
+<span><span class="co">## 19: 6.300000       NA 5.100000 2.300000</span></span>
+<span><span class="co">## 20: 6.400000       NA 5.200000 2.435206</span></span>
+<span><span class="co">## 21: 6.500000       NA 5.337500 2.500000</span></span>
+<span><span class="co">## 22: 6.600000       NA 5.500000       NA</span></span>
+<span><span class="co">## 23: 6.700000       NA 5.617708       NA</span></span>
+<span><span class="co">## 24: 6.800000       NA 5.849554       NA</span></span>
+<span><span class="co">## 25: 6.900000       NA 6.336875       NA</span></span>
+<span><span class="co">## 26: 7.050000       NA 6.900000       NA</span></span>
+<span><span class="co">## 27: 7.224375       NA       NA       NA</span></span>
+<span><span class="co">## 28: 7.687079       NA       NA       NA</span></span>
+<span><span class="co">## 29: 7.900000       NA       NA       NA</span></span>
+<span><span class="co">##           V1       V2       V3       V4</span></span>
+<span><span class="co">##        &lt;num&gt;    &lt;num&gt;    &lt;num&gt;    &lt;num&gt;</span></span></code></pre>
 </div>
 </div>
 </div>
