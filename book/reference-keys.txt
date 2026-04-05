@@ -513,6 +513,7 @@ ensemble-logic-in-the-nns-framework
 base-learners-recursive-partition-estimation
 resampling-and-aggregation-via-nns.boost
 threshold-learning-stage
+weighted-feature-sampling-in-the-epoch-loop
 user-specified-objectives
 feature-frequency-aggregation
 final-estimate
