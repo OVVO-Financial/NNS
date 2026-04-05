@@ -27,140 +27,211 @@
 #' }
 #' @export
 
-NNS.dep = function(x,
-                   y = NULL,
-                   asym = FALSE,
-                   p.value = FALSE,
-                   print.map = FALSE){
+NNS.dep <- function(x,
+                     y         = NULL,
+                     asym      = FALSE,
+                     p.value   = FALSE,
+                     print.map = FALSE) {
   
-  
-  
-  if (any(class(x) %in% c("tbl","data.table")) && !is.null(y)) {
-    x <- if (!is.null(ncol(x)) && ncol(x) == 1) as.vector(unlist(x)) else as.numeric(x)
+  # ---- helper coercion ------------------------------------------------------
+  .coerce_vec <- function(z, nm) {
+    if (is.null(z)) return(NULL)
+    
+    if (any(class(z) %in% c("tbl", "data.table"))) {
+      if (!is.null(ncol(z)) && ncol(z) == 1L) {
+        z <- as.vector(unlist(z))
+      } else {
+        stop(sprintf("%s must be a vector or single-column object in the bivariate path.", nm))
+      }
+    }
+    
+    if (is.data.frame(z)) {
+      if (ncol(z) == 1L) {
+        z <- z[[1L]]
+      } else {
+        stop(sprintf("%s must be a vector or single-column object in the bivariate path.", nm))
+      }
+    }
+    
+    as.numeric(z)
   }
-  if (any(class(y) %in% c("tbl","data.table"))) {
-    y <- if (!is.null(ncol(y)) && ncol(y) == 1) as.vector(unlist(y)) else as.numeric(y)
-  }
   
-  if(anyNA(x)) stop("You have some missing values, please address.")
-  
-  if(p.value){
-    y_p <- replicate(100, sample.int(length(y)))
-    x <- cbind(x, y, matrix(y[y_p], ncol = dim(y_p)[2], byrow = F))
-    y <- NULL
-  }
-  
-  if(!is.null(y)){
-    l <- length(x)
-    
-    obs <- max(8, l/8)
-    
-    # Define segments
-    PART_xy <- suppressWarnings(NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map))
-    
-    PART_yx <- suppressWarnings(NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE))
-    
-    if(dim(PART_xy$regression.points)[1]==0) return(list("Correlation" = 0, "Dependence" = 0))
-    
-    PART_xy <- PART_xy$dt
-    PART_xy <- PART_xy[complete.cases(PART_xy),]
-    weights_xy <- PART_xy[, .N / l, by = quadrant]$V1
-    
-    PART_yx <- PART_yx$dt
-    PART_yx <- PART_yx[complete.cases(PART_yx),]
-    weights_yx <- PART_yx[, .N / l, by = quadrant]$V1
-    
-    
-    dep_fn <- function(xx, yy) {
-      NNS::NNS.copula(cbind(xx, yy)) * sign(fast_lm(xx, yy)$coef[2])
-    }
-    
-    
-    res_xy <- suppressWarnings(tryCatch(PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
-                                        error = function(e) PART_xy[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
-    
-    res_yx <- suppressWarnings(tryCatch(PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = quadrant, .SDcols = c(1,2)],
-                                        error = function(e) PART_yx[ , dep_fn(.SD[[1]], .SD[[2]]), by = prior.quadrant, .SDcols = c(1,2)]))
-    
-    if(anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
-    if(is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
-    
-    if(anyNA(res_yx)) res_yx[is.na(res_yx)] <- dep_fn(x, y)
-    if(is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
-    
-    if(asym){
-      dependence <- sum(abs(res_xy[,2]) * weights_xy)
-    } else {
-      dependence <- max(c(sum(abs(res_yx[,2]) * weights_yx),
-                          sum(abs(res_xy[,2]) * weights_xy)))
-    }
-    
-    lx <- PART_xy[, length(unique(x))]
-    ly <- PART_xy[, length(unique(y))]
-    
-    degree_x <- min(10, max(1,lx-1), max(1,ly-1))
-    
-    I_x <- lx < sqrt(l)
-    I_y <- ly < sqrt(l)
-    I <- I_x * I_y
-    
-    if(I == 1){
-      poly_base <- suppressWarnings(tryCatch(fast_lm_mult(poly(x, degree_x), abs(y))$r.squared,
-                                             warning = function(w) dependence,
-                                             error = function(e) dependence))
-      
-      dependence <- gravity(c(dependence, NNS.copula(cbind(x, y), plot = FALSE), poly_base))
-    }
-    
-    if(asym){
-      corr <- sum(res_xy[,2] * weights_xy)
-    } else {
-      corr <- max(c(sum(res_yx[,2] * weights_yx), sum(res_xy[,2] * weights_xy)))
-    }
-    
-    
-    return(list("Correlation" = corr,
-                "Dependence" = dependence))
+  # ---- class coercions ------------------------------------------------------
+  if (!is.null(y)) {
+    x <- .coerce_vec(x, "x")
+    y <- .coerce_vec(y, "y")
   } else {
-    if(p.value){
+    if (any(class(x) %in% c("tbl", "data.table"))) x <- as.data.frame(x)
+    if (is.data.frame(x)) x <- data.matrix(x)
+  }
+  
+  # ---- missing values -------------------------------------------------------
+  if (anyNA(x)) stop("x has missing values, please address.")
+  if (!is.null(y) && anyNA(y)) stop("y has missing values, please address.")
+  
+  # ---- p.value permutation setup --------------------------------------------
+  if (p.value) {
+    if (is.null(y)) stop("p.value = TRUE requires both x and y.")
+    if (length(x) != length(y)) stop("x and y must have the same length.")
+    
+    y_p <- replicate(100L, sample.int(length(y)))
+    x   <- cbind(x, y, matrix(y[y_p], ncol = ncol(y_p), byrow = FALSE))
+    y   <- NULL
+  }
+  
+  # ---- matrix / p.value path ------------------------------------------------
+  if (is.null(y)) {
+    if (p.value) {
       original.par <- par(no.readonly = TRUE)
+      on.exit(par(original.par), add = TRUE)
       
-      nns.mc <- apply(x, 2, function(g) NNS.dep(x[,1], g))
+      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g))
+      cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
+      deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
-      ## Store results
-      cors <- unlist(lapply(nns.mc, "[[", 1))
-      deps <- unlist(lapply(nns.mc, "[[", 2))
+      cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1L, 2L)])
+      cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1L, 2L)])
+      dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1L, 2L)])
+      dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1L, 2L)])
       
-      
-      cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1,2)])
-      cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1,2)])
-      dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1,2)])
-      dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1,2)])
-      
-      if(print.map){
-        par(mfrow = c(1, 2))
-        hist(cors[-c(1,2)], main = "NNS Correlation", xlab = NULL, xlim = c(min(cors), max(cors[-1])))
-        abline(v = cors[2], col = "red", lwd = 2)
-        mtext("Result", side = 3, col = "red", at = cors[2])
-        abline(v =  cor_lower_CI, col = "red", lwd = 2, lty = 3)
-        abline(v =  cor_upper_CI , col = "red", lwd = 2, lty = 3)
-        hist(deps[-c(1,2)], main = "NNS Dependence", xlab = NULL, xlim = c(min(deps), max(deps[-1])))
-        abline(v = deps[2], col = "red", lwd = 2)
-        mtext("Result", side = 3, col = "red", at = deps[2])
-        abline(v =  dep_lower_CI , col = "red", lwd = 2, lty = 3)
-        abline(v =  dep_upper_CI , col = "red", lwd = 2, lty = 3)
-        par(mfrow = original.par)
+      if (print.map) {
+        par(mfrow = c(1L, 2L))
+        hist(cors[-c(1L, 2L)], main = "NNS Correlation", xlab = NULL,
+             xlim = c(min(cors), max(cors[-1L])))
+        abline(v = cors[2L], col = "red", lwd = 2)
+        mtext("Result", side = 3L, col = "red", at = cors[2L])
+        abline(v = cor_lower_CI, col = "red", lwd = 2, lty = 3)
+        abline(v = cor_upper_CI, col = "red", lwd = 2, lty = 3)
+        
+        hist(deps[-c(1L, 2L)], main = "NNS Dependence", xlab = NULL,
+             xlim = c(min(deps), max(deps[-1L])))
+        abline(v = deps[2L], col = "red", lwd = 2)
+        mtext("Result", side = 3L, col = "red", at = deps[2L])
+        abline(v = dep_lower_CI, col = "red", lwd = 2, lty = 3)
+        abline(v = dep_upper_CI, col = "red", lwd = 2, lty = 3)
       }
       
-      return(list("Correlation" = as.numeric((cors)[2]),
-                  "Correlation p.value" = min(LPM(0, cors[2], cors[-c(1,2)]),
-                                              UPM(0, cors[2], cors[-c(1,2)])),
-                  "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
-                  "Dependence" = as.numeric((deps)[2]),
-                  "Dependence p.value" = min(LPM(0, deps[2], deps[-c(1,2)]),
-                                             UPM(0, deps[2], deps[-c(1,2)])),
-                  "Dependence 95% CIs" = c(dep_lower_CI, dep_upper_CI)))
-    } else return(NNS.dep.matrix(x, asym = asym))
+      return(list(
+        "Correlation"         = as.numeric(cors[2L]),
+        "Correlation p.value" = min(LPM(0, cors[2L], cors[-c(1L, 2L)]),
+                                    UPM(0, cors[2L], cors[-c(1L, 2L)])),
+        "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
+        "Dependence"          = as.numeric(deps[2L]),
+        "Dependence p.value"  = min(LPM(0, deps[2L], deps[-c(1L, 2L)]),
+                                    UPM(0, deps[2L], deps[-c(1L, 2L)])),
+        "Dependence 95% CIs"  = c(dep_lower_CI, dep_upper_CI)
+      ))
+    }
+    
+    return(NNS.dep.matrix(x, asym = asym))
   }
+  
+  # ---- bivariate path -------------------------------------------------------
+  if (length(x) != length(y)) stop("x and y must have the same length.")
+  
+  l   <- length(x)
+  obs <- max(8L, as.integer(l / 8L))
+  
+  PART_xy <- suppressWarnings(
+    NNS.part(x, y, order = NULL, obs.req = obs,
+             min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map)
+  )
+  PART_yx <- suppressWarnings(
+    NNS.part(y, x, order = NULL, obs.req = obs,
+             min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)
+  )
+  
+  if (nrow(PART_xy$regression.points) == 0L)
+    return(list("Correlation" = 0, "Dependence" = 0))
+  
+  NNS_dep_pair_cpp(
+    x       = as.numeric(x),
+    y       = as.numeric(y),
+    quad_xy = as.character(PART_xy$dt$quadrant),
+    quad_yx = as.character(PART_yx$dt$quadrant),
+    asym    = isTRUE(asym)
+  )
+}
+
+
+NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
+  
+  n <- ncol(x)
+  if(is.null(n)){
+    stop("supply both 'x' and 'y' or a matrix-like 'x'")
+  }
+  
+  if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
+  
+  x <- data.matrix(x)
+  
+  if(nrow(x) < 20 ) order <- 2
+  
+  upper_lower <- function(x, y, asym){
+    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
+    if(asym){
+      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym)
+      return(list("Upper_cor" = basic_dep$Correlation,
+                  "Upper_dep" = basic_dep$Dependence,
+                  "Lower_cor" = asym_dep$Correlation,
+                  "Lower_dep" = asym_dep$Dependence))
+    } else {
+      return(list("Upper_cor" = basic_dep$Correlation,
+                  "Upper_dep" = basic_dep$Dependence,
+                  "Lower_cor" = basic_dep$Correlation,
+                  "Lower_dep" = basic_dep$Dependence))
+    }
+  }
+  
+  raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym)))
+  
+  
+  raw.both <- unlist(raw.both)
+  l <- length(raw.both)
+  
+  raw.rhos_upper <- raw.both[seq(1, l, 4)]
+  raw.deps_upper <- raw.both[seq(2, l, 4)]
+  raw.rhos_lower <- raw.both[seq(3, l, 4)]
+  raw.deps_lower <- raw.both[seq(4, l, 4)]
+  
+  rhos <- matrix(0, n, n)
+  deps <- matrix(0, n, n)
+  
+  if(!asym){
+    rhos[lower.tri(rhos, diag = FALSE)] <- (unlist(raw.rhos_upper) + unlist(raw.rhos_lower)) / 2
+    deps[lower.tri(deps, diag = FALSE)] <- (unlist(raw.deps_upper) + unlist(raw.deps_lower)) / 2
+    
+    rhos[upper.tri(rhos)] <- t(rhos)[upper.tri(rhos)]
+    deps[upper.tri(deps)] <- t(deps)[upper.tri(deps)]
+  } else {
+    rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
+    deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
+    
+    rhos_upper <- matrix(0, n, n)
+    deps_upper <- matrix(0, n, n)
+    
+    rhos[is.na(rhos)] <- 0
+    deps[is.na(deps)] <- 0
+    
+    rhos_upper[lower.tri(rhos_upper, diag=FALSE)] <- unlist(raw.rhos_upper)
+    rhos_upper <- t(rhos_upper)
+    
+    deps_upper[lower.tri(deps_upper, diag=FALSE)] <- unlist(raw.deps_upper)
+    deps_upper <- t(deps_upper)
+    
+    rhos <- rhos + rhos_upper
+    deps <- deps + deps_upper
+  }
+  
+  diag(rhos) <- 1
+  diag(deps) <- 1
+  
+  colnames(rhos) <- colnames(x)
+  colnames(deps) <- colnames(x)
+  rownames(rhos) <- colnames(x)
+  rownames(deps) <- colnames(x)
+  
+  return(list("Correlation" = rhos,
+              "Dependence" = deps))
   
 }

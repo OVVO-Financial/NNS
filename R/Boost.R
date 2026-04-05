@@ -319,29 +319,72 @@ NNS.boost <- function(IVs.train,
     
     if (status) message("\nGenerating Final Estimate", "\r", appendLF = TRUE)
     
-    # Use epoch feature frequencies as custom NNS.reg coefficients (dim.red.method
-    # accepts a numeric vector directly -> x.star.coef <- as.numeric(dim.red.method)).
-    # This builds a single X* weighted by how often each feature survived the
-    # threshold filter, then fits one univariate NNS.reg on that synthetic predictor.
+    # Build a frequency-weighted synthetic predictor X* from all features, where
+    # each column is weighted by how often it survived the threshold filter.
+    # NNS.reg with dim.red.method = coef_aligned computes X* internally and
+    # exposes it via $x.star (training rows). $Point.est is the regression
+    # output (predicted Y), NOT the X* projection of test rows, so we compute
+    # the test-set X* explicitly using the same joint-normalisation that
+    # NNS.reg applies internally:
+    #   norm.x  <- apply(rbind(test, train), 2, rescale)
+    #   X*      <- norm.x %*% coef / sum(abs(coef) > 0)
+    # X* is then duplicated into cbind(xstar, xstar) so that NNS.stack
+    # method = 1 can cross-validate n.best on a two-column design matrix.
+    # The duplicate column satisfies the multivariate path requirement
+    # without adding new information. The same obj.fn and objective carried
+    # through the boost loop govern n.best selection.
     freq_weights <- as.numeric(plot.table / sum(plot.table))  # normalised frequencies
     names(freq_weights) <- names(plot.table)
     # align to column order of IVs.train (x)
     coef_aligned <- freq_weights[colnames(x)]
     coef_aligned[is.na(coef_aligned)] <- 0
     
-    final_fit <- suppressWarnings(
+    xstar_fit <- suppressWarnings(
       NNS.reg(as.data.frame(x), y,
-              point.est       = as.data.frame(z),
-              dim.red.method  = coef_aligned,
-              plot            = FALSE,
-              residual.plot   = FALSE,
-              order           = depth,
-              ncores          = 1,
-              type            = type,
-              confidence.interval = pred.int)
+              dim.red.method = coef_aligned,
+              plot           = FALSE,
+              residual.plot  = FALSE,
+              order          = depth,
+              ncores         = 1,
+              type           = NULL,
+              point.only     = FALSE)
     )
     
-    estimates <- final_fit$Point.est
+    xstar_train <- as.numeric(unlist(xstar_fit$x.star))
+    xstar_train[is.na(xstar_train)] <- gravity(na.omit(xstar_train))
+    
+    # Replicate NNS.reg joint-normalisation to project test rows onto X*
+    x_mat  <- data.matrix(as.data.frame(x))
+    z_mat  <- data.matrix(as.data.frame(z))
+    joint  <- rbind(z_mat, x_mat)
+    joint_norm <- apply(joint, 2, function(col) {
+      rng <- max(col) - min(col)
+      (col - min(col)) / ifelse(rng == 0, 1, rng)
+    })
+    xn <- sum(abs(coef_aligned) > 0)
+    if (xn == 0) xn <- 1L
+    xstar_test <- as.numeric(
+      joint_norm[seq_len(nrow(z_mat)), , drop = FALSE] %*% coef_aligned / xn
+    )
+    xstar_test[is.na(xstar_test)] <- gravity(na.omit(xstar_test))
+    
+    IVs.xstar.train <- data.frame(xstar = xstar_train, xstar2 = xstar_train)
+    IVs.xstar.test  <- data.frame(xstar = xstar_test,  xstar2 = xstar_test)
+    
+    final_fit <- suppressWarnings(
+      NNS.stack(IVs.train  = IVs.xstar.train,
+                DV.train   = y,
+                IVs.test   = IVs.xstar.test,
+                method     = 1,
+                obj.fn     = obj.fn,
+                objective  = objective,
+                type       = type,
+                pred.int   = pred.int,
+                status     = status)
+    )
+    
+    estimates <- final_fit$stack
+    if (is.null(estimates)) estimates <- final_fit$reg
     estimates[is.na(estimates)] <- gravity(na.omit(estimates))
     
     if (!is.null(type)) {
@@ -367,7 +410,8 @@ NNS.boost <- function(IVs.train,
     return(list("results"           = estimates,
                 "pred.int"          = final_fit$pred.int,
                 "feature.weights"   = plot.table / sum(plot.table),
-                "feature.frequency" = plot.table))
+                "feature.frequency" = plot.table,
+                "n.best"            = final_fit$NNS.reg.n.best))
   } # end .core
   
   out <- tryCatch(

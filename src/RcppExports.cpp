@@ -10,6 +10,33 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// NNS_dep_pair_cpp
+List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, bool asym);
+RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP asymSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_xy(quad_xySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_yx(quad_yxSEXP);
+    Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, asym));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_dep_matrix_cpp
+List NNS_dep_matrix_cpp(NumericMatrix X, bool asym);
+RcppExport SEXP _NNS_NNS_dep_matrix_cpp(SEXP XSEXP, SEXP asymSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_matrix_cpp(X, asym));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NNS_distance_cpp
 SEXP NNS_distance_cpp(NumericMatrix X, NumericVector yhat, NumericVector dest, int k, bool use_class);
 RcppExport SEXP _NNS_NNS_distance_cpp(SEXP XSEXP, SEXP yhatSEXP, SEXP destSEXP, SEXP kSEXP, SEXP use_classSEXP) {
@@ -587,6 +614,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 5},
+    {"_NNS_NNS_dep_matrix_cpp", (DL_FUNC) &_NNS_NNS_dep_matrix_cpp, 2},
     {"_NNS_NNS_distance_cpp", (DL_FUNC) &_NNS_NNS_distance_cpp, 5},
     {"_NNS_NNS_distance_path_cpp", (DL_FUNC) &_NNS_NNS_distance_path_cpp, 5},
     {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
