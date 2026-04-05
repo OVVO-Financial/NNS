@@ -15,7 +15,6 @@ NNS.boost(
   CV.size = NULL,
   balance = FALSE,
   ts.test = NULL,
-  folds = 5,
   threshold = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
@@ -46,8 +45,6 @@ NNS.boost(
 \item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.}
 
 \item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
-
-\item{folds}{integer; 5 (default) Sets the number of \code{folds} in the \link{NNS.stack} procedure for optimal \code{n.best} parameter.}
 
 \item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
 

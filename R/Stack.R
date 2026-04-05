@@ -150,13 +150,23 @@ NNS.stack <- function(IVs.train,
       colnames(IVs.test) <- colnames(IVs.train)
   }
   
-  if(2 %in% method && dim(IVs.train)[2]>1){
-    if(dim.red.method=="cor"){
-      var.cutoffs_1 <- abs(round(cor(data.matrix(cbind(DV.train, IVs.train)), method = "spearman")[-1,1], digits = 2))
-    } else {
-      var.cutoffs_1 <- abs(round(suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE, order = order, ncores = ncores,
-                                                          type = type, point.only = TRUE)$equation$Coefficient[-(n+1)]), digits = 2))
-    }
+  # var.cutoffs_1 (full-data importance scores) removed: computing importance on the
+  # entire training set before any CV split leaks held-out information into every
+  # fold's threshold grid.  The grid is now built solely from fold-local scores
+  # (var.cutoffs_2) computed inside the fold loop on CV.IVs.train only.
+  
+  # Balance applied ONCE before any fold splitting -- fixes the bug where
+  # IVs.train/DV.train were overwritten on each fold iteration, causing the same
+  # balanced dataset to be reused across folds and leaking information between them.
+  if (balance) {
+    y_train  <- as.factor(DV.train)
+    ycol <- "Class"
+    training_1 <- downSample(IVs.train, y_train, list = FALSE, yname = ycol)
+    training_2 <- upSample(IVs.train,   y_train, list = FALSE, yname = ycol)
+    training_bal <- rbind.data.frame(training_1, training_2)
+    IVs.train <- training_bal[, setdiff(names(training_bal), ycol), drop = FALSE]
+    DV.train  <- as.numeric(as.factor(training_bal[[ycol]]))
+    colnames(IVs.test) <- colnames(IVs.train)
   }
   
   if(is.null(CV.size)) new.CV.size <- round(runif(1, .2, 1/3), 3) else new.CV.size <- CV.size
@@ -189,23 +199,8 @@ NNS.stack <- function(IVs.train,
     training <- cbind(IVs.train[c(-test.set),], DV.train[c(-test.set)])
     training <- training[complete.cases(training),]
     
-    if (balance) {
-      y_train  <- as.factor(DV.train)
-      
-      ycol <- "Class"
-      training_1 <- downSample(IVs.train, y_train, list = FALSE, yname = ycol)
-      training_2 <- upSample(IVs.train,   y_train, list = FALSE, yname = ycol)
-      
-      training <- rbind.data.frame(training_1, training_2)
-      
-      IVs.train <- training[, setdiff(names(training), ycol), drop = FALSE]
-      DV.train  <- as.numeric(as.factor(training[[ycol]]))
-      
-      colnames(IVs.test) <- colnames(IVs.train) 
-    }
-    
     CV.IVs.train <- data.frame(training[, -(ncol(training))])
-    CV.DV.train <- as.numeric(as.factor(training[, ncol(training)]))
+    CV.DV.train <- as.numeric(training[, ncol(training)])
     
     
     # Dimension Reduction Regression Output
@@ -227,7 +222,8 @@ NNS.stack <- function(IVs.train,
         ), digits = 2))
       }
       
-      var.cutoffs <- c(pmin(var.cutoffs_1, (pmax(var.cutoffs_1, var.cutoffs_2) + pmin(var.cutoffs_1, var.cutoffs_2)) / 2))
+      # Threshold grid built solely from fold-local scores -- no full-data leakage.
+      var.cutoffs <- var.cutoffs_2
       var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
       var.cutoffs[is.na(var.cutoffs)] <- 0
       var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
@@ -303,6 +299,52 @@ NNS.stack <- function(IVs.train,
       relevant_vars <- colnames(IVs.train)
       if (is.null(relevant_vars)) relevant_vars <- 1:n
       
+      # Compute per-fold X* (synthetic dim-red predictor) for use in Method 1 CV
+      # when stack = TRUE and both methods are requested.
+      # Replicates NNS.reg internals exactly (Regression.R lines 379-419):
+      #   norm.x    <- apply(original.variable, 2, function(b) (b-min(b))/(max(b)-min(b)))
+      #   X*_train  <- rowSums(eachrow(norm.x, coef, "*")) / sum(abs(coef)>0)
+      # For point.est NNS.reg does: points.norm <- apply(rbind(point.est, x), 2, rescale)
+      # then new.point.est <- points.norm[test_rows,] %*% coef / xn
+      if (stack && identical(sort(method), c(1, 2))) {
+        xstar_cv_fit <- suppressWarnings(
+          NNS.reg(CV.IVs.train, CV.DV.train,
+                  point.est = CV.IVs.test,
+                  dim.red.method = dim.red.method,
+                  plot = FALSE, residual.plot = FALSE,
+                  order = order, threshold = best.threshold,
+                  ncores = ncores, type = NULL,
+                  dist = dist, point.only = FALSE, smooth = smoothness)
+        )
+        # X* for training rows -- returned directly
+        xstar_CV_train <- as.numeric(unlist(xstar_cv_fit$x.star))
+        
+        # X* for test rows -- replicate NNS.reg point.est projection exactly:
+        # coefficients from equation (all rows except last DENOMINATOR row)
+        eq        <- xstar_cv_fit$equation
+        coef_vals <- as.numeric(eq$Coefficient[-nrow(eq)])
+        xn        <- sum(abs(coef_vals) > 0)
+        if (xn == 0) xn <- 1L
+        train_mat <- data.matrix(CV.IVs.train)
+        test_mat  <- data.matrix(CV.IVs.test)
+        np_cv     <- nrow(test_mat)
+        # joint normalisation: rbind(test, train) then rescale each column
+        joint     <- rbind(test_mat, train_mat)
+        joint_norm <- apply(joint, 2, function(b) {
+          rng <- max(b) - min(b)
+          (b - min(b)) / ifelse(rng == 0, 1, rng)
+        })
+        test_norm <- joint_norm[seq_len(np_cv), , drop = FALSE]
+        # guard: coef_vals must match ncol of test_norm
+        if (length(coef_vals) == ncol(test_norm)) {
+          xstar_CV_test <- as.numeric(test_norm %*% coef_vals / xn)
+        } else {
+          # fallback: use training X* mean
+          xstar_CV_test <- rep(mean(xstar_CV_train, na.rm = TRUE), np_cv)
+        }
+        xstar_CV_test[is.na(xstar_CV_test)] <- gravity(na.omit(xstar_CV_test))
+      }
+      
       if (b == folds) {
         threshold.table <- sort(table(unlist(THRESHOLDS)), decreasing = TRUE)
         nns.ord.threshold <- gravity(as.numeric(names(threshold.table[threshold.table == max(threshold.table)])))
@@ -314,7 +356,7 @@ NNS.stack <- function(IVs.train,
                                 plot = FALSE,
                                 order = order, threshold = nns.ord.threshold,
                                 ncores = ncores,
-                                type = type, point.only = TRUE,
+                                type = type, point.only = FALSE,
                                 confidence.interval = pred.int,
                                 smooth = smoothness)
         
@@ -322,6 +364,32 @@ NNS.stack <- function(IVs.train,
         predicted <- nns.method.2$Fitted.xy$y.hat
         pred.int.2 <- nns.method.2$pred.int
         best.nns.ord <- eval(obj.fn)
+        
+        # Capture full-data X* for Method 1's final fit (when stacking)
+        # Use $x.star for training rows; replicate NNS.reg's joint normalisation for test rows
+        if (stack && identical(sort(method), c(1, 2))) {
+          xstar_full_train <- as.numeric(unlist(nns.method.2$x.star))
+          
+          eq        <- nns.method.2$equation
+          coef_vals <- as.numeric(eq$Coefficient[-nrow(eq)])
+          xn        <- sum(abs(coef_vals) > 0)
+          if (xn == 0) xn <- 1L
+          train_mat <- data.matrix(IVs.train)
+          test_mat  <- data.matrix(IVs.test)
+          np_full   <- nrow(test_mat)
+          joint     <- rbind(test_mat, train_mat)
+          joint_norm <- apply(joint, 2, function(b) {
+            rng <- max(b) - min(b)
+            (b - min(b)) / ifelse(rng == 0, 1, rng)
+          })
+          test_norm <- joint_norm[seq_len(np_full), , drop = FALSE]
+          if (length(coef_vals) == ncol(test_norm)) {
+            xstar_full_test <- as.numeric(test_norm %*% coef_vals / xn)
+          } else {
+            xstar_full_test <- rep(mean(xstar_full_train, na.rm = TRUE), np_full)
+          }
+          xstar_full_test[is.na(xstar_full_test)] <- gravity(na.omit(xstar_full_test))
+        }
         
         rel_vars <- nns.method.2$equation
         rel_vars <- which(rel_vars$Coefficient > 0)
@@ -358,16 +426,25 @@ NNS.stack <- function(IVs.train,
     if (1 %in% method) {
       actual <- CV.DV.test
       
-      if (is.character(relevant_vars)) relevant_vars <- relevant_vars != ""
-      if (is.logical(relevant_vars)) {
-        CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars, drop = FALSE])
-        CV.IVs.test  <- data.frame(CV.IVs.test[,  relevant_vars, drop = FALSE])
+      # When stacking with Method 2, replace the CV design matrices with cbind(X*, X*)
+      # so that n.best is cross-validated over the synthetic dim-red predictor.
+      if (stack && identical(sort(method), c(1, 2)) &&
+          exists("xstar_CV_train") && !anyNA(xstar_CV_train)) {
+        CV.IVs.train <- data.frame(Xstar = xstar_CV_train,
+                                   Xstar2 = xstar_CV_train)
+        CV.IVs.test  <- data.frame(Xstar = xstar_CV_test,
+                                   Xstar2 = xstar_CV_test)
+      } else {
+        if (is.character(relevant_vars)) relevant_vars <- relevant_vars != ""
+        if (is.logical(relevant_vars)) {
+          CV.IVs.train <- data.frame(CV.IVs.train[, relevant_vars, drop = FALSE])
+          CV.IVs.test  <- data.frame(CV.IVs.test[,  relevant_vars, drop = FALSE])
+        }
+        if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
+        if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
+        if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
+        if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
       }
-      
-      if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
-      if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
-      if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
-      if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
       
       threshold_results_1 <- vector(mode = "list", length = length(c(1:l, length(IVs.train[, 1]))))
       nns.cv.1 <- numeric()
@@ -577,7 +654,22 @@ NNS.stack <- function(IVs.train,
         best.k <- mode_class(as.numeric(rep(names(ks_tab), as.numeric(unlist(ks_tab)))))
         best.k <- ifelse(best.k %% 1 < 0.5, floor(best.k), ceiling(best.k))
         
-        if (length(relevant_vars) > 1) {
+        # When stacking with Method 2, fit Method 1 on cbind(X*, X*) using full data
+        if (stack && identical(sort(method), c(1, 2)) &&
+            exists("xstar_full_train") && !anyNA(xstar_full_train)) {
+          IVs.train.m1 <- data.frame(Xstar  = xstar_full_train,
+                                     Xstar2 = xstar_full_train)
+          IVs.test.m1  <- data.frame(Xstar  = xstar_full_test,
+                                     Xstar2 = xstar_full_test)
+          nns.method.1 <- suppressWarnings(
+            NNS.reg(
+              IVs.train.m1, DV.train,
+              point.est = IVs.test.m1,
+              plot = FALSE, n.best = best.k, order = order, ncores = ncores,
+              type = type, point.only = FALSE, confidence.interval = pred.int, smooth = smoothness
+            )
+          )
+        } else if (length(relevant_vars) > 1) {
           nns.method.1 <- suppressWarnings(
             NNS.reg(
               IVs.train[, relevant_vars], DV.train,
@@ -621,9 +713,6 @@ NNS.stack <- function(IVs.train,
       threshold_results_1 <- NA
       if (objective == 'min') { best.nns.cv <- Inf } else { best.nns.cv <- -Inf }
     } # end: 1 %in% method
-    
-    
-    
     
   } # errors (b) loop
   
