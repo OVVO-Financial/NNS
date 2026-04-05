@@ -78,7 +78,7 @@ So the order of construction is
 
 This two-level structure is why ensembles are natural in the NNS setting rather than auxiliary.
 
-The first level handles nonlinear local geometry.  
+The first level handles nonlinear local geometry.
 The second level stabilizes that geometry across feature subsets, folds, and candidate model specifications.
 
 ---
@@ -91,7 +91,9 @@ The package documentation for `NNS.stack` states that it is a prediction model u
 
 This matters conceptually.
 
-Classical boosting often improves performance by repeatedly combining learners that are individually simple but globally limited. In NNS, the base learner is already a flexible nonlinear estimator. Ensemble improvement does not arise because the base learner is deliberately weak. It arises because different directional views of the predictor space can still capture different useful structure.
+Classical boosting — and its modern descendant gradient boosting — achieves its power by iteratively correcting residuals from deliberately weak base learners. The mathematical theory of that residual-correction process is well developed, and systems like XGBoost have been engineered to exploit it with exceptional efficiency. NNS does not attempt to replicate that theory. Its base learner is already a flexible nonlinear estimator; there are no residuals to correct in the same sense. Ensemble improvement in NNS comes from a different source entirely: stability and structural coverage across feature subsets and validation splits, not from iterative error minimization.
+
+This is an engineering difference as much as a mathematical one. Competing with XGBoost on its own terms — speed of residual descent, regularization of additive tree models, hardware-aware split enumeration — is not the goal of NNS ensembles and should not be the standard of comparison. The goal is a directional nonparametric system that can represent nonlinear, asymmetric, and threshold-driven structure without imposing a tree topology, and that remains interpretable through the same benchmark-relative geometry used throughout the book.
 
 That distinction gives NNS ensembles a different flavor:
 
@@ -105,7 +107,7 @@ That distinction gives NNS ensembles a different flavor:
 
 The `NNS.boost` routine implements ensemble learning through a sequence of resampling, feature screening, threshold selection, and final aggregation.
 
-At the interface level, the routine accepts training predictors `IVs.train`, a response `DV.train`, optional test predictors `IVs.test`, learner controls such as `depth`, `learner.trials`, `epochs`, `CV.size`, and `folds`, and optimization controls such as `obj.fn`, `objective`, and `threshold`. It also supports class balancing through `balance`, time-series handling through `ts.test`, prediction intervals through `pred.int`, and feature-frequency summaries through `features.only` and `feature.importance`.
+At the interface level, the routine accepts training predictors `IVs.train`, a response `DV.train`, optional test predictors `IVs.test`, learner controls such as `depth`, `learner.trials`, `epochs`, `CV.size`, and optimization controls such as `obj.fn`, `objective`, and `threshold`. It also supports class balancing through `balance`, time-series handling through `ts.test`, prediction intervals through `pred.int`, and feature-frequency summaries through `features.only` and `feature.importance`.
 
 The package description makes two points immediately clear.
 
@@ -137,6 +139,14 @@ This is the first important NNS-specific departure from classical textbook boost
 
 **the algorithm is not reweighting observations sequentially in the AdaBoost sense; it is screening and aggregating feature-defined directional learners.**
 
+### Weighted feature sampling in the epoch loop
+
+After the threshold-learning stage, `NNS.boost` constructs a **feature pool weighted by survival frequency**: each feature index is repeated in proportion to how often it appeared across the learner-trial sets that passed the threshold. In each epoch, two random decisions are made jointly — a feature count $k \in \{1, \ldots, n\}$ is drawn uniformly, and then $k$ distinct indices are sampled from this weighted pool without replacement. Features that recurred often in successful learner trials are therefore overrepresented in the draw, but any combination of any size can still appear.
+
+This is structurally analogous to the random-subspace mechanism in random forests, but with a crucial difference: the sampling probabilities are not uniform. They are earned. A feature earns higher sampling weight by having appeared in learner-trial subsets that cleared the validation threshold. The epoch loop is thus not random exploration of feature space — it is **weighted exploration biased toward stability**, with the bias itself learned from the threshold stage.
+
+An epoch's feature set is retained only if its validation objective clears the same threshold. The surviving sets feed the frequency table that drives the final synthetic predictor construction described below.
+
 ### User-specified objectives
 
 The objective need not be squared error or simple accuracy. The package allows any objective written as an expression in `predicted` and `actual`. Thus users may supply application-specific measures such as precision-weighted loss, F-score style criteria, percentage error, or other custom objectives.
@@ -158,9 +168,11 @@ That second output is especially useful in nonlinear settings, where variable im
 
 ### Final estimate
 
-The final prediction stage passes the retained features into an NNS stacked learner with `stack = FALSE`, using the learned feature structure to produce a stabilized final estimate. In other words, `NNS.boost` does not end with a simple arithmetic mean of all candidate learners. It ends with a **filtered aggregation** followed by a final NNS prediction step.
+Once the epoch loop is complete, feature frequencies are normalized across all passing epochs to produce a weight vector aligned to the columns of `IVs.train`. These normalized frequencies are then supplied to `NNS.reg` as a custom coefficient vector through `dim.red.method`, which constructs a frequency-weighted synthetic predictor $X^*$ from the original features. In this way, predictors that recur more often among successful learners receive greater influence in the final synthetic index.
 
-This is why the routine should be viewed as **resampling and aggregation of directional structure**, not as a direct clone of classical boosting.
+The final estimate is not taken directly from that first dimension-reduction fit. Instead, `NNS.boost` uses the resulting training and test projections onto $X^*$ to form a two-column design `(X^*, X^*)`, and then passes that design to `NNS.stack` with `method = 1`. This allows the routine to obtain the final prediction through the NNS regression-point mechanism while using the stacked framework to optimize the terminal neighbor-selection step `n.best`.
+
+Accordingly, the final model should not be described as a committee vote, a simple average of retained learners, or merely a single `NNS.reg` fit on the weighted composite. It is better understood as a **stability-weighted synthetic predictor followed by an optimized final NNS regression-point estimate**. The boosting stage learns which features survive repeated validation, and the closing stacking step converts that learned structure into the final prediction rule.
 
 ---
 
@@ -207,11 +219,7 @@ A key mechanism of `NNS.stack` that distinguishes it from generic stacking is th
 
 Recall from Chapter 21 that multivariate `NNS.reg` does not predict by connecting regression points with line segments. It performs nearest-neighbor search over the regression-point matrix — a compressed set of local conditional means derived from the per-variable partitions. The number of neighbors $k$ used in that search directly controls the smoothness of the final prediction: small $k$ produces more local, potentially noisy predictions; large $k$ produces broader averaging that may underfit sharp local structure.
 
-Choosing the right $k$ is therefore a bias-variance decision specific to the regression-point geometry of each dataset. `NNS.stack` addresses this through the `knn.ccv` parameter, which triggers cross-validated $k$ selection:
-
-- across each fold, candidate values of $k$ are evaluated on held-out validation predictions,
-- the $k$ that minimizes the chosen objective across folds is selected,
-- the selected $k$ is then used for final prediction on the test set.
+Choosing the right $k$ is therefore a bias-variance decision specific to the regression-point geometry of each dataset. `NNS.stack` addresses this automatically within the fold loop: across each fold, candidate values of $k$ are evaluated on held-out validation predictions, and the $k$ that best satisfies the chosen objective is selected. The selected $k$ is then used for final prediction on the test set.
 
 This means `NNS.stack` is not merely stacking predictions from fixed base learners. It is simultaneously discovering the right localization level for the regression-point nearest-neighbor search, fold by fold, as part of the same cross-validation loop that evaluates feature combinations and classification thresholds.
 
@@ -355,6 +363,8 @@ Random forests combine tree learners built on bootstrap samples and random featu
 
 NNS ensembles share the idea of random or selective feature subsets, but the base learners are not trees. They are directional nonparametric regressors and classifiers based on recursive partition structure. Moreover, in `NNS.boost`, random feature subsets are not retained merely because they were sampled; they are screened by validation performance and then aggregated by frequency. This makes the feature-selection step partly stochastic and partly performance-driven.
 
+The present empirical dominance of tree-based ensembles may reflect engineering maturity as much as statistical principle. Tree methods benefit from decades of optimization in split search, pruning, regularization, parallelization, software design, and default tuning. To the extent that NNS better preserves nonlinear, asymmetric, and directional information, improvements in algorithmic efficiency, tuning strategy, and implementation may allow those structural advantages to appear more consistently in practical applications. Thus, the theoretical contrast with trees should not be framed only as a contest of current benchmark performance, but also as a question of whether engineering has caught up with the underlying statistical geometry.
+
 ### Comparison with classical stacking
 
 Classical stacking uses predictions from multiple models as features for a meta-model.
@@ -451,7 +461,7 @@ Its main contributions are sixfold.
 
 **First**, it explained **feature-subset screening based on predictive performance**. Rather than combining all sampled learners indiscriminately, `NNS.boost` retains those feature-defined learners whose validation performance passes a learned threshold.
 
-**Second**, it clarified **threshold learning** itself. In `NNS.boost`, the retention threshold is learned from the empirical distribution of validation scores, while in `NNS.stack`, classification thresholds are optimized over candidate rounding rules and then aggregated across folds.
+**Second**, it described the **weighted epoch sampling mechanism**. After the threshold-learning stage, feature indices are pooled with weights proportional to their survival frequency, and each epoch draws from this weighted pool. The epoch loop is therefore not uniform random exploration but structured search biased toward stable features — a performance-earned analog of the random-subspace method.
 
 **Third**, it introduced the **cross-validated optimization of $k$** in `NNS.stack`. Because multivariate NNS regression predicts through nearest-neighbor search over a compressed regression-point matrix — not through a piecewise-linear surface — the number of neighbors $k$ is a structural hyperparameter that directly controls the localization scale of prediction. `NNS.stack` optimizes $k$ fold by fold as part of its cross-validation loop, selecting the neighbor count that best generalizes on held-out data. This is one of the clearest ways `NNS.stack` goes beyond generic stacking: it actively discovers the right spatial scale for the underlying prediction mechanism.
 
