@@ -775,8 +775,8 @@ SEXP downSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") 
   // y as factor codes (1..L) and levels
   IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  //const int n = X.nrows();
-  const int n = Rf_nrows(X);
+  const int n = X.nrows();
+  //const int n = Rf_nrows(X);
   if (fy.size() != n) stop("downSample: nrow(x) != length(y)");
   const int L = lev.size();
   
@@ -837,8 +837,8 @@ SEXP upSample(SEXP x, SEXP y, bool list = false, std::string yname = "Class") {
   
   IntegerVector fy = as<IntegerVector>(y);
   CharacterVector lev = Rf_getAttrib(y, R_LevelsSymbol);
-  //const int n = X.nrows();
-  const int n = Rf_nrows(X);
+  const int n = X.nrows();
+  //const int n = Rf_nrows(X);
   if (fy.size() != n) stop("upSample: nrow(x) != length(y)");
   const int L = lev.size();
   
