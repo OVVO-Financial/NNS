@@ -10,7 +10,7 @@ NNS offers:
   - ANOVA
   - Seasonality & Autoregressive Modeling
   - Normalization 
-  - Stochastic Dominance
+  - Stochastic Superiority / Dominance
 
 See the following for NNS detailed examples and specific applications:
 

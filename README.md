@@ -19,7 +19,7 @@ NNS delivers a comprehensive suite of advanced statistical techniques, including
   - ANOVA
   - Seasonality & Autoregressive Modeling
   - Normalization 
-  - Stochastic Dominance
+  - Stochastic Superiority / Dominance
   - Advanced Monte Carlo Sampling
 
 
