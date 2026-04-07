@@ -19,7 +19,7 @@ including: - Numerical Integration & Numerical Differentiation -
 Partitional & Hierarchical Clustering - Nonlinear Correlation &
 Dependence - Causal Analysis - Nonlinear Regression & Classification -
 ANOVA - Seasonality & Autoregressive Modeling - Normalization -
-Stochastic Dominance - Advanced Monte Carlo Sampling
+Stochastic Superiority / Dominance - Advanced Monte Carlo Sampling
 
 Companion R-package and datasets to: \#### Viole, F. and Nawrocki, D.
 (2013) “*Nonlinear Nonparametric Statistics: Using Partial Moments*”
