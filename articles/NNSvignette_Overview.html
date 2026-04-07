@@ -78,25 +78,20 @@
 Nonparametric Statistics (NNS) using <strong>partial moments</strong>.
 Each section blends narrative intuition, precise math, and executable
 code.</p>
-<p><strong>Structure.</strong></p>
-<ol style="list-style-type: decimal">
-<li>Foundations — partial moments &amp; variance decomposition</li>
-<li>Descriptive &amp; distributional tools</li>
-<li>Dependence &amp; nonlinear association</li>
-<li>Hypothesis testing &amp; ANOVA (LPM‑CDF)</li>
-<li>Regression, boosting, stacking &amp; causality</li>
-<li>Time series &amp; forecasting</li>
-<li>Normalziation &amp; Rescaling</li>
-<li>Simulation (max‑entropy) &amp; Monte Carlo</li>
-<li>Portfolio &amp; stochastic dominance</li>
-</ol>
+<p><strong>Structure.</strong> 1. Foundations — partial moments &amp;
+variance decomposition 2. Descriptive &amp; distributional tools 3.
+Dependence &amp; nonlinear association 4. Normalization &amp; Rescaling
+5. Hypothesis testing, ANOVA &amp; Stochastic Superiority 6. Regression,
+boosting, stacking &amp; causality 7. Time series &amp; forecasting 8.
+Simulation (max‑entropy) &amp; Monte Carlo 9. Portfolio &amp; stochastic
+dominance</p>
 <p><strong>Notation.</strong> For a random variable
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 and threshold/target
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
 the population
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>‑th
-<strong>partial moments</strong> are defined as</p>
+<strong>partial moments</strong> are defined as:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>LPM</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>∫</mo><mrow><mo>−</mo><mi>∞</mi></mrow><mi>t</mi></msubsup><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>−</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>n</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="2.0em"></mspace><mo>UPM</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>∫</mo><mi>t</mi><mi>∞</mi></msubsup><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>n</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \operatorname{LPM}(n,t,X) 
 = \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
@@ -198,7 +193,10 @@ from partial‑moment counts.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mo>LPM</mo><mn>3</mn></msub><annotation encoding="application/x-tex">\operatorname{LPM}_3</annotation></semantics></math>
 (and degree 4), yielding robust tail diagnostics without parametric
 assumptions.</p>
-<p><strong>Header.</strong> <code>NNS.moments(x)</code></p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.moments(x)</code></li>
+</ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.moments.html">NNS.moments</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="va">M</span></span></code></pre></div>
@@ -217,7 +215,10 @@ assumptions.</p>
 <div class="section level3">
 <h3 id="mode-estimation-no-binorbandwidth-angst">2.2 Mode estimation (no bin‑or‑bandwidth angst)<a class="anchor" aria-label="anchor" href="#mode-estimation-no-binorbandwidth-angst"></a>
 </h3>
-<p><strong>Header.</strong> <code>NNS.mode(x)</code></p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.mode(x)</code></li>
+</ul>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">23</span><span class="op">)</span></span>
 <span><span class="va">multimodal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1500</span>,<span class="op">-</span><span class="fl">2</span>,<span class="fl">.5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1500</span>,<span class="fl">2</span>,<span class="fl">.5</span><span class="op">)</span><span class="op">)</span></span>
@@ -413,7 +414,7 @@ mean to match
 </div>
 </div>
 <div class="section level2">
-<h2 id="hypothesis-testing-anova-lpmcdf">5. Hypothesis Testing &amp; ANOVA (LPM‑CDF)<a class="anchor" aria-label="anchor" href="#hypothesis-testing-anova-lpmcdf"></a>
+<h2 id="hypothesis-testing-anova-stochastic-superiority">5. Hypothesis Testing, ANOVA &amp; Stochastic Superiority<a class="anchor" aria-label="anchor" href="#hypothesis-testing-anova-stochastic-superiority"></a>
 </h2>
 <div class="section level3">
 <h3 id="concept">5.1 Concept<a class="anchor" aria-label="anchor" href="#concept"></a>
@@ -424,6 +425,7 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <p><strong>Header.</strong></p>
 <ul>
 <li><code>NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)</code></li>
+<li><code>NNS.SS(x, y, ...)</code></li>
 </ul>
 </div>
 <div class="section level3">
@@ -472,6 +474,110 @@ compare CDFs built from <code>LPM.ratio(0, t, •)</code> (possibly with
 one‑sided tails). Aggregate across
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
 to a certainty score.</p>
+</div>
+<div class="section level3">
+<h3 id="stochastic-superiority">5.3 Stochastic Superiority<a class="anchor" aria-label="anchor" href="#stochastic-superiority"></a>
+</h3>
+<p>Stochastic superiority asks a different question than equality of
+means or equality of distributions. Rather than testing whether two
+samples came from the same population, or whether they share the same
+mean or median, stochastic superiority measures the probability that a
+random draw from one distribution exceeds a random draw from
+another.</p>
+<p>For two random variables
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>,
+the stochastic superiority probability is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>&gt;</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+P(X &gt; Y)
+</annotation></semantics></math></p>
+<p>and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>P</mi><mo>*</mo></msup><mo>=</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>&gt;</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+P^* = P(X &gt; Y) + \frac{1}{2} P(X = Y)
+</annotation></semantics></math></p>
+<p>A value of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>P</mi><mo>*</mo></msup><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P^* = 0.5</annotation></semantics></math>
+indicates no directional advantage, values above
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>
+favor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>,
+and values below
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>
+favor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>.</p>
+<p>This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared
+support.</p>
+<p>Below is an example comparing two distributions with unequal
+means.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/NNS.SS.html">NNS.SS</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## $p_gt</span></span>
+<span><span class="co">## [1] 0.233915</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $p_tie</span></span>
+<span><span class="co">## [1] 0</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $p_star</span></span>
+<span><span class="co">## [1] 0.233915</span></span></code></pre>
+<p>Since
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+was generated with a higher mean, the stochastic superiority probability
+for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+relative to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+should be less than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>,
+indicating that a draw from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+is less likely to exceed a draw from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>.</p>
+<p>We can also obtain confidence intervals for the tie-adjusted
+superiority probability using maximum entropy bootstrap replicates.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
+<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
+<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
+<span id="cb35-16"><a href="#cb35-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<p>This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.</p>
+<p>For discrete variables, ties may occur with positive probability, and
+the reported <code>p_tie</code> and <code>p_star</code> values reflect
+that adjustment explicitly.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/NNS.SS.html">NNS.SS</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## $p_gt</span></span>
+<span><span class="co">## [1] 0.3982</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $p_tie</span></span>
+<span><span class="co">## [1] 0.1992</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $p_star</span></span>
+<span><span class="co">## [1] 0.4978</span></span></code></pre>
 <hr>
 </div>
 </div>
@@ -499,7 +605,7 @@ conditional dependence)</li>
 <div class="section level3">
 <h3 id="code-classification-via-regression-ensembles">6.2 Code: classification via regression + ensembles<a class="anchor" aria-label="anchor" href="#code-classification-via-regression-ensembles"></a>
 </h3>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example 1: Nonlinear regression</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
@@ -654,39 +760,40 @@ conditional dependence)</li>
 <span><span class="co">##  998:       0.1831159</span></span>
 <span><span class="co">##  999:       0.2108312</span></span>
 <span><span class="co">## 1000:       0.2078031</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
-<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
-<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a> </span>
-<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>boost <span class="ot">&lt;-</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
-<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
-<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">"CLASS"</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
-<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a></span>
-<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a></span>
-<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a><span class="fu">mean</span>(boost<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
-<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
-<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a></span>
-<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a></span>
-<span id="cb35-16"><a href="#cb35-16" tabindex="-1"></a>boost<span class="sc">$</span>feature.weights; boost<span class="sc">$</span>feature.frequency</span>
-<span id="cb35-17"><a href="#cb35-17" tabindex="-1"></a></span>
-<span id="cb35-18"><a href="#cb35-18" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb35-19"><a href="#cb35-19" tabindex="-1"></a>                     <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
-<span id="cb35-20"><a href="#cb35-20" tabindex="-1"></a>                     <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb35-21"><a href="#cb35-21" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"CLASS"</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb35-22"><a href="#cb35-22" tabindex="-1"></a>                     <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
-<span id="cb35-23"><a href="#cb35-23" tabindex="-1"></a><span class="fu">mean</span>(stacked<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
-<span id="cb35-24"><a href="#cb35-24" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
+<span><span class="va">test.set</span> <span class="op">=</span> <span class="fl">141</span><span class="op">:</span><span class="fl">150</span></span>
+<span> </span>
+<span><span class="va">boost</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.boost.html">NNS.boost</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>              DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span>,</span>
+<span>              IVs.test <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>              epochs <span class="op">=</span> <span class="fl">10</span>, learner.trials <span class="op">=</span> <span class="fl">10</span>, </span>
+<span>              status <span class="op">=</span> <span class="cn">FALSE</span>, balance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              type <span class="op">=</span> <span class="st">"CLASS"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">boost</span><span class="op">$</span><span class="va">results</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>,<span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># [1] 1</span></span>
+<span></span>
+<span></span>
+<span><span class="va">boost</span><span class="op">$</span><span class="va">feature.weights</span>; <span class="va">boost</span><span class="op">$</span><span class="va">feature.frequency</span></span>
+<span></span>
+<span><span class="va">stacked</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.stack.html">NNS.stack</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>                     DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span>,</span>
+<span>                     IVs.test <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>                     type <span class="op">=</span> <span class="st">"CLASS"</span>, balance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                     ncores <span class="op">=</span> <span class="fl">1</span>, folds <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">stacked</span><span class="op">$</span><span class="va">stack</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>,<span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># [1] 1</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="code-directional-causality">6.3 Code: directional causality<a class="anchor" aria-label="anchor" href="#code-directional-causality"></a>
 </h3>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span>,  <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span>  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) </span></span>
 <span><span class="co">##           0.2607148           0.3863580           0.3933374</span></span></code></pre>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span><span class="op">)</span>   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) </span></span>
 <span><span class="co">##           0.3863580           0.2607148           0.3933374</span></span></code></pre>
@@ -706,7 +813,7 @@ drivers.</p>
 <li><code>NNS.seas</code></li>
 <li><code>NNS.VAR</code></li>
 </ul>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Univariate nonlinear ARMA</span></span>
 <span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">480</span><span class="op">/</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">480</span>, sd<span class="op">=</span><span class="fl">.35</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -720,7 +827,7 @@ drivers.</p>
 <span><span class="co">## 4    198                0.4812956                      8.540159e+16</span></span>
 <span><span class="co">## 5    199                0.4885608                      8.540159e+16</span></span>
 <span><span class="co">## 6    146                0.4901054                      8.540159e+16</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate seasonal periods</span></span>
 <span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">z</span>, h <span class="op">=</span> <span class="fl">48</span>, seasonal.factor <span class="op">=</span> <span class="va">seasonal_period</span><span class="op">$</span><span class="va">periods</span>, plot <span class="op">=</span> <span class="cn">TRUE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "CURRNET METHOD: lin"</span></span>
@@ -831,7 +938,7 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x_ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">350</span>, sd<span class="op">=</span><span class="fl">.7</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.meboot.html">NNS.meboot</a></span><span class="op">(</span><span class="va">x_ts</span>, reps<span class="op">=</span><span class="fl">5</span>, rho <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mb</span><span class="op">[</span><span class="st">"replicates"</span>, <span class="op">]</span><span class="op">$</span><span class="va">replicates</span><span class="op">)</span></span></code></pre></div>
@@ -844,12 +951,12 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.MC.html">NNS.MC</a></span><span class="op">(</span><span class="va">x_ts</span>, reps<span class="op">=</span><span class="fl">5</span>, lower_rho<span class="op">=</span><span class="op">-</span><span class="fl">1</span>, upper_rho<span class="op">=</span><span class="fl">1</span>, by<span class="op">=</span><span class="fl">.5</span>, exp<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">ensemble</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 350</span></span></code></pre>
 <pre><code><span><span class="co">## [1] "rho = 1"    "rho = 0.5"  "rho = 0"    "rho = -0.5" "rho = -1"</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">$</span><span class="va">`rho = 0`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5</span></span>
 <span><span class="co">## [1,]    8.561720   11.097841   12.140974    3.478574    16.25845</span></span>
@@ -875,26 +982,26 @@ estimators.</p>
 <li><code>NNS.SD.cluster(R)</code></li>
 <li><code>NNS.SD.efficient.set(R)</code></li>
 </ul>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">RA</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span><span class="op">)</span></span>
 <span><span class="va">RB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span><span class="op">)</span></span>
 <span><span class="va">RC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/NNS.FSD.uni.html">NNS.FSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.SSD.uni.html">NNS.SSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.TSD.uni.html">NNS.TSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Rmat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>A<span class="op">=</span><span class="va">RA</span>, B<span class="op">=</span><span class="va">RB</span>, C<span class="op">=</span><span class="va">RC</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.cluster.html">NNS.SD.cluster</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Clusters</span></span>
 <span><span class="co">## $Clusters$Cluster_1</span></span>
 <span><span class="co">## [1] "C" "A" "B"</span></span></code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.efficient.set.html">NNS.SD.efficient.set</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Checking 1 of 2Checking 2 of 2</span></span></code></pre>
 <pre><code><span><span class="co">## [1] "C" "A" "B"</span></span></code></pre>
@@ -1038,6 +1145,9 @@ Started with NNS: Normalization and Rescaling</a></p>
 <li>
 <code>NNS.ANOVA(control, treatment, ...)</code> — certainty of
 equality (distributions or means).</li>
+<li>
+<code>NNS.SS(x, y, ...)</code> — stochastic superiority between two
+variables.</li>
 </ul>
 <p>See NNS Vignette: <a href="https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Comparing_Distributions.html" class="external-link">Getting
 Started with NNS: Comparing Distributions</a></p>

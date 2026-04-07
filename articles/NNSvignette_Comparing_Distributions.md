@@ -291,6 +291,103 @@ NNS.ANOVA(control = x, treatment = y,
     ## $`Upper 95% CI`
     ## [1] 0.4308527
 
+## Stochastic Superiority
+
+Stochastic superiority asks a different question than equality of means
+or equality of distributions. Rather than testing whether two samples
+came from the same population, or whether they share the same mean or
+median, stochastic superiority measures the probability that a random
+draw from one distribution exceeds a random draw from another.
+
+For two random variables $X$ and $Y$, the stochastic superiority
+probability is:
+
+$$P(X > Y)$$
+
+and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:
+
+$$P^{*} = P(X > Y) + \frac{1}{2}P(X = Y)$$
+
+A value of $P^{*} = 0.5$ indicates no directional advantage, values
+above $0.5$ favor $X$, and values below $0.5$ favor $Y$.
+
+This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared support.
+
+Below is an example using the same data generating process from the
+unequal means example.
+
+``` r
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+```
+
+    ## $p_gt
+    ## [1] 0.233915
+    ## 
+    ## $p_tie
+    ## [1] 0
+    ## 
+    ## $p_star
+    ## [1] 0.233915
+
+Since $y$ was generated with a higher mean, the stochastic superiority
+probability for $x$ relative to $y$ should be less than $0.5$,
+indicating that a draw from $x$ is less likely to exceed a draw from
+$y$.
+
+We can also obtain confidence intervals for the tie-adjusted superiority
+probability using maximum entropy bootstrap replicates.
+
+``` r
+NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+
+$p_gt
+[1] 0.233915
+
+$p_tie
+[1] 0
+
+$p_star
+[1] 0.233915
+
+$lower
+[1] 0.2105631
+
+$upper
+[1] 0.2537789
+```
+
+This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.
+
+For discrete variables, ties may occur with positive probability, and
+the reported `p_tie` and `p_star` values reflect that adjustment
+explicitly.
+
+``` r
+set.seed(123)
+x = sample(1:5, 100, replace = TRUE)
+y = sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+```
+
+    ## $p_gt
+    ## [1] 0.3982
+    ## 
+    ## $p_tie
+    ## [1] 0.1992
+    ## 
+    ## $p_star
+    ## [1] 0.4978
+
 ## Stochastic Dominance
 
 Another method of comparing distributions involves a test for stochastic
@@ -304,6 +401,10 @@ tests are available in **`NNS`** via:
 - **[`NNS.TSD()`](https://OVVO-Financial.github.io/NNS/reference/NNS.TSD.md)**
 
 ``` r
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
 NNS.FSD(x, y)
 ```
 

@@ -23,20 +23,15 @@ library(data.table)
 Statistics (NNS) using **partial moments**. Each section blends
 narrative intuition, precise math, and executable code.
 
-**Structure.**
-
-1.  Foundations — partial moments & variance decomposition
-2.  Descriptive & distributional tools
-3.  Dependence & nonlinear association
-4.  Hypothesis testing & ANOVA (LPM‑CDF)
-5.  Regression, boosting, stacking & causality
-6.  Time series & forecasting
-7.  Normalziation & Rescaling
-8.  Simulation (max‑entropy) & Monte Carlo
-9.  Portfolio & stochastic dominance
+**Structure.** 1. Foundations — partial moments & variance decomposition
+2. Descriptive & distributional tools 3. Dependence & nonlinear
+association 4. Normalization & Rescaling 5. Hypothesis testing, ANOVA &
+Stochastic Superiority 6. Regression, boosting, stacking & causality 7.
+Time series & forecasting 8. Simulation (max‑entropy) & Monte Carlo 9.
+Portfolio & stochastic dominance
 
 **Notation.** For a random variable $X$ and threshold/target $t$, the
-population $n$‑th **partial moments** are defined as
+population $n$‑th **partial moments** are defined as:
 
 $$\operatorname{LPM}(n,t,X) = \int_{- \infty}^{t}(t - x)^{n}\, dF_{X}(x),\qquad\operatorname{UPM}(n,t,X) = \int_{t}^{\infty}(x - t)^{n}\, dF_{X}(x).$$
 
@@ -118,7 +113,9 @@ Define asymmetric analogues of skewness/kurtosis using
 $\operatorname{UPM}_{3}$, $\operatorname{LPM}_{3}$ (and degree 4),
 yielding robust tail diagnostics without parametric assumptions.
 
-**Header.** `NNS.moments(x)`
+**Header.**
+
+- `NNS.moments(x)`
 
 ``` r
 M <- NNS.moments(y)
@@ -139,7 +136,9 @@ M
 
 ### 2.2 Mode estimation (no bin‑or‑bandwidth angst)
 
-**Header.** `NNS.mode(x)`
+**Header.**
+
+- `NNS.mode(x)`
 
 ``` r
 set.seed(23)
@@ -341,7 +340,7 @@ c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 
 ------------------------------------------------------------------------
 
-## 5. Hypothesis Testing & ANOVA (LPM‑CDF)
+## 5. Hypothesis Testing, ANOVA & Stochastic Superiority
 
 ### 5.1 Concept
 
@@ -352,6 +351,7 @@ of populations or means.
 **Header.**
 
 - `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
+- `NNS.SS(x, y, ...)`
 
 ### 5.2 Code: two‑sample & multi‑group
 
@@ -401,6 +401,102 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 **Math sketch.** For each quantile/threshold $t$, compare CDFs built
 from `LPM.ratio(0, t, •)` (possibly with one‑sided tails). Aggregate
 across $t$ to a certainty score.
+
+### 5.3 Stochastic Superiority
+
+Stochastic superiority asks a different question than equality of means
+or equality of distributions. Rather than testing whether two samples
+came from the same population, or whether they share the same mean or
+median, stochastic superiority measures the probability that a random
+draw from one distribution exceeds a random draw from another.
+
+For two random variables $X$ and $Y$, the stochastic superiority
+probability is:
+
+$$P(X > Y)$$
+
+and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:
+
+$$P^{*} = P(X > Y) + \frac{1}{2}P(X = Y)$$
+
+A value of $P^{*} = 0.5$ indicates no directional advantage, values
+above $0.5$ favor $X$, and values below $0.5$ favor $Y$.
+
+This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared support.
+
+Below is an example comparing two distributions with unequal means.
+
+``` r
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+```
+
+    ## $p_gt
+    ## [1] 0.233915
+    ## 
+    ## $p_tie
+    ## [1] 0
+    ## 
+    ## $p_star
+    ## [1] 0.233915
+
+Since $y$ was generated with a higher mean, the stochastic superiority
+probability for $x$ relative to $y$ should be less than $0.5$,
+indicating that a draw from $x$ is less likely to exceed a draw from
+$y$.
+
+We can also obtain confidence intervals for the tie-adjusted superiority
+probability using maximum entropy bootstrap replicates.
+
+``` r
+NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+
+$p_gt
+[1] 0.233915
+
+$p_tie
+[1] 0
+
+$p_star
+[1] 0.233915
+
+$lower
+[1] 0.2105631
+
+$upper
+[1] 0.2537789
+```
+
+This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.
+
+For discrete variables, ties may occur with positive probability, and
+the reported `p_tie` and `p_star` values reflect that adjustment
+explicitly.
+
+``` r
+set.seed(123)
+x = sample(1:5, 100, replace = TRUE)
+y = sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+```
+
+    ## $p_gt
+    ## [1] 0.3982
+    ## 
+    ## $p_tie
+    ## [1] 0.1992
+    ## 
+    ## $p_star
+    ## [1] 0.4978
 
 ------------------------------------------------------------------------
 
@@ -595,7 +691,7 @@ boost <- NNS.boost(IVs.train = iris[-test.set, 1:4],
 
 
 mean(boost$results == as.numeric(iris[test.set,5]))
-[1] 1
+# [1] 1
 
 
 boost$feature.weights; boost$feature.frequency
@@ -606,7 +702,7 @@ stacked <- NNS.stack(IVs.train = iris[-test.set, 1:4],
                      type = "CLASS", balance = TRUE,
                      ncores = 1, folds = 1)
 mean(stacked$stack == as.numeric(iris[test.set,5]))
-[1] 1
+# [1] 1
 ```
 
 ### 6.3 Code: directional causality
@@ -945,6 +1041,7 @@ Rescaling](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Normaliz
 
 - `NNS.ANOVA(control, treatment, ...)` — certainty of equality
   (distributions or means).
+- `NNS.SS(x, y, ...)` — stochastic superiority between two variables.
 
 See NNS Vignette: [Getting Started with NNS: Comparing
 Distributions](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Comparing_Distributions.html)

@@ -40,6 +40,8 @@
   : NNS SD-based Clustering
 - [`NNS.SD.efficient.set()`](https://OVVO-Financial.github.io/NNS/reference/NNS.SD.efficient.set.md)
   : NNS SD Efficient Set
+- [`NNS.SS()`](https://OVVO-Financial.github.io/NNS/reference/NNS.SS.md)
+  : NNS Stochastic Superiority
 - [`NNS.SSD()`](https://OVVO-Financial.github.io/NNS/reference/NNS.SSD.md)
   : NNS SSD Test
 - [`NNS.SSD.uni()`](https://OVVO-Financial.github.io/NNS/reference/NNS.SSD.uni.md)
