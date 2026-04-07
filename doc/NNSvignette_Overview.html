@@ -355,20 +355,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 Nonparametric Statistics (NNS) using <strong>partial moments</strong>.
 Each section blends narrative intuition, precise math, and executable
 code.</p>
-<p><strong>Structure.</strong></p>
-<ol style="list-style-type: decimal">
-<li>Foundations — partial moments &amp; variance decomposition</li>
-<li>Descriptive &amp; distributional tools</li>
-<li>Dependence &amp; nonlinear association</li>
-<li>Hypothesis testing &amp; ANOVA (LPM‑CDF)</li>
-<li>Regression, boosting, stacking &amp; causality</li>
-<li>Time series &amp; forecasting</li>
-<li>Normalziation &amp; Rescaling</li>
-<li>Simulation (max‑entropy) &amp; Monte Carlo</li>
-<li>Portfolio &amp; stochastic dominance</li>
-</ol>
+<p><strong>Structure.</strong> 1. Foundations — partial moments &amp;
+variance decomposition 2. Descriptive &amp; distributional tools 3.
+Dependence &amp; nonlinear association 4. Normalization &amp; Rescaling
+5. Hypothesis testing, ANOVA &amp; Stochastic Superiority 6. Regression,
+boosting, stacking &amp; causality 7. Time series &amp; forecasting 8.
+Simulation (max‑entropy) &amp; Monte Carlo 9. Portfolio &amp; stochastic
+dominance</p>
 <p><strong>Notation.</strong> For a random variable <span class="math inline">\(X\)</span> and threshold/target <span class="math inline">\(t\)</span>, the population <span class="math inline">\(n\)</span>‑th <strong>partial moments</strong> are
-defined as</p>
+defined as:</p>
 <p><span class="math display">\[
 \operatorname{LPM}(n,t,X)
 = \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
@@ -449,7 +444,10 @@ from partial‑moment counts.</p>
 <h2>2.1 Higher moments from partial moments</h2>
 <p>Define asymmetric analogues of skewness/kurtosis using <span class="math inline">\(\operatorname{UPM}_3\)</span>, <span class="math inline">\(\operatorname{LPM}_3\)</span> (and degree 4),
 yielding robust tail diagnostics without parametric assumptions.</p>
-<p><strong>Header.</strong> <code>NNS.moments(x)</code></p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.moments(x)</code></li>
+</ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">NNS.moments</span>(y)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>M</span></code></pre></div>
 <pre><code>## $mean
@@ -466,7 +464,10 @@ yielding robust tail diagnostics without parametric assumptions.</p>
 </div>
 <div id="mode-estimation-no-binorbandwidth-angst" class="section level2">
 <h2>2.2 Mode estimation (no bin‑or‑bandwidth angst)</h2>
-<p><strong>Header.</strong> <code>NNS.mode(x)</code></p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.mode(x)</code></li>
+</ul>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">23</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>multimodal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="sc">-</span><span class="dv">2</span>,.<span class="dv">5</span>), <span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="dv">2</span>,.<span class="dv">5</span>))</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">NNS.mode</span>(multimodal,<span class="at">multi =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
@@ -635,8 +636,8 @@ distributional shape.</p>
 <hr />
 </div>
 </div>
-<div id="hypothesis-testing-anova-lpmcdf" class="section level1">
-<h1>5. Hypothesis Testing &amp; ANOVA (LPM‑CDF)</h1>
+<div id="hypothesis-testing-anova-stochastic-superiority" class="section level1">
+<h1>5. Hypothesis Testing, ANOVA &amp; Stochastic Superiority</h1>
 <div id="concept" class="section level2">
 <h2>5.1 Concept</h2>
 <p>Instead of distributional assumptions, compare groups via
@@ -645,6 +646,7 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <p><strong>Header.</strong></p>
 <ul>
 <li><code>NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c(&quot;Both&quot;,&quot;left&quot;,&quot;right&quot;), pairwise=FALSE, plot=TRUE, robust=FALSE)</code></li>
+<li><code>NNS.SS(x, y, ...)</code></li>
 </ul>
 </div>
 <div id="code-twosample-multigroup" class="section level2">
@@ -688,6 +690,87 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <code>LPM.ratio(0, t, •)</code> (possibly with one‑sided tails).
 Aggregate across <span class="math inline">\(t\)</span> to a certainty
 score.</p>
+</div>
+<div id="stochastic-superiority" class="section level2">
+<h2>5.3 Stochastic Superiority</h2>
+<p>Stochastic superiority asks a different question than equality of
+means or equality of distributions. Rather than testing whether two
+samples came from the same population, or whether they share the same
+mean or median, stochastic superiority measures the probability that a
+random draw from one distribution exceeds a random draw from
+another.</p>
+<p>For two random variables <span class="math inline">\(X\)</span> and
+<span class="math inline">\(Y\)</span>, the stochastic superiority
+probability is:</p>
+<p><span class="math display">\[
+P(X &gt; Y)
+\]</span></p>
+<p>and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:</p>
+<p><span class="math display">\[
+P^* = P(X &gt; Y) + \frac{1}{2} P(X = Y)
+\]</span></p>
+<p>A value of <span class="math inline">\(P^* = 0.5\)</span> indicates
+no directional advantage, values above <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(X\)</span>, and values below <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(Y\)</span>.</p>
+<p>This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared
+support.</p>
+<p>Below is an example comparing two distributions with unequal
+means.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.233915
+## 
+## $p_tie
+## [1] 0
+## 
+## $p_star
+## [1] 0.233915</code></pre>
+<p>Since <span class="math inline">\(y\)</span> was generated with a
+higher mean, the stochastic superiority probability for <span class="math inline">\(x\)</span> relative to <span class="math inline">\(y\)</span> should be less than <span class="math inline">\(0.5\)</span>, indicating that a draw from <span class="math inline">\(x\)</span> is less likely to exceed a draw from
+<span class="math inline">\(y\)</span>.</p>
+<p>We can also obtain confidence intervals for the tie-adjusted
+superiority probability using maximum entropy bootstrap replicates.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
+<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
+<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
+<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<p>This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.</p>
+<p>For discrete variables, ties may occur with positive probability, and
+the reported <code>p_tie</code> and <code>p_star</code> values reflect
+that adjustment explicitly.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.3982
+## 
+## $p_tie
+## [1] 0.1992
+## 
+## $p_star
+## [1] 0.4978</code></pre>
 <hr />
 </div>
 </div>
@@ -710,14 +793,14 @@ conditional dependence)</li>
 </div>
 <div id="code-classification-via-regression-ensembles" class="section level2">
 <h2>6.2 Code: classification via regression + ensembles</h2>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Example 1: Nonlinear regression</span></span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>x_train <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">sin</span>(pi <span class="sc">*</span> x_train) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)</span>
-<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a>x_test <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">100</span>)</span>
-<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a></span>
-<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a><span class="fu">NNS.reg</span>(<span class="at">x =</span> x_train, <span class="at">y =</span> y_train, <span class="at">order =</span> <span class="cn">NULL</span>, <span class="at">point.est =</span> x_test)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Example 1: Nonlinear regression</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>x_train <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">sin</span>(pi <span class="sc">*</span> x_train) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>x_test <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a><span class="fu">NNS.reg</span>(<span class="at">x =</span> x_train, <span class="at">y =</span> y_train, <span class="at">order =</span> <span class="cn">NULL</span>, <span class="at">point.est =</span> x_test)</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <pre><code>## $R2
 ## [1] 0.9276761
@@ -862,37 +945,37 @@ conditional dependence)</li>
 ##  998:       0.1831159
 ##  999:       0.2108312
 ## 1000:       0.2078031</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
-<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
-<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a> </span>
-<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>boost <span class="ot">&lt;-</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
-<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
-<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
-<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a></span>
-<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a></span>
-<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="fu">mean</span>(boost<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
-<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
-<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a></span>
-<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a></span>
-<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a>boost<span class="sc">$</span>feature.weights; boost<span class="sc">$</span>feature.frequency</span>
-<span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a></span>
-<span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a>                     <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
-<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a>                     <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb32-22"><a href="#cb32-22" tabindex="-1"></a>                     <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
-<span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="fu">mean</span>(stacked<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
-<span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a> </span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>boost <span class="ot">&lt;-</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
+<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a></span>
+<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a><span class="fu">mean</span>(boost<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
+<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a><span class="co"># [1] 1</span></span>
+<span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a></span>
+<span id="cb37-15"><a href="#cb37-15" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="#cb37-16" tabindex="-1"></a>boost<span class="sc">$</span>feature.weights; boost<span class="sc">$</span>feature.frequency</span>
+<span id="cb37-17"><a href="#cb37-17" tabindex="-1"></a></span>
+<span id="cb37-18"><a href="#cb37-18" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb37-19"><a href="#cb37-19" tabindex="-1"></a>                     <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb37-20"><a href="#cb37-20" tabindex="-1"></a>                     <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb37-21"><a href="#cb37-21" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-22"><a href="#cb37-22" tabindex="-1"></a>                     <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb37-23"><a href="#cb37-23" tabindex="-1"></a><span class="fu">mean</span>(stacked<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
+<span id="cb37-24"><a href="#cb37-24" tabindex="-1"></a><span class="co"># [1] 1</span></span></code></pre></div>
 </div>
 <div id="code-directional-causality" class="section level2">
 <h2>6.3 Code: directional causality</h2>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>hp,  mtcars<span class="sc">$</span>mpg)  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>hp,  mtcars<span class="sc">$</span>mpg)  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code>## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) 
 ##           0.2607148           0.3863580           0.3933374</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp)   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp)   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code>## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) 
 ##           0.3863580           0.2607148           0.3933374</code></pre>
 <p><strong>Interpretation.</strong> Examine asymmetry in scores to infer
@@ -910,12 +993,12 @@ drivers.</p>
 <li><code>NNS.seas</code></li>
 <li><code>NNS.VAR</code></li>
 </ul>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
-<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
-<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a></span>
-<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
-<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
 <pre><code>##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
 ## 1    200                0.4267885                      8.540159e+16
 ## 2     96                0.4425880                      8.540159e+16
@@ -923,8 +1006,8 @@ drivers.</p>
 ## 4    198                0.4812956                      8.540159e+16
 ## 5    199                0.4885608                      8.540159e+16
 ## 6    146                0.4901054                      8.540159e+16</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
-<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
 ## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 51 ) ...)&quot;
@@ -1031,9 +1114,9 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.meboot(x, reps=999, rho=NULL, type=&quot;spearman&quot;, drift=TRUE, ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>x_ts <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">350</span>, <span class="at">sd=</span>.<span class="dv">7</span>))</span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">NNS.meboot</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">rho =</span> <span class="dv">1</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a><span class="fu">dim</span>(mb[<span class="st">&quot;replicates&quot;</span>, ]<span class="sc">$</span>replicates)</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>x_ts <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">350</span>, <span class="at">sd=</span>.<span class="dv">7</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">NNS.meboot</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">rho =</span> <span class="dv">1</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a><span class="fu">dim</span>(mb[<span class="st">&quot;replicates&quot;</span>, ]<span class="sc">$</span>replicates)</span></code></pre></div>
 <pre><code>## [1] 350   5</code></pre>
 </div>
 <div id="monte-carlo-over-the-full-correlation-space" class="section level2">
@@ -1042,11 +1125,11 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type=&quot;spearman&quot;, ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">NNS.MC</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">lower_rho=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">upper_rho=</span><span class="dv">1</span>, <span class="at">by=</span>.<span class="dv">5</span>, <span class="at">exp=</span><span class="dv">1</span>)</span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">names</span>(mc<span class="sc">$</span>replicates)</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">NNS.MC</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">lower_rho=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">upper_rho=</span><span class="dv">1</span>, <span class="at">by=</span>.<span class="dv">5</span>, <span class="at">exp=</span><span class="dv">1</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">names</span>(mc<span class="sc">$</span>replicates)</span></code></pre></div>
 <pre><code>## [1] 350</code></pre>
 <pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
 <pre><code>##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5
 ## [1,]    8.561720   11.097841   12.140974    3.478574    16.25845
 ## [2,]    4.989649    9.142348    6.298598    2.573488    11.23749
@@ -1070,22 +1153,22 @@ estimators.</p>
 <li><code>NNS.SD.cluster(R)</code></li>
 <li><code>NNS.SD.efficient.set(R)</code></li>
 </ul>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
-<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
-<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
-<span id="cb49-4"><a href="#cb49-4" tabindex="-1"></a></span>
-<span id="cb49-5"><a href="#cb49-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
-<span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
+<span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1
 ## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
-<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
 <pre><code>## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
 <hr />
@@ -1189,6 +1272,8 @@ Started with NNS: Normalization and Rescaling</a></p>
 <ul>
 <li><code>NNS.ANOVA(control, treatment, ...)</code> — certainty of
 equality (distributions or means).</li>
+<li><code>NNS.SS(x, y, ...)</code> — stochastic superiority between two
+variables.</li>
 </ul>
 <p>See NNS Vignette: <a href="https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Comparing_Distributions.html">Getting
 Started with NNS: Comparing Distributions</a></p>

@@ -10,11 +10,11 @@ While useful, these procedures emphasize **binary decisions**—reject or fail t
 
 The directional framework approaches distribution comparison differently. Because partial moments characterize probability mass relative to benchmarks, two distributions can be compared directly through their **directional probability structure**.
 
-This chapter develops a nonparametric approach to distribution comparison based on directional probability measures and effect-size interpretations rather than hypothesis-testing decisions. It then introduces the NNS ANOVA procedure, which operationalizes these ideas through the LPM-based continuous CDF, and concludes with stochastic dominance tests that extend the comparison to ordered preference relations.
+This chapter develops a nonparametric approach to distribution comparison based on directional probability measures and effect-size interpretations rather than hypothesis-testing decisions. It then introduces the NNS ANOVA procedure, which operationalizes these ideas through the LPM-based continuous CDF, adds **stochastic superiority** as the fundamental pairwise effect-size comparison, and concludes with stochastic dominance tests that extend the comparison to ordered preference relations.
 
 ---
 
-This chapter is organized into four signposted blocks so readers can move from concepts to implementation: **Block I (Theory)** develops comparison logic and the continuous-CDF correction; **Block II (Estimation mechanics)** defines operational estimators including NNS ANOVA; **Block III (Diagnostics)** covers dominance curves and ordered-comparison diagnostics; **Block IV (Applied workflow)** provides examples and practical guidance.
+This chapter is organized into four signposted blocks so readers can move from concepts to implementation: **Block I (Theory)** develops comparison logic and the continuous-CDF correction; **Block II (Estimation mechanics)** defines operational estimators including stochastic superiority and NNS ANOVA; **Block III (Diagnostics)** covers dominance curves and ordered-comparison diagnostics; **Block IV (Applied workflow)** provides examples and practical guidance.
 
 ## Block I — Theory and foundational comparisons
 
@@ -198,7 +198,8 @@ where $\mathbf{1}_{\{\cdot\}}$ is the indicator function. This is a **discrete**
 A direct consequence of this discreteness is systematic bias in probability estimation at the sample mean. For a symmetric distribution, exactly 50% of the population lies below the mean. Yet for any finite sample,
 
 $$
-\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}} \ne 0.5
+\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}} 
+e 0.5
 $$
 
 in general, because the sample mean typically falls between two observed values. This quantity oscillates around 0.5 and only converges asymptotically — it will never equal 0.5 for any particular finite draw.
@@ -612,6 +613,95 @@ This multi-group capability directly parallels classical one-way ANOVA, but with
 
 ---
 
+### Stochastic Superiority
+
+Stochastic superiority asks a different question than equality of means or equality of distributions. Rather than asking whether two samples came from the same population, or whether they share the same mean or median, it measures the probability that a random draw from one distribution exceeds a random draw from the other.
+
+Let
+
+$$
+X' \sim F_X, \qquad Y' \sim F_Y,
+$$
+
+independently. The stochastic superiority probability is
+
+$$
+p_{X,Y} = P(X' > Y').
+$$
+
+For continuous distributions, ties occur with probability zero, so $p_{X,Y} + p_{Y,X} = 1$. For discrete or mixed distributions, ties may occur with positive probability. In that case the tie-adjusted comparison is
+
+$$
+p^*_{X,Y} = P(X' > Y') + \tfrac{1}{2}P(X' = Y').
+$$
+
+This adjustment preserves symmetry,
+
+$$
+p^*_{X,Y} + p^*_{Y,X} = 1,
+$$
+
+and keeps the comparison centered at $0.5$ when neither distribution has a directional advantage.
+
+A value of $p^*_{X,Y} = 0.5$ indicates no directional advantage. Values above $0.5$ favor $X$, and values below $0.5$ favor $Y$. One may also report the certainty-style transform
+
+$$
+C_{SS} = |2p^*_{X,Y} - 1|,
+$$
+
+which maps the comparison to $[0,1]$, where $0$ denotes no directional separation and $1$ denotes complete separation. Unlike a p-value, both $p^*_{X,Y}$ and $C_{SS}$ retain a direct frequency interpretation.
+
+This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred over the entire shared support. It also differs from NNS ANOVA. NNS ANOVA asks whether the distributions are in agreement at the grand mean and selected benchmark points; stochastic superiority asks which distribution tends to generate larger draws overall. It is therefore stronger than a simple mean comparison, because it uses the full cross-sample ordering, but weaker than dominance, because it does not require the ordering to hold at every threshold. A distribution may have $p^*_{X,Y} > 0.5$ and still fail to dominate if the CDFs cross.
+
+Given samples
+
+$$
+x_1, \dots, x_n \sim X, \qquad y_1, \dots, y_m \sim Y,
+$$
+
+the empirical estimator is
+
+$$
+\hat p = \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m \mathbf{1}_{\{x_i > y_j\}},
+$$
+
+with tie-adjusted form
+
+$$
+\hat p^* = \frac{1}{nm} \sum_{i=1}^n \sum_{j=1}^m \left[\mathbf{1}_{\{x_i > y_j\}} + \tfrac{1}{2}\mathbf{1}_{\{x_i = y_j\}}\right].
+$$
+
+These estimators use all pairwise cross-sample comparisons and require no parametric assumptions.
+
+In **`NNS`**, stochastic superiority is computed with `NNS.SS()`. The function returns the directional exceedance probability, the tie probability, and the tie-adjusted superiority probability. Confidence intervals can also be obtained by resampling.
+
+```r
+library(NNS)
+
+set.seed(123)
+x <- rnorm(1000, mean = 0, sd = 1)
+y <- rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+```
+
+Because the second sample is shifted to the right, the superiority probability for $X$ relative to $Y$ should fall below $0.5$, while the superiority probability for $Y$ relative to $X$ should exceed $0.5$.
+
+For discrete data, ties should be reported rather than ignored:
+
+```r
+set.seed(123)
+x <- sample(1:5, 100, replace = TRUE)
+y <- sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+```
+
+This is especially important in ordinal and categorical applications where equal outcomes are common. In practice, stochastic superiority is often the cleanest first effect-size summary to report, because it answers the most direct comparative question: how often does one distribution beat the other?
+
+
+---
+
 ### Stochastic Dominance
 
 The directional probability comparison introduced in Section 15.1.6 measures how often observations from one distribution exceed those from another. This idea can be formalized into a preference ordering known as **stochastic dominance**.
@@ -707,7 +797,8 @@ When comparing more than two distributions simultaneously, the concept of domina
 Formally, the first-order stochastic dominant efficient set is
 
 $$
-\mathcal{E}_1 = \{X_i : \nexists\, X_j \text{ such that } X_j \succ_1 X_i\}.
+\mathcal{E}_1 = \{X_i : 
+exists\, X_j \text{ such that } X_j \succ_1 X_i\}.
 $$
 
 Distributions outside this set are dominated and can be excluded by any decision-maker with a non-decreasing utility function.
@@ -753,47 +844,87 @@ These properties make directional distribution comparison particularly useful in
 
 ---
 
-### Example Dataset Workflow (Parts III–V)
+### Example Dataset Workflow
 
-For cross-part continuity, reuse the same dataset from Chapter \@ref(example-dataset) and define two groups from the predictor distribution, for example:
+A convenient applied example is the mtcars transmission split from the NNS distribution-comparison vignette. Let Group A be miles-per-gallon for automatic transmissions, `mtcars$mpg[mtcars$am == 0]`, 
+and let Group B be miles-per-gallon for manual transmissions, `mtcars$mpg[mtcars$am == 1]`. 
+This yields two empirical distributions on the same response variable and provides a direct setting for comparing stochastic superiority, NNS ANOVA, and stochastic dominance.
 
-- Group A: observations with `x` in the bottom quartile.
-- Group B: observations with `x` in the top quartile.
 
-Then apply this chapter's comparison workflow in sequence:
+```{r chapter14-mtcars-workflow, eval=FALSE}
+auto_mpg <- mtcars$mpg[mtcars$am == 0]
+manual_mpg <- mtcars$mpg[mtcars$am == 1]
 
-1. Estimate directional dominance probability `P(A > B)` (or the reverse, depending on target variable orientation).
-2. Compute directional probability effect-size summaries.
-3. Run `NNS.ANOVA` with the continuous CDF option for full-distribution comparison.
-4. Archive the effect-size outputs for later comparison with Chapter 18 predictive performance diagnostics.
+# 1. Pairwise directional advantage
+NNS.SS(manual_mpg, auto_mpg)
+# $p_gt
+# [1] 0.8259109
+#
+# $p_tie
+# [1] 0.008097166
+#
+# $p_star
+# [1] 0.8299595
 
-Using the same data object across chapters keeps interpretation stable: dependence findings from Part III map directly to distribution-comparison in Part IV and then to estimator behavior in Part V.
+# 2. Full-distribution comparison
+NNS.ANOVA(control = auto_mpg,
+          treatment = manual_mpg,
+          robust = TRUE)
+# $Control
+# [1] 17.14737
+#
+# $Treatment
+# [1] 24.39231
+#
+# $Grand_Statistic
+# [1] 20.09063
+#
+# $Control_CDF
+# [1] 0.8708501
+#
+# $Treatment_CDF
+# [1] 0.1294878
+#
+# $Certainty
+# [1] 0.02345583
+#
+# $`Effect_Size_LB.2.5%`
+# [1] 2.377328
+#
+# $`Effect_Size_UB.97.5%`
+# [1] 12.2155
+#
+# $Confidence_Level
+# [1] 0.95
+#
+# $`Robust Certainty Estimate`
+# [1] 0.01094359
+#
+# $`Lower 95% CI`
+# [1] 3.864872e-06
+#
+# $`Upper 95% CI`
+# [1] 0.1048396
 
+# 3. Preference ordering over the full support
+NNS.FSD(manual_mpg, auto_mpg)
+# [1] "X FSD Y"
+```
+
+For this comparison, `NNS.SS(manual_mpg, auto_mpg)` yields `p_gt = 0.8259109`, `p_tie = 0.008097166`, 
+and `p_star = 0.8299595`, indicating that a randomly selected manual-transmission car exceeds a randomly selected automatic-transmission car in miles-per-gallon about 83 percent of the time. 
+`NNS.ANOVA(control = auto_mpg, treatment = manual_mpg, robust = TRUE)` returns `Certainty = 0.02345583` and `Robust Certainty Estimate = 0.01094359`, indicating very little distributional agreement between the two groups. 
+`NNS.FSD(manual_mpg, auto_mpg)` returns "X FSD Y", implying that the manual-transmission miles-per-gallon distribution first-order stochastically dominates the automatic-transmission distribution. Together, these results show pairwise directional advantage, 
+weak distributional agreement, and full-support preference for the manual-transmission group.
 
 ### Summary
 
-Classical distribution comparison relies heavily on hypothesis testing procedures that emphasize binary decisions.
+Classical distribution comparison is usually framed as a sequence of tests that end in accept-or-reject decisions. The directional framework developed here shifts the emphasis from binary testing to interpretable probability comparisons and partial-moment geometry.
 
-The directional framework offers a complementary approach based on **probability comparisons and directional partial moments**.
+At the most direct level, two distributions can be compared through probabilities such as $P(X > Y)$ and the tie-adjusted stochastic superiority measure $P^* = P(X' > Y') + \tfrac{1}{2}P(X' = Y')$. This provides a pairwise effect size with an immediate interpretation: how often does one distribution generate larger outcomes than the other?
 
-Key ideas developed in this chapter include:
+At the distributional-agreement level, the degree-one continuous CDF removes the finite-sample bias of the empirical CDF at the mean, with $F_1(\bar{x}; X) = 0.5$ exactly. That property makes NNS ANOVA a distribution-free and bias-free comparison procedure. Rather than depending on parametric assumptions, it evaluates agreement through benchmark-relative CDF deviations and reports an interpretable certainty statistic together with effect sizes and robust confidence intervals.
 
-- Distribution comparison through probabilities such as $P(X>Y)$.
-- Effect-size interpretation using directional exceedance probabilities such as $P(X' > Y')$.
-- Benchmark-based comparisons using divergent co-partial moments.
-- Directional dominance curves revealing where distributions differ.
-- **The discrete–continuous CDF distinction**: the empirical CDF ($d=0$) is systematically biased at the mean for any finite sample; the degree-one partial moment ratio ($d=1$) eliminates this bias exactly, with $F_1(\bar{x}; X) = 0.5$ holding without exception.
-- NNS ANOVA: CDF-based distributional comparison using the degree-one continuous CDF, producing an agreement certainty statistic $\text{Certainty}_{\text{ANOVA}} \in [0,1]$ (with $1$ indicating greatest agreement) alongside effect sizes and robust confidence intervals. The mean-target property of Section 15.1.8 is what makes this procedure distribution-free and bias-free.
-- Stochastic dominance at first, second, and third order, expressed as partial moment inequalities and testable through empirical estimates.
-- Efficient sets identifying distributions not dominated by any alternative.
-- Dominance clustering for hierarchical grouping of distributions by preference order.
-- Fully nonparametric inference based on empirical probabilities and partial moments throughout.
+At the strongest level, stochastic dominance extends directional comparison from pairwise exceedance to full preference ordering over the support. First-, second-, and third-order dominance can all be written as partial-moment inequalities, which shows that dominance analysis, efficient sets, and dominance clustering are all natural extensions of the same directional probability representation.
 
-These tools provide a flexible and interpretable method for comparing distributions without parametric assumptions.
-
-The next chapter develops **prediction intervals**, showing how the degree-one partial moment CDF and its quantile functions extend the bias-elimination framework to interval estimation for future observations.
-
-## References
-
-- Viole, F., & Nawrocki, D. (2016). LPM density functions for the computation of the SD efficient set. *Journal of Mathematical Finance*, **6**(1), 105–126. https://doi.org/10.4236/jmf.2016.61012
-- Viole, F. (2016). NNS: Nonlinear nonparametric statistics. R package. https://cran.r-project.org/package=NNS
+Taken together, these tools provide a coherent hierarchy for nonparametric distribution comparison. Stochastic superiority answers the pairwise question, NNS ANOVA answers the agreement question, and stochastic dominance answers the preference-ordering question.

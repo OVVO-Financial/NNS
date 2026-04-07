@@ -594,6 +594,87 @@ upper effect boundaries.</p>
 ## [1] 0.4308527</code></pre>
 </div>
 </div>
+<div id="stochastic-superiority" class="section level1">
+<h1>Stochastic Superiority</h1>
+<p>Stochastic superiority asks a different question than equality of
+means or equality of distributions. Rather than testing whether two
+samples came from the same population, or whether they share the same
+mean or median, stochastic superiority measures the probability that a
+random draw from one distribution exceeds a random draw from
+another.</p>
+<p>For two random variables <span class="math inline">\(X\)</span> and
+<span class="math inline">\(Y\)</span>, the stochastic superiority
+probability is:</p>
+<p><span class="math display">\[
+P(X &gt; Y)
+\]</span></p>
+<p>and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:</p>
+<p><span class="math display">\[
+P^* = P(X &gt; Y) + \frac{1}{2} P(X = Y)
+\]</span></p>
+<p>A value of <span class="math inline">\(P^* = 0.5\)</span> indicates
+no directional advantage, values above <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(X\)</span>, and values below <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(Y\)</span>.</p>
+<p>This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared
+support.</p>
+<p>Below is an example using the same data generating process from the
+unequal means example.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.233915
+## 
+## $p_tie
+## [1] 0
+## 
+## $p_star
+## [1] 0.233915</code></pre>
+<p>Since <span class="math inline">\(y\)</span> was generated with a
+higher mean, the stochastic superiority probability for <span class="math inline">\(x\)</span> relative to <span class="math inline">\(y\)</span> should be less than <span class="math inline">\(0.5\)</span>, indicating that a draw from <span class="math inline">\(x\)</span> is less likely to exceed a draw from
+<span class="math inline">\(y\)</span>.</p>
+<p>We can also obtain confidence intervals for the tie-adjusted
+superiority probability using maximum entropy bootstrap replicates.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<p>This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.</p>
+<p>For discrete variables, ties may occur with positive probability, and
+the reported <code>p_tie</code> and <code>p_star</code> values reflect
+that adjustment explicitly.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.3982
+## 
+## $p_tie
+## [1] 0.1992
+## 
+## $p_star
+## [1] 0.4978</code></pre>
+</div>
 <div id="stochastic-dominance" class="section level1">
 <h1>Stochastic Dominance</h1>
 <p>Another method of comparing distributions involves a test for
@@ -605,7 +686,11 @@ via:</p>
 <li><p><strong><code>NNS.SSD()</code></strong></p></li>
 <li><p><strong><code>NNS.TSD()</code></strong></p></li>
 </ul>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">NNS.FSD</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="fu">NNS.FSD</span>(x, y)</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <pre><code>## [1] &quot;Y FSD X&quot;</code></pre>
 <p><strong><code>NNS.FSD()</code></strong> correctly identifies the
@@ -619,24 +704,24 @@ a set of variables that do not have any dominated constituents with the
 <p><code>x2, x4, x6, x8</code> all dominate their preceding
 distributions yet do not dominate one another, and are thus included in
 the first degree stochastic dominance efficient set.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>x3 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>x4 <span class="ot">=</span> x3 <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>x5 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>x6 <span class="ot">=</span> x5 <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>x7 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>x8 <span class="ot">=</span> x7 <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="fu">NNS.SD.efficient.set</span>(<span class="fu">cbind</span>(x1, x2, x3, x4, x5, x6, x7, x8), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">status =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>x3 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>x4 <span class="ot">=</span> x3 <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>x5 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>x6 <span class="ot">=</span> x5 <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>x7 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>x8 <span class="ot">=</span> x7 <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="fu">NNS.SD.efficient.set</span>(<span class="fu">cbind</span>(x1, x2, x3, x4, x5, x6, x7, x8), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">status =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;x4&quot; &quot;x2&quot; &quot;x8&quot; &quot;x6&quot;</code></pre>
 </div>
 <div id="stochastic-dominant-clusters" class="section level2">
 <h2>Stochastic Dominant Clusters</h2>
 <p>Further, we can assign clusters to non dominated constituents and
 represent the clustering in a dendrogram.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">NNS.SD.cluster</span>(<span class="fu">cbind</span>(x1, x2, x3, x4, x5, x6, x7, x8), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">dendrogram =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">NNS.SD.cluster</span>(<span class="fu">cbind</span>(x1, x2, x3, x4, x5, x6, x7, x8), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">dendrogram =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1

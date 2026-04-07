@@ -96,6 +96,38 @@ NNS.ANOVA(control=ctrl, treatment=trt, means.only=FALSE, plot=FALSE)
 A <- list(g1=rnorm(150,0.0,1.1), g2=rnorm(150,0.2,1.0), g3=rnorm(150,-0.1,0.9))
 NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 
+## ----stochsuperiority, echo=TRUE----------------------------------------------
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+
+## ----stochsuperiorityci, echo=TRUE, eval=FALSE--------------------------------
+# NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+# 
+# $p_gt
+# [1] 0.233915
+# 
+# $p_tie
+# [1] 0
+# 
+# $p_star
+# [1] 0.233915
+# 
+# $lower
+# [1] 0.2105631
+# 
+# $upper
+# [1] 0.2537789
+
+## ----stochsuperioritydiscrete, echo=TRUE--------------------------------------
+set.seed(123)
+x = sample(1:5, 100, replace = TRUE)
+y = sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+
 ## ----fig.width=7, fig.height=5, fig.align='center'----------------------------
 # Example 1: Nonlinear regression
 set.seed(123)
@@ -119,7 +151,7 @@ NNS.reg(x = x_train, y = y_train, order = NULL, point.est = x_test)
 # 
 # 
 # mean(boost$results == as.numeric(iris[test.set,5]))
-# [1] 1
+# # [1] 1
 # 
 # 
 # boost$feature.weights; boost$feature.frequency
@@ -130,7 +162,7 @@ NNS.reg(x = x_train, y = y_train, order = NULL, point.est = x_test)
 #                      type = "CLASS", balance = TRUE,
 #                      ncores = 1, folds = 1)
 # mean(stacked$stack == as.numeric(iris[test.set,5]))
-# [1] 1
+# # [1] 1
 
 ## -----------------------------------------------------------------------------
 NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg

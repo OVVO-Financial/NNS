@@ -27,41 +27,37 @@ Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 # Orientation
 
-**Goal.** 
-A complete, hands‑on curriculum for Nonlinear Nonparametric Statistics (NNS) using **partial moments**. Each section blends narrative intuition, precise math, and executable code.
+**Goal.** A complete, hands‑on curriculum for Nonlinear Nonparametric Statistics (NNS) using **partial moments**. Each section blends narrative intuition, precise math, and executable code.
 
-**Structure.** 
-
-1. Foundations — partial moments & variance decomposition
+**Structure.** 1. Foundations — partial moments & variance decomposition
 2. Descriptive & distributional tools 
 3. Dependence & nonlinear association 
-4. Hypothesis testing & ANOVA (LPM‑CDF) 
-5. Regression, boosting, stacking & causality 
-6. Time series & forecasting 
-7. Normalziation & Rescaling
-7. Simulation (max‑entropy) & Monte Carlo
-8. Portfolio & stochastic dominance
+4. Normalization & Rescaling
+5. Hypothesis testing, ANOVA & Stochastic Superiority
+6. Regression, boosting, stacking & causality 
+7. Time series & forecasting 
+8. Simulation (max‑entropy) & Monte Carlo
+9. Portfolio & stochastic dominance
 
-**Notation.** 
-For a random variable $X$ and threshold/target $t$, the population $n$‑th **partial moments** are defined as
+**Notation.** For a random variable \(X\) and threshold/target \(t\), the population \(n\)‑th **partial moments** are defined as:
 
-$$
+\[
 \operatorname{LPM}(n,t,X) 
 = \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
 \qquad
 \operatorname{UPM}(n,t,X) 
 = \int_{t}^{\infty} (x-t)^{n} \, dF_X(x).
-$$
+\]
 
-The **empirical** estimators replace $F_X$ with the empirical CDF $\hat F_n$ (or, equivalently, use indicator functions):
+The **empirical** estimators replace \(F_X\) with the empirical CDF \(\hat F_n\) (or, equivalently, use indicator functions):
 
-$$
+\[
 \widehat{\operatorname{LPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^n \, \mathbf{1}_{\{x_i \le t\}},
 \qquad
 \widehat{\operatorname{UPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^n \, \mathbf{1}_{\{x_i > t\}}.
-$$
+\]
 
-These correspond to integrals over the measurable subsets $\{X \le t\}$ and $\{X > t\}$ in a $\sigma$‑algebra; the empirical sums are discrete analogues of Lebesgue integrals.
+These correspond to integrals over the measurable subsets \(\{X \le t\}\) and \(\{X > t\}\) in a \(\sigma\)‑algebra; the empirical sums are discrete analogues of Lebesgue integrals.
 
 ------------------------------------------------------------------------
 
@@ -69,11 +65,11 @@ These correspond to integrals over the measurable subsets $\{X \le t\}$ and $\{X
 
 ## 1.1 Why partial moments
 
--   Classical variance treats upside and downside symmetrically. Partial moments separate them, allowing **asymmetric risk/reward** analysis around a chosen target $t$ (often the mean or a benchmark).
--   At $t=\mu_X$: 
-$$
+-   Classical variance treats upside and downside symmetrically. Partial moments separate them, allowing **asymmetric risk/reward** analysis around a chosen target \(t\) (often the mean or a benchmark).
+-   At \(t=\mu_X\): 
+\[
 \operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) + \operatorname{LPM}(2,\mu_X,X)\quad\text{(exact empirical identity)}.
-$$
+\]
 This **is not** the same as splitting conditional variances around a threshold; partial moments use a *global* reference, preserving the between‑group contribution.
 
 ## 1.2 Core functions and headers
@@ -112,9 +108,11 @@ cat(sprintf("Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)\n", LPM(2,mu_z,z)
 
 ## 2.1 Higher moments from partial moments
 
-Define asymmetric analogues of skewness/kurtosis using $\operatorname{UPM}_3$, $\operatorname{LPM}_3$ (and degree 4), yielding robust tail diagnostics without parametric assumptions.
+Define asymmetric analogues of skewness/kurtosis using \(\operatorname{UPM}_3\), \(\operatorname{LPM}_3\) (and degree 4), yielding robust tail diagnostics without parametric assumptions.
 
-**Header.** `NNS.moments(x)`
+**Header.**
+
+-   `NNS.moments(x)`
 
 ```{r}
 M <- NNS.moments(y)
@@ -123,7 +121,9 @@ M
 
 ## 2.2 Mode estimation (no bin‑or‑bandwidth angst)
 
-**Header.** `NNS.mode(x)`
+**Header.** 
+
+-   `NNS.mode(x)`
 
 ```{r}
 set.seed(23)
@@ -150,16 +150,16 @@ CDF_tbl
 
 # 3. Dependence & Nonlinear Association
 
-## 3.1 Why move beyond Pearson $r$
+## 3.1 Why move beyond Pearson \(r\)
 
-Pearson captures linear monotone relationships. Many structures (U‑shapes, saturation, asymmetric tails) produce near‑zero $r$ despite strong dependence. Partial‑moment dependence metrics respond to such structure.
+Pearson captures linear monotone relationships. Many structures (U‑shapes, saturation, asymmetric tails) produce near‑zero \(r\) despite strong dependence. Partial‑moment dependence metrics respond to such structure.
 
 **Headers.** 
 
-- `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` / `Co.UPM(...)` (co‑partial moments) 
-- `PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)` 
-- `NNS.dep(x, y)` (scalar dependence coefficient) 
-- `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
+-   `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` / `Co.UPM(...)` (co‑partial moments)
+-   `PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)`
+-   `NNS.dep(x, y)` (scalar dependence coefficient)
+-   `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
 
 ## 3.2 Code: nonlinear dependence
 
@@ -202,14 +202,12 @@ rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 
 NNS provides two main tools for scaling data while preserving rank structure and distributional shape. Both operate via deterministic affine transformations.
 
-
-
 ## 4.1 Normalization
 `NNS.norm()` rescales variables to a common magnitude while preserving distributional structure. The method can be **linear** (all variables forced to have the same mean) or **nonlinear** (using dependence weights to produce a more nuanced scaling). In the nonlinear case, the degree of association between variables influences the final normalized values.
 
 **Header.** 
 
-- `NNS.norm(x, linear=TRUE, chart.type = NULL)`
+-   `NNS.norm(x, linear=TRUE, chart.type = NULL)`
 
 ```{r}
 A <- rnorm(100, mean = 0, sd = 1)
@@ -233,7 +231,7 @@ lin_norm <- NNS.norm(X, linear = TRUE, chart.type=NULL, location=NULL)
 
 **Header.** 
 
-- `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
+-   `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))`
 
 ```{r}
 px <- 100 + cumsum(rnorm(260, sd = 1))
@@ -241,16 +239,11 @@ rn <- NNS.rescale(px, a=100, b=0.03, method="riskneutral", T=1, type="Terminal")
 c( target = 100*exp(0.03*1), mean_rn = mean(rn) )
 ```
 
-**Interpretation.** `riskneutral` shifts the mean to match $S_0 e^{rT}$ (Terminal) or $S_0$ (Discounted), preserving distributional shape.
-
-
+**Interpretation.** `riskneutral` shifts the mean to match \(S_0 e^{rT}\) (Terminal) or \(S_0\) (Discounted), preserving distributional shape.
 
 ------------------------------------------------------------------------
 
-
-
-
-# 5. Hypothesis Testing & ANOVA (LPM‑CDF)
+# 5. Hypothesis Testing, ANOVA & Stochastic Superiority
 
 ## 5.1 Concept
 
@@ -258,7 +251,8 @@ Instead of distributional assumptions, compare groups via **LPM‑based CDFs**. 
 
 **Header.** 
 
-- `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
+-   `NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c("Both","left","right"), pairwise=FALSE, plot=TRUE, robust=FALSE)`
+-   `NNS.SS(x, y, ...)`
 
 ## 5.2 Code: two‑sample & multi‑group
 
@@ -271,7 +265,72 @@ A <- list(g1=rnorm(150,0.0,1.1), g2=rnorm(150,0.2,1.0), g3=rnorm(150,-0.1,0.9))
 NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 ```
 
-**Math sketch.** For each quantile/threshold $t$, compare CDFs built from `LPM.ratio(0, t, •)` (possibly with one‑sided tails). Aggregate across $t$ to a certainty score.
+**Math sketch.** For each quantile/threshold \(t\), compare CDFs built from `LPM.ratio(0, t, •)` (possibly with one‑sided tails). Aggregate across \(t\) to a certainty score.
+
+## 5.3 Stochastic Superiority
+
+Stochastic superiority asks a different question than equality of means or equality of distributions. Rather than testing whether two samples came from the same population, or whether they share the same mean or median, stochastic superiority measures the probability that a random draw from one distribution exceeds a random draw from another.
+
+For two random variables \(X\) and \(Y\), the stochastic superiority probability is:
+
+\[
+P(X > Y)
+\]
+
+and with ties accounted for, the tie-adjusted stochastic superiority measure is:
+
+\[
+P^* = P(X > Y) + \frac{1}{2} P(X = Y)
+\]
+
+A value of \(P^* = 0.5\) indicates no directional advantage, values above \(0.5\) favor \(X\), and values below \(0.5\) favor \(Y\).
+
+This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred to another over the entire shared support.
+
+Below is an example comparing two distributions with unequal means.
+
+```{r stochsuperiority, echo=TRUE}
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+```
+
+Since \(y\) was generated with a higher mean, the stochastic superiority probability for \(x\) relative to \(y\) should be less than \(0.5\), indicating that a draw from \(x\) is less likely to exceed a draw from \(y\).
+
+We can also obtain confidence intervals for the tie-adjusted superiority probability using maximum entropy bootstrap replicates.
+
+```{r stochsuperiorityci, echo=TRUE, eval=FALSE}
+NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+
+$p_gt
+[1] 0.233915
+
+$p_tie
+[1] 0
+
+$p_star
+[1] 0.233915
+
+$lower
+[1] 0.2105631
+
+$upper
+[1] 0.2537789
+```
+
+This provides an interpretable effect size for directional comparison between two distributions without requiring identical distributions or equal variances.
+
+For discrete variables, ties may occur with positive probability, and the reported `p_tie` and `p_star` values reflect that adjustment explicitly.
+
+```{r stochsuperioritydiscrete, echo=TRUE}
+set.seed(123)
+x = sample(1:5, 100, replace = TRUE)
+y = sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+```
 
 ------------------------------------------------------------------------
 
@@ -283,10 +342,10 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 
 **Headers.** 
 
-- `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, … 
-- `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)` 
-- `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)` 
-- `NNS.caus(x, y)` (directional causality score via conditional dependence)
+-   `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, …
+-   `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)`
+-   `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)`
+-   `NNS.caus(x, y)` (directional causality score via conditional dependence)
 
 ## 6.2 Code: classification via regression + ensembles
 
@@ -315,7 +374,7 @@ boost <- NNS.boost(IVs.train = iris[-test.set, 1:4],
 
 
 mean(boost$results == as.numeric(iris[test.set,5]))
-[1] 1
+# [1] 1
 
 
 boost$feature.weights; boost$feature.frequency
@@ -326,7 +385,7 @@ stacked <- NNS.stack(IVs.train = iris[-test.set, 1:4],
                      type = "CLASS", balance = TRUE,
                      ncores = 1, folds = 1)
 mean(stacked$stack == as.numeric(iris[test.set,5]))
-[1] 1
+# [1] 1
 ```
 
 ## 6.3 Code: directional causality
@@ -344,10 +403,10 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 
 **Headers.**
 
-- `NNS.ARMA`
-- `NNS.ARMA.optim`
-- `NNS.seas`
-- `NNS.VAR`
+-   `NNS.ARMA`
+-   `NNS.ARMA.optim`
+-   `NNS.seas`
+-   `NNS.VAR`
 
 ```{r , fig.width=7, fig.align='center'}
 # Univariate nonlinear ARMA
@@ -371,7 +430,7 @@ NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE
 
 **Header.** 
 
-- `NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)`
+-   `NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)`
 
 ```{r}
 x_ts <- cumsum(rnorm(350, sd=.7))
@@ -383,7 +442,7 @@ dim(mb["replicates", ]$replicates)
 
 **Header.** 
 
-- `NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)`
+-   `NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)`
 
 ```{r}
 mc <- NNS.MC(x_ts, reps=5, lower_rho=-1, upper_rho=1, by=.5, exp=1)
@@ -391,8 +450,6 @@ length(mc$ensemble); names(mc$replicates)
 
 head(mc$replicates$`rho = 0`)
 ```
-
-
 
 ------------------------------------------------------------------------
 
@@ -402,11 +459,11 @@ Stochastic dominance orders uncertain prospects for broad classes of risk‑aver
 
 **Headers.** 
 
-- `NNS.FSD.uni(x, y)`
-- `NNS.SSD.uni(x, y)`
-- `NNS.TSD.uni(x, y)` 
-- `NNS.SD.cluster(R)`
-- `NNS.SD.efficient.set(R)`
+-   `NNS.FSD.uni(x, y)`
+-   `NNS.SSD.uni(x, y)`
+-   `NNS.TSD.uni(x, y)`
+-   `NNS.SD.cluster(R)`
+-   `NNS.SD.efficient.set(R)`
 
 ```{r}
 RA <- rnorm(240, 0.005, 0.03)
@@ -426,23 +483,23 @@ try(NNS.SD.efficient.set(Rmat, degree = 1))
 
 # Appendix A — Measure‑theoretic sketch (why partial moments are rigorous)
 
-Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space, $X: \Omega\to\mathbb{R}$ measurable. For any fixed $t\in\mathbb{R}$, the sets $\{X\le t\}$ and $\{X>t\}$ are in $\mathcal{F}$ because they are preimages of Borel sets. The **population** partial moments are
+Let \((\Omega, \mathcal{F}, \mathbb{P})\) be a probability space, \(X: \Omega\to\mathbb{R}\) measurable. For any fixed \(t\in\mathbb{R}\), the sets \(\{X\le t\}\) and \(\{X>t\}\) are in \(\mathcal{F}\) because they are preimages of Borel sets. The **population** partial moments are
 
-$$
+\[
 \operatorname{LPM}(k,t,X) = \int_{-\infty}^{t} (t-x)^k\, dF_X(x),
 \qquad
 \operatorname{UPM}(k,t,X) = \int_{t}^{\infty} (x-t)^k\, dF_X(x).
-$$
+\]
 
-The **empirical** versions correspond to replacing $F_X$ with the empirical measure $\mathbb{P}_n$ (or CDF $\hat F_n$):
+The **empirical** versions correspond to replacing \(F_X\) with the empirical measure \(\mathbb{P}_n\) (or CDF \(\hat F_n\)):
 
-$$
+\[
 \widehat{\operatorname{LPM}}_k(t;X) = \int_{(-\infty,t]} (t-x)^k\, d\mathbb{P}_n(x),
 \qquad
 \widehat{\operatorname{UPM}}_k(t;X) = \int_{(t,\infty)} (x-t)^k\, d\mathbb{P}_n(x).
-$$
+\]
 
-Centering at $t=\mu_X$ yields the variance decomposition identity in Section 1.
+Centering at \(t=\mu_X\) yields the variance decomposition identity in Section 1.
 
 ------------------------------------------------------------------------
 
@@ -484,6 +541,7 @@ See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](https:
 
 ## 5. Hypothesis Testing
 - `NNS.ANOVA(control, treatment, ...)` — certainty of equality (distributions or means).
+- `NNS.SS(x, y, ...)` — stochastic superiority between two variables.
 
 See NNS Vignette: [Getting Started with NNS: Comparing Distributions](https://CRAN.R-project.org/package=NNS/vignettes/NNSvignette_Comparing_Distributions.html)
 
@@ -525,5 +583,3 @@ See NNS Vignette: [Getting Started with NNS: Sampling and Simulation](https://CR
 
 
 For complete references, please see the Vignettes linked above and their specific referenced materials.
-
-

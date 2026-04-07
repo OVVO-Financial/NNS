@@ -46,7 +46,43 @@ t.test(x,y)
 NNS.ANOVA(control = x, treatment = y,
           means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
 
+## ----stochsuperiority, echo=TRUE, eval=TRUE-----------------------------------
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
+NNS.SS(x, y)
+
+## ----stochsuperiorityci, echo=TRUE, eval = FALSE------------------------------
+# NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+# 
+# $p_gt
+# [1] 0.233915
+# 
+# $p_tie
+# [1] 0
+# 
+# $p_star
+# [1] 0.233915
+# 
+# $lower
+# [1] 0.2105631
+# 
+# $upper
+# [1] 0.2537789
+
+## ----stochsuperioritydiscrete, echo=TRUE, eval=TRUE---------------------------
+set.seed(123)
+x = sample(1:5, 100, replace = TRUE)
+y = sample(1:5, 100, replace = TRUE)
+
+NNS.SS(x, y)
+
 ## ----stochdom, fig.width=7, fig.align='center'--------------------------------
+set.seed(123)
+x = rnorm(1000, mean = 0, sd = 1)
+y = rnorm(1000, mean = 1, sd = 1)
+
 NNS.FSD(x, y)
 
 ## ----stochdomset, eval=TRUE---------------------------------------------------

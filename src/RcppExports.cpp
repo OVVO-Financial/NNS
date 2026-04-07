@@ -612,6 +612,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// stoch_superiority_cpp
+List stoch_superiority_cpp(NumericVector x, NumericVector y);
+RcppExport SEXP _NNS_stoch_superiority_cpp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(stoch_superiority_cpp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 5},
@@ -659,6 +671,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_DUPM_RCPP", (DL_FUNC) &_NNS_DUPM_RCPP, 6},
     {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 6},
     {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
+    {"_NNS_stoch_superiority_cpp", (DL_FUNC) &_NNS_stoch_superiority_cpp, 2},
     {NULL, NULL, 0}
 };
 
