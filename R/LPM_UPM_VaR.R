@@ -7,7 +7,7 @@
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is below.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #' \dontrun{
 #' set.seed(123)
@@ -51,7 +51,7 @@ LPM.VaR <- Vectorize(LPM.VaR, vectorize.args = "percentile")
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)

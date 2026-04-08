@@ -13,7 +13,7 @@
 #'   must have length 1 or the same length as \code{variable}.
 #' @return LPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -51,7 +51,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #'   must have length 1 or the same length as \code{variable}.
 #' @return UPM of variable
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #' set.seed(123)
 #' x <- rnorm(100)
@@ -174,7 +174,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #'  \item{\code{"target.value"}} value from the \code{target} argument.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #'
 #' Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"  \doi{10.2139/ssrn.3007373}
 #' 
@@ -402,7 +402,7 @@ NNS.CDF <- function(variable,
 #'  \item{\code{"$kurtosis"}} excess kurtosis of the distribution.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #'
 #' @examples
 #' \dontrun{

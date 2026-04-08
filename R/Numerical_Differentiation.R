@@ -12,7 +12,7 @@
 #' @param plot logical; plots range, secant lines and y-intercept convergence.
 #' @return Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995)
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #' \dontrun{
 #' f <- function(x) sin(x) / x
