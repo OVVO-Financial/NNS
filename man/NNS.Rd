@@ -12,6 +12,7 @@ Nonlinear nonparametric statistics using partial moments.  Partial moments are t
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://github.com/OVVO-Financial/NNS}
   \item Report bugs at \url{https://github.com/OVVO-Financial/NNS/issues}
 }
 

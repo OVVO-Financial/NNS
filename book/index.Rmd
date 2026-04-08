@@ -1,12 +1,16 @@
 ---
 title: "Nonlinear Nonparametric Statistics: Using Partial Moments"
+subtitle: "Second Edition"
 author: "Fred Viole"
+date: 2026
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
 ---
 
 # Preface {-}
+
+This is the **Second Edition** of *Nonlinear Nonparametric Statistics: Using Partial Moments*, updated and expanded by Fred Viole in 2026, building upon the foundational 2013 work with David Nawrocki.
 
 This book presents the **Nonlinear Nonparametric Statistics (NNS)** framework as a coherent toolkit for modeling dependence, uncertainty, prediction, and decision-making without imposing restrictive distributional assumptions.
 
