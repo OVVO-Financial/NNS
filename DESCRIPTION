@@ -2,15 +2,16 @@ Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
 Version: 12.0
-Date: 2026-04-07
+Date: 2026-04-08
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.open.source@gmail.com"),
   person("Roberto", "Spadim", role=c("ctb"))
   )
 Maintainer: Fred Viole <ovvo.open.source@gmail.com>
-Description: NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental elements of variance that asymptotically approximate the area under f(x) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.  NNS delivers a comprehensive suite of advanced statistical techniques, including: Numerical integration, Numerical differentiation, Clustering, Correlation, Dependence, Causal analysis, ANOVA, Regression, Classification, Seasonality, Autoregressive modeling, Normalization, Stochastic superiority / dominance and Advanced Monte Carlo sampling.  All routines based on: Viole, F. and Nawrocki, D. (2013), Nonlinear Nonparametric Statistics: Using Partial Moments (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/}).
-License: GPL-3
+Description: NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental elements of variance that asymptotically approximate the area under f(x) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.  NNS delivers a comprehensive suite of advanced statistical techniques, including: Numerical integration, Numerical differentiation, Clustering, Correlation, Dependence, Causal analysis, ANOVA, Regression, Classification, Seasonality, Autoregressive modeling, Normalization, Stochastic superiority / dominance and Advanced Monte Carlo sampling.  All routines based on: Viole, F. and Nawrocki, D. (2013), Nonlinear Nonparametric Statistics: Using Partial Moments (ISBN: 1490523995, 2nd edition: https://ovvo-financial.github.io/NNS/book/).
 BugReports: https://github.com/OVVO-Financial/NNS/issues
+License: GPL-3
+URL: https://github.com/OVVO-Financial/NNS
 Depends: R (>= 3.6.0)
 Imports: data.table, doParallel, foreach, quantmod, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
 Suggests: 
