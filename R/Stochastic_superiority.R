@@ -91,7 +91,7 @@
 #'   Simulations. \doi{10.2139/ssrn.3621614}
 #'   \item Viole, F. and Nawrocki, D. (2013)
 #'   \emph{Nonlinear Nonparametric Statistics: Using Partial Moments}.
-#'   ISBN: 1490523995.
+#'   ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/}.
 #' }
 #'
 #' @examples
