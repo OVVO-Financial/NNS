@@ -83,11 +83,14 @@ Returns a list containing:
 - `Certainty`: Probability that the groups are the *same* (means-only or
   full distribution depending on `means.only`).
 
-- `Effect_Size_LB`: Lower bound of treatment effect (if CI requested)
+- `Effect_Size_LB`: Lower bound of treatment effect (if
+  confidence.interval requested)
 
-- `Effect_Size_UB`: Upper bound of treatment effect (if CI requested)
+- `Effect_Size_UB`: Upper bound of treatment effect (if
+  confidence.interval requested)
 
-- `Confidence_Level`: Confidence level used (if CI requested)
+- `Confidence_Level`: Confidence level used (if confidence.interval
+  requested)
 
 ## Details
 
@@ -109,7 +112,8 @@ evidence of similarity.
 ## References
 
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics:
-Using Partial Moments" (ISBN: 1490523995)
+Using Partial Moments" (ISBN: 1490523995, 2nd edition:
+<https://ovvo-financial.github.io/NNS/book/>)
 
 Viole, F. (2017) "Continuous CDFs and ANOVA with NNS"
 [doi:10.2139/ssrn.3007373](https://doi.org/10.2139/ssrn.3007373)

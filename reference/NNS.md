@@ -9,11 +9,13 @@ Dependence, Causal analysis, ANOVA, Regression, Classification,
 Seasonality, Autoregressive modeling, Normalization and Stochastic
 dominance. All routines based on: Viole, F. and Nawrocki, D. (2013),
 Nonlinear Nonparametric Statistics: Using Partial Moments (ISBN:
-1490523995).
+1490523995, 2nd edition: <https://ovvo-financial.github.io/NNS/book/>).
 
 ## See also
 
 Useful links:
+
+- <https://github.com/OVVO-Financial/NNS>
 
 - Report bugs at <https://github.com/OVVO-Financial/NNS/issues>
 

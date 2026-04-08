@@ -143,7 +143,8 @@ exercise due to the number of seasonal periods detected.
 ## References
 
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics:
-Using Partial Moments" (ISBN: 1490523995)
+Using Partial Moments" (ISBN: 1490523995, 2nd edition:
+<https://ovvo-financial.github.io/NNS/book/>)
 
 Viole, F. (2019) "Forecasting Using NNS"
 [doi:10.2139/ssrn.3382300](https://doi.org/10.2139/ssrn.3382300)

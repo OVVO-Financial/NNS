@@ -32,7 +32,8 @@ of the area of `x` is above.
 ## References
 
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics:
-Using Partial Moments" (ISBN: 1490523995)
+Using Partial Moments" (ISBN: 1490523995, 2nd edition:
+<https://ovvo-financial.github.io/NNS/book/>)
 
 ## Author
 

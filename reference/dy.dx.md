@@ -33,7 +33,8 @@ derivative.
 ## References
 
 Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics:
-Using Partial Moments" (ISBN: 1490523995)
+Using Partial Moments" (ISBN: 1490523995, 2nd edition:
+<https://ovvo-financial.github.io/NNS/book/>)
 
 Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"
 [doi:10.1007/s10614-017-9713-5](https://doi.org/10.1007/s10614-017-9713-5)
