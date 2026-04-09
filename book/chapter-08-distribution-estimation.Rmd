@@ -165,6 +165,8 @@ The directional framework approaches the problem differently. Rather than smooth
 
 The theoretical foundation for this approach is established in Chapter 12, where degree-one partial moments are shown to recover the full distribution without smoothing parameters. The computational implementation — data-adaptive partitioning that locates modes and local probability mass concentration — is developed in Chapter 18.
 
+Practical implementation of these methods — including sampling from empirical distributions and generating PDFs via degree manipulation of `LPM.VaR` — is demonstrated in the NNS package vignette [Sampling and Simulation](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_Sampling.html).
+
 ---
 
 ## Comparison with Kernel Density Estimation
