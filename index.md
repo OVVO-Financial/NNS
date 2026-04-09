@@ -12,7 +12,8 @@ fundamental [elements of
 variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md)
 that asymptotically approximate the area under f(x) – to provide a
 robust foundation for nonlinear analysis while maintaining linear
-equivalences.
+equivalences. Designed for real-world data that violates symmetry,
+linearity, or distributional assumptions.
 
 NNS delivers a comprehensive suite of advanced statistical techniques,
 including: - Numerical Integration & Numerical Differentiation -
