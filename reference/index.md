@@ -86,8 +86,6 @@
   : NNS Seasonality Test
 - [`NNS.stack()`](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
   : NNS Stack
-- [`NNS.term.matrix()`](https://OVVO-Financial.github.io/NNS/reference/NNS.term.matrix.md)
-  : NNS Term Matrix
 - [`NNS_bin()`](https://OVVO-Financial.github.io/NNS/reference/NNS_bin.md)
   : Fast binning of numeric vector into equidistant bins
 - [`PM.matrix()`](https://OVVO-Financial.github.io/NNS/reference/PM.matrix.md)
