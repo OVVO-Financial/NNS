@@ -1,7 +1,7 @@
 # NNS
-Nonlinear nonparametric statistics using partial moments.  Partial moments are the [elements of variance](https://www.linkedin.com/pulse/elements-variance-fred-viole) and [asymptotically approximate the area of f(x)](https://ovvo-financial.github.io/NNS/book/numerical-integration-via-partial-moments.html).  These robust statistics provide the basis for nonlinear analysis while retaining linear equivalences.
+NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental [elements of variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md) that [asymptotically approximate the area of f(x)](https://ovvo-financial.github.io/NNS/book/numerical-integration-via-partial-moments.html) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.  Designed for real-world data that violates symmetry, linearity, or distributional assumptions.
 
-NNS offers: 
+NNS delivers a comprehensive suite of advanced statistical techniques, including:
   - Numerical Integration & Numerical Differentiation
   - Partitional & Hierarchical Clustering
   - Nonlinear Correlation & Dependence
