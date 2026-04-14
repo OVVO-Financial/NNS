@@ -352,6 +352,10 @@ and therefore
 
 The surface \(H\) is directly estimable from data by averaging hinge products. Mixed second derivatives recover the joint CDF numerically via finite differences; further differentiation recovers the density, though this is noisier due to higher-order amplification of sampling variation.
 
+See [Discrete and Continuous Bayes](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/discrete_and_continuous_bayes.md) for a worked example.
+
+
+
 ## Hierarchy across degrees
 
 This result establishes a natural hierarchy:
