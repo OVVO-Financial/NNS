@@ -90,10 +90,10 @@ wilcox.test(mpg ~ am, data=mtcars)
 ```
 
     ## 
-    ##  Wilcoxon rank sum test with continuity correction
+    ##  Wilcoxon rank sum exact test
     ## 
     ## data:  mpg by am
-    ## W = 42, p-value = 0.001871
+    ## W = 42, p-value = 0.001159
     ## alternative hypothesis: true location shift is not equal to 0
 
 ### Test if means are Equal
