@@ -280,12 +280,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="9.3" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-from-co-partial-moments"><i class="fa fa-check"></i><b>9.3</b> Covariance from Co-Partial Moments</a></li>
 <li class="chapter" data-level="9.4" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices"><i class="fa fa-check"></i><b>9.4</b> Covariance Matrices from Partial-Moment Matrices</a></li>
-<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.5</b> Correlation as a Normalized Covariance</a></li>
-<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.6</b> Nonlinear Dependence</a></li>
-<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.7</b> Asymmetric Dependence</a></li>
-<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.8</b> Tail Dependence</a></li>
-<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.9</b> Information Loss in Aggregation</a></li>
-<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.10</b> Summary</a></li>
+<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#gram-matrix-structure-of-concordant-co-partial-moment-matrices"><i class="fa fa-check"></i><b>9.5</b> Gram-Matrix Structure of Concordant Co-Partial Moment Matrices</a></li>
+<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.6</b> Correlation as a Normalized Covariance</a></li>
+<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.7</b> Nonlinear Dependence</a></li>
+<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.8</b> Asymmetric Dependence</a></li>
+<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.9</b> Tail Dependence</a></li>
+<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.10</b> Information Loss in Aggregation</a></li>
+<li class="chapter" data-level="9.11" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.11</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="10" data-path="directional-dependence.html"><a href="directional-dependence.html"><i class="fa fa-check"></i><b>10</b> Directional Dependence</a>
 <ul>
@@ -1202,10 +1203,10 @@ Continuing to order <span class="math inline">\(O\)</span> produces at most <spa
 <h3><span class="header-section-number">18.5.4</span> Regression points<a href="recursive-mean-split-estimation.html#regression-points" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The <strong>regression points</strong> of the partition are the local means <span class="math inline">\((\bar{X}_R, \bar{Y}_R)\)</span> within each region.
 These points summarize the conditional mean surface and serve as the basis for prediction and curve fitting.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="recursive-mean-split-estimation.html#cb27-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, .<span class="dv">05</span>)</span>
-<span id="cb27-2"><a href="recursive-mean-split-estimation.html#cb27-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">3</span></span>
-<span id="cb27-3"><a href="recursive-mean-split-estimation.html#cb27-3" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="recursive-mean-split-estimation.html#cb27-4" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>){<span class="fu">NNS.part</span>(x, y, <span class="at">order =</span> i, <span class="at">Voronoi =</span> <span class="cn">TRUE</span>, <span class="at">obs.req =</span> <span class="dv">0</span>)}</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="recursive-mean-split-estimation.html#cb36-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, .<span class="dv">05</span>)</span>
+<span id="cb36-2"><a href="recursive-mean-split-estimation.html#cb36-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">3</span></span>
+<span id="cb36-3"><a href="recursive-mean-split-estimation.html#cb36-3" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="recursive-mean-split-estimation.html#cb36-4" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>){<span class="fu">NNS.part</span>(x, y, <span class="at">order =</span> i, <span class="at">Voronoi =</span> <span class="cn">TRUE</span>, <span class="at">obs.req =</span> <span class="dv">0</span>)}</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch18_part_1.png" alt="Figure 18.1. NNS.part joint partitioning for orders 1–4 (Voronoi view), showing progressive recursive refinement." />
@@ -1245,10 +1246,10 @@ Continuing to order <span class="math inline">\(O\)</span> produces at most <spa
 <h3><span class="header-section-number">18.6.4</span> Regression points<a href="recursive-mean-split-estimation.html#regression-points-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The regression points are the local means <span class="math inline">\((\bar{X}_R, \bar{Y}_R)\)</span> within each predictor-defined region.
 Because the region boundaries are determined by <span class="math inline">\(X\)</span> alone, the regression points make use of the <strong>full bandwidth</strong> of the response values within each region for their <span class="math inline">\(Y\)</span> coordinate.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="recursive-mean-split-estimation.html#cb28-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, .<span class="dv">05</span>)</span>
-<span id="cb28-2"><a href="recursive-mean-split-estimation.html#cb28-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">3</span></span>
-<span id="cb28-3"><a href="recursive-mean-split-estimation.html#cb28-3" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="recursive-mean-split-estimation.html#cb28-4" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>){<span class="fu">NNS.part</span>(x, y, <span class="at">order =</span> i, <span class="at">type =</span> <span class="st">&quot;XONLY&quot;</span>, <span class="at">Voronoi =</span> <span class="cn">TRUE</span>, <span class="at">obs.req =</span> <span class="dv">0</span>)}</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="recursive-mean-split-estimation.html#cb37-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, .<span class="dv">05</span>)</span>
+<span id="cb37-2"><a href="recursive-mean-split-estimation.html#cb37-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">3</span></span>
+<span id="cb37-3"><a href="recursive-mean-split-estimation.html#cb37-3" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="recursive-mean-split-estimation.html#cb37-4" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>){<span class="fu">NNS.part</span>(x, y, <span class="at">order =</span> i, <span class="at">type =</span> <span class="st">&quot;XONLY&quot;</span>, <span class="at">Voronoi =</span> <span class="cn">TRUE</span>, <span class="at">obs.req =</span> <span class="dv">0</span>)}</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch18_part_2.png" alt="Figure 18.2. NNS.part(..., type = &quot;XONLY&quot;) predictor-only partitioning across recursive splits." />

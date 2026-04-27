@@ -280,12 +280,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="9.3" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-from-co-partial-moments"><i class="fa fa-check"></i><b>9.3</b> Covariance from Co-Partial Moments</a></li>
 <li class="chapter" data-level="9.4" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices"><i class="fa fa-check"></i><b>9.4</b> Covariance Matrices from Partial-Moment Matrices</a></li>
-<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.5</b> Correlation as a Normalized Covariance</a></li>
-<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.6</b> Nonlinear Dependence</a></li>
-<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.7</b> Asymmetric Dependence</a></li>
-<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.8</b> Tail Dependence</a></li>
-<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.9</b> Information Loss in Aggregation</a></li>
-<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.10</b> Summary</a></li>
+<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#gram-matrix-structure-of-concordant-co-partial-moment-matrices"><i class="fa fa-check"></i><b>9.5</b> Gram-Matrix Structure of Concordant Co-Partial Moment Matrices</a></li>
+<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.6</b> Correlation as a Normalized Covariance</a></li>
+<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.7</b> Nonlinear Dependence</a></li>
+<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.8</b> Asymmetric Dependence</a></li>
+<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.9</b> Tail Dependence</a></li>
+<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.10</b> Information Loss in Aggregation</a></li>
+<li class="chapter" data-level="9.11" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.11</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="10" data-path="directional-dependence.html"><a href="directional-dependence.html"><i class="fa fa-check"></i><b>10</b> Directional Dependence</a>
 <ul>
@@ -1026,13 +1027,17 @@ Just as classical moments arise from aggregations of partial moments, <strong>co
 <h2><span class="header-section-number">9.1</span> Classical Dependence Measures<a href="why-correlation-fails.html#classical-dependence-measures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>For two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, the <strong>covariance</strong> is</p>
 <p><span class="math display">\[
-Cov(X,Y)=E[(X-\mu_X)(Y-\mu_Y)].
+\operatorname{Cov}(X,Y)
+=
+E[(X-\mu_X)(Y-\mu_Y)].
 \]</span></p>
 <p>Covariance measures the joint variation of the two variables relative to their means.</p>
 <p>The <strong>Pearson correlation coefficient</strong> standardizes covariance:</p>
 <p><span class="math display">\[
-\rho(X,Y)=
-\frac{Cov(X,Y)}{\sigma_X\sigma_Y}.
+\rho(X,Y)
+=
+\frac{\operatorname{Cov}(X,Y)}
+{\sigma_X\sigma_Y}.
 \]</span></p>
 <p>The statistic lies in the interval</p>
 <p><span class="math display">\[
@@ -1044,65 +1049,79 @@ Cov(X,Y)=E[(X-\mu_X)(Y-\mu_Y)].
 <li><span class="math inline">\(-1\)</span> indicate strong negative linear association,</li>
 <li><span class="math inline">\(0\)</span> indicate no linear association.</li>
 </ul>
-<p>The key limitation is that correlation measures <strong>only linear relationships</strong>.</p>
+<p>The key limitation is that correlation measures <strong>only linear relationships</strong>.<br />
+If dependence is nonlinear, asymmetric, or concentrated in tails, correlation may understate it or miss it entirely.</p>
 <hr />
 </div>
 <div id="directional-co-partial-moments" class="section level2 hasAnchor" number="9.2">
 <h2><span class="header-section-number">9.2</span> Directional Co-Partial Moments<a href="why-correlation-fails.html#directional-co-partial-moments" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Directional statistics partitions the joint distribution relative to benchmark values <span class="math inline">\(t_X\)</span> and <span class="math inline">\(t_Y\)</span>.</p>
-<p>Four regions arise:</p>
+<p>Four directional regions arise:</p>
 <p><span class="math display">\[
-X \le t_X,\; Y \le t_Y
+X \le t_X,\; Y \le t_Y,
 \]</span></p>
 <p><span class="math display">\[
-X \le t_X,\; Y &gt; t_Y
+X \le t_X,\; Y &gt; t_Y,
 \]</span></p>
 <p><span class="math display">\[
-X &gt; t_X,\; Y \le t_Y
+X &gt; t_X,\; Y \le t_Y,
 \]</span></p>
 <p><span class="math display">\[
-X &gt; t_X,\; Y &gt; t_Y
+X &gt; t_X,\; Y &gt; t_Y.
 \]</span></p>
 <p>These regions correspond to combinations of directional deviations.</p>
-<p>Benchmarks may be chosen in different ways depending on the application.</p>
+<p>Benchmarks may be chosen in different ways depending on the application:</p>
 <ul>
-<li><strong>External benchmarks</strong>, such as policy targets or required returns.</li>
-<li><strong>Internal benchmarks</strong>, such as sample means.</li>
+<li><strong>External benchmarks</strong>, such as policy targets, required returns, safety thresholds, or liability levels.</li>
+<li><strong>Internal benchmarks</strong>, such as sample means, medians, or other distribution-derived reference points.</li>
 </ul>
-<p>The covariance decomposition developed in Section 9.3 uses the <strong>means</strong>:</p>
+<p>The covariance decomposition developed in the next section uses the <strong>means</strong>:</p>
 <p><span class="math display">\[
-t_X = \mu_X, \quad t_Y = \mu_Y.
+t_X = \mu_X,
+\qquad
+t_Y = \mu_Y.
 \]</span></p>
 <p>Define the positive-part operator</p>
 <p><span class="math display">\[
-(x)^+ = \max(x,0).
+(x)_+ = \max(x,0).
 \]</span></p>
 <p>The directional co-partial moments of order <span class="math inline">\(r,s\)</span> are:</p>
 <div id="co-lower-partial-moment" class="section level3 hasAnchor" number="9.2.1">
 <h3><span class="header-section-number">9.2.1</span> Co-Lower Partial Moment<a href="why-correlation-fails.html#co-lower-partial-moment" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><span class="math display">\[
-CoLPM_{r,s}(X,Y)=E[(t_X-X)_+^r (t_Y-Y)_+^s]
+\operatorname{CoLPM}_{r,s}(X,Y)
+=
+E[(t_X-X)_+^r (t_Y-Y)_+^s].
 \]</span></p>
+<p>This measures concordant lower-side co-movement: both variables are below their benchmarks.</p>
 </div>
 <div id="co-upper-partial-moment" class="section level3 hasAnchor" number="9.2.2">
 <h3><span class="header-section-number">9.2.2</span> Co-Upper Partial Moment<a href="why-correlation-fails.html#co-upper-partial-moment" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><span class="math display">\[
-CoUPM_{r,s}(X,Y)=E[(X-t_X)_+^r (Y-t_Y)_+^s]
+\operatorname{CoUPM}_{r,s}(X,Y)
+=
+E[(X-t_X)_+^r (Y-t_Y)_+^s].
 \]</span></p>
+<p>This measures concordant upper-side co-movement: both variables are above their benchmarks.</p>
 </div>
 <div id="divergent-lower-partial-moment" class="section level3 hasAnchor" number="9.2.3">
 <h3><span class="header-section-number">9.2.3</span> Divergent Lower Partial Moment<a href="why-correlation-fails.html#divergent-lower-partial-moment" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><span class="math display">\[
-DLPM_{r,s}(X,Y)=E[(X-t_X)_+^r (t_Y-Y)_+^s]
+\operatorname{DLPM}_{r,s}(X,Y)
+=
+E[(X-t_X)_+^r (t_Y-Y)_+^s].
 \]</span></p>
+<p>This measures one divergent direction: <span class="math inline">\(X\)</span> is above its benchmark while <span class="math inline">\(Y\)</span> is below its benchmark.</p>
 </div>
 <div id="divergent-upper-partial-moment" class="section level3 hasAnchor" number="9.2.4">
 <h3><span class="header-section-number">9.2.4</span> Divergent Upper Partial Moment<a href="why-correlation-fails.html#divergent-upper-partial-moment" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><span class="math display">\[
-DUPM_{r,s}(X,Y)=E[(t_X-X)_+^r (Y-t_Y)_+^s]
+\operatorname{DUPM}_{r,s}(X,Y)
+=
+E[(t_X-X)_+^r (Y-t_Y)_+^s].
 \]</span></p>
-<p>These quantities measure the magnitude of joint deviations within each directional region of the joint distribution.</p>
-<p>Together they provide a <strong>directional decomposition of dependence structure</strong>.</p>
+<p>This measures the opposite divergent direction: <span class="math inline">\(X\)</span> is below its benchmark while <span class="math inline">\(Y\)</span> is above its benchmark.</p>
+<p>Together, these four quantities provide a <strong>directional decomposition of dependence structure</strong>.</p>
 <hr />
 </div>
 </div>
@@ -1111,168 +1130,276 @@ DUPM_{r,s}(X,Y)=E[(t_X-X)_+^r (Y-t_Y)_+^s]
 <p>Covariance can be expressed directly in terms of directional co-partial moments.</p>
 <p>Let the benchmarks equal the means:</p>
 <p><span class="math display">\[
-t_X=\mu_X, \quad t_Y=\mu_Y.
+t_X=\mu_X,
+\qquad
+t_Y=\mu_Y.
 \]</span></p>
-<p>From Chapter 2,</p>
+<p>From the directional decomposition introduced in Chapter 2,</p>
 <p><span class="math display">\[
-x = x^+ - (-x)^+.
+x = x_+ - (-x)_+.
 \]</span></p>
-<p>Applying this to deviations:</p>
+<p>Applying this to deviations gives</p>
 <p><span class="math display">\[
-X-\mu_X = (X-\mu_X)^+ - (\mu_X-X)^+
+X-\mu_X = (X-\mu_X)_+ - (\mu_X-X)_+
 \]</span></p>
+<p>and</p>
 <p><span class="math display">\[
-Y-\mu_Y = (Y-\mu_Y)^+ - (\mu_Y-Y)^+
+Y-\mu_Y = (Y-\mu_Y)_+ - (\mu_Y-Y)_+.
 \]</span></p>
 <p>Define</p>
 <p><span class="math display">\[
-A=(X-\mu_X)^+,\quad B=(\mu_X-X)^+
+A=(X-\mu_X)_+,
+\qquad
+B=(\mu_X-X)_+,
 \]</span></p>
 <p><span class="math display">\[
-C=(Y-\mu_Y)^+,\quad D=(\mu_Y-Y)^+
+C=(Y-\mu_Y)_+,
+\qquad
+D=(\mu_Y-Y)_+.
 \]</span></p>
 <p>Then</p>
 <p><span class="math display">\[
-(X-\mu_X)(Y-\mu_Y)=(A-B)(C-D).
+(X-\mu_X)(Y-\mu_Y)
+=
+(A-B)(C-D).
 \]</span></p>
 <p>Expanding gives</p>
 <p><span class="math display">\[
-(A-B)(C-D)=AC + BD - AD - BC.
+(A-B)(C-D)
+=
+AC + BD - AD - BC.
 \]</span></p>
 <p>Substituting the definitions yields</p>
 <p><span class="math display">\[
+\begin{aligned}
 (X-\mu_X)(Y-\mu_Y)
-=
-(X-\mu_X)^+(Y-\mu_Y)^+
-+
-(\mu_X-X)^+(\mu_Y-Y)^+
--
-(X-\mu_X)^+(\mu_Y-Y)^+
--
-(\mu_X-X)^+(Y-\mu_Y)^+.
+&amp;=
+(X-\mu_X)_+(Y-\mu_Y)_+ \\
+&amp;\quad+
+(\mu_X-X)_+(\mu_Y-Y)_+ \\
+&amp;\quad-
+(X-\mu_X)_+(\mu_Y-Y)_+ \\
+&amp;\quad-
+(\mu_X-X)_+(Y-\mu_Y)_+.
+\end{aligned}
 \]</span></p>
 <p>Taking expectations gives</p>
 <p><span class="math display">\[
-Cov(X,Y)
+\operatorname{Cov}(X,Y)
 =
-CoUPM_{1,1}(X,Y)
+\operatorname{CoUPM}_{1,1}(X,Y)
 +
-CoLPM_{1,1}(X,Y)
+\operatorname{CoLPM}_{1,1}(X,Y)
 -
-DLPM_{1,1}(X,Y)
+\operatorname{DLPM}_{1,1}(X,Y)
 -
-DUPM_{1,1}(X,Y).
+\operatorname{DUPM}_{1,1}(X,Y).
 \]</span></p>
-<p>Thus covariance is simply the <strong>signed aggregation of four directional co-partial moments</strong>.</p>
+<p>Thus covariance is the <strong>signed aggregation of four directional co-partial moments</strong>.</p>
 <p>This mirrors the earlier variance decomposition</p>
 <p><span class="math display">\[
-Var(X)=U_2(\mu;X)+L_2(\mu;X).
+\operatorname{Var}(X)
+=
+U_2(\mu;X)+L_2(\mu;X).
 \]</span></p>
+<p>The difference is that covariance requires both concordant and divergent directional components. Concordant components enter positively. Divergent components enter negatively.</p>
 <hr />
 </div>
 <div id="covariance-matrices-from-partial-moment-matrices" class="section level2 hasAnchor" number="9.4">
 <h2><span class="header-section-number">9.4</span> Covariance Matrices from Partial-Moment Matrices<a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>For a system of <span class="math inline">\(n\)</span> variables, directional co-partial moments form matrices.</p>
-<p>Define</p>
+<p>For a system of <span class="math inline">\(N\)</span> variables, directional co-partial moments form matrices.</p>
+<p>Define the degree-1 directional matrices by</p>
 <p><span class="math display">\[
-CLPM_{ij}=CoLPM_{1,1}(X_i,X_j)
+\operatorname{CoLPM}_{ij}
+=
+\operatorname{CoLPM}_{1,1}(X_i,X_j),
 \]</span></p>
 <p><span class="math display">\[
-CUPM_{ij}=CoUPM_{1,1}(X_i,X_j)
+\operatorname{CoUPM}_{ij}
+=
+\operatorname{CoUPM}_{1,1}(X_i,X_j),
 \]</span></p>
 <p><span class="math display">\[
-DLPM_{ij}=DLPM_{1,1}(X_i,X_j)
+\operatorname{DLPM}_{ij}
+=
+\operatorname{DLPM}_{1,1}(X_i,X_j),
 \]</span></p>
 <p><span class="math display">\[
-DUPM_{ij}=DUPM_{1,1}(X_i,X_j)
+\operatorname{DUPM}_{ij}
+=
+\operatorname{DUPM}_{1,1}(X_i,X_j).
 \]</span></p>
 <p>Each matrix captures directional co-movement across the variables.</p>
 <p>The classical covariance matrix can be written as</p>
 <p><span class="math display">\[
-\Sigma = CLPM + CUPM - DLPM - DUPM.
+\Sigma
+=
+\operatorname{CoLPM}
++
+\operatorname{CoUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}.
 \]</span></p>
 <p>The diagonal elements satisfy</p>
 <p><span class="math display">\[
-\Sigma_{ii}=Var(X_i).
+\Sigma_{ii}
+=
+\operatorname{Var}(X_i).
 \]</span></p>
-<p>This follows because when <span class="math inline">\(i=j\)</span>, the divergent partial moments <span class="math inline">\(DLPM\)</span> and <span class="math inline">\(DUPM\)</span> vanish, leaving only the lower and upper components.<br />
-The expression therefore reduces to the variance decomposition derived earlier:</p>
+<p>This follows because when <span class="math inline">\(i=j\)</span>, the divergent partial moments vanish. A variable cannot be both above and below its own benchmark at the same observation. The expression therefore reduces to the variance decomposition derived earlier:</p>
 <p><span class="math display">\[
-Var(X_i)=U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
+\operatorname{Var}(X_i)
+=
+U_2(\mu_i;X_i)+L_2(\mu_i;X_i).
 \]</span></p>
 <p>Like their univariate counterparts, these directional matrices can be <strong>estimated empirically from sample data</strong> using sample co-partial moments.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="why-correlation-fails.html#cb2-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb2-2"><a href="why-correlation-fails.html#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb2-3"><a href="why-correlation-fails.html#cb2-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>) </span>
-<span id="cb2-4"><a href="why-correlation-fails.html#cb2-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb2-5"><a href="why-correlation-fails.html#cb2-5" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="why-correlation-fails.html#cb2-6" tabindex="-1"></a>cov.mtx <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(<span class="at">LPM_degree =</span> <span class="dv">1</span>, <span class="at">UPM_degree =</span> <span class="dv">1</span>, <span class="at">target =</span> <span class="st">&#39;mean&#39;</span>, <span class="at">variable =</span> <span class="fu">cbind</span>(x, y), <span class="at">pop_adj =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-7"><a href="why-correlation-fails.html#cb2-7" tabindex="-1"></a>cov.mtx</span>
-<span id="cb2-8"><a href="why-correlation-fails.html#cb2-8" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="why-correlation-fails.html#cb2-9" tabindex="-1"></a><span class="do">## $cupm</span></span>
-<span id="cb2-10"><a href="why-correlation-fails.html#cb2-10" tabindex="-1"></a><span class="do">##           x         y</span></span>
-<span id="cb2-11"><a href="why-correlation-fails.html#cb2-11" tabindex="-1"></a><span class="do">## x 0.4299250 0.1033601</span></span>
-<span id="cb2-12"><a href="why-correlation-fails.html#cb2-12" tabindex="-1"></a><span class="do">## y 0.1033601 0.5411626</span></span>
-<span id="cb2-13"><a href="why-correlation-fails.html#cb2-13" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-14"><a href="why-correlation-fails.html#cb2-14" tabindex="-1"></a><span class="do">## $dupm</span></span>
-<span id="cb2-15"><a href="why-correlation-fails.html#cb2-15" tabindex="-1"></a><span class="do">##           x         y</span></span>
-<span id="cb2-16"><a href="why-correlation-fails.html#cb2-16" tabindex="-1"></a><span class="do">## x 0.0000000 0.1469182</span></span>
-<span id="cb2-17"><a href="why-correlation-fails.html#cb2-17" tabindex="-1"></a><span class="do">## y 0.1560924 0.0000000</span></span>
-<span id="cb2-18"><a href="why-correlation-fails.html#cb2-18" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-19"><a href="why-correlation-fails.html#cb2-19" tabindex="-1"></a><span class="do">## $dlpm</span></span>
-<span id="cb2-20"><a href="why-correlation-fails.html#cb2-20" tabindex="-1"></a><span class="do">##           x         y</span></span>
-<span id="cb2-21"><a href="why-correlation-fails.html#cb2-21" tabindex="-1"></a><span class="do">## x 0.0000000 0.1560924</span></span>
-<span id="cb2-22"><a href="why-correlation-fails.html#cb2-22" tabindex="-1"></a><span class="do">## y 0.1469182 0.0000000</span></span>
-<span id="cb2-23"><a href="why-correlation-fails.html#cb2-23" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-24"><a href="why-correlation-fails.html#cb2-24" tabindex="-1"></a><span class="do">## $clpm</span></span>
-<span id="cb2-25"><a href="why-correlation-fails.html#cb2-25" tabindex="-1"></a><span class="do">##           x         y</span></span>
-<span id="cb2-26"><a href="why-correlation-fails.html#cb2-26" tabindex="-1"></a><span class="do">## x 0.4033078 0.1559295</span></span>
-<span id="cb2-27"><a href="why-correlation-fails.html#cb2-27" tabindex="-1"></a><span class="do">## y 0.1559295 0.3939005</span></span>
-<span id="cb2-28"><a href="why-correlation-fails.html#cb2-28" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb2-29"><a href="why-correlation-fails.html#cb2-29" tabindex="-1"></a><span class="do">## $cov.matrix</span></span>
-<span id="cb2-30"><a href="why-correlation-fails.html#cb2-30" tabindex="-1"></a><span class="do">##             x           y</span></span>
-<span id="cb2-31"><a href="why-correlation-fails.html#cb2-31" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
-<span id="cb2-32"><a href="why-correlation-fails.html#cb2-32" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
-<span id="cb2-33"><a href="why-correlation-fails.html#cb2-33" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="why-correlation-fails.html#cb2-34" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="why-correlation-fails.html#cb2-35" tabindex="-1"></a><span class="co"># Reassembled Covariance Matrix</span></span>
-<span id="cb2-36"><a href="why-correlation-fails.html#cb2-36" tabindex="-1"></a>cov.mtx<span class="sc">$</span>clpm <span class="sc">+</span> cov.mtx<span class="sc">$</span>cupm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dlpm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dupm</span>
-<span id="cb2-37"><a href="why-correlation-fails.html#cb2-37" tabindex="-1"></a></span>
-<span id="cb2-38"><a href="why-correlation-fails.html#cb2-38" tabindex="-1"></a><span class="do">##             x           y</span></span>
-<span id="cb2-39"><a href="why-correlation-fails.html#cb2-39" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
-<span id="cb2-40"><a href="why-correlation-fails.html#cb2-40" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
-<span id="cb2-41"><a href="why-correlation-fails.html#cb2-41" tabindex="-1"></a></span>
-<span id="cb2-42"><a href="why-correlation-fails.html#cb2-42" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="why-correlation-fails.html#cb2-43" tabindex="-1"></a><span class="co"># Standard Covariance Matrix</span></span>
-<span id="cb2-44"><a href="why-correlation-fails.html#cb2-44" tabindex="-1"></a><span class="fu">cov</span>(<span class="fu">cbind</span>(x, y))</span>
-<span id="cb2-45"><a href="why-correlation-fails.html#cb2-45" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="why-correlation-fails.html#cb2-46" tabindex="-1"></a><span class="do">##             x           y</span></span>
-<span id="cb2-47"><a href="why-correlation-fails.html#cb2-47" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
-<span id="cb2-48"><a href="why-correlation-fails.html#cb2-48" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="why-correlation-fails.html#cb2-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span></code></pre></div>
+<pre><code>## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</code></pre>
+<pre><code>## Warning: &#39;rgl.init&#39; failed, will use the null device.
+## See &#39;?rgl.useNULL&#39; for ways to avoid this warning.</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;quantmod&#39;:
+##   method            from
+##   as.zoo.data.frame zoo</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="why-correlation-fails.html#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb6-2"><a href="why-correlation-fails.html#cb6-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb6-3"><a href="why-correlation-fails.html#cb6-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb6-4"><a href="why-correlation-fails.html#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="why-correlation-fails.html#cb6-5" tabindex="-1"></a>cov.mtx <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(</span>
+<span id="cb6-6"><a href="why-correlation-fails.html#cb6-6" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb6-7"><a href="why-correlation-fails.html#cb6-7" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb6-8"><a href="why-correlation-fails.html#cb6-8" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb6-9"><a href="why-correlation-fails.html#cb6-9" tabindex="-1"></a>  <span class="at">variable =</span> <span class="fu">cbind</span>(x, y),</span>
+<span id="cb6-10"><a href="why-correlation-fails.html#cb6-10" tabindex="-1"></a>  <span class="at">pop_adj =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-11"><a href="why-correlation-fails.html#cb6-11" tabindex="-1"></a>)</span>
+<span id="cb6-12"><a href="why-correlation-fails.html#cb6-12" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="why-correlation-fails.html#cb6-13" tabindex="-1"></a>cov.mtx</span></code></pre></div>
+<pre><code>## $cupm
+##           x         y
+## x 0.4299250 0.1033601
+## y 0.1033601 0.5411626
+## 
+## $dupm
+##           x         y
+## x 0.0000000 0.1469182
+## y 0.1560924 0.0000000
+## 
+## $dlpm
+##           x         y
+## x 0.0000000 0.1560924
+## y 0.1469182 0.0000000
+## 
+## $clpm
+##           x         y
+## x 0.4033078 0.1559295
+## y 0.1559295 0.3939005
+## 
+## $cov.matrix
+##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="why-correlation-fails.html#cb8-1" tabindex="-1"></a><span class="co"># Reassembled covariance matrix</span></span>
+<span id="cb8-2"><a href="why-correlation-fails.html#cb8-2" tabindex="-1"></a>cov.mtx<span class="sc">$</span>clpm <span class="sc">+</span> cov.mtx<span class="sc">$</span>cupm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dlpm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dupm</span></code></pre></div>
+<pre><code>##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="why-correlation-fails.html#cb10-1" tabindex="-1"></a><span class="co"># Standard covariance matrix</span></span>
+<span id="cb10-2"><a href="why-correlation-fails.html#cb10-2" tabindex="-1"></a><span class="fu">cov</span>(<span class="fu">cbind</span>(x, y))</span></code></pre></div>
+<pre><code>##             x           y
+## x  0.83323283 -0.04372107
+## y -0.04372107  0.93506310</code></pre>
+<p>The reassembled matrix is identical to the standard covariance matrix, confirming the degree-1 directional decomposition in empirical form.</p>
 <hr />
 </div>
-<div id="correlation-as-a-normalized-covariance" class="section level2 hasAnchor" number="9.5">
-<h2><span class="header-section-number">9.5</span> Correlation as a Normalized Covariance<a href="why-correlation-fails.html#correlation-as-a-normalized-covariance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="gram-matrix-structure-of-concordant-co-partial-moment-matrices" class="section level2 hasAnchor" number="9.5">
+<h2><span class="header-section-number">9.5</span> Gram-Matrix Structure of Concordant Co-Partial Moment Matrices<a href="why-correlation-fails.html#gram-matrix-structure-of-concordant-co-partial-moment-matrices" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The concordant co-partial moment matrices have a simple linear algebra structure.</p>
+<p>For a system of <span class="math inline">\(N\)</span> variables observed over <span class="math inline">\(T\)</span> periods, define the lower directional-deviation matrix <span class="math inline">\(L^{(r)}\)</span> by</p>
+<p><span class="math display">\[
+L^{(r)}_{t i}
+=
+(t_i-X_{i,t})_+^r.
+\]</span></p>
+<p>The <span class="math inline">\(i\)</span>-th column of <span class="math inline">\(L^{(r)}\)</span> is the lower directional-deviation vector for variable <span class="math inline">\(X_i\)</span>.</p>
+<p>Then the co-lower partial moment matrix is</p>
+<p><span class="math display">\[
+\operatorname{CoLPM}^{(r)}
+=
+\frac{1}{T}
+\left(L^{(r)}\right)^\top L^{(r)}.
+\]</span></p>
+<p>Similarly, define the upper directional-deviation matrix <span class="math inline">\(U^{(r)}\)</span> by</p>
+<p><span class="math display">\[
+U^{(r)}_{t i}
+=
+(X_{i,t}-t_i)_+^r.
+\]</span></p>
+<p>Then the co-upper partial moment matrix is</p>
+<p><span class="math display">\[
+\operatorname{CoUPM}^{(r)}
+=
+\frac{1}{T}
+\left(U^{(r)}\right)^\top U^{(r)}.
+\]</span></p>
+<p>Thus each concordant co-partial moment matrix is a <strong>Gram matrix</strong>: its entries are pairwise inner products of directional-deviation vectors.</p>
+<p>For any weight vector <span class="math inline">\(w\)</span>,</p>
+<p><span class="math display">\[
+\begin{aligned}
+w^\top \operatorname{CoLPM}^{(r)} w
+&amp;=
+\frac{1}{T}
+w^\top
+\left(L^{(r)}\right)^\top
+L^{(r)}
+w \\
+&amp;=
+\frac{1}{T}
+\left\|L^{(r)}w\right\|^2 \\
+&amp;\geq 0.
+\end{aligned}
+\]</span></p>
+<p>Therefore <span class="math inline">\(\operatorname{CoLPM}^{(r)}\)</span> is positive semidefinite. The same argument applies to <span class="math inline">\(\operatorname{CoUPM}^{(r)}\)</span>.</p>
+<p>This explains why concordant co-partial moment matrices are symmetric and positive semidefinite: they are matrices of inner products between directional deviation vectors. The result is structural, not distributional. It does not require normality, linearity, or parametric assumptions.</p>
+<p>This point should not be confused with the covariance reconstruction above. The concordant matrices <span class="math inline">\(\operatorname{CoLPM}\)</span> and <span class="math inline">\(\operatorname{CoUPM}\)</span> are positive semidefinite Gram matrices. The covariance matrix is a <strong>signed aggregation</strong> that subtracts the divergent matrices:</p>
+<p><span class="math display">\[
+\Sigma
+=
+\operatorname{CoLPM}
++
+\operatorname{CoUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}.
+\]</span></p>
+<p>The Gram structure explains why the directional building blocks are well-behaved. The signed aggregation explains how classical covariance is recovered from those building blocks.</p>
+<hr />
+</div>
+<div id="correlation-as-a-normalized-covariance" class="section level2 hasAnchor" number="9.6">
+<h2><span class="header-section-number">9.6</span> Correlation as a Normalized Covariance<a href="why-correlation-fails.html#correlation-as-a-normalized-covariance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The correlation matrix is obtained by standardizing covariance:</p>
 <p><span class="math display">\[
-\rho_{ij}=
+\rho_{ij}
+=
 \frac{\Sigma_{ij}}
 {\sqrt{\Sigma_{ii}\Sigma_{jj}}}.
 \]</span></p>
 <p>Since covariance itself is derived from directional matrices, correlation represents a further aggregation.</p>
 <p>The information hierarchy becomes</p>
 <p><span class="math display">\[
-(CLPM,CUPM,DLPM,DUPM)
+(\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})
 \rightarrow
 \Sigma
 \rightarrow
 \rho.
 \]</span></p>
 <p>Directional matrices therefore preserve more structural information about dependence than correlation alone.</p>
+<p>Correlation is useful when a single linear summary is appropriate. It is incomplete when the dependence structure differs across lower, upper, or divergent regions.</p>
 <hr />
 </div>
-<div id="nonlinear-dependence" class="section level2 hasAnchor" number="9.6">
-<h2><span class="header-section-number">9.6</span> Nonlinear Dependence<a href="why-correlation-fails.html#nonlinear-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="nonlinear-dependence" class="section level2 hasAnchor" number="9.7">
+<h2><span class="header-section-number">9.7</span> Nonlinear Dependence<a href="why-correlation-fails.html#nonlinear-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Correlation measures linear association and therefore fails when relationships are nonlinear.</p>
 <p>Consider</p>
 <p><span class="math display">\[
@@ -1281,75 +1408,87 @@ Y=X^2
 <p>with <span class="math inline">\(X\)</span> symmetrically distributed around zero.</p>
 <p>In this case</p>
 <p><span class="math display">\[
-Corr(X,Y)=0.
+\operatorname{Corr}(X,Y)=0.
 \]</span></p>
-<p>For example, if <span class="math inline">\(X\sim N(0,1)\)</span>,</p>
+<p>For example, if <span class="math inline">\(X\sim N(0,1)\)</span>, then</p>
 <p><span class="math display">\[
-Corr(X,X^2)=0.
+\operatorname{Corr}(X,X^2)=0.
 \]</span></p>
 <p>Despite zero correlation, the variables are perfectly dependent.</p>
 <p>Directional co-partial moments reveal this structure.</p>
 <p>With benchmark <span class="math inline">\(t_X=0\)</span>,</p>
 <ul>
-<li><span class="math inline">\(CoUPM\)</span> captures strong dependence when <span class="math inline">\(X&gt;0\)</span></li>
-<li><span class="math inline">\(DLPM\)</span> captures the mirrored dependence when <span class="math inline">\(X&lt;0\)</span></li>
+<li><span class="math inline">\(\operatorname{CoUPM}\)</span> captures dependence when <span class="math inline">\(X&gt;0\)</span> and <span class="math inline">\(Y\)</span> is above its benchmark,</li>
+<li><span class="math inline">\(\operatorname{DUPM}\)</span> or <span class="math inline">\(\operatorname{DLPM}\)</span> captures the mirrored dependence when <span class="math inline">\(X&lt;0\)</span>, depending on the benchmark chosen for <span class="math inline">\(Y\)</span>.</li>
 </ul>
-<p>The directional matrices therefore expose strong dependence that the aggregated covariance cancels.</p>
+<p>The directional matrices expose strong dependence that the aggregated covariance can cancel.</p>
 <hr />
 </div>
-<div id="asymmetric-dependence" class="section level2 hasAnchor" number="9.7">
-<h2><span class="header-section-number">9.7</span> Asymmetric Dependence<a href="why-correlation-fails.html#asymmetric-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="asymmetric-dependence" class="section level2 hasAnchor" number="9.8">
+<h2><span class="header-section-number">9.8</span> Asymmetric Dependence<a href="why-correlation-fails.html#asymmetric-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Asymmetric dependence</strong> refers to dependence that differs between the upper and lower regions of the joint distribution.</p>
 <p>Examples include</p>
 <ul>
-<li>financial assets that move together primarily during crashes</li>
-<li>economic variables responding differently to positive and negative shocks</li>
-<li>risk exposures concentrated in losses</li>
+<li>financial assets that move together primarily during crashes,</li>
+<li>economic variables responding differently to positive and negative shocks,</li>
+<li>risk exposures concentrated in losses.</li>
 </ul>
 <p>Directional matrices isolate these effects directly.</p>
 <p>For example,</p>
 <p><span class="math display">\[
-CLPM
+\operatorname{CoLPM}
 \]</span></p>
 <p>captures joint downside deviations, while</p>
 <p><span class="math display">\[
-CUPM
+\operatorname{CoUPM}
 \]</span></p>
 <p>captures joint upside co-movement.</p>
 <p>If dependence is concentrated in one region, the directional matrices reveal it even when overall covariance appears modest.</p>
 <hr />
 </div>
-<div id="tail-dependence" class="section level2 hasAnchor" number="9.8">
-<h2><span class="header-section-number">9.8</span> Tail Dependence<a href="why-correlation-fails.html#tail-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="tail-dependence" class="section level2 hasAnchor" number="9.9">
+<h2><span class="header-section-number">9.9</span> Tail Dependence<a href="why-correlation-fails.html#tail-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Extreme events often drive the most consequential relationships.</p>
 <p>Correlation averages dependence across the entire distribution and therefore may understate tail relationships.</p>
 <p>Directional co-partial moments of higher order emphasize extreme deviations:</p>
 <p><span class="math display">\[
-CoLPM_{r,s}, \quad CoUPM_{r,s}.
+\operatorname{CoLPM}_{r,s},
+\qquad
+\operatorname{CoUPM}_{r,s}.
 \]</span></p>
 <p>Increasing <span class="math inline">\(r\)</span> and <span class="math inline">\(s\)</span> increases sensitivity to extreme observations.</p>
 <p>This concept is closely related to <strong>tail dependence in copula theory</strong>, which Chapter 10 examines in detail.</p>
 <hr />
 </div>
-<div id="information-loss-in-aggregation" class="section level2 hasAnchor" number="9.9">
-<h2><span class="header-section-number">9.9</span> Information Loss in Aggregation<a href="why-correlation-fails.html#information-loss-in-aggregation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="information-loss-in-aggregation" class="section level2 hasAnchor" number="9.10">
+<h2><span class="header-section-number">9.10</span> Information Loss in Aggregation<a href="why-correlation-fails.html#information-loss-in-aggregation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The mapping from directional matrices to covariance is <strong>many-to-one</strong>.</p>
 <p>Different directional dependence structures can produce identical covariance values.</p>
 <p>Similarly, many covariance matrices produce identical correlation matrices after normalization.</p>
 <p>Thus correlation discards substantial structural information about joint distributions.</p>
 <p>Directional methods preserve this information by retaining contributions from each directional region separately.</p>
+<p>The directional representation is therefore strictly richer:</p>
+<p><span class="math display">\[
+\text{directional co-partial moments}
+\rightarrow
+\text{covariance}
+\rightarrow
+\text{correlation}.
+\]</span></p>
+<p>Each arrow aggregates information. Once aggregated, the lost directional structure cannot generally be recovered without additional assumptions.</p>
 <hr />
 </div>
-<div id="summary-3" class="section level2 hasAnchor" number="9.10">
-<h2><span class="header-section-number">9.10</span> Summary<a href="why-correlation-fails.html#summary-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="summary-3" class="section level2 hasAnchor" number="9.11">
+<h2><span class="header-section-number">9.11</span> Summary<a href="why-correlation-fails.html#summary-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>This chapter examined the limitations of classical correlation and covariance.</p>
 <p>Key observations include:</p>
 <ol style="list-style-type: decimal">
 <li>Correlation measures only linear association.</li>
 <li>Covariance aggregates directional co-deviations across the joint distribution.</li>
 <li>Covariance itself arises from directional co-partial moments.</li>
-<li>The covariance matrix equals the aggregation of directional partial-moment matrices.</li>
-<li>Correlation is the normalized version of this aggregate.</li>
+<li>The covariance matrix equals a signed aggregation of directional partial-moment matrices.</li>
+<li>Concordant co-partial moment matrices are Gram matrices and are therefore symmetric and positive semidefinite.</li>
+<li>Correlation is the normalized version of the covariance aggregate.</li>
 </ol>
 <p>Directional statistics therefore provides a richer representation of dependence structure.</p>
 <p>The following chapter develops directional dependence measures built from directional co-partial moments.</p>

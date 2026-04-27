@@ -280,12 +280,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="9.3" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-from-co-partial-moments"><i class="fa fa-check"></i><b>9.3</b> Covariance from Co-Partial Moments</a></li>
 <li class="chapter" data-level="9.4" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#covariance-matrices-from-partial-moment-matrices"><i class="fa fa-check"></i><b>9.4</b> Covariance Matrices from Partial-Moment Matrices</a></li>
-<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.5</b> Correlation as a Normalized Covariance</a></li>
-<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.6</b> Nonlinear Dependence</a></li>
-<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.7</b> Asymmetric Dependence</a></li>
-<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.8</b> Tail Dependence</a></li>
-<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.9</b> Information Loss in Aggregation</a></li>
-<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.10</b> Summary</a></li>
+<li class="chapter" data-level="9.5" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#gram-matrix-structure-of-concordant-co-partial-moment-matrices"><i class="fa fa-check"></i><b>9.5</b> Gram-Matrix Structure of Concordant Co-Partial Moment Matrices</a></li>
+<li class="chapter" data-level="9.6" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#correlation-as-a-normalized-covariance"><i class="fa fa-check"></i><b>9.6</b> Correlation as a Normalized Covariance</a></li>
+<li class="chapter" data-level="9.7" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#nonlinear-dependence"><i class="fa fa-check"></i><b>9.7</b> Nonlinear Dependence</a></li>
+<li class="chapter" data-level="9.8" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#asymmetric-dependence"><i class="fa fa-check"></i><b>9.8</b> Asymmetric Dependence</a></li>
+<li class="chapter" data-level="9.9" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#tail-dependence"><i class="fa fa-check"></i><b>9.9</b> Tail Dependence</a></li>
+<li class="chapter" data-level="9.10" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#information-loss-in-aggregation"><i class="fa fa-check"></i><b>9.10</b> Information Loss in Aggregation</a></li>
+<li class="chapter" data-level="9.11" data-path="why-correlation-fails.html"><a href="why-correlation-fails.html#summary-3"><i class="fa fa-check"></i><b>9.11</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="10" data-path="directional-dependence.html"><a href="directional-dependence.html"><i class="fa fa-check"></i><b>10</b> Directional Dependence</a>
 <ul>
@@ -1194,46 +1195,46 @@ F_1(\bar{x};\, X) = 0.5
 <div id="empirical-demonstration" class="section level4 hasAnchor" number="14.1.8.4">
 <h4><span class="header-section-number">14.1.8.4</span> Empirical Demonstration<a href="distribution-comparison.html#empirical-demonstration" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>The contrast between the two representations is immediately visible in data:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="distribution-comparison.html#cb9-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb9-2"><a href="distribution-comparison.html#cb9-2" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="distribution-comparison.html#cb9-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb9-4"><a href="distribution-comparison.html#cb9-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb9-5"><a href="distribution-comparison.html#cb9-5" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="distribution-comparison.html#cb9-6" tabindex="-1"></a><span class="co"># Discrete CDF at the mean — biased</span></span>
-<span id="cb9-7"><a href="distribution-comparison.html#cb9-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x), x)</span>
-<span id="cb9-8"><a href="distribution-comparison.html#cb9-8" tabindex="-1"></a><span class="do">## [1] 0.44</span></span>
-<span id="cb9-9"><a href="distribution-comparison.html#cb9-9" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="distribution-comparison.html#cb9-10" tabindex="-1"></a><span class="co"># Continuous (area-based) probability at the mean — unbiased</span></span>
-<span id="cb9-11"><a href="distribution-comparison.html#cb9-11" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x), x)</span>
-<span id="cb9-12"><a href="distribution-comparison.html#cb9-12" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="distribution-comparison.html#cb18-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb18-2"><a href="distribution-comparison.html#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="distribution-comparison.html#cb18-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb18-4"><a href="distribution-comparison.html#cb18-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb18-5"><a href="distribution-comparison.html#cb18-5" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="distribution-comparison.html#cb18-6" tabindex="-1"></a><span class="co"># Discrete CDF at the mean — biased</span></span>
+<span id="cb18-7"><a href="distribution-comparison.html#cb18-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x), x)</span>
+<span id="cb18-8"><a href="distribution-comparison.html#cb18-8" tabindex="-1"></a><span class="do">## [1] 0.44</span></span>
+<span id="cb18-9"><a href="distribution-comparison.html#cb18-9" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="distribution-comparison.html#cb18-10" tabindex="-1"></a><span class="co"># Continuous (area-based) probability at the mean — unbiased</span></span>
+<span id="cb18-11"><a href="distribution-comparison.html#cb18-11" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x), x)</span>
+<span id="cb18-12"><a href="distribution-comparison.html#cb18-12" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 <p>With 100 observations, the discrete CDF places only 44% of mass below the sample mean. The degree-one ratio returns exactly 0.5. Increasing to 500 observations closes the gap but never eliminates it for the discrete version:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="distribution-comparison.html#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb10-2"><a href="distribution-comparison.html#cb10-2" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb10-3"><a href="distribution-comparison.html#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="distribution-comparison.html#cb10-4" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># discrete — still biased</span></span>
-<span id="cb10-5"><a href="distribution-comparison.html#cb10-5" tabindex="-1"></a><span class="do">## [1] 0.496</span></span>
-<span id="cb10-6"><a href="distribution-comparison.html#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="distribution-comparison.html#cb10-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># continuous — exact</span></span>
-<span id="cb10-8"><a href="distribution-comparison.html#cb10-8" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="distribution-comparison.html#cb19-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb19-2"><a href="distribution-comparison.html#cb19-2" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="distribution-comparison.html#cb19-3" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="distribution-comparison.html#cb19-4" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># discrete — still biased</span></span>
+<span id="cb19-5"><a href="distribution-comparison.html#cb19-5" tabindex="-1"></a><span class="do">## [1] 0.496</span></span>
+<span id="cb19-6"><a href="distribution-comparison.html#cb19-6" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="distribution-comparison.html#cb19-7" tabindex="-1"></a><span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x2), x2)   <span class="co"># continuous — exact</span></span>
+<span id="cb19-8"><a href="distribution-comparison.html#cb19-8" tabindex="-1"></a><span class="do">## [1] 0.5</span></span></code></pre></div>
 <p>Tracking both measures sequentially across every observation confirms that the degree-zero ratio oscillates around 0.5 and converges only in the limit, while the degree-one ratio is pinned at exactly 0.5 throughout:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="distribution-comparison.html#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb11-2"><a href="distribution-comparison.html#cb11-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>)</span>
-<span id="cb11-3"><a href="distribution-comparison.html#cb11-3" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="distribution-comparison.html#cb11-4" tabindex="-1"></a>lpm0 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(x))</span>
-<span id="cb11-5"><a href="distribution-comparison.html#cb11-5" tabindex="-1"></a>lpm1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(x))</span>
-<span id="cb11-6"><a href="distribution-comparison.html#cb11-6" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="distribution-comparison.html#cb11-7" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(x)) {</span>
-<span id="cb11-8"><a href="distribution-comparison.html#cb11-8" tabindex="-1"></a>    lpm0[i] <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x[<span class="dv">1</span><span class="sc">:</span>i]), x[<span class="dv">1</span><span class="sc">:</span>i])</span>
-<span id="cb11-9"><a href="distribution-comparison.html#cb11-9" tabindex="-1"></a>    lpm1[i] <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x[<span class="dv">1</span><span class="sc">:</span>i]), x[<span class="dv">1</span><span class="sc">:</span>i])</span>
-<span id="cb11-10"><a href="distribution-comparison.html#cb11-10" tabindex="-1"></a>}</span>
-<span id="cb11-11"><a href="distribution-comparison.html#cb11-11" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="distribution-comparison.html#cb11-12" tabindex="-1"></a><span class="fu">plot</span>(lpm0, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,  <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
-<span id="cb11-13"><a href="distribution-comparison.html#cb11-13" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylab =</span> <span class="st">&quot;P(X ≤ mean)&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;n&quot;</span>)</span>
-<span id="cb11-14"><a href="distribution-comparison.html#cb11-14" tabindex="-1"></a><span class="fu">lines</span>(lpm1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb11-15"><a href="distribution-comparison.html#cb11-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.5</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb11-16"><a href="distribution-comparison.html#cb11-16" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;LPM degree 0 (discrete)&quot;</span>,</span>
-<span id="cb11-17"><a href="distribution-comparison.html#cb11-17" tabindex="-1"></a>                               <span class="st">&quot;LPM degree 1 (continuous)&quot;</span>),</span>
-<span id="cb11-18"><a href="distribution-comparison.html#cb11-18" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="distribution-comparison.html#cb20-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb20-2"><a href="distribution-comparison.html#cb20-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">500</span>)</span>
+<span id="cb20-3"><a href="distribution-comparison.html#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="distribution-comparison.html#cb20-4" tabindex="-1"></a>lpm0 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(x))</span>
+<span id="cb20-5"><a href="distribution-comparison.html#cb20-5" tabindex="-1"></a>lpm1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(x))</span>
+<span id="cb20-6"><a href="distribution-comparison.html#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="distribution-comparison.html#cb20-7" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(x)) {</span>
+<span id="cb20-8"><a href="distribution-comparison.html#cb20-8" tabindex="-1"></a>    lpm0[i] <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, <span class="fu">mean</span>(x[<span class="dv">1</span><span class="sc">:</span>i]), x[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb20-9"><a href="distribution-comparison.html#cb20-9" tabindex="-1"></a>    lpm1[i] <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">1</span>, <span class="fu">mean</span>(x[<span class="dv">1</span><span class="sc">:</span>i]), x[<span class="dv">1</span><span class="sc">:</span>i])</span>
+<span id="cb20-10"><a href="distribution-comparison.html#cb20-10" tabindex="-1"></a>}</span>
+<span id="cb20-11"><a href="distribution-comparison.html#cb20-11" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="distribution-comparison.html#cb20-12" tabindex="-1"></a><span class="fu">plot</span>(lpm0, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>,  <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb20-13"><a href="distribution-comparison.html#cb20-13" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylab =</span> <span class="st">&quot;P(X ≤ mean)&quot;</span>, <span class="at">xlab =</span> <span class="st">&quot;n&quot;</span>)</span>
+<span id="cb20-14"><a href="distribution-comparison.html#cb20-14" tabindex="-1"></a><span class="fu">lines</span>(lpm1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb20-15"><a href="distribution-comparison.html#cb20-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.5</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb20-16"><a href="distribution-comparison.html#cb20-16" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;LPM degree 0 (discrete)&quot;</span>,</span>
+<span id="cb20-17"><a href="distribution-comparison.html#cb20-17" tabindex="-1"></a>                               <span class="st">&quot;LPM degree 1 (continuous)&quot;</span>),</span>
+<span id="cb20-18"><a href="distribution-comparison.html#cb20-18" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>), <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>)</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch14_lpm0_lpm1_diff.png" alt="Figure 14.1. Degree-0 versus degree-1 LPM ratio convergence at the sample mean: degree-0 wanders while degree-1 remains pinned at 0.5." />
@@ -1496,20 +1497,20 @@ x_1, \dots, x_n \sim X, \qquad y_1, \dots, y_m \sim Y,
 \]</span></p>
 <p>These estimators use all pairwise cross-sample comparisons and require no parametric assumptions.</p>
 <p>In <strong><code>NNS</code></strong>, stochastic superiority is computed with <code>NNS.SS()</code>. The function returns the directional exceedance probability, the tie probability, and the tie-adjusted superiority probability. Confidence intervals can also be obtained by resampling.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="distribution-comparison.html#cb12-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb12-2"><a href="distribution-comparison.html#cb12-2" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="distribution-comparison.html#cb12-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb12-4"><a href="distribution-comparison.html#cb12-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb12-5"><a href="distribution-comparison.html#cb12-5" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb12-6"><a href="distribution-comparison.html#cb12-6" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="distribution-comparison.html#cb12-7" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="distribution-comparison.html#cb21-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb21-2"><a href="distribution-comparison.html#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="distribution-comparison.html#cb21-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb21-4"><a href="distribution-comparison.html#cb21-4" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb21-5"><a href="distribution-comparison.html#cb21-5" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb21-6"><a href="distribution-comparison.html#cb21-6" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="distribution-comparison.html#cb21-7" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
 <p>Because the second sample is shifted to the right, the superiority probability for <span class="math inline">\(X\)</span> relative to <span class="math inline">\(Y\)</span> should fall below <span class="math inline">\(0.5\)</span>, while the superiority probability for <span class="math inline">\(Y\)</span> relative to <span class="math inline">\(X\)</span> should exceed <span class="math inline">\(0.5\)</span>.</p>
 <p>For discrete data, ties should be reported rather than ignored:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="distribution-comparison.html#cb13-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb13-2"><a href="distribution-comparison.html#cb13-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-3"><a href="distribution-comparison.html#cb13-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-4"><a href="distribution-comparison.html#cb13-4" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="distribution-comparison.html#cb13-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="distribution-comparison.html#cb22-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb22-2"><a href="distribution-comparison.html#cb22-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-3"><a href="distribution-comparison.html#cb22-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-4"><a href="distribution-comparison.html#cb22-4" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="distribution-comparison.html#cb22-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
 <p>This is especially important in ordinal and categorical applications where equal outcomes are common. In practice, stochastic superiority is often the cleanest first effect-size summary to report, because it answers the most direct comparative question: how often does one distribution beat the other?</p>
 <hr />
 </div>
@@ -1619,63 +1620,63 @@ Stochastic dominance tests express distributional preference in terms that are d
 <p>A convenient applied example is the mtcars transmission split from the NNS distribution-comparison vignette. Let Group A be miles-per-gallon for automatic transmissions, <code>mtcars$mpg[mtcars$am == 0]</code>,
 and let Group B be miles-per-gallon for manual transmissions, <code>mtcars$mpg[mtcars$am == 1]</code>.
 This yields two empirical distributions on the same response variable and provides a direct setting for comparing stochastic superiority, NNS ANOVA, and stochastic dominance.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="distribution-comparison.html#cb14-1" tabindex="-1"></a>auto_mpg <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>mpg[mtcars<span class="sc">$</span>am <span class="sc">==</span> <span class="dv">0</span>]</span>
-<span id="cb14-2"><a href="distribution-comparison.html#cb14-2" tabindex="-1"></a>manual_mpg <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>mpg[mtcars<span class="sc">$</span>am <span class="sc">==</span> <span class="dv">1</span>]</span>
-<span id="cb14-3"><a href="distribution-comparison.html#cb14-3" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="distribution-comparison.html#cb14-4" tabindex="-1"></a><span class="co"># 1. Pairwise directional advantage</span></span>
-<span id="cb14-5"><a href="distribution-comparison.html#cb14-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(manual_mpg, auto_mpg)</span>
-<span id="cb14-6"><a href="distribution-comparison.html#cb14-6" tabindex="-1"></a><span class="co"># $p_gt</span></span>
-<span id="cb14-7"><a href="distribution-comparison.html#cb14-7" tabindex="-1"></a><span class="co"># [1] 0.8259109</span></span>
-<span id="cb14-8"><a href="distribution-comparison.html#cb14-8" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-9"><a href="distribution-comparison.html#cb14-9" tabindex="-1"></a><span class="co"># $p_tie</span></span>
-<span id="cb14-10"><a href="distribution-comparison.html#cb14-10" tabindex="-1"></a><span class="co"># [1] 0.008097166</span></span>
-<span id="cb14-11"><a href="distribution-comparison.html#cb14-11" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-12"><a href="distribution-comparison.html#cb14-12" tabindex="-1"></a><span class="co"># $p_star</span></span>
-<span id="cb14-13"><a href="distribution-comparison.html#cb14-13" tabindex="-1"></a><span class="co"># [1] 0.8299595</span></span>
-<span id="cb14-14"><a href="distribution-comparison.html#cb14-14" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="distribution-comparison.html#cb14-15" tabindex="-1"></a><span class="co"># 2. Full-distribution comparison</span></span>
-<span id="cb14-16"><a href="distribution-comparison.html#cb14-16" tabindex="-1"></a><span class="fu">NNS.ANOVA</span>(<span class="at">control =</span> auto_mpg,</span>
-<span id="cb14-17"><a href="distribution-comparison.html#cb14-17" tabindex="-1"></a>          <span class="at">treatment =</span> manual_mpg,</span>
-<span id="cb14-18"><a href="distribution-comparison.html#cb14-18" tabindex="-1"></a>          <span class="at">robust =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-19"><a href="distribution-comparison.html#cb14-19" tabindex="-1"></a><span class="co"># $Control</span></span>
-<span id="cb14-20"><a href="distribution-comparison.html#cb14-20" tabindex="-1"></a><span class="co"># [1] 17.14737</span></span>
-<span id="cb14-21"><a href="distribution-comparison.html#cb14-21" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-22"><a href="distribution-comparison.html#cb14-22" tabindex="-1"></a><span class="co"># $Treatment</span></span>
-<span id="cb14-23"><a href="distribution-comparison.html#cb14-23" tabindex="-1"></a><span class="co"># [1] 24.39231</span></span>
-<span id="cb14-24"><a href="distribution-comparison.html#cb14-24" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-25"><a href="distribution-comparison.html#cb14-25" tabindex="-1"></a><span class="co"># $Grand_Statistic</span></span>
-<span id="cb14-26"><a href="distribution-comparison.html#cb14-26" tabindex="-1"></a><span class="co"># [1] 20.09063</span></span>
-<span id="cb14-27"><a href="distribution-comparison.html#cb14-27" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-28"><a href="distribution-comparison.html#cb14-28" tabindex="-1"></a><span class="co"># $Control_CDF</span></span>
-<span id="cb14-29"><a href="distribution-comparison.html#cb14-29" tabindex="-1"></a><span class="co"># [1] 0.8708501</span></span>
-<span id="cb14-30"><a href="distribution-comparison.html#cb14-30" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-31"><a href="distribution-comparison.html#cb14-31" tabindex="-1"></a><span class="co"># $Treatment_CDF</span></span>
-<span id="cb14-32"><a href="distribution-comparison.html#cb14-32" tabindex="-1"></a><span class="co"># [1] 0.1294878</span></span>
-<span id="cb14-33"><a href="distribution-comparison.html#cb14-33" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-34"><a href="distribution-comparison.html#cb14-34" tabindex="-1"></a><span class="co"># $Certainty</span></span>
-<span id="cb14-35"><a href="distribution-comparison.html#cb14-35" tabindex="-1"></a><span class="co"># [1] 0.02345583</span></span>
-<span id="cb14-36"><a href="distribution-comparison.html#cb14-36" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-37"><a href="distribution-comparison.html#cb14-37" tabindex="-1"></a><span class="co"># $`Effect_Size_LB.2.5%`</span></span>
-<span id="cb14-38"><a href="distribution-comparison.html#cb14-38" tabindex="-1"></a><span class="co"># [1] 2.377328</span></span>
-<span id="cb14-39"><a href="distribution-comparison.html#cb14-39" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-40"><a href="distribution-comparison.html#cb14-40" tabindex="-1"></a><span class="co"># $`Effect_Size_UB.97.5%`</span></span>
-<span id="cb14-41"><a href="distribution-comparison.html#cb14-41" tabindex="-1"></a><span class="co"># [1] 12.2155</span></span>
-<span id="cb14-42"><a href="distribution-comparison.html#cb14-42" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-43"><a href="distribution-comparison.html#cb14-43" tabindex="-1"></a><span class="co"># $Confidence_Level</span></span>
-<span id="cb14-44"><a href="distribution-comparison.html#cb14-44" tabindex="-1"></a><span class="co"># [1] 0.95</span></span>
-<span id="cb14-45"><a href="distribution-comparison.html#cb14-45" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-46"><a href="distribution-comparison.html#cb14-46" tabindex="-1"></a><span class="co"># $`Robust Certainty Estimate`</span></span>
-<span id="cb14-47"><a href="distribution-comparison.html#cb14-47" tabindex="-1"></a><span class="co"># [1] 0.01094359</span></span>
-<span id="cb14-48"><a href="distribution-comparison.html#cb14-48" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-49"><a href="distribution-comparison.html#cb14-49" tabindex="-1"></a><span class="co"># $`Lower 95% CI`</span></span>
-<span id="cb14-50"><a href="distribution-comparison.html#cb14-50" tabindex="-1"></a><span class="co"># [1] 3.864872e-06</span></span>
-<span id="cb14-51"><a href="distribution-comparison.html#cb14-51" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb14-52"><a href="distribution-comparison.html#cb14-52" tabindex="-1"></a><span class="co"># $`Upper 95% CI`</span></span>
-<span id="cb14-53"><a href="distribution-comparison.html#cb14-53" tabindex="-1"></a><span class="co"># [1] 0.1048396</span></span>
-<span id="cb14-54"><a href="distribution-comparison.html#cb14-54" tabindex="-1"></a></span>
-<span id="cb14-55"><a href="distribution-comparison.html#cb14-55" tabindex="-1"></a><span class="co"># 3. Preference ordering over the full support</span></span>
-<span id="cb14-56"><a href="distribution-comparison.html#cb14-56" tabindex="-1"></a><span class="fu">NNS.FSD</span>(manual_mpg, auto_mpg)</span>
-<span id="cb14-57"><a href="distribution-comparison.html#cb14-57" tabindex="-1"></a><span class="co"># [1] &quot;X FSD Y&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="distribution-comparison.html#cb23-1" tabindex="-1"></a>auto_mpg <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>mpg[mtcars<span class="sc">$</span>am <span class="sc">==</span> <span class="dv">0</span>]</span>
+<span id="cb23-2"><a href="distribution-comparison.html#cb23-2" tabindex="-1"></a>manual_mpg <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>mpg[mtcars<span class="sc">$</span>am <span class="sc">==</span> <span class="dv">1</span>]</span>
+<span id="cb23-3"><a href="distribution-comparison.html#cb23-3" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="distribution-comparison.html#cb23-4" tabindex="-1"></a><span class="co"># 1. Pairwise directional advantage</span></span>
+<span id="cb23-5"><a href="distribution-comparison.html#cb23-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(manual_mpg, auto_mpg)</span>
+<span id="cb23-6"><a href="distribution-comparison.html#cb23-6" tabindex="-1"></a><span class="co"># $p_gt</span></span>
+<span id="cb23-7"><a href="distribution-comparison.html#cb23-7" tabindex="-1"></a><span class="co"># [1] 0.8259109</span></span>
+<span id="cb23-8"><a href="distribution-comparison.html#cb23-8" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-9"><a href="distribution-comparison.html#cb23-9" tabindex="-1"></a><span class="co"># $p_tie</span></span>
+<span id="cb23-10"><a href="distribution-comparison.html#cb23-10" tabindex="-1"></a><span class="co"># [1] 0.008097166</span></span>
+<span id="cb23-11"><a href="distribution-comparison.html#cb23-11" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-12"><a href="distribution-comparison.html#cb23-12" tabindex="-1"></a><span class="co"># $p_star</span></span>
+<span id="cb23-13"><a href="distribution-comparison.html#cb23-13" tabindex="-1"></a><span class="co"># [1] 0.8299595</span></span>
+<span id="cb23-14"><a href="distribution-comparison.html#cb23-14" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="distribution-comparison.html#cb23-15" tabindex="-1"></a><span class="co"># 2. Full-distribution comparison</span></span>
+<span id="cb23-16"><a href="distribution-comparison.html#cb23-16" tabindex="-1"></a><span class="fu">NNS.ANOVA</span>(<span class="at">control =</span> auto_mpg,</span>
+<span id="cb23-17"><a href="distribution-comparison.html#cb23-17" tabindex="-1"></a>          <span class="at">treatment =</span> manual_mpg,</span>
+<span id="cb23-18"><a href="distribution-comparison.html#cb23-18" tabindex="-1"></a>          <span class="at">robust =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-19"><a href="distribution-comparison.html#cb23-19" tabindex="-1"></a><span class="co"># $Control</span></span>
+<span id="cb23-20"><a href="distribution-comparison.html#cb23-20" tabindex="-1"></a><span class="co"># [1] 17.14737</span></span>
+<span id="cb23-21"><a href="distribution-comparison.html#cb23-21" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-22"><a href="distribution-comparison.html#cb23-22" tabindex="-1"></a><span class="co"># $Treatment</span></span>
+<span id="cb23-23"><a href="distribution-comparison.html#cb23-23" tabindex="-1"></a><span class="co"># [1] 24.39231</span></span>
+<span id="cb23-24"><a href="distribution-comparison.html#cb23-24" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-25"><a href="distribution-comparison.html#cb23-25" tabindex="-1"></a><span class="co"># $Grand_Statistic</span></span>
+<span id="cb23-26"><a href="distribution-comparison.html#cb23-26" tabindex="-1"></a><span class="co"># [1] 20.09063</span></span>
+<span id="cb23-27"><a href="distribution-comparison.html#cb23-27" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-28"><a href="distribution-comparison.html#cb23-28" tabindex="-1"></a><span class="co"># $Control_CDF</span></span>
+<span id="cb23-29"><a href="distribution-comparison.html#cb23-29" tabindex="-1"></a><span class="co"># [1] 0.8708501</span></span>
+<span id="cb23-30"><a href="distribution-comparison.html#cb23-30" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-31"><a href="distribution-comparison.html#cb23-31" tabindex="-1"></a><span class="co"># $Treatment_CDF</span></span>
+<span id="cb23-32"><a href="distribution-comparison.html#cb23-32" tabindex="-1"></a><span class="co"># [1] 0.1294878</span></span>
+<span id="cb23-33"><a href="distribution-comparison.html#cb23-33" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-34"><a href="distribution-comparison.html#cb23-34" tabindex="-1"></a><span class="co"># $Certainty</span></span>
+<span id="cb23-35"><a href="distribution-comparison.html#cb23-35" tabindex="-1"></a><span class="co"># [1] 0.02345583</span></span>
+<span id="cb23-36"><a href="distribution-comparison.html#cb23-36" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-37"><a href="distribution-comparison.html#cb23-37" tabindex="-1"></a><span class="co"># $`Effect_Size_LB.2.5%`</span></span>
+<span id="cb23-38"><a href="distribution-comparison.html#cb23-38" tabindex="-1"></a><span class="co"># [1] 2.377328</span></span>
+<span id="cb23-39"><a href="distribution-comparison.html#cb23-39" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-40"><a href="distribution-comparison.html#cb23-40" tabindex="-1"></a><span class="co"># $`Effect_Size_UB.97.5%`</span></span>
+<span id="cb23-41"><a href="distribution-comparison.html#cb23-41" tabindex="-1"></a><span class="co"># [1] 12.2155</span></span>
+<span id="cb23-42"><a href="distribution-comparison.html#cb23-42" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-43"><a href="distribution-comparison.html#cb23-43" tabindex="-1"></a><span class="co"># $Confidence_Level</span></span>
+<span id="cb23-44"><a href="distribution-comparison.html#cb23-44" tabindex="-1"></a><span class="co"># [1] 0.95</span></span>
+<span id="cb23-45"><a href="distribution-comparison.html#cb23-45" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-46"><a href="distribution-comparison.html#cb23-46" tabindex="-1"></a><span class="co"># $`Robust Certainty Estimate`</span></span>
+<span id="cb23-47"><a href="distribution-comparison.html#cb23-47" tabindex="-1"></a><span class="co"># [1] 0.01094359</span></span>
+<span id="cb23-48"><a href="distribution-comparison.html#cb23-48" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-49"><a href="distribution-comparison.html#cb23-49" tabindex="-1"></a><span class="co"># $`Lower 95% CI`</span></span>
+<span id="cb23-50"><a href="distribution-comparison.html#cb23-50" tabindex="-1"></a><span class="co"># [1] 3.864872e-06</span></span>
+<span id="cb23-51"><a href="distribution-comparison.html#cb23-51" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-52"><a href="distribution-comparison.html#cb23-52" tabindex="-1"></a><span class="co"># $`Upper 95% CI`</span></span>
+<span id="cb23-53"><a href="distribution-comparison.html#cb23-53" tabindex="-1"></a><span class="co"># [1] 0.1048396</span></span>
+<span id="cb23-54"><a href="distribution-comparison.html#cb23-54" tabindex="-1"></a></span>
+<span id="cb23-55"><a href="distribution-comparison.html#cb23-55" tabindex="-1"></a><span class="co"># 3. Preference ordering over the full support</span></span>
+<span id="cb23-56"><a href="distribution-comparison.html#cb23-56" tabindex="-1"></a><span class="fu">NNS.FSD</span>(manual_mpg, auto_mpg)</span>
+<span id="cb23-57"><a href="distribution-comparison.html#cb23-57" tabindex="-1"></a><span class="co"># [1] &quot;X FSD Y&quot;</span></span></code></pre></div>
 <p>For this comparison, <code>NNS.SS(manual_mpg, auto_mpg)</code> yields <code>p_gt = 0.8259109</code>, <code>p_tie = 0.008097166</code>,
 and <code>p_star = 0.8299595</code>, indicating that a randomly selected manual-transmission car exceeds a randomly selected automatic-transmission car in miles-per-gallon about 83 percent of the time.
 <code>NNS.ANOVA(control = auto_mpg, treatment = manual_mpg, robust = TRUE)</code> returns <code>Certainty = 0.02345583</code> and <code>Robust Certainty Estimate = 0.01094359</code>, indicating very little distributional agreement between the two groups.
