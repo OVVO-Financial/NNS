@@ -156,6 +156,7 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
+
 ## Nonlinear NNS.ARMA using AirPassengers monthly data and 12 period lag
 if (FALSE) { # \dontrun{
 NNS.ARMA(AirPassengers, h = 45, training.set = 100, seasonal.factor = 12, method = "nonlin")

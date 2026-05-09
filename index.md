@@ -48,12 +48,14 @@ See <https://cran.r-project.org/> or
 for upgrading to latest R release.
 
 ``` r
+
 library(remotes); remotes::install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
 ```
 
 or via CRAN
 
 ``` r
+
 install.packages('NNS')
 ```
 

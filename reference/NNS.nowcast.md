@@ -195,6 +195,7 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
+
  if (FALSE) { # \dontrun{
  ## Interpolates / Extrapolates all variables to current month
  NNS.nowcast(h = 0)

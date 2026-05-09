@@ -172,6 +172,7 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
+
 ## Nonlinear NNS.ARMA period optimization using 2 yearly lags on AirPassengers monthly data
 if (FALSE) { # \dontrun{
 nns.optims <- NNS.ARMA.optim(AirPassengers[1:132], training.set = 120,

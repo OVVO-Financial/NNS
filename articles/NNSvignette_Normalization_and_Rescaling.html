@@ -102,13 +102,13 @@ matrix of variables.</p>
 <div class="section level4">
 <h4 id="step-1-compute-mean-vector">Step 1: Compute Mean Vector<a class="anchor" aria-label="anchor" href="#step-1-compute-mean-vector"></a>
 </h4>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>j</mi></msub><mo>=</mo><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mrow><mo>⋅</mo><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>j</mi></msub><mo>=</mo><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mrow><mi>⋅</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 m_j = \text{mean}(X_{\cdot j})
 </annotation></semantics></math></p>
 <p>If any
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>j</mi></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">m_j = 0</annotation></semantics></math>,
 it is replaced with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mo>−</mo><mn>10</mn></mrow></msup><annotation encoding="application/x-tex">10^{-10}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>10</mn></mrow></msup><annotation encoding="application/x-tex">10^{-10}</annotation></semantics></math>
 to prevent division by zero.</p>
 <hr>
 </div>
@@ -130,12 +130,12 @@ RG_{ij} = \frac{m_i}{m_j}
 <ul>
 <li>If number of variables
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">p &lt; 10</annotation></semantics></math>:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">|</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false" form="prefix">|</mo><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">
 W = |\mathrm{cor}(X)|
 </annotation></semantics></math>
 </li>
 <li>Otherwise:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>D</mi><mo stretchy="true" form="postfix">|</mo></mrow><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">where </mtext><mspace width="0.333em"></mspace></mrow><mi>D</mi><mo>=</mo><mtext mathvariant="normal">NNS.dep</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>$</mi><mi>D</mi><mi>e</mi><mi>p</mi><mi>e</mi><mi>n</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false" form="prefix">|</mo><mi>D</mi><mo stretchy="false" form="prefix">|</mo><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">where </mtext><mspace width="0.333em"></mspace></mrow><mi>D</mi><mo>=</mo><mtext mathvariant="normal">NNS.dep</mtext><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mi>$</mi><mi>D</mi><mi>e</mi><mi>p</mi><mi>e</mi><mi>n</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">
 W = |D| \quad \text{where } D = \text{NNS.dep}(X)\$Dependence
 </annotation></semantics></math><code><a href="../reference/NNS.dep.html">NNS.dep()</a></code> returns a
 symmetric matrix of nonlinear dependence measures.</li>
@@ -153,7 +153,7 @@ W_{ij} = 1
 s_j = \frac{1}{p} \sum_{i=1}^{p} RG_{ij} W_{ij}
 </annotation></semantics></math></p>
 <p>Each column is scaled:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>X</mi><mrow><mo>⋅</mo><mi>j</mi></mrow><mo>*</mo></msubsup><mo>=</mo><msub><mi>s</mi><mi>j</mi></msub><msub><mi>X</mi><mrow><mo>⋅</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>X</mi><mrow><mi>⋅</mi><mi>j</mi></mrow><mo>*</mo></msubsup><mo>=</mo><msub><mi>s</mi><mi>j</mi></msub><msub><mi>X</mi><mrow><mi>⋅</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
 X_{\cdot j}^{*} = s_j X_{\cdot j}
 </annotation></semantics></math></p>
 <hr>
@@ -169,7 +169,7 @@ s_j = \frac{1}{p} \sum_{i=1}^{p} \frac{m_i}{m_j}
 = \frac{\bar{m}}{m_j}
 </annotation></semantics></math></p>
 <p>Then:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>X</mi><mrow><mo>⋅</mo><mi>j</mi></mrow><mo>*</mo></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>s</mi><mi>j</mi></msub><msub><mi>m</mi><mi>j</mi></msub><mo>=</mo><mover><mi>m</mi><mo accent="true">‾</mo></mover></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><msubsup><mi>X</mi><mrow><mi>⋅</mi><mi>j</mi></mrow><mo>*</mo></msubsup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>s</mi><mi>j</mi></msub><msub><mi>m</mi><mi>j</mi></msub><mo>=</mo><mover><mi>m</mi><mo accent="true">‾</mo></mover></mrow><annotation encoding="application/x-tex">
 \text{mean}(X_{\cdot j}^{*}) = s_j m_j = \bar{m}
 </annotation></semantics></math></p>
 <p>All variables share the same mean.</p>
@@ -178,7 +178,7 @@ s_j = \frac{1}{p} \sum_{i=1}^{p} \frac{m_i}{m_j}
 <div class="section level3">
 <h3 id="nonlinear-case-interpretation">Nonlinear Case Interpretation<a class="anchor" aria-label="anchor" href="#nonlinear-case-interpretation"></a>
 </h3>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>X</mi><mrow><mo>⋅</mo><mi>j</mi></mrow><mo>*</mo></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mi>p</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><msub><mi>m</mi><mi>i</mi></msub><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><msubsup><mi>X</mi><mrow><mi>⋅</mi><mi>j</mi></mrow><mo>*</mo></msubsup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>p</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></munderover><msub><mi>m</mi><mi>i</mi></msub><msub><mi>W</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
 \text{mean}(X_{\cdot j}^{*})
 =
 \frac{1}{p}
@@ -301,7 +301,7 @@ transformations.</p>
 <h3 id="min-max-scaling">1) Min-Max Scaling<a class="anchor" aria-label="anchor" href="#min-max-scaling"></a>
 </h3>
 <p>If <code>method = "minmax"</code>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mo>*</mo></msup><mo>=</mo><mi>a</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mfrac><mrow><mi>x</mi><mo>−</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo>max</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mo>*</mo></msup><mo>=</mo><mi>a</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mfrac><mrow><mi>x</mi><mo>−</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
 x^{*}
 =
 a
@@ -314,7 +314,7 @@ a
 <ul>
 <li>Preserves order</li>
 <li>Maps support to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[a,b]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[a,b]</annotation></semantics></math>
 </li>
 <li>Linear transformation</li>
 </ul>
@@ -362,11 +362,11 @@ a
 <h4 id="terminal-type">Terminal Type<a class="anchor" aria-label="anchor" href="#terminal-type"></a>
 </h4>
 <p>Target:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">
 \mathbb{E}[S_T] = S_0 e^{rT}
 </annotation></semantics></math></p>
 <p>Transformation form:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mo>*</mo></msup><mo>=</mo><mi>x</mi><mo>⋅</mo><mfrac><mrow><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><mrow><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mo>*</mo></msup><mo>=</mo><mi>x</mi><mo>⋅</mo><mfrac><mrow><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><mrow><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
 x^{*}
 =
 x
@@ -381,18 +381,18 @@ x
 <h4 id="discounted-type">Discounted Type<a class="anchor" aria-label="anchor" href="#discounted-type"></a>
 </h4>
 <p>Target:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>r</mi><mi>T</mi></mrow></msup><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">
 \mathbb{E}[e^{-rT} S_T] = S_0
 </annotation></semantics></math></p>
 <p>Equivalent to:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msub><mi>S</mi><mi>T</mi></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">
 \mathbb{E}[S_T] = S_0 e^{rT}
 </annotation></semantics></math></p>
 <p>but the returned series is scaled so that its discounted mean equals
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>S</mi><mn>0</mn></msub><annotation encoding="application/x-tex">S_0</annotation></semantics></math>.
 In practice, the function applies the same multiplicative factor as
 above, because:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>r</mi><mi>T</mi></mrow></msup><msup><mi>x</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>r</mi><mi>T</mi></mrow></msup><mo>⋅</mo><mtext mathvariant="normal">mean</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>x</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>r</mi><mi>T</mi></mrow></msup><mo>⋅</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><msup><mi>x</mi><mo>*</mo></msup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><mo>⋅</mo><mtext mathvariant="normal">mean</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>x</mi><mo>*</mo></msup><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><mo>⋅</mo><msub><mi>S</mi><mn>0</mn></msub><msup><mi>e</mi><mrow><mi>r</mi><mi>T</mi></mrow></msup><mo>=</mo><msub><mi>S</mi><mn>0</mn></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \text{mean}(e^{-rT} x^{*}) = e^{-rT} \cdot \text{mean}(x^{*}) = e^{-rT} \cdot S_0 e^{rT} = S_0.
 </annotation></semantics></math></p>
 <hr>

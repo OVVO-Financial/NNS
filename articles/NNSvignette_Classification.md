@@ -1,6 +1,7 @@
 # Getting Started with NNS: Classification
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -41,6 +42,7 @@ allow for a larger number of partitions. This is determined internally
 with the **`NNS.dep`** measure.
 
 ``` r
+
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 ```
 
@@ -151,6 +153,7 @@ For brevity, we set `folds = 1`.
 classification problems when using `NNS.stack(..., type = "CLASS")`**.
 
 ``` r
+
 b = NNS.stack(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
               IVs.test = iris[test.set, 1:4],
@@ -196,6 +199,7 @@ NULL
 ```
 
 ``` r
+
 mean( b$stack == as.numeric(iris[test.set, 5]) )
 ```
 

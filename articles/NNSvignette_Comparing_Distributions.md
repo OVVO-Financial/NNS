@@ -1,6 +1,7 @@
 # Getting Started with NNS: Comparing Distributions
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -18,10 +19,9 @@ The output from
 **[`NNS.ANOVA()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ANOVA.md)**
 is a `Certainty` statistic, which compares CDFs of distributions from
 several shared quantiles and normalizes the similarity of these points
-to be within the interval $\lbrack 0,1\rbrack$, with 1 representing
-identical distributions. For a complete analysis of `Certainty` to
-common p-values and the role of power, please see the
-[References](#References).
+to be within the interval $`[0,1]`$, with 1 representing identical
+distributions. For a complete analysis of `Certainty` to common p-values
+and the role of power, please see the [References](#References).
 
 ### Test if Same Population
 
@@ -36,6 +36,7 @@ treatment variables, along with the grand mean among variables, and the
 confidence interval associated with the control mean.
 
 ``` r
+
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
 mpg_man_trans = mtcars[mtcars$am==0, "mpg"]
 
@@ -86,6 +87,7 @@ Mann-Whitney-Wilcoxon test, which also does not assume a normality to
 the underlying data as a nonparametric test of identical distributions.
 
 ``` r
+
 wilcox.test(mpg ~ am, data=mtcars) 
 ```
 
@@ -105,6 +107,7 @@ Normal distribution samples, where we are pretty certain these two means
 are equal.
 
 ``` r
+
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 0, sd = 2)
@@ -152,6 +155,7 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.9928339
 
 ``` r
+
 t.test(x,y)
 ```
 
@@ -174,6 +178,7 @@ sensitivity of the results from the two methods, where both firmly
 reject the null hypothesis of identical means.
 
 ``` r
+
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
@@ -221,6 +226,7 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.2114944
 
 ``` r
+
 t.test(x,y)
 ```
 
@@ -249,6 +255,7 @@ In order to test medians instead of means, simply set both
 **[`NNS.ANOVA()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ANOVA.md)**.
 
 ``` r
+
 NNS.ANOVA(control = x, treatment = y,
           means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
 ```
@@ -299,18 +306,22 @@ came from the same population, or whether they share the same mean or
 median, stochastic superiority measures the probability that a random
 draw from one distribution exceeds a random draw from another.
 
-For two random variables $X$ and $Y$, the stochastic superiority
+For two random variables $`X`$ and $`Y`$, the stochastic superiority
 probability is:
 
-$$P(X > Y)$$
+``` math
+P(X > Y)
+```
 
 and with ties accounted for, the tie-adjusted stochastic superiority
 measure is:
 
-$$P^{*} = P(X > Y) + \frac{1}{2}P(X = Y)$$
+``` math
+P^* = P(X > Y) + \frac{1}{2} P(X = Y)
+```
 
-A value of $P^{*} = 0.5$ indicates no directional advantage, values
-above $0.5$ favor $X$, and values below $0.5$ favor $Y$.
+A value of $`P^* = 0.5`$ indicates no directional advantage, values
+above $`0.5`$ favor $`X`$, and values below $`0.5`$ favor $`Y`$.
 
 This differs from stochastic dominance. Stochastic superiority is a
 pairwise exceedance probability, while stochastic dominance requires one
@@ -320,6 +331,7 @@ Below is an example using the same data generating process from the
 unequal means example.
 
 ``` r
+
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
@@ -336,10 +348,10 @@ NNS.SS(x, y)
     ## $p_star
     ## [1] 0.233915
 
-Since $y$ was generated with a higher mean, the stochastic superiority
-probability for $x$ relative to $y$ should be less than $0.5$,
-indicating that a draw from $x$ is less likely to exceed a draw from
-$y$.
+Since $`y`$ was generated with a higher mean, the stochastic superiority
+probability for $`x`$ relative to $`y`$ should be less than $`0.5`$,
+indicating that a draw from $`x`$ is less likely to exceed a draw from
+$`y`$.
 
 We can also obtain confidence intervals for the tie-adjusted superiority
 probability using maximum entropy bootstrap replicates.
@@ -372,6 +384,7 @@ the reported `p_tie` and `p_star` values reflect that adjustment
 explicitly.
 
 ``` r
+
 set.seed(123)
 x = sample(1:5, 100, replace = TRUE)
 y = sample(1:5, 100, replace = TRUE)
@@ -401,6 +414,7 @@ tests are available in **`NNS`** via:
 - **[`NNS.TSD()`](https://OVVO-Financial.github.io/NNS/reference/NNS.TSD.md)**
 
 ``` r
+
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
@@ -428,6 +442,7 @@ dominate one another, and are thus included in the first degree
 stochastic dominance efficient set.
 
 ``` r
+
 set.seed(123)
 x1 = rnorm(1000)
 x2 = x1 + 1
@@ -449,6 +464,7 @@ Further, we can assign clusters to non dominated constituents and
 represent the clustering in a dendrogram.
 
 ``` r
+
 NNS.SD.cluster(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, dendrogram = TRUE)
 ```
 

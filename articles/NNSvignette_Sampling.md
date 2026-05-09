@@ -1,6 +1,7 @@
 # Getting Started with NNS: Sampling and Simulation
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -15,16 +16,19 @@ well as simulating variables while maintaining their dependence.
 ### CDFs
 
 Cumulative distribution functions (CDFs) represent the probability a
-variable $X$ will take a value less than or equal to $x$.
-$$F(x) = P(X \leq x)$$
+variable $`X`$ will take a value less than or equal to $`x`$.
+``` math
+F(x) = P(X \leq x)
+```
 
 #### Empirical CDF
 
 The empirical CDF is a simple construct, provided in the base package of
 R. We can generate an empirical CDF with the `ecdf` function and create
-a function `(P)` to return the CDF of a given value of $X$.
+a function `(P)` to return the CDF of a given value of $`X`$.
 
 ``` r
+
 set.seed(123); x = rnorm(100)
 ecdf(x)
 ```
@@ -34,6 +38,7 @@ ecdf(x)
     ##  x[1:100] = -2.3092, -1.9666, -1.6867,  ...,  2.169, 2.1873
 
 ``` r
+
 P = ecdf(x)
 P(0); P(1)
 ```
@@ -48,14 +53,20 @@ The empirical CDF and Lower Partial Moment CDF (**`LPM.ratio`**) are
 identical when the degree term of the `LPM.ratio` is set to zero.
 
 Degree 0 LPM:
-$$LPM(0,t,X) = \frac{1}{N}\sum\limits_{n = 1}^{N}\left\lbrack max\left( t - X_{n} \right),0 \right\rbrack^{0}$$`LPM.ratio`
-is equivalent to the following form for any target $(t)$ and variable
-$X$: $$LPM(0,t,X) = \frac{LPM(0,t,X)}{LPM(0,t,X) + UPM(0,t,X)}$$
+``` math
+LPM(0,t,X)=\frac{1}{N}\sum_{n=1}^{N}[max(t-X_n),0]^0
+```
+`LPM.ratio` is equivalent to the following form for any target $`(t)`$
+and variable $`X`$:
+``` math
+LPM(0,t,X)=\frac{LPM(0,t,X)}{LPM(0,t,X)+UPM(0,t,X)}
+```
 
 Using the same targets from our `ecdf` example above (0,1) we can
 compare **`LPM.ratio`**s.
 
 ``` r
+
 LPM.ratio(degree = 0, target = 0, variable = x); LPM.ratio(degree = 0, target = 1, variable = x)
 ```
 
@@ -63,16 +74,16 @@ LPM.ratio(degree = 0, target = 0, variable = x); LPM.ratio(degree = 0, target = 
 
     ## [1] 0.83
 
-Calculating the probability for every `target` value in $X$, we can plot
-both methods visualizing their identical results. `ecdf` function in
-black and **`LPM.ratio`** in red.
+Calculating the probability for every `target` value in $`X`$, we can
+plot both methods visualizing their identical results. `ecdf` function
+in black and **`LPM.ratio`** in red.
 
 ![](NNSvignette_Sampling_files/figure-html/unnamed-chunk-3-1.png)
 
 #### **`LPM.ratio`** degree \> 0
 
 By simply increasing the `degree` parameter to any positive real number,
-we can generate different CDFs of our initial distribution $x$.
+we can generate different CDFs of our initial distribution $`x`$.
 
 ![](images/CDFs_1.png)
 
@@ -87,12 +98,12 @@ The general form in the following plots is:
 **`LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0, x = x)`**
 
 Any length `percentile` can be used to sample from the underlying
-distribution $x$.
+distribution $`x`$.
 
 ![](images/CDFs_2.png)
 
 Viewing the first 10 samples from each of the `degree`s compared to our
-original $X$.
+original $`X`$.
 
 ``` r
 degree.0.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0, x = x)
@@ -143,12 +154,13 @@ The ability to sample from specified correlations ensures the full
 spectrum of future paths is sampled from. Typical Monte Carlo samples
 are restricted to \[-0.3, 0.3\] correlations to the original data.
 
-We will generate 1 replicate of $X$ for each value of a sequence of
-$\rho$ values (the $ensemble$), and then plot the results compared to
-our original $X$ (black line). **`NNS.MC`** is a streamlined wrapper
-function for this functionality of **`NNS.meboot`**.
+We will generate 1 replicate of $`X`$ for each value of a sequence of
+$`\rho`$ values (the $`ensemble`$), and then plot the results compared
+to our original $`X`$ (black line). **`NNS.MC`** is a streamlined
+wrapper function for this functionality of **`NNS.meboot`**.
 
 ``` r
+
 boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 reps = do.call(cbind, boots)
 
@@ -169,7 +181,7 @@ sapply(boots, function(r) cor(r, x, method = "spearman"))
 ```
 
 More replicates and ensembles thereof can be generated for any number of
-$\rho$ values.
+$`\rho`$ values.
 
 #### `target_drift` Specification
 
@@ -177,6 +189,7 @@ We can also specify a target drift in our replicates with the
 `target_drift` parameter.
 
 ``` r
+
 boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
 reps = do.call(cbind, boots)
 
@@ -214,6 +227,7 @@ corresponding to `original data` position mappings, and return a matrix
 of these transformed values with the same dimensions as `new.data`.
 
 ``` r
+
 set.seed(123)
 x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
 
@@ -233,7 +247,7 @@ new.dep.data = sapply(1:ncol(original.data), function(x) LPM.VaR(percentile = de
 #### Compare Multivariate Dependence Structures
 
 Similar dependence with radically different values, since we used
-$N(10,20)$ in place of our original $N(0,1)$ observations.
+$`N(10, 20)`$ in place of our original $`N(0,1)`$ observations.
 
 ``` r
 NNS.copula(original.data)
@@ -269,11 +283,12 @@ Alternatively, if we wish to keep the simulated values close to the
 original data, we can apply the **`NNS.meboot`** procedure to each of
 the variables.
 
-We will generate 1 replicate (for brevity) of $\rho = 0.95$ to our
+We will generate 1 replicate (for brevity) of $`\rho = 0.95`$ to our
 `original.data`, use their `ensemble` and note the multivariate
 dependence among our `new.boot.dep.data`.
 
 ``` r
+
 # Apply bootstrap to each variable
 new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 100, rho = .95))
 

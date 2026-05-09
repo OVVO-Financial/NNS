@@ -156,7 +156,7 @@ partitioning.</p>
 <h2 id="nns-regression-nns-reg">NNS Regression <code>NNS.reg()</code><a class="anchor" aria-label="anchor" href="#nns-regression-nns-reg"></a>
 </h2>
 <p><strong><code>NNS.reg</code></strong> can fit any
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>,
 for both uni- and multivariate cases.
 <strong><code>NNS.reg</code></strong> returns a self-evident list of
 values provided below.</p>
@@ -596,7 +596,7 @@ internally using the partitioning method described earlier.</p>
 neighbor regression. When values of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
 are missing, we use the observed
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X,y)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X,y)</annotation></semantics></math>
 pairs as the training set and the predictors of the missing rows as
 <code>point.est</code>.</p>
 <p>A key insight is that even in univariate regressions,

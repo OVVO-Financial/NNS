@@ -101,6 +101,7 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 ## x causes y...
 set.seed(123)

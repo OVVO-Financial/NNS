@@ -1,6 +1,7 @@
 # Getting Started with NNS: Forecasting
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -39,6 +40,7 @@ Below is the linear fit and associated root mean squared error (RMSE)
 using `method = "lin"`.
 
 ``` r
+
 nns_lin = NNS.ARMA(AirPassengers, 
                h = 44, 
                training.set = 100, 
@@ -51,6 +53,7 @@ nns_lin = NNS.ARMA(AirPassengers,
 ![](NNSvignette_Forecasting_files/figure-html/linear-1.png)
 
 ``` r
+
 sqrt(mean((nns_lin - tail(AirPassengers, 44)) ^ 2))
 ```
 
@@ -62,6 +65,7 @@ Now we can try using a nonlinear regression on the relevant component
 series using `method = "nonlin"`.
 
 ``` r
+
 nns_nonlin = NNS.ARMA(AirPassengers, 
                h = 44, 
                training.set = 100, 
@@ -86,6 +90,7 @@ testing the first 100 observations of `AirPassengers`, not the full 144
 observations.
 
 ``` r
+
 seas = t(sapply(1 : 25, function(i) c(i, sqrt( mean( (NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", seasonal.factor = i, plot=FALSE) - tail(AirPassengers, 44)) ^ 2) ) ) ) )
 
 colnames(seas) = c("Period", "RMSE")
@@ -125,6 +130,7 @@ can define our best fit as the corresponding `seas$Period` entry of the
 minimum value in our `seas$RMSE` column.
 
 ``` r
+
 a = seas[which.min(seas[ , 2]), 1]
 ```
 
@@ -132,6 +138,7 @@ Below you will notice the use of `seasonal.factor = a` generates the
 same output.
 
 ``` r
+
 nns = NNS.ARMA(AirPassengers, 
                h = 44, 
                training.set = 100, 
@@ -143,6 +150,7 @@ nns = NNS.ARMA(AirPassengers,
 ![](NNSvignette_Forecasting_files/figure-html/best%20nonlinear-1.png)
 
 ``` r
+
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
@@ -158,6 +166,7 @@ inferred cyclical patterns. The nearest periods to that `modulo` will be
 in the expanded output.
 
 ``` r
+
 NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 ```
 
@@ -197,6 +206,7 @@ Given our monthly dataset, we will try multiple years by setting
 **NNS.seas()** insights above.
 
 ``` r
+
 nns.optimal = NNS.ARMA.optim(AirPassengers,
                              training.set = 100, 
                              seasonal.factor = seq(12, 60, 6),
@@ -280,6 +290,7 @@ the `training.set` parameter while generating the 95% prediction
 intervals.
 
 ``` r
+
 NNS.ARMA.optim(AirPassengers, 
                 seasonal.factor = seq(12, 60, 6),
                 obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),

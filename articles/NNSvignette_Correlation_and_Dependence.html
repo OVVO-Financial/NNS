@@ -192,7 +192,7 @@ random permutations of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>→</mo><msub><mi>y</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">y \rightarrow y_p</annotation></semantics></math>
 and running <strong><code>NNS.dep(x,$y_p$)</code></strong> to compare
 against a null hypothesis of 0 correlation, or independence between
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(x, y)</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(x, y)</annotation></semantics></math>.</p>
 <p>Simply set
 <strong><code>NNS.dep(..., p.value = TRUE, print.map = TRUE)</code></strong>
 to run 100 permutations and plot the results.</p>
@@ -229,9 +229,9 @@ to run 100 permutations and plot the results.</p>
 </h2>
 <p>These partial moment insights permit us to extend the analysis to
 multivariate instances and deliver a dependence measure
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>D</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(D)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(D)</annotation></semantics></math>
 such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">D \in [0,1]</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">D \in [0,1]</annotation></semantics></math>.
 This level of analysis is simply impossible with Pearson or other rank
 based correlation methods, which are restricted to bivariate cases.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">

@@ -12,6 +12,7 @@ the elements of variance.
 ### Mean
 
 ``` r
+
 library(NNS)
 set.seed(123) ; x = rnorm(100) ; y = rnorm(100)
 
@@ -21,6 +22,7 @@ mean(x)
     ## [1] 0.09040591
 
 ``` r
+
 UPM(1, 0, x) - LPM(1, 0, x)
 ```
 
@@ -29,6 +31,7 @@ UPM(1, 0, x) - LPM(1, 0, x)
 ### Variance
 
 ``` r
+
 # Sample Variance (base R):
 var(x)
 ```
@@ -36,6 +39,7 @@ var(x)
     ## [1] 0.8332328
 
 ``` r
+
 # Sample Variance:
 (UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))
 ```
@@ -43,6 +47,7 @@ var(x)
     ## [1] 0.8332328
 
 ``` r
+
 # Population Adjustment of Sample Variance (base R):
 var(x) * ((length(x) - 1) / length(x))
 ```
@@ -50,6 +55,7 @@ var(x) * ((length(x) - 1) / length(x))
     ## [1] 0.8249005
 
 ``` r
+
 # Population Variance:
 UPM(2, mean(x), x) + LPM(2, mean(x), x)
 ```
@@ -57,6 +63,7 @@ UPM(2, mean(x), x) + LPM(2, mean(x), x)
     ## [1] 0.8249005
 
 ``` r
+
 # Variance is also the co-variance of itself:
 (Co.LPM(1, x, x, mean(x), mean(x)) + Co.UPM(1, x, x, mean(x), mean(x)) - D.LPM(1, 1, x, x, mean(x), mean(x)) - D.UPM(1, 1, x, x, mean(x), mean(x)))
 ```
@@ -66,12 +73,14 @@ UPM(2, mean(x), x) + LPM(2, mean(x), x)
 ### Standard Deviation
 
 ``` r
+
 sd(x)
 ```
 
     ## [1] 0.9128159
 
 ``` r
+
 ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 ```
 
@@ -83,6 +92,7 @@ The first 4 moments are returned with the function `NNS.moments`. For
 sample statistics, set `population = FALSE`.
 
 ``` r
+
 NNS.moments(x)
 ```
 
@@ -99,6 +109,7 @@ NNS.moments(x)
     ## [1] -0.161053
 
 ``` r
+
 NNS.moments(x, population = FALSE)
 ```
 
@@ -120,6 +131,7 @@ NNS.moments(x, population = FALSE)
 recognizing multiple modes.
 
 ``` r
+
 # Continuous
 NNS.mode(x)
 ```
@@ -127,6 +139,7 @@ NNS.mode(x)
     ## [1] -0.4132834
 
 ``` r
+
 # Discrete and multiple modes
 NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
 ```
@@ -136,12 +149,14 @@ NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
 ### Covariance
 
 ``` r
+
 cov(x, y)
 ```
 
     ## [1] -0.04372107
 
 ``` r
+
 (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
 ```
 
@@ -149,11 +164,14 @@ cov(x, y)
 
 ### Covariance Elements and Covariance Matrix
 
-The covariance matrix $(\Sigma)$ is equal to the sum of the co-partial
+The covariance matrix $`(\Sigma)`$ is equal to the sum of the co-partial
 moments matrices less the divergent partial moments matrices.
-$$\Sigma = CLPM + CUPM - DLPM - DUPM$$
+``` math
+ \Sigma = CLPM + CUPM - DLPM - DUPM 
+```
 
 ``` r
+
 cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1, target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
 cov.mtx
 ```
@@ -184,6 +202,7 @@ cov.mtx
     ## y -0.04372107  0.93506310
 
 ``` r
+
 # Reassembled Covariance Matrix
 cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
 ```
@@ -193,6 +212,7 @@ cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
     ## y -0.04372107  0.93506310
 
 ``` r
+
 # Standard Covariance Matrix
 cov(cbind(x, y))
 ```
@@ -204,12 +224,14 @@ cov(cbind(x, y))
 ### Pearson Correlation
 
 ``` r
+
 cor(x, y)
 ```
 
     ## [1] -0.04953215
 
 ``` r
+
 cov.xy = (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
 sd.x = ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 sd.y = ((UPM(2, mean(y), y) + LPM(2, mean(y) , y)) * (length(y) / (length(y) - 1))) ^ .5
@@ -221,6 +243,7 @@ cov.xy / (sd.x * sd.y)
 ### CDFs (Discrete and Continuous)
 
 ``` r
+
 P = ecdf(x)
 P(0) ; P(1)
 LPM(0, 0, x) ; LPM(0, 1, x)
@@ -236,6 +259,7 @@ legend("left", legend = c("ecdf", "LPM.CDF"), fill = c("black", "red"), border =
 ![](NNSvignette_Partial_Moments_files/figure-html/cdfs-1.png)
 
 ``` r
+
 # Joint CDF:
 Co.LPM(0, x, y, 0, 0)
 
@@ -260,6 +284,7 @@ NNS.CDF(x, 1, target = mean(x))
 ![](NNSvignette_Partial_Moments_files/figure-html/cdfs-2.png)
 
 ``` r
+
 # Survival Function:
 NNS.CDF(x, 1, type = "survival")
 ```
@@ -268,34 +293,46 @@ NNS.CDF(x, 1, type = "survival")
 
 ### Numerical Integration
 
-Partial moments are asymptotic area approximations of $f(x)$ akin to the
-familiar Trapezoidal and Simpson’s rules. More observations, more
+Partial moments are asymptotic area approximations of $`f(x)`$ akin to
+the familiar Trapezoidal and Simpson’s rules. More observations, more
 accuracy…
 
-$$\left\lbrack UPM\left( 1,0,f(x) \right) - LPM\left( 1,0,f(x) \right) \right\rbrack \asymp \frac{\left\lbrack F(b) - F(a) \right\rbrack}{\lbrack b - a\rbrack}$$$$\left\lbrack UPM\left( 1,0,f(x) \right) - LPM\left( 1,0,f(x) \right) \right\rbrack*\lbrack b - a\rbrack \asymp \left\lbrack F(b) - F(a) \right\rbrack$$
+``` math
+[UPM(1,0,f(x))-LPM(1,0,f(x))]\asymp\frac{[F(b)-F(a)]}{[b-a]}
+```
+``` math
+[UPM(1,0,f(x))-LPM(1,0,f(x))] *[b-a] \asymp[F(b)-F(a)]
+```
 
 ``` r
+
 x = seq(0, 1, .001) ; y = x ^ 2
 (UPM(1, 0, y) - LPM(1, 0, y)) * (1 - 0)
 ```
 
     ## [1] 0.3335
 
-$$0.3333*\lbrack 1 - 0\rbrack = \int_{0}^{1}x^{2}dx$$ For the total
-area, not just the definite integral, simply sum the partial moments and
-multiply by $\lbrack b - a\rbrack$:
-$$\left\lbrack UPM\left( 1,0,f(x) \right) + LPM\left( 1,0,f(x) \right) \right\rbrack*\lbrack b - a\rbrack \asymp \left| \int_{a}^{b}f(x)dx \right|$$
+``` math
+0.3333 * [1-0] = \int_{0}^{1} x^2 dx
+```
+For the total area, not just the definite integral, simply sum the
+partial moments and multiply by $`[b - a]`$:
+``` math
+[UPM(1,0,f(x))+LPM(1,0,f(x))] *[b-a]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert
+```
 
 ### Bayes’ Theorem
 
-For example, when ascertaining the probability of an increase in $A$
-given an increase in $B$, the
+For example, when ascertaining the probability of an increase in $`A`$
+given an increase in $`B`$, the
 `Co.UPM(degree_upm, x, y, target_x, target_y)` target parameters are set
 to `target_x = 0` and `target_y = 0` and the
 `UPM(degree, target, variable)` target parameter is also set to
 `target = 0`.
 
-$$P\left( A|B \right) = \frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$
+``` math
+P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}
+```
 
 ## References
 

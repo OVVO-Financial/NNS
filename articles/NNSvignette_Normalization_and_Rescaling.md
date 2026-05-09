@@ -1,6 +1,7 @@
 # Getting Started with NNS: Normalization and Rescaling
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -33,24 +34,29 @@ between variables influences the final normalized values.
 
 ### Mathematical Structure
 
-Let $X$ be an $n \times p$ matrix of variables.
+Let $`X`$ be an $`n \times p`$ matrix of variables.
 
 #### Step 1: Compute Mean Vector
 
-$$m_{j} = \text{mean}\left( X_{\cdot j} \right)$$
+``` math
+m_j = \text{mean}(X_{\cdot j})
+```
 
-If any $m_{j} = 0$, it is replaced with $10^{- 10}$ to prevent division
+If any $`m_j = 0`$, it is replaced with $`10^{-10}`$ to prevent division
 by zero.
 
 ------------------------------------------------------------------------
 
 #### Step 2: Construct Mean Ratio Matrix
 
-$$RG_{ij} = \frac{m_{i}}{m_{j}}$$
+``` math
+RG_{ij} = \frac{m_i}{m_j}
+```
 
 In R this corresponds to:
 
 ``` r
+
 RG <- outer(m, 1 / m)
 ```
 
@@ -60,36 +66,53 @@ RG <- outer(m, 1 / m)
 
 If `linear = FALSE`:
 
-- If number of variables $p < 10$: $$W = \left| {cor}(X) \right|$$
+- If number of variables $`p < 10`$:
+  ``` math
+  W = |\mathrm{cor}(X)|
+  ```
 - Otherwise:
-  $$W = |D|\quad{\text{where}\mspace{6mu}}D = \text{NNS.dep}(X)\$ Dependence$$[`NNS.dep()`](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
+  ``` math
+  W = |D| \quad \text{where } D = \text{NNS.dep}(X)\$Dependence
+  ```
+  [`NNS.dep()`](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
   returns a symmetric matrix of nonlinear dependence measures.
 
 If `linear = TRUE`, the weighting effectively becomes:
 
-$$W_{ij} = 1$$
+``` math
+W_{ij} = 1
+```
 
 ------------------------------------------------------------------------
 
 #### Step 4: Scaling Factors
 
-$$s_{j} = \frac{1}{p}\sum\limits_{i = 1}^{p}RG_{ij}W_{ij}$$
+``` math
+s_j = \frac{1}{p} \sum_{i=1}^{p} RG_{ij} W_{ij}
+```
 
 Each column is scaled:
 
-$$X_{\cdot j}^{*} = s_{j}X_{\cdot j}$$
+``` math
+X_{\cdot j}^{*} = s_j X_{\cdot j}
+```
 
 ------------------------------------------------------------------------
 
 ### Linear Case Proof
 
-If $W_{ij} = 1$:
+If $`W_{ij} = 1`$:
 
-$$s_{j} = \frac{1}{p}\sum\limits_{i = 1}^{p}\frac{m_{i}}{m_{j}} = \frac{\bar{m}}{m_{j}}$$
+``` math
+s_j = \frac{1}{p} \sum_{i=1}^{p} \frac{m_i}{m_j}
+= \frac{\bar{m}}{m_j}
+```
 
 Then:
 
-$$\text{mean}\left( X_{\cdot j}^{*} \right) = s_{j}m_{j} = \bar{m}$$
+``` math
+\text{mean}(X_{\cdot j}^{*}) = s_j m_j = \bar{m}
+```
 
 All variables share the same mean.
 
@@ -97,7 +120,13 @@ All variables share the same mean.
 
 ### Nonlinear Case Interpretation
 
-$$\text{mean}\left( X_{\cdot j}^{*} \right) = \frac{1}{p}\sum\limits_{i = 1}^{p}m_{i}W_{ij}$$
+``` math
+\text{mean}(X_{\cdot j}^{*})
+=
+\frac{1}{p}
+\sum_{i=1}^{p}
+m_i W_{ij}
+```
 
 Thus, the normalized mean becomes a dependence‑weighted average of
 original means. Variables more strongly dependent with higher‑mean
@@ -224,12 +253,20 @@ Function signature:
 
 If `method = "minmax"`:
 
-$$x^{*} = a + (b - a)\frac{x - \min(x)}{\max(x) - \min(x)}$$
+``` math
+x^{*}
+=
+a
++
+(b - a)
+\frac{x - \min(x)}
+{\max(x) - \min(x)}
+```
 
 Properties:
 
 - Preserves order
-- Maps support to $\lbrack a,b\rbrack$
+- Maps support to $`[a,b]`$
 - Linear transformation
 
 ------------------------------------------------------------------------
@@ -237,6 +274,7 @@ Properties:
 #### Example
 
 ``` r
+
 raw_vals <- c(-2.5, 0.2, 1.1, 3.7, 5.0)
 
 scaled_minmax <- NNS.rescale(
@@ -267,19 +305,28 @@ If `method = "riskneutral"`:
 
 Let:
 
-- $S_{0} = a$
-- $r = b$
-- $T$ = time horizon
+- $`S_0 = a`$
+- $`r = b`$
+- $`T`$ = time horizon
 
 #### Terminal Type
 
 Target:
 
-$${\mathbb{E}}\left\lbrack S_{T} \right\rbrack = S_{0}e^{rT}$$
+``` math
+\mathbb{E}[S_T] = S_0 e^{rT}
+```
 
 Transformation form:
 
-$$x^{*} = x \cdot \frac{S_{0}e^{rT}}{\text{mean}(x)}$$
+``` math
+x^{*}
+=
+x
+\cdot
+\frac{S_0 e^{rT}}
+{\text{mean}(x)}
+```
 
 This enforces the required expectation.
 
@@ -289,17 +336,23 @@ This enforces the required expectation.
 
 Target:
 
-$${\mathbb{E}}\left\lbrack e^{- rT}S_{T} \right\rbrack = S_{0}$$
+``` math
+\mathbb{E}[e^{-rT} S_T] = S_0
+```
 
 Equivalent to:
 
-$${\mathbb{E}}\left\lbrack S_{T} \right\rbrack = S_{0}e^{rT}$$
+``` math
+\mathbb{E}[S_T] = S_0 e^{rT}
+```
 
 but the returned series is scaled so that its discounted mean equals
-$S_{0}$. In practice, the function applies the same multiplicative
+$`S_0`$. In practice, the function applies the same multiplicative
 factor as above, because:
 
-$$\text{mean}\left( e^{- rT}x^{*} \right) = e^{- rT} \cdot \text{mean}\left( x^{*} \right) = e^{- rT} \cdot S_{0}e^{rT} = S_{0}.$$
+``` math
+\text{mean}(e^{-rT} x^{*}) = e^{-rT} \cdot \text{mean}(x^{*}) = e^{-rT} \cdot S_0 e^{rT} = S_0.
+```
 
 ------------------------------------------------------------------------
 
@@ -378,6 +431,7 @@ Both functions maintain monotonicity and are therefore compatible with
 NNS copula and dependence modeling frameworks.
 
 ``` r
+
 set.seed(123)
 
 x <- rnorm(1000, 5, 2)

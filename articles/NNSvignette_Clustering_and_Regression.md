@@ -1,6 +1,7 @@
 # Getting Started with NNS: Clustering and Regression
 
 ``` r
+
 library(NNS)
 library(data.table)
 require(knitr)
@@ -26,6 +27,7 @@ final quadrant identification. It also returns the regression points,
 which are the quadrant means used in **`NNS.reg`**.
 
 ``` r
+
 x = seq(-5, 5, .05); y = x ^ 3
 
 for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
@@ -35,20 +37,21 @@ for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
 
 #### X-only Partitioning
 
-**`NNS.part`** offers a partitioning based on $x$ values only
+**`NNS.part`** offers a partitioning based on $`x`$ values only
 **`NNS.part(x, y, type = "XONLY", ...)`**, using the entire bandwidth in
 its regression point derivation, and shares the same limit condition as
-partitioning via both $x$ and $y$ values.
+partitioning via both $`x`$ and $`y`$ values.
 
 ``` r
+
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
 ```
 
 ![](NNSvignette_Clustering_and_Regression_files/figure-html/x%20part-1.png)![](NNSvignette_Clustering_and_Regression_files/figure-html/x%20part-2.png)![](NNSvignette_Clustering_and_Regression_files/figure-html/x%20part-3.png)![](NNSvignette_Clustering_and_Regression_files/figure-html/x%20part-4.png)
 
 Note the partition identifications are limited to 1’s and 2’s (left and
-right of the partition respectively), not the 4 values per the $x$ and
-$y$ partitioning.
+right of the partition respectively), not the 4 values per the $`x`$ and
+$`y`$ partitioning.
 
     ## $order
     ## [1] 4
@@ -86,6 +89,7 @@ The right column of plots shows the corresponding regression (plus
 endpoints and central point) for the order of `NNS` partitioning.
 
 ``` r
+
 for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY") ; NNS.reg(x, y, order = i, ncores = 1)}
 ```
 
@@ -93,12 +97,14 @@ for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "X
 
 ## NNS Regression `NNS.reg()`
 
-**`NNS.reg`** can fit any $f(x)$, for both uni- and multivariate cases.
-**`NNS.reg`** returns a self-evident list of values provided below.
+**`NNS.reg`** can fit any $`f(x)`$, for both uni- and multivariate
+cases. **`NNS.reg`** returns a self-evident list of values provided
+below.
 
 ### Univariate:
 
 ``` r
+
 NNS.reg(x, y, ncores = 1)
 ```
 
@@ -287,11 +293,12 @@ NNS.reg(x, y, ncores = 1)
 
 ### Multivariate:
 
-Multivariate regressions return a plot of $y$ and $\widehat{y}$, as well
+Multivariate regressions return a plot of $`y`$ and $`\hat{y}`$, as well
 as the regression points (`$RPM`) and partitions (`$rhs.partitions`) for
 each regressor.
 
 ``` r
+
 f = function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
 y = x ; z <- expand.grid(x, y)
 g = f(z[ , 1], z[ , 2])
@@ -356,7 +363,7 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
 
 `NNS.reg` can inter- or extrapolate any point of interest. The
 **`NNS.reg(x, y, point.est = ...)`** parameter permits any sized data of
-similar dimensions to $x$ and called specifically with
+similar dimensions to $`x`$ and called specifically with
 **`NNS.reg(...)$Point.est`**.
 
 ### NNS Dimension Reduction Regression
@@ -367,6 +374,7 @@ Reducing all regressors to a single dimension using the returned
 equation **`NNS.reg(..., dim.red.method = "cor", ...)$equation`**.
 
 ``` r
+
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
 ```
 
@@ -381,7 +389,9 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft"
     ## 5:  DENOMINATOR   4.0000000
 
 Thus, our model for this regression would be:
-$$Species = \frac{0.798*Sepal.Length - 0.44*Sepal.Width + 0.935*Petal.Length + 0.938*Petal.Width}{4}$$
+``` math
+Species = \frac{0.798*Sepal.Length -0.44*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{4} 
+```
 
 #### Threshold
 
@@ -390,6 +400,7 @@ method of reducing regressors further by controlling the absolute value
 of required correlation.
 
 ``` r
+
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
 ```
 
@@ -404,12 +415,15 @@ NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, loc
     ## 5:  DENOMINATOR   3.0000000
 
 Thus, our model for this further reduced dimension regression would be:
-$$Species = \frac{\ 0.798*Sepal.Length + 0*Sepal.Width + 0.935*Petal.Length + 0.938*Petal.Width}{3}$$
+``` math
+Species = \frac{\: 0.798*Sepal.Length + 0*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{3} 
+```
 
 and the `point.est = (...)` operates in the same manner as the full
 regression above, again called with **`NNS.reg(...)$Point.est`**.
 
 ``` r
+
 NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
 
@@ -426,6 +440,7 @@ For a classification problem, we simply set
 classification problems.**
 
 ``` r
+
 NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
 ```
 
@@ -453,6 +468,7 @@ Any objective function `obj.fn` can be called using
 **`NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`**.
 
 ``` r
+
 NNS.stack(IVs.train = iris[ , 1 : 4], 
           DV.train = iris[ , 5], 
           IVs.test = iris[1 : 10, 1 : 4],
@@ -515,6 +531,7 @@ of itself and cross-validate the number of clusters `n.best` via:
 **`NNS.stack(IVs.train = cbind(x, x), DV.train = y, method = 1, ...)`**.
 
 ``` r
+
 set.seed(123)
 x = rnorm(100); y = rnorm(100)
 
@@ -524,6 +541,7 @@ nns.params = NNS.stack(IVs.train = cbind(x, x),
 ```
 
 ``` r
+
 NNS.reg(cbind(x, x), y, 
         n.best = nns.params$NNS.reg.n.best,
         point.est = cbind(x, x), 
@@ -541,6 +559,7 @@ to regression points generated internally using the partitioning method
 described earlier.
 
 ``` r
+
 NNS.reg(x, y, smooth = TRUE)
 ```
 
@@ -549,9 +568,9 @@ NNS.reg(x, y, smooth = TRUE)
 ## Imputation
 
 Imputation in `NNS` is a direct application of nearest neighbor
-regression. When values of $y$ are missing, we use the observed $(X,y)$
-pairs as the training set and the predictors of the missing rows as
-`point.est`.
+regression. When values of $`y`$ are missing, we use the observed
+$`(X,y)`$ pairs as the training set and the predictors of the missing
+rows as `point.est`.
 
 A key insight is that even in univariate regressions, `NNS.reg` benefits
 from the increasing dimensions trick: by duplicating the predictor into
@@ -562,12 +581,12 @@ univariate imputation into a special case of multivariate nearest
 neighbor regression.
 
 For multivariate predictors, the same form applies directly — supply the
-full set of observed predictors in $x$, the observed responses in $y$,
-and the incomplete rows in `point.est`. With
+full set of observed predictors in $`x`$, the observed responses in
+$`y`$, and the incomplete rows in `point.est`. With
 `order = "max", n.best = 1`, the imputation is always 1-NN donor-based:
-each missing $y$ is filled in by the response of its closest donor under
-the `NNS` hybrid distance. This ensures imputations remain strictly
-within the support of the observed data.
+each missing $`y`$ is filled in by the response of its closest donor
+under the `NNS` hybrid distance. This ensures imputations remain
+strictly within the support of the observed data.
 
 **Categorical data** is handled analogously, only requiring
 `NNS.reg(..., type = "CLASS")` in the procedure.
@@ -575,6 +594,7 @@ within the support of the observed data.
 ### Univariate Imputation
 
 ``` r
+
 set.seed(123)
 
 # Univariate predictor with nonlinear signal
@@ -625,6 +645,7 @@ legend("topleft",
 ### Multivariate Imputation
 
 ``` r
+
 set.seed(123)
 
 # Multivariate predictors with nonlinear & interaction structure

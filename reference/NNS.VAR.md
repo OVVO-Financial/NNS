@@ -160,6 +160,7 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
+
  if (FALSE) { # \dontrun{
  ####################################################
  ### Standard Nonparametric Vector Autoregression ###
