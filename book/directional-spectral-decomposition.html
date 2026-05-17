@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 16 Directional Tail Thresholds, Probability Bounds, and Estimation Error | Nonlinear Nonparametric Statistics: Using Partial Moments</title>
-  <meta name="description" content="Chapter 16 Directional Tail Thresholds, Probability Bounds, and Estimation Error | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  <title>Chapter 11 Directional Spectral Decomposition | Nonlinear Nonparametric Statistics: Using Partial Moments</title>
+  <meta name="description" content="Chapter 11 Directional Spectral Decomposition | Nonlinear Nonparametric Statistics: Using Partial Moments" />
   <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 16 Directional Tail Thresholds, Probability Bounds, and Estimation Error | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  <meta property="og:title" content="Chapter 11 Directional Spectral Decomposition | Nonlinear Nonparametric Statistics: Using Partial Moments" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 16 Directional Tail Thresholds, Probability Bounds, and Estimation Error | Nonlinear Nonparametric Statistics: Using Partial Moments" />
+  <meta name="twitter:title" content="Chapter 11 Directional Spectral Decomposition | Nonlinear Nonparametric Statistics: Using Partial Moments" />
   
   
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="distribution-comparison.html"/>
-<link rel="next" href="prediction-intervals.html"/>
+<link rel="prev" href="directional-dependence.html"/>
+<link rel="next" href="copula-interpretation.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -1030,247 +1030,1106 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="directional-tail-thresholds-probability-bounds-and-estimation-error" class="section level1 hasAnchor" number="16">
-<h1><span class="header-section-number">Chapter 16</span> Directional Tail Thresholds, Probability Bounds, and Estimation Error<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#directional-tail-thresholds-probability-bounds-and-estimation-error" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Previous chapters developed the directional framework for probability, dependence, distribution comparison, and prediction. A natural next step is threshold analysis.</p>
-<p>In many practical settings, the analyst is not interested only in a central interval for future observations. The analyst also wants to understand how a process behaves near adverse regions of its distribution: how often a benchmark is crossed, how severe the benchmark violations are once they occur, how conservative tail-probability statements remain under weak assumptions, and how stable the resulting estimates are in finite samples.</p>
-<p>These questions arise in many domains:</p>
+<div id="directional-spectral-decomposition" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Directional Spectral Decomposition<a href="directional-spectral-decomposition.html#directional-spectral-decomposition" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Chapters 9 and 10 developed dependence structure using directional co-partial moments.
+Chapter 9 showed that covariance and correlation arise from aggregations of directional co-partial moments.
+Chapter 10 showed that those directional components reveal nonlinear, asymmetric, and tail-specific dependence that correlation cannot detect.</p>
+<p>One further classical object lies downstream of covariance: its <strong>eigenvalue decomposition</strong>.</p>
+<p>Principal component analysis, factor models, covariance ellipses, and multivariate risk diagnostics all begin from the eigensystem of the covariance matrix.
+Since covariance itself is recovered from directional co-partial moment matrices, the eigensystem is also recoverable from those directional components.</p>
+<p>This chapter establishes that result and draws out its consequence:</p>
+<p><span class="math display">\[
+\text{PCA diagonalizes covariance.
+Directional decomposition explains where that covariance came from.}
+\]</span></p>
+<p>The eigensystem is not replaced.
+It is attributed.</p>
+<hr />
+<div id="classical-spectral-decomposition" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Classical Spectral Decomposition<a href="directional-spectral-decomposition.html#classical-spectral-decomposition" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let</p>
+<p><span class="math display">\[
+Z =
+\begin{pmatrix}
+X \\
+Y
+\end{pmatrix}
+\]</span></p>
+<p>be a bivariate random vector with mean</p>
+<p><span class="math display">\[
+\mu = E[Z]
+=
+\begin{pmatrix}
+\mu_X \\
+\mu_Y
+\end{pmatrix}.
+\]</span></p>
+<p>The covariance matrix is</p>
+<p><span class="math display">\[
+\Sigma
+=
+E[(Z-\mu)(Z-\mu)^\top].
+\]</span></p>
+<p>Since <span class="math inline">\(\Sigma\)</span> is symmetric and positive semidefinite, it admits an orthonormal eigendecomposition</p>
+<p><span class="math display">\[
+\Sigma
+=
+V\Lambda V^\top,
+\]</span></p>
+<p>where <span class="math inline">\(V = (v_1, v_2)\)</span> contains orthonormal eigenvectors and</p>
+<p><span class="math display">\[
+\Lambda =
+\begin{pmatrix}
+\lambda_1 &amp; 0 \\
+0 &amp; \lambda_2
+\end{pmatrix}
+\]</span></p>
+<p>contains eigenvalues with <span class="math inline">\(\lambda_1 \geq \lambda_2 \geq 0\)</span>.</p>
+<p>Classical PCA identifies <span class="math inline">\(v_1\)</span> as the direction of maximum variance:</p>
+<p><span class="math display">\[
+v_1
+=
+\arg\max_{\|v\|=1} v^\top \Sigma v,
+\qquad
+\lambda_1 = v_1^\top \Sigma v_1.
+\]</span></p>
+<p>This is a powerful summary, but it remains a symmetric aggregate.
+It does not say whether the variance along <span class="math inline">\(v_1\)</span> originated from concordant lower-side co-movement, concordant upper-side co-movement, divergent behavior, or residual scatter within directional regions.</p>
+<p>Directional spectral decomposition answers that question.</p>
+<hr />
+</div>
+<div id="directional-recovery-of-the-eigensystem" class="section level2 hasAnchor" number="11.2">
+<h2><span class="header-section-number">11.2</span> Directional Recovery of the Eigensystem<a href="directional-spectral-decomposition.html#directional-recovery-of-the-eigensystem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Chapter 9 established that the covariance matrix is recovered from directional co-partial moment matrices:</p>
+<p><span class="math display">\[
+\Sigma
+=
+\operatorname{CoLPM}
++
+\operatorname{CoUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}.
+\]</span></p>
+<p>Since the covariance matrix determines its eigensystem, the classical eigensystem is also recovered from the directional aggregate:</p>
+<p><span class="math display">\[
+(\lambda_i, v_i)
+=
+\operatorname{eig}_i
+\!\left(
+\operatorname{CoLPM}
++
+\operatorname{CoUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}
+\right).
+\]</span></p>
+<p>The information hierarchy therefore extends to</p>
+<p><span class="math display">\[
+(\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})
+\rightarrow
+\Sigma
+\rightarrow
+(\lambda_i, v_i)
+\rightarrow
+\rho.
+\]</span></p>
+<p>The ordering is not symmetric.
+The directional matrices determine the covariance matrix and its eigenstructure.
+The eigenstructure does not determine the directional matrices.
+Many different directional structures can produce the same covariance matrix, and many different covariance matrices can produce similar principal directions.
+Once the directional components are aggregated into <span class="math inline">\(\Sigma\)</span>, the information about where the co-movement occurred is generally lost.</p>
+<p>This asymmetry is central:</p>
+<p><span class="math display">\[
+\text{Directional structure recovers PCA.
+PCA does not recover directional structure.}
+\]</span></p>
+<hr />
+</div>
+<div id="quadrant-mean-geometry" class="section level2 hasAnchor" number="11.3">
+<h2><span class="header-section-number">11.3</span> Quadrant Mean Geometry<a href="directional-spectral-decomposition.html#quadrant-mean-geometry" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>There is a second route to the eigensystem, more geometric than the co-partial moment reconstruction.
+It passes through the <strong>conditional means of the four directional quadrants</strong>.</p>
+<p>Let the benchmarks be the component means:</p>
+<p><span class="math display">\[
+t_X = \mu_X,
+\qquad
+t_Y = \mu_Y.
+\]</span></p>
+<p>The four directional quadrants are</p>
+<table>
+<thead>
+<tr class="header">
+<th>Region</th>
+<th>Condition</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CUPM</td>
+<td><span class="math inline">\(X &gt; \mu_X,\; Y &gt; \mu_Y\)</span></td>
+<td>concordant upper</td>
+</tr>
+<tr class="even">
+<td>CLPM</td>
+<td><span class="math inline">\(X \leq \mu_X,\; Y \leq \mu_Y\)</span></td>
+<td>concordant lower</td>
+</tr>
+<tr class="odd">
+<td>DLPM</td>
+<td><span class="math inline">\(X &gt; \mu_X,\; Y \leq \mu_Y\)</span></td>
+<td>divergent lower</td>
+</tr>
+<tr class="even">
+<td>DUPM</td>
+<td><span class="math inline">\(X \leq \mu_X,\; Y &gt; \mu_Y\)</span></td>
+<td>divergent upper</td>
+</tr>
+</tbody>
+</table>
+<p>For each quadrant <span class="math inline">\(q\)</span>, define the quadrant probability</p>
+<p><span class="math display">\[
+p_q = P(Q = q),
+\]</span></p>
+<p>the quadrant conditional mean</p>
+<p><span class="math display">\[
+m_q = E[Z \mid Q = q],
+\]</span></p>
+<p>and the centered quadrant mean displacement</p>
+<p><span class="math display">\[
+u_q = m_q - \mu.
+\]</span></p>
+<p>Because the quadrant means partition the distribution,</p>
+<p><span class="math display">\[
+\mu = \sum_q p_q m_q,
+\]</span></p>
+<p>which gives</p>
+<p><span class="math display">\[
+\sum_q p_q u_q = 0.
+\]</span></p>
+<p>This is the law of total expectation in vector form.
+It implies that the weighted quadrant mean displacements must balance around the global mean.</p>
+<p>The displacement vectors <span class="math inline">\(u_q\)</span> are the geometric objects of interest.
+Each one points from the global mean to a quadrant conditional mean.
+They identify where the conditional mass of the distribution sits after the directional partition.</p>
+<hr />
+</div>
+<div id="between-within-covariance-decomposition" class="section level2 hasAnchor" number="11.4">
+<h2><span class="header-section-number">11.4</span> Between-Within Covariance Decomposition<a href="directional-spectral-decomposition.html#between-within-covariance-decomposition" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The covariance matrix decomposes exactly through the quadrant partition.</p>
+<p>Inside quadrant <span class="math inline">\(q\)</span>, write</p>
+<p><span class="math display">\[
+Z - \mu
+=
+(m_q - \mu) + (Z - m_q)
+=
+u_q + \varepsilon_q,
+\]</span></p>
+<p>where <span class="math inline">\(E[\varepsilon_q \mid Q = q] = 0\)</span>.</p>
+<p>The conditional covariance contribution from quadrant <span class="math inline">\(q\)</span> is</p>
+<p><span class="math display">\[
+E[(Z-\mu)(Z-\mu)^\top \mid Q = q]
+=
+u_q u_q^\top
++
+\operatorname{Cov}(Z \mid Q = q).
+\]</span></p>
+<p>Averaging across quadrants gives</p>
+<p><span class="math display">\[
+\boxed{
+\Sigma
+=
+\underbrace{\sum_q p_q u_q u_q^\top}_{\Sigma_Q}
++
+\underbrace{\sum_q p_q \operatorname{Cov}(Z \mid Q = q)}_{\Sigma_W}.
+}
+\]</span></p>
+<p>The first term, <span class="math inline">\(\Sigma_Q\)</span>, is the <strong>between-quadrant covariance</strong>: how much covariance arises from the locations of the quadrant conditional means relative to the global mean.</p>
+<p>The second term, <span class="math inline">\(\Sigma_W\)</span>, is the <strong>within-quadrant covariance</strong>: the remaining scatter around each quadrant mean, pooled across quadrants.</p>
+<p>This identity is the law of total covariance applied to the NNS quadrant partition.
+It is exact and requires no distributional assumptions.</p>
+<p>The two terms answer different questions.</p>
+<p><span class="math display">\[
+\text{PCA of }\Sigma\text{ is PCA of total covariance.}
+\]</span></p>
+<p><span class="math display">\[
+\text{PCA of }\Sigma_Q\text{ is PCA of conditional mean displacement.}
+\]</span></p>
+<p>These need not coincide.</p>
+<hr />
+</div>
+<div id="rank-one-spectral-primitives" class="section level2 hasAnchor" number="11.5">
+<h2><span class="header-section-number">11.5</span> Rank-One Spectral Primitives<a href="directional-spectral-decomposition.html#rank-one-spectral-primitives" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Each quadrant contributes a rank-one matrix to the between-quadrant covariance:</p>
+<p><span class="math display">\[
+B_q
+=
+p_q u_q u_q^\top.
+\]</span></p>
+<p>When <span class="math inline">\(u_q \neq 0\)</span>,</p>
+<p><span class="math display">\[
+B_q u_q
+=
+p_q u_q u_q^\top u_q
+=
+p_q \|u_q\|^2 u_q.
+\]</span></p>
+<p>The vector <span class="math inline">\(u_q\)</span> is the nonzero eigenvector of <span class="math inline">\(B_q\)</span>, with eigenvalue</p>
+<p><span class="math display">\[
+\lambda_q = p_q \|u_q\|^2.
+\]</span></p>
+<p>After normalization, <span class="math inline">\(v_q = u_q / \|u_q\|\)</span> is the corresponding unit eigenvector.</p>
+<p>This is the precise sense in which each quadrant mean displacement is spectral.
+It is not generally an eigenvector of the full covariance matrix.
+It is exactly the eigenvector of its own rank-one contribution to <span class="math inline">\(\Sigma_Q\)</span>.</p>
+<p>The between-quadrant covariance is the sum of these rank-one primitives:</p>
+<p><span class="math display">\[
+\Sigma_Q
+=
+B_{\operatorname{CUPM}}
++B_{\operatorname{CLPM}}
++B_{\operatorname{DLPM}}
++B_{\operatorname{DUPM}}.
+\]</span></p>
+<p>Defining the matrix of weighted displacement columns,</p>
+<p><span class="math display">\[
+C
+=
+\begin{pmatrix}
+\sqrt{p_{\operatorname{CUPM}}}\,u_{\operatorname{CUPM}} &amp;
+\sqrt{p_{\operatorname{CLPM}}}\,u_{\operatorname{CLPM}} &amp;
+\sqrt{p_{\operatorname{DLPM}}}\,u_{\operatorname{DLPM}} &amp;
+\sqrt{p_{\operatorname{DUPM}}}\,u_{\operatorname{DUPM}}
+\end{pmatrix},
+\]</span></p>
+<p>one has <span class="math inline">\(\Sigma_Q = CC^\top\)</span>.
+The eigenvectors of <span class="math inline">\(\Sigma_Q\)</span> are the left singular vectors of <span class="math inline">\(C\)</span>, built entirely from weighted quadrant mean displacements.</p>
+<p><span class="math display">\[
+\boxed{
+\text{Centered NNS quadrant means are rank-one spectral primitives.}
+}
+\]</span></p>
+<hr />
+</div>
+<div id="recovering-eigenvectors-from-quadrant-conditional-means" class="section level2 hasAnchor" number="11.6">
+<h2><span class="header-section-number">11.6</span> Recovering Eigenvectors from Quadrant Conditional Means<a href="directional-spectral-decomposition.html#recovering-eigenvectors-from-quadrant-conditional-means" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The preceding section gives the local rank-one statement.
+We now make the recovery step explicit.</p>
+<p>At a given NNS split, the only inputs needed for the between-quadrant eigensystem are the quadrant probabilities and the quadrant conditional means:</p>
+<p><span class="math display">\[
+\{p_q, m_q\}_{q \in \{\operatorname{CUPM},\operatorname{CLPM},\operatorname{DLPM},\operatorname{DUPM}\}}.
+\]</span></p>
+<p>From these quantities,</p>
+<p><span class="math display">\[
+\mu = \sum_q p_q m_q,
+\qquad
+u_q = m_q-\mu.
+\]</span></p>
+<p>Construct the weighted conditional-mean matrix</p>
+<p><span class="math display">\[
+C =
+\begin{pmatrix}
+\sqrt{p_{\operatorname{CUPM}}}u_{\operatorname{CUPM}} &amp;
+\sqrt{p_{\operatorname{CLPM}}}u_{\operatorname{CLPM}} &amp;
+\sqrt{p_{\operatorname{DLPM}}}u_{\operatorname{DLPM}} &amp;
+\sqrt{p_{\operatorname{DUPM}}}u_{\operatorname{DUPM}}
+\end{pmatrix}.
+\]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+\Sigma_Q = CC^\top.
+\]</span></p>
+<p>Thus the eigenvectors of <span class="math inline">\(\Sigma_Q\)</span> are recovered from the quadrant conditional means by</p>
+<p><span class="math display">\[
+\Sigma_Q v_j = \lambda_j v_j.
+\]</span></p>
+<p>Equivalently, take the singular value decomposition</p>
+<p><span class="math display">\[
+C = U\Lambda_Q^{1/2}R^\top.
+\]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+\Sigma_Q = CC^\top = U\Lambda_Q U^\top,
+\]</span></p>
+<p>so the columns of <span class="math inline">\(U\)</span> are the eigenvectors of the conditional-mean covariance.
+No raw observations are needed at this step once the quadrant conditional means and probabilities have been computed.</p>
+<p>This is the exact role of the conditional means:</p>
+<p><span class="math display">\[
+\boxed{
+\{p_q,m_q\}_q
+\quad \Longrightarrow \quad
+\{u_q\}_q
+\quad \Longrightarrow \quad
+C
+\quad \Longrightarrow \quad
+\Sigma_Q
+\quad \Longrightarrow \quad
+(v_{Q,j},\lambda_{Q,j}).
+}
+\]</span></p>
+<p>The eigenvectors are therefore not imposed externally.
+They are recovered from the geometry of the four quadrant conditional means.</p>
+<p>A second, more visual representation comes from opposite quadrant centroid contrasts:</p>
+<p><span class="math display">\[
+a_C = m_{\operatorname{CUPM}} - m_{\operatorname{CLPM}},
+\qquad
+a_D = m_{\operatorname{DLPM}} - m_{\operatorname{DUPM}}.
+\]</span></p>
+<p>The first contrast joins the two concordant conditional means.
+The second contrast joins the two divergent conditional means.
+After normalization,</p>
+<p><span class="math display">\[
+\tilde v_C = \frac{a_C}{\|a_C\|},
+\qquad
+\tilde v_D = \frac{a_D}{\|a_D\|}.
+\]</span></p>
+<p>When the concordant and divergent centroid pairs lie on orthogonal local axes, these contrast directions are the eigenvectors of <span class="math inline">\(\Sigma_Q\)</span>:</p>
+<p><span class="math display">\[
+v_{Q,1} = \tilde v_C,
+\qquad
+v_{Q,2} = \tilde v_D,
+\]</span></p>
+<p>up to signs and ordering.
+This alignment condition is common in symmetric or nearly elliptical dependence structures, but it is not required for recovery.
+Without this special alignment, the eigenvectors of <span class="math inline">\(\Sigma_Q\)</span> are the orthogonal principal axes obtained by diagonalizing <span class="math inline">\(CC^\top\)</span>; they remain weighted linear combinations of the same quadrant conditional mean displacements.</p>
+<p>The distinction is important:</p>
+<p><span class="math display">\[
+\boxed{
+\text{Individual }u_q\text{ are eigenvectors of their own }B_q=p_qu_qu_q^\top.
+}
+\]</span></p>
+<p><span class="math display">\[
+\boxed{
+\text{The full between-quadrant eigenvectors are recovered by summing those }B_q\text{ through }\Sigma_Q=CC^\top.
+}
+\]</span></p>
+<p>For the original PCA eigensystem of the full covariance matrix, add the within-quadrant residual covariance:</p>
+<p><span class="math display">\[
+\Sigma = \Sigma_Q+\Sigma_W.
+\]</span></p>
+<p>Then diagonalizing <span class="math inline">\(\Sigma\)</span> recovers the classical eigenvectors.
+As recursive NNS partitions refine and terminal cells shrink, <span class="math inline">\(\Sigma_W\)</span> decreases.
+At the finite-sample singleton limit, <span class="math inline">\(\Sigma_W=0\)</span>, so the eigenvectors of the full covariance are recovered entirely from conditional means of the terminal regions.</p>
+<hr />
+</div>
+<div id="quadrant-mean-slope-versus-pc1-within-a-quadrant" class="section level2 hasAnchor" number="11.7">
+<h2><span class="header-section-number">11.7</span> Quadrant Mean Slope Versus PC1 Within a Quadrant<a href="directional-spectral-decomposition.html#quadrant-mean-slope-versus-pc1-within-a-quadrant" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The between-within decomposition clarifies a distinction that arises when analyzing a single directional quadrant.</p>
+<p>Consider the CLPM region.
+The CLPM mean displacement is</p>
+<p><span class="math display">\[
+u_{\operatorname{CLPM}} = m_{\operatorname{CLPM}} - \mu.
+\]</span></p>
+<p>The line from <span class="math inline">\(\mu\)</span> through <span class="math inline">\(m_{\operatorname{CLPM}}\)</span> has direction</p>
+<p><span class="math display">\[
+g_{\operatorname{CLPM}}
+=
+\frac{u_{\operatorname{CLPM}}}{\|u_{\operatorname{CLPM}}\|}.
+\]</span></p>
+<p>This is the eigenvector of the rank-one matrix <span class="math inline">\(B_{\operatorname{CLPM}}\)</span>.</p>
+<p>By contrast, the first principal component of the CLPM observations is the leading eigenvector of</p>
+<p><span class="math display">\[
+\operatorname{Cov}(Z \mid \operatorname{CLPM}).
+\]</span></p>
+<p>These are different matrices computed from different objects.
+The quadrant mean slope is a between-centroid displacement direction.
+The within-quadrant PC1 is a within-quadrant scatter direction.
+The within-quadrant regression line is a conditional least-squares direction.</p>
+<p><span class="math display">\[
+\text{quadrant mean slope}
+\neq
+\text{within-quadrant PC1}
+\neq
+\text{within-quadrant regression line.}
+\]</span></p>
+<p>For directional dependence analysis, the quadrant mean slope is the relevant object because it describes where conditional mass moved relative to the global mean benchmark.</p>
+<hr />
+</div>
+<div id="eigenvalue-attribution" class="section level2 hasAnchor" number="11.8">
+<h2><span class="header-section-number">11.8</span> Eigenvalue Attribution<a href="directional-spectral-decomposition.html#eigenvalue-attribution" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The most useful result is not merely that the eigensystem is recoverable.
+It is that each eigenvalue can be attributed to directional sources.</p>
+<p>Let <span class="math inline">\(v_i\)</span> be a unit eigenvector of <span class="math inline">\(\Sigma\)</span>.
+Then</p>
+<p><span class="math display">\[
+\lambda_i = v_i^\top \Sigma v_i.
+\]</span></p>
+<p>Substituting the between-within decomposition,</p>
+<p><span class="math display">\[
+\lambda_i
+=
+v_i^\top \Sigma_Q v_i
++
+v_i^\top \Sigma_W v_i.
+\]</span></p>
+<p>Expanding each term,</p>
+<p><span class="math display">\[
+\boxed{
+\lambda_i
+=
+\sum_q p_q (v_i^\top u_q)^2
++
+\sum_q p_q \, v_i^\top \operatorname{Cov}(Z \mid Q{=}q)\, v_i.
+}
+\]</span></p>
+<p>The first sum is the <strong>between-quadrant contribution</strong>: each term measures how much the <span class="math inline">\(i\)</span>-th principal direction aligns with the conditional mean displacement of quadrant <span class="math inline">\(q\)</span>, weighted by the quadrant’s probability.</p>
+<p>The second sum is the <strong>within-quadrant contribution</strong>: residual scatter around each quadrant mean, projected onto the principal direction.</p>
+<p>Define</p>
+<p><span class="math display">\[
+\lambda_{i,Q} = \sum_q p_q (v_i^\top u_q)^2,
+\qquad
+\lambda_{i,W} = \sum_q p_q \, v_i^\top \operatorname{Cov}(Z \mid Q{=}q)\, v_i,
+\]</span></p>
+<p>so that</p>
+<p><span class="math display">\[
+\lambda_i = \lambda_{i,Q} + \lambda_{i,W}.
+\]</span></p>
+<p>At the quadrant level, the between contribution from quadrant <span class="math inline">\(q\)</span> to eigenvalue <span class="math inline">\(i\)</span> is</p>
+<p><span class="math display">\[
+\lambda_{i,q}^{between} = p_q (v_i^\top u_q)^2.
+\]</span></p>
+<p>This answers a question ordinary PCA does not pose:</p>
+<p><span class="math display">\[
+\boxed{
+\text{Which directional regions of the joint distribution generated this eigenvalue?}
+}
+\]</span></p>
+<p>If most of <span class="math inline">\(\lambda_1\)</span> arises from CLPM and CUPM terms, the leading principal direction is driven by concordant co-movement.
+If most of <span class="math inline">\(\lambda_1\)</span> arises from DLPM and DUPM terms, the leading direction is driven by divergent behavior.
+If <span class="math inline">\(\Sigma_W\)</span> dominates, the principal axis reflects residual within-region scatter rather than separation among conditional means.</p>
+<p>PCA reports the axis.
+Directional decomposition reports the sources of that axis.</p>
+<hr />
+</div>
+<div id="two-dimensional-explicit-recovery" class="section level2 hasAnchor" number="11.9">
+<h2><span class="header-section-number">11.9</span> Two-Dimensional Explicit Recovery<a href="directional-spectral-decomposition.html#two-dimensional-explicit-recovery" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In two dimensions the eigensystem is recovered in closed form from the directional components.</p>
+<p>Let the reconstructed covariance matrix be</p>
+<p><span class="math display">\[
+\Sigma
+=
+\begin{pmatrix}
+a &amp; b \\
+b &amp; d
+\end{pmatrix}.
+\]</span></p>
+<p>The eigenvalues are</p>
+<p><span class="math display">\[
+\lambda_{1,2}
+=
+\frac{a+d}{2}
+\pm
+\sqrt{
+\left(\frac{a-d}{2}\right)^2 + b^2
+}.
+\]</span></p>
+<p>The principal-axis angle <span class="math inline">\(\theta\)</span> satisfies</p>
+<p><span class="math display">\[
+\tan(2\theta)
+=
+\frac{2b}{a-d}.
+\]</span></p>
+<p>The eigenvectors are</p>
+<p><span class="math display">\[
+v_1
+=
+\begin{pmatrix}
+\cos\theta \\
+\sin\theta
+\end{pmatrix},
+\qquad
+v_2
+=
+\begin{pmatrix}
+-\sin\theta \\
+\cos\theta
+\end{pmatrix}.
+\]</span></p>
+<p>Because the directional pieces reconstruct <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(d\)</span> exactly, they also reconstruct <span class="math inline">\(\lambda_{1,2}\)</span> and <span class="math inline">\(v_{1,2}\)</span> exactly.
+The recovery is complete.</p>
+<hr />
+</div>
+<div id="recursive-spectral-refinement" class="section level2 hasAnchor" number="11.10">
+<h2><span class="header-section-number">11.10</span> Recursive Spectral Refinement<a href="directional-spectral-decomposition.html#recursive-spectral-refinement" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Chapter 10 noted that NNS partitioning can be applied recursively, subdividing each region into further quadrants.
+This produces a nested sequence of partitions <span class="math inline">\(\mathcal{P}_1, \mathcal{P}_2, \ldots, \mathcal{P}_O\)</span>.</p>
+<p>For any partition <span class="math inline">\(\mathcal{P}_O\)</span> with cells <span class="math inline">\(r\)</span>, probabilities <span class="math inline">\(p_r\)</span>, conditional means <span class="math inline">\(m_r\)</span>, and displacements <span class="math inline">\(u_r = m_r - \mu\)</span>, the same decomposition applies:</p>
+<p><span class="math display">\[
+\Sigma
+=
+\sum_r p_r u_r u_r^\top
++
+\sum_r p_r \operatorname{Cov}(Z \mid r).
+\]</span></p>
+<p>Each cell contributes a rank-one between-cell primitive <span class="math inline">\(B_r = p_r u_r u_r^\top\)</span>.</p>
+<p>As the partition refines, within-cell covariance decreases.
+At the limit where each terminal cell contains one observation,</p>
+<p><span class="math display">\[
+\operatorname{Cov}(Z \mid r) = 0
+\]</span></p>
+<p>for every cell, and the full empirical covariance is represented entirely by terminal cell centroids:</p>
+<p><span class="math display">\[
+\Sigma = \sum_r p_r u_r u_r^\top.
+\]</span></p>
+<p>The eigenvalue perturbation bound follows immediately from Weyl’s inequality.
+Since <span class="math inline">\(\Sigma - B_O = W_O\)</span>,</p>
+<p><span class="math display">\[
+|\lambda_i(\Sigma) - \lambda_i(B_O)| \leq \|W_O\|_2.
+\]</span></p>
+<p>When the eigenvalue gap is large, fewer partition steps are needed to recover the dominant principal direction.</p>
+<p>Recursive NNS partitioning therefore provides a <strong>multiscale positive semidefinite decomposition of conditional mean covariance</strong>: each split explains part of the residual total covariance through the between-child displacement, and these contributions accumulate monotonically as cells are refined.</p>
+<hr />
+</div>
+<div id="multivariate-extension" class="section level2 hasAnchor" number="11.11">
+<h2><span class="header-section-number">11.11</span> Multivariate Extension<a href="directional-spectral-decomposition.html#multivariate-extension" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The same construction extends to any dimension <span class="math inline">\(d\)</span>.</p>
+<p>A mean split across all <span class="math inline">\(d\)</span> coordinates produces up to <span class="math inline">\(2^d\)</span> orthants.
+For any partition with cells <span class="math inline">\(r\)</span>, the decomposition</p>
+<p><span class="math display">\[
+\Sigma
+=
+\sum_r p_r u_r u_r^\top
++
+\sum_r p_r \operatorname{Cov}(Z \mid r)
+\]</span></p>
+<p>holds in <span class="math inline">\(\mathbb{R}^{d \times d}\)</span>.</p>
+<p>Each cell contributes a rank-one positive semidefinite matrix <span class="math inline">\(B_r = p_r u_r u_r^\top\)</span>.
+The between-cell covariance has rank at most <span class="math inline">\(\min(d, K-1)\)</span>, where <span class="math inline">\(K\)</span> is the number of occupied cells.
+The <span class="math inline">\(K-1\)</span> bound appears because the constraint <span class="math inline">\(\sum_r p_r u_r = 0\)</span> removes one degree of freedom.</p>
+<p>The multivariate statement therefore matches the bivariate one:</p>
+<p><span class="math display">\[
+\boxed{
+\text{NNS partitions generate locatable rank-one spectral primitives in any dimension.}
+}
+\]</span></p>
+<hr />
+</div>
+<div id="converse-failure" class="section level2 hasAnchor" number="11.12">
+<h2><span class="header-section-number">11.12</span> Converse Failure<a href="directional-spectral-decomposition.html#converse-failure" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The directional decomposition runs in one direction.</p>
+<p>Given the directional pieces <span class="math inline">\(\{p_q, m_q, \operatorname{Cov}(Z \mid Q{=}q)\}_q\)</span>, the covariance matrix and its eigensystem are recovered.
+Given only <span class="math inline">\(\Sigma\)</span> or its eigensystem <span class="math inline">\((V, \Lambda)\)</span>, the directional pieces are not recovered.</p>
+<p>Neither <span class="math inline">\(\Sigma\)</span> nor <span class="math inline">\((V, \Lambda)\)</span> determines</p>
 <ul>
-<li>forecast errors relative to a service target,</li>
-<li>inventory levels relative to a replenishment threshold,</li>
-<li>reliability metrics relative to a safety margin,</li>
-<li>environmental measurements relative to a policy limit,</li>
-<li>financial returns relative to a minimum acceptable outcome.</li>
+<li>which observations belong to CLPM, CUPM, DLPM, or DUPM,</li>
+<li>the quadrant probabilities <span class="math inline">\(p_q\)</span>,</li>
+<li>the quadrant conditional means <span class="math inline">\(m_q\)</span>,</li>
+<li>the within-quadrant covariance matrices <span class="math inline">\(\operatorname{Cov}(Z \mid Q{=}q)\)</span>,</li>
+<li>or the higher-order directional moment profiles.</li>
 </ul>
-<p>The common structure is benchmark-relative tail analysis. The same directional operators that generated distribution functions and quantile intervals in earlier chapters also generate threshold rules, directional probability bounds, and finite-sample diagnostics. This chapter develops that connection.</p>
-<p>The main thesis is simple:</p>
+<p>In symbols:</p>
+<p><span class="math display">\[
+\{p_q, m_q, \operatorname{Cov}(Z \mid Q{=}q)\}_q
+\rightarrow
+\Sigma
+\rightarrow
+(V, \Lambda)
+\]</span></p>
+<p>is recoverable in both steps, while</p>
+<p><span class="math display">\[
+(V, \Lambda)
+\rightarrow
+\{p_q, m_q, \operatorname{Cov}(Z \mid Q{=}q)\}_q
+\]</span></p>
+<p>is not.</p>
+<p>This is another instance of the information-loss principle developed throughout the book.
+Directional components determine symmetric aggregates.
+Symmetric aggregates do not generally determine directional components.</p>
+<hr />
+</div>
+<div id="correct-claims-and-caveats" class="section level2 hasAnchor" number="11.13">
+<h2><span class="header-section-number">11.13</span> Correct Claims and Caveats<a href="directional-spectral-decomposition.html#correct-claims-and-caveats" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Several precise statements follow from the results above.</p>
+<p>Correct:</p>
+<p><span class="math display">\[
+\text{NNS directional co-partial moment matrices recover covariance and therefore recover the classical eigensystem.}
+\]</span></p>
+<p>Correct:</p>
+<p><span class="math display">\[
+\text{Each centered quadrant mean }u_q\text{ is the eigenvector of }B_q = p_q u_q u_q^\top.
+\]</span></p>
+<p>Correct:</p>
+<p><span class="math display">\[
+\text{Classical eigenvalues admit exact directional attribution: }
+\lambda_i = \lambda_{i,Q} + \lambda_{i,W}.
+\]</span></p>
+<p>Correct:</p>
+<p><span class="math display">\[
+\text{The full eigenvectors of }\Sigma_Q\text{ are obtained after summing the }B_q\text{ matrices, not before.}
+\]</span></p>
+<p>Not generally correct:</p>
+<p><span class="math display">\[
+\text{Every line connecting opposite quadrant centroids is an eigenvector of }\Sigma_Q.
+\]</span></p>
+<p>That holds only when concordant and divergent quadrant means lie on orthogonal axes, a special alignment condition that may hold approximately for nearly elliptical positive dependence but is not guaranteed in general.</p>
+<p>Not generally correct:</p>
+<p><span class="math display">\[
+\lambda_1(\Sigma_Q + \Sigma_W) = \lambda_1(\Sigma_Q) + \lambda_1(\Sigma_W).
+\]</span></p>
+<p>Eigenvalues are not additive across summands.
+The exact attribution uses the Rayleigh quotient along the same eigenvector:</p>
+<p><span class="math display">\[
+\lambda_i
+=
+v_i^\top \Sigma_Q v_i
++
+v_i^\top \Sigma_W v_i.
+\]</span></p>
+<p>These caveats strengthen rather than weaken the results.
+They identify precisely what is claimed: locatable spectral attribution, not a replacement for linear algebra.</p>
+<hr />
+</div>
+<div id="quadrant-decomposition-in-r" class="section level2 hasAnchor" number="11.14">
+<h2><span class="header-section-number">11.14</span> Quadrant Decomposition in R<a href="directional-spectral-decomposition.html#quadrant-decomposition-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following functions implement the between-within decomposition.
+Population normalization <span class="math inline">\(1/n\)</span> is used throughout to match the expectation formulas above.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="directional-spectral-decomposition.html#cb13-1" tabindex="-1"></a>pop_cov <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb13-2"><a href="directional-spectral-decomposition.html#cb13-2" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb13-3"><a href="directional-spectral-decomposition.html#cb13-3" tabindex="-1"></a>  Zc <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, <span class="fu">colMeans</span>(Z), <span class="at">FUN =</span> <span class="st">&quot;-&quot;</span>)</span>
+<span id="cb13-4"><a href="directional-spectral-decomposition.html#cb13-4" tabindex="-1"></a>  <span class="fu">crossprod</span>(Zc) <span class="sc">/</span> <span class="fu">nrow</span>(Zc)</span>
+<span id="cb13-5"><a href="directional-spectral-decomposition.html#cb13-5" tabindex="-1"></a>}</span>
+<span id="cb13-6"><a href="directional-spectral-decomposition.html#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="directional-spectral-decomposition.html#cb13-7" tabindex="-1"></a>quadrant_decomposition <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb13-8"><a href="directional-spectral-decomposition.html#cb13-8" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb13-9"><a href="directional-spectral-decomposition.html#cb13-9" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">ncol</span>(Z) <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb13-10"><a href="directional-spectral-decomposition.html#cb13-10" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="directional-spectral-decomposition.html#cb13-11" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb13-12"><a href="directional-spectral-decomposition.html#cb13-12" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb13-13"><a href="directional-spectral-decomposition.html#cb13-13" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
+<span id="cb13-14"><a href="directional-spectral-decomposition.html#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="directional-spectral-decomposition.html#cb13-15" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-16"><a href="directional-spectral-decomposition.html#cb13-16" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
+<span id="cb13-17"><a href="directional-spectral-decomposition.html#cb13-17" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb13-18"><a href="directional-spectral-decomposition.html#cb13-18" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb13-19"><a href="directional-spectral-decomposition.html#cb13-19" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
+<span id="cb13-20"><a href="directional-spectral-decomposition.html#cb13-20" tabindex="-1"></a>  )</span>
+<span id="cb13-21"><a href="directional-spectral-decomposition.html#cb13-21" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="directional-spectral-decomposition.html#cb13-22" tabindex="-1"></a>  Sigma_Q   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb13-23"><a href="directional-spectral-decomposition.html#cb13-23" tabindex="-1"></a>  Sigma_W   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb13-24"><a href="directional-spectral-decomposition.html#cb13-24" tabindex="-1"></a>  details   <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
+<span id="cb13-25"><a href="directional-spectral-decomposition.html#cb13-25" tabindex="-1"></a>  centroids <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
+<span id="cb13-26"><a href="directional-spectral-decomposition.html#cb13-26" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="directional-spectral-decomposition.html#cb13-27" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
+<span id="cb13-28"><a href="directional-spectral-decomposition.html#cb13-28" tabindex="-1"></a>    qname <span class="ot">&lt;-</span> <span class="fu">names</span>(quadrants)[i]</span>
+<span id="cb13-29"><a href="directional-spectral-decomposition.html#cb13-29" tabindex="-1"></a>    mask  <span class="ot">&lt;-</span> quadrants[[i]]</span>
+<span id="cb13-30"><a href="directional-spectral-decomposition.html#cb13-30" tabindex="-1"></a>    n_q   <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask)</span>
+<span id="cb13-31"><a href="directional-spectral-decomposition.html#cb13-31" tabindex="-1"></a>    <span class="cf">if</span> (n_q <span class="sc">==</span> <span class="dv">0</span>) <span class="cf">next</span></span>
+<span id="cb13-32"><a href="directional-spectral-decomposition.html#cb13-32" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="directional-spectral-decomposition.html#cb13-33" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> n_q <span class="sc">/</span> n</span>
+<span id="cb13-34"><a href="directional-spectral-decomposition.html#cb13-34" tabindex="-1"></a>    Z_q <span class="ot">&lt;-</span> Z[mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb13-35"><a href="directional-spectral-decomposition.html#cb13-35" tabindex="-1"></a>    m_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z_q)</span>
+<span id="cb13-36"><a href="directional-spectral-decomposition.html#cb13-36" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> m_q <span class="sc">-</span> mu</span>
+<span id="cb13-37"><a href="directional-spectral-decomposition.html#cb13-37" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="directional-spectral-decomposition.html#cb13-38" tabindex="-1"></a>    Sigma_Q <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">tcrossprod</span>(u_q)</span>
+<span id="cb13-39"><a href="directional-spectral-decomposition.html#cb13-39" tabindex="-1"></a>    Sigma_W <span class="ot">&lt;-</span> Sigma_W <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">pop_cov</span>(Z_q)</span>
+<span id="cb13-40"><a href="directional-spectral-decomposition.html#cb13-40" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="directional-spectral-decomposition.html#cb13-41" tabindex="-1"></a>    centroids[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-42"><a href="directional-spectral-decomposition.html#cb13-42" tabindex="-1"></a>      <span class="at">quadrant =</span> qname,</span>
+<span id="cb13-43"><a href="directional-spectral-decomposition.html#cb13-43" tabindex="-1"></a>      <span class="at">n        =</span> n_q,</span>
+<span id="cb13-44"><a href="directional-spectral-decomposition.html#cb13-44" tabindex="-1"></a>      <span class="at">p        =</span> p_q,</span>
+<span id="cb13-45"><a href="directional-spectral-decomposition.html#cb13-45" tabindex="-1"></a>      <span class="at">mean_x   =</span> m_q[<span class="dv">1</span>],</span>
+<span id="cb13-46"><a href="directional-spectral-decomposition.html#cb13-46" tabindex="-1"></a>      <span class="at">mean_y   =</span> m_q[<span class="dv">2</span>],</span>
+<span id="cb13-47"><a href="directional-spectral-decomposition.html#cb13-47" tabindex="-1"></a>      <span class="at">u_x      =</span> u_q[<span class="dv">1</span>],</span>
+<span id="cb13-48"><a href="directional-spectral-decomposition.html#cb13-48" tabindex="-1"></a>      <span class="at">u_y      =</span> u_q[<span class="dv">2</span>]</span>
+<span id="cb13-49"><a href="directional-spectral-decomposition.html#cb13-49" tabindex="-1"></a>    )</span>
+<span id="cb13-50"><a href="directional-spectral-decomposition.html#cb13-50" tabindex="-1"></a></span>
+<span id="cb13-51"><a href="directional-spectral-decomposition.html#cb13-51" tabindex="-1"></a>    details[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-52"><a href="directional-spectral-decomposition.html#cb13-52" tabindex="-1"></a>      <span class="at">quadrant     =</span> qname,</span>
+<span id="cb13-53"><a href="directional-spectral-decomposition.html#cb13-53" tabindex="-1"></a>      <span class="at">n            =</span> n_q,</span>
+<span id="cb13-54"><a href="directional-spectral-decomposition.html#cb13-54" tabindex="-1"></a>      <span class="at">p            =</span> <span class="fu">round</span>(p_q, <span class="dv">6</span>),</span>
+<span id="cb13-55"><a href="directional-spectral-decomposition.html#cb13-55" tabindex="-1"></a>      <span class="at">mean_x       =</span> <span class="fu">round</span>(m_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
+<span id="cb13-56"><a href="directional-spectral-decomposition.html#cb13-56" tabindex="-1"></a>      <span class="at">mean_y       =</span> <span class="fu">round</span>(m_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
+<span id="cb13-57"><a href="directional-spectral-decomposition.html#cb13-57" tabindex="-1"></a>      <span class="at">u_x          =</span> <span class="fu">round</span>(u_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
+<span id="cb13-58"><a href="directional-spectral-decomposition.html#cb13-58" tabindex="-1"></a>      <span class="at">u_y          =</span> <span class="fu">round</span>(u_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
+<span id="cb13-59"><a href="directional-spectral-decomposition.html#cb13-59" tabindex="-1"></a>      <span class="at">lambda_rank1 =</span> <span class="fu">round</span>(p_q <span class="sc">*</span> <span class="fu">sum</span>(u_q<span class="sc">^</span><span class="dv">2</span>), <span class="dv">6</span>)</span>
+<span id="cb13-60"><a href="directional-spectral-decomposition.html#cb13-60" tabindex="-1"></a>    )</span>
+<span id="cb13-61"><a href="directional-spectral-decomposition.html#cb13-61" tabindex="-1"></a>  }</span>
+<span id="cb13-62"><a href="directional-spectral-decomposition.html#cb13-62" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="directional-spectral-decomposition.html#cb13-63" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb13-64"><a href="directional-spectral-decomposition.html#cb13-64" tabindex="-1"></a>    <span class="at">mu      =</span> mu,</span>
+<span id="cb13-65"><a href="directional-spectral-decomposition.html#cb13-65" tabindex="-1"></a>    <span class="at">Sigma   =</span> <span class="fu">pop_cov</span>(Z),</span>
+<span id="cb13-66"><a href="directional-spectral-decomposition.html#cb13-66" tabindex="-1"></a>    <span class="at">Sigma_Q   =</span> Sigma_Q,</span>
+<span id="cb13-67"><a href="directional-spectral-decomposition.html#cb13-67" tabindex="-1"></a>    <span class="at">Sigma_W   =</span> Sigma_W,</span>
+<span id="cb13-68"><a href="directional-spectral-decomposition.html#cb13-68" tabindex="-1"></a>    <span class="at">centroids =</span> <span class="fu">do.call</span>(rbind, centroids),</span>
+<span id="cb13-69"><a href="directional-spectral-decomposition.html#cb13-69" tabindex="-1"></a>    <span class="at">details   =</span> <span class="fu">do.call</span>(rbind, details)</span>
+<span id="cb13-70"><a href="directional-spectral-decomposition.html#cb13-70" tabindex="-1"></a>  )</span>
+<span id="cb13-71"><a href="directional-spectral-decomposition.html#cb13-71" tabindex="-1"></a>}</span></code></pre></div>
+<p>Generate positively dependent bivariate data, compute the quadrant decomposition, and pass <span class="math inline">\(\Sigma\)</span> directly to <code>eigen</code> for attribution.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="directional-spectral-decomposition.html#cb14-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb14-2"><a href="directional-spectral-decomposition.html#cb14-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb14-3"><a href="directional-spectral-decomposition.html#cb14-3" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.70</span></span>
+<span id="cb14-4"><a href="directional-spectral-decomposition.html#cb14-4" tabindex="-1"></a>R   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, rho, rho, <span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="directional-spectral-decomposition.html#cb14-5" tabindex="-1"></a>Z   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>) <span class="sc">%*%</span> <span class="fu">chol</span>(R)</span>
+<span id="cb14-6"><a href="directional-spectral-decomposition.html#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="directional-spectral-decomposition.html#cb14-7" tabindex="-1"></a>D             <span class="ot">&lt;-</span> <span class="fu">quadrant_decomposition</span>(Z)</span>
+<span id="cb14-8"><a href="directional-spectral-decomposition.html#cb14-8" tabindex="-1"></a>eig_classical <span class="ot">&lt;-</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma)</span>
+<span id="cb14-9"><a href="directional-spectral-decomposition.html#cb14-9" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="directional-spectral-decomposition.html#cb14-10" tabindex="-1"></a>D<span class="sc">$</span>details</span></code></pre></div>
+<pre><code>##   quadrant    n      p    mean_x    mean_y       u_x       u_y lambda_rank1
+## 1     CUPM 3732 0.3732  0.909351  0.902914  0.911723  0.911077     0.619997
+## 2     CLPM 3779 0.3779 -0.900760 -0.915622 -0.898388 -0.907459     0.616197
+## 3     DLPM 1232 0.1232  0.464620 -0.490819  0.466992 -0.482655     0.055568
+## 4     DUPM 1257 0.1257 -0.466076  0.488080 -0.463704  0.496243     0.057983</code></pre>
+<p>The quadrant summary shows the four conditional mean displacements <span class="math inline">\(u_q\)</span> and their rank-one eigenvalues <span class="math inline">\(p_q \|u_q\|^2\)</span>.
+For positively dependent data the concordant quadrants (CUPM, CLPM) carry large displacements in opposite directions along the main axis, while the divergent quadrants (DLPM, DUPM) show much smaller displacements orthogonal to it.</p>
+<hr />
+</div>
+<div id="rank-one-primitive-verification-in-r" class="section level2 hasAnchor" number="11.15">
+<h2><span class="header-section-number">11.15</span> Rank-One Primitive Verification in R<a href="directional-spectral-decomposition.html#rank-one-primitive-verification-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The previous table reports the rank-one eigenvalue for each quadrant.
+The following code verifies the stronger statement from Section 11.5 directly: for each quadrant,</p>
+<p><span class="math display">\[
+B_q u_q = p_q u_q u_q^\top u_q = p_q \|u_q\|^2 u_q.
+\]</span></p>
+<p>It also verifies that summing the four rank-one primitives reconstructs the between-quadrant conditional-mean covariance <span class="math inline">\(\Sigma_Q\)</span>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="directional-spectral-decomposition.html#cb16-1" tabindex="-1"></a>rank_one_primitive_check <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
+<span id="cb16-2"><a href="directional-spectral-decomposition.html#cb16-2" tabindex="-1"></a>  pieces <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(D<span class="sc">$</span>centroids)), <span class="cf">function</span>(i) {</span>
+<span id="cb16-3"><a href="directional-spectral-decomposition.html#cb16-3" tabindex="-1"></a>    row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[i, ]</span>
+<span id="cb16-4"><a href="directional-spectral-decomposition.html#cb16-4" tabindex="-1"></a>    u   <span class="ot">&lt;-</span> <span class="fu">c</span>(row<span class="sc">$</span>u_x, row<span class="sc">$</span>u_y)</span>
+<span id="cb16-5"><a href="directional-spectral-decomposition.html#cb16-5" tabindex="-1"></a>    p   <span class="ot">&lt;-</span> row<span class="sc">$</span>p</span>
+<span id="cb16-6"><a href="directional-spectral-decomposition.html#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="directional-spectral-decomposition.html#cb16-7" tabindex="-1"></a>    Bq     <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">tcrossprod</span>(u)</span>
+<span id="cb16-8"><a href="directional-spectral-decomposition.html#cb16-8" tabindex="-1"></a>    lambda <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb16-9"><a href="directional-spectral-decomposition.html#cb16-9" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="directional-spectral-decomposition.html#cb16-10" tabindex="-1"></a>    lhs <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Bq <span class="sc">%*%</span> u)</span>
+<span id="cb16-11"><a href="directional-spectral-decomposition.html#cb16-11" tabindex="-1"></a>    rhs <span class="ot">&lt;-</span> lambda <span class="sc">*</span> u</span>
+<span id="cb16-12"><a href="directional-spectral-decomposition.html#cb16-12" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="directional-spectral-decomposition.html#cb16-13" tabindex="-1"></a>    eig_Bq <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Bq, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-14"><a href="directional-spectral-decomposition.html#cb16-14" tabindex="-1"></a>    v_q    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(u <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb16-15"><a href="directional-spectral-decomposition.html#cb16-15" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="directional-spectral-decomposition.html#cb16-16" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb16-17"><a href="directional-spectral-decomposition.html#cb16-17" tabindex="-1"></a>      <span class="at">Bq =</span> Bq,</span>
+<span id="cb16-18"><a href="directional-spectral-decomposition.html#cb16-18" tabindex="-1"></a>      <span class="at">table =</span> <span class="fu">data.frame</span>(</span>
+<span id="cb16-19"><a href="directional-spectral-decomposition.html#cb16-19" tabindex="-1"></a>        <span class="at">quadrant =</span> row<span class="sc">$</span>quadrant,</span>
+<span id="cb16-20"><a href="directional-spectral-decomposition.html#cb16-20" tabindex="-1"></a>        <span class="at">lambda_rank1 =</span> lambda,</span>
+<span id="cb16-21"><a href="directional-spectral-decomposition.html#cb16-21" tabindex="-1"></a>        <span class="at">max_abs_Bu_minus_lambda_u =</span> <span class="fu">max</span>(<span class="fu">abs</span>(lhs <span class="sc">-</span> rhs)),</span>
+<span id="cb16-22"><a href="directional-spectral-decomposition.html#cb16-22" tabindex="-1"></a>        <span class="at">alignment_with_eigen_Bq =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_q, eig_Bq<span class="sc">$</span>vectors[, <span class="dv">1</span>])))</span>
+<span id="cb16-23"><a href="directional-spectral-decomposition.html#cb16-23" tabindex="-1"></a>      )</span>
+<span id="cb16-24"><a href="directional-spectral-decomposition.html#cb16-24" tabindex="-1"></a>    )</span>
+<span id="cb16-25"><a href="directional-spectral-decomposition.html#cb16-25" tabindex="-1"></a>  })</span>
+<span id="cb16-26"><a href="directional-spectral-decomposition.html#cb16-26" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="directional-spectral-decomposition.html#cb16-27" tabindex="-1"></a>  Sigma_Q_from_Bq <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">`</span><span class="at">+</span><span class="st">`</span>, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;Bq&quot;</span>))</span>
+<span id="cb16-28"><a href="directional-spectral-decomposition.html#cb16-28" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="directional-spectral-decomposition.html#cb16-29" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb16-30"><a href="directional-spectral-decomposition.html#cb16-30" tabindex="-1"></a>    <span class="at">checks =</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;table&quot;</span>)),</span>
+<span id="cb16-31"><a href="directional-spectral-decomposition.html#cb16-31" tabindex="-1"></a>    <span class="at">Sigma_Q_from_Bq =</span> Sigma_Q_from_Bq,</span>
+<span id="cb16-32"><a href="directional-spectral-decomposition.html#cb16-32" tabindex="-1"></a>    <span class="at">max_abs_Sigma_Q_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma_Q_from_Bq <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span>
+<span id="cb16-33"><a href="directional-spectral-decomposition.html#cb16-33" tabindex="-1"></a>  )</span>
+<span id="cb16-34"><a href="directional-spectral-decomposition.html#cb16-34" tabindex="-1"></a>}</span>
+<span id="cb16-35"><a href="directional-spectral-decomposition.html#cb16-35" tabindex="-1"></a></span>
+<span id="cb16-36"><a href="directional-spectral-decomposition.html#cb16-36" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> <span class="fu">rank_one_primitive_check</span>(D)</span>
+<span id="cb16-37"><a href="directional-spectral-decomposition.html#cb16-37" tabindex="-1"></a></span>
+<span id="cb16-38"><a href="directional-spectral-decomposition.html#cb16-38" tabindex="-1"></a>R1<span class="sc">$</span>checks</span></code></pre></div>
+<pre><code>##   quadrant lambda_rank1 max_abs_Bu_minus_lambda_u alignment_with_eigen_Bq
+## 1     CUPM   0.61999744              0.000000e+00                       1
+## 2     CLPM   0.61619706              1.110223e-16                       1
+## 3     DLPM   0.05556776              3.469447e-18                       1
+## 4     DUPM   0.05798275              0.000000e+00                       1</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="directional-spectral-decomposition.html#cb18-1" tabindex="-1"></a>R1<span class="sc">$</span>max_abs_Sigma_Q_error</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<p>The column <code>max_abs_Bu_minus_lambda_u</code> should be numerically zero, confirming that each centered quadrant conditional mean is the eigenvector of its own rank-one matrix.
+The column <code>alignment_with_eigen_Bq</code> should be one up to floating-point precision, confirming that the normalized vector <span class="math inline">\(u_q / \|u_q\|\)</span> is the same direction recovered by <code>eigen(Bq)</code>.
+The final scalar verifies</p>
+<p><span class="math display">\[
+\Sigma_Q = B_{\operatorname{CUPM}} + B_{\operatorname{CLPM}} + B_{\operatorname{DLPM}} + B_{\operatorname{DUPM}}.
+\]</span></p>
+<hr />
+</div>
+<div id="conditional-mean-eigenvector-recovery-in-r" class="section level2 hasAnchor" number="11.16">
+<h2><span class="header-section-number">11.16</span> Conditional-Mean Eigenvector Recovery in R<a href="directional-spectral-decomposition.html#conditional-mean-eigenvector-recovery-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following code uses only the quadrant probabilities and quadrant conditional means stored in <code>D$centroids</code>.
+It reconstructs <span class="math inline">\(C\)</span>, then <span class="math inline">\(\Sigma_Q = CC^\top\)</span>, then the eigenvectors of the between-quadrant conditional-mean covariance.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="directional-spectral-decomposition.html#cb20-1" tabindex="-1"></a>recover_eigen_from_quadrant_means <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
+<span id="cb20-2"><a href="directional-spectral-decomposition.html#cb20-2" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(D<span class="sc">$</span>centroids[, <span class="fu">c</span>(<span class="st">&quot;u_x&quot;</span>, <span class="st">&quot;u_y&quot;</span>)])</span>
+<span id="cb20-3"><a href="directional-spectral-decomposition.html#cb20-3" tabindex="-1"></a>  P <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids<span class="sc">$</span>p</span>
+<span id="cb20-4"><a href="directional-spectral-decomposition.html#cb20-4" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="directional-spectral-decomposition.html#cb20-5" tabindex="-1"></a>  Cmat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sqrt</span>(P) <span class="sc">*</span> U)</span>
+<span id="cb20-6"><a href="directional-spectral-decomposition.html#cb20-6" tabindex="-1"></a>  Sigma_Q_from_means <span class="ot">&lt;-</span> Cmat <span class="sc">%*%</span> <span class="fu">t</span>(Cmat)</span>
+<span id="cb20-7"><a href="directional-spectral-decomposition.html#cb20-7" tabindex="-1"></a>  eig_Q <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_Q_from_means)</span>
+<span id="cb20-8"><a href="directional-spectral-decomposition.html#cb20-8" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="directional-spectral-decomposition.html#cb20-9" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb20-10"><a href="directional-spectral-decomposition.html#cb20-10" tabindex="-1"></a>    <span class="at">C =</span> Cmat,</span>
+<span id="cb20-11"><a href="directional-spectral-decomposition.html#cb20-11" tabindex="-1"></a>    <span class="at">Sigma_Q_from_means =</span> Sigma_Q_from_means,</span>
+<span id="cb20-12"><a href="directional-spectral-decomposition.html#cb20-12" tabindex="-1"></a>    <span class="at">eig_Q =</span> eig_Q</span>
+<span id="cb20-13"><a href="directional-spectral-decomposition.html#cb20-13" tabindex="-1"></a>  )</span>
+<span id="cb20-14"><a href="directional-spectral-decomposition.html#cb20-14" tabindex="-1"></a>}</span>
+<span id="cb20-15"><a href="directional-spectral-decomposition.html#cb20-15" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="directional-spectral-decomposition.html#cb20-16" tabindex="-1"></a>Qrec <span class="ot">&lt;-</span> <span class="fu">recover_eigen_from_quadrant_means</span>(D)</span>
+<span id="cb20-17"><a href="directional-spectral-decomposition.html#cb20-17" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="directional-spectral-decomposition.html#cb20-18" tabindex="-1"></a><span class="co"># This should match D$Sigma_Q, which was accumulated quadrant by quadrant.</span></span>
+<span id="cb20-19"><a href="directional-spectral-decomposition.html#cb20-19" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(Qrec<span class="sc">$</span>Sigma_Q_from_means <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span></code></pre></div>
+<pre><code>## [1] 1.110223e-16</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="directional-spectral-decomposition.html#cb22-1" tabindex="-1"></a><span class="co"># Eigenvectors recovered from quadrant conditional means.</span></span>
+<span id="cb22-2"><a href="directional-spectral-decomposition.html#cb22-2" tabindex="-1"></a>Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors</span></code></pre></div>
+<pre><code>##           [,1]       [,2]
+## [1,] 0.7034732 -0.7107218
+## [2,] 0.7107218  0.7034732</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="directional-spectral-decomposition.html#cb24-1" tabindex="-1"></a><span class="co"># Same eigensystem obtained by diagonalizing the stored Sigma_Q.</span></span>
+<span id="cb24-2"><a href="directional-spectral-decomposition.html#cb24-2" tabindex="-1"></a><span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors</span></code></pre></div>
+<pre><code>##           [,1]       [,2]
+## [1,] 0.7034732 -0.7107218
+## [2,] 0.7107218  0.7034732</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="directional-spectral-decomposition.html#cb26-1" tabindex="-1"></a><span class="co"># Eigenvector signs are arbitrary. Absolute inner products should be near 1.</span></span>
+<span id="cb26-2"><a href="directional-spectral-decomposition.html#cb26-2" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">t</span>(Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors) <span class="sc">%*%</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors)</span></code></pre></div>
+<pre><code>##              [,1]         [,2]
+## [1,] 1.000000e+00 2.332288e-17
+## [2,] 2.332288e-17 1.000000e+00</code></pre>
+<p>The recovery above is the explicit conditional-mean step:</p>
+<p><span class="math display">\[
+\{p_q,m_q\}_q
+\rightarrow
+C
+\rightarrow
+CC^\top
+\rightarrow
+\operatorname{eig}(CC^\top).
+\]</span></p>
+<p>The same conditional means also provide the visible concordant and divergent centroid contrasts.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="directional-spectral-decomposition.html#cb28-1" tabindex="-1"></a>unit <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">as.numeric</span>(x <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb28-2"><a href="directional-spectral-decomposition.html#cb28-2" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="directional-spectral-decomposition.html#cb28-3" tabindex="-1"></a>centroid <span class="ot">&lt;-</span> <span class="cf">function</span>(D, qname) {</span>
+<span id="cb28-4"><a href="directional-spectral-decomposition.html#cb28-4" tabindex="-1"></a>  row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[D<span class="sc">$</span>centroids<span class="sc">$</span>quadrant <span class="sc">==</span> qname, ]</span>
+<span id="cb28-5"><a href="directional-spectral-decomposition.html#cb28-5" tabindex="-1"></a>  <span class="fu">c</span>(row<span class="sc">$</span>mean_x, row<span class="sc">$</span>mean_y)</span>
+<span id="cb28-6"><a href="directional-spectral-decomposition.html#cb28-6" tabindex="-1"></a>}</span>
+<span id="cb28-7"><a href="directional-spectral-decomposition.html#cb28-7" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="directional-spectral-decomposition.html#cb28-8" tabindex="-1"></a>v_concordant <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;CUPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;CLPM&quot;</span>))</span>
+<span id="cb28-9"><a href="directional-spectral-decomposition.html#cb28-9" tabindex="-1"></a>v_divergent  <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;DLPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;DUPM&quot;</span>))</span>
+<span id="cb28-10"><a href="directional-spectral-decomposition.html#cb28-10" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="directional-spectral-decomposition.html#cb28-11" tabindex="-1"></a>contrast_comparison <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb28-12"><a href="directional-spectral-decomposition.html#cb28-12" tabindex="-1"></a>  <span class="at">concordant_contrast =</span> v_concordant,</span>
+<span id="cb28-13"><a href="directional-spectral-decomposition.html#cb28-13" tabindex="-1"></a>  <span class="at">Sigma_Q_v1          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>],</span>
+<span id="cb28-14"><a href="directional-spectral-decomposition.html#cb28-14" tabindex="-1"></a>  <span class="at">divergent_contrast  =</span> v_divergent,</span>
+<span id="cb28-15"><a href="directional-spectral-decomposition.html#cb28-15" tabindex="-1"></a>  <span class="at">Sigma_Q_v2          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>]</span>
+<span id="cb28-16"><a href="directional-spectral-decomposition.html#cb28-16" tabindex="-1"></a>)</span>
+<span id="cb28-17"><a href="directional-spectral-decomposition.html#cb28-17" tabindex="-1"></a></span>
+<span id="cb28-18"><a href="directional-spectral-decomposition.html#cb28-18" tabindex="-1"></a><span class="fu">round</span>(contrast_comparison, <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##      concordant_contrast Sigma_Q_v1 divergent_contrast Sigma_Q_v2
+## [1,]            0.705463   0.703473           0.689038  -0.710722
+## [2,]            0.708747   0.710722          -0.724725   0.703473</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="directional-spectral-decomposition.html#cb30-1" tabindex="-1"></a><span class="co"># Alignment between contrast directions and the Sigma_Q eigenvectors.</span></span>
+<span id="cb30-2"><a href="directional-spectral-decomposition.html#cb30-2" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(</span>
+<span id="cb30-3"><a href="directional-spectral-decomposition.html#cb30-3" tabindex="-1"></a>  <span class="at">concordant_with_v1 =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_concordant, Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>]))),</span>
+<span id="cb30-4"><a href="directional-spectral-decomposition.html#cb30-4" tabindex="-1"></a>  <span class="at">divergent_with_v2  =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_divergent,  Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>])))</span>
+<span id="cb30-5"><a href="directional-spectral-decomposition.html#cb30-5" tabindex="-1"></a>), <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>## concordant_with_v1  divergent_with_v2 
+##           0.999996           0.999539</code></pre>
+<p>For the positively dependent example, the concordant contrast aligns closely with the first between-quadrant eigenvector and the divergent contrast aligns closely with the second.
+In more asymmetric samples, the exact recovery remains <span class="math inline">\(C \rightarrow CC^\top \rightarrow \operatorname{eig}(CC^\top)\)</span>, while the centroid contrasts provide the directly visible directional geometry.</p>
+<hr />
+</div>
+<div id="eigenvalue-attribution-in-r" class="section level2 hasAnchor" number="11.17">
+<h2><span class="header-section-number">11.17</span> Eigenvalue Attribution in R<a href="directional-spectral-decomposition.html#eigenvalue-attribution-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following code attributes each classical eigenvalue into between-quadrant and within-quadrant components using the Rayleigh quotient.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="directional-spectral-decomposition.html#cb32-1" tabindex="-1"></a>V <span class="ot">&lt;-</span> eig_classical<span class="sc">$</span>vectors</span>
+<span id="cb32-2"><a href="directional-spectral-decomposition.html#cb32-2" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="directional-spectral-decomposition.html#cb32-3" tabindex="-1"></a>attribute_lambda <span class="ot">&lt;-</span> <span class="cf">function</span>(v, Sigma_Q, Sigma_W) {</span>
+<span id="cb32-4"><a href="directional-spectral-decomposition.html#cb32-4" tabindex="-1"></a>  v <span class="ot">&lt;-</span> <span class="fu">matrix</span>(v, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb32-5"><a href="directional-spectral-decomposition.html#cb32-5" tabindex="-1"></a>  between <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_Q <span class="sc">%*%</span> v)</span>
+<span id="cb32-6"><a href="directional-spectral-decomposition.html#cb32-6" tabindex="-1"></a>  within  <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_W <span class="sc">%*%</span> v)</span>
+<span id="cb32-7"><a href="directional-spectral-decomposition.html#cb32-7" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">between =</span> between, <span class="at">within =</span> within, <span class="at">total =</span> between <span class="sc">+</span> within)</span>
+<span id="cb32-8"><a href="directional-spectral-decomposition.html#cb32-8" tabindex="-1"></a>}</span>
+<span id="cb32-9"><a href="directional-spectral-decomposition.html#cb32-9" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="directional-spectral-decomposition.html#cb32-10" tabindex="-1"></a>attrib_1 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">1</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
+<span id="cb32-11"><a href="directional-spectral-decomposition.html#cb32-11" tabindex="-1"></a>attrib_2 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">2</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
+<span id="cb32-12"><a href="directional-spectral-decomposition.html#cb32-12" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="directional-spectral-decomposition.html#cb32-13" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">lambda_1 =</span> attrib_1, <span class="at">lambda_2 =</span> attrib_2)</span></code></pre></div>
+<pre><code>##            between    within     total
+## lambda_1 1.2362859 0.4677328 1.7040187
+## lambda_2 0.1134591 0.1858835 0.2993426</code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="directional-spectral-decomposition.html#cb34-1" tabindex="-1"></a>eig_classical<span class="sc">$</span>values</span></code></pre></div>
+<pre><code>## [1] 1.7040187 0.2993426</code></pre>
+<p>This is the exact decomposition <span class="math inline">\(\lambda_i = v_i^\top \Sigma_Q v_i + v_i^\top \Sigma_W v_i\)</span>.
+The totals in each row match the classical eigenvalues to floating-point precision.</p>
+<p>Quadrant-level attribution of the between component:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="directional-spectral-decomposition.html#cb36-1" tabindex="-1"></a>quadrant_between_contrib <span class="ot">&lt;-</span> <span class="cf">function</span>(Z, v) {</span>
+<span id="cb36-2"><a href="directional-spectral-decomposition.html#cb36-2" tabindex="-1"></a>  Z  <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb36-3"><a href="directional-spectral-decomposition.html#cb36-3" tabindex="-1"></a>  v  <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(v)</span>
+<span id="cb36-4"><a href="directional-spectral-decomposition.html#cb36-4" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb36-5"><a href="directional-spectral-decomposition.html#cb36-5" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb36-6"><a href="directional-spectral-decomposition.html#cb36-6" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
+<span id="cb36-7"><a href="directional-spectral-decomposition.html#cb36-7" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="directional-spectral-decomposition.html#cb36-8" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb36-9"><a href="directional-spectral-decomposition.html#cb36-9" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
+<span id="cb36-10"><a href="directional-spectral-decomposition.html#cb36-10" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb36-11"><a href="directional-spectral-decomposition.html#cb36-11" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb36-12"><a href="directional-spectral-decomposition.html#cb36-12" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
+<span id="cb36-13"><a href="directional-spectral-decomposition.html#cb36-13" tabindex="-1"></a>  )</span>
+<span id="cb36-14"><a href="directional-spectral-decomposition.html#cb36-14" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="directional-spectral-decomposition.html#cb36-15" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">quadrant =</span> <span class="fu">names</span>(quadrants), <span class="at">contribution =</span> <span class="cn">NA_real_</span>)</span>
+<span id="cb36-16"><a href="directional-spectral-decomposition.html#cb36-16" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="directional-spectral-decomposition.html#cb36-17" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
+<span id="cb36-18"><a href="directional-spectral-decomposition.html#cb36-18" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> quadrants[[i]]</span>
+<span id="cb36-19"><a href="directional-spectral-decomposition.html#cb36-19" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(mask) <span class="sc">==</span> <span class="dv">0</span>) { out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">next</span> }</span>
+<span id="cb36-20"><a href="directional-spectral-decomposition.html#cb36-20" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask) <span class="sc">/</span> n</span>
+<span id="cb36-21"><a href="directional-spectral-decomposition.html#cb36-21" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z[mask, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">-</span> mu</span>
+<span id="cb36-22"><a href="directional-spectral-decomposition.html#cb36-22" tabindex="-1"></a>    out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> p_q <span class="sc">*</span> <span class="fu">sum</span>(v <span class="sc">*</span> u_q)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb36-23"><a href="directional-spectral-decomposition.html#cb36-23" tabindex="-1"></a>  }</span>
+<span id="cb36-24"><a href="directional-spectral-decomposition.html#cb36-24" tabindex="-1"></a></span>
+<span id="cb36-25"><a href="directional-spectral-decomposition.html#cb36-25" tabindex="-1"></a>  out</span>
+<span id="cb36-26"><a href="directional-spectral-decomposition.html#cb36-26" tabindex="-1"></a>}</span>
+<span id="cb36-27"><a href="directional-spectral-decomposition.html#cb36-27" tabindex="-1"></a></span>
+<span id="cb36-28"><a href="directional-spectral-decomposition.html#cb36-28" tabindex="-1"></a>q_attr_v1 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">1</span>])</span>
+<span id="cb36-29"><a href="directional-spectral-decomposition.html#cb36-29" tabindex="-1"></a>q_attr_v2 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">2</span>])</span>
+<span id="cb36-30"><a href="directional-spectral-decomposition.html#cb36-30" tabindex="-1"></a></span>
+<span id="cb36-31"><a href="directional-spectral-decomposition.html#cb36-31" tabindex="-1"></a><span class="co"># PC1: driven by concordant quadrants</span></span>
+<span id="cb36-32"><a href="directional-spectral-decomposition.html#cb36-32" tabindex="-1"></a>q_attr_v1</span></code></pre></div>
+<pre><code>##   quadrant contribution
+## 1     CUPM 6.199896e-01
+## 2     CLPM 6.161950e-01
+## 3     DLPM 2.156224e-05
+## 4     DUPM 7.973202e-05</code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="directional-spectral-decomposition.html#cb38-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v1<span class="sc">$</span>contribution)    <span class="co"># matches attrib_1[&quot;between&quot;]</span></span></code></pre></div>
+<pre><code>## [1] 1.236286</code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="directional-spectral-decomposition.html#cb40-1" tabindex="-1"></a><span class="co"># PC2: driven by divergent quadrants</span></span>
+<span id="cb40-2"><a href="directional-spectral-decomposition.html#cb40-2" tabindex="-1"></a>q_attr_v2</span></code></pre></div>
+<pre><code>##   quadrant contribution
+## 1     CUPM 7.864362e-06
+## 2     CLPM 2.031692e-06
+## 3     DLPM 5.554620e-02
+## 4     DUPM 5.790302e-02</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="directional-spectral-decomposition.html#cb42-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v2<span class="sc">$</span>contribution)    <span class="co"># matches attrib_2[&quot;between&quot;]</span></span></code></pre></div>
+<pre><code>## [1] 0.1134591</code></pre>
+<p>For this positively dependent example the pattern is clear.
+PC1 receives nearly all its between-quadrant contribution from CUPM and CLPM: the leading principal direction is a concordant co-movement axis.
+PC2 receives nearly all its between-quadrant contribution from DLPM and DUPM: the minor axis is a divergent direction.
+This is the interpretive content that classical PCA alone cannot supply.</p>
+<hr />
+</div>
+<div id="visualizing-the-clpm-mean-slope" class="section level2 hasAnchor" number="11.18">
+<h2><span class="header-section-number">11.18</span> Visualizing the CLPM Mean Slope<a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The following figure displays the three distinct directions associated with the CLPM region: the quadrant mean slope, the within-CLPM regression line, and the within-CLPM first principal component.
+The exact picture varies by random seed; the three lines generally differ because they are computed from different statistical objects.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="directional-spectral-decomposition.html#cb44-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
+<span id="cb44-2"><a href="directional-spectral-decomposition.html#cb44-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb44-3"><a href="directional-spectral-decomposition.html#cb44-3" tabindex="-1"></a>Z0  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>)</span>
+<span id="cb44-4"><a href="directional-spectral-decomposition.html#cb44-4" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z0)</span>
+<span id="cb44-5"><a href="directional-spectral-decomposition.html#cb44-5" tabindex="-1"></a>clpm_mask <span class="ot">&lt;-</span> Z0[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">1</span>] <span class="sc">&amp;</span> Z0[,<span class="dv">2</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">2</span>]</span>
+<span id="cb44-6"><a href="directional-spectral-decomposition.html#cb44-6" tabindex="-1"></a>Zc  <span class="ot">&lt;-</span> Z0[clpm_mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb44-7"><a href="directional-spectral-decomposition.html#cb44-7" tabindex="-1"></a>mc  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zc)</span>
+<span id="cb44-8"><a href="directional-spectral-decomposition.html#cb44-8" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="directional-spectral-decomposition.html#cb44-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb44-10"><a href="directional-spectral-decomposition.html#cb44-10" tabindex="-1"></a>  Zc[, <span class="dv">1</span>], Zc[, <span class="dv">2</span>],</span>
+<span id="cb44-11"><a href="directional-spectral-decomposition.html#cb44-11" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
+<span id="cb44-12"><a href="directional-spectral-decomposition.html#cb44-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;X&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb44-13"><a href="directional-spectral-decomposition.html#cb44-13" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;CLPM: Mean Slope, Regression, and PC1&quot;</span></span>
+<span id="cb44-14"><a href="directional-spectral-decomposition.html#cb44-14" tabindex="-1"></a>)</span>
+<span id="cb44-15"><a href="directional-spectral-decomposition.html#cb44-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu0[<span class="dv">1</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb44-16"><a href="directional-spectral-decomposition.html#cb44-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> mu0[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb44-17"><a href="directional-spectral-decomposition.html#cb44-17" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb44-18"><a href="directional-spectral-decomposition.html#cb44-18" tabindex="-1"></a><span class="fu">points</span>(mc[<span class="dv">1</span>],  mc[<span class="dv">2</span>],  <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb44-19"><a href="directional-spectral-decomposition.html#cb44-19" tabindex="-1"></a></span>
+<span id="cb44-20"><a href="directional-spectral-decomposition.html#cb44-20" tabindex="-1"></a><span class="co"># Quadrant mean slope: line through global mean toward CLPM conditional mean</span></span>
+<span id="cb44-21"><a href="directional-spectral-decomposition.html#cb44-21" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> (mc[<span class="dv">2</span>] <span class="sc">-</span> mu0[<span class="dv">2</span>]) <span class="sc">/</span> (mc[<span class="dv">1</span>] <span class="sc">-</span> mu0[<span class="dv">1</span>])</span>
+<span id="cb44-22"><a href="directional-spectral-decomposition.html#cb44-22" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mu0[<span class="dv">2</span>] <span class="sc">-</span> slope_mean <span class="sc">*</span> mu0[<span class="dv">1</span>], <span class="at">b =</span> slope_mean, <span class="at">col =</span> <span class="st">&quot;green&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb44-23"><a href="directional-spectral-decomposition.html#cb44-23" tabindex="-1"></a></span>
+<span id="cb44-24"><a href="directional-spectral-decomposition.html#cb44-24" tabindex="-1"></a><span class="co"># Linear regression inside CLPM</span></span>
+<span id="cb44-25"><a href="directional-spectral-decomposition.html#cb44-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Zc[, <span class="dv">2</span>] <span class="sc">~</span> Zc[, <span class="dv">1</span>])</span>
+<span id="cb44-26"><a href="directional-spectral-decomposition.html#cb44-26" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;gold&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb44-27"><a href="directional-spectral-decomposition.html#cb44-27" tabindex="-1"></a></span>
+<span id="cb44-28"><a href="directional-spectral-decomposition.html#cb44-28" tabindex="-1"></a><span class="co"># PC1 inside CLPM: leading eigenvector of within-CLPM covariance</span></span>
+<span id="cb44-29"><a href="directional-spectral-decomposition.html#cb44-29" tabindex="-1"></a>pc1       <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">pop_cov</span>(Zc))<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
+<span id="cb44-30"><a href="directional-spectral-decomposition.html#cb44-30" tabindex="-1"></a>slope_pc1 <span class="ot">&lt;-</span> pc1[<span class="dv">2</span>] <span class="sc">/</span> pc1[<span class="dv">1</span>]</span>
+<span id="cb44-31"><a href="directional-spectral-decomposition.html#cb44-31" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mc[<span class="dv">2</span>] <span class="sc">-</span> slope_pc1 <span class="sc">*</span> mc[<span class="dv">1</span>], <span class="at">b =</span> slope_pc1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb44-32"><a href="directional-spectral-decomposition.html#cb44-32" tabindex="-1"></a></span>
+<span id="cb44-33"><a href="directional-spectral-decomposition.html#cb44-33" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb44-34"><a href="directional-spectral-decomposition.html#cb44-34" tabindex="-1"></a>  <span class="st">&quot;bottomright&quot;</span>,</span>
+<span id="cb44-35"><a href="directional-spectral-decomposition.html#cb44-35" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;CLPM mean slope&quot;</span>, <span class="st">&quot;CLPM regression&quot;</span>, <span class="st">&quot;CLPM PC1&quot;</span>),</span>
+<span id="cb44-36"><a href="directional-spectral-decomposition.html#cb44-36" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;green&quot;</span>, <span class="st">&quot;gold&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb44-37"><a href="directional-spectral-decomposition.html#cb44-37" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
+<span id="cb44-38"><a href="directional-spectral-decomposition.html#cb44-38" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
+<span id="cb44-39"><a href="directional-spectral-decomposition.html#cb44-39" tabindex="-1"></a>)</span></code></pre></div>
+<p><img src="nns-book_files/figure-html/clpm-mean-slope-figure-1.png" alt="" width="576" /></p>
+<p>The green line is the eigenvector direction of the rank-one matrix</p>
+<p><span class="math display">\[
+B_{\operatorname{CLPM}}
+=
+p_{\operatorname{CLPM}} u_{\operatorname{CLPM}} u_{\operatorname{CLPM}}^\top.
+\]</span></p>
+<p>The blue line is the leading eigenvector of <span class="math inline">\(\operatorname{Cov}(Z \mid \operatorname{CLPM})\)</span>.
+The yellow line is the ordinary least-squares regression line within the CLPM subset.
+They differ because they summarize different statistical objects.</p>
+<hr />
+</div>
+<div id="practical-interpretation" class="section level2 hasAnchor" number="11.19">
+<h2><span class="header-section-number">11.19</span> Practical Interpretation<a href="directional-spectral-decomposition.html#practical-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Directional spectral decomposition changes what can be said about a classical PCA result.</p>
+<p><strong>Risk and Stress Testing.</strong>
+If the leading eigenvalue of a return covariance matrix is dominated by CLPM contributions, the leading risk factor is primarily a joint downside event.
+That is more actionable than knowing only that assets load on a common factor.</p>
+<p><strong>Portfolio Construction.</strong>
+Mean-variance optimization treats the covariance matrix as a single object.
+Directional spectral decomposition separates it into concordant downside, concordant upside, divergent, between-centroid, and within-region components.
+An analyst can ask whether an optimized portfolio is exposed to broad covariance or specifically to lower-tail covariance.</p>
+<p><strong>Nonlinear Dependence.</strong>
+When correlation is small but <span class="math inline">\(\Sigma_Q\)</span> is large relative to <span class="math inline">\(\Sigma_W\)</span>, the conditional means are separated across quadrants in a way that total covariance may mask.
+This signals potential nonlinear or regime-dependent structure worth investigating through the full directional dependence measures of Chapter 10.</p>
+<p><strong>Model Diagnostics.</strong>
+The ratio</p>
+<p><span class="math display">\[
+D_{spectral} = \frac{\operatorname{tr}(\Sigma_Q)}{\operatorname{tr}(\Sigma)}
+\]</span></p>
+<p>measures the share of total covariance trace explained by between-quadrant mean displacement.
+A high value indicates that the quadrant partition is capturing the relevant second-moment geometry.
+A low value indicates that within-region residual scatter dominates, and finer partitioning or higher-order moments may be warranted.</p>
+<hr />
+</div>
+<div id="summary-5" class="section level2 hasAnchor" number="11.20">
+<h2><span class="header-section-number">11.20</span> Summary<a href="directional-spectral-decomposition.html#summary-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This chapter extended the directional decomposition of covariance into spectral analysis.</p>
+<p>Key results:</p>
 <ol style="list-style-type: decimal">
-<li>degree-0 partial moments recover the usual lower-tail probability and quantile threshold,</li>
-<li>higher-degree partial moments generate severity-weighted threshold rules,</li>
-<li>semivariance and higher lower partial moments yield distribution-free upper bounds for tail probabilities,</li>
-<li>and the practical usefulness of these quantities depends on their estimation stability.</li>
+<li>The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem:</li>
 </ol>
-<p>Thus quantiles, semivariance, lower partial moments, and estimation error are not separate topics. They are manifestations of the same benchmark-relative geometry.</p>
-<hr />
-<div id="why-threshold-analysis-needs-more-than-quantiles" class="section level2 hasAnchor" number="16.1">
-<h2><span class="header-section-number">16.1</span> Why Threshold Analysis Needs More Than Quantiles<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#why-threshold-analysis-needs-more-than-quantiles" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>A lower-tail quantile identifies where adverse observations begin to accumulate. If <span class="math inline">\(X\)</span> is a random variable and <span class="math inline">\(\alpha \in (0,1)\)</span>, the lower <span class="math inline">\(\alpha\)</span>-quantile is</p>
 <p><span class="math display">\[
-Q_X(\alpha)=\inf\{t : F_X(t)\ge \alpha\}.
+(\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})
+\rightarrow
+\Sigma
+\rightarrow
+(\lambda_i, v_i).
 \]</span></p>
-<p>This is already enough to partition a chosen fraction of lower-tail probability mass.</p>
-<p>But quantiles alone do not answer two additional questions that matter in practice.</p>
-<p>First, how conservative is the selected threshold if the data are skewed, heavy-tailed, or otherwise poorly described by a parametric model?</p>
-<p>Second, how stable is the threshold estimate in finite samples?</p>
-<p>The first question is about probability control. A threshold may appear numerically precise, but if it relies on a misspecified model then its practical interpretation can be fragile exactly where decisions are most sensitive.</p>
-<p>The second question is about sample sensitivity. Any statistic used in a decision system must stabilize as information accumulates. A threshold or directional probability measure that behaves erratically under modest sample variation may be mathematically elegant but operationally weak.</p>
-<p>The purpose of this chapter is therefore broader than quantile selection alone. It is to show that the directional framework supports:</p>
-<ul>
-<li>threshold selection,</li>
-<li>severity-weighted thresholding,</li>
-<li>directional probability bounds,</li>
-<li>and finite-sample estimation diagnostics</li>
-</ul>
-<p>within one common structure.</p>
-<hr />
-</div>
-<div id="degree-zero-thresholds-and-their-directional-meaning" class="section level2 hasAnchor" number="16.2">
-<h2><span class="header-section-number">16.2</span> Degree-Zero Thresholds and Their Directional Meaning<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#degree-zero-thresholds-and-their-directional-meaning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>A foundational identity of the directional framework is</p>
-<p><span class="math display">\[
-L_0(t;X)=P(X\le t)=F_X(t).
-\]</span></p>
-<p>That result means the cumulative distribution function is not external to the partial-moment framework. It is the degree-0 lower partial moment itself.</p>
-<p>Therefore the lower-tail threshold at probability level <span class="math inline">\(\alpha\)</span> is</p>
-<p><span class="math display">\[
-t_\alpha^{(0)}=\inf\{t : L_0(t;X)\ge \alpha\}.
-\]</span></p>
-<p>This is simply the ordinary lower quantile written in directional form.</p>
-<p>In finance this degree-0 threshold is often called Value-at-Risk, but the mathematical object is more general than that label. The same degree-0 threshold can represent:</p>
-<ul>
-<li>a maximum tolerated forecast shortfall,</li>
-<li>a minimum service threshold,</li>
-<li>a lower safety boundary,</li>
-<li>or any analyst-defined adverse benchmark.</li>
-</ul>
-<p>The structural meaning is identical in every case:</p>
-<p><span class="math display">\[
-t_\alpha^{(0)}
-\]</span></p>
-<p>is the benchmark at which an <span class="math inline">\(\alpha\)</span> fraction of observations lies at or below the threshold.</p>
-<p>Thus degree 0 is the <strong>frequency-calibrated</strong> threshold rule.</p>
-<hr />
-</div>
-<div id="from-frequency-to-severity-higher-degree-thresholds" class="section level2 hasAnchor" number="16.3">
-<h2><span class="header-section-number">16.3</span> From Frequency to Severity: Higher-Degree Thresholds<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#from-frequency-to-severity-higher-degree-thresholds" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Degree-0 thresholds count adverse events, but they do not distinguish between small and large deviations once the threshold is crossed.</p>
-<p>That limitation is exactly what higher-order partial moments correct.</p>
-<p>For degree <span class="math inline">\(d \ge 1\)</span>, define the lower and upper directional masses</p>
-<p><span class="math display">\[
-L_d(t;X)=E[(t-X)_+^d], \qquad U_d(t;X)=E[(X-t)_+^d].
-\]</span></p>
-<p>A normalized lower share is then</p>
-<p><span class="math display">\[
-F_d(t;X)=\frac{L_d(t;X)}{L_d(t;X)+U_d(t;X)}.
-\]</span></p>
-<p>When <span class="math inline">\(d=0\)</span>, this reduces to the ordinary probability partition. When <span class="math inline">\(d=1\)</span>, observations are weighted by the magnitude of their deviation from the benchmark. When <span class="math inline">\(d=2\)</span>, large deviations receive quadratic emphasis.</p>
-<p>This yields a family of generalized thresholds:</p>
-<p><span class="math display">\[
-t_\alpha^{(d)}=\inf\{t : F_d(t;X)\ge \alpha\}.
-\]</span></p>
-<p>The interpretation changes by degree:</p>
-<p><span class="math display">\[
-d=0 \rightarrow \text{event frequency},
-\]</span></p>
-<p><span class="math display">\[
-d=1 \rightarrow \text{aggregate adverse magnitude},
-\]</span></p>
-<p><span class="math display">\[
-d=2 \rightarrow \text{extreme-deviation sensitivity}.
-\]</span></p>
-<p>So the correct conceptual reading is not that partial moments add extra domain-specific measures. It is that quantile calibration itself can be performed in different geometries:</p>
-<ul>
-<li>raw counting geometry at degree 0,</li>
-<li>linear severity geometry at degree 1,</li>
-<li>quadratic severity geometry at degree 2.</li>
-</ul>
-<hr />
-</div>
-<div id="directional-probability-bounds-1" class="section level2 hasAnchor" number="16.4">
-<h2><span class="header-section-number">16.4</span> Directional Probability Bounds<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#directional-probability-bounds-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Threshold selection is only part of the problem. Analysts also want distribution-free upper bounds on the probability of threshold violation.</p>
-<p>Suppose <span class="math inline">\(g &lt; \mu\)</span>, where <span class="math inline">\(\mu = E[X]\)</span>, and consider the lower-tail event</p>
-<p><span class="math display">\[
-X \le g.
-\]</span></p>
-<p>A classical one-sided Chebyshev argument bounds this probability using only the mean and variance:</p>
-<p><span class="math display">\[
-P(X \le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
-\]</span></p>
-<p>A directional refinement replaces symmetric standard deviation with semideviation:</p>
-<p><span class="math display">\[
-P(X \le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
-\]</span></p>
-<p>where <span class="math inline">\(\sigma_-\)</span> measures only downside dispersion.</p>
-<p>A more general bound uses lower partial moments of degree <span class="math inline">\(\alpha\)</span>. Define</p>
-<p><span class="math display">\[
-\theta(t,\alpha)=\left(E[(t-X)_+^\alpha]\right)^{1/\alpha}.
-\]</span></p>
-<p>Then, for <span class="math inline">\(g \le t\)</span>,</p>
-<p><span class="math display">\[
-P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
-\]</span></p>
-<p>So the directional hierarchy of probability control is</p>
-<p><span class="math display">\[
-\text{symmetric variance bound} \to \text{semivariance bound} \to \text{general lower-partial-moment bound}.
-\]</span></p>
-<p>Each step aligns the bound more closely with the side of the distribution that matters for the decision.</p>
-<hr />
-</div>
-<div id="severity-weighted-thresholds-as-early-intervention-rules" class="section level2 hasAnchor" number="16.5">
-<h2><span class="header-section-number">16.5</span> Severity-Weighted Thresholds as Early-Intervention Rules<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#severity-weighted-thresholds-as-early-intervention-rules" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Once higher-degree thresholds are viewed as severity-weighted quantiles, an important practical feature becomes clear.</p>
-<p>A degree-1 or degree-2 threshold can be less extreme than the degree-0 threshold and yet still produce milder realized tail behavior.</p>
-<p>This is not a contradiction. It occurs because higher-degree thresholds are calibrated in weighted directional mass, not in raw event counts.</p>
-<p>Mathematically, this makes sense. The degree-2 rule assigns much more weight to large adverse deviations than to small ones. If a 10-unit shortfall contributes <span class="math inline">\(10^2\)</span> units of quadratic severity while a 1-unit shortfall contributes only <span class="math inline">\(1^2\)</span>, then the threshold naturally shifts toward earlier intervention.</p>
-<p>The same logic applies across domains:</p>
-<ul>
-<li>in forecasting, the rule intervenes before very large misses accumulate,</li>
-<li>in operations, it triggers replenishment before deep shortages form,</li>
-<li>in engineering, it signals action before large safety-margin breaches dominate the lower tail.</li>
-</ul>
-<p>Thus higher-degree thresholds are best interpreted as <strong>early-intervention rules under asymmetric cost</strong>.</p>
-<hr />
-</div>
-<div id="model-misspecification-and-robustness" class="section level2 hasAnchor" number="16.6">
-<h2><span class="header-section-number">16.6</span> Model Misspecification and Robustness<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#model-misspecification-and-robustness" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Directional thresholds are especially useful when parametric models misrepresent the lower tail.</p>
-<p>The chapter-level lesson is general. Parametric misspecification is often most consequential exactly in the tail region where decision costs are highest.</p>
-<p>The directional framework responds in two ways.</p>
-<p>First, it estimates thresholds directly from empirical directional structure via degree-0 or higher-degree partial-moment quantiles.</p>
-<p>Second, it supplements those empirical thresholds with distribution-free probability bounds that remain valid under far weaker assumptions than a fully specified parametric family.</p>
-<p>This is particularly important under skewness, heavy tails, and asymmetric adverse regions, where symmetric models can understate the severity of rare but important events.</p>
-<hr />
-</div>
-<div id="estimation-error-and-sample-size-sensitivity" class="section level2 hasAnchor" number="16.7">
-<h2><span class="header-section-number">16.7</span> Estimation Error and Sample-Size Sensitivity<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#estimation-error-and-sample-size-sensitivity" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>A directional statistic is only operationally useful if it stabilizes as sample size grows.</p>
-<p>Estimation error is therefore not a peripheral concern. It is central to any threshold-based or benchmark-driven decision process. If a statistic is unstable, then even a mathematically correct threshold rule can become unreliable in practice.</p>
-<p>The key empirical question is whether partial moments behave at least as well as classical mean-variance quantities under regular conditions and whether they improve upon them when the data are asymmetric or heavy-tailed.</p>
-<p>This matters well beyond portfolio optimization. Any benchmark-driven procedure depends on stable estimation of lower-tail structure. If lower partial moments and semideviation remain well behaved under skewness and heavy tails, then they are not only conceptually aligned with directional asymmetry. They are also strong candidates for practical nonparametric measurement when classical symmetric summaries are fragile.</p>
-<p>In particular, the stability of degree-0 partial moments reinforces the result that the cdf itself is a partial moment. The cdf is not merely a theoretical building block; it is also a stable empirical object within the directional system.</p>
-<hr />
-</div>
-<div id="utility-decision-context-and-why-degree-matters" class="section level2 hasAnchor" number="16.8">
-<h2><span class="header-section-number">16.8</span> Utility, Decision Context, and Why Degree Matters<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#utility-decision-context-and-why-degree-matters" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The correct threshold degree depends on the decision problem.</p>
-<p>In general benchmark-relative terms, the lesson is:</p>
-<ul>
-<li>if the main concern is <strong>how often</strong> a threshold is crossed, degree 0 is appropriate;</li>
-<li>if the concern is <strong>how much aggregate damage</strong> accumulates below the threshold, degree 1 is more natural;</li>
-<li>if the concern is <strong>rare but severe violations</strong>, degree 2 or higher can be more appropriate.</li>
-</ul>
-<p>A benchmark may be a target return, a policy threshold, a forecast baseline, a service minimum, or a safety limit. The degree determines how adverse deviation relative to that benchmark is measured.</p>
-<p>So the framework is not one-threshold-fits-all. It is a family of threshold rules indexed by the geometry of the adverse region.</p>
-<hr />
-</div>
-<div id="practical-workflow" class="section level2 hasAnchor" number="16.9">
-<h2><span class="header-section-number">16.9</span> Practical Workflow<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#practical-workflow" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>A general workflow for directional tail analysis is:</p>
-<ol style="list-style-type: decimal">
-<li><p><strong>Choose a benchmark context.</strong><br />
-Identify the lower threshold region that matters substantively.</p></li>
-<li><p><strong>Estimate the degree-0 threshold.</strong><br />
-Compute</p>
-<p><span class="math display">\[
-t_\alpha^{(0)}=\inf\{t:L_0(t;X)\ge \alpha\}.
-\]</span></p>
-<p>This yields the frequency-calibrated threshold.</p></li>
-<li><p><strong>Estimate higher-degree thresholds.</strong><br />
-Compute degree-1 and degree-2 threshold rules through normalized directional mass:</p>
-<p><span class="math display">\[
-t_\alpha^{(d)}=\inf\{t:F_d(t;X)\ge \alpha\}.
-\]</span></p></li>
-<li><p><strong>Bound lower-tail probability conservatively.</strong><br />
-Use one-sided Chebyshev, semivariance, and Atwood-style lower-partial-moment bounds to assess worst-case violation probabilities.</p></li>
-<li><p><strong>Compare with parametric approximations if relevant.</strong><br />
-Large discrepancies indicate model risk in the tail.</p></li>
-<li><p><strong>Assess finite-sample stability and sample-size sensitivity.</strong><br />
-Implement the sample-size sensitivity diagnostics from Section 17.7 using the <strong>Maximum Entropy Bootstrap</strong> workflow developed in Chapter 17, especially when threshold rules feed larger decision or optimization systems.</p></li>
+<ol start="2" style="list-style-type: decimal">
+<li>The covariance matrix decomposes into between-quadrant and within-quadrant components:</li>
 </ol>
-<p>This workflow makes clear why threshold analysis, probability bounds, and estimation error belong together.</p>
-<hr />
-</div>
-<div id="summary-10" class="section level2 hasAnchor" number="16.10">
-<h2><span class="header-section-number">16.10</span> Summary<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#summary-10" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This chapter extended the directional framework from interval estimation to full tail-threshold analysis.</p>
-<p>The key ideas are:</p>
-<ul>
-<li><p>The lower-tail quantile is the degree-0 partial-moment threshold because</p>
 <p><span class="math display">\[
-L_0(t;X)=F_X(t).
-\]</span></p></li>
-<li><p>Higher-degree thresholds are severity-weighted calibrations of the lower tail, not merely alternative labels.</p></li>
-<li><p>Semivariance and higher lower partial moments yield distribution-free upper bounds on threshold-violation probabilities.</p></li>
-<li><p>Severity-weighted thresholds can act as early-intervention rules because they respond to adverse magnitude, not just event counts.</p></li>
-<li><p>Parametric misspecification matters most in the tail, so empirical directional thresholds and probability bounds provide complementary robustness.</p></li>
-<li><p>Partial moments form a coherent nonparametric language for threshold selection, probability control, and finite-sample decision support.</p></li>
-</ul>
-<p>In that sense, quantiles, semivariance, lower partial moments, and estimation error belong together. They are generated by the same benchmark-relative primitives and serve the same broader purpose: to make probability, thresholds, and adverse deviation analysis interpretable without relying on restrictive symmetry or parametric assumptions.</p>
-<p>Chapter 17 then supplies the synthetic-data and Maximum Entropy Bootstrap machinery used to operationalize these stability checks, after which Chapter 18 returns to recursive mean-split estimation for adaptive nonparametric regression.</p>
-<hr />
-</div>
-<div id="references" class="section level2 hasAnchor" number="16.11">
-<h2><span class="header-section-number">16.11</span> References<a href="directional-tail-thresholds-probability-bounds-and-estimation-error.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<ul>
-<li>Berck, P., &amp; Hihn, J. (1982). <em>Using the Semivariance to Estimate Safety-First Rules</em>. <em>American Journal of Agricultural Economics</em>, May 1982, 298-300.</li>
-<li>Atwood, M. (1985). <em>Demonstration of the Use of Lower Partial Moments to Improve Safety-First Probability Limits</em>. <em>American Journal of Agricultural Economics</em>, 67(4), 880-886. DOI: 10.2307/1241818.</li>
-<li>Rockafellar, R. T., &amp; Uryasev, S. (2000). <em>Optimization of Conditional Value-at-Risk</em>. <em>Journal of Risk</em>, 2(3), 21-41.</li>
-<li>Chebyshev, P. L. (1867). <em>Des valeurs moyennes</em>. <em>Journal de Mathématiques Pures et Appliquées</em>, 12, 177-184.</li>
-<li>Viole, F., &amp; Nawrocki, D. (2012). <em>Cumulative Distribution Functions and UPM/LPM Analysis</em>. SSRN. DOI: <a href="https://dx.doi.org/10.2139/ssrn.2148482" class="uri">https://dx.doi.org/10.2139/ssrn.2148482</a></li>
-<li>Viole, F. (2025). <em>Value-at-Risk (VaR) and Probability Bounds Analysis</em> (June 18, 2025). SSRN. Available at: <a href="https://ssrn.com/abstract=5310345" class="uri">https://ssrn.com/abstract=5310345</a>. DOI: <a href="http://dx.doi.org/10.2139/ssrn.5310345" class="uri">http://dx.doi.org/10.2139/ssrn.5310345</a></li>
-<li>Nawrocki, D., &amp; Viole, F. (2024). <em>Estimation error and partial moments</em>. <em>International Review of Financial Analysis</em>, 95, Part B, 103443. DOI: <a href="https://doi.org/10.1016/j.irfa.2024.103443" class="uri">https://doi.org/10.1016/j.irfa.2024.103443</a></li>
-</ul>
+\Sigma
+=
+\sum_q p_q u_q u_q^\top
++
+\sum_q p_q \operatorname{Cov}(Z \mid Q{=}q).
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Each quadrant conditional mean displacement generates a rank-one spectral primitive</li>
+</ol>
+<p><span class="math display">\[
+B_q = p_q u_q u_q^\top
+\]</span></p>
+<p>with eigenvector <span class="math inline">\(u_q\)</span> and eigenvalue <span class="math inline">\(p_q \|u_q\|^2\)</span>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Classical eigenvalues admit exact directional attribution:</li>
+</ol>
+<p><span class="math display">\[
+\lambda_i
+=
+\sum_q p_q (v_i^\top u_q)^2
++
+\sum_q p_q \, v_i^\top \operatorname{Cov}(Z \mid Q{=}q)\, v_i.
+\]</span></p>
+<ol start="5" style="list-style-type: decimal">
+<li><p>PCA is downstream of the NNS directional structure.
+The directional components recover PCA and explain which quadrant regions generated the result.</p></li>
+<li><p>The converse fails: the eigensystem does not recover the directional components.</p></li>
+</ol>
+<p>The central message is:</p>
+<p><span class="math display">\[
+\text{PCA diagonalizes covariance.
+Directional decomposition explains the sources of that covariance.}
+\]</span></p>
+<p>The next chapter connects the directional partial moment framework to <strong>copula interpretation</strong>, linking co-partial moments with rank-based dependence structures used in multivariate statistics.</p>
 
 </div>
 </div>
@@ -1279,8 +2138,8 @@ L_0(t;X)=F_X(t).
           </div>
         </div>
       </div>
-<a href="distribution-comparison.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="prediction-intervals.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="directional-dependence.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="copula-interpretation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
