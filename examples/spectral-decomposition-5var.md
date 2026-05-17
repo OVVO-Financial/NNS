@@ -8,8 +8,8 @@ within-orthant covariance matrices sum exactly to the population covariance matr
 and the recovered eigensystem matches classical PCA to floating-point precision.
 
 The second part of this example addresses a practical question the five-variable case
-immediately raises: how does this scale to high-dimensional portfolios? The answer
-introduces the `DPM_nD` aggregation strategy and states its tradeoff precisely.
+immediately raises: how does this scale to high-dimensional multivariate data? The
+answer introduces the `DPM_nD` aggregation strategy and states its tradeoff precisely.
 
 ---
 
@@ -88,16 +88,16 @@ four-quadrant CUPM/CLPM/DLPM/DUPM partition: each of the five sign combinations 
 deviations from the component means receives positive empirical mass.
 
 The mean split is the natural benchmark here because the between-orthant covariance
-$\Sigma_Q$ is defined relative to the global mean $\mu$. Using the mean as the split
-point ensures that the displacement vectors $u_r = m_r - \mu$ measure deviations from
+`Sigma_Q` is defined relative to the global mean `mu`. Using the mean as the split
+point ensures that the displacement vectors `u_r = m_r - mu` measure deviations from
 the same reference as the covariance matrix itself.
 
 ---
 
 ## Between-Within Decomposition
 
-For each orthant $r$, compute the orthant probability $p_r$, the conditional mean
-displacement $u_r = m_r - \mu$, and the within-orthant covariance $\mathrm{Cov}_r$.
+For each orthant `r`, compute the orthant probability `p_r`, the conditional mean
+displacement `u_r = m_r - mu`, and the within-orthant covariance `\mathrm{Cov}_r`.
 Accumulate the between-orthant and within-orthant covariance matrices.
 
 ```r
@@ -134,8 +134,8 @@ The decomposition identity is
 
 
 Each of the 32 orthants contributes a rank-one spectral primitive
-$B_r = p_r u_r u_r^\top$ to the between-orthant covariance, and a weighted
-within-orthant scatter matrix to $\Sigma_W$. The identity is the law of total
+`B_r = p_r u_r u_r^T` to the between-orthant covariance, and a weighted
+within-orthant scatter matrix to `Sigma_W`. The identity is the law of total
 covariance applied to the mean-split orthant partition.
 
 ---
@@ -272,7 +272,7 @@ the direction of maximum conditional mean separation across orthants.
 
 ## Orthant-Level Attribution of PC1
 
-The between-orthant contribution to $\lambda_1$ decomposes further into per-orthant
+The between-orthant contribution to `lambda_1` decomposes further into per-orthant
 rank-one terms:
 
 
@@ -306,15 +306,15 @@ Sum of orthant-level between contributions for PC1: 2.439089
 Direct Σ_Q between contribution for PC1: 2.439089
 ```
 
-The per-orthant terms sum to exactly the Rayleigh quotient $v_1^\top \Sigma_Q v_1$.
+The per-orthant terms sum to exactly the Rayleigh quotient `v1^T Sigma_Q v1`.
 This confirms that the between-orthant attribution is not an approximation — it is
-an exact partition of $\lambda_{1,Q}$ into 32 identifiable orthant contributions,
-each equal to $p_r (v_1^\top u_r)^2$.
+an exact partition of `lambda_{1,Q}` into 32 identifiable orthant contributions,
+each equal to `p_r (v1^T u_r)^2`.
 
 The largest contributions come from the two fully concordant orthants: all five
 variables above their means (binary label 31) and all five below (binary label 0).
-These two orthants have the largest displacement magnitudes $\|u_r\|$ and align most
-strongly with the common-factor eigenvector $v_1$, which loads approximately equally
+These two orthants have the largest displacement magnitudes `||u_r||` and align most
+strongly with the common-factor eigenvector `v_1`, which loads approximately equally
 on all five variables.
 
 ---
@@ -337,9 +337,9 @@ This cannot be deduced from PCA output.
 ```
 
 The most populated orthant — all five variables above their component means — has a
-conditional mean approximately 1.07 standard deviations above $\mu$ in every
+conditional mean approximately 1.07 standard deviations above `mu` in every
 dimension. This is exactly the all-concordant-upper orthant, the five-dimensional
-analogue of CUPM. Classical PCA reports only $(\lambda_i, v_i)$. Neither the orthant
+analogue of CUPM. Classical PCA reports only `(lambda_i, v_i)`. Neither the orthant
 assignment, the orthant probabilities, nor the 32 conditional means appear anywhere
 in that output. The directional decomposition runs in one direction:
 
@@ -357,67 +357,83 @@ The map does not reverse.
 
 ---
 
+
 ## Scaling to Higher Dimensions: The Curse of Dimensionality
 
 The five-variable example is a useful proof-of-concept. It confirms that the full
-mean-split orthant decomposition works cleanly for $2^5 = 32$ orthants and recovers
-the PCA eigensystem to floating-point precision.
+mean-split orthant decomposition works cleanly for:
 
-A practitioner will immediately ask: how does this scale to a 50-asset portfolio?
+```math
+2^5 = 32
+```
 
-The full orthant decomposition scales exponentially. For a 50-asset portfolio the
-number of possible orthants is $2^{50} \approx 10^{15}$. Even if the computation
-were feasible, most orthants would be empty or too sparsely populated to support
-stable conditional mean and covariance estimates. This is the curse of dimensionality
-in its most direct form.
+orthants and recovers the PCA eigensystem to floating-point precision.
+
+A natural statistical question follows:
+
+> How does this scale to 50 variables?
+
+The full orthant decomposition scales exponentially. For a 50-dimensional dataset,
+the number of possible orthants is:
+
+```math
+2^{50}
+\approx
+1.13 \times 10^{15}.
+```
+
+That is not a practical partition to estimate directly. Even if the computation were
+possible, most orthants would be empty or too sparsely populated to support stable
+conditional mean and covariance estimates. This is the curse of dimensionality in
+its most direct form.
 
 ### State Aggregation with DPM_nD
 
-The $n$-dimensional partial moment framework resolves this through aggregation. Rather
-than retaining all $2^d$ orthants separately, the high-dimensional state space
-collapses into three macroscopic, fully observable directional states:
-
-
-```math
-\mathrm{CLPM}_{nD} = \mathrm{all\ variables\ simultaneously\ below\ target},
-```
-
-
+The n-dimensional partial moment framework provides a practical aggregation strategy.
+Rather than retaining all orthants separately, the high-dimensional state space can
+be collapsed into three macroscopic, observable directional states:
 
 ```math
-\mathrm{CUPM}_{nD} = \mathrm{all\ variables\ simultaneously\ above\ target},
+\mathrm{CLPM}_{nD}
+=
+\mathrm{all\ variables\ simultaneously\ below\ target},
 ```
-
-
 
 ```math
-\mathrm{DPM}_{nD} = \mathrm{all\ mixed-sign\ configurations}.
+\mathrm{CUPM}_{nD}
+=
+\mathrm{all\ variables\ simultaneously\ above\ target},
 ```
 
+```math
+\mathrm{DPM}_{nD}
+=
+\mathrm{all\ mixed\ sign\ configurations}.
+```
 
-The state count reduces from $2^d$ to $3$.
+The state count is therefore reduced from:
 
-> **Caveat.** This aggregation does not preserve the exact spectral identity. The
-> full decomposition $\Sigma_Q = \sum_r p_r u_r u_r^\top$ requires the individual
-> displacement vector $u_r$ from every orthant. `DPM_nD` collapses all $2^d - 2$
-> mixed-sign orthants into a single scalar, discarding their individual $u_r$. It
-> is therefore a scalable diagnostic and portfolio objective, not a replacement for
-> exact orthant-level spectral attribution.
+```math
+2^d
+```
 
-The C++ implementations in the NNS package evaluate each state in a single parallel
-pass over the $n$ observations with $O(nd)$ cost regardless of dimension, using
-`parallelFor` over per-observation workers.
+to:
 
-### Portfolio Interpretation
+```math
+3.
+```
 
-In portfolio terms the three states have direct meaning:
+This is a dimensionality reduction by aggregation.
 
-- `CLPM_nD` measures joint downside concentration — all assets moving down together.
-- `CUPM_nD` measures joint upside participation — all assets moving up together.
-- `DPM_nD` measures mixed-sign divergence — some assets up while others are down.
+### General Statistical Interpretation
+
+The three aggregate states have direct statistical meanings:
+
+- `CLPM_nD` measures joint lower-tail concordance.
+- `CUPM_nD` measures joint upper-tail concordance.
+- `DPM_nD` measures mixed-sign divergence or dispersion.
 
 The normalized quantities are shares of total directional mass:
-
 
 ```math
 \mathrm{CLPM}^{\,\mathrm{norm}}_{nD}
@@ -426,16 +442,12 @@ The normalized quantities are shares of total directional mass:
 {\mathrm{CLPM}_{nD} + \mathrm{CUPM}_{nD} + \mathrm{DPM}_{nD}},
 ```
 
-
-
 ```math
 \mathrm{CUPM}^{\,\mathrm{norm}}_{nD}
 =
 \frac{\mathrm{CUPM}_{nD}}
 {\mathrm{CLPM}_{nD} + \mathrm{CUPM}_{nD} + \mathrm{DPM}_{nD}},
 ```
-
-
 
 ```math
 \mathrm{DPM}^{\,\mathrm{norm}}_{nD}
@@ -444,108 +456,93 @@ The normalized quantities are shares of total directional mass:
 {\mathrm{CLPM}_{nD} + \mathrm{CUPM}_{nD} + \mathrm{DPM}_{nD}}.
 ```
 
-
-At degree zero these are probability shares. At higher degrees they are
+At degree zero, these are probability shares. At higher degrees, they are
 severity-weighted directional mass shares.
 
-### Portfolio Objective
-
-A scalable directional portfolio objective is:
-
-
-```math
-\max_w
-\left[
-\mathrm{CUPM}^{\,\mathrm{norm}}_{nD}(w)
--
-\lambda\, \mathrm{CLPM}^{\,\mathrm{norm}}_{nD}(w)
-+
-\eta\, \mathrm{DPM}^{\,\mathrm{norm}}_{nD}(w)
-\right].
-```
-
-
-The parameter $\lambda > 0$ penalizes joint downside. The parameter $\eta$
-determines the treatment of mixed-sign behavior: $\eta > 0$ rewards dispersion
-and treats it as diversification; $\eta < 0$ penalizes it and treats it as
-unwanted divergence; $\eta = 0$ recovers the two-objective CUPM/CLPM tradeoff
-directly.
-
-A sketch of how the NNS C++ functions would be called for a candidate weight
-vector `w` and a data matrix `Z`:
-
-```r
-# Evaluate directional states for portfolio w
-# Returns are Z %*% w (n x 1 portfolio return series)
-# For joint evaluation across all assets simultaneously,
-# pass the full return matrix Z and a target vector t = mu
-
-library(NNS)
-
-target <- colMeans(Z)          # component means as benchmark
-
-clpm_val <- NNS::CoLPM(degree = 1, x = Z, target = target)
-cupm_val <- NNS::CoUPM(degree = 1, x = Z, target = target)
-dpm_val  <- NNS::DPM( degree = 1, x = Z, target = target)
-
-norm_const <- clpm_val + cupm_val + dpm_val
-
-clpm_norm <- clpm_val / norm_const
-cupm_norm <- cupm_val / norm_const
-dpm_norm  <- dpm_val  / norm_const
-
-# Objective: maximize upside participation, penalize joint downside,
-# reward diversification (eta > 0)
-lambda <- 1.0
-eta    <- 0.5
-objective <- cupm_norm - lambda * clpm_norm + eta * dpm_norm
-```
-
-In an optimizer this objective replaces the variance term in mean-variance
-optimization. No covariance matrix needs to be estimated or inverted.
+This gives a compact high-dimensional summary of whether observations tend to
+cluster in all-lower, all-upper, or mixed-sign regions relative to a target vector.
 
 ### The Tradeoff
 
-| | Full orthant decomposition | `DPM_nD` aggregation |
-|---|---|---|
-| **Orthant count** | $2^d$ | $3$ |
-| **Computation** | $O(n \cdot 2^d)$, exponential | $O(nd)$, linear |
-| **Spectral identity** | Exact: $\Sigma = \Sigma_Q + \Sigma_W$ | Not preserved |
-| **Mixed-state resolution** | Every sign pattern named | All mixed patterns collapsed |
-| **Use case** | Diagnosis, attribution, interpretation | Optimization objective |
-| **Eigenvalue attribution** | Exact per-orthant | Not available |
+The aggregation is useful, but it comes with a clear tradeoff.
 
-The full decomposition is exact but exponential. The `DPM_nD` aggregation is
-linear but coarser. Inside the mixed-sign region, for example, all of the
-following are distinct orthants that the full decomposition keeps separate but
-`DPM_nD` collapses:
+`DPM_nD` preserves computational tractability and captures the two fully concordant
+tail states: all variables below target and all variables above target. These are
+often important summary states in multivariate dependence analysis.
 
-```
-Asset1+ Asset2+ Asset3- Asset4- Asset5-
-Asset1+ Asset2- Asset3+ Asset4- Asset5+
-Asset1- Asset2+ Asset3- Asset4+ Asset5+
+However, `DPM_nD` sacrifices granular geometric resolution inside the mixed-sign
+region. It does not identify exactly which variables diverged from which others. For
+example, in a five-variable setting, all of the following are mixed-sign states:
+
+```text
+Variable1+ Variable2+ Variable3- Variable4- Variable5-
+Variable1+ Variable2- Variable3+ Variable4- Variable5+
+Variable1- Variable2+ Variable3- Variable4+ Variable5+
 ```
 
-The full spectral genealogy requires $\{p_r, u_r, \Sigma_r\}_{r=1}^{2^d}$.
-The scalable directional summary uses $\mathrm{CLPM}_{nD}$,
-$\mathrm{CUPM}_{nD}$, and $\mathrm{DPM}_{nD}$.
+The full orthant-level decomposition keeps these states separate. `DPM_nD` aggregates
+them.
 
-### Practical Workflow
+Therefore, the full spectral genealogy requires:
 
-The two approaches are complementary. A useful high-dimensional workflow is:
+```math
+\{p_r,\;u_r,\;\Sigma_r\}_{r=1}^{2^d},
+```
 
-1. Use `CLPM_nD`, `CUPM_nD`, and `DPM_nD` as scalable portfolio diagnostics.
-2. Minimize `CLPM_nD` to reduce joint downside concentration.
-3. Maximize `CUPM_nD` to increase joint upside participation.
-4. Use `DPM_nD` to monitor and control dispersion or hedge behavior.
-5. When orthant-level detail is needed, drill into selected orthants, grouped
-   orthants, or lower-dimensional factor partitions where $2^d$ remains tractable.
+while the scalable directional summary uses:
 
-A portfolio optimized directly over directional partial moments already controls
-the sources of PCA risk without requiring an eigensystem. The spectral decomposition
-of Chapter 11 explains *why*: PCA's dominant axis emerges from CLPM/CUPM separation,
-so operating directly on that separation is the more primitive — and more actionable
-— approach. The eigenvector is a summary of what the optimizer already knows.
+```math
+\mathrm{CLPM}_{nD},
+\qquad
+\mathrm{CUPM}_{nD},
+\qquad
+\mathrm{DPM}_{nD}.
+```
+
+The full orthant-level between covariance is:
+
+```math
+\Sigma_Q
+=
+\sum_{r=1}^{2^d} p_r u_r u_r^\top.
+```
+
+The `DPM_nD` aggregation does not preserve each individual mixed-orthant displacement
+vector `u_r`. It is therefore best understood as a scalable descriptive statistic,
+not as a replacement for exact orthant-level spectral attribution.
+
+### General Workflow
+
+The two approaches are complementary.
+
+A useful high-dimensional workflow is:
+
+1. Use `CLPM_nD`, `CUPM_nD`, and `DPM_nD` as compact directional summaries.
+2. Use the full orthant decomposition when `d` is small enough for reliable
+   estimation.
+3. Use grouped orthants, selected orthants, or lower-dimensional factor partitions
+   when intermediate resolution is needed.
+4. Reserve exact per-orthant spectral attribution for settings where the number of
+   occupied orthants is statistically manageable.
+
+In short:
+
+```math
+\mathrm{full\ orthant\ decomposition}
+=
+\mathrm{exact\ but\ exponential}.
+```
+
+```math
+\mathrm{DPM}_{nD}\ \mathrm{aggregation}
+=
+\mathrm{scalable\ but\ coarser}.
+```
+
+This section bridges the gap between theoretical exactness and high-dimensional
+statistical practice. The five-variable decomposition proves the identity. The
+`DPM_nD` aggregation explains how related directional information can still be
+summarized when full orthant enumeration is not feasible.
 
 ---
 
