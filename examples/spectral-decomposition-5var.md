@@ -119,13 +119,15 @@ Sigma_rec <- Sigma_Q + Sigma_W
 
 The decomposition identity is
 
-$$
+
+```math
 \Sigma
 =
 \underbrace{\sum_r p_r u_r u_r^\top}_{\Sigma_Q}
 +
-\underbrace{\sum_r p_r \operatorname{Cov}(Z \mid r)}_{\Sigma_W}.
-$$
+\underbrace{\sum_r p_r \mathrm{Cov}(Z \mid r)}_{\Sigma_W}.
+```
+
 
 Each of the 32 orthants contributes a rank-one spectral primitive
 $B_r = p_r u_r u_r^\top$ to the between-orthant covariance, and a weighted
@@ -199,13 +201,15 @@ Each classical eigenvalue decomposes into a between-orthant contribution
 (conditional mean displacement along the eigenvector) and a within-orthant
 contribution (residual scatter projected onto the eigenvector):
 
-$$
+
+```math
 \lambda_i
 =
 \underbrace{v_i^\top \Sigma_Q v_i}_{\lambda_{i,Q}}
 +
 \underbrace{v_i^\top \Sigma_W v_i}_{\lambda_{i,W}}.
-$$
+```
+
 
 ```r
 attrib <- data.frame(eigenvalue = pca$values, between = NA, within = NA)
@@ -244,14 +248,16 @@ directional structure in the residuals, between and within contributions balance
 
 The diagnostic ratio for PC1 is
 
-$$
-D_{\text{spectral}}
+
+```math
+D_{\mathrm{spectral}}
 =
 \frac{v_1^\top \Sigma_Q v_1}{\lambda_1}
 =
 \frac{2.4391}{2.9652}
 \approx 0.823.
-$$
+```
+
 
 A value this high confirms that the 32-orthant mean-split partition is capturing
 the dominant covariance geometry almost entirely through conditional mean structure.
@@ -265,11 +271,13 @@ the direction of maximum conditional mean separation across orthants.
 The between-orthant contribution to $\lambda_1$ decomposes further into per-orthant
 rank-one terms:
 
-$$
+
+```math
 \lambda_{1,Q}
 =
 \sum_r p_r (v_1^\top u_r)^2.
-$$
+```
+
 
 ```r
 v1              <- pca$vectors[, 1]
@@ -331,13 +339,15 @@ analogue of CUPM. Classical PCA reports only $(\lambda_i, v_i)$. Neither the ort
 assignment, the orthant probabilities, nor the 32 conditional means appear anywhere
 in that output. The directional decomposition runs in one direction:
 
-$$
-\{p_r, m_r, \operatorname{Cov}(Z \mid r)\}_r
+
+```math
+\{p_r, m_r, \mathrm{Cov}(Z \mid r)\}_r
 \;\longrightarrow\;
 \Sigma
 \;\longrightarrow\;
 (\lambda_i, v_i).
-$$
+```
+
 
 The map does not reverse.
 
