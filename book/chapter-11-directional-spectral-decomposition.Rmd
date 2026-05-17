@@ -1226,6 +1226,8 @@ measures the share of total covariance trace explained by between-quadrant mean 
 A high value indicates that the quadrant partition is capturing the relevant second-moment geometry.
 A low value indicates that within-region residual scatter dominates, and finer partitioning or higher-order moments may be warranted.
 
+A full numerical implementation with transition matrix estimation, one-step predictive mixtures, and dynamic eigenvalue attribution by transition path is available at [OVVO-Financial/NNS: directional-markov-regimes-pca.md](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/directional-markov-regimes-pca.md).
+
 ---
 
 ## Summary
