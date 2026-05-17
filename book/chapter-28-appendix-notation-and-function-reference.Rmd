@@ -68,19 +68,19 @@ To maintain continuity with Chapter 22's directional decision-region framing, th
 | Pearson correlation | Linear association summary | `NNS.dep(x, y)` | Chapter 10 | Captures nonlinear and asymmetric dependence, not only linear co-movement. |
 | Parametric VaR / empirical quantile VaR | Tail-loss thresholding | `LPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Degree controls sensitivity to tail severity beyond degree-0 quantiles. |
 | Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
-| Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 14 | Agreement certainty is benchmarked through directional CDF-style deviations. |
-| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 13 | Directionality can be nonlinear and state dependent. |
+| Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
+| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Directionality can be nonlinear and state dependent. |
 | Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree, target.x, target.y, x, y)` / `Co.UPM(degree, target.x, target.y, x, y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
-| Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapters 16–17 | Produces directional prediction intervals without normality assumptions. |
+| Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapter 17 | Produces directional prediction intervals without normality assumptions. |
 
 
 ## Regression and forecasting workflow objects
 
 | Symbol | Definition / role | R function | Reference chapter |
 |---|---|---|---|
-| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` | Chapter 21 |
-| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 21 |
-| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 15 |
+| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` | Chapter 22 |
+| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 22 |
+| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 17 |
 | Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows | Chapter 10 |
 
 ## A.3 Technical Note: Adaptive Order and Consistency Conditions

@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Directional Causation
 
 Chapters 9–11 developed the directional framework for measuring dependence between variables. Co-partial moments were shown to capture asymmetric, nonlinear, and tail-specific joint behavior that classical correlation obscures. The copula interpretation then demonstrated how dependence structure can be separated from marginal distributions entirely.
@@ -280,3 +285,21 @@ The resulting statistic remains nonparametric, benchmark-relative, and distribut
 For an applied macroeconomic example using `NNS.nowcast`, `NNS.caus`, noise benchmarks, and strength-of-inference summaries, see [Causal Inference Amongst Macroeconomic Variables Using NNS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html).
 
 The next chapter develops distribution comparison methods, providing nonparametric tools for directly comparing distributions without parametric assumptions.
+
+
+```{r invisible_marker_ch13, echo=FALSE, results='asis'}
+name <- "OVVO Labs Registrant"
+date <- Sys.Date()
+
+cat(sprintf(
+"\\begingroup
+\\color{white}
+\\centering
+\\vspace*{0.45\\textheight}
+{\\tiny Generated for: %s \\quad Date: %s}
+\\par
+\\endgroup
+",
+name, date
+))
+```

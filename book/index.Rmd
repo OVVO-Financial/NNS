@@ -6,6 +6,8 @@ date: 2026
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
+header-includes:
+  - \usepackage{xcolor}
 ---
 
 # Preface {-}

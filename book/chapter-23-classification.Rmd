@@ -63,7 +63,7 @@ g^*(x) = \arg\max_{c \in \mathcal{C}} P(Y=c \mid X=x).
 
 Thus the classification problem is fundamentally a conditional probability problem.
 
-This aligns naturally with the NNS framework developed earlier. Chapter 12 showed that conditional probabilities can be written in terms of partial moments and co-partial moments. Classification therefore fits directly into the same directional machinery:
+This aligns naturally with the NNS framework developed earlier. Chapter 13 showed that conditional probabilities can be written in terms of partial moments and co-partial moments. Classification therefore fits directly into the same directional machinery:
 
 - partition the predictor space,
 - estimate local class probabilities,

@@ -773,7 +773,7 @@ $$
 
 These equivalences mean that **stochastic dominance tests are partial moment comparisons** evaluated across the full support of the data. The NNS framework implements all three levels directly through empirical partial moment estimates.
 
-This is also the bridge to Chapter 15: the degree-one quantile objects used for bias-corrected prediction intervals (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional probability representation.
+This is also the bridge to Chapter 17: the degree-one quantile objects used for bias-corrected prediction intervals (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional probability representation.
 
 #### Empirical Stochastic Dominance Tests
 

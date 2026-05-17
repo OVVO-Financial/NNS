@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.14)  20 MAR 2026 20:45
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.5.9)  16 MAY 2026 19:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **nns-book.tex
 (./nns-book.tex
 LaTeX2e <2025-11-01>
-L3 programming layer <2026-01-19>
+L3 programming layer <2026-03-20>
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/book.cls
 Document Class: book 2025/01/22 v1.4n Standard LaTeX document class
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/bk10.clo
@@ -22,7 +22,7 @@ File: bk10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 \c@table=\count279
 \abovecaptionskip=\skip49
 \belowcaptionskip=\skip50
-\bibindent=\dimen148
+\bibindent=\dimen150
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
@@ -49,10 +49,10 @@ Package: amstext 2024/11/17 v2.01 AMS text
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks17
-\ex@=\dimen149
+\ex@=\dimen151
 )) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen150
+\pmbraise@=\dimen152
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
@@ -73,7 +73,7 @@ LaTeX Info: Redefining \big on input line 721.
 LaTeX Info: Redefining \Big on input line 722.
 LaTeX Info: Redefining \bigg on input line 723.
 LaTeX Info: Redefining \Bigg on input line 724.
-\big@size=\dimen151
+\big@size=\dimen153
 LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
 \macc@depth=\count285
@@ -91,12 +91,12 @@ LaTeX Info: Redefining \Relbar on input line 970.
 \column@=\count290
 \maxfields@=\count291
 \andhelp@=\toks19
-\eqnshift@=\dimen152
-\alignsep@=\dimen153
-\tagshift@=\dimen154
-\tagwidth@=\dimen155
-\totwidth@=\dimen156
-\lineht@=\dimen157
+\eqnshift@=\dimen154
+\alignsep@=\dimen155
+\tagshift@=\dimen156
+\tagwidth@=\dimen157
+\totwidth@=\dimen158
+\lineht@=\dimen159
 \@envbody=\toks20
 \multlinegap=\skip52
 \multlinetaggap=\skip53
@@ -115,9 +115,9 @@ LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 )) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
 Package: iftex 2024/12/12 v1.0g TeX engine tests
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.sty (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2026-01-19 L3 programming layer (loader) 
+Package: expl3 2026-03-20 L3 programming layer (loader) 
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
-File: l3backend-xetex.def 2025-10-09 L3 backend support: XeTeX
+File: l3backend-xetex.def 2026-02-18 L3 backend support: XeTeX
 \g__graphics_track_int=\count292
 \g__pdfannot_backend_int=\count293
 \g__pdfannot_backend_link_int=\count294
@@ -144,9 +144,9 @@ Package: fontspec-xetex 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
 \l__fontspec_emdef_int=\count303
 \l__fontspec_strong_int=\count304
 \l__fontspec_strongdef_int=\count305
-\l__fontspec_tmpa_dim=\dimen158
-\l__fontspec_tmpb_dim=\dimen159
-\l__fontspec_tmpc_dim=\dimen160
+\l__fontspec_tmpa_dim=\dimen160
+\l__fontspec_tmpb_dim=\dimen161
+\l__fontspec_tmpc_dim=\dimen162
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec.cfg))) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/fix-cm.sty
@@ -341,7 +341,7 @@ LaTeX Info: Redefining \leftprotrusion on input line 1085.
 \MT@prot@toks=\toks24
 LaTeX Info: Redefining \rightprotrusion on input line 1104.
 LaTeX Info: Redefining \textls on input line 1449.
-\MT@outer@kern=\dimen161
+\MT@outer@kern=\dimen163
 LaTeX Info: Redefining \microtypecontext on input line 2053.
 LaTeX Info: Redefining \textmicrotypecontext on input line 2070.
 \MT@listname@count=\count311
@@ -365,7 +365,7 @@ Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 ))) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
-Package: fancyvrb 2025/07/28 4.6 verbatim text (tvz,hv)
+Package: fancyvrb 2026/04/16 4.6a verbatim text (tvz,hv)
 \FV@CodeLineNo=\count312
 \FV@InFile=\read2
 \FV@TabBox=\box56
@@ -375,10 +375,10 @@ Package: fancyvrb 2025/07/28 4.6 verbatim text (tvz,hv)
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/framed/framed.sty
 Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \OuterFrameSep=\skip55
-\fb@frw=\dimen162
-\fb@frh=\dimen163
-\FrameRule=\dimen164
-\FrameSep=\dimen165
+\fb@frw=\dimen164
+\fb@frh=\dimen165
+\FrameRule=\dimen166
+\FrameSep=\dimen167
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
 \LTleft=\skip56
@@ -386,7 +386,7 @@ Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
 \LTpre=\skip58
 \LTpost=\skip59
 \LTchunksize=\count315
-\LTcapwidth=\dimen166
+\LTcapwidth=\dimen168
 \LT@head=\box57
 \LT@firsthead=\box58
 \LT@foot=\box59
@@ -399,28 +399,28 @@ Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
 \LT@p@ftn=\toks25
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
-\heavyrulewidth=\dimen167
-\lightrulewidth=\dimen168
-\cmidrulewidth=\dimen169
-\belowrulesep=\dimen170
-\belowbottomsep=\dimen171
-\aboverulesep=\dimen172
-\abovetopsep=\dimen173
-\cmidrulesep=\dimen174
-\cmidrulekern=\dimen175
-\defaultaddspace=\dimen176
+\heavyrulewidth=\dimen169
+\lightrulewidth=\dimen170
+\cmidrulewidth=\dimen171
+\belowrulesep=\dimen172
+\belowbottomsep=\dimen173
+\aboverulesep=\dimen174
+\abovetopsep=\dimen175
+\cmidrulesep=\dimen176
+\cmidrulekern=\dimen177
+\defaultaddspace=\dimen178
 \@cmidla=\count320
 \@cmidlb=\count321
-\@aboverulesep=\dimen177
-\@belowrulesep=\dimen178
+\@aboverulesep=\dimen179
+\@belowrulesep=\dimen180
 \@thisruleclass=\count322
 \@lastruleclass=\count323
-\@thisrulewidth=\dimen179
+\@thisrulewidth=\dimen181
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/tools/array.sty
 Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
-\col@sep=\dimen180
+\col@sep=\dimen182
 \ar@mcellbox=\box62
-\extrarowheight=\dimen181
+\extrarowheight=\dimen183
 \NC@list=\toks26
 \extratabsurround=\skip60
 \backup@length=\skip61
@@ -429,8 +429,8 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 Package: calc 2025/03/01 v4.3b Infix arithmetic (KKT,FJ)
 \calc@Acount=\count324
 \calc@Bcount=\count325
-\calc@Adimen=\dimen182
-\calc@Bdimen=\dimen183
+\calc@Adimen=\dimen184
+\calc@Bdimen=\dimen185
 \calc@Askip=\skip62
 \calc@Bskip=\skip63
 LaTeX Info: Redefining \setlength on input line 86.
@@ -440,7 +440,7 @@ LaTeX Info: Redefining \addtolength on input line 87.
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/mdwtools/footnote.sty
 Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 \fn@notes=\box64
-\fn@width=\dimen184
+\fn@width=\dimen186
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
@@ -452,14 +452,14 @@ File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: xetex.def on input line 106.
 )
-\Gin@req@height=\dimen185
-\Gin@req@width=\dimen186
+\Gin@req@height=\dimen187
+\Gin@req@width=\dimen188
 )
 \pandoc@box=\box65
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/bookmark/bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
-Package: hyperref 2026-01-29 v7.01p Hypertext links for LaTeX
+Package: hyperref 2026-04-24 v7.01q Hypertext links for LaTeX
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty
@@ -485,55 +485,55 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
-\@linkdim=\dimen187
+\@linkdim=\dimen189
 \Hy@linkcounter=\count328
 \Hy@pagecounter=\count329
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
-File: pd1enc.def 2026-01-29 v7.01p Hyperref: PDFDocEncoding definition (HO)
+File: pd1enc.def 2026-04-24 v7.01q Hyperref: PDFDocEncoding definition (HO)
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
 \Hy@SavedSpaceFactor=\count330
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
-File: puenc.def 2026-01-29 v7.01p Hyperref: PDF Unicode definition (HO)
+File: puenc.def 2026-04-24 v7.01q Hyperref: PDF Unicode definition (HO)
 )
-Package hyperref Info: Option `unicode' set `true' on input line 4072.
-Package hyperref Info: Hyper figures OFF on input line 4201.
-Package hyperref Info: Link nesting OFF on input line 4206.
-Package hyperref Info: Hyper index ON on input line 4209.
-Package hyperref Info: Plain pages OFF on input line 4216.
-Package hyperref Info: Backreferencing OFF on input line 4221.
+Package hyperref Info: Option `unicode' set `true' on input line 4070.
+Package hyperref Info: Hyper figures OFF on input line 4199.
+Package hyperref Info: Link nesting OFF on input line 4204.
+Package hyperref Info: Hyper index ON on input line 4207.
+Package hyperref Info: Plain pages OFF on input line 4214.
+Package hyperref Info: Backreferencing OFF on input line 4219.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4468.
+Package hyperref Info: Bookmarks ON on input line 4466.
 \c@Hy@tempcnt=\count331
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip19
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-LaTeX Info: Redefining \url on input line 4807.
-\XeTeXLinkMargin=\dimen188
+LaTeX Info: Redefining \url on input line 4805.
+\XeTeXLinkMargin=\dimen190
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 \Fld@menulength=\count332
-\Field@Width=\dimen189
-\Fld@charsize=\dimen190
-Package hyperref Info: Hyper figures OFF on input line 6084.
-Package hyperref Info: Link nesting OFF on input line 6089.
-Package hyperref Info: Hyper index ON on input line 6092.
-Package hyperref Info: backreferencing OFF on input line 6099.
-Package hyperref Info: Link coloring OFF on input line 6104.
-Package hyperref Info: Link coloring with OCG OFF on input line 6109.
-Package hyperref Info: PDF/A mode OFF on input line 6114.
+\Field@Width=\dimen191
+\Fld@charsize=\dimen192
+Package hyperref Info: Hyper figures OFF on input line 6091.
+Package hyperref Info: Link nesting OFF on input line 6096.
+Package hyperref Info: Hyper index ON on input line 6099.
+Package hyperref Info: backreferencing OFF on input line 6106.
+Package hyperref Info: Link coloring OFF on input line 6111.
+Package hyperref Info: Link coloring with OCG OFF on input line 6116.
+Package hyperref Info: PDF/A mode OFF on input line 6121.
 \Hy@abspage=\count333
 \c@Item=\count334
 \c@Hfootnote=\count335
 )
 Package hyperref Info: Driver (autodetected): hxetex.
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/hyperref/hxetex.def
-File: hxetex.def 2026-01-29 v7.01p Hyperref driver for XeTeX
+File: hxetex.def 2026-04-24 v7.01q Hyperref driver for XeTeX
 \pdfm@box=\box66
 \c@Hy@AnnotLevel=\count336
 \HyField@AnnotCount=\count337
@@ -553,40 +553,40 @@ File: bkm-dvipdfm.def 2023-12-10 v1.31 bookmark driver for dvipdfm (HO)
 )) (./nns-book.aux)
 \openout1 = `nns-book.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 120.
-LaTeX Font Info:    ... okay on input line 120.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 128.
+LaTeX Font Info:    ... okay on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `normal'
-(Font)                  OT1/lmr/m/n --> TU/lmr/m/n on input line 120.
+(Font)                  OT1/lmr/m/n --> TU/lmr/m/n on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/lmr/m/it --> TU/lmr/m/it on input line 120.
+(Font)                  OT1/lmr/m/it --> TU/lmr/m/it on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/lmr/bx/n --> TU/lmr/bx/n on input line 120.
+(Font)                  OT1/lmr/bx/n --> TU/lmr/bx/n on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/lmss/m/n --> TU/lmss/m/n on input line 120.
+(Font)                  OT1/lmss/m/n --> TU/lmss/m/n on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/lmss/bx/n --> TU/lmss/bx/n on input line 120.
+(Font)                  OT1/lmss/bx/n --> TU/lmss/bx/n on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 120.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 128.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/bx/n on input line 120.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/bx/n on input line 128.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 0.9999964596882403.
@@ -614,7 +614,7 @@ Package fontspec Info:
 (fontspec)             <->s*[0.9999964596882403]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(0)/m/n' will be
-(Font)              scaled to size 10.0pt on input line 120.
+(Font)              scaled to size 10.0pt on input line 128.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 0.9999964596882403.
@@ -650,15 +650,15 @@ Package fontspec Info:
 (fontspec)             <->s*[0.9999964596882403]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 10.0pt on input line 120.
+(Font)              scaled to size 10.0pt on input line 128.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 120.
+(Font)              `operators' in the math version `normal' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/lmr/m/n --> TU/latinmodern-math.otf(1)/m/n on input line 120.
+(Font)                  OT1/lmr/m/n --> TU/latinmodern-math.otf(1)/m/n on input line 128.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 120.
+(Font)              `operators' in the math version `bold' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/lmr/bx/n --> TU/latinmodern-math.otf(1)/b/n on input line 120.
+(Font)                  OT1/lmr/bx/n --> TU/latinmodern-math.otf(1)/b/n on input line 128.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 0.9999964596882403.
@@ -724,13 +724,13 @@ Package fontspec Info:
 (fontspec)             <->s*[1.000096459334209]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `normal' on input line 120.
+(Font)              `symbols' in the math version `normal' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
-(Font)                  OMS/lmsy/m/n --> TU/latinmodern-math.otf(2)/m/n on input line 120.
+(Font)                  OMS/lmsy/m/n --> TU/latinmodern-math.otf(2)/m/n on input line 128.
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `bold' on input line 120.
+(Font)              `symbols' in the math version `bold' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
-(Font)                  OMS/lmsy/b/n --> TU/latinmodern-math.otf(2)/b/n on input line 120.
+(Font)                  OMS/lmsy/b/n --> TU/latinmodern-math.otf(2)/b/n on input line 128.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 0.9999964596882403.
@@ -790,20 +790,20 @@ Package fontspec Info:
 (fontspec)             <->s*[0.9998964600422715]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
-(Font)              `largesymbols' in the math version `normal' on input line 120.
+(Font)              `largesymbols' in the math version `normal' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
-(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/m/n on input line 120.
+(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/m/n on input line 128.
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
-(Font)              `largesymbols' in the math version `bold' on input line 120.
+(Font)              `largesymbols' in the math version `bold' on input line 128.
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
-(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/b/n on input line 120.
-LaTeX Info: Redefining \microtypecontext on input line 120.
-Package microtype Info: Applying patch `item' on input line 120.
-Package microtype Info: Applying patch `toc' on input line 120.
-Package microtype Info: Applying patch `eqnum' on input line 120.
-Package microtype Info: Applying patch `footnote' on input line 120.
-Package microtype Info: Applying patch `verbatim' on input line 120.
-LaTeX Info: Redefining \microtypesetup on input line 120.
+(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/b/n on input line 128.
+LaTeX Info: Redefining \microtypecontext on input line 128.
+Package microtype Info: Applying patch `item' on input line 128.
+Package microtype Info: Applying patch `toc' on input line 128.
+Package microtype Info: Applying patch `eqnum' on input line 128.
+Package microtype Info: Applying patch `footnote' on input line 128.
+Package microtype Info: Applying patch `verbatim' on input line 128.
+LaTeX Info: Redefining \microtypesetup on input line 128.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
 Package microtype Info: No adjustment of tracking.
@@ -812,36 +812,36 @@ Package microtype Info: No adjustment of kerning.
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/mt-LatinModernRoman.cfg
 File: mt-LatinModernRoman.cfg 2026/02/26 v1.2 microtype config. file: Latin Modern Roman (RS)
 )
-Package hyperref Info: Link coloring OFF on input line 120.
+Package hyperref Info: Link coloring OFF on input line 128.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 12.0pt on input line 122.
+(Font)              scaled to size 12.0pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 8.0pt on input line 122.
+(Font)              scaled to size 8.0pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 6.0pt on input line 122.
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 122.
+(Font)              scaled to size 6.0pt on input line 130.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 130.
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 12.0011pt on input line 122.
+(Font)              scaled to size 12.0011pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 8.00073pt on input line 122.
+(Font)              scaled to size 8.00073pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 6.00055pt on input line 122.
+(Font)              scaled to size 6.00055pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 11.99872pt on input line 122.
+(Font)              scaled to size 11.99872pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 7.99915pt on input line 122.
+(Font)              scaled to size 7.99915pt on input line 130.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 5.99936pt on input line 122.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 122.
+(Font)              scaled to size 5.99936pt on input line 130.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 130.
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 122.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 130.
 (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (c:/Users/fredv/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
@@ -875,7 +875,7 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 [11] [12
 
 ] [13]
-Underfull \hbox (badness 10000) in paragraph at lines 188--189
+Underfull \hbox (badness 10000) in paragraph at lines 198--199
 [][]$[][][][][] [] [] [] [][][][][][] [] [][][] [] [][][][] [][] [][][][][][][][][] [] [][][] [] [][][][] [] [][][] [][] [][][][] [][] [][][][][][][] []
  []
 
@@ -896,51 +896,48 @@ Chapter 2.
 Chapter 3.
 [29] [30]
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 910.
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 920.
+File: images/ch3_cdf_lpm0.png Graphic file (type bmp)
+<images/ch3_cdf_lpm0.png>
 [31] [32] [33]
-Underfull \hbox (badness 4144) in paragraph at lines 1067--1067
+Underfull \hbox (badness 4144) in paragraph at lines 1083--1083
 []\TU/lmr/bx/n/12 Lower-Tail Thresholds as Degree-Zero Partial-
  []
 
-[34] [35] [36]
-Chapter 4.
-[37
+[34] [35] [36] [37] [38
 
-] [38] [39] [40] [41] [42]
-Overfull \hbox (11.9321pt too wide) detected at line 1476
+]
+Chapter 4.
+[39] [40] [41] [42] [43] [44]
+Overfull \hbox (11.9321pt too wide) detected at line 1492
 [] [] [] [] [][][]
  []
 
-[43]
-Overfull \hbox (73.20363pt too wide) detected at line 1514
+[45]
+Overfull \hbox (73.20363pt too wide) detected at line 1530
 [][]  [][]  [][]
  []
 
-[44] [45] [46
+[46] [47] [48
 
 ]
 Chapter 5.
-[47]
-Underfull \hbox (badness 10000) in paragraph at lines 1580--1582
+[49]
+Underfull \hbox (badness 10000) in paragraph at lines 1596--1598
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1582--1584
+Underfull \hbox (badness 10000) in paragraph at lines 1598--1600
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1584--1586
+Underfull \hbox (badness 10000) in paragraph at lines 1600--1602
 
  []
 
 
-Overfull \hbox (7.22562pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 48 \TU/lmr/m/sl/10 CHAPTER 5.  CLASSICAL MOMENTS AS DIRECTIONAL AGGREGATES
- []
-
-[48] [49]
 Overfull \hbox (7.22562pt too wide) has occurred while \output is active
 \TU/lmr/m/n/10 50 \TU/lmr/m/sl/10 CHAPTER 5.  CLASSICAL MOMENTS AS DIRECTIONAL AGGREGATES
  []
@@ -955,686 +952,899 @@ Overfull \hbox (7.22562pt too wide) has occurred while \output is active
 \TU/lmr/m/n/10 54 \TU/lmr/m/sl/10 CHAPTER 5.  CLASSICAL MOMENTS AS DIRECTIONAL AGGREGATES
  []
 
-[54
+[54] [55]
+Overfull \hbox (7.22562pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 56 \TU/lmr/m/sl/10 CHAPTER 5.  CLASSICAL MOMENTS AS DIRECTIONAL AGGREGATES
+ []
+
+[56
 
 ]
 Chapter 6.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1907--1909
+Underfull \hbox (badness 10000) in paragraph at lines 1923--1925
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1909--1911
+Underfull \hbox (badness 10000) in paragraph at lines 1925--1927
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1911--1913
+Underfull \hbox (badness 10000) in paragraph at lines 1927--1929
 
  []
 
-[55]
-Underfull \hbox (badness 10000) in paragraph at lines 1946--1948
+[57]
+Underfull \hbox (badness 10000) in paragraph at lines 1962--1964
 
  []
 
 Missing character: There is no σ (U+03C3) in font [lmroman10-regular]:mapping=tex-text;!
 
-Underfull \hbox (badness 10000) in paragraph at lines 1948--1950
+Underfull \hbox (badness 10000) in paragraph at lines 1964--1966
 
  []
 
-[56]
-Underfull \hbox (badness 10000) in paragraph at lines 1996--1998
+[58]
+Underfull \hbox (badness 10000) in paragraph at lines 2012--2014
 
  []
 
-[57] [58] [59] [60] [61] [62]
+[59] [60] [61] [62] [63] [64]
 Chapter 7.
-[63
+[65
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2303--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2319--2321
 
  []
 
-[64] [65]
-Underfull \hbox (badness 10000) in paragraph at lines 2428--2430
+[66] [67]
+Underfull \hbox (badness 10000) in paragraph at lines 2444--2446
 
  []
 
-[66] [67] [68]
-Underfull \hbox (badness 10000) in paragraph at lines 2588--2590
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2590--2592
+[68] [69] [70]
+Underfull \hbox (badness 10000) in paragraph at lines 2604--2606
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2592--2594
+Underfull \hbox (badness 10000) in paragraph at lines 2606--2608
 
  []
 
-[69] [70] [71] [72
+
+Underfull \hbox (badness 10000) in paragraph at lines 2608--2610
+
+ []
+
+[71] [72] [73] [74
 
 ]
 Chapter 8.
 
-Underfull \hbox (badness 10000) in paragraph at lines 2657--2659
+Underfull \hbox (badness 10000) in paragraph at lines 2673--2675
 
  []
 
-[73] [74] [75] [76] [77]
-Underfull \hbox (badness 10000) in paragraph at lines 2906--2908
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2908--2910
+[75] [76] [77] [78] [79]
+Underfull \hbox (badness 10000) in paragraph at lines 2924--2926
 
  []
 
 
-Overfull \hbox (27.84775pt too wide) detected at line 2921
+Underfull \hbox (badness 10000) in paragraph at lines 2926--2928
+
+ []
+
+
+Overfull \hbox (27.84775pt too wide) detected at line 2939
 [][][][] [] [] [] [][][][]  [][][][] [] [][][] [] [] [] [] [] [] [] [][] [] [][][][]  [][][][] [] [][][] [] [] [] [] [] [] [] [][] [] [][][][]
  []
 
-[78] [79] [80] [81] [82
+[80] [81] [82] [83] [84
 
 ]
 Chapter 9.
-[83] [84] [85]
-Overfull \hbox (110.8439pt too wide) detected at line 3227
-[][] [] [][][][][] [] [][][] [] [][] [] [][][][][][] [] [][][][] [] [][][] [] [][][][][][] [] [][][] [] [][] [] [][][][][][][] [] [][][] [] [][][] [] [][][][][] [] [][][][][]
+[85] [86] [87]
+Overfull \hbox (31.036pt too wide) detected at line 3294
+[][][][] [][] [] [][][][][] [][] [] [][][][][] [][] [] [][][][][] [][] [] [][][][][] [][][]
  []
 
-
-Overfull \hbox (42.00594pt too wide) detected at line 3241
-[][][][][][] [][] [] [][][][][][][][][] [][] [] [][][][][][][][][] [][] [] [][][][][][][][] [][] [] [][][][][][][][] [][][]
+[88] [89] [90]
+Overfull \hbox (93.31343pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 9.5.  GRAM-MATRIX STRUCTURE OF CONCORDANT CO-PARTIAL MOMENT MATRICES \TU/lmr/m/n/10 91
  []
 
-[86] [87] [88] [89] [90]
-Chapter 10.
-[91
-
-] [92] [93] [94]
-
-LaTeX Font Warning: Font shape `TU/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `TU/lmtt/b/sl' tried instead on input line 3738.
-
-[95] [96] [97] [98]
-Chapter 11.
-[99
+[91] [92] [93] [94] [95] [96
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 3935--3935
+Chapter 10.
+[97] [98] [99] [100]
+
+LaTeX Font Warning: Font shape `TU/lmtt/bx/it' in size <10> not available
+(Font)              Font shape `TU/lmtt/b/sl' tried instead on input line 3990.
+
+[101] [102] [103] [104]
+Chapter 11.
+
+Overfull \hbox (91.39001pt too wide) detected at line 4153
+[]
+ []
+
+[105
+
+] [106]
+Overfull \hbox (6.46002pt too wide) detected at line 4284
+[]
+ []
+
+[107]
+Underfull \hbox (badness 2478) in paragraph at lines 4355--4355
+[]\TU/lmr/bx/n/14.4 Between-Within Covariance Decomposi-
+ []
+
+[108] [109]
+Overfull \hbox (4.67207pt too wide) detected at line 4519
+[] [] [] [] []
+ []
+
+[110] [111] [112] [113]
+Overfull \hbox (16.9pt too wide) detected at line 4728
+[]
+ []
+
+[114]
+Overfull \hbox (140.76006pt too wide) detected at line 4789
+[]
+ []
+
+
+Overfull \hbox (24.50304pt too wide) detected at line 4808
+[][][][][][][]
+ []
+
+[115] [116]
+Overfull \hbox (64.5pt too wide) in paragraph at lines 4933--4933
+[]\TU/lmtt/m/n/10 ##   quadrant    n      p    mean_x    mean_y       u_x       u_y lambda_rank1[] 
+ []
+
+
+Overfull \hbox (64.5pt too wide) in paragraph at lines 4933--4933
+[]\TU/lmtt/m/n/10 ## 1     CUPM 3732 0.3732  0.909351  0.902914  0.911723  0.911077     0.619997[] 
+ []
+
+[117]
+Overfull \hbox (64.5pt too wide) in paragraph at lines 4933--4933
+[]\TU/lmtt/m/n/10 ## 2     CLPM 3779 0.3779 -0.900760 -0.915622 -0.898388 -0.907459     0.616197[] 
+ []
+
+
+Overfull \hbox (64.5pt too wide) in paragraph at lines 4933--4933
+[]\TU/lmtt/m/n/10 ## 3     DLPM 1232 0.1232  0.464620 -0.490819  0.466992 -0.482655     0.055568[] 
+ []
+
+
+Overfull \hbox (64.5pt too wide) in paragraph at lines 4933--4933
+[]\TU/lmtt/m/n/10 ## 4     DUPM 1257 0.1257 -0.466076  0.488080 -0.463704  0.496243     0.057983[] 
+ []
+
+[118] [119]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[120]
+Underfull \vbox (badness 10000) detected at line 5198
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[121]
+File: nns-book_files/figure-latex/clpm-mean-slope-figure-1.pdf Graphic file (type pdf)
+<use nns-book_files/figure-latex/clpm-mean-slope-figure-1.pdf>
+[122] [123]
+Overfull \hbox (76.48001pt too wide) detected at line 5328
+[]
+ []
+
+[124]
+Chapter 12.
+[125
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 5382--5382
 []\TU/lmr/bx/n/14.4 Directional Statistics and Probability
  []
 
-[100]
-Underfull \hbox (badness 10000) in paragraph at lines 3991--3993
+[126]
+Underfull \hbox (badness 10000) in paragraph at lines 5438--5440
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3993--3995
+Underfull \hbox (badness 10000) in paragraph at lines 5440--5442
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3995--3997
+Underfull \hbox (badness 10000) in paragraph at lines 5442--5444
 
  []
 
-[101]
-Underfull \hbox (badness 10000) in paragraph at lines 4037--4039
+[127]
+Underfull \hbox (badness 10000) in paragraph at lines 5484--5486
 
  []
 
 Missing character: There is no ∎ (U+220E) in font [lmroman10-regular]:mapping=tex-text;!
-[102]
+[128]
+File: images/ch11_raw_copula.png Graphic file (type bmp)
+<images/ch11_raw_copula.png>
+
 Overfull \hbox (119.11453pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 11.6.  EXAMPLE: DIRECTIONAL DEPENDENCE SURFACE AND COPULA TRANSFORMATION \TU/lmr/m/n/10 103
+\TU/lmr/m/sl/10 12.6.  EXAMPLE: DIRECTIONAL DEPENDENCE SURFACE AND COPULA TRANSFORMATION \TU/lmr/m/n/10 129
  []
 
-[103] [104]
-Underfull \hbox (badness 10000) in paragraph at lines 4254--4256
+[129] [130]
+File: images/ch11_transformed_copula.png Graphic file (type bmp)
+<images/ch11_transformed_copula.png>
+
+Overfull \hbox (119.11453pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 12.6.  EXAMPLE: DIRECTIONAL DEPENDENCE SURFACE AND COPULA TRANSFORMATION \TU/lmr/m/n/10 131
+ []
+
+[131] [132]
+Underfull \hbox (badness 10000) in paragraph at lines 5713--5715
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4256--4258
+Underfull \hbox (badness 10000) in paragraph at lines 5715--5717
 
  []
 
-[105]
-Underfull \hbox (badness 10000) in paragraph at lines 4258--4260
+
+Underfull \hbox (badness 10000) in paragraph at lines 5717--5719
 
  []
 
-[106] [107] [108]
-Chapter 12.
-[109
+[133] [134] [135] [136
 
 ]
+Chapter 13.
+[137]
 Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 110 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
+\TU/lmr/m/n/10 138 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
  []
 
-[110]
-Overfull \hbox (47.7826pt too wide) detected at line 4497
+[138]
+Overfull \hbox (47.7826pt too wide) detected at line 5956
 [][][] [] [][] [] [] [] [][][] [] [][]  [][][] [] [][] [] [] [] [][][] [] [][]
  []
 
-[111]
-Overfull \hbox (50.2826pt too wide) detected at line 4506
+[139]
+Overfull \hbox (50.2826pt too wide) detected at line 5965
 [][][] [] [][] [] [] [] [][][] [] [][]  [][][] [] [][] [] [] [] [][][] [] [][]
  []
 
 
-Overfull \hbox (39.87259pt too wide) detected at line 4515
+Overfull \hbox (39.87259pt too wide) detected at line 5974
 [][][] [] [][] [] [] [] [][][] [] [][]  [][][] [] [][] [] [] [] [][][] [] [][]
  []
 
 
 Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 112 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
+\TU/lmr/m/n/10 140 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
  []
 
-[112] [113]
-Underfull \hbox (badness 1210) in paragraph at lines 4628--4629
+[140] [141]
+Underfull \hbox (badness 1210) in paragraph at lines 6087--6088
 []\TU/lmr/m/n/10 Bayesian updating therefore corresponds to \TU/lmr/bx/n/10 redistributing probability
  []
 
 
 Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 114 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
+\TU/lmr/m/n/10 142 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
  []
 
-[114]
+[142]
 Overfull \hbox (160.23343pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 12.14.  THE DEGREE-ONE EXTENSION: CO-PARTIAL MOMENTS AS DISTRIBUTIONAL GENERATORS \TU/lmr/m/n/10 115
+\TU/lmr/m/sl/10 13.14.  THE DEGREE-ONE EXTENSION: CO-PARTIAL MOMENTS AS DISTRIBUTIONAL GENERATORS \TU/lmr/m/n/10 143
  []
 
-[115]
+[143]
 Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 116 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
+\TU/lmr/m/n/10 144 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
  []
 
-[116]
-Overfull \hbox (49.50218pt too wide) detected at line 4732
+[144]
+Overfull \hbox (49.50218pt too wide) detected at line 6191
 [][][][][] [][][] [] [] [][][][] [] [][][] [][][] [] [][][][] [] [][][] [] [][][]  [] [] [][][] [] [][][][][][] [][][][] \U/msa/m/n/10 ^^C
  []
 
-[117]
-Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 118 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
- []
-
-[118]
-Underfull \hbox (badness 1533) in paragraph at lines 4792--4794
-[]\TU/lmr/bx/n/10 Bayesian updating corresponds to renormalizing the four-
- []
-
-[119]
-Overfull \hbox (7.40564pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 120 \TU/lmr/m/sl/10 CHAPTER 12.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
- []
-
-[120
-
-]
-Chapter 13.
-[121] [122] [123] [124] [125] [126] [127]
-Underfull \hbox (badness 2837) in paragraph at lines 5090--5091
-[]\TU/lmr/m/n/10 The resulting statistic remains nonparametric, benchmark-relative, and
- []
-
-[128]
-Chapter 14.
-[129
-
-] [130] [131]
-Underfull \hbox (badness 1308) in paragraph at lines 5258--5259
-[]\TU/lmr/m/n/10 Within the partial-moment framework, these probabilities correspond to
- []
-
-[132]
-Underfull \hbox (badness 1082) in paragraph at lines 5288--5288
-[]\TU/lmr/bx/n/12 The Discrete–Continuous CDF Distinction and
- []
-
-[133] [134] [135]
-Missing character: There is no ≤ (U+2264) in font [lmmono10-regular]:!
-[136] [137] [138]
-Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 139
- []
-
-[139] [140]
-Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 141
- []
-
-[141] [142]
-Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 143
- []
-
-[143] [144]
-Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 145
- []
-
 [145]
-Underfull \hbox (badness 3049) in paragraph at lines 5802--5803
-\TU/lmr/m/n/10 for bias-corrected prediction intervals (\TU/lmtt/m/n/10 LPM.VaR(..., degree = 1, ...)\TU/lmr/m/n/10 ,
+Overfull \hbox (7.40564pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 146 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
  []
 
 [146]
-Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 147
+Underfull \hbox (badness 1533) in paragraph at lines 6253--6255
+[]\TU/lmr/bx/n/10 Bayesian updating corresponds to renormalizing the four-
  []
 
 [147]
+Overfull \hbox (7.40564pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 148 \TU/lmr/m/sl/10 CHAPTER 13.  CONDITIONAL PROBABILITY AND BAYES’ THEOREM
+ []
 
-LaTeX Warning: Reference `example-dataset' on page 148 undefined on input line 5872.
+[148
 
-[148]
-Underfull \hbox (badness 3635) in paragraph at lines 5920--5922
-\TU/lmr/m/n/10 one continuous CDF, producing an agreement certainty statistic
+]
+Chapter 14.
+[149] [150] [151] [152] [153] [154] [155]
+Underfull \hbox (badness 2837) in paragraph at lines 6551--6552
+[]\TU/lmr/m/n/10 The resulting statistic remains nonparametric, benchmark-relative, and
+ []
+
+
+Underfull \hbox (badness 3019) in paragraph at lines 6553--6554
+\TU/lmr/m/n/10 benchmarks, and strength-of-inference summaries, see []Causal Inference
+ []
+
+
+Underfull \vbox (badness 1902) has occurred while \output is active []
+
+[156] [157] [158
+
+]
+Chapter 15.
+[159] [160] [161]
+Underfull \hbox (badness 1308) in paragraph at lines 6731--6732
+[]\TU/lmr/m/n/10 Within the partial-moment framework, these probabilities correspond to
+ []
+
+[162]
+Underfull \hbox (badness 1082) in paragraph at lines 6761--6761
+[]\TU/lmr/bx/n/12 The Discrete–Continuous CDF Distinction and
+ []
+
+[163] [164] [165]
+Missing character: There is no ≤ (U+2264) in font [lmmono10-regular]:!
+File: images/ch14_lpm0_lpm1_diff.png Graphic file (type bmp)
+<images/ch14_lpm0_lpm1_diff.png>
+[166] [167] [168]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 169
+ []
+
+[169] [170]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 171
+ []
+
+[171] [172]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 173
+ []
+
+[173] [174]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 175
+ []
+
+[175] [176]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 177
+ []
+
+[177] [178]
+Underfull \hbox (badness 3049) in paragraph at lines 7374--7375
+\TU/lmr/m/n/10 for bias-corrected prediction intervals (\TU/lmtt/m/n/10 LPM.VaR(..., degree = 1, ...)\TU/lmr/m/n/10 ,
  []
 
 
 Overfull \hbox (21.71344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 14.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 149
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 179
  []
 
-[149] [150]
-Chapter 15.
-[151
+[179] [180]
+Overfull \vbox (0.9429pt too high) detected at line 7509
+ []
+
+
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 181
+ []
+
+[181]
+Underfull \hbox (badness 10000) in paragraph at lines 7511--7516
+[]\TU/lmr/m/n/10 For this comparison, \TU/lmtt/m/n/10 NNS.SS(manual_mpg, auto_mpg) \TU/lmr/m/n/10 yields \TU/lmtt/m/n/10 p_gt =
+ []
+
+
+Underfull \hbox (badness 2261) in paragraph at lines 7511--7516
+\TU/lmtt/m/n/10 0.8259109\TU/lmr/m/n/10 , \TU/lmtt/m/n/10 p_tie = 0.008097166\TU/lmr/m/n/10 , and \TU/lmtt/m/n/10 p_star = 0.8299595\TU/lmr/m/n/10 , indicating
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7511--7516
+\TU/lmtt/m/n/10 NNS.ANOVA(control = auto_mpg, treatment = manual_mpg, robust =
+ []
+
+
+Underfull \hbox (badness 1062) in paragraph at lines 7511--7516
+\TU/lmr/m/n/10 show pairwise directional advantage, weak distributional agreement, and
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[182]
+Overfull \hbox (21.71344pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 15.4.  BLOCK IV — APPLIED WORKFLOW AND PRACTICAL INFERENCE \TU/lmr/m/n/10 183
+ []
+
+[183] [184
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 5995--5997
+Chapter 16.
+[185]
+Overfull \hbox (166.99454pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 186 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
+ []
+
+[186]
+Underfull \hbox (badness 2351) in paragraph at lines 7654--7654
+[]\TU/lmr/bx/n/14.4 From Frequency to Severity: Higher-
+ []
+
+
+Overfull \hbox (29.09453pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 16.2.  DEGREE-ZERO THRESHOLDS AND THEIR DIRECTIONAL MEANING \TU/lmr/m/n/10 187
+ []
+
+[187]
+Overfull \hbox (166.99454pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 188 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
+ []
+
+[188]
+Overfull \hbox (49.4621pt too wide) detected at line 7748
+[] [] [] [] [][]
+ []
+
+
+Underfull \hbox (badness 1635) in paragraph at lines 7754--7754
+[]\TU/lmr/bx/n/14.4 Severity-Weighted Thresholds as Early-
+ []
+
+
+Overfull \hbox (51.81563pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 16.5.  SEVERITY-WEIGHTED THRESHOLDS AS EARLY-INTERVENTION RULES \TU/lmr/m/n/10 189
+ []
+
+[189]
+Overfull \hbox (166.99454pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 190 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
+ []
+
+[190]
+Overfull \hbox (0.8256pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 16.8.  UTILITY, DECISION CONTEXT, AND WHY DEGREE MATTERS \TU/lmr/m/n/10 191
+ []
+
+[191]
+Overfull \hbox (166.99454pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 192 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
+ []
+
+[192] [193]
+Overfull \hbox (166.99454pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 194 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
+ []
+
+[194
+
+]
+Chapter 17.
+[195]
+Underfull \hbox (badness 10000) in paragraph at lines 7973--7975
 
  []
 
-[152] [153]
-Underfull \hbox (badness 10000) in paragraph at lines 6064--6064
+[196] [197]
+Underfull \hbox (badness 10000) in paragraph at lines 8042--8042
 []\TU/lmr/bx/n/14.4 Partial-Moment Quantile Functions:
  []
 
 
 Underfull \vbox (badness 1189) has occurred while \output is active []
 
-[154] [155] [156] [157] [158] [159] [160] [161] [162]
-Chapter 16.
-[163
+[198] [199] [200] [201] [202] [203]
+File: images/ch15_reg_conf_int.png Graphic file (type bmp)
+<images/ch15_reg_conf_int.png>
+[204] [205] [206]
+Chapter 18.
+[207
+
+] [208]
+Overfull \hbox (3.67741pt too wide) in paragraph at lines 8458--8459
+[]\TU/lmr/bx/n/10 Theorem (Consistency of Partition Estimators). \TU/lmr/m/n/10 Let $[][][][] [][][][] [] [] [][][][] [][][]$
+ []
+
+[209] [210] [211] [212]
+File: images/ch18_part_1.png Graphic file (type bmp)
+<images/ch18_part_1.png>
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 14.4pt on input line 8639.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 14.4013pt on input line 8639.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 14.39845pt on input line 8639.
+[213]
+File: images/ch18_part_2.png Graphic file (type bmp)
+<images/ch18_part_2.png>
+[214] [215]
+Underfull \hbox (badness 2495) in paragraph at lines 8739--8739
+[]\TU/lmr/bx/n/14.4 Partial-Moment Interpretation of Joint
+ []
+
+[216] [217] [218] [219] [220] [221] [222] [223] [224]
+Chapter 19.
+[225
+
+] [226]
+Overfull \hbox (24.78342pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 19.2.  LOCAL AVERAGING IN THE RECURSIVE MEAN-SPLIT ESTIMATOR \TU/lmr/m/n/10 227
+ []
+
+[227]
+Underfull \hbox (badness 1259) in paragraph at lines 9169--9170
+[]\TU/lmr/m/n/10 The recursive mean-split estimator can be viewed as a \TU/lmr/bx/n/10 local-constant
+ []
+
+[228]
+Overfull \hbox (61.64343pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 19.5.  CONSISTENCY CONDITIONS RE-READ THROUGH THE BANDWIDTH LENS \TU/lmr/m/n/10 229
+ []
+
+[229] [230] [231] [232] [233] [234]
+Overfull \hbox (9.92343pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 19.11.  THE ORDER PARAMETER AS GLOBAL SMOOTHING CONTROL \TU/lmr/m/n/10 235
+ []
+
+[235] [236] [237] [238] [239] [240
 
 ]
-Overfull \hbox (166.99454pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 164 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
- []
-
-[164]
-Underfull \hbox (badness 2351) in paragraph at lines 6498--6498
-[]\TU/lmr/bx/n/14.4 From Frequency to Severity: Higher-
- []
-
-
-Overfull \hbox (29.09453pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 16.2.  DEGREE-ZERO THRESHOLDS AND THEIR DIRECTIONAL MEANING \TU/lmr/m/n/10 165
- []
-
-[165]
-Overfull \hbox (166.99454pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 166 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
- []
-
-[166]
-Overfull \hbox (49.4621pt too wide) detected at line 6592
-[] [] [] [] [][]
- []
-
-
-Underfull \hbox (badness 1635) in paragraph at lines 6598--6598
-[]\TU/lmr/bx/n/14.4 Severity-Weighted Thresholds as Early-
- []
-
-
-Overfull \hbox (51.81563pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 16.5.  SEVERITY-WEIGHTED THRESHOLDS AS EARLY-INTERVENTION RULES \TU/lmr/m/n/10 167
- []
-
-[167]
-Overfull \hbox (166.99454pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 168 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
- []
-
-[168]
-Overfull \hbox (0.8256pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 16.8.  UTILITY, DECISION CONTEXT, AND WHY DEGREE MATTERS \TU/lmr/m/n/10 169
- []
-
-[169]
-Overfull \hbox (166.99454pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 170 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
- []
-
-[170] [171]
-Overfull \hbox (166.99454pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 172 \TU/lmr/m/sl/10 CHAPTER 16.  DIRECTIONAL TAIL THRESHOLDS, PROBABILITY BOUNDS, AND ESTIMATION ERROR
- []
-
-[172
-
-]
-Chapter 17.
-[173]
+Chapter 20.
+[241]
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 174 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 242 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[174] [175]
+[242] [243]
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 176 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 244 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[176] [177]
+[244] [245]
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 6921.
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 9861.
 
-Underfull \hbox (badness 2503) in paragraph at lines 6921--6921
+Underfull \hbox (badness 2503) in paragraph at lines 9861--9861
 []\TU/lmr/bx/n/14.4 Arbitrary Spearman Rank Correlation:
  []
 
 
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 178 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 246 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[178]
-Overfull \hbox (3.32802pt too wide) in paragraph at lines 6980--6981
+[246]
+Overfull \hbox (3.32802pt too wide) in paragraph at lines 9920--9921
 []\TU/lmr/m/n/10 Reconstructed synthetic series are formed as $[][] [] [][]$,
  []
 
-[179]
-Underfull \hbox (badness 2913) in paragraph at lines 7005--7005
+[247]
+Underfull \hbox (badness 2913) in paragraph at lines 9945--9945
 []\TU/lmr/bx/n/14.4 Synthetic Time-Series Generation with
  []
 
+File: images/ch17_meboot_orig.png Graphic file (type bmp)
+<images/ch17_meboot_orig.png>
 
 ignored: Infinite glue shrinkage found in box being split
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 180 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 248 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[180]
+[248]
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <12> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 7063.
-[181]
-Underfull \vbox (badness 1107) has occurred while \output is active []
-
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 10009.
+[249]
+File: images/ch17_iid_mc_sim.png Graphic file (type bmp)
+<images/ch17_iid_mc_sim.png>
 
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 182 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 250 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[182]
-Underfull \hbox (badness 2635) in paragraph at lines 7154--7154
+[250]
+File: images/ch17_meboot_mc_sim.png Graphic file (type bmp)
+<images/ch17_meboot_mc_sim.png>
+[251]
+Underfull \hbox (badness 2635) in paragraph at lines 10112--10112
 []\TU/lmr/bx/n/14.4 Applications in Forecasting and Risk
  []
 
-[183]
+
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 184 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 252 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[184] [185]
+[252] [253]
 Overfull \hbox (32.1345pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 186 \TU/lmr/m/sl/10 CHAPTER 17.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
+\TU/lmr/m/n/10 254 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
-[186]
-Chapter 18.
-[187
-
-] [188] [189] [190]
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 14.4pt on input line 7496.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 14.4013pt on input line 7496.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 14.39845pt on input line 7496.
-[191] [192]
-Underfull \hbox (badness 2495) in paragraph at lines 7582--7582
-[]\TU/lmr/bx/n/14.4 Partial-Moment Interpretation of Joint
+[254] [255]
+Overfull \hbox (32.1345pt too wide) has occurred while \output is active
+\TU/lmr/m/n/10 256 \TU/lmr/m/sl/10 CHAPTER 20.  SYNTHETIC DATA AND MAXIMUM ENTROPY BOOTSTRAP
  []
 
+[256]
+Chapter 21.
+[257
 
-Overfull \hbox (15.41563pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 18.7.  PARTIAL-MOMENT INTERPRETATION OF JOINT PARTITIONING \TU/lmr/m/n/10 193
- []
+] [258] [259] [260] [261]
+ignored: Infinite glue shrinkage found in box being split [262] [263] [264]
+File: images/ch20_kmeans_comp.png Graphic file (type bmp)
+<images/ch20_kmeans_comp.png>
 
-[193] [194] [195] [196] [197] [198] [199] [200]
-Chapter 19.
-[201
+Underfull \vbox (badness 4634) has occurred while \output is active []
+
+[265] [266] [267] [268] [269] [270] [271] [272] [273] [274
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 7889--7891
-
+Chapter 22.
+[275] [276] [277]
+Underfull \hbox (badness 1102) in paragraph at lines 10933--10933
+[]\TU/lmr/bx/n/14.4 From Conditional Means to Regression
  []
 
-[202]
-Underfull \hbox (badness 1259) in paragraph at lines 7999--8000
-[]\TU/lmr/m/n/10 The recursive mean-split estimator can be viewed as a \TU/lmr/bx/n/10 local-constant
- []
+[278]
+File: images/ch21_part_reg.png Graphic file (type bmp)
+<images/ch21_part_reg.png>
 
-[203] [204] [205] [206] [207] [208] [209] [210] [211] [212] [213] [214]
-Chapter 20.
-[215
+LaTeX Warning: Float too large for page by 23.04681pt on input line 10991.
 
-] [216] [217] [218]
-Overfull \hbox (51.3334pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 20.5.  RECURSIVE MEAN SPLITS AS UNSUPERVISED STRUCTURE DISCOVERY \TU/lmr/m/n/10 219
- []
-
-[219] [220] [221] [222] [223] [224] [225] [226] [227] [228]
-Chapter 21.
-[229
-
-] [230] [231] [232] [233] [234]
-Underfull \hbox (badness 6300) in paragraph at lines 9483--9483
+[279] [280] [281]
+Underfull \hbox (badness 6300) in paragraph at lines 11090--11090
 []\TU/lmr/bx/n/14.4 Comparison with Classical Regression
  []
 
-[235] [236] [237] [238]
+[282] [283] [284]
+Overfull \hbox (213.92236pt too wide) has occurred while \output is active
+\TU/lmr/m/sl/10 22.11.  MULTIVARIATE REGRESSION: PER-REGRESSOR PARTITIONING AND THE CURSE OF DIMENSIONALITY \TU/lmr/m/n/10 285
+ []
+
+[285] [286]
 Overfull \hbox (73.97562pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 21.11.  ADAPTIVE ORDER SELECTION: DEPENDENCE-DRIVEN PARTITION DEPTH \TU/lmr/m/n/10 239
+\TU/lmr/m/sl/10 22.12.  ADAPTIVE ORDER SELECTION: DEPENDENCE-DRIVEN PARTITION DEPTH \TU/lmr/m/n/10 287
  []
 
-[239] [240] [241]
-Underfull \hbox (badness 1521) in paragraph at lines 9783--9784
-\TU/lmr/m/n/10 The framework can either preserve joint multivariate structure through
+[287] [288] [289] [290]
+Underfull \hbox (badness 3240) in paragraph at lines 11373--11374
+[]\TU/lmr/m/n/10 The multivariate architecture — per-regressor partitioning against the
  []
 
-[242] [243] [244]
-Chapter 22.
-[245
 
-] [246] [247] [248] [249] [250] [251] [252] [253] [254]
-Underfull \hbox (badness 3861) in paragraph at lines 10335--10336
-[]\TU/lmr/m/n/10 Schematically, this is implemented by calling \TU/lmtt/m/n/10 NNS.boost(..., type =
+Underfull \hbox (badness 2418) in paragraph at lines 11373--11374
+\TU/lmr/m/n/10 response, regression-point matrix construction, and dependence-adaptive
  []
 
-[255] [256] [257] [258] [259] [260] [261] [262
+[291]
+Underfull \hbox (badness 1127) in paragraph at lines 11395--11396
+\TU/lmr/m/n/10 bandwidth, response-anchored regression-point nearest-neighbor prediction,
+ []
+
+[292] [293] [294
 
 ]
 Chapter 23.
-[263] [264] [265] [266] [267] [268] [269]
-Underfull \hbox (badness 1521) in paragraph at lines 10987--10987
+[295] [296] [297] [298] [299] [300] [301] [302] [303] [304]
+Underfull \hbox (badness 3861) in paragraph at lines 11908--11909
+[]\TU/lmr/m/n/10 Schematically, this is implemented by calling \TU/lmtt/m/n/10 NNS.boost(..., type =
+ []
+
+[305] [306] [307] [308] [309] [310] [311] [312
+
+]
+Chapter 24.
+
+Underfull \hbox (badness 1796) in paragraph at lines 12272--12273
+\TU/lmr/m/n/10 features for an optimized stacked model, including cross-validated
+ []
+
+[313] [314] [315]
+Underfull \hbox (badness 1132) in paragraph at lines 12394--12395
+\TU/lmtt/m/n/10 pred.int\TU/lmr/m/n/10 , and feature-frequency summaries through \TU/lmtt/m/n/10 features.only \TU/lmr/m/n/10 and
+ []
+
+
+Underfull \vbox (badness 1565) has occurred while \output is active []
+
+[316] [317] [318] [319] [320] [321]
+Underfull \hbox (badness 1521) in paragraph at lines 12562--12562
 []\TU/lmr/bx/n/14.4 Cross-Validation in Nonparametric Set-
  []
 
-[270]
+[322]
 Overfull \hbox (2.49452pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 23.7.  ENSEMBLE LEARNING AND THE BIAS–VARIANCE TRADEOFF \TU/lmr/m/n/10 271
+\TU/lmr/m/sl/10 24.7.  ENSEMBLE LEARNING AND THE BIAS–VARIANCE TRADEOFF \TU/lmr/m/n/10 323
  []
 
-[271] [272] [273] [274] [275] [276] [277] [278]
-Chapter 24.
-[279
-
-] [280]
-Underfull \hbox (badness 1975) in paragraph at lines 11448--11448
-[]\TU/lmr/bx/n/14.4 Autoregression as a Subset Regression
- []
-
-[281] [282] [283] [284] [285] [286] [287] [288] [289] [290] [291] [292] [293] [294] [295] [296]
+[323] [324] [325] [326] [327] [328] [329] [330]
 Chapter 25.
-[297
+[331
 
 ]
-Overfull \hbox (20.34938pt too wide) detected at line 12241
+Overfull \hbox (20.34938pt too wide) detected at line 12893
 [][] [] [][] [][][][] [][][] [] [] [][][] [][][] [] [] [][][] [][][] [] [] [] [][][]  [] [] [][] [] [] [][]
  []
 
-[298] [299] [300]
-Overfull \hbox (14.98096pt too wide) detected at line 12376
+[332] [333] [334]
+Overfull \hbox (14.98096pt too wide) detected at line 13028
 [][] [] [][][][] [][][] [] [] [][][] [][][] [][][] [] [] [][][] [] [] [][][] [][][] [] [] [][][][]
  []
 
-[301]
-Underfull \hbox (badness 2626) in paragraph at lines 12431--12432
+[335]
+Underfull \hbox (badness 2626) in paragraph at lines 13083--13084
 []\TU/lmr/m/n/10 So mixed-frequency forecasting is handled natively, rather than being
  []
 
-[302] [303] [304] [305] [306] [307] [308] [309] [310]
+[336] [337] [338] [339] [340] [341] [342] [343] [344]
 Overfull \hbox (125.63344pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 25.17.  LEAKAGE-SAFE VALIDATION IN MULTIVARIATE AND MIXED-FREQUENCY SETTINGS \TU/lmr/m/n/10 311
+\TU/lmr/m/sl/10 25.17.  LEAKAGE-SAFE VALIDATION IN MULTIVARIATE AND MIXED-FREQUENCY SETTINGS \TU/lmr/m/n/10 345
  []
 
-[311]
-Underfull \hbox (badness 1776) in paragraph at lines 12988--12989
+[345]
+Underfull \hbox (badness 1776) in paragraph at lines 13642--13643
 []\TU/lmr/bx/n/10 nonparametric vector autoregression as directional multivariate
  []
 
-[312]
+[346]
 Chapter 26.
-[313
+[347
 
-] [314]
+] [348]
+Underfull \hbox (badness 1975) in paragraph at lines 13754--13754
+[]\TU/lmr/bx/n/14.4 Autoregression as a Subset Regression
+ []
+
+[349] [350] [351] [352] [353] [354] [355] [356]
+File: images/ch24_uni_ts.png Graphic file (type bmp)
+<images/ch24_uni_ts.png>
+
+Underfull \hbox (badness 1259) in paragraph at lines 14156--14156
+[]\TU/lmr/m/n/10 Figure 26.1: []Figure 24.1. \TU/lmtt/m/n/10 NNS.ARMA(..., h = 45, seasonal.factor =
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[357] [358] [359] [360] [361] [362] [363] [364] [365] [366
+
+]
 Chapter 27.
+[367] [368]
+Chapter 28.
 
-ignored: Infinite glue shrinkage found in box being split [315
+ignored: Infinite glue shrinkage found in box being split [369
 
 ]
 ignored: Infinite glue shrinkage found in box being split
 Overfull \hbox (2.70673pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 316 \TU/lmr/m/sl/10 CHAPTER 27.  APPENDIX: NOTATION AND FUNCTION REFERENCE
+\TU/lmr/m/n/10 370 \TU/lmr/m/sl/10 CHAPTER 28.  APPENDIX: NOTATION AND FUNCTION REFERENCE
  []
 
-[316]
-Underfull \hbox (badness 1762) in paragraph at lines 13176--13178
+[370]
+Underfull \hbox (badness 1762) in paragraph at lines 14689--14691
 []\TU/lmtt/m/n/10 UPM.VaR(percentile, degree, variable) \TU/lmr/m/n/10 Upper-tail analog of \TU/lmtt/m/n/10 LPM.VaR\TU/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 1642) in paragraph at lines 13179--13179
+Underfull \hbox (badness 1642) in paragraph at lines 14692--14692
 []\TU/lmr/bx/n/14.4 Directional Decision Regions Crosswalk
  []
 
 
-Overfull \hbox (14.1009pt too wide) in paragraph at lines 13206--13206
+Overfull \hbox (14.1009pt too wide) in paragraph at lines 14719--14719
 []|\TU/lmtt/m/n/10 LPM.VaR(alpha, 
  []
 
 
-Overfull \hbox (13.15091pt too wide) in paragraph at lines 13207--13207
+Overfull \hbox (13.15091pt too wide) in paragraph at lines 14720--14720
 \TU/lmr/m/n/10 risk/opportunity 
  []
 
 
-Overfull \hbox (14.1009pt too wide) in paragraph at lines 13207--13207
+Overfull \hbox (14.1009pt too wide) in paragraph at lines 14720--14720
 []|\TU/lmtt/m/n/10 UPM.VaR(alpha, 
  []
 
 
-Overfull \hbox (14.1009pt too wide) in paragraph at lines 13208--13208
+Overfull \hbox (14.1009pt too wide) in paragraph at lines 14721--14721
 []|\TU/lmtt/m/n/10 NNS.ANOVA(...) 
  []
 
 
-Overfull \hbox (14.1009pt too wide) in paragraph at lines 13210--13210
+Overfull \hbox (14.1009pt too wide) in paragraph at lines 14723--14723
 []|\TU/lmtt/m/n/10 Co.LPM(degree, 
  []
 
 
-Overfull \hbox (14.1009pt too wide) in paragraph at lines 13210--13210
+Overfull \hbox (14.1009pt too wide) in paragraph at lines 14723--14723
 \TU/lmtt/m/n/10 Co.UPM(degree, 
  []
 
 
-Overfull \hbox (3.6009pt too wide) in paragraph at lines 13211--13211
+Overfull \hbox (3.6009pt too wide) in paragraph at lines 14724--14724
 []|\TU/lmtt/m/n/10 LPM.VaR(...) 
  []
 
 
-Overfull \hbox (3.6009pt too wide) in paragraph at lines 13211--13211
+Overfull \hbox (3.6009pt too wide) in paragraph at lines 14724--14724
 \TU/lmtt/m/n/10 UPM.VaR(...) 
  []
 
 
 Overfull \hbox (37.77452pt too wide) has occurred while \output is active
-\TU/lmr/m/sl/10 27.4.  DIRECTIONAL DECISION REGIONS CROSSWALK (CLASSICAL → NNS) \TU/lmr/m/n/10 317
+\TU/lmr/m/sl/10 28.4.  DIRECTIONAL DECISION REGIONS CROSSWALK (CLASSICAL → NNS) \TU/lmr/m/n/10 371
  []
 
-[317]
+[371]
 ignored: Infinite glue shrinkage found in box being split
 Overfull \hbox (2.70673pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 318 \TU/lmr/m/sl/10 CHAPTER 27.  APPENDIX: NOTATION AND FUNCTION REFERENCE
+\TU/lmr/m/n/10 372 \TU/lmr/m/sl/10 CHAPTER 28.  APPENDIX: NOTATION AND FUNCTION REFERENCE
  []
 
-[318]
-Overfull \hbox (90.75pt too wide) in paragraph at lines 13236--13236
+[372]
+Overfull \hbox (90.75pt too wide) in paragraph at lines 14749--14749
 \TU/lmtt/m/n/10 NNS.reg(...)$Fitted.xy$residuals 
  []
 
 
-Overfull \hbox (22.5pt too wide) in paragraph at lines 13237--13237
+Overfull \hbox (22.5pt too wide) in paragraph at lines 14750--14750
 \TU/lmtt/m/n/10 confidence.interval 
  []
 
 
-Overfull \hbox (0.89pt too wide) in paragraph at lines 13238--13238
+Overfull \hbox (0.89pt too wide) in paragraph at lines 14751--14751
 \TU/lmr/m/n/10 rolling/segmented 
  []
 
-[319]
+[373]
 Overfull \hbox (2.70673pt too wide) has occurred while \output is active
-\TU/lmr/m/n/10 320 \TU/lmr/m/sl/10 CHAPTER 27.  APPENDIX: NOTATION AND FUNCTION REFERENCE
+\TU/lmr/m/n/10 374 \TU/lmr/m/sl/10 CHAPTER 28.  APPENDIX: NOTATION AND FUNCTION REFERENCE
  []
 
-[320] (./nns-book.aux)
+[374] (./nns-book.aux)
  ***********
 LaTeX2e <2025-11-01>
-L3 programming layer <2026-01-19>
+L3 programming layer <2026-03-20>
  ***********
-
-LaTeX Warning: There were undefined references.
-
  ) 
 Here is how much of TeX's memory you used:
- 19950 strings out of 470190
- 372314 string characters out of 5477123
- 996868 words of memory out of 5000000
- 48258 multiletter control sequences out of 15000+600000
+ 20166 strings out of 470014
+ 379344 string characters out of 5473777
+ 1007866 words of memory out of 5000000
+ 48632 multiletter control sequences out of 15000+600000
  635269 words of font info for 116 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 90i,11n,114p,1005b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,11n,114p,1005b,598s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on nns-book.pdf (320 pages).
+Output written on nns-book.pdf (374 pages).

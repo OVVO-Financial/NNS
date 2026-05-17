@@ -521,19 +521,19 @@ In practice, one might generate a large number of bootstrap replicates, often on
 
 Time-series modeling in NNS is not an isolated technique. It is a direct extension of earlier ideas.
 
-### From Chapter 18
+### From Chapter 19
 
 The forecast engine is built from recursive conditional estimation.
 
-### From Chapter 19
+### From Chapter 22
 
 The local regression on component series inherits the data-adaptive bandwidth logic of partition estimators.
 
-### From Chapter 21
+### From Chapter 22
 
 Forecasting is just regression where the predictor is lagged time index or lagged structure and the response is the next component value.
 
-### From Chapter 23
+### From Chapter 24
 
 Aggregation across multiple lag structures is an ensemble of directional learners.
 
@@ -647,7 +647,7 @@ A nonparametric forecasting method is not free of tradeoffs.
 
 ### Primarily univariate in this chapter
 
-The methods developed here focus on a single series. Cross-series interactions are deferred to Chapter 25.
+The methods developed here focus on a single series. Cross-series interactions are deferred to Chapter 26.
 
 ### Data requirements
 
@@ -663,7 +663,7 @@ A fitted ARIMA equation provides direct coefficients. NNS instead provides a pre
 
 These limitations are real. But they are the cost of avoiding the stronger assumptions of parametric time-series models.
 
-The multivariate extension is natural in principle, but not automatic in implementation. Once several series enter, one must distinguish self-dependence from cross-dependence, align potentially different frequencies, and account for lead-lag structure across variables. Those complications motivate the next chapter.
+The multivariate extension is natural in principle, but not automatic in implementation. Once several series enter, one must distinguish self-dependence from cross-dependence, align potentially different frequencies, and account for lead-lag structure across variables. 
 
 ---
 
