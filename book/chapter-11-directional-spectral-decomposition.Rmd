@@ -644,6 +644,8 @@ v_2
 Because the directional pieces reconstruct \(a\), \(b\), and \(d\) exactly, they also reconstruct \(\lambda_{1,2}\) and \(v_{1,2}\) exactly.
 The recovery is complete.
 
+See the following for a [5 variable detailed example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/spectral-decomposition-5var.md).
+
 ---
 
 ## Recursive Spectral Refinement
