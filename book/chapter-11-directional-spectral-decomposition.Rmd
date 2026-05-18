@@ -827,46 +827,36 @@ They identify precisely what is claimed: locatable spectral attribution, not a r
 The directional co-partial moment matrices are obtained directly from `NNS::PM.matrix()`.
 Population normalization \(1/n\) is used throughout to match the expectation formulas above, so `pop_adj = FALSE` is used.
 
-```{r spectral-setup}
-library(NNS)
+For degree-one co-partial moments,
 
-pm_decomposition <- function(Z) {
-  Z <- as.matrix(Z)
-  stopifnot(ncol(Z) == 2)
-
-  pm <- NNS::PM.matrix(
-    LPM_degree = 1,
-    UPM_degree = 1,
-    target     = "mean",
-    variable   = Z,
-    pop_adj    = FALSE,
-    norm       = FALSE
-  )
-
-  Sigma_pm <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
-
-  list(
-    clpm     = pm$clpm,
-    cupm     = pm$cupm,
-    dlpm     = pm$dlpm,
-    dupm     = pm$dupm,
-    Sigma    = pm$cov.matrix,
-    Sigma_pm = Sigma_pm,
-    eig      = eigen(Sigma_pm, symmetric = TRUE)
-  )
-}
-```
-
-Generate positively dependent bivariate data, compute the quadrant decomposition, and pass \(\Sigma\) directly to `eigen` for attribution.
+\[
+\Sigma
+=
+\mathrm{CLPM}
++
+\mathrm{CUPM}
+-
+\mathrm{DLPM}
+-
+\mathrm{DUPM}.
+\]
 
 ```{r spectral-data}
 library(NNS)
 
 set.seed(123)
+
 n   <- 10000
 rho <- 0.70
-R   <- matrix(c(1, rho, rho, 1), 2, 2)
-Z   <- matrix(rnorm(2 * n), n, 2) %*% chol(R)
+
+R <- matrix(
+  c(1, rho,
+    rho, 1),
+  nrow = 2,
+  byrow = TRUE
+)
+
+Z <- matrix(rnorm(2 * n), nrow = n, ncol = 2) %*% chol(R)
 colnames(Z) <- c("X", "Y")
 
 pm <- NNS::PM.matrix(
@@ -878,17 +868,23 @@ pm <- NNS::PM.matrix(
   norm       = FALSE
 )
 
-Sigma_PM <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
+pm
 
-D             <- quadrant_decomposition(Z)
-eig_classical <- eigen(Sigma_PM)
+Sigma <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
+eig   <- eigen(Sigma, symmetric = TRUE)
 
-max(abs(D$Sigma - Sigma_PM))
-D$details
+round(Sigma, 6)
+
+round(eig$values, 6)
+
+round(eig$vectors, 6)
+
+max(abs(pm$cov.matrix - Sigma))
 ```
 
-The quadrant summary shows the four conditional mean displacements \(u_q\) and their rank-one eigenvalues \(p_q \|u_q\|^2\).
-For positively dependent data the concordant quadrants (CUPM, CLPM) carry large displacements in opposite directions along the main axis, while the divergent quadrants (DLPM, DUPM) show much smaller displacements orthogonal to it.
+The `PM.matrix()` object reports the four directional co-partial moment matrices and the reconstructed covariance matrix. The concordant terms, `clpm` and `cupm`, enter positively, while the divergent terms, `dlpm` and `dupm`, enter negatively.
+
+The recovered covariance matrix is then passed directly to `eigen()` for spectral decomposition. For the simulated positively dependent data, the leading eigenvector lies approximately along the concordant direction, while the second eigenvector lies along the opposing contrast direction.
 
 ---
 
