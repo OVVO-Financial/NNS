@@ -333,9 +333,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="11.15" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#rank-one-primitive-verification-in-r"><i class="fa fa-check"></i><b>11.15</b> Rank-One Primitive Verification in R</a></li>
 <li class="chapter" data-level="11.16" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#conditional-mean-eigenvector-recovery-in-r"><i class="fa fa-check"></i><b>11.16</b> Conditional-Mean Eigenvector Recovery in R</a></li>
 <li class="chapter" data-level="11.17" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#eigenvalue-attribution-in-r"><i class="fa fa-check"></i><b>11.17</b> Eigenvalue Attribution in R</a></li>
-<li class="chapter" data-level="11.18" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope"><i class="fa fa-check"></i><b>11.18</b> Visualizing the CLPM Mean Slope</a></li>
-<li class="chapter" data-level="11.19" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#practical-interpretation"><i class="fa fa-check"></i><b>11.19</b> Practical Interpretation</a></li>
-<li class="chapter" data-level="11.20" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#summary-5"><i class="fa fa-check"></i><b>11.20</b> Summary</a></li>
+<li class="chapter" data-level="11.18" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#direct-package-recovery-with-nnspm.matrix"><i class="fa fa-check"></i><b>11.18</b> Direct Package Recovery with <code>NNS::PM.matrix</code></a></li>
+<li class="chapter" data-level="11.19" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope"><i class="fa fa-check"></i><b>11.19</b> Visualizing the CLPM Mean Slope</a></li>
+<li class="chapter" data-level="11.20" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#practical-interpretation"><i class="fa fa-check"></i><b>11.20</b> Practical Interpretation</a></li>
+<li class="chapter" data-level="11.21" data-path="directional-spectral-decomposition.html"><a href="directional-spectral-decomposition.html#summary-5"><i class="fa fa-check"></i><b>11.21</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="12" data-path="copula-interpretation.html"><a href="copula-interpretation.html"><i class="fa fa-check"></i><b>12</b> Copula Interpretation</a>
 <ul>
@@ -1552,7 +1553,7 @@ v_2
 \]</span></p>
 <p>Because the directional pieces reconstruct <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, and <span class="math inline">\(d\)</span> exactly, they also reconstruct <span class="math inline">\(\lambda_{1,2}\)</span> and <span class="math inline">\(v_{1,2}\)</span> exactly.
 The recovery is complete.</p>
-<p>See the following for a <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/spectral-decomposition-5var.md">5 variable detailed example</a>.</p>
+<p>See the following for a <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns-directional-spectral-decomposition.md">high dimensional detailed example</a>.</p>
 <hr />
 </div>
 <div id="recursive-spectral-refinement" class="section level2 hasAnchor" number="11.10">
@@ -2001,49 +2002,215 @@ PC2 receives nearly all its between-quadrant contribution from DLPM and DUPM: th
 This is the interpretive content that classical PCA alone cannot supply.</p>
 <hr />
 </div>
-<div id="visualizing-the-clpm-mean-slope" class="section level2 hasAnchor" number="11.18">
-<h2><span class="header-section-number">11.18</span> Visualizing the CLPM Mean Slope<a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="direct-package-recovery-with-nnspm.matrix" class="section level2 hasAnchor" number="11.18">
+<h2><span class="header-section-number">11.18</span> Direct Package Recovery with <code>NNS::PM.matrix</code><a href="directional-spectral-decomposition.html#direct-package-recovery-with-nnspm.matrix" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The preceding examples construct the directional components manually from quadrant membership.
+The same covariance recovery can also be obtained directly from the exported NNS package function <code>PM.matrix</code>.</p>
+<p>For covariance and PCA recovery, use degree-one lower and upper partial moments, the mean target, sample covariance adjustment, and unnormalized output:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="directional-spectral-decomposition.html#cb44-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb44-2"><a href="directional-spectral-decomposition.html#cb44-2" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="directional-spectral-decomposition.html#cb44-3" tabindex="-1"></a>Z_pm <span class="ot">&lt;-</span> Z</span>
+<span id="cb44-4"><a href="directional-spectral-decomposition.html#cb44-4" tabindex="-1"></a><span class="fu">colnames</span>(Z_pm) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>)</span>
+<span id="cb44-5"><a href="directional-spectral-decomposition.html#cb44-5" tabindex="-1"></a></span>
+<span id="cb44-6"><a href="directional-spectral-decomposition.html#cb44-6" tabindex="-1"></a>Sigma_sample <span class="ot">&lt;-</span> <span class="fu">cov</span>(Z_pm)</span>
+<span id="cb44-7"><a href="directional-spectral-decomposition.html#cb44-7" tabindex="-1"></a>eig_sample   <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_sample, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb44-8"><a href="directional-spectral-decomposition.html#cb44-8" tabindex="-1"></a></span>
+<span id="cb44-9"><a href="directional-spectral-decomposition.html#cb44-9" tabindex="-1"></a>pm <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">PM.matrix</span>(</span>
+<span id="cb44-10"><a href="directional-spectral-decomposition.html#cb44-10" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb44-11"><a href="directional-spectral-decomposition.html#cb44-11" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb44-12"><a href="directional-spectral-decomposition.html#cb44-12" tabindex="-1"></a>  <span class="at">target     =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb44-13"><a href="directional-spectral-decomposition.html#cb44-13" tabindex="-1"></a>  <span class="at">variable   =</span> Z_pm,</span>
+<span id="cb44-14"><a href="directional-spectral-decomposition.html#cb44-14" tabindex="-1"></a>  <span class="at">pop_adj    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb44-15"><a href="directional-spectral-decomposition.html#cb44-15" tabindex="-1"></a>  <span class="at">norm       =</span> <span class="cn">FALSE</span></span>
+<span id="cb44-16"><a href="directional-spectral-decomposition.html#cb44-16" tabindex="-1"></a>)</span>
+<span id="cb44-17"><a href="directional-spectral-decomposition.html#cb44-17" tabindex="-1"></a></span>
+<span id="cb44-18"><a href="directional-spectral-decomposition.html#cb44-18" tabindex="-1"></a><span class="fu">names</span>(pm)</span></code></pre></div>
+<pre><code>## [1] &quot;cupm&quot;       &quot;dupm&quot;       &quot;dlpm&quot;       &quot;clpm&quot;       &quot;cov.matrix&quot;</code></pre>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="directional-spectral-decomposition.html#cb46-1" tabindex="-1"></a>Sigma_pm <span class="ot">&lt;-</span> pm<span class="sc">$</span>clpm <span class="sc">+</span> pm<span class="sc">$</span>cupm <span class="sc">-</span> pm<span class="sc">$</span>dlpm <span class="sc">-</span> pm<span class="sc">$</span>dupm</span>
+<span id="cb46-2"><a href="directional-spectral-decomposition.html#cb46-2" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="directional-spectral-decomposition.html#cb46-3" tabindex="-1"></a>Sigma_sample</span></code></pre></div>
+<pre><code>##           X         Y
+## X 0.9972751 0.7023938
+## Y 0.7023938 1.0062865</code></pre>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="directional-spectral-decomposition.html#cb48-1" tabindex="-1"></a>pm<span class="sc">$</span>cov.matrix</span></code></pre></div>
+<pre><code>##           X         Y
+## X 0.9972751 0.7023938
+## Y 0.7023938 1.0062865</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="directional-spectral-decomposition.html#cb50-1" tabindex="-1"></a>Sigma_pm</span></code></pre></div>
+<pre><code>##           X         Y
+## X 0.9972751 0.7023938
+## Y 0.7023938 1.0062865</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="directional-spectral-decomposition.html#cb52-1" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(Sigma_sample <span class="sc">-</span> pm<span class="sc">$</span>cov.matrix))</span></code></pre></div>
+<pre><code>## [1] 6.661338e-16</code></pre>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="directional-spectral-decomposition.html#cb54-1" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(Sigma_sample <span class="sc">-</span> Sigma_pm))</span></code></pre></div>
+<pre><code>## [1] 6.661338e-16</code></pre>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="directional-spectral-decomposition.html#cb56-1" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(pm<span class="sc">$</span>cov.matrix <span class="sc">-</span> Sigma_pm))</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<p>In this run, <code>PM.matrix</code> returns the directional matrices</p>
+<p><span class="math display">\[
+\operatorname{CUPM},\quad
+\operatorname{DUPM},\quad
+\operatorname{DLPM},\quad
+\operatorname{CLPM}
+\]</span></p>
+<p>and the assembled covariance matrix <code>cov.matrix</code>.
+The identity</p>
+<p><span class="math display">\[
+\Sigma
+=
+\operatorname{CLPM}
++
+\operatorname{CUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}
+\]</span></p>
+<p>matches base R <code>cov(Z_pm)</code> to floating-point precision.
+The maximum absolute difference was approximately <span class="math inline">\(6.66\times 10^{-16}\)</span>.</p>
+<p>The corresponding PCA recovery is immediate:</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="directional-spectral-decomposition.html#cb58-1" tabindex="-1"></a>eig_pm <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_pm, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb58-2"><a href="directional-spectral-decomposition.html#cb58-2" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="directional-spectral-decomposition.html#cb58-3" tabindex="-1"></a>eig_sample<span class="sc">$</span>values</span></code></pre></div>
+<pre><code>## [1] 1.7041891 0.2993725</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="directional-spectral-decomposition.html#cb60-1" tabindex="-1"></a>eig_pm<span class="sc">$</span>values</span></code></pre></div>
+<pre><code>## [1] 1.7041891 0.2993725</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="directional-spectral-decomposition.html#cb62-1" tabindex="-1"></a>eig_sample<span class="sc">$</span>values <span class="sc">-</span> eig_pm<span class="sc">$</span>values</span></code></pre></div>
+<pre><code>## [1]  8.881784e-16 -2.775558e-16</code></pre>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="directional-spectral-decomposition.html#cb64-1" tabindex="-1"></a><span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="cf">function</span>(k) {</span>
+<span id="cb64-2"><a href="directional-spectral-decomposition.html#cb64-2" tabindex="-1"></a>  <span class="fu">abs</span>(<span class="fu">sum</span>(eig_sample<span class="sc">$</span>vectors[, k] <span class="sc">*</span> eig_pm<span class="sc">$</span>vectors[, k]))</span>
+<span id="cb64-3"><a href="directional-spectral-decomposition.html#cb64-3" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## [1] 1 1</code></pre>
+<p>The classical eigenvalues and the <code>PM.matrix</code>-recovered eigenvalues were identical at displayed precision:</p>
+<p><span class="math display">\[
+1.7041891,\qquad 0.2993726.
+\]</span></p>
+<p>The absolute inner products between corresponding eigenvectors were both equal to one.
+Thus the exported package implementation recovers the same eigensystem as the classical covariance matrix.</p>
+<p>The same Rayleigh-quotient attribution can be computed directly from the package matrices:</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="directional-spectral-decomposition.html#cb66-1" tabindex="-1"></a>attribute_pm_lambda <span class="ot">&lt;-</span> <span class="cf">function</span>(v, pm) {</span>
+<span id="cb66-2"><a href="directional-spectral-decomposition.html#cb66-2" tabindex="-1"></a>  v <span class="ot">&lt;-</span> <span class="fu">matrix</span>(v, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb66-3"><a href="directional-spectral-decomposition.html#cb66-3" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="directional-spectral-decomposition.html#cb66-4" tabindex="-1"></a>  clpm <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> pm<span class="sc">$</span>clpm <span class="sc">%*%</span> v)</span>
+<span id="cb66-5"><a href="directional-spectral-decomposition.html#cb66-5" tabindex="-1"></a>  cupm <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> pm<span class="sc">$</span>cupm <span class="sc">%*%</span> v)</span>
+<span id="cb66-6"><a href="directional-spectral-decomposition.html#cb66-6" tabindex="-1"></a>  dlpm <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> pm<span class="sc">$</span>dlpm <span class="sc">%*%</span> v)</span>
+<span id="cb66-7"><a href="directional-spectral-decomposition.html#cb66-7" tabindex="-1"></a>  dupm <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> pm<span class="sc">$</span>dupm <span class="sc">%*%</span> v)</span>
+<span id="cb66-8"><a href="directional-spectral-decomposition.html#cb66-8" tabindex="-1"></a></span>
+<span id="cb66-9"><a href="directional-spectral-decomposition.html#cb66-9" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb66-10"><a href="directional-spectral-decomposition.html#cb66-10" tabindex="-1"></a>    <span class="at">CLPM      =</span> clpm,</span>
+<span id="cb66-11"><a href="directional-spectral-decomposition.html#cb66-11" tabindex="-1"></a>    <span class="at">CUPM      =</span> cupm,</span>
+<span id="cb66-12"><a href="directional-spectral-decomposition.html#cb66-12" tabindex="-1"></a>    <span class="at">DLPM      =</span> dlpm,</span>
+<span id="cb66-13"><a href="directional-spectral-decomposition.html#cb66-13" tabindex="-1"></a>    <span class="at">DUPM      =</span> dupm,</span>
+<span id="cb66-14"><a href="directional-spectral-decomposition.html#cb66-14" tabindex="-1"></a>    <span class="at">recovered =</span> clpm <span class="sc">+</span> cupm <span class="sc">-</span> dlpm <span class="sc">-</span> dupm</span>
+<span id="cb66-15"><a href="directional-spectral-decomposition.html#cb66-15" tabindex="-1"></a>  )</span>
+<span id="cb66-16"><a href="directional-spectral-decomposition.html#cb66-16" tabindex="-1"></a>}</span>
+<span id="cb66-17"><a href="directional-spectral-decomposition.html#cb66-17" tabindex="-1"></a></span>
+<span id="cb66-18"><a href="directional-spectral-decomposition.html#cb66-18" tabindex="-1"></a>pm_attr_1 <span class="ot">&lt;-</span> <span class="fu">attribute_pm_lambda</span>(eig_sample<span class="sc">$</span>vectors[, <span class="dv">1</span>], pm)</span>
+<span id="cb66-19"><a href="directional-spectral-decomposition.html#cb66-19" tabindex="-1"></a>pm_attr_2 <span class="ot">&lt;-</span> <span class="fu">attribute_pm_lambda</span>(eig_sample<span class="sc">$</span>vectors[, <span class="dv">2</span>], pm)</span>
+<span id="cb66-20"><a href="directional-spectral-decomposition.html#cb66-20" tabindex="-1"></a></span>
+<span id="cb66-21"><a href="directional-spectral-decomposition.html#cb66-21" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb66-22"><a href="directional-spectral-decomposition.html#cb66-22" tabindex="-1"></a>  <span class="at">lambda_1 =</span> pm_attr_1,</span>
+<span id="cb66-23"><a href="directional-spectral-decomposition.html#cb66-23" tabindex="-1"></a>  <span class="at">lambda_2 =</span> pm_attr_2</span>
+<span id="cb66-24"><a href="directional-spectral-decomposition.html#cb66-24" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>##               CLPM      CUPM        DLPM        DUPM recovered
+## lambda_1 0.8742047 0.8786260  0.02432081  0.02432081 1.7041891
+## lambda_2 0.1258265 0.1249045 -0.02432081 -0.02432081 0.2993725</code></pre>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="directional-spectral-decomposition.html#cb68-1" tabindex="-1"></a>eig_sample<span class="sc">$</span>values</span></code></pre></div>
+<pre><code>## [1] 1.7041891 0.2993725</code></pre>
+<p>In the reported run the leading eigenvalue was generated primarily by lower and upper concordant co-movement:</p>
+<p><span class="math display">\[
+\lambda_1
+=
+0.8742047
++
+0.8786260
+-
+0.0243208
+-
+0.0243208
+=
+1.7041891.
+\]</span></p>
+<p>The second eigenvalue had a larger relative divergent contribution:</p>
+<p><span class="math display">\[
+\lambda_2
+=
+0.1258265
++
+0.1249045
+-
+(-0.0243208)
+-
+(-0.0243208)
+=
+0.2993726.
+\]</span></p>
+<p>This confirms the interpretation developed above: the leading axis is mainly concordant, while the orthogonal axis contains more divergent structure.</p>
+<p>One implementation caveat is important.
+For spectral recovery use <code>norm = FALSE</code>.
+With <code>norm = TRUE</code>, <code>PM.matrix</code> returns a normalized signed dependence matrix, not the covariance matrix:</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="directional-spectral-decomposition.html#cb70-1" tabindex="-1"></a>pm_norm <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">PM.matrix</span>(</span>
+<span id="cb70-2"><a href="directional-spectral-decomposition.html#cb70-2" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb70-3"><a href="directional-spectral-decomposition.html#cb70-3" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb70-4"><a href="directional-spectral-decomposition.html#cb70-4" tabindex="-1"></a>  <span class="at">target     =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb70-5"><a href="directional-spectral-decomposition.html#cb70-5" tabindex="-1"></a>  <span class="at">variable   =</span> Z_pm,</span>
+<span id="cb70-6"><a href="directional-spectral-decomposition.html#cb70-6" tabindex="-1"></a>  <span class="at">pop_adj    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb70-7"><a href="directional-spectral-decomposition.html#cb70-7" tabindex="-1"></a>  <span class="at">norm       =</span> <span class="cn">TRUE</span></span>
+<span id="cb70-8"><a href="directional-spectral-decomposition.html#cb70-8" tabindex="-1"></a>)</span>
+<span id="cb70-9"><a href="directional-spectral-decomposition.html#cb70-9" tabindex="-1"></a></span>
+<span id="cb70-10"><a href="directional-spectral-decomposition.html#cb70-10" tabindex="-1"></a>pm_norm<span class="sc">$</span>cov.matrix</span></code></pre></div>
+<pre><code>##           X         Y
+## X 1.0000000 0.8783447
+## Y 0.8783447 1.0000000</code></pre>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="directional-spectral-decomposition.html#cb72-1" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(pm_norm<span class="sc">$</span>cov.matrix <span class="sc">-</span> Sigma_sample))</span></code></pre></div>
+<pre><code>## [1] 0.1759508</code></pre>
+<p>In this run, the normalized matrix had unit diagonal and off-diagonal value approximately <span class="math inline">\(0.8783447\)</span>, and differed from the covariance matrix by about <span class="math inline">\(0.1759508\)</span>.
+That object is useful as a normalized signed dependence matrix, but it is not the covariance object used for PCA recovery.</p>
+<hr />
+</div>
+<div id="visualizing-the-clpm-mean-slope" class="section level2 hasAnchor" number="11.19">
+<h2><span class="header-section-number">11.19</span> Visualizing the CLPM Mean Slope<a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following figure displays the three distinct directions associated with the CLPM region: the quadrant mean slope, the within-CLPM regression line, and the within-CLPM first principal component.
 The exact picture varies by random seed; the three lines generally differ because they are computed from different statistical objects.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="directional-spectral-decomposition.html#cb44-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
-<span id="cb44-2"><a href="directional-spectral-decomposition.html#cb44-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
-<span id="cb44-3"><a href="directional-spectral-decomposition.html#cb44-3" tabindex="-1"></a>Z0  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>)</span>
-<span id="cb44-4"><a href="directional-spectral-decomposition.html#cb44-4" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z0)</span>
-<span id="cb44-5"><a href="directional-spectral-decomposition.html#cb44-5" tabindex="-1"></a>clpm_mask <span class="ot">&lt;-</span> Z0[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">1</span>] <span class="sc">&amp;</span> Z0[,<span class="dv">2</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">2</span>]</span>
-<span id="cb44-6"><a href="directional-spectral-decomposition.html#cb44-6" tabindex="-1"></a>Zc  <span class="ot">&lt;-</span> Z0[clpm_mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb44-7"><a href="directional-spectral-decomposition.html#cb44-7" tabindex="-1"></a>mc  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zc)</span>
-<span id="cb44-8"><a href="directional-spectral-decomposition.html#cb44-8" tabindex="-1"></a></span>
-<span id="cb44-9"><a href="directional-spectral-decomposition.html#cb44-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
-<span id="cb44-10"><a href="directional-spectral-decomposition.html#cb44-10" tabindex="-1"></a>  Zc[, <span class="dv">1</span>], Zc[, <span class="dv">2</span>],</span>
-<span id="cb44-11"><a href="directional-spectral-decomposition.html#cb44-11" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
-<span id="cb44-12"><a href="directional-spectral-decomposition.html#cb44-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;X&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Y&quot;</span>,</span>
-<span id="cb44-13"><a href="directional-spectral-decomposition.html#cb44-13" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;CLPM: Mean Slope, Regression, and PC1&quot;</span></span>
-<span id="cb44-14"><a href="directional-spectral-decomposition.html#cb44-14" tabindex="-1"></a>)</span>
-<span id="cb44-15"><a href="directional-spectral-decomposition.html#cb44-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu0[<span class="dv">1</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb44-16"><a href="directional-spectral-decomposition.html#cb44-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> mu0[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb44-17"><a href="directional-spectral-decomposition.html#cb44-17" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
-<span id="cb44-18"><a href="directional-spectral-decomposition.html#cb44-18" tabindex="-1"></a><span class="fu">points</span>(mc[<span class="dv">1</span>],  mc[<span class="dv">2</span>],  <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
-<span id="cb44-19"><a href="directional-spectral-decomposition.html#cb44-19" tabindex="-1"></a></span>
-<span id="cb44-20"><a href="directional-spectral-decomposition.html#cb44-20" tabindex="-1"></a><span class="co"># Quadrant mean slope: line through global mean toward CLPM conditional mean</span></span>
-<span id="cb44-21"><a href="directional-spectral-decomposition.html#cb44-21" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> (mc[<span class="dv">2</span>] <span class="sc">-</span> mu0[<span class="dv">2</span>]) <span class="sc">/</span> (mc[<span class="dv">1</span>] <span class="sc">-</span> mu0[<span class="dv">1</span>])</span>
-<span id="cb44-22"><a href="directional-spectral-decomposition.html#cb44-22" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mu0[<span class="dv">2</span>] <span class="sc">-</span> slope_mean <span class="sc">*</span> mu0[<span class="dv">1</span>], <span class="at">b =</span> slope_mean, <span class="at">col =</span> <span class="st">&quot;green&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-23"><a href="directional-spectral-decomposition.html#cb44-23" tabindex="-1"></a></span>
-<span id="cb44-24"><a href="directional-spectral-decomposition.html#cb44-24" tabindex="-1"></a><span class="co"># Linear regression inside CLPM</span></span>
-<span id="cb44-25"><a href="directional-spectral-decomposition.html#cb44-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Zc[, <span class="dv">2</span>] <span class="sc">~</span> Zc[, <span class="dv">1</span>])</span>
-<span id="cb44-26"><a href="directional-spectral-decomposition.html#cb44-26" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;gold&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-27"><a href="directional-spectral-decomposition.html#cb44-27" tabindex="-1"></a></span>
-<span id="cb44-28"><a href="directional-spectral-decomposition.html#cb44-28" tabindex="-1"></a><span class="co"># PC1 inside CLPM: leading eigenvector of within-CLPM covariance</span></span>
-<span id="cb44-29"><a href="directional-spectral-decomposition.html#cb44-29" tabindex="-1"></a>pc1       <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">pop_cov</span>(Zc))<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
-<span id="cb44-30"><a href="directional-spectral-decomposition.html#cb44-30" tabindex="-1"></a>slope_pc1 <span class="ot">&lt;-</span> pc1[<span class="dv">2</span>] <span class="sc">/</span> pc1[<span class="dv">1</span>]</span>
-<span id="cb44-31"><a href="directional-spectral-decomposition.html#cb44-31" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mc[<span class="dv">2</span>] <span class="sc">-</span> slope_pc1 <span class="sc">*</span> mc[<span class="dv">1</span>], <span class="at">b =</span> slope_pc1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-32"><a href="directional-spectral-decomposition.html#cb44-32" tabindex="-1"></a></span>
-<span id="cb44-33"><a href="directional-spectral-decomposition.html#cb44-33" tabindex="-1"></a><span class="fu">legend</span>(</span>
-<span id="cb44-34"><a href="directional-spectral-decomposition.html#cb44-34" tabindex="-1"></a>  <span class="st">&quot;bottomright&quot;</span>,</span>
-<span id="cb44-35"><a href="directional-spectral-decomposition.html#cb44-35" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;CLPM mean slope&quot;</span>, <span class="st">&quot;CLPM regression&quot;</span>, <span class="st">&quot;CLPM PC1&quot;</span>),</span>
-<span id="cb44-36"><a href="directional-spectral-decomposition.html#cb44-36" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;green&quot;</span>, <span class="st">&quot;gold&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
-<span id="cb44-37"><a href="directional-spectral-decomposition.html#cb44-37" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
-<span id="cb44-38"><a href="directional-spectral-decomposition.html#cb44-38" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
-<span id="cb44-39"><a href="directional-spectral-decomposition.html#cb44-39" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="directional-spectral-decomposition.html#cb74-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
+<span id="cb74-2"><a href="directional-spectral-decomposition.html#cb74-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb74-3"><a href="directional-spectral-decomposition.html#cb74-3" tabindex="-1"></a>Z0  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>)</span>
+<span id="cb74-4"><a href="directional-spectral-decomposition.html#cb74-4" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z0)</span>
+<span id="cb74-5"><a href="directional-spectral-decomposition.html#cb74-5" tabindex="-1"></a>clpm_mask <span class="ot">&lt;-</span> Z0[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">1</span>] <span class="sc">&amp;</span> Z0[,<span class="dv">2</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">2</span>]</span>
+<span id="cb74-6"><a href="directional-spectral-decomposition.html#cb74-6" tabindex="-1"></a>Zc  <span class="ot">&lt;-</span> Z0[clpm_mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb74-7"><a href="directional-spectral-decomposition.html#cb74-7" tabindex="-1"></a>mc  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zc)</span>
+<span id="cb74-8"><a href="directional-spectral-decomposition.html#cb74-8" tabindex="-1"></a></span>
+<span id="cb74-9"><a href="directional-spectral-decomposition.html#cb74-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb74-10"><a href="directional-spectral-decomposition.html#cb74-10" tabindex="-1"></a>  Zc[, <span class="dv">1</span>], Zc[, <span class="dv">2</span>],</span>
+<span id="cb74-11"><a href="directional-spectral-decomposition.html#cb74-11" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
+<span id="cb74-12"><a href="directional-spectral-decomposition.html#cb74-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;X&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb74-13"><a href="directional-spectral-decomposition.html#cb74-13" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;CLPM: Mean Slope, Regression, and PC1&quot;</span></span>
+<span id="cb74-14"><a href="directional-spectral-decomposition.html#cb74-14" tabindex="-1"></a>)</span>
+<span id="cb74-15"><a href="directional-spectral-decomposition.html#cb74-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu0[<span class="dv">1</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb74-16"><a href="directional-spectral-decomposition.html#cb74-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> mu0[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb74-17"><a href="directional-spectral-decomposition.html#cb74-17" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb74-18"><a href="directional-spectral-decomposition.html#cb74-18" tabindex="-1"></a><span class="fu">points</span>(mc[<span class="dv">1</span>],  mc[<span class="dv">2</span>],  <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb74-19"><a href="directional-spectral-decomposition.html#cb74-19" tabindex="-1"></a></span>
+<span id="cb74-20"><a href="directional-spectral-decomposition.html#cb74-20" tabindex="-1"></a><span class="co"># Quadrant mean slope: line through global mean toward CLPM conditional mean</span></span>
+<span id="cb74-21"><a href="directional-spectral-decomposition.html#cb74-21" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> (mc[<span class="dv">2</span>] <span class="sc">-</span> mu0[<span class="dv">2</span>]) <span class="sc">/</span> (mc[<span class="dv">1</span>] <span class="sc">-</span> mu0[<span class="dv">1</span>])</span>
+<span id="cb74-22"><a href="directional-spectral-decomposition.html#cb74-22" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mu0[<span class="dv">2</span>] <span class="sc">-</span> slope_mean <span class="sc">*</span> mu0[<span class="dv">1</span>], <span class="at">b =</span> slope_mean, <span class="at">col =</span> <span class="st">&quot;green&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb74-23"><a href="directional-spectral-decomposition.html#cb74-23" tabindex="-1"></a></span>
+<span id="cb74-24"><a href="directional-spectral-decomposition.html#cb74-24" tabindex="-1"></a><span class="co"># Linear regression inside CLPM</span></span>
+<span id="cb74-25"><a href="directional-spectral-decomposition.html#cb74-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Zc[, <span class="dv">2</span>] <span class="sc">~</span> Zc[, <span class="dv">1</span>])</span>
+<span id="cb74-26"><a href="directional-spectral-decomposition.html#cb74-26" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;gold&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb74-27"><a href="directional-spectral-decomposition.html#cb74-27" tabindex="-1"></a></span>
+<span id="cb74-28"><a href="directional-spectral-decomposition.html#cb74-28" tabindex="-1"></a><span class="co"># PC1 inside CLPM: leading eigenvector of within-CLPM covariance</span></span>
+<span id="cb74-29"><a href="directional-spectral-decomposition.html#cb74-29" tabindex="-1"></a>pc1       <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">pop_cov</span>(Zc))<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
+<span id="cb74-30"><a href="directional-spectral-decomposition.html#cb74-30" tabindex="-1"></a>slope_pc1 <span class="ot">&lt;-</span> pc1[<span class="dv">2</span>] <span class="sc">/</span> pc1[<span class="dv">1</span>]</span>
+<span id="cb74-31"><a href="directional-spectral-decomposition.html#cb74-31" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mc[<span class="dv">2</span>] <span class="sc">-</span> slope_pc1 <span class="sc">*</span> mc[<span class="dv">1</span>], <span class="at">b =</span> slope_pc1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb74-32"><a href="directional-spectral-decomposition.html#cb74-32" tabindex="-1"></a></span>
+<span id="cb74-33"><a href="directional-spectral-decomposition.html#cb74-33" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb74-34"><a href="directional-spectral-decomposition.html#cb74-34" tabindex="-1"></a>  <span class="st">&quot;bottomright&quot;</span>,</span>
+<span id="cb74-35"><a href="directional-spectral-decomposition.html#cb74-35" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;CLPM mean slope&quot;</span>, <span class="st">&quot;CLPM regression&quot;</span>, <span class="st">&quot;CLPM PC1&quot;</span>),</span>
+<span id="cb74-36"><a href="directional-spectral-decomposition.html#cb74-36" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;green&quot;</span>, <span class="st">&quot;gold&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb74-37"><a href="directional-spectral-decomposition.html#cb74-37" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
+<span id="cb74-38"><a href="directional-spectral-decomposition.html#cb74-38" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
+<span id="cb74-39"><a href="directional-spectral-decomposition.html#cb74-39" tabindex="-1"></a>)</span></code></pre></div>
 <p><img src="nns-book_files/figure-html/clpm-mean-slope-figure-1.png" alt="" width="576" /></p>
 <p>The green line is the eigenvector direction of the rank-one matrix</p>
 <p><span class="math display">\[
@@ -2056,8 +2223,8 @@ The yellow line is the ordinary least-squares regression line within the CLPM su
 They differ because they summarize different statistical objects.</p>
 <hr />
 </div>
-<div id="practical-interpretation" class="section level2 hasAnchor" number="11.19">
-<h2><span class="header-section-number">11.19</span> Practical Interpretation<a href="directional-spectral-decomposition.html#practical-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="practical-interpretation" class="section level2 hasAnchor" number="11.20">
+<h2><span class="header-section-number">11.20</span> Practical Interpretation<a href="directional-spectral-decomposition.html#practical-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Directional spectral decomposition changes what can be said about a classical PCA result.</p>
 <p><strong>Risk and Stress Testing.</strong>
 If the leading eigenvalue of a return covariance matrix is dominated by CLPM contributions, the leading risk factor is primarily a joint downside event.
@@ -2080,12 +2247,12 @@ A low value indicates that within-region residual scatter dominates, and finer p
 <p>A full numerical implementation with transition matrix estimation, one-step predictive mixtures, and dynamic eigenvalue attribution by transition path is available at <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/directional-markov-regimes-pca.md">OVVO-Financial/NNS: directional-markov-regimes-pca.md</a>.</p>
 <hr />
 </div>
-<div id="summary-5" class="section level2 hasAnchor" number="11.20">
-<h2><span class="header-section-number">11.20</span> Summary<a href="directional-spectral-decomposition.html#summary-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="summary-5" class="section level2 hasAnchor" number="11.21">
+<h2><span class="header-section-number">11.21</span> Summary<a href="directional-spectral-decomposition.html#summary-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>This chapter extended the directional decomposition of covariance into spectral analysis.</p>
 <p>Key results:</p>
 <ol style="list-style-type: decimal">
-<li>The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem:</li>
+<li>The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem. This can be constructed manually or obtained directly from <code>NNS::PM.matrix</code> with <code>norm = FALSE</code>:</li>
 </ol>
 <p><span class="math display">\[
 (\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})

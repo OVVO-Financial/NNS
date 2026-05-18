@@ -144,6 +144,7 @@ quadrant-decomposition-in-r
 rank-one-primitive-verification-in-r
 conditional-mean-eigenvector-recovery-in-r
 eigenvalue-attribution-in-r
+direct-package-recovery-with-nnspm.matrix
 visualizing-the-clpm-mean-slope
 practical-interpretation
 summary-5
