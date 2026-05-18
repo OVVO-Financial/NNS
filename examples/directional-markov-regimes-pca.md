@@ -45,6 +45,35 @@ The main result is:
 
 > PCA identifies the dominant axis. NNS identifies the regimes and transition paths that created it.
 
+The manual decompositions below are also checked against the exported NNS package workflow. With:
+
+```r
+NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z,
+  pop_adj    = TRUE,
+  norm       = FALSE
+)
+```
+
+the returned matrices satisfy:
+
+```math
+\Sigma
+=
+\mathrm{clpm}
++
+\mathrm{cupm}
+-
+\mathrm{dlpm}
+-
+\mathrm{dupm}.
+```
+
+Thus the same covariance and PCA recovery can be verified directly through the package API. The setting `norm = FALSE` is required for covariance and PCA recovery; `norm = TRUE` returns a normalized signed dependence matrix.
+
 ---
 
 ## 1. Hidden Markov Models Versus Directional Markov Regimes
@@ -828,6 +857,209 @@ Therefore:
 
 ---
 
+## 11A. Direct NNS `PM.matrix` Verification
+
+The previous sections construct the static covariance recovery manually from quadrant probabilities, conditional means, and within-quadrant covariances.
+
+The same covariance object can also be recovered directly from the exported NNS function:
+
+```r
+pm <- NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z,
+  pop_adj    = TRUE,
+  norm       = FALSE
+)
+```
+
+The returned object contains:
+
+```r
+names(pm)
+# "cupm" "dupm" "dlpm" "clpm" "cov.matrix"
+```
+
+Using the returned directional matrices:
+
+```math
+\Sigma_{\mathrm{NNS}}
+=
+\mathrm{clpm}
++
+\mathrm{cupm}
+-
+\mathrm{dlpm}
+-
+\mathrm{dupm}.
+```
+
+In the reported run:
+
+```math
+\max\left|\mathrm{cov}(Z)-\mathrm{PM.matrix}(Z)\$cov.matrix\right|
+=
+4.336809\times 10^{-19}.
+```
+
+Also:
+
+```math
+\max\left|\mathrm{cov}(Z)-\Sigma_{\mathrm{NNS}}\right|
+=
+4.336809\times 10^{-19}.
+```
+
+and:
+
+```math
+\max\left|\mathrm{PM.matrix}(Z)\$cov.matrix-\Sigma_{\mathrm{NNS}}\right|
+=
+0.
+```
+
+So the direct package implementation recovers the covariance matrix to numerical precision.
+
+### Static PCA Recovery from `PM.matrix`
+
+The classical PCA eigenvalues of `cov(Z)` were:
+
+```math
+0.0013485675,
+\qquad
+0.0002359029.
+```
+
+The eigenvalues recovered from the `PM.matrix` directional reconstruction were identical:
+
+```math
+0.0013485675,
+\qquad
+0.0002359029.
+```
+
+The eigenvector alignments were:
+
+```math
+1,\qquad 1.
+```
+
+Thus `PM.matrix` directly recovers the same static PCA eigensystem.
+
+### Static Eigenvalue Attribution from `PM.matrix`
+
+For PC1:
+
+| Component | Contribution | Signed Share |
+|---|---:|---:|
+| CLPM | 0.0007091240 | 52.58351% |
+| CUPM | 0.0006828494 | 50.63517% |
+| DLPM | 0.0000217030 | -1.609337% |
+| DUPM | 0.0000217030 | -1.609337% |
+
+The signed shares sum to 100 percent because the divergent components enter the covariance reconstruction with negative sign.
+
+For PC2:
+
+| Component | Contribution | Signed Share |
+|---|---:|---:|
+| CLPM | 0.0000973457 | 41.26517% |
+| CUPM | 0.0000951512 | 40.33489% |
+| DLPM | -0.0000217030 | 9.199970% |
+| DUPM | -0.0000217030 | 9.199970% |
+
+The same interpretation holds:
+
+> PC1 is primarily a concordant co-movement object. PC2 contains a larger relative divergent contribution.
+
+### Lead-Sample Verification
+
+The dynamic section works with the lead sample `Z_{t+1}`. Applying the same package workflow to `Z_lead = Z[-1, ]` gives:
+
+```math
+\max\left|\mathrm{cov}(Z_{\mathrm{lead}})-\mathrm{PM.matrix}(Z_{\mathrm{lead}})\$cov.matrix\right|
+=
+5.421011\times 10^{-19}.
+```
+
+The lead-sample PCA eigenvalues were:
+
+```math
+0.0013488347,
+\qquad
+0.0002355702.
+```
+
+The `PM.matrix` recovered eigenvalues were identical, and the eigenvector alignments were again:
+
+```math
+1,\qquad 1.
+```
+
+Thus the unconditional lead covariance used in the dynamic section is also directly recoverable through `PM.matrix`.
+
+### Transition-Path Covariance Validation
+
+The transition-path decomposition remains a manual observable-regime decomposition because it groups observations by paths such as:
+
+```math
+\mathrm{CLPM}\to\mathrm{CUPM},
+\qquad
+\mathrm{CUPM}\to\mathrm{CLPM},
+\qquad
+\mathrm{CLPM}\to\mathrm{CLPM}.
+```
+
+However, the covariance inside each transition path can be checked directly with `PM.matrix`.
+
+Across all 16 transition paths, the maximum path-level covariance error was:
+
+```math
+3.794708\times 10^{-19}.
+```
+
+The maximum path-level directional reassembly error was also:
+
+```math
+3.794708\times 10^{-19}.
+```
+
+So `PM.matrix` validates the within-path covariance objects used inside the dynamic transition-path decomposition.
+
+### `norm = TRUE` Caveat
+
+For covariance and PCA recovery, use:
+
+```r
+norm = FALSE
+```
+
+With `norm = TRUE`, the returned `cov.matrix` is a normalized signed dependence matrix. In this run:
+
+```math
+\mathrm{PM.matrix}(Z,\mathrm{norm}=TRUE)\$cov.matrix
+=
+\begin{pmatrix}
+1 & 0.8650148\\
+0.8650148 & 1
+\end{pmatrix}.
+```
+
+This differs from `cov(Z)` by:
+
+```math
+0.9992113.
+```
+
+Therefore:
+
+> `norm = FALSE` preserves covariance magnitude and recovers PCA.  
+> `norm = TRUE` returns a normalized signed dependence matrix, not the covariance/PCA object.
+
+
+---
+
 ## 12. Observable Transition Matrix
 
 The estimated transition matrix was:
@@ -1044,6 +1276,8 @@ The static covariance recovery error was approximately `1e-19`.
 
 The recovered eigenvalues and eigenvectors matched the original covariance eigensystem exactly to numerical precision.
 
+The same static covariance and PCA recovery was verified directly through `NNS::PM.matrix` with `norm = FALSE`. The package reconstruction matched `cov(Z)` to numerical precision and produced eigenvector alignments of `1, 1`.
+
 ### Claim 2: Centered quadrant means are rank-one eigenvector primitives.
 
 For every quadrant:
@@ -1193,6 +1427,8 @@ The HMM comparison says:
 > HMMs infer latent regimes and then interpret them. NNS defines observable directional regimes first and then measures their dynamics.
 
 Together, these results show that directional NNS is not merely an alternative dependence statistic. It is a regime-indexed spectral genealogy for covariance, PCA, and dynamic risk.
+
+The manual regime decomposition explains the genealogy. The direct `NNS::PM.matrix` checks show that the underlying directional covariance and PCA recovery are also available through the exported NNS package workflow.
 
 ---
 
@@ -1889,3 +2125,270 @@ cat("DONE\n")
 cat("============================================================\n")
 
 ```
+
+---
+
+## Appendix B: Direct `NNS::PM.matrix` Verification Code
+
+```r
+# =============================================================================
+# Directional Markov Regimes: Direct NNS::PM.matrix Verification
+# Static, Lead, and Transition-Path Covariance Checks
+# =============================================================================
+
+library(NNS)
+
+pop_cov <- function(M) {
+  M <- as.matrix(M)
+  n <- nrow(M)
+  if (n <= 1) return(matrix(0, ncol(M), ncol(M)))
+  cov(M) * (n - 1) / n
+}
+
+mvrnorm_base <- function(n, mu, Sigma) {
+  p <- length(mu)
+  Z <- matrix(rnorm(n * p), n, p)
+  sweep(Z %*% chol(Sigma), 2, mu, "+")
+}
+
+assign_quadrants <- function(Z, center) {
+  X <- Z[, 1]
+  Y <- Z[, 2]
+  cx <- center[1]
+  cy <- center[2]
+
+  Q <- rep(NA_character_, nrow(Z))
+
+  Q[X >  cx & Y >  cy] <- "CUPM"
+  Q[X <= cx & Y <= cy] <- "CLPM"
+  Q[X >  cx & Y <= cy] <- "DLPM"
+  Q[X <= cx & Y >  cy] <- "DUPM"
+
+  factor(Q, levels = c("CUPM", "CLPM", "DLPM", "DUPM"))
+}
+
+pm_matrix_check <- function(Z, label, pcs = 2) {
+  Z <- as.matrix(Z)
+
+  cat("\n------------------------------------------------------------\n")
+  cat(label, "\n")
+  cat("------------------------------------------------------------\n")
+
+  Sigma_classic <- cov(Z)
+  pca_classic <- eigen(Sigma_classic, symmetric = TRUE)
+
+  pm <- NNS::PM.matrix(
+    LPM_degree = 1,
+    UPM_degree = 1,
+    target     = "mean",
+    variable   = Z,
+    pop_adj    = TRUE,
+    norm       = FALSE
+  )
+
+  Sigma_nns <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
+  pca_nns <- eigen(Sigma_nns, symmetric = TRUE)
+
+  for (j in seq_len(ncol(Z))) {
+    if (sum(pca_classic$vectors[, j] * pca_nns$vectors[, j]) < 0) {
+      pca_nns$vectors[, j] <- -pca_nns$vectors[, j]
+    }
+  }
+
+  pcs <- min(pcs, ncol(Z))
+
+  alignments <- sapply(seq_len(pcs), function(k) {
+    abs(sum(pca_classic$vectors[, k] * pca_nns$vectors[, k]))
+  })
+
+  cat("\nMax abs difference: cov(Z) vs PM.matrix $cov.matrix:\n")
+  print(max(abs(Sigma_classic - pm$cov.matrix)))
+
+  cat("\nMax abs difference: cov(Z) vs directional reassembly:\n")
+  print(max(abs(Sigma_classic - Sigma_nns)))
+
+  cat("\nClassical PCA eigenvalues:\n")
+  print(round(pca_classic$values, 12))
+
+  cat("\nNNS PM.matrix recovered PCA eigenvalues:\n")
+  print(round(pca_nns$values, 12))
+
+  cat("\nEigenvector alignments:\n")
+  print(round(alignments, 12))
+
+  attrib <- data.frame(
+    PC         = seq_len(pcs),
+    eigenvalue = pca_classic$values[seq_len(pcs)],
+    CLPM       = NA_real_,
+    CUPM       = NA_real_,
+    DLPM       = NA_real_,
+    DUPM       = NA_real_,
+    recovered  = NA_real_,
+    error      = NA_real_
+  )
+
+  for (k in seq_len(pcs)) {
+    v <- pca_classic$vectors[, k, drop = FALSE]
+
+    clpm_k <- drop(t(v) %*% pm$clpm %*% v)
+    cupm_k <- drop(t(v) %*% pm$cupm %*% v)
+    dlpm_k <- drop(t(v) %*% pm$dlpm %*% v)
+    dupm_k <- drop(t(v) %*% pm$dupm %*% v)
+
+    recovered_k <- clpm_k + cupm_k - dlpm_k - dupm_k
+
+    attrib$CLPM[k] <- clpm_k
+    attrib$CUPM[k] <- cupm_k
+    attrib$DLPM[k] <- dlpm_k
+    attrib$DUPM[k] <- dupm_k
+    attrib$recovered[k] <- recovered_k
+    attrib$error[k] <- abs(attrib$eigenvalue[k] - recovered_k)
+  }
+
+  cat("\nDirectional eigenvalue attribution from PM.matrix:\n")
+  print(round(attrib, 12))
+
+  invisible(list(
+    pm = pm,
+    Sigma_classic = Sigma_classic,
+    Sigma_nns = Sigma_nns,
+    pca_classic = pca_classic,
+    pca_nns = pca_nns,
+    attrib = attrib,
+    alignments = alignments
+  ))
+}
+
+# Recreate the Markov-regime simulation from the note.
+set.seed(123)
+
+n <- 5000
+
+state <- integer(n)
+state[1] <- 1
+
+p_stay <- 0.96
+
+for (t in 2:n) {
+  state[t] <- ifelse(runif(1) < p_stay, state[t - 1], 3 - state[t - 1])
+}
+
+mu_calm <- c(0.0003, 0.0003)
+Sigma_calm <- matrix(
+  c(0.0002, 0.00003,
+    0.00003, 0.0002),
+  nrow = 2,
+  byrow = TRUE
+)
+
+mu_turb <- c(-0.0008, -0.0012)
+Sigma_turb <- matrix(
+  c(0.0012, 0.0009,
+    0.0009, 0.0012),
+  nrow = 2,
+  byrow = TRUE
+)
+
+Z <- matrix(0, n, 2)
+
+for (t in seq_len(n)) {
+  if (state[t] == 1) {
+    Z[t, ] <- mvrnorm_base(1, mu_calm, Sigma_calm)
+  } else {
+    Z[t, ] <- mvrnorm_base(1, mu_turb, Sigma_turb)
+  }
+}
+
+colnames(Z) <- c("X", "Y")
+
+center <- colMeans(Z)
+Q <- assign_quadrants(Z, center)
+
+# Static PM.matrix recovery.
+static_pm <- pm_matrix_check(
+  Z = Z,
+  label = "Static covariance/PCA recovery using NNS::PM.matrix(Z)",
+  pcs = 2
+)
+
+# Lead-sample PM.matrix recovery.
+Z_lead <- Z[-1, , drop = FALSE]
+
+lead_pm <- pm_matrix_check(
+  Z = Z_lead,
+  label = "Lead covariance/PCA recovery using NNS::PM.matrix(Z_lead)",
+  pcs = 2
+)
+
+# Transition-path covariance validation.
+Q_current <- Q[-n]
+Q_next <- Q[-1]
+levels_Q <- levels(Q)
+
+path_pm_table <- data.frame(
+  path = character(),
+  n_path = integer(),
+  p_path = numeric(),
+  max_abs_cov_vs_PM_cov = numeric(),
+  max_abs_cov_vs_PM_reassembly = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (q in levels_Q) {
+  for (qq in levels_Q) {
+    idx <- which(Q_current == q & Q_next == qq)
+    if (length(idx) <= 1) next
+
+    Z_path <- Z_lead[idx, , drop = FALSE]
+
+    pm_path <- NNS::PM.matrix(
+      LPM_degree = 1,
+      UPM_degree = 1,
+      target     = "mean",
+      variable   = Z_path,
+      pop_adj    = TRUE,
+      norm       = FALSE
+    )
+
+    Sigma_path_pm <- pm_path$clpm + pm_path$cupm - pm_path$dlpm - pm_path$dupm
+
+    path_pm_table <- rbind(
+      path_pm_table,
+      data.frame(
+        path = paste(q, qq, sep = "->"),
+        n_path = nrow(Z_path),
+        p_path = nrow(Z_path) / nrow(Z_lead),
+        max_abs_cov_vs_PM_cov = max(abs(cov(Z_path) - pm_path$cov.matrix)),
+        max_abs_cov_vs_PM_reassembly = max(abs(cov(Z_path) - Sigma_path_pm)),
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+}
+
+cat("\nPM.matrix validation for each transition-path covariance:\n")
+print(path_pm_table[order(path_pm_table$path), ], digits = 10)
+
+cat("\nMax transition-path PM.matrix covariance error:\n")
+print(max(path_pm_table$max_abs_cov_vs_PM_cov))
+
+cat("\nMax transition-path PM.matrix reassembly error:\n")
+print(max(path_pm_table$max_abs_cov_vs_PM_reassembly))
+
+# norm = TRUE caveat.
+pm_norm <- NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z,
+  pop_adj    = TRUE,
+  norm       = TRUE
+)
+
+cat("\nnorm = TRUE $cov.matrix:\n")
+print(round(pm_norm$cov.matrix, 10))
+
+cat("\nMax absolute difference: norm = TRUE $cov.matrix vs cov(Z):\n")
+print(max(abs(pm_norm$cov.matrix - cov(Z))))
+```
+

@@ -644,7 +644,7 @@ v_2
 Because the directional pieces reconstruct \(a\), \(b\), and \(d\) exactly, they also reconstruct \(\lambda_{1,2}\) and \(v_{1,2}\) exactly.
 The recovery is complete.
 
-See the following for a [5 variable detailed example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/spectral-decomposition-5var.md).
+See the following for a [high dimensional detailed example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns-directional-spectral-decomposition.md).
 
 ---
 
@@ -1139,6 +1139,184 @@ This is the interpretive content that classical PCA alone cannot supply.
 
 ---
 
+
+## Direct Package Recovery with `NNS::PM.matrix`
+
+The preceding examples construct the directional components manually from quadrant membership.
+The same covariance recovery can also be obtained directly from the exported NNS package function `PM.matrix`.
+
+For covariance and PCA recovery, use degree-one lower and upper partial moments, the mean target, sample covariance adjustment, and unnormalized output:
+
+```{r spectral-pm-matrix-direct}
+library(NNS)
+
+Z_pm <- Z
+colnames(Z_pm) <- c("X", "Y")
+
+Sigma_sample <- cov(Z_pm)
+eig_sample   <- eigen(Sigma_sample, symmetric = TRUE)
+
+pm <- NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z_pm,
+  pop_adj    = TRUE,
+  norm       = FALSE
+)
+
+names(pm)
+
+Sigma_pm <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
+
+Sigma_sample
+pm$cov.matrix
+Sigma_pm
+
+max(abs(Sigma_sample - pm$cov.matrix))
+max(abs(Sigma_sample - Sigma_pm))
+max(abs(pm$cov.matrix - Sigma_pm))
+```
+
+In this run, `PM.matrix` returns the directional matrices
+
+\[
+\operatorname{CUPM},\quad
+\operatorname{DUPM},\quad
+\operatorname{DLPM},\quad
+\operatorname{CLPM}
+\]
+
+and the assembled covariance matrix `cov.matrix`.
+The identity
+
+\[
+\Sigma
+=
+\operatorname{CLPM}
++
+\operatorname{CUPM}
+-
+\operatorname{DLPM}
+-
+\operatorname{DUPM}
+\]
+
+matches base R `cov(Z_pm)` to floating-point precision.
+The maximum absolute difference was approximately \(6.66\times 10^{-16}\).
+
+The corresponding PCA recovery is immediate:
+
+```{r spectral-pm-matrix-pca}
+eig_pm <- eigen(Sigma_pm, symmetric = TRUE)
+
+eig_sample$values
+eig_pm$values
+
+eig_sample$values - eig_pm$values
+
+sapply(1:2, function(k) {
+  abs(sum(eig_sample$vectors[, k] * eig_pm$vectors[, k]))
+})
+```
+
+The classical eigenvalues and the `PM.matrix`-recovered eigenvalues were identical at displayed precision:
+
+\[
+1.7041891,\qquad 0.2993726.
+\]
+
+The absolute inner products between corresponding eigenvectors were both equal to one.
+Thus the exported package implementation recovers the same eigensystem as the classical covariance matrix.
+
+The same Rayleigh-quotient attribution can be computed directly from the package matrices:
+
+```{r spectral-pm-matrix-attribution}
+attribute_pm_lambda <- function(v, pm) {
+  v <- matrix(v, ncol = 1)
+
+  clpm <- drop(t(v) %*% pm$clpm %*% v)
+  cupm <- drop(t(v) %*% pm$cupm %*% v)
+  dlpm <- drop(t(v) %*% pm$dlpm %*% v)
+  dupm <- drop(t(v) %*% pm$dupm %*% v)
+
+  c(
+    CLPM      = clpm,
+    CUPM      = cupm,
+    DLPM      = dlpm,
+    DUPM      = dupm,
+    recovered = clpm + cupm - dlpm - dupm
+  )
+}
+
+pm_attr_1 <- attribute_pm_lambda(eig_sample$vectors[, 1], pm)
+pm_attr_2 <- attribute_pm_lambda(eig_sample$vectors[, 2], pm)
+
+rbind(
+  lambda_1 = pm_attr_1,
+  lambda_2 = pm_attr_2
+)
+
+eig_sample$values
+```
+
+In the reported run the leading eigenvalue was generated primarily by lower and upper concordant co-movement:
+
+\[
+\lambda_1
+=
+0.8742047
++
+0.8786260
+-
+0.0243208
+-
+0.0243208
+=
+1.7041891.
+\]
+
+The second eigenvalue had a larger relative divergent contribution:
+
+\[
+\lambda_2
+=
+0.1258265
++
+0.1249045
+-
+(-0.0243208)
+-
+(-0.0243208)
+=
+0.2993726.
+\]
+
+This confirms the interpretation developed above: the leading axis is mainly concordant, while the orthogonal axis contains more divergent structure.
+
+One implementation caveat is important.
+For spectral recovery use `norm = FALSE`.
+With `norm = TRUE`, `PM.matrix` returns a normalized signed dependence matrix, not the covariance matrix:
+
+```{r spectral-pm-matrix-norm-caveat}
+pm_norm <- NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z_pm,
+  pop_adj    = TRUE,
+  norm       = TRUE
+)
+
+pm_norm$cov.matrix
+max(abs(pm_norm$cov.matrix - Sigma_sample))
+```
+
+In this run, the normalized matrix had unit diagonal and off-diagonal value approximately \(0.8783447\), and differed from the covariance matrix by about \(0.1759508\).
+That object is useful as a normalized signed dependence matrix, but it is not the covariance object used for PCA recovery.
+
+---
+
 ## Visualizing the CLPM Mean Slope
 
 The following figure displays the three distinct directions associated with the CLPM region: the quadrant mean slope, the within-CLPM regression line, and the within-CLPM first principal component.
@@ -1238,7 +1416,7 @@ This chapter extended the directional decomposition of covariance into spectral 
 
 Key results:
 
-1. The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem:
+1. The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem. This can be constructed manually or obtained directly from `NNS::PM.matrix` with `norm = FALSE`:
 
 \[
 (\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})
