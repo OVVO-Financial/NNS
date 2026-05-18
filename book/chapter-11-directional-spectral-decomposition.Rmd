@@ -824,79 +824,35 @@ They identify precisely what is claimed: locatable spectral attribution, not a r
 
 ## Quadrant Decomposition in R
 
-The following functions implement the between-within decomposition.
-Population normalization \(1/n\) is used throughout to match the expectation formulas above.
+The directional co-partial moment matrices are obtained directly from `NNS::PM.matrix()`.
+Population normalization \(1/n\) is used throughout to match the expectation formulas above, so `pop_adj = FALSE` is used.
 
 ```{r spectral-setup}
-pop_cov <- function(Z) {
-  Z <- as.matrix(Z)
-  Zc <- sweep(Z, 2, colMeans(Z), FUN = "-")
-  crossprod(Zc) / nrow(Zc)
-}
+library(NNS)
 
-quadrant_decomposition <- function(Z) {
+pm_decomposition <- function(Z) {
   Z <- as.matrix(Z)
   stopifnot(ncol(Z) == 2)
 
-  n  <- nrow(Z)
-  mu <- colMeans(Z)
-  mx <- mu[1]; my <- mu[2]
-
-  quadrants <- list(
-    CUPM = (Z[,1] >  mx) & (Z[,2] >  my),
-    CLPM = (Z[,1] <= mx) & (Z[,2] <= my),
-    DLPM = (Z[,1] >  mx) & (Z[,2] <= my),
-    DUPM = (Z[,1] <= mx) & (Z[,2] >  my)
+  pm <- NNS::PM.matrix(
+    LPM_degree = 1,
+    UPM_degree = 1,
+    target     = "mean",
+    variable   = Z,
+    pop_adj    = FALSE,
+    norm       = FALSE
   )
 
-  Sigma_Q   <- matrix(0, 2, 2)
-  Sigma_W   <- matrix(0, 2, 2)
-  details   <- vector("list", length(quadrants))
-  centroids <- vector("list", length(quadrants))
-
-  for (i in seq_along(quadrants)) {
-    qname <- names(quadrants)[i]
-    mask  <- quadrants[[i]]
-    n_q   <- sum(mask)
-    if (n_q == 0) next
-
-    p_q <- n_q / n
-    Z_q <- Z[mask, , drop = FALSE]
-    m_q <- colMeans(Z_q)
-    u_q <- m_q - mu
-
-    Sigma_Q <- Sigma_Q + p_q * tcrossprod(u_q)
-    Sigma_W <- Sigma_W + p_q * pop_cov(Z_q)
-
-    centroids[[i]] <- data.frame(
-      quadrant = qname,
-      n        = n_q,
-      p        = p_q,
-      mean_x   = m_q[1],
-      mean_y   = m_q[2],
-      u_x      = u_q[1],
-      u_y      = u_q[2]
-    )
-
-    details[[i]] <- data.frame(
-      quadrant     = qname,
-      n            = n_q,
-      p            = round(p_q, 6),
-      mean_x       = round(m_q[1], 6),
-      mean_y       = round(m_q[2], 6),
-      u_x          = round(u_q[1], 6),
-      u_y          = round(u_q[2], 6),
-      lambda_rank1 = round(p_q * sum(u_q^2), 6)
-    )
-  }
+  Sigma_pm <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
 
   list(
-    mu      = mu,
-    Sigma   = pop_cov(Z),
-    Sigma_Q   = Sigma_Q,
-    Sigma_W   = Sigma_W,
-    centroids = do.call(rbind, centroids),
-    details   = do.call(rbind, details)
+    clpm     = pm$clpm,
+    cupm     = pm$cupm,
+    dlpm     = pm$dlpm,
+    dupm     = pm$dupm,
+    Sigma    = pm$cov.matrix,
+    Sigma_pm = Sigma_pm,
+    eig      = eigen(Sigma_pm, symmetric = TRUE)
   )
 }
 ```
@@ -904,15 +860,30 @@ quadrant_decomposition <- function(Z) {
 Generate positively dependent bivariate data, compute the quadrant decomposition, and pass \(\Sigma\) directly to `eigen` for attribution.
 
 ```{r spectral-data}
+library(NNS)
+
 set.seed(123)
 n   <- 10000
 rho <- 0.70
 R   <- matrix(c(1, rho, rho, 1), 2, 2)
 Z   <- matrix(rnorm(2 * n), n, 2) %*% chol(R)
+colnames(Z) <- c("X", "Y")
+
+pm <- NNS::PM.matrix(
+  LPM_degree = 1,
+  UPM_degree = 1,
+  target     = "mean",
+  variable   = Z,
+  pop_adj    = FALSE,
+  norm       = FALSE
+)
+
+Sigma_PM <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
 
 D             <- quadrant_decomposition(Z)
-eig_classical <- eigen(D$Sigma)
+eig_classical <- eigen(Sigma_PM)
 
+max(abs(D$Sigma - Sigma_PM))
 D$details
 ```
 
@@ -1090,146 +1061,7 @@ eig_classical$values
 This is the exact decomposition \(\lambda_i = v_i^\top \Sigma_Q v_i + v_i^\top \Sigma_W v_i\).
 The totals in each row match the classical eigenvalues to floating-point precision.
 
-Quadrant-level attribution of the between component:
-
-```{r spectral-quadrant-attribution}
-quadrant_between_contrib <- function(Z, v) {
-  Z  <- as.matrix(Z)
-  v  <- as.numeric(v)
-  n  <- nrow(Z)
-  mu <- colMeans(Z)
-  mx <- mu[1]; my <- mu[2]
-
-  quadrants <- list(
-    CUPM = (Z[,1] >  mx) & (Z[,2] >  my),
-    CLPM = (Z[,1] <= mx) & (Z[,2] <= my),
-    DLPM = (Z[,1] >  mx) & (Z[,2] <= my),
-    DUPM = (Z[,1] <= mx) & (Z[,2] >  my)
-  )
-
-  out <- data.frame(quadrant = names(quadrants), contribution = NA_real_)
-
-  for (i in seq_along(quadrants)) {
-    mask <- quadrants[[i]]
-    if (sum(mask) == 0) { out$contribution[i] <- 0; next }
-    p_q <- sum(mask) / n
-    u_q <- colMeans(Z[mask, , drop = FALSE]) - mu
-    out$contribution[i] <- p_q * sum(v * u_q)^2
-  }
-
-  out
-}
-
-q_attr_v1 <- quadrant_between_contrib(Z, V[, 1])
-q_attr_v2 <- quadrant_between_contrib(Z, V[, 2])
-
-# PC1: driven by concordant quadrants
-q_attr_v1
-sum(q_attr_v1$contribution)    # matches attrib_1["between"]
-
-# PC2: driven by divergent quadrants
-q_attr_v2
-sum(q_attr_v2$contribution)    # matches attrib_2["between"]
-```
-
-For this positively dependent example the pattern is clear.
-PC1 receives nearly all its between-quadrant contribution from CUPM and CLPM: the leading principal direction is a concordant co-movement axis.
-PC2 receives nearly all its between-quadrant contribution from DLPM and DUPM: the minor axis is a divergent direction.
-This is the interpretive content that classical PCA alone cannot supply.
-
----
-
-
-## Direct Package Recovery with `NNS::PM.matrix`
-
-The preceding examples construct the directional components manually from quadrant membership.
-The same covariance recovery can also be obtained directly from the exported NNS package function `PM.matrix`.
-
-For covariance and PCA recovery, use degree-one lower and upper partial moments, the mean target, sample covariance adjustment, and unnormalized output:
-
-```{r spectral-pm-matrix-direct}
-library(NNS)
-
-Z_pm <- Z
-colnames(Z_pm) <- c("X", "Y")
-
-Sigma_sample <- cov(Z_pm)
-eig_sample   <- eigen(Sigma_sample, symmetric = TRUE)
-
-pm <- NNS::PM.matrix(
-  LPM_degree = 1,
-  UPM_degree = 1,
-  target     = "mean",
-  variable   = Z_pm,
-  pop_adj    = TRUE,
-  norm       = FALSE
-)
-
-names(pm)
-
-Sigma_pm <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
-
-Sigma_sample
-pm$cov.matrix
-Sigma_pm
-
-max(abs(Sigma_sample - pm$cov.matrix))
-max(abs(Sigma_sample - Sigma_pm))
-max(abs(pm$cov.matrix - Sigma_pm))
-```
-
-In this run, `PM.matrix` returns the directional matrices
-
-\[
-\operatorname{CUPM},\quad
-\operatorname{DUPM},\quad
-\operatorname{DLPM},\quad
-\operatorname{CLPM}
-\]
-
-and the assembled covariance matrix `cov.matrix`.
-The identity
-
-\[
-\Sigma
-=
-\operatorname{CLPM}
-+
-\operatorname{CUPM}
--
-\operatorname{DLPM}
--
-\operatorname{DUPM}
-\]
-
-matches base R `cov(Z_pm)` to floating-point precision.
-The maximum absolute difference was approximately \(6.66\times 10^{-16}\).
-
-The corresponding PCA recovery is immediate:
-
-```{r spectral-pm-matrix-pca}
-eig_pm <- eigen(Sigma_pm, symmetric = TRUE)
-
-eig_sample$values
-eig_pm$values
-
-eig_sample$values - eig_pm$values
-
-sapply(1:2, function(k) {
-  abs(sum(eig_sample$vectors[, k] * eig_pm$vectors[, k]))
-})
-```
-
-The classical eigenvalues and the `PM.matrix`-recovered eigenvalues were identical at displayed precision:
-
-\[
-1.7041891,\qquad 0.2993726.
-\]
-
-The absolute inner products between corresponding eigenvectors were both equal to one.
-Thus the exported package implementation recovers the same eigensystem as the classical covariance matrix.
-
-The same Rayleigh-quotient attribution can be computed directly from the package matrices:
+Directional co-partial moment attribution is computed directly from the matrices returned by `NNS::PM.matrix`.
 
 ```{r spectral-pm-matrix-attribution}
 attribute_pm_lambda <- function(v, pm) {
@@ -1249,73 +1081,21 @@ attribute_pm_lambda <- function(v, pm) {
   )
 }
 
-pm_attr_1 <- attribute_pm_lambda(eig_sample$vectors[, 1], pm)
-pm_attr_2 <- attribute_pm_lambda(eig_sample$vectors[, 2], pm)
+pm_attr_1 <- attribute_pm_lambda(V[, 1], pm)
+pm_attr_2 <- attribute_pm_lambda(V[, 2], pm)
 
-rbind(
-  lambda_1 = pm_attr_1,
-  lambda_2 = pm_attr_2
-)
-
-eig_sample$values
+rbind(lambda_1 = pm_attr_1, lambda_2 = pm_attr_2)
+eig_classical$values
 ```
 
-In the reported run the leading eigenvalue was generated primarily by lower and upper concordant co-movement:
-
-\[
-\lambda_1
-=
-0.8742047
-+
-0.8786260
--
-0.0243208
--
-0.0243208
-=
-1.7041891.
-\]
-
-The second eigenvalue had a larger relative divergent contribution:
-
-\[
-\lambda_2
-=
-0.1258265
-+
-0.1249045
--
-(-0.0243208)
--
-(-0.0243208)
-=
-0.2993726.
-\]
-
-This confirms the interpretation developed above: the leading axis is mainly concordant, while the orthogonal axis contains more divergent structure.
-
-One implementation caveat is important.
-For spectral recovery use `norm = FALSE`.
-With `norm = TRUE`, `PM.matrix` returns a normalized signed dependence matrix, not the covariance matrix:
-
-```{r spectral-pm-matrix-norm-caveat}
-pm_norm <- NNS::PM.matrix(
-  LPM_degree = 1,
-  UPM_degree = 1,
-  target     = "mean",
-  variable   = Z_pm,
-  pop_adj    = TRUE,
-  norm       = TRUE
-)
-
-pm_norm$cov.matrix
-max(abs(pm_norm$cov.matrix - Sigma_sample))
-```
-
-In this run, the normalized matrix had unit diagonal and off-diagonal value approximately \(0.8783447\), and differed from the covariance matrix by about \(0.1759508\).
-That object is useful as a normalized signed dependence matrix, but it is not the covariance object used for PCA recovery.
+For this positively dependent example the pattern is clear.
+The leading eigenvalue is generated primarily by lower and upper concordant co-movement.
+The second eigenvalue has a larger relative divergent contribution.
+This is the interpretive content that classical PCA alone cannot supply.
 
 ---
+
+
 
 ## Visualizing the CLPM Mean Slope
 
