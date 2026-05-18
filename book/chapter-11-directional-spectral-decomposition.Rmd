@@ -644,8 +644,6 @@ v_2
 Because the directional pieces reconstruct \(a\), \(b\), and \(d\) exactly, they also reconstruct \(\lambda_{1,2}\) and \(v_{1,2}\) exactly.
 The recovery is complete.
 
-See the following for a [high dimensional detailed example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns-directional-spectral-decomposition.md).
-
 ---
 
 ## Recursive Spectral Refinement
@@ -719,6 +717,8 @@ The multivariate statement therefore matches the bivariate one:
 \text{NNS partitions generate locatable rank-one spectral primitives in any dimension.}
 }
 \]
+
+See the following for a [detailed higher dimension example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns-directional-spectral-decomposition.md).
 
 ---
 
@@ -824,67 +824,100 @@ They identify precisely what is claimed: locatable spectral attribution, not a r
 
 ## Quadrant Decomposition in R
 
-The directional co-partial moment matrices are obtained directly from `NNS::PM.matrix()`.
-Population normalization \(1/n\) is used throughout to match the expectation formulas above, so `pop_adj = FALSE` is used.
+The following functions implement the between-within decomposition.
+Population normalization \(1/n\) is used throughout to match the expectation formulas above.
 
-For degree-one co-partial moments,
+```{r spectral-setup}
+pop_cov <- function(Z) {
+  Z <- as.matrix(Z)
+  Zc <- sweep(Z, 2, colMeans(Z), FUN = "-")
+  crossprod(Zc) / nrow(Zc)
+}
 
-\[
-\Sigma
-=
-\mathrm{CLPM}
-+
-\mathrm{CUPM}
--
-\mathrm{DLPM}
--
-\mathrm{DUPM}.
-\]
+quadrant_decomposition <- function(Z) {
+  Z <- as.matrix(Z)
+  stopifnot(ncol(Z) == 2)
 
-```{r spectral-data}
-library(NNS)
+  n  <- nrow(Z)
+  mu <- colMeans(Z)
+  mx <- mu[1]; my <- mu[2]
 
-set.seed(123)
+  quadrants <- list(
+    CUPM = (Z[,1] >  mx) & (Z[,2] >  my),
+    CLPM = (Z[,1] <= mx) & (Z[,2] <= my),
+    DLPM = (Z[,1] >  mx) & (Z[,2] <= my),
+    DUPM = (Z[,1] <= mx) & (Z[,2] >  my)
+  )
 
-n   <- 10000
-rho <- 0.70
+  Sigma_Q   <- matrix(0, 2, 2)
+  Sigma_W   <- matrix(0, 2, 2)
+  details   <- vector("list", length(quadrants))
+  centroids <- vector("list", length(quadrants))
 
-R <- matrix(
-  c(1, rho,
-    rho, 1),
-  nrow = 2,
-  byrow = TRUE
-)
+  for (i in seq_along(quadrants)) {
+    qname <- names(quadrants)[i]
+    mask  <- quadrants[[i]]
+    n_q   <- sum(mask)
+    if (n_q == 0) next
 
-Z <- matrix(rnorm(2 * n), nrow = n, ncol = 2) %*% chol(R)
-colnames(Z) <- c("X", "Y")
+    p_q <- n_q / n
+    Z_q <- Z[mask, , drop = FALSE]
+    m_q <- colMeans(Z_q)
+    u_q <- m_q - mu
 
-pm <- NNS::PM.matrix(
-  LPM_degree = 1,
-  UPM_degree = 1,
-  target     = "mean",
-  variable   = Z,
-  pop_adj    = FALSE,
-  norm       = FALSE
-)
+    Sigma_Q <- Sigma_Q + p_q * tcrossprod(u_q)
+    Sigma_W <- Sigma_W + p_q * pop_cov(Z_q)
 
-pm
+    centroids[[i]] <- data.frame(
+      quadrant = qname,
+      n        = n_q,
+      p        = p_q,
+      mean_x   = m_q[1],
+      mean_y   = m_q[2],
+      u_x      = u_q[1],
+      u_y      = u_q[2]
+    )
 
-Sigma <- pm$clpm + pm$cupm - pm$dlpm - pm$dupm
-eig   <- eigen(Sigma, symmetric = TRUE)
+    details[[i]] <- data.frame(
+      quadrant     = qname,
+      n            = n_q,
+      p            = round(p_q, 6),
+      mean_x       = round(m_q[1], 6),
+      mean_y       = round(m_q[2], 6),
+      u_x          = round(u_q[1], 6),
+      u_y          = round(u_q[2], 6),
+      lambda_rank1 = round(p_q * sum(u_q^2), 6)
+    )
+  }
 
-round(Sigma, 6)
-
-round(eig$values, 6)
-
-round(eig$vectors, 6)
-
-max(abs(pm$cov.matrix - Sigma))
+  list(
+    mu      = mu,
+    Sigma   = pop_cov(Z),
+    Sigma_Q   = Sigma_Q,
+    Sigma_W   = Sigma_W,
+    centroids = do.call(rbind, centroids),
+    details   = do.call(rbind, details)
+  )
+}
 ```
 
-The `PM.matrix()` object reports the four directional co-partial moment matrices and the reconstructed covariance matrix. The concordant terms, `clpm` and `cupm`, enter positively, while the divergent terms, `dlpm` and `dupm`, enter negatively.
+Generate positively dependent bivariate data, compute the quadrant decomposition, and pass \(\Sigma\) directly to `eigen` for attribution.
 
-The recovered covariance matrix is then passed directly to `eigen()` for spectral decomposition. For the simulated positively dependent data, the leading eigenvector lies approximately along the concordant direction, while the second eigenvector lies along the opposing contrast direction.
+```{r spectral-data}
+set.seed(123)
+n   <- 10000
+rho <- 0.70
+R   <- matrix(c(1, rho, rho, 1), 2, 2)
+Z   <- matrix(rnorm(2 * n), n, 2) %*% chol(R)
+
+D             <- quadrant_decomposition(Z)
+eig_classical <- eigen(D$Sigma)
+
+D$details
+```
+
+The quadrant summary shows the four conditional mean displacements \(u_q\) and their rank-one eigenvalues \(p_q \|u_q\|^2\).
+For positively dependent data the concordant quadrants (CUPM, CLPM) carry large displacements in opposite directions along the main axis, while the divergent quadrants (DLPM, DUPM) show much smaller displacements orthogonal to it.
 
 ---
 
@@ -1057,41 +1090,54 @@ eig_classical$values
 This is the exact decomposition \(\lambda_i = v_i^\top \Sigma_Q v_i + v_i^\top \Sigma_W v_i\).
 The totals in each row match the classical eigenvalues to floating-point precision.
 
-Directional co-partial moment attribution is computed directly from the matrices returned by `NNS::PM.matrix`.
+Quadrant-level attribution of the between component:
 
-```{r spectral-pm-matrix-attribution}
-attribute_pm_lambda <- function(v, pm) {
-  v <- matrix(v, ncol = 1)
+```{r spectral-quadrant-attribution}
+quadrant_between_contrib <- function(Z, v) {
+  Z  <- as.matrix(Z)
+  v  <- as.numeric(v)
+  n  <- nrow(Z)
+  mu <- colMeans(Z)
+  mx <- mu[1]; my <- mu[2]
 
-  clpm <- drop(t(v) %*% pm$clpm %*% v)
-  cupm <- drop(t(v) %*% pm$cupm %*% v)
-  dlpm <- drop(t(v) %*% pm$dlpm %*% v)
-  dupm <- drop(t(v) %*% pm$dupm %*% v)
-
-  c(
-    CLPM      = clpm,
-    CUPM      = cupm,
-    DLPM      = dlpm,
-    DUPM      = dupm,
-    recovered = clpm + cupm - dlpm - dupm
+  quadrants <- list(
+    CUPM = (Z[,1] >  mx) & (Z[,2] >  my),
+    CLPM = (Z[,1] <= mx) & (Z[,2] <= my),
+    DLPM = (Z[,1] >  mx) & (Z[,2] <= my),
+    DUPM = (Z[,1] <= mx) & (Z[,2] >  my)
   )
+
+  out <- data.frame(quadrant = names(quadrants), contribution = NA_real_)
+
+  for (i in seq_along(quadrants)) {
+    mask <- quadrants[[i]]
+    if (sum(mask) == 0) { out$contribution[i] <- 0; next }
+    p_q <- sum(mask) / n
+    u_q <- colMeans(Z[mask, , drop = FALSE]) - mu
+    out$contribution[i] <- p_q * sum(v * u_q)^2
+  }
+
+  out
 }
 
-pm_attr_1 <- attribute_pm_lambda(V[, 1], pm)
-pm_attr_2 <- attribute_pm_lambda(V[, 2], pm)
+q_attr_v1 <- quadrant_between_contrib(Z, V[, 1])
+q_attr_v2 <- quadrant_between_contrib(Z, V[, 2])
 
-rbind(lambda_1 = pm_attr_1, lambda_2 = pm_attr_2)
-eig_classical$values
+# PC1: driven by concordant quadrants
+q_attr_v1
+sum(q_attr_v1$contribution)    # matches attrib_1["between"]
+
+# PC2: driven by divergent quadrants
+q_attr_v2
+sum(q_attr_v2$contribution)    # matches attrib_2["between"]
 ```
 
 For this positively dependent example the pattern is clear.
-The leading eigenvalue is generated primarily by lower and upper concordant co-movement.
-The second eigenvalue has a larger relative divergent contribution.
+PC1 receives nearly all its between-quadrant contribution from CUPM and CLPM: the leading principal direction is a concordant co-movement axis.
+PC2 receives nearly all its between-quadrant contribution from DLPM and DUPM: the minor axis is a divergent direction.
 This is the interpretive content that classical PCA alone cannot supply.
 
 ---
-
-
 
 ## Visualizing the CLPM Mean Slope
 
@@ -1192,7 +1238,7 @@ This chapter extended the directional decomposition of covariance into spectral 
 
 Key results:
 
-1. The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem. This can be constructed manually or obtained directly from `NNS::PM.matrix` with `norm = FALSE`:
+1. The directional co-partial moment matrices recover covariance and therefore recover the classical PCA eigensystem:
 
 \[
 (\operatorname{CoLPM},\operatorname{CoUPM},\operatorname{DLPM},\operatorname{DUPM})
