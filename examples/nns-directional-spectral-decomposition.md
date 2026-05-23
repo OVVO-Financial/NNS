@@ -1,6 +1,6 @@
 # NNS Directional Spectral Decomposition: Full Orthants, Pairwise Matrices, and Scalable PCA Attribution
 
-This note extends the Chapter 11 directional spectral decomposition workflow in three layers:
+This note extends the [Chapter 11 directional spectral decomposition](https://ovvo-financial.github.io/NNS/book/directional-spectral-decomposition.html) workflow in three layers:
 
 1. **Full orthant decomposition**  
    The complete mean-split partition gives an exact spectral genealogy of covariance and PCA, but it scales as $2^d$.
