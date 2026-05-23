@@ -1,6 +1,6 @@
 # Directional Markov Regimes and PCA Recovery from NNS Quadrants
 
-This note extends NNS directional spectral decomposition from static quadrants to time-indexed directional regimes.
+This note extends the [Chapter 11 directional spectral decomposition](https://ovvo-financial.github.io/NNS/book/directional-spectral-decomposition.html) from static quadrants to time-indexed directional regimes.
 
 ---
 
