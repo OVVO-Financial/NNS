@@ -84,6 +84,8 @@ See the following for NNS detailed examples and specific applications:
 
    4.5 [NNS vs. N-HiTS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS.ARMA%20vs%20N-Hits.md)
 
+   4.6 [NNS Time-Series Prediction Interval Benchmark](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns_arma_conformal_benchmark_report.md)
+
 
 # 5. Econometrics
 
