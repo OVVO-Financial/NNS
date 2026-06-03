@@ -709,3 +709,4 @@ The next chapter therefore generalizes the same ideas to **multivariate forecast
 
 > **Further Reading / Examples**
 > For forecasting applications, including the tidal data example, see the [NNS Time-Series Forecasting Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#4-time-series-forecasting). This behavior is illustrated in the [tidal forecasting example](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html), where the seasonal decomposition captures the dominant 12-month cycle.
+> For prediction-interval calibration under nonstationarity — `NNS.ARMA.optim` benchmarked against conformal-prediction methods on coverage and the Winkler interval score — see the [time-series prediction-interval benchmark](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns_arma_conformal_benchmark_report.md).
