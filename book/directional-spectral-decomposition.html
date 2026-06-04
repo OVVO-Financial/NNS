@@ -1689,88 +1689,88 @@ They identify precisely what is claimed: locatable spectral attribution, not a r
 <h2><span class="header-section-number">11.14</span> Quadrant Decomposition in R<a href="directional-spectral-decomposition.html#quadrant-decomposition-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following functions implement the between-within decomposition.
 Population normalization <span class="math inline">\(1/n\)</span> is used throughout to match the expectation formulas above.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="directional-spectral-decomposition.html#cb13-1" tabindex="-1"></a>pop_cov <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
-<span id="cb13-2"><a href="directional-spectral-decomposition.html#cb13-2" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
-<span id="cb13-3"><a href="directional-spectral-decomposition.html#cb13-3" tabindex="-1"></a>  Zc <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, <span class="fu">colMeans</span>(Z), <span class="at">FUN =</span> <span class="st">&quot;-&quot;</span>)</span>
-<span id="cb13-4"><a href="directional-spectral-decomposition.html#cb13-4" tabindex="-1"></a>  <span class="fu">crossprod</span>(Zc) <span class="sc">/</span> <span class="fu">nrow</span>(Zc)</span>
-<span id="cb13-5"><a href="directional-spectral-decomposition.html#cb13-5" tabindex="-1"></a>}</span>
-<span id="cb13-6"><a href="directional-spectral-decomposition.html#cb13-6" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="directional-spectral-decomposition.html#cb13-7" tabindex="-1"></a>quadrant_decomposition <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
-<span id="cb13-8"><a href="directional-spectral-decomposition.html#cb13-8" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
-<span id="cb13-9"><a href="directional-spectral-decomposition.html#cb13-9" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">ncol</span>(Z) <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb13-10"><a href="directional-spectral-decomposition.html#cb13-10" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="directional-spectral-decomposition.html#cb13-11" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
-<span id="cb13-12"><a href="directional-spectral-decomposition.html#cb13-12" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
-<span id="cb13-13"><a href="directional-spectral-decomposition.html#cb13-13" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
-<span id="cb13-14"><a href="directional-spectral-decomposition.html#cb13-14" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="directional-spectral-decomposition.html#cb13-15" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb13-16"><a href="directional-spectral-decomposition.html#cb13-16" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
-<span id="cb13-17"><a href="directional-spectral-decomposition.html#cb13-17" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
-<span id="cb13-18"><a href="directional-spectral-decomposition.html#cb13-18" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
-<span id="cb13-19"><a href="directional-spectral-decomposition.html#cb13-19" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
-<span id="cb13-20"><a href="directional-spectral-decomposition.html#cb13-20" tabindex="-1"></a>  )</span>
-<span id="cb13-21"><a href="directional-spectral-decomposition.html#cb13-21" tabindex="-1"></a></span>
-<span id="cb13-22"><a href="directional-spectral-decomposition.html#cb13-22" tabindex="-1"></a>  Sigma_Q   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb13-23"><a href="directional-spectral-decomposition.html#cb13-23" tabindex="-1"></a>  Sigma_W   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb13-24"><a href="directional-spectral-decomposition.html#cb13-24" tabindex="-1"></a>  details   <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
-<span id="cb13-25"><a href="directional-spectral-decomposition.html#cb13-25" tabindex="-1"></a>  centroids <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
-<span id="cb13-26"><a href="directional-spectral-decomposition.html#cb13-26" tabindex="-1"></a></span>
-<span id="cb13-27"><a href="directional-spectral-decomposition.html#cb13-27" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
-<span id="cb13-28"><a href="directional-spectral-decomposition.html#cb13-28" tabindex="-1"></a>    qname <span class="ot">&lt;-</span> <span class="fu">names</span>(quadrants)[i]</span>
-<span id="cb13-29"><a href="directional-spectral-decomposition.html#cb13-29" tabindex="-1"></a>    mask  <span class="ot">&lt;-</span> quadrants[[i]]</span>
-<span id="cb13-30"><a href="directional-spectral-decomposition.html#cb13-30" tabindex="-1"></a>    n_q   <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask)</span>
-<span id="cb13-31"><a href="directional-spectral-decomposition.html#cb13-31" tabindex="-1"></a>    <span class="cf">if</span> (n_q <span class="sc">==</span> <span class="dv">0</span>) <span class="cf">next</span></span>
-<span id="cb13-32"><a href="directional-spectral-decomposition.html#cb13-32" tabindex="-1"></a></span>
-<span id="cb13-33"><a href="directional-spectral-decomposition.html#cb13-33" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> n_q <span class="sc">/</span> n</span>
-<span id="cb13-34"><a href="directional-spectral-decomposition.html#cb13-34" tabindex="-1"></a>    Z_q <span class="ot">&lt;-</span> Z[mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb13-35"><a href="directional-spectral-decomposition.html#cb13-35" tabindex="-1"></a>    m_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z_q)</span>
-<span id="cb13-36"><a href="directional-spectral-decomposition.html#cb13-36" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> m_q <span class="sc">-</span> mu</span>
-<span id="cb13-37"><a href="directional-spectral-decomposition.html#cb13-37" tabindex="-1"></a></span>
-<span id="cb13-38"><a href="directional-spectral-decomposition.html#cb13-38" tabindex="-1"></a>    Sigma_Q <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">tcrossprod</span>(u_q)</span>
-<span id="cb13-39"><a href="directional-spectral-decomposition.html#cb13-39" tabindex="-1"></a>    Sigma_W <span class="ot">&lt;-</span> Sigma_W <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">pop_cov</span>(Z_q)</span>
-<span id="cb13-40"><a href="directional-spectral-decomposition.html#cb13-40" tabindex="-1"></a></span>
-<span id="cb13-41"><a href="directional-spectral-decomposition.html#cb13-41" tabindex="-1"></a>    centroids[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb13-42"><a href="directional-spectral-decomposition.html#cb13-42" tabindex="-1"></a>      <span class="at">quadrant =</span> qname,</span>
-<span id="cb13-43"><a href="directional-spectral-decomposition.html#cb13-43" tabindex="-1"></a>      <span class="at">n        =</span> n_q,</span>
-<span id="cb13-44"><a href="directional-spectral-decomposition.html#cb13-44" tabindex="-1"></a>      <span class="at">p        =</span> p_q,</span>
-<span id="cb13-45"><a href="directional-spectral-decomposition.html#cb13-45" tabindex="-1"></a>      <span class="at">mean_x   =</span> m_q[<span class="dv">1</span>],</span>
-<span id="cb13-46"><a href="directional-spectral-decomposition.html#cb13-46" tabindex="-1"></a>      <span class="at">mean_y   =</span> m_q[<span class="dv">2</span>],</span>
-<span id="cb13-47"><a href="directional-spectral-decomposition.html#cb13-47" tabindex="-1"></a>      <span class="at">u_x      =</span> u_q[<span class="dv">1</span>],</span>
-<span id="cb13-48"><a href="directional-spectral-decomposition.html#cb13-48" tabindex="-1"></a>      <span class="at">u_y      =</span> u_q[<span class="dv">2</span>]</span>
-<span id="cb13-49"><a href="directional-spectral-decomposition.html#cb13-49" tabindex="-1"></a>    )</span>
-<span id="cb13-50"><a href="directional-spectral-decomposition.html#cb13-50" tabindex="-1"></a></span>
-<span id="cb13-51"><a href="directional-spectral-decomposition.html#cb13-51" tabindex="-1"></a>    details[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb13-52"><a href="directional-spectral-decomposition.html#cb13-52" tabindex="-1"></a>      <span class="at">quadrant     =</span> qname,</span>
-<span id="cb13-53"><a href="directional-spectral-decomposition.html#cb13-53" tabindex="-1"></a>      <span class="at">n            =</span> n_q,</span>
-<span id="cb13-54"><a href="directional-spectral-decomposition.html#cb13-54" tabindex="-1"></a>      <span class="at">p            =</span> <span class="fu">round</span>(p_q, <span class="dv">6</span>),</span>
-<span id="cb13-55"><a href="directional-spectral-decomposition.html#cb13-55" tabindex="-1"></a>      <span class="at">mean_x       =</span> <span class="fu">round</span>(m_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
-<span id="cb13-56"><a href="directional-spectral-decomposition.html#cb13-56" tabindex="-1"></a>      <span class="at">mean_y       =</span> <span class="fu">round</span>(m_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
-<span id="cb13-57"><a href="directional-spectral-decomposition.html#cb13-57" tabindex="-1"></a>      <span class="at">u_x          =</span> <span class="fu">round</span>(u_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
-<span id="cb13-58"><a href="directional-spectral-decomposition.html#cb13-58" tabindex="-1"></a>      <span class="at">u_y          =</span> <span class="fu">round</span>(u_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
-<span id="cb13-59"><a href="directional-spectral-decomposition.html#cb13-59" tabindex="-1"></a>      <span class="at">lambda_rank1 =</span> <span class="fu">round</span>(p_q <span class="sc">*</span> <span class="fu">sum</span>(u_q<span class="sc">^</span><span class="dv">2</span>), <span class="dv">6</span>)</span>
-<span id="cb13-60"><a href="directional-spectral-decomposition.html#cb13-60" tabindex="-1"></a>    )</span>
-<span id="cb13-61"><a href="directional-spectral-decomposition.html#cb13-61" tabindex="-1"></a>  }</span>
-<span id="cb13-62"><a href="directional-spectral-decomposition.html#cb13-62" tabindex="-1"></a></span>
-<span id="cb13-63"><a href="directional-spectral-decomposition.html#cb13-63" tabindex="-1"></a>  <span class="fu">list</span>(</span>
-<span id="cb13-64"><a href="directional-spectral-decomposition.html#cb13-64" tabindex="-1"></a>    <span class="at">mu      =</span> mu,</span>
-<span id="cb13-65"><a href="directional-spectral-decomposition.html#cb13-65" tabindex="-1"></a>    <span class="at">Sigma   =</span> <span class="fu">pop_cov</span>(Z),</span>
-<span id="cb13-66"><a href="directional-spectral-decomposition.html#cb13-66" tabindex="-1"></a>    <span class="at">Sigma_Q   =</span> Sigma_Q,</span>
-<span id="cb13-67"><a href="directional-spectral-decomposition.html#cb13-67" tabindex="-1"></a>    <span class="at">Sigma_W   =</span> Sigma_W,</span>
-<span id="cb13-68"><a href="directional-spectral-decomposition.html#cb13-68" tabindex="-1"></a>    <span class="at">centroids =</span> <span class="fu">do.call</span>(rbind, centroids),</span>
-<span id="cb13-69"><a href="directional-spectral-decomposition.html#cb13-69" tabindex="-1"></a>    <span class="at">details   =</span> <span class="fu">do.call</span>(rbind, details)</span>
-<span id="cb13-70"><a href="directional-spectral-decomposition.html#cb13-70" tabindex="-1"></a>  )</span>
-<span id="cb13-71"><a href="directional-spectral-decomposition.html#cb13-71" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="directional-spectral-decomposition.html#cb9-1" tabindex="-1"></a>pop_cov <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb9-2"><a href="directional-spectral-decomposition.html#cb9-2" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb9-3"><a href="directional-spectral-decomposition.html#cb9-3" tabindex="-1"></a>  Zc <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, <span class="fu">colMeans</span>(Z), <span class="at">FUN =</span> <span class="st">&quot;-&quot;</span>)</span>
+<span id="cb9-4"><a href="directional-spectral-decomposition.html#cb9-4" tabindex="-1"></a>  <span class="fu">crossprod</span>(Zc) <span class="sc">/</span> <span class="fu">nrow</span>(Zc)</span>
+<span id="cb9-5"><a href="directional-spectral-decomposition.html#cb9-5" tabindex="-1"></a>}</span>
+<span id="cb9-6"><a href="directional-spectral-decomposition.html#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="directional-spectral-decomposition.html#cb9-7" tabindex="-1"></a>quadrant_decomposition <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb9-8"><a href="directional-spectral-decomposition.html#cb9-8" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb9-9"><a href="directional-spectral-decomposition.html#cb9-9" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">ncol</span>(Z) <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb9-10"><a href="directional-spectral-decomposition.html#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="directional-spectral-decomposition.html#cb9-11" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb9-12"><a href="directional-spectral-decomposition.html#cb9-12" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb9-13"><a href="directional-spectral-decomposition.html#cb9-13" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
+<span id="cb9-14"><a href="directional-spectral-decomposition.html#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="directional-spectral-decomposition.html#cb9-15" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb9-16"><a href="directional-spectral-decomposition.html#cb9-16" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
+<span id="cb9-17"><a href="directional-spectral-decomposition.html#cb9-17" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb9-18"><a href="directional-spectral-decomposition.html#cb9-18" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb9-19"><a href="directional-spectral-decomposition.html#cb9-19" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
+<span id="cb9-20"><a href="directional-spectral-decomposition.html#cb9-20" tabindex="-1"></a>  )</span>
+<span id="cb9-21"><a href="directional-spectral-decomposition.html#cb9-21" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="directional-spectral-decomposition.html#cb9-22" tabindex="-1"></a>  Sigma_Q   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb9-23"><a href="directional-spectral-decomposition.html#cb9-23" tabindex="-1"></a>  Sigma_W   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb9-24"><a href="directional-spectral-decomposition.html#cb9-24" tabindex="-1"></a>  details   <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
+<span id="cb9-25"><a href="directional-spectral-decomposition.html#cb9-25" tabindex="-1"></a>  centroids <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">length</span>(quadrants))</span>
+<span id="cb9-26"><a href="directional-spectral-decomposition.html#cb9-26" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="directional-spectral-decomposition.html#cb9-27" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
+<span id="cb9-28"><a href="directional-spectral-decomposition.html#cb9-28" tabindex="-1"></a>    qname <span class="ot">&lt;-</span> <span class="fu">names</span>(quadrants)[i]</span>
+<span id="cb9-29"><a href="directional-spectral-decomposition.html#cb9-29" tabindex="-1"></a>    mask  <span class="ot">&lt;-</span> quadrants[[i]]</span>
+<span id="cb9-30"><a href="directional-spectral-decomposition.html#cb9-30" tabindex="-1"></a>    n_q   <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask)</span>
+<span id="cb9-31"><a href="directional-spectral-decomposition.html#cb9-31" tabindex="-1"></a>    <span class="cf">if</span> (n_q <span class="sc">==</span> <span class="dv">0</span>) <span class="cf">next</span></span>
+<span id="cb9-32"><a href="directional-spectral-decomposition.html#cb9-32" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="directional-spectral-decomposition.html#cb9-33" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> n_q <span class="sc">/</span> n</span>
+<span id="cb9-34"><a href="directional-spectral-decomposition.html#cb9-34" tabindex="-1"></a>    Z_q <span class="ot">&lt;-</span> Z[mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb9-35"><a href="directional-spectral-decomposition.html#cb9-35" tabindex="-1"></a>    m_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z_q)</span>
+<span id="cb9-36"><a href="directional-spectral-decomposition.html#cb9-36" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> m_q <span class="sc">-</span> mu</span>
+<span id="cb9-37"><a href="directional-spectral-decomposition.html#cb9-37" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="directional-spectral-decomposition.html#cb9-38" tabindex="-1"></a>    Sigma_Q <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">tcrossprod</span>(u_q)</span>
+<span id="cb9-39"><a href="directional-spectral-decomposition.html#cb9-39" tabindex="-1"></a>    Sigma_W <span class="ot">&lt;-</span> Sigma_W <span class="sc">+</span> p_q <span class="sc">*</span> <span class="fu">pop_cov</span>(Z_q)</span>
+<span id="cb9-40"><a href="directional-spectral-decomposition.html#cb9-40" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="directional-spectral-decomposition.html#cb9-41" tabindex="-1"></a>    centroids[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-42"><a href="directional-spectral-decomposition.html#cb9-42" tabindex="-1"></a>      <span class="at">quadrant =</span> qname,</span>
+<span id="cb9-43"><a href="directional-spectral-decomposition.html#cb9-43" tabindex="-1"></a>      <span class="at">n        =</span> n_q,</span>
+<span id="cb9-44"><a href="directional-spectral-decomposition.html#cb9-44" tabindex="-1"></a>      <span class="at">p        =</span> p_q,</span>
+<span id="cb9-45"><a href="directional-spectral-decomposition.html#cb9-45" tabindex="-1"></a>      <span class="at">mean_x   =</span> m_q[<span class="dv">1</span>],</span>
+<span id="cb9-46"><a href="directional-spectral-decomposition.html#cb9-46" tabindex="-1"></a>      <span class="at">mean_y   =</span> m_q[<span class="dv">2</span>],</span>
+<span id="cb9-47"><a href="directional-spectral-decomposition.html#cb9-47" tabindex="-1"></a>      <span class="at">u_x      =</span> u_q[<span class="dv">1</span>],</span>
+<span id="cb9-48"><a href="directional-spectral-decomposition.html#cb9-48" tabindex="-1"></a>      <span class="at">u_y      =</span> u_q[<span class="dv">2</span>]</span>
+<span id="cb9-49"><a href="directional-spectral-decomposition.html#cb9-49" tabindex="-1"></a>    )</span>
+<span id="cb9-50"><a href="directional-spectral-decomposition.html#cb9-50" tabindex="-1"></a></span>
+<span id="cb9-51"><a href="directional-spectral-decomposition.html#cb9-51" tabindex="-1"></a>    details[[i]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-52"><a href="directional-spectral-decomposition.html#cb9-52" tabindex="-1"></a>      <span class="at">quadrant     =</span> qname,</span>
+<span id="cb9-53"><a href="directional-spectral-decomposition.html#cb9-53" tabindex="-1"></a>      <span class="at">n            =</span> n_q,</span>
+<span id="cb9-54"><a href="directional-spectral-decomposition.html#cb9-54" tabindex="-1"></a>      <span class="at">p            =</span> <span class="fu">round</span>(p_q, <span class="dv">6</span>),</span>
+<span id="cb9-55"><a href="directional-spectral-decomposition.html#cb9-55" tabindex="-1"></a>      <span class="at">mean_x       =</span> <span class="fu">round</span>(m_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
+<span id="cb9-56"><a href="directional-spectral-decomposition.html#cb9-56" tabindex="-1"></a>      <span class="at">mean_y       =</span> <span class="fu">round</span>(m_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
+<span id="cb9-57"><a href="directional-spectral-decomposition.html#cb9-57" tabindex="-1"></a>      <span class="at">u_x          =</span> <span class="fu">round</span>(u_q[<span class="dv">1</span>], <span class="dv">6</span>),</span>
+<span id="cb9-58"><a href="directional-spectral-decomposition.html#cb9-58" tabindex="-1"></a>      <span class="at">u_y          =</span> <span class="fu">round</span>(u_q[<span class="dv">2</span>], <span class="dv">6</span>),</span>
+<span id="cb9-59"><a href="directional-spectral-decomposition.html#cb9-59" tabindex="-1"></a>      <span class="at">lambda_rank1 =</span> <span class="fu">round</span>(p_q <span class="sc">*</span> <span class="fu">sum</span>(u_q<span class="sc">^</span><span class="dv">2</span>), <span class="dv">6</span>)</span>
+<span id="cb9-60"><a href="directional-spectral-decomposition.html#cb9-60" tabindex="-1"></a>    )</span>
+<span id="cb9-61"><a href="directional-spectral-decomposition.html#cb9-61" tabindex="-1"></a>  }</span>
+<span id="cb9-62"><a href="directional-spectral-decomposition.html#cb9-62" tabindex="-1"></a></span>
+<span id="cb9-63"><a href="directional-spectral-decomposition.html#cb9-63" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb9-64"><a href="directional-spectral-decomposition.html#cb9-64" tabindex="-1"></a>    <span class="at">mu      =</span> mu,</span>
+<span id="cb9-65"><a href="directional-spectral-decomposition.html#cb9-65" tabindex="-1"></a>    <span class="at">Sigma   =</span> <span class="fu">pop_cov</span>(Z),</span>
+<span id="cb9-66"><a href="directional-spectral-decomposition.html#cb9-66" tabindex="-1"></a>    <span class="at">Sigma_Q   =</span> Sigma_Q,</span>
+<span id="cb9-67"><a href="directional-spectral-decomposition.html#cb9-67" tabindex="-1"></a>    <span class="at">Sigma_W   =</span> Sigma_W,</span>
+<span id="cb9-68"><a href="directional-spectral-decomposition.html#cb9-68" tabindex="-1"></a>    <span class="at">centroids =</span> <span class="fu">do.call</span>(rbind, centroids),</span>
+<span id="cb9-69"><a href="directional-spectral-decomposition.html#cb9-69" tabindex="-1"></a>    <span class="at">details   =</span> <span class="fu">do.call</span>(rbind, details)</span>
+<span id="cb9-70"><a href="directional-spectral-decomposition.html#cb9-70" tabindex="-1"></a>  )</span>
+<span id="cb9-71"><a href="directional-spectral-decomposition.html#cb9-71" tabindex="-1"></a>}</span></code></pre></div>
 <p>Generate positively dependent bivariate data, compute the quadrant decomposition, and pass <span class="math inline">\(\Sigma\)</span> directly to <code>eigen</code> for attribution.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="directional-spectral-decomposition.html#cb14-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb14-2"><a href="directional-spectral-decomposition.html#cb14-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
-<span id="cb14-3"><a href="directional-spectral-decomposition.html#cb14-3" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.70</span></span>
-<span id="cb14-4"><a href="directional-spectral-decomposition.html#cb14-4" tabindex="-1"></a>R   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, rho, rho, <span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb14-5"><a href="directional-spectral-decomposition.html#cb14-5" tabindex="-1"></a>Z   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>) <span class="sc">%*%</span> <span class="fu">chol</span>(R)</span>
-<span id="cb14-6"><a href="directional-spectral-decomposition.html#cb14-6" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="directional-spectral-decomposition.html#cb14-7" tabindex="-1"></a>D             <span class="ot">&lt;-</span> <span class="fu">quadrant_decomposition</span>(Z)</span>
-<span id="cb14-8"><a href="directional-spectral-decomposition.html#cb14-8" tabindex="-1"></a>eig_classical <span class="ot">&lt;-</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma)</span>
-<span id="cb14-9"><a href="directional-spectral-decomposition.html#cb14-9" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="directional-spectral-decomposition.html#cb14-10" tabindex="-1"></a>D<span class="sc">$</span>details</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="directional-spectral-decomposition.html#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb10-2"><a href="directional-spectral-decomposition.html#cb10-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb10-3"><a href="directional-spectral-decomposition.html#cb10-3" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.70</span></span>
+<span id="cb10-4"><a href="directional-spectral-decomposition.html#cb10-4" tabindex="-1"></a>R   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, rho, rho, <span class="dv">1</span>), <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb10-5"><a href="directional-spectral-decomposition.html#cb10-5" tabindex="-1"></a>Z   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>) <span class="sc">%*%</span> <span class="fu">chol</span>(R)</span>
+<span id="cb10-6"><a href="directional-spectral-decomposition.html#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="directional-spectral-decomposition.html#cb10-7" tabindex="-1"></a>D             <span class="ot">&lt;-</span> <span class="fu">quadrant_decomposition</span>(Z)</span>
+<span id="cb10-8"><a href="directional-spectral-decomposition.html#cb10-8" tabindex="-1"></a>eig_classical <span class="ot">&lt;-</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma)</span>
+<span id="cb10-9"><a href="directional-spectral-decomposition.html#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="directional-spectral-decomposition.html#cb10-10" tabindex="-1"></a>D<span class="sc">$</span>details</span></code></pre></div>
 <pre><code>##   quadrant    n      p    mean_x    mean_y       u_x       u_y lambda_rank1
 ## 1     CUPM 3732 0.3732  0.909351  0.902914  0.911723  0.911077     0.619997
 ## 2     CLPM 3779 0.3779 -0.900760 -0.915622 -0.898388 -0.907459     0.616197
@@ -1788,50 +1788,50 @@ The following code verifies the stronger statement from Section 11.5 directly: f
 B_q u_q = p_q u_q u_q^\top u_q = p_q \|u_q\|^2 u_q.
 \]</span></p>
 <p>It also verifies that summing the four rank-one primitives reconstructs the between-quadrant conditional-mean covariance <span class="math inline">\(\Sigma_Q\)</span>.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="directional-spectral-decomposition.html#cb16-1" tabindex="-1"></a>rank_one_primitive_check <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
-<span id="cb16-2"><a href="directional-spectral-decomposition.html#cb16-2" tabindex="-1"></a>  pieces <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(D<span class="sc">$</span>centroids)), <span class="cf">function</span>(i) {</span>
-<span id="cb16-3"><a href="directional-spectral-decomposition.html#cb16-3" tabindex="-1"></a>    row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[i, ]</span>
-<span id="cb16-4"><a href="directional-spectral-decomposition.html#cb16-4" tabindex="-1"></a>    u   <span class="ot">&lt;-</span> <span class="fu">c</span>(row<span class="sc">$</span>u_x, row<span class="sc">$</span>u_y)</span>
-<span id="cb16-5"><a href="directional-spectral-decomposition.html#cb16-5" tabindex="-1"></a>    p   <span class="ot">&lt;-</span> row<span class="sc">$</span>p</span>
-<span id="cb16-6"><a href="directional-spectral-decomposition.html#cb16-6" tabindex="-1"></a></span>
-<span id="cb16-7"><a href="directional-spectral-decomposition.html#cb16-7" tabindex="-1"></a>    Bq     <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">tcrossprod</span>(u)</span>
-<span id="cb16-8"><a href="directional-spectral-decomposition.html#cb16-8" tabindex="-1"></a>    lambda <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb16-9"><a href="directional-spectral-decomposition.html#cb16-9" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="directional-spectral-decomposition.html#cb16-10" tabindex="-1"></a>    lhs <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Bq <span class="sc">%*%</span> u)</span>
-<span id="cb16-11"><a href="directional-spectral-decomposition.html#cb16-11" tabindex="-1"></a>    rhs <span class="ot">&lt;-</span> lambda <span class="sc">*</span> u</span>
-<span id="cb16-12"><a href="directional-spectral-decomposition.html#cb16-12" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="directional-spectral-decomposition.html#cb16-13" tabindex="-1"></a>    eig_Bq <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Bq, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-14"><a href="directional-spectral-decomposition.html#cb16-14" tabindex="-1"></a>    v_q    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(u <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)))</span>
-<span id="cb16-15"><a href="directional-spectral-decomposition.html#cb16-15" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="directional-spectral-decomposition.html#cb16-16" tabindex="-1"></a>    <span class="fu">list</span>(</span>
-<span id="cb16-17"><a href="directional-spectral-decomposition.html#cb16-17" tabindex="-1"></a>      <span class="at">Bq =</span> Bq,</span>
-<span id="cb16-18"><a href="directional-spectral-decomposition.html#cb16-18" tabindex="-1"></a>      <span class="at">table =</span> <span class="fu">data.frame</span>(</span>
-<span id="cb16-19"><a href="directional-spectral-decomposition.html#cb16-19" tabindex="-1"></a>        <span class="at">quadrant =</span> row<span class="sc">$</span>quadrant,</span>
-<span id="cb16-20"><a href="directional-spectral-decomposition.html#cb16-20" tabindex="-1"></a>        <span class="at">lambda_rank1 =</span> lambda,</span>
-<span id="cb16-21"><a href="directional-spectral-decomposition.html#cb16-21" tabindex="-1"></a>        <span class="at">max_abs_Bu_minus_lambda_u =</span> <span class="fu">max</span>(<span class="fu">abs</span>(lhs <span class="sc">-</span> rhs)),</span>
-<span id="cb16-22"><a href="directional-spectral-decomposition.html#cb16-22" tabindex="-1"></a>        <span class="at">alignment_with_eigen_Bq =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_q, eig_Bq<span class="sc">$</span>vectors[, <span class="dv">1</span>])))</span>
-<span id="cb16-23"><a href="directional-spectral-decomposition.html#cb16-23" tabindex="-1"></a>      )</span>
-<span id="cb16-24"><a href="directional-spectral-decomposition.html#cb16-24" tabindex="-1"></a>    )</span>
-<span id="cb16-25"><a href="directional-spectral-decomposition.html#cb16-25" tabindex="-1"></a>  })</span>
-<span id="cb16-26"><a href="directional-spectral-decomposition.html#cb16-26" tabindex="-1"></a></span>
-<span id="cb16-27"><a href="directional-spectral-decomposition.html#cb16-27" tabindex="-1"></a>  Sigma_Q_from_Bq <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">`</span><span class="at">+</span><span class="st">`</span>, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;Bq&quot;</span>))</span>
-<span id="cb16-28"><a href="directional-spectral-decomposition.html#cb16-28" tabindex="-1"></a></span>
-<span id="cb16-29"><a href="directional-spectral-decomposition.html#cb16-29" tabindex="-1"></a>  <span class="fu">list</span>(</span>
-<span id="cb16-30"><a href="directional-spectral-decomposition.html#cb16-30" tabindex="-1"></a>    <span class="at">checks =</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;table&quot;</span>)),</span>
-<span id="cb16-31"><a href="directional-spectral-decomposition.html#cb16-31" tabindex="-1"></a>    <span class="at">Sigma_Q_from_Bq =</span> Sigma_Q_from_Bq,</span>
-<span id="cb16-32"><a href="directional-spectral-decomposition.html#cb16-32" tabindex="-1"></a>    <span class="at">max_abs_Sigma_Q_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma_Q_from_Bq <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span>
-<span id="cb16-33"><a href="directional-spectral-decomposition.html#cb16-33" tabindex="-1"></a>  )</span>
-<span id="cb16-34"><a href="directional-spectral-decomposition.html#cb16-34" tabindex="-1"></a>}</span>
-<span id="cb16-35"><a href="directional-spectral-decomposition.html#cb16-35" tabindex="-1"></a></span>
-<span id="cb16-36"><a href="directional-spectral-decomposition.html#cb16-36" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> <span class="fu">rank_one_primitive_check</span>(D)</span>
-<span id="cb16-37"><a href="directional-spectral-decomposition.html#cb16-37" tabindex="-1"></a></span>
-<span id="cb16-38"><a href="directional-spectral-decomposition.html#cb16-38" tabindex="-1"></a>R1<span class="sc">$</span>checks</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="directional-spectral-decomposition.html#cb12-1" tabindex="-1"></a>rank_one_primitive_check <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
+<span id="cb12-2"><a href="directional-spectral-decomposition.html#cb12-2" tabindex="-1"></a>  pieces <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(D<span class="sc">$</span>centroids)), <span class="cf">function</span>(i) {</span>
+<span id="cb12-3"><a href="directional-spectral-decomposition.html#cb12-3" tabindex="-1"></a>    row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[i, ]</span>
+<span id="cb12-4"><a href="directional-spectral-decomposition.html#cb12-4" tabindex="-1"></a>    u   <span class="ot">&lt;-</span> <span class="fu">c</span>(row<span class="sc">$</span>u_x, row<span class="sc">$</span>u_y)</span>
+<span id="cb12-5"><a href="directional-spectral-decomposition.html#cb12-5" tabindex="-1"></a>    p   <span class="ot">&lt;-</span> row<span class="sc">$</span>p</span>
+<span id="cb12-6"><a href="directional-spectral-decomposition.html#cb12-6" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="directional-spectral-decomposition.html#cb12-7" tabindex="-1"></a>    Bq     <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">tcrossprod</span>(u)</span>
+<span id="cb12-8"><a href="directional-spectral-decomposition.html#cb12-8" tabindex="-1"></a>    lambda <span class="ot">&lt;-</span> p <span class="sc">*</span> <span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb12-9"><a href="directional-spectral-decomposition.html#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="directional-spectral-decomposition.html#cb12-10" tabindex="-1"></a>    lhs <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Bq <span class="sc">%*%</span> u)</span>
+<span id="cb12-11"><a href="directional-spectral-decomposition.html#cb12-11" tabindex="-1"></a>    rhs <span class="ot">&lt;-</span> lambda <span class="sc">*</span> u</span>
+<span id="cb12-12"><a href="directional-spectral-decomposition.html#cb12-12" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="directional-spectral-decomposition.html#cb12-13" tabindex="-1"></a>    eig_Bq <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Bq, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-14"><a href="directional-spectral-decomposition.html#cb12-14" tabindex="-1"></a>    v_q    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(u <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(u<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb12-15"><a href="directional-spectral-decomposition.html#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="directional-spectral-decomposition.html#cb12-16" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb12-17"><a href="directional-spectral-decomposition.html#cb12-17" tabindex="-1"></a>      <span class="at">Bq =</span> Bq,</span>
+<span id="cb12-18"><a href="directional-spectral-decomposition.html#cb12-18" tabindex="-1"></a>      <span class="at">table =</span> <span class="fu">data.frame</span>(</span>
+<span id="cb12-19"><a href="directional-spectral-decomposition.html#cb12-19" tabindex="-1"></a>        <span class="at">quadrant =</span> row<span class="sc">$</span>quadrant,</span>
+<span id="cb12-20"><a href="directional-spectral-decomposition.html#cb12-20" tabindex="-1"></a>        <span class="at">lambda_rank1 =</span> lambda,</span>
+<span id="cb12-21"><a href="directional-spectral-decomposition.html#cb12-21" tabindex="-1"></a>        <span class="at">max_abs_Bu_minus_lambda_u =</span> <span class="fu">max</span>(<span class="fu">abs</span>(lhs <span class="sc">-</span> rhs)),</span>
+<span id="cb12-22"><a href="directional-spectral-decomposition.html#cb12-22" tabindex="-1"></a>        <span class="at">alignment_with_eigen_Bq =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_q, eig_Bq<span class="sc">$</span>vectors[, <span class="dv">1</span>])))</span>
+<span id="cb12-23"><a href="directional-spectral-decomposition.html#cb12-23" tabindex="-1"></a>      )</span>
+<span id="cb12-24"><a href="directional-spectral-decomposition.html#cb12-24" tabindex="-1"></a>    )</span>
+<span id="cb12-25"><a href="directional-spectral-decomposition.html#cb12-25" tabindex="-1"></a>  })</span>
+<span id="cb12-26"><a href="directional-spectral-decomposition.html#cb12-26" tabindex="-1"></a></span>
+<span id="cb12-27"><a href="directional-spectral-decomposition.html#cb12-27" tabindex="-1"></a>  Sigma_Q_from_Bq <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">`</span><span class="at">+</span><span class="st">`</span>, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;Bq&quot;</span>))</span>
+<span id="cb12-28"><a href="directional-spectral-decomposition.html#cb12-28" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="directional-spectral-decomposition.html#cb12-29" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb12-30"><a href="directional-spectral-decomposition.html#cb12-30" tabindex="-1"></a>    <span class="at">checks =</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(pieces, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;table&quot;</span>)),</span>
+<span id="cb12-31"><a href="directional-spectral-decomposition.html#cb12-31" tabindex="-1"></a>    <span class="at">Sigma_Q_from_Bq =</span> Sigma_Q_from_Bq,</span>
+<span id="cb12-32"><a href="directional-spectral-decomposition.html#cb12-32" tabindex="-1"></a>    <span class="at">max_abs_Sigma_Q_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma_Q_from_Bq <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span>
+<span id="cb12-33"><a href="directional-spectral-decomposition.html#cb12-33" tabindex="-1"></a>  )</span>
+<span id="cb12-34"><a href="directional-spectral-decomposition.html#cb12-34" tabindex="-1"></a>}</span>
+<span id="cb12-35"><a href="directional-spectral-decomposition.html#cb12-35" tabindex="-1"></a></span>
+<span id="cb12-36"><a href="directional-spectral-decomposition.html#cb12-36" tabindex="-1"></a>R1 <span class="ot">&lt;-</span> <span class="fu">rank_one_primitive_check</span>(D)</span>
+<span id="cb12-37"><a href="directional-spectral-decomposition.html#cb12-37" tabindex="-1"></a></span>
+<span id="cb12-38"><a href="directional-spectral-decomposition.html#cb12-38" tabindex="-1"></a>R1<span class="sc">$</span>checks</span></code></pre></div>
 <pre><code>##   quadrant lambda_rank1 max_abs_Bu_minus_lambda_u alignment_with_eigen_Bq
 ## 1     CUPM   0.61999744              0.000000e+00                       1
 ## 2     CLPM   0.61619706              1.110223e-16                       1
 ## 3     DLPM   0.05556776              3.469447e-18                       1
-## 4     DUPM   0.05798275              3.469447e-18                       1</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="directional-spectral-decomposition.html#cb18-1" tabindex="-1"></a>R1<span class="sc">$</span>max_abs_Sigma_Q_error</span></code></pre></div>
+## 4     DUPM   0.05798275              0.000000e+00                       1</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="directional-spectral-decomposition.html#cb14-1" tabindex="-1"></a>R1<span class="sc">$</span>max_abs_Sigma_Q_error</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
 <p>The column <code>max_abs_Bu_minus_lambda_u</code> should be numerically zero, confirming that each centered quadrant conditional mean is the eigenvector of its own rank-one matrix.
 The column <code>alignment_with_eigen_Bq</code> should be one up to floating-point precision, confirming that the normalized vector <span class="math inline">\(u_q / \|u_q\|\)</span> is the same direction recovered by <code>eigen(Bq)</code>.
@@ -1845,38 +1845,38 @@ The final scalar verifies</p>
 <h2><span class="header-section-number">11.16</span> Conditional-Mean Eigenvector Recovery in R<a href="directional-spectral-decomposition.html#conditional-mean-eigenvector-recovery-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following code uses only the quadrant probabilities and quadrant conditional means stored in <code>D$centroids</code>.
 It reconstructs <span class="math inline">\(C\)</span>, then <span class="math inline">\(\Sigma_Q = CC^\top\)</span>, then the eigenvectors of the between-quadrant conditional-mean covariance.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="directional-spectral-decomposition.html#cb20-1" tabindex="-1"></a>recover_eigen_from_quadrant_means <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
-<span id="cb20-2"><a href="directional-spectral-decomposition.html#cb20-2" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(D<span class="sc">$</span>centroids[, <span class="fu">c</span>(<span class="st">&quot;u_x&quot;</span>, <span class="st">&quot;u_y&quot;</span>)])</span>
-<span id="cb20-3"><a href="directional-spectral-decomposition.html#cb20-3" tabindex="-1"></a>  P <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids<span class="sc">$</span>p</span>
-<span id="cb20-4"><a href="directional-spectral-decomposition.html#cb20-4" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="directional-spectral-decomposition.html#cb20-5" tabindex="-1"></a>  Cmat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sqrt</span>(P) <span class="sc">*</span> U)</span>
-<span id="cb20-6"><a href="directional-spectral-decomposition.html#cb20-6" tabindex="-1"></a>  Sigma_Q_from_means <span class="ot">&lt;-</span> Cmat <span class="sc">%*%</span> <span class="fu">t</span>(Cmat)</span>
-<span id="cb20-7"><a href="directional-spectral-decomposition.html#cb20-7" tabindex="-1"></a>  eig_Q <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_Q_from_means)</span>
-<span id="cb20-8"><a href="directional-spectral-decomposition.html#cb20-8" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="directional-spectral-decomposition.html#cb20-9" tabindex="-1"></a>  <span class="fu">list</span>(</span>
-<span id="cb20-10"><a href="directional-spectral-decomposition.html#cb20-10" tabindex="-1"></a>    <span class="at">C =</span> Cmat,</span>
-<span id="cb20-11"><a href="directional-spectral-decomposition.html#cb20-11" tabindex="-1"></a>    <span class="at">Sigma_Q_from_means =</span> Sigma_Q_from_means,</span>
-<span id="cb20-12"><a href="directional-spectral-decomposition.html#cb20-12" tabindex="-1"></a>    <span class="at">eig_Q =</span> eig_Q</span>
-<span id="cb20-13"><a href="directional-spectral-decomposition.html#cb20-13" tabindex="-1"></a>  )</span>
-<span id="cb20-14"><a href="directional-spectral-decomposition.html#cb20-14" tabindex="-1"></a>}</span>
-<span id="cb20-15"><a href="directional-spectral-decomposition.html#cb20-15" tabindex="-1"></a></span>
-<span id="cb20-16"><a href="directional-spectral-decomposition.html#cb20-16" tabindex="-1"></a>Qrec <span class="ot">&lt;-</span> <span class="fu">recover_eigen_from_quadrant_means</span>(D)</span>
-<span id="cb20-17"><a href="directional-spectral-decomposition.html#cb20-17" tabindex="-1"></a></span>
-<span id="cb20-18"><a href="directional-spectral-decomposition.html#cb20-18" tabindex="-1"></a><span class="co"># This should match D$Sigma_Q, which was accumulated quadrant by quadrant.</span></span>
-<span id="cb20-19"><a href="directional-spectral-decomposition.html#cb20-19" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(Qrec<span class="sc">$</span>Sigma_Q_from_means <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="directional-spectral-decomposition.html#cb16-1" tabindex="-1"></a>recover_eigen_from_quadrant_means <span class="ot">&lt;-</span> <span class="cf">function</span>(D) {</span>
+<span id="cb16-2"><a href="directional-spectral-decomposition.html#cb16-2" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(D<span class="sc">$</span>centroids[, <span class="fu">c</span>(<span class="st">&quot;u_x&quot;</span>, <span class="st">&quot;u_y&quot;</span>)])</span>
+<span id="cb16-3"><a href="directional-spectral-decomposition.html#cb16-3" tabindex="-1"></a>  P <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids<span class="sc">$</span>p</span>
+<span id="cb16-4"><a href="directional-spectral-decomposition.html#cb16-4" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="directional-spectral-decomposition.html#cb16-5" tabindex="-1"></a>  Cmat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sqrt</span>(P) <span class="sc">*</span> U)</span>
+<span id="cb16-6"><a href="directional-spectral-decomposition.html#cb16-6" tabindex="-1"></a>  Sigma_Q_from_means <span class="ot">&lt;-</span> Cmat <span class="sc">%*%</span> <span class="fu">t</span>(Cmat)</span>
+<span id="cb16-7"><a href="directional-spectral-decomposition.html#cb16-7" tabindex="-1"></a>  eig_Q <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_Q_from_means)</span>
+<span id="cb16-8"><a href="directional-spectral-decomposition.html#cb16-8" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="directional-spectral-decomposition.html#cb16-9" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb16-10"><a href="directional-spectral-decomposition.html#cb16-10" tabindex="-1"></a>    <span class="at">C =</span> Cmat,</span>
+<span id="cb16-11"><a href="directional-spectral-decomposition.html#cb16-11" tabindex="-1"></a>    <span class="at">Sigma_Q_from_means =</span> Sigma_Q_from_means,</span>
+<span id="cb16-12"><a href="directional-spectral-decomposition.html#cb16-12" tabindex="-1"></a>    <span class="at">eig_Q =</span> eig_Q</span>
+<span id="cb16-13"><a href="directional-spectral-decomposition.html#cb16-13" tabindex="-1"></a>  )</span>
+<span id="cb16-14"><a href="directional-spectral-decomposition.html#cb16-14" tabindex="-1"></a>}</span>
+<span id="cb16-15"><a href="directional-spectral-decomposition.html#cb16-15" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="directional-spectral-decomposition.html#cb16-16" tabindex="-1"></a>Qrec <span class="ot">&lt;-</span> <span class="fu">recover_eigen_from_quadrant_means</span>(D)</span>
+<span id="cb16-17"><a href="directional-spectral-decomposition.html#cb16-17" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="directional-spectral-decomposition.html#cb16-18" tabindex="-1"></a><span class="co"># This should match D$Sigma_Q, which was accumulated quadrant by quadrant.</span></span>
+<span id="cb16-19"><a href="directional-spectral-decomposition.html#cb16-19" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(Qrec<span class="sc">$</span>Sigma_Q_from_means <span class="sc">-</span> D<span class="sc">$</span>Sigma_Q))</span></code></pre></div>
 <pre><code>## [1] 1.110223e-16</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="directional-spectral-decomposition.html#cb22-1" tabindex="-1"></a><span class="co"># Eigenvectors recovered from quadrant conditional means.</span></span>
-<span id="cb22-2"><a href="directional-spectral-decomposition.html#cb22-2" tabindex="-1"></a>Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="directional-spectral-decomposition.html#cb18-1" tabindex="-1"></a><span class="co"># Eigenvectors recovered from quadrant conditional means.</span></span>
+<span id="cb18-2"><a href="directional-spectral-decomposition.html#cb18-2" tabindex="-1"></a>Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors</span></code></pre></div>
 <pre><code>##           [,1]       [,2]
 ## [1,] 0.7034732 -0.7107218
 ## [2,] 0.7107218  0.7034732</code></pre>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="directional-spectral-decomposition.html#cb24-1" tabindex="-1"></a><span class="co"># Same eigensystem obtained by diagonalizing the stored Sigma_Q.</span></span>
-<span id="cb24-2"><a href="directional-spectral-decomposition.html#cb24-2" tabindex="-1"></a><span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="directional-spectral-decomposition.html#cb20-1" tabindex="-1"></a><span class="co"># Same eigensystem obtained by diagonalizing the stored Sigma_Q.</span></span>
+<span id="cb20-2"><a href="directional-spectral-decomposition.html#cb20-2" tabindex="-1"></a><span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors</span></code></pre></div>
 <pre><code>##           [,1]       [,2]
 ## [1,] 0.7034732 -0.7107218
 ## [2,] 0.7107218  0.7034732</code></pre>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="directional-spectral-decomposition.html#cb26-1" tabindex="-1"></a><span class="co"># Eigenvector signs are arbitrary. Absolute inner products should be near 1.</span></span>
-<span id="cb26-2"><a href="directional-spectral-decomposition.html#cb26-2" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">t</span>(Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors) <span class="sc">%*%</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="directional-spectral-decomposition.html#cb22-1" tabindex="-1"></a><span class="co"># Eigenvector signs are arbitrary. Absolute inner products should be near 1.</span></span>
+<span id="cb22-2"><a href="directional-spectral-decomposition.html#cb22-2" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">t</span>(Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors) <span class="sc">%*%</span> <span class="fu">eigen</span>(D<span class="sc">$</span>Sigma_Q)<span class="sc">$</span>vectors)</span></code></pre></div>
 <pre><code>##              [,1]         [,2]
 ## [1,] 1.000000e+00 2.332288e-17
 ## [2,] 2.332288e-17 1.000000e+00</code></pre>
@@ -1891,32 +1891,32 @@ CC^\top
 \operatorname{eig}(CC^\top).
 \]</span></p>
 <p>The same conditional means also provide the visible concordant and divergent centroid contrasts.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="directional-spectral-decomposition.html#cb28-1" tabindex="-1"></a>unit <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">as.numeric</span>(x <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)))</span>
-<span id="cb28-2"><a href="directional-spectral-decomposition.html#cb28-2" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="directional-spectral-decomposition.html#cb28-3" tabindex="-1"></a>centroid <span class="ot">&lt;-</span> <span class="cf">function</span>(D, qname) {</span>
-<span id="cb28-4"><a href="directional-spectral-decomposition.html#cb28-4" tabindex="-1"></a>  row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[D<span class="sc">$</span>centroids<span class="sc">$</span>quadrant <span class="sc">==</span> qname, ]</span>
-<span id="cb28-5"><a href="directional-spectral-decomposition.html#cb28-5" tabindex="-1"></a>  <span class="fu">c</span>(row<span class="sc">$</span>mean_x, row<span class="sc">$</span>mean_y)</span>
-<span id="cb28-6"><a href="directional-spectral-decomposition.html#cb28-6" tabindex="-1"></a>}</span>
-<span id="cb28-7"><a href="directional-spectral-decomposition.html#cb28-7" tabindex="-1"></a></span>
-<span id="cb28-8"><a href="directional-spectral-decomposition.html#cb28-8" tabindex="-1"></a>v_concordant <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;CUPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;CLPM&quot;</span>))</span>
-<span id="cb28-9"><a href="directional-spectral-decomposition.html#cb28-9" tabindex="-1"></a>v_divergent  <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;DLPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;DUPM&quot;</span>))</span>
-<span id="cb28-10"><a href="directional-spectral-decomposition.html#cb28-10" tabindex="-1"></a></span>
-<span id="cb28-11"><a href="directional-spectral-decomposition.html#cb28-11" tabindex="-1"></a>contrast_comparison <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
-<span id="cb28-12"><a href="directional-spectral-decomposition.html#cb28-12" tabindex="-1"></a>  <span class="at">concordant_contrast =</span> v_concordant,</span>
-<span id="cb28-13"><a href="directional-spectral-decomposition.html#cb28-13" tabindex="-1"></a>  <span class="at">Sigma_Q_v1          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>],</span>
-<span id="cb28-14"><a href="directional-spectral-decomposition.html#cb28-14" tabindex="-1"></a>  <span class="at">divergent_contrast  =</span> v_divergent,</span>
-<span id="cb28-15"><a href="directional-spectral-decomposition.html#cb28-15" tabindex="-1"></a>  <span class="at">Sigma_Q_v2          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>]</span>
-<span id="cb28-16"><a href="directional-spectral-decomposition.html#cb28-16" tabindex="-1"></a>)</span>
-<span id="cb28-17"><a href="directional-spectral-decomposition.html#cb28-17" tabindex="-1"></a></span>
-<span id="cb28-18"><a href="directional-spectral-decomposition.html#cb28-18" tabindex="-1"></a><span class="fu">round</span>(contrast_comparison, <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="directional-spectral-decomposition.html#cb24-1" tabindex="-1"></a>unit <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">as.numeric</span>(x <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(x<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb24-2"><a href="directional-spectral-decomposition.html#cb24-2" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="directional-spectral-decomposition.html#cb24-3" tabindex="-1"></a>centroid <span class="ot">&lt;-</span> <span class="cf">function</span>(D, qname) {</span>
+<span id="cb24-4"><a href="directional-spectral-decomposition.html#cb24-4" tabindex="-1"></a>  row <span class="ot">&lt;-</span> D<span class="sc">$</span>centroids[D<span class="sc">$</span>centroids<span class="sc">$</span>quadrant <span class="sc">==</span> qname, ]</span>
+<span id="cb24-5"><a href="directional-spectral-decomposition.html#cb24-5" tabindex="-1"></a>  <span class="fu">c</span>(row<span class="sc">$</span>mean_x, row<span class="sc">$</span>mean_y)</span>
+<span id="cb24-6"><a href="directional-spectral-decomposition.html#cb24-6" tabindex="-1"></a>}</span>
+<span id="cb24-7"><a href="directional-spectral-decomposition.html#cb24-7" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="directional-spectral-decomposition.html#cb24-8" tabindex="-1"></a>v_concordant <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;CUPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;CLPM&quot;</span>))</span>
+<span id="cb24-9"><a href="directional-spectral-decomposition.html#cb24-9" tabindex="-1"></a>v_divergent  <span class="ot">&lt;-</span> <span class="fu">unit</span>(<span class="fu">centroid</span>(D, <span class="st">&quot;DLPM&quot;</span>) <span class="sc">-</span> <span class="fu">centroid</span>(D, <span class="st">&quot;DUPM&quot;</span>))</span>
+<span id="cb24-10"><a href="directional-spectral-decomposition.html#cb24-10" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="directional-spectral-decomposition.html#cb24-11" tabindex="-1"></a>contrast_comparison <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb24-12"><a href="directional-spectral-decomposition.html#cb24-12" tabindex="-1"></a>  <span class="at">concordant_contrast =</span> v_concordant,</span>
+<span id="cb24-13"><a href="directional-spectral-decomposition.html#cb24-13" tabindex="-1"></a>  <span class="at">Sigma_Q_v1          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>],</span>
+<span id="cb24-14"><a href="directional-spectral-decomposition.html#cb24-14" tabindex="-1"></a>  <span class="at">divergent_contrast  =</span> v_divergent,</span>
+<span id="cb24-15"><a href="directional-spectral-decomposition.html#cb24-15" tabindex="-1"></a>  <span class="at">Sigma_Q_v2          =</span> Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>]</span>
+<span id="cb24-16"><a href="directional-spectral-decomposition.html#cb24-16" tabindex="-1"></a>)</span>
+<span id="cb24-17"><a href="directional-spectral-decomposition.html#cb24-17" tabindex="-1"></a></span>
+<span id="cb24-18"><a href="directional-spectral-decomposition.html#cb24-18" tabindex="-1"></a><span class="fu">round</span>(contrast_comparison, <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>##      concordant_contrast Sigma_Q_v1 divergent_contrast Sigma_Q_v2
 ## [1,]            0.705463   0.703473           0.689038  -0.710722
 ## [2,]            0.708747   0.710722          -0.724725   0.703473</code></pre>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="directional-spectral-decomposition.html#cb30-1" tabindex="-1"></a><span class="co"># Alignment between contrast directions and the Sigma_Q eigenvectors.</span></span>
-<span id="cb30-2"><a href="directional-spectral-decomposition.html#cb30-2" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(</span>
-<span id="cb30-3"><a href="directional-spectral-decomposition.html#cb30-3" tabindex="-1"></a>  <span class="at">concordant_with_v1 =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_concordant, Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>]))),</span>
-<span id="cb30-4"><a href="directional-spectral-decomposition.html#cb30-4" tabindex="-1"></a>  <span class="at">divergent_with_v2  =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_divergent,  Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>])))</span>
-<span id="cb30-5"><a href="directional-spectral-decomposition.html#cb30-5" tabindex="-1"></a>), <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="directional-spectral-decomposition.html#cb26-1" tabindex="-1"></a><span class="co"># Alignment between contrast directions and the Sigma_Q eigenvectors.</span></span>
+<span id="cb26-2"><a href="directional-spectral-decomposition.html#cb26-2" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(</span>
+<span id="cb26-3"><a href="directional-spectral-decomposition.html#cb26-3" tabindex="-1"></a>  <span class="at">concordant_with_v1 =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_concordant, Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">1</span>]))),</span>
+<span id="cb26-4"><a href="directional-spectral-decomposition.html#cb26-4" tabindex="-1"></a>  <span class="at">divergent_with_v2  =</span> <span class="fu">abs</span>(<span class="fu">drop</span>(<span class="fu">crossprod</span>(v_divergent,  Qrec<span class="sc">$</span>eig_Q<span class="sc">$</span>vectors[, <span class="dv">2</span>])))</span>
+<span id="cb26-5"><a href="directional-spectral-decomposition.html#cb26-5" tabindex="-1"></a>), <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>## concordant_with_v1  divergent_with_v2 
 ##           0.999996           0.999539</code></pre>
 <p>For the positively dependent example, the concordant contrast aligns closely with the first between-quadrant eigenvector and the divergent contrast aligns closely with the second.
@@ -1926,74 +1926,74 @@ In more asymmetric samples, the exact recovery remains <span class="math inline"
 <div id="eigenvalue-attribution-in-r" class="section level2 hasAnchor" number="11.17">
 <h2><span class="header-section-number">11.17</span> Eigenvalue Attribution in R<a href="directional-spectral-decomposition.html#eigenvalue-attribution-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following code attributes each classical eigenvalue into between-quadrant and within-quadrant components using the Rayleigh quotient.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="directional-spectral-decomposition.html#cb32-1" tabindex="-1"></a>V <span class="ot">&lt;-</span> eig_classical<span class="sc">$</span>vectors</span>
-<span id="cb32-2"><a href="directional-spectral-decomposition.html#cb32-2" tabindex="-1"></a></span>
-<span id="cb32-3"><a href="directional-spectral-decomposition.html#cb32-3" tabindex="-1"></a>attribute_lambda <span class="ot">&lt;-</span> <span class="cf">function</span>(v, Sigma_Q, Sigma_W) {</span>
-<span id="cb32-4"><a href="directional-spectral-decomposition.html#cb32-4" tabindex="-1"></a>  v <span class="ot">&lt;-</span> <span class="fu">matrix</span>(v, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
-<span id="cb32-5"><a href="directional-spectral-decomposition.html#cb32-5" tabindex="-1"></a>  between <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_Q <span class="sc">%*%</span> v)</span>
-<span id="cb32-6"><a href="directional-spectral-decomposition.html#cb32-6" tabindex="-1"></a>  within  <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_W <span class="sc">%*%</span> v)</span>
-<span id="cb32-7"><a href="directional-spectral-decomposition.html#cb32-7" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">between =</span> between, <span class="at">within =</span> within, <span class="at">total =</span> between <span class="sc">+</span> within)</span>
-<span id="cb32-8"><a href="directional-spectral-decomposition.html#cb32-8" tabindex="-1"></a>}</span>
-<span id="cb32-9"><a href="directional-spectral-decomposition.html#cb32-9" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="directional-spectral-decomposition.html#cb32-10" tabindex="-1"></a>attrib_1 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">1</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
-<span id="cb32-11"><a href="directional-spectral-decomposition.html#cb32-11" tabindex="-1"></a>attrib_2 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">2</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
-<span id="cb32-12"><a href="directional-spectral-decomposition.html#cb32-12" tabindex="-1"></a></span>
-<span id="cb32-13"><a href="directional-spectral-decomposition.html#cb32-13" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">lambda_1 =</span> attrib_1, <span class="at">lambda_2 =</span> attrib_2)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="directional-spectral-decomposition.html#cb28-1" tabindex="-1"></a>V <span class="ot">&lt;-</span> eig_classical<span class="sc">$</span>vectors</span>
+<span id="cb28-2"><a href="directional-spectral-decomposition.html#cb28-2" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="directional-spectral-decomposition.html#cb28-3" tabindex="-1"></a>attribute_lambda <span class="ot">&lt;-</span> <span class="cf">function</span>(v, Sigma_Q, Sigma_W) {</span>
+<span id="cb28-4"><a href="directional-spectral-decomposition.html#cb28-4" tabindex="-1"></a>  v <span class="ot">&lt;-</span> <span class="fu">matrix</span>(v, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb28-5"><a href="directional-spectral-decomposition.html#cb28-5" tabindex="-1"></a>  between <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_Q <span class="sc">%*%</span> v)</span>
+<span id="cb28-6"><a href="directional-spectral-decomposition.html#cb28-6" tabindex="-1"></a>  within  <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_W <span class="sc">%*%</span> v)</span>
+<span id="cb28-7"><a href="directional-spectral-decomposition.html#cb28-7" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">between =</span> between, <span class="at">within =</span> within, <span class="at">total =</span> between <span class="sc">+</span> within)</span>
+<span id="cb28-8"><a href="directional-spectral-decomposition.html#cb28-8" tabindex="-1"></a>}</span>
+<span id="cb28-9"><a href="directional-spectral-decomposition.html#cb28-9" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="directional-spectral-decomposition.html#cb28-10" tabindex="-1"></a>attrib_1 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">1</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
+<span id="cb28-11"><a href="directional-spectral-decomposition.html#cb28-11" tabindex="-1"></a>attrib_2 <span class="ot">&lt;-</span> <span class="fu">attribute_lambda</span>(V[, <span class="dv">2</span>], D<span class="sc">$</span>Sigma_Q, D<span class="sc">$</span>Sigma_W)</span>
+<span id="cb28-12"><a href="directional-spectral-decomposition.html#cb28-12" tabindex="-1"></a></span>
+<span id="cb28-13"><a href="directional-spectral-decomposition.html#cb28-13" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">lambda_1 =</span> attrib_1, <span class="at">lambda_2 =</span> attrib_2)</span></code></pre></div>
 <pre><code>##            between    within     total
 ## lambda_1 1.2362859 0.4677328 1.7040187
 ## lambda_2 0.1134591 0.1858835 0.2993426</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="directional-spectral-decomposition.html#cb34-1" tabindex="-1"></a>eig_classical<span class="sc">$</span>values</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="directional-spectral-decomposition.html#cb30-1" tabindex="-1"></a>eig_classical<span class="sc">$</span>values</span></code></pre></div>
 <pre><code>## [1] 1.7040187 0.2993426</code></pre>
 <p>This is the exact decomposition <span class="math inline">\(\lambda_i = v_i^\top \Sigma_Q v_i + v_i^\top \Sigma_W v_i\)</span>.
 The totals in each row match the classical eigenvalues to floating-point precision.</p>
 <p>Quadrant-level attribution of the between component:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="directional-spectral-decomposition.html#cb36-1" tabindex="-1"></a>quadrant_between_contrib <span class="ot">&lt;-</span> <span class="cf">function</span>(Z, v) {</span>
-<span id="cb36-2"><a href="directional-spectral-decomposition.html#cb36-2" tabindex="-1"></a>  Z  <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
-<span id="cb36-3"><a href="directional-spectral-decomposition.html#cb36-3" tabindex="-1"></a>  v  <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(v)</span>
-<span id="cb36-4"><a href="directional-spectral-decomposition.html#cb36-4" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
-<span id="cb36-5"><a href="directional-spectral-decomposition.html#cb36-5" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
-<span id="cb36-6"><a href="directional-spectral-decomposition.html#cb36-6" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
-<span id="cb36-7"><a href="directional-spectral-decomposition.html#cb36-7" tabindex="-1"></a></span>
-<span id="cb36-8"><a href="directional-spectral-decomposition.html#cb36-8" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb36-9"><a href="directional-spectral-decomposition.html#cb36-9" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
-<span id="cb36-10"><a href="directional-spectral-decomposition.html#cb36-10" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
-<span id="cb36-11"><a href="directional-spectral-decomposition.html#cb36-11" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
-<span id="cb36-12"><a href="directional-spectral-decomposition.html#cb36-12" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
-<span id="cb36-13"><a href="directional-spectral-decomposition.html#cb36-13" tabindex="-1"></a>  )</span>
-<span id="cb36-14"><a href="directional-spectral-decomposition.html#cb36-14" tabindex="-1"></a></span>
-<span id="cb36-15"><a href="directional-spectral-decomposition.html#cb36-15" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">quadrant =</span> <span class="fu">names</span>(quadrants), <span class="at">contribution =</span> <span class="cn">NA_real_</span>)</span>
-<span id="cb36-16"><a href="directional-spectral-decomposition.html#cb36-16" tabindex="-1"></a></span>
-<span id="cb36-17"><a href="directional-spectral-decomposition.html#cb36-17" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
-<span id="cb36-18"><a href="directional-spectral-decomposition.html#cb36-18" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> quadrants[[i]]</span>
-<span id="cb36-19"><a href="directional-spectral-decomposition.html#cb36-19" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(mask) <span class="sc">==</span> <span class="dv">0</span>) { out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">next</span> }</span>
-<span id="cb36-20"><a href="directional-spectral-decomposition.html#cb36-20" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask) <span class="sc">/</span> n</span>
-<span id="cb36-21"><a href="directional-spectral-decomposition.html#cb36-21" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z[mask, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">-</span> mu</span>
-<span id="cb36-22"><a href="directional-spectral-decomposition.html#cb36-22" tabindex="-1"></a>    out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> p_q <span class="sc">*</span> <span class="fu">sum</span>(v <span class="sc">*</span> u_q)<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb36-23"><a href="directional-spectral-decomposition.html#cb36-23" tabindex="-1"></a>  }</span>
-<span id="cb36-24"><a href="directional-spectral-decomposition.html#cb36-24" tabindex="-1"></a></span>
-<span id="cb36-25"><a href="directional-spectral-decomposition.html#cb36-25" tabindex="-1"></a>  out</span>
-<span id="cb36-26"><a href="directional-spectral-decomposition.html#cb36-26" tabindex="-1"></a>}</span>
-<span id="cb36-27"><a href="directional-spectral-decomposition.html#cb36-27" tabindex="-1"></a></span>
-<span id="cb36-28"><a href="directional-spectral-decomposition.html#cb36-28" tabindex="-1"></a>q_attr_v1 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">1</span>])</span>
-<span id="cb36-29"><a href="directional-spectral-decomposition.html#cb36-29" tabindex="-1"></a>q_attr_v2 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">2</span>])</span>
-<span id="cb36-30"><a href="directional-spectral-decomposition.html#cb36-30" tabindex="-1"></a></span>
-<span id="cb36-31"><a href="directional-spectral-decomposition.html#cb36-31" tabindex="-1"></a><span class="co"># PC1: driven by concordant quadrants</span></span>
-<span id="cb36-32"><a href="directional-spectral-decomposition.html#cb36-32" tabindex="-1"></a>q_attr_v1</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="directional-spectral-decomposition.html#cb32-1" tabindex="-1"></a>quadrant_between_contrib <span class="ot">&lt;-</span> <span class="cf">function</span>(Z, v) {</span>
+<span id="cb32-2"><a href="directional-spectral-decomposition.html#cb32-2" tabindex="-1"></a>  Z  <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb32-3"><a href="directional-spectral-decomposition.html#cb32-3" tabindex="-1"></a>  v  <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(v)</span>
+<span id="cb32-4"><a href="directional-spectral-decomposition.html#cb32-4" tabindex="-1"></a>  n  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb32-5"><a href="directional-spectral-decomposition.html#cb32-5" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb32-6"><a href="directional-spectral-decomposition.html#cb32-6" tabindex="-1"></a>  mx <span class="ot">&lt;-</span> mu[<span class="dv">1</span>]; my <span class="ot">&lt;-</span> mu[<span class="dv">2</span>]</span>
+<span id="cb32-7"><a href="directional-spectral-decomposition.html#cb32-7" tabindex="-1"></a></span>
+<span id="cb32-8"><a href="directional-spectral-decomposition.html#cb32-8" tabindex="-1"></a>  quadrants <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb32-9"><a href="directional-spectral-decomposition.html#cb32-9" tabindex="-1"></a>    <span class="at">CUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my),</span>
+<span id="cb32-10"><a href="directional-spectral-decomposition.html#cb32-10" tabindex="-1"></a>    <span class="at">CLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb32-11"><a href="directional-spectral-decomposition.html#cb32-11" tabindex="-1"></a>    <span class="at">DLPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&gt;</span>  mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&lt;=</span> my),</span>
+<span id="cb32-12"><a href="directional-spectral-decomposition.html#cb32-12" tabindex="-1"></a>    <span class="at">DUPM =</span> (Z[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mx) <span class="sc">&amp;</span> (Z[,<span class="dv">2</span>] <span class="sc">&gt;</span>  my)</span>
+<span id="cb32-13"><a href="directional-spectral-decomposition.html#cb32-13" tabindex="-1"></a>  )</span>
+<span id="cb32-14"><a href="directional-spectral-decomposition.html#cb32-14" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="directional-spectral-decomposition.html#cb32-15" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">quadrant =</span> <span class="fu">names</span>(quadrants), <span class="at">contribution =</span> <span class="cn">NA_real_</span>)</span>
+<span id="cb32-16"><a href="directional-spectral-decomposition.html#cb32-16" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="directional-spectral-decomposition.html#cb32-17" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(quadrants)) {</span>
+<span id="cb32-18"><a href="directional-spectral-decomposition.html#cb32-18" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> quadrants[[i]]</span>
+<span id="cb32-19"><a href="directional-spectral-decomposition.html#cb32-19" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(mask) <span class="sc">==</span> <span class="dv">0</span>) { out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> <span class="dv">0</span>; <span class="cf">next</span> }</span>
+<span id="cb32-20"><a href="directional-spectral-decomposition.html#cb32-20" tabindex="-1"></a>    p_q <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask) <span class="sc">/</span> n</span>
+<span id="cb32-21"><a href="directional-spectral-decomposition.html#cb32-21" tabindex="-1"></a>    u_q <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z[mask, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">-</span> mu</span>
+<span id="cb32-22"><a href="directional-spectral-decomposition.html#cb32-22" tabindex="-1"></a>    out<span class="sc">$</span>contribution[i] <span class="ot">&lt;-</span> p_q <span class="sc">*</span> <span class="fu">sum</span>(v <span class="sc">*</span> u_q)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb32-23"><a href="directional-spectral-decomposition.html#cb32-23" tabindex="-1"></a>  }</span>
+<span id="cb32-24"><a href="directional-spectral-decomposition.html#cb32-24" tabindex="-1"></a></span>
+<span id="cb32-25"><a href="directional-spectral-decomposition.html#cb32-25" tabindex="-1"></a>  out</span>
+<span id="cb32-26"><a href="directional-spectral-decomposition.html#cb32-26" tabindex="-1"></a>}</span>
+<span id="cb32-27"><a href="directional-spectral-decomposition.html#cb32-27" tabindex="-1"></a></span>
+<span id="cb32-28"><a href="directional-spectral-decomposition.html#cb32-28" tabindex="-1"></a>q_attr_v1 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">1</span>])</span>
+<span id="cb32-29"><a href="directional-spectral-decomposition.html#cb32-29" tabindex="-1"></a>q_attr_v2 <span class="ot">&lt;-</span> <span class="fu">quadrant_between_contrib</span>(Z, V[, <span class="dv">2</span>])</span>
+<span id="cb32-30"><a href="directional-spectral-decomposition.html#cb32-30" tabindex="-1"></a></span>
+<span id="cb32-31"><a href="directional-spectral-decomposition.html#cb32-31" tabindex="-1"></a><span class="co"># PC1: driven by concordant quadrants</span></span>
+<span id="cb32-32"><a href="directional-spectral-decomposition.html#cb32-32" tabindex="-1"></a>q_attr_v1</span></code></pre></div>
 <pre><code>##   quadrant contribution
 ## 1     CUPM 6.199896e-01
 ## 2     CLPM 6.161950e-01
 ## 3     DLPM 2.156224e-05
 ## 4     DUPM 7.973202e-05</code></pre>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="directional-spectral-decomposition.html#cb38-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v1<span class="sc">$</span>contribution)    <span class="co"># matches attrib_1[&quot;between&quot;]</span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="directional-spectral-decomposition.html#cb34-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v1<span class="sc">$</span>contribution)    <span class="co"># matches attrib_1[&quot;between&quot;]</span></span></code></pre></div>
 <pre><code>## [1] 1.236286</code></pre>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="directional-spectral-decomposition.html#cb40-1" tabindex="-1"></a><span class="co"># PC2: driven by divergent quadrants</span></span>
-<span id="cb40-2"><a href="directional-spectral-decomposition.html#cb40-2" tabindex="-1"></a>q_attr_v2</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="directional-spectral-decomposition.html#cb36-1" tabindex="-1"></a><span class="co"># PC2: driven by divergent quadrants</span></span>
+<span id="cb36-2"><a href="directional-spectral-decomposition.html#cb36-2" tabindex="-1"></a>q_attr_v2</span></code></pre></div>
 <pre><code>##   quadrant contribution
 ## 1     CUPM 7.864362e-06
 ## 2     CLPM 2.031692e-06
 ## 3     DLPM 5.554620e-02
 ## 4     DUPM 5.790302e-02</code></pre>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="directional-spectral-decomposition.html#cb42-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v2<span class="sc">$</span>contribution)    <span class="co"># matches attrib_2[&quot;between&quot;]</span></span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="directional-spectral-decomposition.html#cb38-1" tabindex="-1"></a><span class="fu">sum</span>(q_attr_v2<span class="sc">$</span>contribution)    <span class="co"># matches attrib_2[&quot;between&quot;]</span></span></code></pre></div>
 <pre><code>## [1] 0.1134591</code></pre>
 <p>For this positively dependent example the pattern is clear.
 PC1 receives nearly all its between-quadrant contribution from CUPM and CLPM: the leading principal direction is a concordant co-movement axis.
@@ -2005,45 +2005,45 @@ This is the interpretive content that classical PCA alone cannot supply.</p>
 <h2><span class="header-section-number">11.18</span> Visualizing the CLPM Mean Slope<a href="directional-spectral-decomposition.html#visualizing-the-clpm-mean-slope" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following figure displays the three distinct directions associated with the CLPM region: the quadrant mean slope, the within-CLPM regression line, and the within-CLPM first principal component.
 The exact picture varies by random seed; the three lines generally differ because they are computed from different statistical objects.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="directional-spectral-decomposition.html#cb44-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
-<span id="cb44-2"><a href="directional-spectral-decomposition.html#cb44-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
-<span id="cb44-3"><a href="directional-spectral-decomposition.html#cb44-3" tabindex="-1"></a>Z0  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>)</span>
-<span id="cb44-4"><a href="directional-spectral-decomposition.html#cb44-4" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z0)</span>
-<span id="cb44-5"><a href="directional-spectral-decomposition.html#cb44-5" tabindex="-1"></a>clpm_mask <span class="ot">&lt;-</span> Z0[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">1</span>] <span class="sc">&amp;</span> Z0[,<span class="dv">2</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">2</span>]</span>
-<span id="cb44-6"><a href="directional-spectral-decomposition.html#cb44-6" tabindex="-1"></a>Zc  <span class="ot">&lt;-</span> Z0[clpm_mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb44-7"><a href="directional-spectral-decomposition.html#cb44-7" tabindex="-1"></a>mc  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zc)</span>
-<span id="cb44-8"><a href="directional-spectral-decomposition.html#cb44-8" tabindex="-1"></a></span>
-<span id="cb44-9"><a href="directional-spectral-decomposition.html#cb44-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
-<span id="cb44-10"><a href="directional-spectral-decomposition.html#cb44-10" tabindex="-1"></a>  Zc[, <span class="dv">1</span>], Zc[, <span class="dv">2</span>],</span>
-<span id="cb44-11"><a href="directional-spectral-decomposition.html#cb44-11" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
-<span id="cb44-12"><a href="directional-spectral-decomposition.html#cb44-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;X&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Y&quot;</span>,</span>
-<span id="cb44-13"><a href="directional-spectral-decomposition.html#cb44-13" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;CLPM: Mean Slope, Regression, and PC1&quot;</span></span>
-<span id="cb44-14"><a href="directional-spectral-decomposition.html#cb44-14" tabindex="-1"></a>)</span>
-<span id="cb44-15"><a href="directional-spectral-decomposition.html#cb44-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu0[<span class="dv">1</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb44-16"><a href="directional-spectral-decomposition.html#cb44-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> mu0[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb44-17"><a href="directional-spectral-decomposition.html#cb44-17" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
-<span id="cb44-18"><a href="directional-spectral-decomposition.html#cb44-18" tabindex="-1"></a><span class="fu">points</span>(mc[<span class="dv">1</span>],  mc[<span class="dv">2</span>],  <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
-<span id="cb44-19"><a href="directional-spectral-decomposition.html#cb44-19" tabindex="-1"></a></span>
-<span id="cb44-20"><a href="directional-spectral-decomposition.html#cb44-20" tabindex="-1"></a><span class="co"># Quadrant mean slope: line through global mean toward CLPM conditional mean</span></span>
-<span id="cb44-21"><a href="directional-spectral-decomposition.html#cb44-21" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> (mc[<span class="dv">2</span>] <span class="sc">-</span> mu0[<span class="dv">2</span>]) <span class="sc">/</span> (mc[<span class="dv">1</span>] <span class="sc">-</span> mu0[<span class="dv">1</span>])</span>
-<span id="cb44-22"><a href="directional-spectral-decomposition.html#cb44-22" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mu0[<span class="dv">2</span>] <span class="sc">-</span> slope_mean <span class="sc">*</span> mu0[<span class="dv">1</span>], <span class="at">b =</span> slope_mean, <span class="at">col =</span> <span class="st">&quot;green&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-23"><a href="directional-spectral-decomposition.html#cb44-23" tabindex="-1"></a></span>
-<span id="cb44-24"><a href="directional-spectral-decomposition.html#cb44-24" tabindex="-1"></a><span class="co"># Linear regression inside CLPM</span></span>
-<span id="cb44-25"><a href="directional-spectral-decomposition.html#cb44-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Zc[, <span class="dv">2</span>] <span class="sc">~</span> Zc[, <span class="dv">1</span>])</span>
-<span id="cb44-26"><a href="directional-spectral-decomposition.html#cb44-26" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;gold&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-27"><a href="directional-spectral-decomposition.html#cb44-27" tabindex="-1"></a></span>
-<span id="cb44-28"><a href="directional-spectral-decomposition.html#cb44-28" tabindex="-1"></a><span class="co"># PC1 inside CLPM: leading eigenvector of within-CLPM covariance</span></span>
-<span id="cb44-29"><a href="directional-spectral-decomposition.html#cb44-29" tabindex="-1"></a>pc1       <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">pop_cov</span>(Zc))<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
-<span id="cb44-30"><a href="directional-spectral-decomposition.html#cb44-30" tabindex="-1"></a>slope_pc1 <span class="ot">&lt;-</span> pc1[<span class="dv">2</span>] <span class="sc">/</span> pc1[<span class="dv">1</span>]</span>
-<span id="cb44-31"><a href="directional-spectral-decomposition.html#cb44-31" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mc[<span class="dv">2</span>] <span class="sc">-</span> slope_pc1 <span class="sc">*</span> mc[<span class="dv">1</span>], <span class="at">b =</span> slope_pc1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb44-32"><a href="directional-spectral-decomposition.html#cb44-32" tabindex="-1"></a></span>
-<span id="cb44-33"><a href="directional-spectral-decomposition.html#cb44-33" tabindex="-1"></a><span class="fu">legend</span>(</span>
-<span id="cb44-34"><a href="directional-spectral-decomposition.html#cb44-34" tabindex="-1"></a>  <span class="st">&quot;bottomright&quot;</span>,</span>
-<span id="cb44-35"><a href="directional-spectral-decomposition.html#cb44-35" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;CLPM mean slope&quot;</span>, <span class="st">&quot;CLPM regression&quot;</span>, <span class="st">&quot;CLPM PC1&quot;</span>),</span>
-<span id="cb44-36"><a href="directional-spectral-decomposition.html#cb44-36" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;green&quot;</span>, <span class="st">&quot;gold&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
-<span id="cb44-37"><a href="directional-spectral-decomposition.html#cb44-37" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
-<span id="cb44-38"><a href="directional-spectral-decomposition.html#cb44-38" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
-<span id="cb44-39"><a href="directional-spectral-decomposition.html#cb44-39" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="directional-spectral-decomposition.html#cb40-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">321</span>)</span>
+<span id="cb40-2"><a href="directional-spectral-decomposition.html#cb40-2" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb40-3"><a href="directional-spectral-decomposition.html#cb40-3" tabindex="-1"></a>Z0  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">2</span> <span class="sc">*</span> n), n, <span class="dv">2</span>)</span>
+<span id="cb40-4"><a href="directional-spectral-decomposition.html#cb40-4" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z0)</span>
+<span id="cb40-5"><a href="directional-spectral-decomposition.html#cb40-5" tabindex="-1"></a>clpm_mask <span class="ot">&lt;-</span> Z0[,<span class="dv">1</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">1</span>] <span class="sc">&amp;</span> Z0[,<span class="dv">2</span>] <span class="sc">&lt;=</span> mu0[<span class="dv">2</span>]</span>
+<span id="cb40-6"><a href="directional-spectral-decomposition.html#cb40-6" tabindex="-1"></a>Zc  <span class="ot">&lt;-</span> Z0[clpm_mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb40-7"><a href="directional-spectral-decomposition.html#cb40-7" tabindex="-1"></a>mc  <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zc)</span>
+<span id="cb40-8"><a href="directional-spectral-decomposition.html#cb40-8" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="directional-spectral-decomposition.html#cb40-9" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb40-10"><a href="directional-spectral-decomposition.html#cb40-10" tabindex="-1"></a>  Zc[, <span class="dv">1</span>], Zc[, <span class="dv">2</span>],</span>
+<span id="cb40-11"><a href="directional-spectral-decomposition.html#cb40-11" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">1</span>, <span class="at">cex =</span> <span class="fl">0.35</span>,</span>
+<span id="cb40-12"><a href="directional-spectral-decomposition.html#cb40-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;X&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb40-13"><a href="directional-spectral-decomposition.html#cb40-13" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;CLPM: Mean Slope, Regression, and PC1&quot;</span></span>
+<span id="cb40-14"><a href="directional-spectral-decomposition.html#cb40-14" tabindex="-1"></a>)</span>
+<span id="cb40-15"><a href="directional-spectral-decomposition.html#cb40-15" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu0[<span class="dv">1</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb40-16"><a href="directional-spectral-decomposition.html#cb40-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> mu0[<span class="dv">2</span>], <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb40-17"><a href="directional-spectral-decomposition.html#cb40-17" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb40-18"><a href="directional-spectral-decomposition.html#cb40-18" tabindex="-1"></a><span class="fu">points</span>(mc[<span class="dv">1</span>],  mc[<span class="dv">2</span>],  <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">1.2</span>)</span>
+<span id="cb40-19"><a href="directional-spectral-decomposition.html#cb40-19" tabindex="-1"></a></span>
+<span id="cb40-20"><a href="directional-spectral-decomposition.html#cb40-20" tabindex="-1"></a><span class="co"># Quadrant mean slope: line through global mean toward CLPM conditional mean</span></span>
+<span id="cb40-21"><a href="directional-spectral-decomposition.html#cb40-21" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> (mc[<span class="dv">2</span>] <span class="sc">-</span> mu0[<span class="dv">2</span>]) <span class="sc">/</span> (mc[<span class="dv">1</span>] <span class="sc">-</span> mu0[<span class="dv">1</span>])</span>
+<span id="cb40-22"><a href="directional-spectral-decomposition.html#cb40-22" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mu0[<span class="dv">2</span>] <span class="sc">-</span> slope_mean <span class="sc">*</span> mu0[<span class="dv">1</span>], <span class="at">b =</span> slope_mean, <span class="at">col =</span> <span class="st">&quot;green&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb40-23"><a href="directional-spectral-decomposition.html#cb40-23" tabindex="-1"></a></span>
+<span id="cb40-24"><a href="directional-spectral-decomposition.html#cb40-24" tabindex="-1"></a><span class="co"># Linear regression inside CLPM</span></span>
+<span id="cb40-25"><a href="directional-spectral-decomposition.html#cb40-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(Zc[, <span class="dv">2</span>] <span class="sc">~</span> Zc[, <span class="dv">1</span>])</span>
+<span id="cb40-26"><a href="directional-spectral-decomposition.html#cb40-26" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;gold&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb40-27"><a href="directional-spectral-decomposition.html#cb40-27" tabindex="-1"></a></span>
+<span id="cb40-28"><a href="directional-spectral-decomposition.html#cb40-28" tabindex="-1"></a><span class="co"># PC1 inside CLPM: leading eigenvector of within-CLPM covariance</span></span>
+<span id="cb40-29"><a href="directional-spectral-decomposition.html#cb40-29" tabindex="-1"></a>pc1       <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">pop_cov</span>(Zc))<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
+<span id="cb40-30"><a href="directional-spectral-decomposition.html#cb40-30" tabindex="-1"></a>slope_pc1 <span class="ot">&lt;-</span> pc1[<span class="dv">2</span>] <span class="sc">/</span> pc1[<span class="dv">1</span>]</span>
+<span id="cb40-31"><a href="directional-spectral-decomposition.html#cb40-31" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> mc[<span class="dv">2</span>] <span class="sc">-</span> slope_pc1 <span class="sc">*</span> mc[<span class="dv">1</span>], <span class="at">b =</span> slope_pc1, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb40-32"><a href="directional-spectral-decomposition.html#cb40-32" tabindex="-1"></a></span>
+<span id="cb40-33"><a href="directional-spectral-decomposition.html#cb40-33" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb40-34"><a href="directional-spectral-decomposition.html#cb40-34" tabindex="-1"></a>  <span class="st">&quot;bottomright&quot;</span>,</span>
+<span id="cb40-35"><a href="directional-spectral-decomposition.html#cb40-35" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;CLPM mean slope&quot;</span>, <span class="st">&quot;CLPM regression&quot;</span>, <span class="st">&quot;CLPM PC1&quot;</span>),</span>
+<span id="cb40-36"><a href="directional-spectral-decomposition.html#cb40-36" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;green&quot;</span>, <span class="st">&quot;gold&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb40-37"><a href="directional-spectral-decomposition.html#cb40-37" tabindex="-1"></a>  <span class="at">lwd    =</span> <span class="dv">2</span>,</span>
+<span id="cb40-38"><a href="directional-spectral-decomposition.html#cb40-38" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
+<span id="cb40-39"><a href="directional-spectral-decomposition.html#cb40-39" tabindex="-1"></a>)</span></code></pre></div>
 <p><img src="nns-book_files/figure-html/clpm-mean-slope-figure-1.png" alt="" width="576" /></p>
 <p>The green line is the eigenvector direction of the rank-one matrix</p>
 <p><span class="math display">\[

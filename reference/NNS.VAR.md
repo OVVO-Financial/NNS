@@ -91,8 +91,8 @@ NNS.VAR(
 
 - nowcast:
 
-  logical; `FALSE` (default) internal call for
-  [NNS.nowcast](https://OVVO-Financial.github.io/NNS/reference/NNS.nowcast.md).
+  logical; `FALSE` (default) internal call for frequency alignment in
+  downstream nowcasting applications.
 
 ## Value
 

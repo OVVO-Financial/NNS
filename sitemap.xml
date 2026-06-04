@@ -1,14 +1,14 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://OVVO-Financial.github.io/NNS/404.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Classification.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Clustering_and_Regression.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Comparing_Distributions.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Correlation_and_Dependence.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Forecasting.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Normalization_and_Rescaling.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Overview.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Partial_Moments.html</loc></url>
-<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_Sampling.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_01_Overview.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_02_Partial_Moments.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_03_Correlation_and_Dependence.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_04_Normalization_and_Rescaling.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_05_Sampling.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_06_Comparing_Distributions.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_07_Clustering_and_Regression.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_08_Classification.html</loc></url>
+<url><loc>https://OVVO-Financial.github.io/NNS/articles/NNSvignette_09_Forecasting.html</loc></url>
 <url><loc>https://OVVO-Financial.github.io/NNS/articles/index.html</loc></url>
 <url><loc>https://OVVO-Financial.github.io/NNS/authors.html</loc></url>
 <url><loc>https://OVVO-Financial.github.io/NNS/index.html</loc></url>

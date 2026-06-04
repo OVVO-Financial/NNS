@@ -30,7 +30,7 @@ DPM_nD(data, target, degree = 0, norm = TRUE)
 
 ## Value
 
-Numeric; the n‑dimensional co‑upper partial moment.
+Numeric; the n-dimensional divergent partial moment.
 
 ## Examples
 

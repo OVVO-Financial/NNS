@@ -1243,22 +1243,22 @@ Corr(X,Y)=0.
 CoLPM_{1,1} \gg CoUPM_{1,1}.
 \]</span></p>
 <p>A replicable simulation makes this asymmetry explicit. In the construction below, <strong>negative shocks are shared</strong> between both variables, while positive-side behavior is generated independently:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="directional-dependence.html#cb12-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb12-2"><a href="directional-dependence.html#cb12-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb12-3"><a href="directional-dependence.html#cb12-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
-<span id="cb12-4"><a href="directional-dependence.html#cb12-4" tabindex="-1"></a>shock <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb12-5"><a href="directional-dependence.html#cb12-5" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="directional-dependence.html#cb12-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(shock <span class="sc">&lt;</span> <span class="dv">0</span>, shock, <span class="fu">rnorm</span>(n))</span>
-<span id="cb12-7"><a href="directional-dependence.html#cb12-7" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(shock <span class="sc">&lt;</span> <span class="dv">0</span>, shock <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.1</span>), <span class="fu">rnorm</span>(n))</span>
-<span id="cb12-8"><a href="directional-dependence.html#cb12-8" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="directional-dependence.html#cb12-9" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
-<span id="cb12-10"><a href="directional-dependence.html#cb12-10" tabindex="-1"></a><span class="do">## [1] 0.2770795</span></span>
-<span id="cb12-11"><a href="directional-dependence.html#cb12-11" tabindex="-1"></a><span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
-<span id="cb12-12"><a href="directional-dependence.html#cb12-12" tabindex="-1"></a><span class="do">## [1] 0.2103299</span></span>
-<span id="cb12-13"><a href="directional-dependence.html#cb12-13" tabindex="-1"></a><span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
-<span id="cb12-14"><a href="directional-dependence.html#cb12-14" tabindex="-1"></a><span class="do">## [1] 0.06191035</span></span>
-<span id="cb12-15"><a href="directional-dependence.html#cb12-15" tabindex="-1"></a><span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
-<span id="cb12-16"><a href="directional-dependence.html#cb12-16" tabindex="-1"></a><span class="do">## [1] 0.08481611</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="directional-dependence.html#cb8-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb8-2"><a href="directional-dependence.html#cb8-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb8-3"><a href="directional-dependence.html#cb8-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb8-4"><a href="directional-dependence.html#cb8-4" tabindex="-1"></a>shock <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb8-5"><a href="directional-dependence.html#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="directional-dependence.html#cb8-6" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(shock <span class="sc">&lt;</span> <span class="dv">0</span>, shock, <span class="fu">rnorm</span>(n))</span>
+<span id="cb8-7"><a href="directional-dependence.html#cb8-7" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(shock <span class="sc">&lt;</span> <span class="dv">0</span>, shock <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.1</span>), <span class="fu">rnorm</span>(n))</span>
+<span id="cb8-8"><a href="directional-dependence.html#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="directional-dependence.html#cb8-9" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
+<span id="cb8-10"><a href="directional-dependence.html#cb8-10" tabindex="-1"></a><span class="do">## [1] 0.2770795</span></span>
+<span id="cb8-11"><a href="directional-dependence.html#cb8-11" tabindex="-1"></a><span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
+<span id="cb8-12"><a href="directional-dependence.html#cb8-12" tabindex="-1"></a><span class="do">## [1] 0.2103299</span></span>
+<span id="cb8-13"><a href="directional-dependence.html#cb8-13" tabindex="-1"></a><span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
+<span id="cb8-14"><a href="directional-dependence.html#cb8-14" tabindex="-1"></a><span class="do">## [1] 0.06191035</span></span>
+<span id="cb8-15"><a href="directional-dependence.html#cb8-15" tabindex="-1"></a><span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))</span>
+<span id="cb8-16"><a href="directional-dependence.html#cb8-16" tabindex="-1"></a><span class="do">## [1] 0.08481611</span></span></code></pre></div>
 <p>In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.</p>
 <p>Correlation averages across all regions and may therefore appear moderate even when downside dependence dominates.</p>
 <hr />
