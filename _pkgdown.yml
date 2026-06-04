@@ -10,24 +10,24 @@ development:
 articles:
 - title: "Getting Started"
   contents:
-  - NNSvignette_Overview
+  - NNSvignette_01_Overview
 
 - title: "Foundations"
   contents:
-  - NNSvignette_Partial_Moments
-  - NNSvignette_Correlation_and_Dependence
-  - NNSvignette_Normalization_and_Rescaling
-  - NNSvignette_Sampling
+  - NNSvignette_02_Partial_Moments
+  - NNSvignette_03_Correlation_and_Dependence
+  - NNSvignette_04_Normalization_and_Rescaling
+  - NNSvignette_05_Sampling
 
 - title: "Inference"
   contents:
-  - NNSvignette_Comparing_Distributions
+  - NNSvignette_06_Comparing_Distributions
 
 - title: "Modeling"
   contents:
-  - NNSvignette_Clustering_and_Regression
-  - NNSvignette_Classification
+  - NNSvignette_07_Clustering_and_Regression
+  - NNSvignette_08_Classification
 
 - title: "Applications"
   contents:
-  - NNSvignette_Forecasting
+  - NNSvignette_09_Forecasting
