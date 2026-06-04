@@ -1,8 +1,8 @@
 Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
-Version: 12.0
-Date: 2026-04-09
+Version: 12.1
+Date: 2026-06-04
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.open.source@gmail.com"),
   person("Roberto", "Spadim", role=c("ctb"))
@@ -13,7 +13,7 @@ BugReports: https://github.com/OVVO-Financial/NNS/issues
 License: GPL-3
 URL: https://github.com/OVVO-Financial/NNS
 Depends: R (>= 3.6.0)
-Imports: data.table, doParallel, foreach, quantmod, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
+Imports: data.table, doParallel, foreach, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
 Suggests: 
     knitr,
     rmarkdown,

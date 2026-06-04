@@ -1,0 +1,377 @@
+---
+title: "Getting Started with NNS: Clustering and Regression"
+author: "Fred Viole"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{07. Getting Started with NNS: Clustering and Regression}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(NNS)
+library(data.table)
+data.table::setDTthreads(1L)
+options(mc.cores = 1)
+RcppParallel::setThreadOptions(numThreads = 1)
+Sys.setenv("OMP_THREAD_LIMIT" = 1)
+```
+
+```{r setup2, message=FALSE, warning=FALSE}
+library(NNS)
+library(data.table)
+require(knitr)
+require(rgl)
+```
+
+
+# Clustering and Regression
+Below are some examples demonstrating unsupervised learning with NNS clustering and nonlinear regression using the resulting clusters.  As always, for a more thorough description and definition, please view the References.
+
+## NNS Partitioning <span style="color:red">`NNS.part()`</span>
+**`NNS.part`** is both a partitional and hierarchical clustering method.  `NNS` iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification (1:4) at each partition.
+
+**`NNS.part`** returns a `data.table` of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in **`NNS.reg`**.
+```{r linear}
+x = seq(-5, 5, .05); y = x ^ 3
+
+for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
+```
+
+
+### X-only Partitioning
+**`NNS.part`** offers a partitioning based on $x$ values only **`NNS.part(x, y, type = "XONLY", ...)`**, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
+```{r x part,results='hide'}
+for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
+```
+
+Note the partition identifications are limited to 1's and 2's (left and right of the partition respectively), not the 4 values per the $x$ and $y$ partitioning.
+```{r res2, echo=FALSE}
+NNS.part(x,y,order = 4, type = "XONLY")
+```
+
+## Clusters Used in Regression
+The right column of plots shows the corresponding regression (plus endpoints and central point) for the order of `NNS` partitioning.
+```{r depreg},results='hide'}
+for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY") ; NNS.reg(x, y, order = i, ncores = 1)}
+```
+
+
+# NNS Regression `NNS.reg()`
+**`NNS.reg`** can fit any $f(x)$, for both uni- and multivariate cases.  **`NNS.reg`** returns a self-evident list of values provided below.
+
+## Univariate:
+```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(x, y, ncores = 1)
+```
+
+## Multivariate:
+Multivariate regressions return a plot of $y$ and $\hat{y}$, as well as the regression points (`$RPM`) and partitions (`$rhs.partitions`) for each regressor.
+```{r nonlinear multi,fig.width=5,fig.height=3,fig.align = "center"}
+f = function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
+y = x ; z <- expand.grid(x, y)
+g = f(z[ , 1], z[ , 2])
+NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
+```
+
+## Inter/Extrapolation
+`NNS.reg` can inter- or extrapolate any point of interest.  The **`NNS.reg(x, y, point.est = ...)`** parameter permits any sized data of similar dimensions to $x$ and called specifically with **`NNS.reg(...)$Point.est`**.
+
+
+## NNS Dimension Reduction Regression
+**`NNS.reg`** also provides a dimension reduction regression by including a parameter **`NNS.reg(x, y, dim.red.method = "cor", ...)`**.  Reducing all regressors to a single dimension using the returned equation **`NNS.reg(..., dim.red.method = "cor", ...)$equation`**.
+```{r nonlinear_class,fig.width=5,fig.height=3,fig.align = "center", message = FALSE}
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
+```
+
+```{r nonlinear_class2,fig.width=5,fig.height=3,fig.align = "center", message = FALSE, echo=FALSE}
+a = NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1, plot = FALSE)$equation
+```
+Thus, our model for this regression would be:
+$$Species = \frac{`r round(a$Coefficient[1],3)`*Sepal.Length `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{4} $$
+
+
+### Threshold
+**`NNS.reg(x, y, dim.red.method = "cor", threshold = ...)`** offers a method of reducing regressors further by controlling the absolute value of required correlation.
+```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
+```
+
+```{r nonlinear class threshold 2,fig.width=5,fig.height=3,fig.align = "center", echo=FALSE}
+a = NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1, plot = FALSE)$equation
+```
+
+Thus, our model for this further reduced dimension regression would be:
+$$Species = \frac{\: `r round(a$Coefficient[1],3)`*Sepal.Length + `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{3} $$
+
+and the `point.est = (...)` operates in the same manner as the full regression above, again called with **`NNS.reg(...)$Point.est`**.
+```{r final,fig.width=5,fig.height=3,fig.align = "center"}
+NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
+```
+
+
+# Classification
+For a classification problem, we simply set **`NNS.reg(x, y, type = "CLASS", ...)`**.
+
+**NOTE: Base category of response variable should be 1, not 0 for classification problems.**
+
+```{r class,fig.width=5,fig.height=3,fig.align = "center", message=FALSE}
+NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
+```
+
+
+# Cross-Validation `NNS.stack()`
+The **`NNS.stack`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version.  **`NNS.stack`** can be used for classification:
+
+**`NNS.stack(..., type = "CLASS", ...)`** 
+
+or continuous dependent variables:
+
+**`NNS.stack(..., type = NULL, ...)`**.
+
+Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`, even from external packages such as `Metrics`.
+
+**`NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`**.
+
+
+```{r stack,fig.width=5,fig.height=3,fig.align = "center", message=FALSE, eval=FALSE}
+NNS.stack(IVs.train = iris[ , 1 : 4], 
+          DV.train = iris[ , 5], 
+          IVs.test = iris[1 : 10, 1 : 4],
+          dim.red.method = "cor",
+          obj.fn = expression( mean(round(predicted) == actual) ),
+          objective = "max", type = "CLASS", 
+          folds = 1, ncores = 1)
+```
+
+```{r stackevalres, eval = FALSE}
+Folds Remaining = 0 
+Current NNS.reg(... , threshold = 0.9350 ) | eval(obj.fn) = 1.000000 | MAX Iterations Remaining = 2
+Current NNS.reg(... , threshold = 0.7950 ) | eval(obj.fn) = 0.973684 | MAX Iterations Remaining = 1
+Current NNS.reg(... , threshold = 0.4400 ) | eval(obj.fn) = 0.894737 | MAX Iterations Remaining = 0
+Current NNS.reg(. , n.best = 1 ) | eval(obj.fn) = 0.868421 | MAX Iterations Remaining = 12
+Current NNS.reg(. , n.best = 2 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 11
+Current NNS.reg(. , n.best = 3 ) | eval(obj.fn) = 0.763158 | MAX Iterations Remaining = 10
+Current NNS.reg(. , n.best = 4 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 9
+$OBJfn.reg
+[1] 0.9733333
+
+$NNS.reg.n.best
+[1] 1
+
+$probability.threshold
+[1] 0.495
+
+$OBJfn.dim.red
+[1] 0.9666667
+
+$NNS.dim.red.threshold
+[1] 0.935
+
+$reg
+ [1] 1 1 1 1 1 1 1 1 1 1
+
+$reg.pred.int
+NULL
+
+$dim.red
+ [1] 1 1 1 1 1 1 1 1 1 1
+
+$dim.red.pred.int
+NULL
+
+$stack
+ [1] 1 1 1 1 1 1 1 1 1 1
+
+$pred.int
+NULL
+```
+
+# Increasing Dimensions
+Given multicollinearity is not an issue for nonparametric regressions as it is for OLS, in the case of an ill-fit univariate model a better option may be to increase the dimensionality of regressors with a copy of itself and cross-validate the number of clusters `n.best` via:
+
+**`NNS.stack(IVs.train = cbind(x, x), DV.train = y, method = 1, ...)`**.
+
+```{r stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide', eval = FALSE}
+set.seed(123)
+x = rnorm(100); y = rnorm(100)
+
+nns.params = NNS.stack(IVs.train = cbind(x, x),
+                        DV.train = y,
+                        method = 1, ncores = 1)
+```
+
+```{r stack2optim, echo = FALSE}
+set.seed(123)
+x = rnorm(100); y = rnorm(100)
+
+nns.params = list()
+nns.params$NNS.reg.n.best = 100
+```
+
+```{r stack2res, fig.width=5,fig.height=3,fig.align = "center",results='hide'}
+NNS.reg(cbind(x, x), y, 
+        n.best = nns.params$NNS.reg.n.best,
+        point.est = cbind(x, x), 
+        residual.plot = TRUE,  
+        ncores = 1, confidence.interval = .95)
+```
+
+
+
+# Smoothing Option
+Smoothness is not required for curve fitting, but the `NNS.reg` function offers an optional smoothed fit. This feature applies a smoothing spline to regression points generated internally using the partitioning method described earlier.
+
+```{r smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'}
+NNS.reg(x, y, smooth = TRUE)
+```
+
+
+# Imputation
+Imputation in `NNS` is a direct application of nearest neighbor regression. When values of $y$ are missing, we use the observed $(X,y)$ pairs as the training set and the predictors of the missing rows as `point.est`.
+
+A key insight is that even in univariate regressions, `NNS.reg` benefits from the increasing dimensions trick: by duplicating the predictor into a multivariate form, e.g. `cbind(x, x)`, the distance function underlying `NNS.reg` operates in a 2-D space. This sharpened distance metric allows a more robust donor selection, effectively turning univariate imputation into a special case of multivariate nearest neighbor regression.
+
+For multivariate predictors, the same form applies directly — supply the full set of observed predictors in $x$, the observed responses in $y$, and the incomplete rows in `point.est`. With `order = "max", n.best = 1`, the imputation is always 1-NN donor-based: each missing $y$ is filled in by the response of its closest donor under the `NNS` hybrid distance. This ensures imputations remain strictly within the support of the observed data.
+
+**Categorical data** is handled analogously, only requiring `NNS.reg(..., type = "CLASS")` in the procedure.
+
+## Univariate Imputation
+
+```{r uniimpute, eval=FALSE}
+set.seed(123)
+
+# Univariate predictor with nonlinear signal
+n <- 400
+x <- sort(runif(n, -3, 3))
+y <- sin(x) + 0.2 * x^2 + rnorm(n, 0, 0.25)
+
+# Induce ~25% MCAR missingness in y
+miss <- rbinom(n, 1, 0.25) == 1
+y_mis <- y
+y_mis[miss] <- NA
+
+# ---- Increasing dimensions trick ----
+# Duplicate x so the distance operates in a 2D space: cbind(x, x).
+# This sharpens nearest-neighbor selection even in a nominally univariate setting.
+x2_train <- cbind(x[!miss], x[!miss])
+x2_miss  <- cbind(x[miss],  x[miss])
+
+# 1-NN donor imputation with NNS.reg
+y_hat_uni <- NNS::NNS.reg(
+  x         = x2_train,             # predictors (duplicated x)
+  y         = y[!miss],             # observed responses
+  point.est = x2_miss,              # rows to impute
+  order     = "max",                # dependence-maximizing order
+  n.best    = 1,                    # 1-NN donor
+  plot      = FALSE
+)$Point.est
+
+# Fill back
+y_completed_uni <- y_mis
+y_completed_uni[miss] <- y_hat_uni
+
+# Plot observed vs imputed (NNS 1-NN)
+plot(x, y, pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
+     xlab = "x", ylab = "y", main = "NNS 1-NN Imputation")
+points(x[miss], y_hat_uni, col = "red", pch = 15, cex = 1.3)
+
+legend("topleft",
+       legend = c("Observed", "Imputed (NNS 1-NN)"),
+       col    = c("steelblue", "red"),
+       pch    = c(1, 15),
+       pt.lwd = c(2, NA),
+       bty    = "n")
+```
+
+<center>
+
+![](images/uni_impute.png){width="600" height="600"}
+
+## Multivariate Imputation
+```{r multiimpute, eval=FALSE}
+set.seed(123)
+
+# Multivariate predictors with nonlinear & interaction structure
+n <- 800
+X <- cbind(
+  x1 = rnorm(n),
+  x2 = runif(n, -2, 2),
+  x3 = rnorm(n, 0, 1)
+)
+
+f <- function(x1, x2, x3) 1.1*x1 - 0.8*x2 + 0.5*x3 + 0.6*x1*x2 - 0.4*x2*x3 + 0.3*sin(1.3*x1)
+y <- f(X[,1], X[,2], X[,3]) + rnorm(n, 0, 0.4)
+
+# Induce ~30% MCAR missingness in y
+miss <- rbinom(n, 1, 0.30) == 1
+y_mis <- y
+y_mis[miss] <- NA
+
+# Training (observed) vs rows to impute
+X_obs <- X[!miss, , drop = FALSE]
+y_obs <- y[!miss]
+X_mis <- X[ miss, , drop = FALSE]
+
+# 1-NN donor imputation with NNS.reg
+y_hat_mv <- NNS::NNS.reg(
+  x         = X_obs,     # all observed predictors
+  y         = y_obs,     # observed responses
+  point.est = X_mis,     # rows to impute
+  order     = "max",     # dependence-maximizing order
+  n.best    = 1,         # 1-NN donor
+  plot      = FALSE
+)$Point.est
+
+# Completed vector
+y_completed_mv <- y_mis
+y_completed_mv[miss] <- y_hat_mv
+
+# Plot observed vs imputed (multivariate, NNS 1-NN)
+plot(seq_along(y), y, 
+     pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
+     xlab = "Observation index", ylab = "y",
+     main = "NNS 1-NN Multivariate Imputation")
+
+# Overlay imputed values
+points(which(miss), y_hat_mv, pch = 15, col = "red", cex = 1.2)
+
+# Legend
+legend("topleft",
+       legend = c("Observed", "Imputed (NNS 1-NN)"),
+       col    = c("steelblue", "red"),
+       pch    = c(1, 15),
+       pt.lwd = c(2, NA),
+       bty    = "n")
+```
+
+<center>
+
+![](images/multi_impute.png){width="600" height="600"}
+
+## A Note on Uncertainty Propagation
+
+A common concern with local imputation methods is whether imputation uncertainty propagates correctly into downstream inference. `NNS` addresses this through bootstrap multiple imputation: resampling complete cases across `m` iterations generates between-imputation variance that flows through standard Rubin's rules pooling identically to any classical procedure.
+
+Empirically, `NNS` bootstrap MI outperforms MICE with predictive mean matching on nonlinear data — producing a pooled estimate closer to the true parameter with a smaller pooled SE. The advantage comes not from compressing uncertainty but from a more accurate imputation model, which reduces between-imputation variance driven by model error rather than genuine data uncertainty.
+
+See [NNS Multiple Imputation vs MICE](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md) for the full reproducible comparison.
+
+
+# References
+If the user is so motivated, detailed arguments further examples are provided within the following:
+
+-  [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
+
+-  [Deriving Nonlinear Correlation Coefficients from Partial Moments](https://doi.org/10.2139/ssrn.2148522)
+
+-  [Nonparametric Regression Using Clusters](https://doi.org/10.1007/s10614-017-9713-5)
+
+-  [Clustering and Curve Fitting by Line Segments](https://doi.org/10.2139/ssrn.2861339)
+
+-  [Classification Using NNS Clustering Analysis](https://doi.org/10.2139/ssrn.2864711)
+
+-  [Partitional Estimation Using Partial Moments](https://doi.org/10.2139/ssrn.3592491)
+
+

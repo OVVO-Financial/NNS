@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Fred Viole" />
+
+
+<title>Getting Started with NNS: Overview</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with NNS: Overview</h1>
+<h4 class="author">Fred Viole</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Prereqs (uncomment if needed):</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># install.packages(&quot;NNS&quot;)</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># install.packages(c(&quot;data.table&quot;,&quot;xts&quot;,&quot;zoo&quot;,&quot;Rfast&quot;))</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
+<div id="orientation" class="section level1">
+<h1>Orientation</h1>
+<p><strong>Goal.</strong> A complete, hands‑on curriculum for Nonlinear
+Nonparametric Statistics (NNS) using <strong>partial moments</strong>.
+Each section blends narrative intuition, precise math, and executable
+code.</p>
+<p><strong>Structure.</strong> 1. Foundations — partial moments &amp;
+variance decomposition 2. Descriptive &amp; distributional tools 3.
+Dependence &amp; nonlinear association 4. Normalization &amp; Rescaling
+5. Hypothesis testing, ANOVA &amp; Stochastic Superiority 6. Regression,
+boosting, stacking &amp; causality 7. Time series &amp; forecasting 8.
+Simulation (max‑entropy) &amp; Monte Carlo 9. Portfolio &amp; stochastic
+dominance</p>
+<p><strong>Notation.</strong> For a random variable <span class="math inline">\(X\)</span> and threshold/target <span class="math inline">\(t\)</span>, the population <span class="math inline">\(n\)</span>‑th <strong>partial moments</strong> are
+defined as:</p>
+<p><span class="math display">\[
+\operatorname{LPM}(n,t,X)
+= \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
+\qquad
+\operatorname{UPM}(n,t,X)
+= \int_{t}^{\infty} (x-t)^{n} \, dF_X(x).
+\]</span></p>
+<p>The <strong>empirical</strong> estimators replace <span class="math inline">\(F_X\)</span> with the empirical CDF <span class="math inline">\(\hat F_n\)</span> (or, equivalently, use indicator
+functions):</p>
+<p><span class="math display">\[
+\widehat{\operatorname{LPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^n
+\, \mathbf{1}_{\{x_i \le t\}},
+\qquad
+\widehat{\operatorname{UPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^n
+\, \mathbf{1}_{\{x_i &gt; t\}}.
+\]</span></p>
+<p>These correspond to integrals over the measurable subsets <span class="math inline">\(\{X \le t\}\)</span> and <span class="math inline">\(\{X &gt; t\}\)</span> in a <span class="math inline">\(\sigma\)</span>‑algebra; the empirical sums are
+discrete analogues of Lebesgue integrals.</p>
+<hr />
+</div>
+<div id="foundations-partial-moments-variance-decomposition" class="section level1">
+<h1>1. Foundations — Partial Moments &amp; Variance Decomposition</h1>
+<div id="why-partial-moments" class="section level2">
+<h2>1.1 Why partial moments</h2>
+<ul>
+<li>Classical variance treats upside and downside symmetrically. Partial
+moments separate them, allowing <strong>asymmetric risk/reward</strong>
+analysis around a chosen target <span class="math inline">\(t\)</span>
+(often the mean or a benchmark).</li>
+<li>At <span class="math inline">\(t=\mu_X\)</span>: <span class="math display">\[
+\operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) +
+\operatorname{LPM}(2,\mu_X,X)\quad\text{(exact empirical identity)}.
+\]</span> This <strong>is not</strong> the same as splitting conditional
+variances around a threshold; partial moments use a <em>global</em>
+reference, preserving the between‑group contribution.</li>
+</ul>
+</div>
+<div id="core-functions-and-headers" class="section level2">
+<h2>1.2 Core functions and headers</h2>
+<ul>
+<li><code>LPM(degree, target, variable)</code></li>
+<li><code>UPM(degree, target, variable)</code></li>
+</ul>
+</div>
+<div id="code-variance-decomposition-cdf" class="section level2">
+<h2>1.3 Code: variance decomposition &amp; CDF</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Normal sample</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3000</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>L2 <span class="ot">&lt;-</span> <span class="fu">LPM</span>(<span class="dv">2</span>, mu, y); U2 <span class="ot">&lt;-</span> <span class="fu">UPM</span>(<span class="dv">2</span>, mu, y)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;LPM2 + UPM2 = %.6f vs var(y)=%.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, (L2<span class="sc">+</span>U2)<span class="sc">*</span>(<span class="fu">length</span>(y) <span class="sc">/</span> (<span class="fu">length</span>(y) <span class="sc">-</span> <span class="dv">1</span>)), <span class="fu">var</span>(y)))</span></code></pre></div>
+<pre><code>## LPM2 + UPM2 = 1.011889 vs var(y)=1.011889</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Empirical CDF via LPM.ratio(0, t, x)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>)) {</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  cdf_lpm <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t, y)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;CDF at t=%+.1f : LPM.ratio=%.4f | empirical=%.4f</span><span class="sc">\n</span><span class="st">&quot;</span>, t, cdf_lpm, <span class="fu">mean</span>(y<span class="sc">&lt;=</span>t)))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## CDF at t=-1.0 : LPM.ratio=0.1633 | empirical=0.1633
+## CDF at t=+0.0 : LPM.ratio=0.5043 | empirical=0.5043
+## CDF at t=+1.0 : LPM.ratio=0.8480 | empirical=0.8480</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Asymmetry on a skewed distribution</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">3000</span>)<span class="sc">-</span><span class="dv">1</span>; mu_z <span class="ot">&lt;-</span> <span class="fu">mean</span>(z)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">LPM</span>(<span class="dv">2</span>,mu_z,z), <span class="fu">UPM</span>(<span class="dv">2</span>,mu_z,z)))</span></code></pre></div>
+<pre><code>## Skewed z: LPM2=0.2780, UPM2=0.7682 (expect imbalance)</code></pre>
+<p><strong>Interpretation.</strong> The equality
+<code>LPM2 + UPM2 == var(x)</code> (Bessel adjustment used) holds
+because deviations are measured against the <em>global</em> mean.
+<code>LPM.ratio(0, t, x)</code> constructs an empirical CDF directly
+from partial‑moment counts.</p>
+<hr />
+</div>
+</div>
+<div id="descriptive-distributional-tools" class="section level1">
+<h1>2. Descriptive &amp; Distributional Tools</h1>
+<div id="higher-moments-from-partial-moments" class="section level2">
+<h2>2.1 Higher moments from partial moments</h2>
+<p>Define asymmetric analogues of skewness/kurtosis using <span class="math inline">\(\operatorname{UPM}_3\)</span>, <span class="math inline">\(\operatorname{LPM}_3\)</span> (and degree 4),
+yielding robust tail diagnostics without parametric assumptions.</p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.moments(x)</code></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">NNS.moments</span>(y)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>M</span></code></pre></div>
+<pre><code>## $mean
+## [1] -0.0114498
+## 
+## $variance
+## [1] 1.011552
+## 
+## $skewness
+## [1] -0.007412142
+## 
+## $kurtosis
+## [1] 0.06723772</code></pre>
+</div>
+<div id="mode-estimation-no-binorbandwidth-angst" class="section level2">
+<h2>2.2 Mode estimation (no bin‑or‑bandwidth angst)</h2>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.mode(x)</code></li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">23</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>multimodal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="sc">-</span><span class="dv">2</span>,.<span class="dv">5</span>), <span class="fu">rnorm</span>(<span class="dv">1500</span>,<span class="dv">2</span>,.<span class="dv">5</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">NNS.mode</span>(multimodal,<span class="at">multi =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] -2.049405  1.987674</code></pre>
+</div>
+<div id="cdf-tables-via-lpm-ratios" class="section level2">
+<h2>2.3 CDF tables via LPM ratios</h2>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>LPM.ratio(degree = 0, target, variable)</code> (empirical CDF
+when <code>degree=0</code>)</li>
+<li><code>UPM.ratio(degree = 0, target, variable)</code></li>
+<li><code>LPM.VaR(p, degree, variable)</code> (quantiles via
+partial‑moment CDFs)</li>
+<li><code>UPM.VaR(p, degree, variable)</code></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">LPM.VaR</span>(<span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,.<span class="dv">1</span>),<span class="dv">0</span>,z) <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,qgrid,z))</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>CDF_tbl</span></code></pre></div>
+<pre><code>##       threshold   CDF
+##           &lt;num&gt; &lt;num&gt;
+##  1: -0.94052127  0.05
+##  2: -0.83748109  0.15
+##  3: -0.71317882  0.25
+##  4: -0.57443327  0.35
+##  5: -0.41017671  0.45
+##  6: -0.20424962  0.55
+##  7:  0.06850182  0.65
+##  8:  0.41462712  0.75
+##  9:  0.94307172  0.85
+## 10:  2.09633977  0.95</code></pre>
+<hr />
+</div>
+</div>
+<div id="dependence-nonlinear-association" class="section level1">
+<h1>3. Dependence &amp; Nonlinear Association</h1>
+<div id="why-move-beyond-pearson-r" class="section level2">
+<h2>3.1 Why move beyond Pearson <span class="math inline">\(r\)</span></h2>
+<p>Pearson captures linear monotone relationships. Many structures
+(U‑shapes, saturation, asymmetric tails) produce near‑zero <span class="math inline">\(r\)</span> despite strong dependence.
+Partial‑moment dependence metrics respond to such structure.</p>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
+/ <code>Co.UPM(...)</code> (co‑partial moments)</li>
+<li><code>PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)</code></li>
+<li><code>NNS.dep(x, y)</code> (scalar dependence coefficient)</li>
+<li><code>NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)</code></li>
+</ul>
+</div>
+<div id="code-nonlinear-dependence" class="section level2">
+<h2>3.2 Code: nonlinear dependence</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">2000</span>,<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>, <span class="at">sd=</span>.<span class="dv">05</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Pearson r = %.4f</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">cor</span>(x,y)))</span></code></pre></div>
+<pre><code>## Pearson r = 0.0006</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;NNS.dep  = %.4f</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">NNS.dep</span>(x,y)<span class="sc">$</span>Dependence))</span></code></pre></div>
+<pre><code>## NNS.dep  = 0.7097</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">a=</span>x, <span class="at">b=</span>y, <span class="at">c=</span>x<span class="sc">*</span>y <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">2000</span>, <span class="at">sd=</span>.<span class="dv">05</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="at">target =</span> <span class="st">&quot;means&quot;</span>, <span class="at">variable=</span>X, <span class="at">pop_adj=</span><span class="cn">TRUE</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>pm</span></code></pre></div>
+<pre><code>## $cupm
+##            a          b          c
+## a 0.17384174 0.05668152 0.10450858
+## b 0.05668152 0.05566363 0.04414923
+## c 0.10450858 0.04414923 0.07529373
+## 
+## $dupm
+##              a          b            c
+## a 0.0000000000 0.05675501 0.0005598221
+## b 0.0143108307 0.00000000 0.0036839026
+## c 0.0004239566 0.04430691 0.0000000000
+## 
+## $dlpm
+##              a           b            c
+## a 0.0000000000 0.014310831 0.0004239566
+## b 0.0567550147 0.000000000 0.0443069142
+## c 0.0005598221 0.003683903 0.0000000000
+## 
+## $clpm
+##            a           b           c
+## a 0.16803827 0.014485430 0.102709867
+## b 0.01448543 0.037120650 0.003051617
+## c 0.10270987 0.003051617 0.074865823
+## 
+## $cov.matrix
+##              a             b            c
+## a 0.3418800141  0.0001011068  0.206234664
+## b 0.0001011068  0.0927842833 -0.000789973
+## c 0.2062346637 -0.0007899730  0.150159552</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>cop <span class="ot">&lt;-</span> <span class="fu">NNS.copula</span>(X, <span class="at">continuous=</span><span class="cn">TRUE</span>, <span class="at">plot=</span><span class="cn">FALSE</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>cop</span></code></pre></div>
+<pre><code>## [1] 0.5692785</code></pre>
+</div>
+<div id="code-copula" class="section level2">
+<h2>3.3 Code: copula</h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Data</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>); x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>); y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>); z <span class="ot">=</span> <span class="fu">expand.grid</span>(x, y)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], <span class="fu">Co.LPM</span>(<span class="dv">0</span>, z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], z[,<span class="dv">1</span>], z[,<span class="dv">2</span>]), <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co"># Uniform values</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a>u_x <span class="ot">=</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, x, x); u_y <span class="ot">=</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, y, y); z <span class="ot">=</span> <span class="fu">expand.grid</span>(u_x, u_y)</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>rgl<span class="sc">::</span><span class="fu">plot3d</span>(z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], <span class="fu">Co.LPM</span>(<span class="dv">0</span>, z[,<span class="dv">1</span>], z[,<span class="dv">2</span>], z[,<span class="dv">1</span>], z[,<span class="dv">2</span>]), <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p><strong>Interpretation.</strong> <code>NNS.dep</code> remains high
+for curved relationships; <code>PM.matrix</code> collects co‑partial
+moments across variables; <code>NNS.copula</code> summarizes
+higher‑dimensional dependence using partial‑moment ratios. Copulas are
+returned and evaluated via <code>Co.LPM</code> functions.</p>
+<hr />
+</div>
+</div>
+<div id="normalization-and-rescaling" class="section level1">
+<h1>4. Normalization and Rescaling</h1>
+<p>NNS provides two main tools for scaling data while preserving rank
+structure and distributional shape. Both operate via deterministic
+affine transformations.</p>
+<div id="normalization" class="section level2">
+<h2>4.1 Normalization</h2>
+<p><code>NNS.norm()</code> rescales variables to a common magnitude
+while preserving distributional structure. The method can be
+<strong>linear</strong> (all variables forced to have the same mean) or
+<strong>nonlinear</strong> (using dependence weights to produce a more
+nuanced scaling). In the nonlinear case, the degree of association
+between variables influences the final normalized values.</p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.norm(x, linear=TRUE, chart.type = NULL)</code></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(A, B, C, D)</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a><span class="co"># Linear scaling</span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>lin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">TRUE</span>, <span class="at">chart.type=</span><span class="cn">NULL</span>, <span class="at">location=</span><span class="cn">NULL</span>)</span></code></pre></div>
+<p><strong>Interpretation.</strong> <code>NNS.norm()</code> brings
+variables to a common scale without distorting their distributional
+shape. Linear mode equalizes means; nonlinear mode additionally weights
+each variable by its dependence with others, so more correlated
+variables exert greater influence on the final scaling.</p>
+</div>
+<div id="riskneutral-rescale-pricing-context" class="section level2">
+<h2>4.2 Risk‑neutral rescale (pricing context)</h2>
+<p><code>NNS.rescale()</code> performs one‑dimensional affine
+transformations.</p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.rescale(x, a, b, method=c(&quot;minmax&quot;,&quot;riskneutral&quot;), T=NULL, type=c(&quot;Terminal&quot;,&quot;Discounted&quot;))</code></li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>px <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">260</span>, <span class="at">sd =</span> <span class="dv">1</span>))</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>rn <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(px, <span class="at">a=</span><span class="dv">100</span>, <span class="at">b=</span><span class="fl">0.03</span>, <span class="at">method=</span><span class="st">&quot;riskneutral&quot;</span>, <span class="at">T=</span><span class="dv">1</span>, <span class="at">type=</span><span class="st">&quot;Terminal&quot;</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="fu">c</span>( <span class="at">target =</span> <span class="dv">100</span><span class="sc">*</span><span class="fu">exp</span>(<span class="fl">0.03</span><span class="sc">*</span><span class="dv">1</span>), <span class="at">mean_rn =</span> <span class="fu">mean</span>(rn) )</span></code></pre></div>
+<pre><code>##   target  mean_rn 
+## 103.0455 103.0455</code></pre>
+<p><strong>Interpretation.</strong> <code>riskneutral</code> shifts the
+mean to match <span class="math inline">\(S_0 e^{rT}\)</span> (Terminal)
+or <span class="math inline">\(S_0\)</span> (Discounted), preserving
+distributional shape.</p>
+<hr />
+</div>
+</div>
+<div id="hypothesis-testing-anova-stochastic-superiority" class="section level1">
+<h1>5. Hypothesis Testing, ANOVA &amp; Stochastic Superiority</h1>
+<div id="concept" class="section level2">
+<h2>5.1 Concept</h2>
+<p>Instead of distributional assumptions, compare groups via
+<strong>LPM‑based CDFs</strong>. Output is a <em>degree of
+certainty</em> (not a p‑value) for equality of populations or means.</p>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.ANOVA(control, treatment, means.only=FALSE, medians=FALSE, confidence.interval=.95, tails=c(&quot;Both&quot;,&quot;left&quot;,&quot;right&quot;), pairwise=FALSE, plot=TRUE, robust=FALSE)</code></li>
+<li><code>NNS.SS(x, y, ...)</code></li>
+</ul>
+</div>
+<div id="code-twosample-multigroup" class="section level2">
+<h2>5.2 Code: two‑sample &amp; multi‑group</h2>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>trt  <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">180</span>, <span class="fl">0.35</span>, <span class="fl">1.2</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="fu">NNS.ANOVA</span>(<span class="at">control=</span>ctrl, <span class="at">treatment=</span>trt, <span class="at">means.only=</span><span class="cn">FALSE</span>, <span class="at">plot=</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## $Control
+## [1] 0.05568255
+## 
+## $Treatment
+## [1] 0.2771257
+## 
+## $Grand_Statistic
+## [1] 0.1605767
+## 
+## $Control_CDF
+## [1] 0.5670595
+## 
+## $Treatment_CDF
+## [1] 0.4385169
+## 
+## $Certainty
+## [1] 0.6905166
+## 
+## $Effect_Size_LB
+##        2.5% 
+## -0.07055716 
+## 
+## $Effect_Size_UB
+##     97.5% 
+## 0.5317766 
+## 
+## $Confidence_Level
+## [1] 0.95</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">g1=</span><span class="fu">rnorm</span>(<span class="dv">150</span>,<span class="fl">0.0</span>,<span class="fl">1.1</span>), <span class="at">g2=</span><span class="fu">rnorm</span>(<span class="dv">150</span>,<span class="fl">0.2</span>,<span class="fl">1.0</span>), <span class="at">g3=</span><span class="fu">rnorm</span>(<span class="dv">150</span>,<span class="sc">-</span><span class="fl">0.1</span>,<span class="fl">0.9</span>))</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="fu">NNS.ANOVA</span>(<span class="at">control=</span>A, <span class="at">means.only=</span><span class="cn">TRUE</span>, <span class="at">plot=</span><span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## Certainty 
+## 0.6876008</code></pre>
+<p><strong>Math sketch.</strong> For each quantile/threshold <span class="math inline">\(t\)</span>, compare CDFs built from
+<code>LPM.ratio(0, t, •)</code> (possibly with one‑sided tails).
+Aggregate across <span class="math inline">\(t\)</span> to a certainty
+score.</p>
+</div>
+<div id="stochastic-superiority" class="section level2">
+<h2>5.3 Stochastic Superiority</h2>
+<p>Stochastic superiority asks a different question than equality of
+means or equality of distributions. Rather than testing whether two
+samples came from the same population, or whether they share the same
+mean or median, stochastic superiority measures the probability that a
+random draw from one distribution exceeds a random draw from
+another.</p>
+<p>For two random variables <span class="math inline">\(X\)</span> and
+<span class="math inline">\(Y\)</span>, the stochastic superiority
+probability is:</p>
+<p><span class="math display">\[
+P(X &gt; Y)
+\]</span></p>
+<p>and with ties accounted for, the tie-adjusted stochastic superiority
+measure is:</p>
+<p><span class="math display">\[
+P^* = P(X &gt; Y) + \frac{1}{2} P(X = Y)
+\]</span></p>
+<p>A value of <span class="math inline">\(P^* = 0.5\)</span> indicates
+no directional advantage, values above <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(X\)</span>, and values below <span class="math inline">\(0.5\)</span> favor <span class="math inline">\(Y\)</span>.</p>
+<p>This differs from stochastic dominance. Stochastic superiority is a
+pairwise exceedance probability, while stochastic dominance requires one
+distribution to be preferred to another over the entire shared
+support.</p>
+<p>Below is an example comparing two distributions with unequal
+means.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.233915
+## 
+## $p_tie
+## [1] 0
+## 
+## $p_star
+## [1] 0.233915</code></pre>
+<p>Since <span class="math inline">\(y\)</span> was generated with a
+higher mean, the stochastic superiority probability for <span class="math inline">\(x\)</span> relative to <span class="math inline">\(y\)</span> should be less than <span class="math inline">\(0.5\)</span>, indicating that a draw from <span class="math inline">\(x\)</span> is less likely to exceed a draw from
+<span class="math inline">\(y\)</span>.</p>
+<p>We can also obtain confidence intervals for the tie-adjusted
+superiority probability using maximum entropy bootstrap replicates.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
+<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
+<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
+<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<p>This provides an interpretable effect size for directional comparison
+between two distributions without requiring identical distributions or
+equal variances.</p>
+<p>For discrete variables, ties may occur with positive probability, and
+the reported <code>p_tie</code> and <code>p_star</code> values reflect
+that adjustment explicitly.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">100</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y)</span></code></pre></div>
+<pre><code>## $p_gt
+## [1] 0.3982
+## 
+## $p_tie
+## [1] 0.1992
+## 
+## $p_star
+## [1] 0.4978</code></pre>
+<hr />
+</div>
+</div>
+<div id="regression-boosting-stacking-causality" class="section level1">
+<h1>6. Regression, Boosting, Stacking &amp; Causality</h1>
+<div id="philosophy" class="section level2">
+<h2>6.1 Philosophy</h2>
+<p><code>NNS.reg</code> learns <strong>partitioned</strong>
+relationships using partial‑moment weights — linear where appropriate,
+nonlinear where needed — avoiding fragile global parametric forms.</p>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)</code> →
+<code>$Fitted.xy</code>, <code>$Point.est</code>, …</li>
+<li><code>NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)</code></li>
+<li><code>NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)</code></li>
+<li><code>NNS.caus(x, y)</code> (directional causality score via
+conditional dependence)</li>
+</ul>
+</div>
+<div id="code-classification-via-regression-ensembles" class="section level2">
+<h2>6.2 Code: classification via regression + ensembles</h2>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Example 1: Nonlinear regression</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>x_train <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">sin</span>(pi <span class="sc">*</span> x_train) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>x_test <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a><span class="fu">NNS.reg</span>(<span class="at">x =</span> x_train, <span class="at">y =</span> y_train, <span class="at">order =</span> <span class="cn">NULL</span>, <span class="at">point.est =</span> x_test)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<pre><code>## $R2
+## [1] 0.9276761
+## 
+## $SE
+## [1] 0.2015258
+## 
+## $Prediction.Accuracy
+## NULL
+## 
+## $equation
+## NULL
+## 
+## $x.star
+## NULL
+## 
+## $derivative
+##     Coefficient X.Lower.Range X.Upper.Range
+##           &lt;num&gt;         &lt;num&gt;         &lt;num&gt;
+##  1:   3.0485215  -1.998138604  -1.934370540
+##  2:   3.5169373  -1.934370540  -1.804387149
+##  3:   1.8605016  -1.804387149  -1.692769075
+##  4:   0.6783073  -1.692769075  -1.590915710
+##  5:   0.4272848  -1.590915710  -1.465816449
+##  6:  -0.5144026  -1.465816449  -1.376464546
+##  7:  -1.9381128  -1.376464546  -1.229726997
+##  8:  -3.0106084  -1.229726997  -1.110428636
+##  9:  -2.5210796  -1.110428636  -0.976623793
+## 10:  -3.7347021  -0.976623793  -0.870193992
+## 11:  -2.0861598  -0.870193992  -0.754706576
+## 12:  -2.1796417  -0.754706576  -0.636846031
+## 13:  -0.9300308  -0.636846031  -0.533099369
+## 14:   1.0359249  -0.533099369  -0.417818767
+## 15:   0.9115004  -0.417818767  -0.323764665
+## 16:   2.3250859  -0.323764665  -0.184330858
+## 17:   3.0769180  -0.184330858  -0.132632209
+## 18:   3.3162510  -0.132632209  -0.080933560
+## 19:   3.5323950  -0.080933560  -0.004108338
+## 20:   2.1862481  -0.004108338   0.121863569
+## 21:   3.4805229   0.121863569   0.216987038
+## 22:   1.8001452   0.216987038   0.336388996
+## 23:   0.2295375   0.336388996   0.516729182
+## 24:  -0.5625172   0.516729182   0.668479078
+## 25:  -2.5532272   0.668479078   0.830264570
+## 26:  -2.4765129   0.830264570   0.988320504
+## 27:  -3.1248612   0.988320504   1.083380900
+## 28:  -2.9622550   1.083380900   1.218812429
+## 29:  -1.5047059   1.218812429   1.279773569
+## 30:  -1.5723118   1.279773569   1.445979675
+## 31:   0.1804598   1.445979675   1.571628940
+## 32:   0.8726461   1.571628940   1.689536565
+## 33:   3.4198918   1.689536565   1.860999223
+## 34:   1.5206901   1.860999223   1.997618112
+##     Coefficient X.Lower.Range X.Upper.Range
+## 
+## $Point.est
+##   [1]  0.01571202  0.10442684  0.23470933  0.37680781  0.51890629  0.65039140
+##   [7]  0.72556318  0.80073496  0.85698998  0.88439634  0.91180269  0.93033285
+##  [13]  0.94759688  0.96486091  0.95248720  0.93170326  0.87827479  0.79996720
+##  [19]  0.72165961  0.64335202  0.52449573  0.40285499  0.28121424  0.17901835
+##  [25]  0.07715655 -0.02470525 -0.15949123 -0.31038828 -0.45880078 -0.54309006
+##  [31] -0.62737935 -0.71234468 -0.80041101 -0.88847734 -0.96331853 -1.00089554
+##  [37] -1.03847254 -1.02090671 -0.97905116 -0.93719561 -0.89956805 -0.86273975
+##  [43] -0.79660165 -0.70265879 -0.60871593 -0.51288396 -0.38856404 -0.25667590
+##  [49] -0.11829230  0.02443074  0.13442845  0.22276171  0.31109496  0.42473203
+##  [55]  0.56535922  0.69718932  0.76992246  0.84265560  0.90432326  0.91359751
+##  [61]  0.92287175  0.93214599  0.94142023  0.92794242  0.90521445  0.88248648
+##  [67]  0.85975852  0.76020581  0.65704511  0.55388442  0.45072372  0.35051056
+##  [73]  0.25044944  0.15038831  0.04930377 -0.07695325 -0.20321027 -0.32495818
+##  [79] -0.44464525 -0.56433232 -0.66432673 -0.72512293 -0.78817431 -0.85170206
+##  [85] -0.91522981 -0.97875756 -0.99186193 -0.98457062 -0.97727932 -0.95314667
+##  [91] -0.91788824 -0.88262981 -0.77697785 -0.63880041 -0.50062296 -0.36244551
+##  [97] -0.25805231 -0.19661029 -0.13516826 -0.07526941
+## 
+## $pred.int
+## NULL
+## 
+## $regression.points
+##                x           y
+##            &lt;num&gt;       &lt;num&gt;
+##  1: -1.998138604 -0.01307124
+##  2: -1.934370540  0.18132707
+##  3: -1.804387149  0.63847051
+##  4: -1.692769075  0.84613612
+##  5: -1.590915710  0.91522399
+##  6: -1.465816449  0.96867700
+##  7: -1.376464546  0.92271416
+##  8: -1.229726997  0.63832023
+##  9: -1.110428636  0.27915958
+## 10: -0.976623793 -0.05817308
+## 11: -0.870193992 -0.45565668
+## 12: -0.754706576 -0.69658188
+## 13: -0.636846031 -0.95347564
+## 14: -0.533099369 -1.04996323
+## 15: -0.417818767 -0.93054118
+## 16: -0.323764665 -0.84481083
+## 17: -0.184330858 -0.52061525
+## 18: -0.132632209 -0.36154275
+## 19: -0.080933560 -0.19009705
+## 20: -0.004108338  0.08127998
+## 21:  0.121863569  0.35668582
+## 22:  0.216987038  0.68776523
+## 23:  0.336388996  0.90270609
+## 24:  0.516729182  0.94410093
+## 25:  0.668479078  0.85873901
+## 26:  0.830264570  0.44566388
+## 27:  0.988320504  0.05423632
+## 28:  1.083380900 -0.24281423
+## 29:  1.218812429 -0.64399694
+## 30:  1.279773569 -0.73572553
+## 31:  1.445979675 -0.99705336
+## 32:  1.571628940 -0.97437872
+## 33:  1.689536565 -0.87148709
+## 34:  1.860999223 -0.28510334
+## 35:  1.997618112 -0.07734835
+##                x           y
+## 
+## $Fitted.xy
+##                x          y      y.hat  NNS.ID   gradient    residuals
+##            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;  &lt;char&gt;      &lt;num&gt;        &lt;num&gt;
+##    1: -0.8496899 -0.5752368 -0.4984314 q121122 -2.0861598  0.076805376
+##    2:  1.1532205 -0.6617217 -0.4496971 q221122 -2.9622550  0.212024652
+##    3: -0.3640923 -0.7048691 -0.8815695 q122122  0.9115004 -0.176700402
+##    4:  1.5320696 -0.8447168 -0.9815176 q222121  0.1804598 -0.136800802
+##    5:  1.7618691 -0.9820881 -0.6241175 q222212  3.4198918  0.357970569
+##   ---                                                                 
+##  996:  1.3184955 -0.7988901 -0.7966085 q221222 -1.5723118  0.002281548
+##  997:  0.5684553  1.1554781  0.9150041 q212122 -0.5625172 -0.240473993
+##  998: -0.4340050 -0.7748325 -0.9473089 q122121  1.0359249 -0.172476359
+##  999:  0.8383194  0.7041960  0.4257159 q212222 -2.4765129 -0.278480031
+## 1000: -1.5647037  0.9467853  0.9264240 q111222  0.4272848 -0.020361366
+##       standard.errors
+##                 &lt;num&gt;
+##    1:       0.1769692
+##    2:       0.1783713
+##    3:       0.1905081
+##    4:       0.2044300
+##    5:       0.2636784
+##   ---                
+##  996:       0.1971693
+##  997:       0.2137362
+##  998:       0.1831159
+##  999:       0.2108312
+## 1000:       0.2078031</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a> </span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>boost <span class="ot">&lt;-</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
+<span id="cb37-8"><a href="#cb37-8" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-9"><a href="#cb37-9" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">folds =</span> <span class="dv">5</span>)</span>
+<span id="cb37-10"><a href="#cb37-10" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" tabindex="-1"></a></span>
+<span id="cb37-12"><a href="#cb37-12" tabindex="-1"></a><span class="fu">mean</span>(boost<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
+<span id="cb37-13"><a href="#cb37-13" tabindex="-1"></a><span class="co"># [1] 1</span></span>
+<span id="cb37-14"><a href="#cb37-14" tabindex="-1"></a></span>
+<span id="cb37-15"><a href="#cb37-15" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="#cb37-16" tabindex="-1"></a>boost<span class="sc">$</span>feature.weights; boost<span class="sc">$</span>feature.frequency</span>
+<span id="cb37-17"><a href="#cb37-17" tabindex="-1"></a></span>
+<span id="cb37-18"><a href="#cb37-18" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">NNS.stack</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
+<span id="cb37-19"><a href="#cb37-19" tabindex="-1"></a>                     <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
+<span id="cb37-20"><a href="#cb37-20" tabindex="-1"></a>                     <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb37-21"><a href="#cb37-21" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">&quot;CLASS&quot;</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-22"><a href="#cb37-22" tabindex="-1"></a>                     <span class="at">ncores =</span> <span class="dv">1</span>, <span class="at">folds =</span> <span class="dv">1</span>)</span>
+<span id="cb37-23"><a href="#cb37-23" tabindex="-1"></a><span class="fu">mean</span>(stacked<span class="sc">$</span>stack <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set,<span class="dv">5</span>]))</span>
+<span id="cb37-24"><a href="#cb37-24" tabindex="-1"></a><span class="co"># [1] 1</span></span></code></pre></div>
+</div>
+<div id="code-directional-causality" class="section level2">
+<h2>6.3 Code: directional causality</h2>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>hp,  mtcars<span class="sc">$</span>mpg)  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
+<pre><code>## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) 
+##           0.2607148           0.3863580           0.3933374</code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="fu">NNS.caus</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp)   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
+<pre><code>## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) 
+##           0.3863580           0.2607148           0.3933374</code></pre>
+<p><strong>Interpretation.</strong> Examine asymmetry in scores to infer
+direction. The method conditions partial‑moment dependence on candidate
+drivers.</p>
+<hr />
+</div>
+</div>
+<div id="time-series-forecasting" class="section level1">
+<h1>7. Time Series &amp; Forecasting</h1>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>NNS.ARMA</code></li>
+<li><code>NNS.ARMA.optim</code></li>
+<li><code>NNS.seas</code></li>
+<li><code>NNS.VAR</code></li>
+</ul>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
+<pre><code>##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
+## 1    200                0.4267885                      8.540159e+16
+## 2     96                0.4425880                      8.540159e+16
+## 3     49                0.4615546                      8.540159e+16
+## 4    198                0.4812956                      8.540159e+16
+## 5    199                0.4885608                      8.540159e+16
+## 6    146                0.4901054                      8.540159e+16</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 51 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.398327414917885&quot;
+## [1] &quot;BEST method = &#39;lin&#39;, seasonal.factor = c( 51 )&quot;
+## [1] &quot;BEST lin OBJECTIVE FUNCTION = 0.398327414917885&quot;
+## [1] &quot;CURRNET METHOD: nonlin&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;nonlin&#39; , seasonal.factor =  c( 51 ) ...)&quot;
+## [1] &quot;CURRENT nonlin OBJECTIVE FUNCTION = 2.75408671013046&quot;
+## [1] &quot;BEST method = &#39;nonlin&#39; PATH MEMBER = c( 51 )&quot;
+## [1] &quot;BEST nonlin OBJECTIVE FUNCTION = 2.75408671013046&quot;
+## [1] &quot;CURRNET METHOD: both&quot;
+## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;both&#39; , seasonal.factor =  c( 51 ) ...)&quot;
+## [1] &quot;CURRENT both OBJECTIVE FUNCTION = 0.778172239627562&quot;
+## [1] &quot;BEST method = &#39;both&#39; PATH MEMBER = c( 51 )&quot;
+## [1] &quot;BEST both OBJECTIVE FUNCTION = 0.778172239627562&quot;</code></pre>
+<p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<pre><code>## $periods
+## [1] 51
+## 
+## $weights
+## NULL
+## 
+## $obj.fn
+## [1] 0.3983274
+## 
+## $method
+## [1] &quot;lin&quot;
+## 
+## $shrink
+## [1] FALSE
+## 
+## $nns.regress
+## [1] FALSE
+## 
+## $bias.shift
+## [1] 0.01738357
+## 
+## $errors
+##  [1] -0.4754897523 -0.4609730867 -0.3018876142  0.0439513384 -0.1128600832
+##  [6]  0.9193835234  0.0160010547 -0.7516578805 -0.8195384972 -0.1274709629
+## [11] -0.0093477175  0.1480424491  0.0345888303  0.0009331215 -0.2819915138
+## [16] -0.3474821395 -1.2543849202 -0.5442948705 -0.0049610072 -0.4702036102
+## [21]  0.1846614137  1.6541950586 -0.2046795992  0.9691745476  1.1460606178
+## [26] -0.5141738440 -1.3562787956  0.3853973272 -0.3364881552 -0.5604890777
+## [31] -0.3175309175 -0.1677932189 -0.1511705981  0.4541183441 -0.1377055180
+## [36]  0.4279932502  1.3576081283 -0.0645315976  1.1430476887  0.1399600873
+## [41]  0.0874395694 -0.3703494531  0.3046994756  0.2057574931 -0.7602832912
+## [46]  0.6902933417  0.2238850985 -0.2775974238 -0.8250763050  0.5817787408
+## [51] -0.8733350647  0.2906911996  0.1863210948 -0.2484232855  0.1444232735
+## [56]  1.1655644133  0.0821221969 -0.2813315730 -0.7959981329 -0.3601165470
+## [61] -0.4617740020 -0.0593491905  0.0143389607  0.1016580238  0.0300275332
+## [66] -1.7237406556 -0.0930802461 -0.9348574200 -0.7189682901  0.0700766333
+## [71] -0.3547205444  0.2333233909  0.6840012123 -0.0779445509  0.8409902584
+## [76]  0.0130711684  0.8074727217 -1.1462424589  0.0926963526 -0.4674150054
+## [81]  0.1308248298 -0.6493713604  0.0713668583  0.4889233461  0.4293197750
+## [86] -0.4397639878  0.4261287370  0.7556075116  0.6016698079 -0.1086690282
+## [91]  0.6426872057 -0.4175612763  0.0250816728  0.9344147185  0.5444153587
+## [96] -0.8746369897
+## 
+## $results
+##  [1] -0.495145166 -0.629911085 -0.423647703 -1.217211533 -1.313660334
+##  [6] -1.507558621 -1.512809568 -1.244102492 -0.765300445 -2.402307464
+## [11] -1.325990243 -0.928756118 -1.819067479 -0.855732188 -1.152690586
+## [16] -1.039006594 -0.562011496 -1.103503510 -0.685097085 -0.727417601
+## [21] -0.044018500 -0.030435409  0.002633325 -0.314902491  0.232587264
+## [26]  1.030889038  0.556722546  0.680351082  1.101193382  0.941245213
+## [31]  1.648626820  1.225992916  1.806473740  0.964372963  1.627354696
+## [36]  0.460925955  1.318674310  1.692295367  0.854538440  0.768654797
+## [41]  0.739228654  1.582319086  0.402156303  0.902802567  0.718513288
+## [46]  0.086635865  0.193748286  0.283357285
+## 
+## $lower.pred.int
+##  [1] -1.67077922 -1.80554514 -1.59928176 -2.39284559 -2.48929439 -2.68319268
+##  [7] -2.68844363 -2.41973655 -1.94093450 -3.57794152 -2.50162430 -2.10439018
+## [13] -2.99470154 -2.03136624 -2.32832464 -2.21464065 -1.73764555 -2.27913757
+## [19] -1.86073114 -1.90305166 -1.21965256 -1.20606947 -1.17300073 -1.49053655
+## [25] -0.94304679 -0.14474502 -0.61891151 -0.49528298 -0.07444068 -0.23438884
+## [31]  0.47299276  0.05035886  0.63083968 -0.21126109  0.45172064 -0.71470810
+## [37]  0.14304025  0.51666131 -0.32109562 -0.40697926 -0.43640540  0.40668503
+## [43] -0.77347775 -0.27283149 -0.45712077 -1.08899819 -0.98188577 -0.89227677
+## 
+## $upper.pred.int
+##  [1]  0.68048889  0.54572297  0.75198635 -0.04157748 -0.13802628 -0.33192456
+##  [7] -0.33717551 -0.06846843  0.41033361 -1.22667341 -0.15035619  0.24687794
+## [13] -0.64343342  0.31990187  0.02294347  0.13662746  0.61362256  0.07213055
+## [19]  0.49053697  0.44821646  1.13161556  1.14519865  1.17826738  0.86073157
+## [25]  1.40822132  2.20652310  1.73235660  1.85598514  2.27682744  2.11687927
+## [31]  2.82426088  2.40162697  2.98210780  2.14000702  2.80298875  1.63656001
+## [37]  2.49430837  2.86792942  2.03017250  1.94428885  1.91486271  2.75795314
+## [43]  1.57779036  2.07843662  1.89414735  1.26226992  1.36938234  1.45899134</code></pre>
+<p><strong>Notes.</strong> NNS seasonality uses coefficient of variation
+instead of ACF/PACFs, and NNS ARMA blends multiple seasonal periods into
+the linear or nonlinear regression forecasts.</p>
+<hr />
+</div>
+<div id="simulation-bootstrap-riskneutral-rescaling" class="section level1">
+<h1>8. Simulation &amp; Bootstrap &amp; Risk‑Neutral Rescaling</h1>
+<div id="maximum-entropy-bootstrap-shapepreserving" class="section level2">
+<h2>8.1 Maximum entropy bootstrap (shape‑preserving)</h2>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.meboot(x, reps=999, rho=NULL, type=&quot;spearman&quot;, drift=TRUE, ...)</code></li>
+</ul>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>x_ts <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">350</span>, <span class="at">sd=</span>.<span class="dv">7</span>))</span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">NNS.meboot</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">rho =</span> <span class="dv">1</span>)</span>
+<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a><span class="fu">dim</span>(mb[<span class="st">&quot;replicates&quot;</span>, ]<span class="sc">$</span>replicates)</span></code></pre></div>
+<pre><code>## [1] 350   5</code></pre>
+</div>
+<div id="monte-carlo-over-the-full-correlation-space" class="section level2">
+<h2>8.2 Monte Carlo over the full correlation space</h2>
+<p><strong>Header.</strong></p>
+<ul>
+<li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type=&quot;spearman&quot;, ...)</code></li>
+</ul>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a>mc <span class="ot">&lt;-</span> <span class="fu">NNS.MC</span>(x_ts, <span class="at">reps=</span><span class="dv">5</span>, <span class="at">lower_rho=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">upper_rho=</span><span class="dv">1</span>, <span class="at">by=</span>.<span class="dv">5</span>, <span class="at">exp=</span><span class="dv">1</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a><span class="fu">length</span>(mc<span class="sc">$</span>ensemble); <span class="fu">names</span>(mc<span class="sc">$</span>replicates)</span></code></pre></div>
+<pre><code>## [1] 350</code></pre>
+<pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
+<pre><code>##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5
+## [1,]    8.561720   11.097841   12.140974    3.478574    16.25845
+## [2,]    4.989649    9.142348    6.298598    2.573488    11.23749
+## [3,]    5.489892   11.635826    9.151404    4.146175    13.61840
+## [4,]    7.175210   13.194315   11.614209    5.906763    19.23707
+## [5,]    8.443500   12.157572   13.263425    4.369562    13.40513
+## [6,]    7.386515   10.979258   11.705842    2.410838    15.31133</code></pre>
+<hr />
+</div>
+</div>
+<div id="portfolio-stochastic-dominance" class="section level1">
+<h1>9. Portfolio &amp; Stochastic Dominance</h1>
+<p>Stochastic dominance orders uncertain prospects for broad classes of
+risk‑averse utilities; partial moments supply practical, nonparametric
+estimators.</p>
+<p><strong>Headers.</strong></p>
+<ul>
+<li><code>NNS.FSD.uni(x, y)</code></li>
+<li><code>NNS.SSD.uni(x, y)</code></li>
+<li><code>NNS.TSD.uni(x, y)</code></li>
+<li><code>NNS.SD.cluster(R)</code></li>
+<li><code>NNS.SD.efficient.set(R)</code></li>
+</ul>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="fu">NNS.TSD.uni</span>(RA, RB)</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a>Rmat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">A=</span>RA, <span class="at">B=</span>RB, <span class="at">C=</span>RC)</span>
+<span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## $Clusters
+## $Clusters$Cluster_1
+## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
+<pre><code>## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+<hr />
+</div>
+<div id="appendix-a-measuretheoretic-sketch-why-partial-moments-are-rigorous" class="section level1">
+<h1>Appendix A — Measure‑theoretic sketch (why partial moments are
+rigorous)</h1>
+<p>Let <span class="math inline">\((\Omega, \mathcal{F},
+\mathbb{P})\)</span> be a probability space, <span class="math inline">\(X: \Omega\to\mathbb{R}\)</span> measurable. For
+any fixed <span class="math inline">\(t\in\mathbb{R}\)</span>, the sets
+<span class="math inline">\(\{X\le t\}\)</span> and <span class="math inline">\(\{X&gt;t\}\)</span> are in <span class="math inline">\(\mathcal{F}\)</span> because they are preimages of
+Borel sets. The <strong>population</strong> partial moments are</p>
+<p><span class="math display">\[
+\operatorname{LPM}(k,t,X) = \int_{-\infty}^{t} (t-x)^k\, dF_X(x),
+\qquad
+\operatorname{UPM}(k,t,X) = \int_{t}^{\infty} (x-t)^k\, dF_X(x).
+\]</span></p>
+<p>The <strong>empirical</strong> versions correspond to replacing <span class="math inline">\(F_X\)</span> with the empirical measure <span class="math inline">\(\mathbb{P}_n\)</span> (or CDF <span class="math inline">\(\hat F_n\)</span>):</p>
+<p><span class="math display">\[
+\widehat{\operatorname{LPM}}_k(t;X) = \int_{(-\infty,t]} (t-x)^k\,
+d\mathbb{P}_n(x),
+\qquad
+\widehat{\operatorname{UPM}}_k(t;X) = \int_{(t,\infty)} (x-t)^k\,
+d\mathbb{P}_n(x).
+\]</span></p>
+<p>Centering at <span class="math inline">\(t=\mu_X\)</span> yields the
+variance decomposition identity in Section 1.</p>
+<hr />
+</div>
+<div id="appendix-b-quick-reference-grouped-by-topic" class="section level1">
+<h1>Appendix B — Quick Reference (Grouped by Topic)</h1>
+<div id="overall-theory" class="section level2">
+<h2>Overall Theory</h2>
+<ul>
+<li><a href="https://ovvo-financial.github.io/NNS/book/">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></li>
+</ul>
+</div>
+<div id="partial-moments-ratios" class="section level2">
+<h2>1. Partial Moments &amp; Ratios</h2>
+<ul>
+<li><code>LPM(degree, target, variable)</code> — lower partial moment of
+order <code>degree</code> at <code>target</code>.</li>
+<li><code>UPM(degree, target, variable)</code> — upper partial moment of
+order <code>degree</code> at <code>target</code>.</li>
+<li><code>LPM.ratio(degree, target, variable)</code>;
+<code>UPM.ratio(...)</code> — normalized shares; <code>degree=0</code>
+gives CDF.</li>
+<li><code>LPM.VaR(p, degree, variable)</code> — partial-moment quantile
+at probability <code>p</code>.</li>
+<li><code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
+— co-lower partial moment between two variables.</li>
+<li><code>Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)</code>
+— co-upper partial moment between two variables.</li>
+<li><code>D.LPM(degree, target, variable)</code> — divergent lower
+partial moment (away from <code>target</code>).</li>
+<li><code>D.UPM(degree, target, variable)</code> — divergent upper
+partial moment (away from <code>target</code>).</li>
+<li><code>NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)</code>
+— CDF from partial moments.</li>
+<li><code>NNS.moments(x)</code> — mean/var/skew/kurtosis via partial
+moments.</li>
+</ul>
+</div>
+<div id="descriptive-statistics-distributions" class="section level2">
+<h2>2. Descriptive Statistics &amp; Distributions</h2>
+<ul>
+<li><code>NNS.mode(x, multi = FALSE)</code> — nonparametric
+mode(s).</li>
+<li><code>PM.matrix(l_degree, u_degree, target, variable, pop_adj)</code>
+— co-/divergent partial-moment matrices.</li>
+<li><code>NNS.gravity(x, w = NULL)</code> — partial-moment weighted
+location (gravity center).</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Partial_Moments.html">Getting
+Started with NNS: Partial Moments</a></p>
+</div>
+<div id="dependence-association" class="section level2">
+<h2>3. Dependence &amp; Association</h2>
+<ul>
+<li><code>NNS.dep(x, y)</code> — nonlinear dependence coefficient.</li>
+<li><code>NNS.copula(X, target, continuous, plot, independence.overlay)</code>
+— dependence from co-partial moments.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Correlation_and_Dependence.html">Getting Started with
+NNS: Correlation and Dependence</a></p>
+</div>
+<div id="normalization-rescaling" class="section level2">
+<h2>4. Normalization &amp; Rescaling</h2>
+<ul>
+<li><code>NNS.norm(x, linear=FALSE)</code> — normalization retaining
+target moments.</li>
+<li><code>NNS.rescale(x, a, b, method=c(&quot;minmax&quot;,&quot;riskneutral&quot;), T=NULL, type=c(&quot;Terminal&quot;,&quot;Discounted&quot;))</code>
+— risk-neutral or min–max rescaling.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Normalization_and_Rescaling.html">Getting Started with
+NNS: Normalization and Rescaling</a></p>
+</div>
+<div id="hypothesis-testing" class="section level2">
+<h2>5. Hypothesis Testing</h2>
+<ul>
+<li><code>NNS.ANOVA(control, treatment, ...)</code> — certainty of
+equality (distributions or means).</li>
+<li><code>NNS.SS(x, y, ...)</code> — stochastic superiority between two
+variables.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Comparing_Distributions.html">Getting Started with
+NNS: Comparing Distributions</a></p>
+</div>
+<div id="regression-classification-causality" class="section level2">
+<h2>6. Regression, Classification &amp; Causality</h2>
+<ul>
+<li><code>NNS.part(x, y, ...)</code> — partition analysis for variable
+segmentation.</li>
+<li><code>NNS.reg(x, y, ...)</code> — partition-based
+regression/classification (<code>$Fitted.xy</code>,
+<code>$Point.est</code>).</li>
+<li><code>NNS.boost(IVs, DV, ...)</code>,
+<code>NNS.stack(IVs, DV, ...)</code> — ensembles using
+<code>NNS.reg</code> base learners.</li>
+<li><code>NNS.caus(x, y)</code> — directional causality score.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Clustering_and_Regression.html">Getting Started with
+NNS: Clustering and Regression</a></p>
+<p>See NNS Vignette: <a href="NNSvignette_Classification.html">Getting
+Started with NNS: Classification</a></p>
+</div>
+<div id="differentiation-slope-measures" class="section level2">
+<h2>7. Differentiation &amp; Slope Measures</h2>
+<ul>
+<li><code>dy.dx(x, y)</code> — numerical derivative of <code>y</code>
+with respect to <code>x</code> via <code>NNS.reg</code>.</li>
+<li><code>dy.d_(x, Y, var)</code> — partial derivative of multivariate
+<code>Y</code> w.r.t. <code>var</code>.</li>
+<li><code>NNS.diff(x, y)</code> — derivative via secant
+projections.</li>
+</ul>
+</div>
+<div id="time-series-forecasting-1" class="section level2">
+<h2>8. Time Series &amp; Forecasting</h2>
+<ul>
+<li><code>NNS.ARMA(...)</code>, <code>NNS.ARMA.optim(...)</code> —
+nonlinear ARMA modeling.</li>
+<li><code>NNS.seas(...)</code> — detect seasonality.</li>
+<li><code>NNS.VAR(...)</code> — nonlinear VAR modeling.</li>
+<li><code>NNS.nowcast(x, h, ...)</code> — near-term nonlinear
+forecast.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Forecasting.html">Getting
+Started with NNS: Forecasting</a></p>
+</div>
+<div id="simulation-bootstrap" class="section level2">
+<h2>9. Simulation &amp; Bootstrap</h2>
+<ul>
+<li><code>NNS.meboot(...)</code> — maximum entropy bootstrap.</li>
+<li><code>NNS.MC(...)</code> — Monte Carlo over correlation space.</li>
+</ul>
+<p>See NNS Vignette: <a href="NNSvignette_Sampling.html">Getting Started
+with NNS: Sampling and Simulation</a></p>
+</div>
+<div id="portfolio-analysis-stochastic-dominance" class="section level2">
+<h2>10. Portfolio Analysis &amp; Stochastic Dominance</h2>
+<ul>
+<li><code>NNS.FSD.uni(x, y)</code>, <code>NNS.SSD.uni(x, y)</code>,
+<code>NNS.TSD.uni(x, y)</code> — univariate stochastic dominance
+tests.</li>
+<li><code>NNS.SD.cluster(R)</code>, <code>NNS.SD.efficient.set(R)</code>
+— dominance-based portfolio sets.</li>
+</ul>
+<p>For complete references, please see the Vignettes linked above and
+their specific referenced materials.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

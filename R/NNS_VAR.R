@@ -12,7 +12,7 @@
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-#' @param nowcast logical; \code{FALSE} (default) internal call for \link{NNS.nowcast}.
+#' @param nowcast logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{

@@ -138,7 +138,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
 #' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
-#' @return Numeric; the n‑dimensional co‑upper partial moment.
+#' @return Numeric; the n-dimensional divergent partial moment.
 #' @examples
 #' \dontrun{
 #' mat <- matrix(rnorm(200), ncol = 4)

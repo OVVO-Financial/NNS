@@ -16,7 +16,7 @@ DPM_nD(data, target, degree = 0, norm = TRUE)
 \item{norm}{logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.}
 }
 \value{
-Numeric; the n‑dimensional co‑upper partial moment.
+Numeric; the n-dimensional divergent partial moment.
 }
 \description{
 This function generates the aggregate n‑dimensional divergent partial moment (n >= 2) for any degree or target.

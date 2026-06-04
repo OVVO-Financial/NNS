@@ -39,7 +39,7 @@ NNS.VAR(
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{nowcast}{logical; \code{FALSE} (default) internal call for \link{NNS.nowcast}.}
+\item{nowcast}{logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.}
 }
 \value{
 Returns the following matrices of forecasted variables:
