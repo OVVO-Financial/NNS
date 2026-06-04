@@ -525,25 +525,25 @@ Centering at \(t=\mu_X\) yields the variance decomposition identity in Section 1
 - `NNS.gravity(x, w = NULL)` — partial-moment weighted location (gravity center).
 
 
-See NNS Vignette: [Getting Started with NNS: Partial Moments](NNSvignette_Partial_Moments.html)
+See NNS Vignette: [Getting Started with NNS: Partial Moments](NNSvignette_02_Partial_Moments.html)
 
 ## 3. Dependence & Association
 - `NNS.dep(x, y)` — nonlinear dependence coefficient.
 - `NNS.copula(X, target, continuous, plot, independence.overlay)` — dependence from co-partial moments.
 
-See NNS Vignette: [Getting Started with NNS: Correlation and Dependence](NNSvignette_Correlation_and_Dependence.html)
+See NNS Vignette: [Getting Started with NNS: Correlation and Dependence](NNSvignette_03_Correlation_and_Dependence.html)
 
 ## 4. Normalization & Rescaling
 - `NNS.norm(x, linear=FALSE)` — normalization retaining target moments.
 - `NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))` — risk-neutral or min–max rescaling.
 
-See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](NNSvignette_Normalization_and_Rescaling.html)
+See NNS Vignette: [Getting Started with NNS: Normalization and Rescaling](NNSvignette_04_Normalization_and_Rescaling.html)
 
 ## 5. Hypothesis Testing
 - `NNS.ANOVA(control, treatment, ...)` — certainty of equality (distributions or means).
 - `NNS.SS(x, y, ...)` — stochastic superiority between two variables.
 
-See NNS Vignette: [Getting Started with NNS: Comparing Distributions](NNSvignette_Comparing_Distributions.html)
+See NNS Vignette: [Getting Started with NNS: Comparing Distributions](NNSvignette_06_Comparing_Distributions.html)
 
 
 ## 6. Regression, Classification & Causality
@@ -552,11 +552,11 @@ See NNS Vignette: [Getting Started with NNS: Comparing Distributions](NNSvignett
 - `NNS.boost(IVs, DV, ...)`, `NNS.stack(IVs, DV, ...)` — ensembles using `NNS.reg` base learners.
 - `NNS.caus(x, y)` — directional causality score.
 
-See NNS Vignette: [Getting Started with NNS: Clustering and Regression](NNSvignette_Clustering_and_Regression.html)
+See NNS Vignette: [Getting Started with NNS: Clustering and Regression](NNSvignette_07_Clustering_and_Regression.html)
 
 \medskip
 
-See NNS Vignette: [Getting Started with NNS: Classification](NNSvignette_Classification.html)
+See NNS Vignette: [Getting Started with NNS: Classification](NNSvignette_08_Classification.html)
 
 ## 7. Differentiation & Slope Measures
 - `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via `NNS.reg`.
@@ -569,13 +569,13 @@ See NNS Vignette: [Getting Started with NNS: Classification](NNSvignette_Classif
 - `NNS.VAR(...)` — nonlinear VAR modeling.
 - `NNS.nowcast(x, h, ...)` — near-term nonlinear forecast.
 
-See NNS Vignette: [Getting Started with NNS: Forecasting](NNSvignette_Forecasting.html)
+See NNS Vignette: [Getting Started with NNS: Forecasting](NNSvignette_09_Forecasting.html)
 
 ## 9. Simulation & Bootstrap 
 - `NNS.meboot(...)` — maximum entropy bootstrap.
 - `NNS.MC(...)` — Monte Carlo over correlation space.
 
-See NNS Vignette: [Getting Started with NNS: Sampling and Simulation](NNSvignette_Sampling.html)
+See NNS Vignette: [Getting Started with NNS: Sampling and Simulation](NNSvignette_05_Sampling.html)
 
 ## 10. Portfolio Analysis & Stochastic Dominance
 - `NNS.FSD.uni(x, y)`, `NNS.SSD.uni(x, y)`, `NNS.TSD.uni(x, y)` — univariate stochastic dominance tests.
