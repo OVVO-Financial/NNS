@@ -1,4 +1,4 @@
-# Workflow from official r-lib/actions (updated for your branch)
+# Workflow from official r-lib/actions (updated for headless rgl)
 name: pkgdown
 
 on:
@@ -36,6 +36,10 @@ jobs:
           extra-packages: any::pkgdown, any::bookdown, local::.
           needs: website
 
+      - name: Configure headless rgl
+        run: echo "options(rgl.useNULL = TRUE)" >> ~/.Rprofile
+        shell: bash
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
@@ -56,6 +60,6 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
-          clean: false
+          clean: true
           branch: gh-pages
           folder: docs
