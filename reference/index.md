@@ -74,8 +74,6 @@
   : NNS moments
 - [`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
   : NNS Normalization
-- [`NNS.nowcast()`](https://OVVO-Financial.github.io/NNS/reference/NNS.nowcast.md)
-  : NNS Nowcast
 - [`NNS.part()`](https://OVVO-Financial.github.io/NNS/reference/NNS.part.md)
   : NNS Partition Map
 - [`NNS.reg()`](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
