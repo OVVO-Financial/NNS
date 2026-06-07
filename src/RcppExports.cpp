@@ -99,8 +99,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_part_cpp
-List NNS_part_cpp(NumericVector x, NumericVector y, Nullable<std::string> type, Nullable<int> order_in, int obs_req, bool min_obs_stop, std::string noise_reduction);
-RcppExport SEXP _NNS_NNS_part_cpp(SEXP xSEXP, SEXP ySEXP, SEXP typeSEXP, SEXP order_inSEXP, SEXP obs_reqSEXP, SEXP min_obs_stopSEXP, SEXP noise_reductionSEXP) {
+List NNS_part_cpp(NumericVector x, NumericVector y, Nullable<std::string> type, Nullable<int> order_in, int obs_req, bool min_obs_stop, std::string noise_reduction, bool quadrants_only);
+RcppExport SEXP _NNS_NNS_part_cpp(SEXP xSEXP, SEXP ySEXP, SEXP typeSEXP, SEXP order_inSEXP, SEXP obs_reqSEXP, SEXP min_obs_stopSEXP, SEXP noise_reductionSEXP, SEXP quadrants_onlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -111,7 +111,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type obs_req(obs_reqSEXP);
     Rcpp::traits::input_parameter< bool >::type min_obs_stop(min_obs_stopSEXP);
     Rcpp::traits::input_parameter< std::string >::type noise_reduction(noise_reductionSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_part_cpp(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction));
+    Rcpp::traits::input_parameter< bool >::type quadrants_only(quadrants_onlySEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_part_cpp(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -632,7 +633,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_distance_path_cpp", (DL_FUNC) &_NNS_NNS_distance_path_cpp, 5},
     {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
     {"_NNS_NNS_distance_path_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_parallel_cpp, 6},
-    {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 7},
+    {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 8},
     {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 3},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
     {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},

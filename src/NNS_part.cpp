@@ -61,7 +61,8 @@ List NNS_part_cpp(NumericVector x,
                   Nullable<int> order_in,
                   int obs_req,
                   bool min_obs_stop,
-                  std::string noise_reduction){
+                  std::string noise_reduction,
+                  bool quadrants_only = false){
   
   const int n=x.size();
   if(y.size()!=n) stop("x and y must have same length");
@@ -123,7 +124,7 @@ List NNS_part_cpp(NumericVector x,
     }
     
     // -------------------- NEW: record ablines for XONLY at this depth ----------
-    if(xonly){
+    if(xonly && !quadrants_only){
       for(auto &kv: grp){
         const auto &idx = kv.second;
         double minx=R_PosInf, maxx=R_NegInf;
@@ -165,8 +166,12 @@ List NNS_part_cpp(NumericVector x,
   }
   
   // assemble results
-  CharacterVector q_cur(n), q_prior(n);
-  for(int i=0;i<n;++i){ q_cur[i]=quadrant[i]; q_prior[i]=prior_quadrant[i]; }
+  CharacterVector q_cur(n);
+  for(int i=0;i<n;++i) q_cur[i]=quadrant[i];
+  if(quadrants_only) return List::create(_["quadrant"]=q_cur);
+
+  CharacterVector q_prior(n);
+  for(int i=0;i<n;++i) q_prior[i]=prior_quadrant[i];
   DataFrame part = DataFrame::create(_["x"]=x,_["y"]=y,_["quadrant"]=q_cur,
                                      _["prior.quadrant"]=q_prior,
                                      _["stringsAsFactors"]=false);
