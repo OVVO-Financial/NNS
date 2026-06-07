@@ -14,6 +14,22 @@ static double repeatMultiplication(double value, int n) {
   return result;
 }
 
+static inline double lower_component(double diff, double degree, bool degree_is_int) {
+  if (degree == 0) return diff >= 0.0 ? 1.0 : 0.0;
+  if (diff < 0.0) return 0.0;
+  return degree_is_int
+    ? repeatMultiplication(diff, static_cast<int>(degree))
+    : std::pow(diff, degree);
+}
+
+static inline double upper_component(double diff, double degree, bool degree_is_int) {
+  if (degree == 0) return diff > 0.0 ? 1.0 : 0.0;
+  if (diff < 0.0) return 0.0;
+  return degree_is_int
+    ? repeatMultiplication(diff, static_cast<int>(degree))
+    : std::pow(diff, degree);
+}
+
 //static double fastPow(double a, double b) {
 //  union { double d; int x[2]; } u = { a };
 //  u.x[1] = static_cast<int>(b * (u.x[1] - 1072632447) + 1072632447);
@@ -575,15 +591,35 @@ void PMMatrix_Cv(
 ){
   RVector<double> x_rvec(x);
   RVector<double> y_rvec(y);
-  
-  coLpm=CoLPM_C(degree_lpm, degree_lpm, x_rvec, y_rvec, target_x, target_y);
-  coUpm=CoUPM_C(degree_upm, degree_upm, x_rvec, y_rvec, target_x, target_y);
-  dLpm=DLPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
-  dUpm=DUPM_C(degree_lpm, degree_upm, x_rvec, y_rvec, target_x, target_y);
+
+  coLpm = 0.0;
+  coUpm = 0.0;
+  dLpm = 0.0;
+  dUpm = 0.0;
   covMat=0;
   if(rows == 0)
     return;
-  
+
+  bool lpm_is_int = isInteger(degree_lpm);
+  bool upm_is_int = isInteger(degree_upm);
+  for(size_t i=0; i<rows; i++){
+    double x_lower = lower_component(target_x - x_rvec[i], degree_lpm, lpm_is_int);
+    double x_upper = upper_component(x_rvec[i] - target_x, degree_upm, upm_is_int);
+    double y_lower = lower_component(target_y - y_rvec[i], degree_lpm, lpm_is_int);
+    double y_upper = upper_component(y_rvec[i] - target_y, degree_upm, upm_is_int);
+
+    coLpm += x_lower * y_lower;
+    coUpm += x_upper * y_upper;
+    dLpm += x_upper * y_lower;
+    dUpm += x_lower * y_upper;
+  }
+
+  double inv_rows = 1.0 / static_cast<double>(rows);
+  coLpm *= inv_rows;
+  coUpm *= inv_rows;
+  dLpm *= inv_rows;
+  dUpm *= inv_rows;
+
   if(pop_adj && rows > 1 && degree_lpm > 0 && degree_upm > 0){
     coLpm *= adjust;
     coUpm *= adjust;
