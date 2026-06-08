@@ -169,7 +169,7 @@ List NNS_part_cpp(NumericVector x,
   CharacterVector q_cur(n);
   for(int i=0;i<n;++i) q_cur[i]=quadrant[i];
   if(quadrants_only) return List::create(_["quadrant"]=q_cur);
-
+  
   CharacterVector q_prior(n);
   for(int i=0;i<n;++i) q_prior[i]=prior_quadrant[i];
   DataFrame part = DataFrame::create(_["x"]=x,_["y"]=y,_["quadrant"]=q_cur,

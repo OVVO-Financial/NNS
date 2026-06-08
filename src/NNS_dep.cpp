@@ -96,16 +96,16 @@ static double copula_signed(const std::vector<double>& xv,
   double d0_cupm = 0.0, d0_clpm = 0.0, dpm_d0_count = 0.0;
   double c1_cupm = 0.0, c1_clpm = 0.0, c1_dpm = 0.0;
   double cov = 0.0, varx = 0.0;
-
+  
   for (int i = 0; i < n; ++i) {
     double dx = xv[i] - tx;
     double dy = yv[i] - ty;
-
+    
     if (dx > 0.0 && dy > 0.0) d0_cupm += 1.0;
     if (dx <= 0.0 && dy <= 0.0) d0_clpm += 1.0;
     if (!((dx < 0.0 && dy < 0.0) || (dx > 0.0 && dy > 0.0)))
       dpm_d0_count += 1.0;
-
+    
     if (dx >= 0.0 && dy >= 0.0) {
       c1_cupm += dx * dy;
     } else if (dx <= 0.0 && dy <= 0.0) {
@@ -113,7 +113,7 @@ static double copula_signed(const std::vector<double>& xv,
     } else {
       c1_dpm += std::abs(dx) * std::abs(dy);
     }
-
+    
     cov += dx * dy;
     varx += dx * dx;
   }

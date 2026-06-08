@@ -131,34 +131,24 @@ NNS.dep <- function(x,
   
   l   <- length(x)
   obs <- max(8L, as.integer(l / 8L))
-  x_num <- as.numeric(x)
-  y_num <- as.numeric(y)
-
-  if (isTRUE(print.map)) {
-    PART_xy <- suppressWarnings(
-      NNS.part(x, y, order = NULL, obs.req = obs,
-               min.obs.stop = FALSE, type = "XONLY", Voronoi = TRUE)
-    )
-    PART_yx <- suppressWarnings(
-      NNS.part(y, x, order = NULL, obs.req = obs,
-               min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)
-    )
-
-    if (nrow(PART_xy$regression.points) == 0L)
-      return(list("Correlation" = 0, "Dependence" = 0))
-
-    quad_xy <- PART_xy$dt$quadrant
-    quad_yx <- PART_yx$dt$quadrant
-  } else {
-    quad_xy <- NNS_part_cpp(x_num, y_num, "XONLY", NULL, obs, FALSE, "off", TRUE)$quadrant
-    quad_yx <- NNS_part_cpp(y_num, x_num, "XONLY", NULL, obs, FALSE, "off", TRUE)$quadrant
-  }
+  
+  PART_xy <- suppressWarnings(
+    NNS.part(x, y, order = NULL, obs.req = obs,
+             min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map)
+  )
+  PART_yx <- suppressWarnings(
+    NNS.part(y, x, order = NULL, obs.req = obs,
+             min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)
+  )
+  
+  if (nrow(PART_xy$regression.points) == 0L)
+    return(list("Correlation" = 0, "Dependence" = 0))
   
   NNS_dep_pair_cpp(
-    x       = x_num,
-    y       = y_num,
-    quad_xy = as.character(quad_xy),
-    quad_yx = as.character(quad_yx),
+    x       = as.numeric(x),
+    y       = as.numeric(y),
+    quad_xy = as.character(PART_xy$dt$quadrant),
+    quad_yx = as.character(PART_yx$dt$quadrant),
     asym    = isTRUE(asym)
   )
 }

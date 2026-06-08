@@ -1,11 +1,12 @@
 Package: NNS
 Type: Package
 Title: Nonlinear Nonparametric Statistics
-Version: 12.1
-Date: 2026-06-04
+Version: 12.2
+Date: 2026-06-08
 Authors@R: c(
   person("Fred", "Viole", role=c("aut","cre"), email="ovvo.open.source@gmail.com"),
-  person("Roberto", "Spadim", role=c("ctb"))
+  person("Roberto", "Spadim", role="ctb"),
+  person("Rasheed", "Khoshnaw", role ="ctb")
   )
 Maintainer: Fred Viole <ovvo.open.source@gmail.com>
 Description: NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental elements of variance that asymptotically approximate the area under f(x) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.  Designed for real-world data that violates symmetry, linearity, or distributional assumptions, NNS delivers a comprehensive suite of advanced statistical techniques, including: Numerical integration, Numerical differentiation, Clustering, Correlation, Dependence, Causal analysis, ANOVA, Regression, Classification, Seasonality, Autoregressive modeling, Normalization, Stochastic superiority / dominance and Advanced Monte Carlo sampling.  All routines based on: Viole, F. and Nawrocki, D. (2013), Nonlinear Nonparametric Statistics: Using Partial Moments (ISBN: 1490523995, Second edition: <https://ovvo-financial.github.io/NNS/book/>).

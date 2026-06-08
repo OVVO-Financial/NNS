@@ -18,7 +18,7 @@ static inline double lower_component(double diff, double degree, bool degree_is_
   if (degree == 0) return diff >= 0.0 ? 1.0 : 0.0;
   if (diff < 0.0) return 0.0;
   return degree_is_int
-    ? repeatMultiplication(diff, static_cast<int>(degree))
+  ? repeatMultiplication(diff, static_cast<int>(degree))
     : std::pow(diff, degree);
 }
 
@@ -26,7 +26,7 @@ static inline double upper_component(double diff, double degree, bool degree_is_
   if (degree == 0) return diff > 0.0 ? 1.0 : 0.0;
   if (diff < 0.0) return 0.0;
   return degree_is_int
-    ? repeatMultiplication(diff, static_cast<int>(degree))
+  ? repeatMultiplication(diff, static_cast<int>(degree))
     : std::pow(diff, degree);
 }
 
@@ -395,10 +395,10 @@ double CoUPM_C(
     
     if(d_x_0) x1 = (x1 > 0 ? 1 : 0);
     else x1 = (x1 < 0 ? 0 : x1);
-
+    
     if(d_y_0) y1 = (y1 > 0 ? 1 : 0);
     else y1 = (y1 < 0 ? 0 : y1);
-
+    
     if(!d_x_0){
       if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
       else x1 = std::pow(x1, degree_x);
@@ -435,10 +435,10 @@ double CoLPM_C(
     
     if(d_x_0) x1 = (x1 >= 0 ? 1 : 0);
     else x1 = (x1 < 0 ? 0 : x1);
-
+    
     if(d_y_0) y1 = (y1 >= 0 ? 1 : 0);
     else y1 = (y1 < 0 ? 0 : y1);
-
+    
     if(!d_x_0){
       if(x_is_int) x1 = repeatMultiplication(x1, static_cast<int>(degree_x));
       else x1 = std::pow(x1, degree_x);
@@ -591,7 +591,7 @@ void PMMatrix_Cv(
 ){
   RVector<double> x_rvec(x);
   RVector<double> y_rvec(y);
-
+  
   coLpm = 0.0;
   coUpm = 0.0;
   dLpm = 0.0;
@@ -599,7 +599,7 @@ void PMMatrix_Cv(
   covMat=0;
   if(rows == 0)
     return;
-
+  
   bool lpm_is_int = isInteger(degree_lpm);
   bool upm_is_int = isInteger(degree_upm);
   for(size_t i=0; i<rows; i++){
@@ -607,19 +607,19 @@ void PMMatrix_Cv(
     double x_upper = upper_component(x_rvec[i] - target_x, degree_upm, upm_is_int);
     double y_lower = lower_component(target_y - y_rvec[i], degree_lpm, lpm_is_int);
     double y_upper = upper_component(y_rvec[i] - target_y, degree_upm, upm_is_int);
-
+    
     coLpm += x_lower * y_lower;
     coUpm += x_upper * y_upper;
     dLpm += x_upper * y_lower;
     dUpm += x_lower * y_upper;
   }
-
+  
   double inv_rows = 1.0 / static_cast<double>(rows);
   coLpm *= inv_rows;
   coUpm *= inv_rows;
   dLpm *= inv_rows;
   dUpm *= inv_rows;
-
+  
   if(pop_adj && rows > 1 && degree_lpm > 0 && degree_upm > 0){
     coLpm *= adjust;
     coUpm *= adjust;
@@ -670,7 +670,7 @@ List PMMatrix_CPv(
         } else {
           coUpm(i, j) = dUpm(i, j) = dLpm(i, j) = coLpm(i, j) = 0.0;
         }
-
+        
         covMat(i, j) = coUpm(i, j) + coLpm(i, j) - dUpm(i, j) - dLpm(i, j);
       }
     }

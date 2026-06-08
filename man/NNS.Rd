@@ -23,6 +23,7 @@ Useful links:
 Other contributors:
 \itemize{
   \item Roberto Spadim [contributor]
+  \item Rasheed Khoshnaw [contributor]
 }
 
 }
