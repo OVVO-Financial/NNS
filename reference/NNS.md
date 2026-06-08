@@ -26,3 +26,5 @@ Useful links:
 Other contributors:
 
 - Roberto Spadim \[contributor\]
+
+- Rasheed Khoshnaw \[contributor\]
