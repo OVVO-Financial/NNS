@@ -15,9 +15,8 @@
 //   trial and epoch in NNS.boost / NNS.stack.
 //
 //   This file eliminates every one of those dispatches.  The per-quadrant
-//   copula computation (copula_signed) calls CoLPM_C / CoUPM_C / DLPM_C /
-//   DUPM_C / clpm_nD_cpp / cupm_nD_cpp / dpm_nD_cpp directly -- all already
-//   C++ internal-linkage functions in partial_moments.cpp / partial_moments.h.
+//   copula computation is evaluated directly for the bivariate degree-0 and
+//   degree-1 partial moment terms used by NNS.dep.
 //
 //   Discrete-variable correction (triggered when both x and y have fewer
 //   unique values than sqrt(n)):
@@ -38,8 +37,6 @@
 #include <unordered_map>
 #include <algorithm>
 #include <numeric>
-#include "partial_moments.h"    // CoLPM_C, CoUPM_C, DLPM_C, DUPM_C
-// clpm_nD_cpp, cupm_nD_cpp, dpm_nD_cpp
 #include "central_tendencies.h" // NNS_gravity_cpp
 
 using namespace Rcpp;
@@ -54,26 +51,6 @@ static inline double gravity_cpp(const std::vector<double>& v) {
   if (v.empty()) return NA_REAL;
   NumericVector nv(v.begin(), v.end());
   return as<double>(NNS_gravity_cpp(nv, false));
-}
-
-// Sign of OLS slope: replicates sign(fast_lm(x, y)$coef[2])
-// Returns exactly -1.0, 0.0, or +1.0
-static inline double ols_sign(const std::vector<double>& x,
-                              const std::vector<double>& y) {
-  int n = static_cast<int>(x.size());
-  if (n < 2) return 0.0;
-  double mx = 0.0, my = 0.0;
-  for (int i = 0; i < n; ++i) { mx += x[i]; my += y[i]; }
-  mx /= n; my /= n;
-  double cov = 0.0, varx = 0.0;
-  for (int i = 0; i < n; ++i) {
-    double dx = x[i] - mx;
-    cov  += dx * (y[i] - my);
-    varx += dx * dx;
-  }
-  if (varx == 0.0) return 0.0;
-  double s = cov / varx;
-  return (s > 0.0) ? 1.0 : (s < 0.0) ? -1.0 : 0.0;
 }
 
 // Count distinct values in a std::vector<double>
@@ -112,54 +89,51 @@ static double copula_signed(const std::vector<double>& xv,
   int n = static_cast<int>(xv.size());
   if (n < 2) return 0.0;
   
-  // targets = column means
   double tx = 0.0, ty = 0.0;
   for (int i = 0; i < n; ++i) { tx += xv[i]; ty += yv[i]; }
   tx /= n; ty /= n;
   
-  // Build RVector views for the scalar C functions
-  NumericVector xnv(xv.begin(), xv.end());
-  NumericVector ynv(yv.begin(), yv.end());
-  RVector<double> xrv(xnv), yrv(ynv);
-  
-  // --- degree-0 pairwise moments (pop_adj = FALSE) ---
-  double d0_cupm = CoUPM_C(0.0, 0.0, xrv, yrv, tx, ty);
-  double d0_clpm = CoLPM_C(0.0, 0.0, xrv, yrv, tx, ty);
-  
-  // early-return guard (matches NNS.copula: if(Co_pm==1||Co_pm==0) return(1))
-  double d0_Co = d0_cupm + d0_clpm;
-  if (d0_Co == 1.0 || d0_Co == 0.0) return 1.0;
-  
-  // --- degree-1 pairwise moments (pop_adj = TRUE, then normalise) ---
-  double adj = static_cast<double>(n) / static_cast<double>(n - 1);
-  double c1_cupm = CoUPM_C(1.0, 1.0, xrv, yrv, tx, ty) * adj;
-  double c1_clpm = CoLPM_C(1.0, 1.0, xrv, yrv, tx, ty) * adj;
-  double c1_dlpm = DLPM_C (1.0, 1.0, xrv, yrv, tx, ty) * adj;
-  double c1_dupm = DUPM_C (1.0, 1.0, xrv, yrv, tx, ty) * adj;
-  {
-    double tot = c1_cupm + c1_dupm + c1_dlpm + c1_clpm;
-    if (tot > 0.0) {
-      c1_cupm /= tot; c1_clpm /= tot;
-      c1_dlpm /= tot; c1_dupm /= tot;
+  double d0_cupm = 0.0, d0_clpm = 0.0, dpm_d0_count = 0.0;
+  double c1_cupm = 0.0, c1_clpm = 0.0, c1_dpm = 0.0;
+  double cov = 0.0, varx = 0.0;
+
+  for (int i = 0; i < n; ++i) {
+    double dx = xv[i] - tx;
+    double dy = yv[i] - ty;
+
+    if (dx > 0.0 && dy > 0.0) d0_cupm += 1.0;
+    if (dx <= 0.0 && dy <= 0.0) d0_clpm += 1.0;
+    if (!((dx < 0.0 && dy < 0.0) || (dx > 0.0 && dy > 0.0)))
+      dpm_d0_count += 1.0;
+
+    if (dx >= 0.0 && dy >= 0.0) {
+      c1_cupm += dx * dy;
+    } else if (dx <= 0.0 && dy <= 0.0) {
+      c1_clpm += dx * dy;
+    } else {
+      c1_dpm += std::abs(dx) * std::abs(dy);
     }
+
+    cov += dx * dy;
+    varx += dx * dx;
   }
   
-  // --- n-dimensional partial moments (2D matrix) ---
-  NumericMatrix data(n, 2);
-  for (int i = 0; i < n; ++i) { data(i, 0) = xv[i]; data(i, 1) = yv[i]; }
-  NumericVector tgt = NumericVector::create(tx, ty);
+  double inv_n = 1.0 / static_cast<double>(n);
+  double d0_Co = (d0_cupm + d0_clpm) * inv_n;
+  if (d0_Co == 1.0 || d0_Co == 0.0) return 1.0;
   
-  double dpm_d0 = dpm_nD_cpp(data, tgt, 0.0, true);
-  double dpm_d1 = dpm_nD_cpp(data, tgt, 1.0, true);
+  double c1_total = c1_cupm + c1_clpm + c1_dpm;
+  double co_d1 = c1_total > 0.0 ? (c1_cupm + c1_clpm) / c1_total : 0.0;
+  double dpm_d0 = dpm_d0_count * inv_n;
+  double dpm_d1 = c1_total > 0.0 ? c1_dpm / c1_total : 0.0;
   
-  // --- four dependence terms ---
   constexpr double indep_Co = 0.5;   // 0.25*(2^2-2) for n=2 cols
   constexpr double indep_D  = 0.75;  // 1 - 0.5^2   for n=2 cols
   
   double discrete_dep   = std::min(1.0, std::max(0.0,
                                                  std::abs(d0_Co              - indep_Co) / indep_Co));
   double continuous_dep = std::min(1.0, std::max(0.0,
-                                                 std::abs(c1_cupm + c1_clpm  - indep_Co) / indep_Co));
+                                                 std::abs(co_d1              - indep_Co) / indep_Co));
   double nd_disc_dep    = std::abs(dpm_d0 - indep_D) / indep_D;
   double nd_cont_dep    = std::abs(dpm_d1 - indep_D) / indep_D;
   
@@ -167,7 +141,8 @@ static double copula_signed(const std::vector<double>& xv,
     (discrete_dep + continuous_dep + nd_disc_dep + nd_cont_dep) / 4.0
   );
   
-  return copula_val * ols_sign(xv, yv);
+  double slope_sign = varx == 0.0 ? 0.0 : ((cov > 0.0) ? 1.0 : (cov < 0.0) ? -1.0 : 0.0);
+  return copula_val * slope_sign;
 }
 
 // ============================================================
@@ -190,18 +165,19 @@ static double copula_degree0_unsigned(const std::vector<double>& xv,
   for (int i = 0; i < n; ++i) { tx += xv[i]; ty += yv[i]; }
   tx /= n; ty /= n;
   
-  NumericVector xnv(xv.begin(), xv.end());
-  NumericVector ynv(yv.begin(), yv.end());
-  RVector<double> xrv(xnv), yrv(ynv);
+  double d0_cupm = 0.0, d0_clpm = 0.0, dpm_d0_count = 0.0;
+  for (int i = 0; i < n; ++i) {
+    double dx = xv[i] - tx;
+    double dy = yv[i] - ty;
+    if (dx > 0.0 && dy > 0.0) d0_cupm += 1.0;
+    if (dx <= 0.0 && dy <= 0.0) d0_clpm += 1.0;
+    if (!((dx < 0.0 && dy < 0.0) || (dx > 0.0 && dy > 0.0)))
+      dpm_d0_count += 1.0;
+  }
   
-  double d0_cupm = CoUPM_C(0.0, 0.0, xrv, yrv, tx, ty);
-  double d0_clpm = CoLPM_C(0.0, 0.0, xrv, yrv, tx, ty);
-  double d0_Co   = d0_cupm + d0_clpm;
-  
-  NumericMatrix data(n, 2);
-  for (int i = 0; i < n; ++i) { data(i, 0) = xv[i]; data(i, 1) = yv[i]; }
-  NumericVector tgt = NumericVector::create(tx, ty);
-  double dpm_d0 = dpm_nD_cpp(data, tgt, 0.0, true);
+  double inv_n = 1.0 / static_cast<double>(n);
+  double d0_Co = (d0_cupm + d0_clpm) * inv_n;
+  double dpm_d0 = dpm_d0_count * inv_n;
   
   constexpr double indep_Co = 0.5;
   constexpr double indep_D  = 0.75;
