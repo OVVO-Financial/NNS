@@ -21,15 +21,15 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   n <- length(dest)
   y.hat <- as.numeric(rpm$y.hat)
   
-  # 2) candidate feature columns (drop y.hat)
+  # 2) candidate feature columns, drop y.hat
   feat_all <- setdiff(names(rpm), "y.hat")
   
   # 3) choose columns to match dist.estimate
   if (!is.null(names(dest)) && all(names(dest) %in% feat_all)) {
-    # align by names (preferred)
+    # align by names, preferred
     feat <- names(dest)
   } else {
-    # fall back: take the first n *numeric* columns (like the original)
+    # fall back: take the first n numeric columns, like the original
     numerics <- vapply(rpm[, ..feat_all], is.numeric, logical(1L))
     feat <- feat_all[numerics]
     if (length(feat) < n) stop("Not enough numeric feature columns in rpm")
@@ -37,12 +37,25 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   }
   
   X <- as.matrix(rpm[, ..feat])
-  if (ncol(X) != n) stop(sprintf("after alignment, ncol(X)=%d != length(dist.estimate)=%d", ncol(X), n))
+  if (ncol(X) != n) {
+    stop(sprintf(
+      "after alignment, ncol(X)=%d != length(dist.estimate)=%d",
+      ncol(X),
+      n
+    ))
+  }
   
   # 4) k handling
-  if (identical(k, "all")) k <- nrow(X)
-  k <- as.integer(k)
+  # Oversized k means use all available RPM rows.
+  if (identical(k, "all") ||
+      (is.numeric(k) && length(k) == 1L && is.infinite(k))) {
+    k <- nrow(X)
+  } else {
+    k <- suppressWarnings(as.integer(k[1L]))
+    if (is.na(k)) k <- nrow(X)
+    k <- max(1L, min(k, nrow(X)))
+  }
   
   # 5) call the C++ core
-  NNS_distance_cpp(X, y.hat, as.numeric(dest), k, !is.null(class))
+  NNS_distance_cpp(X, y.hat, as.numeric(dest), as.integer(k), !is.null(class))
 }

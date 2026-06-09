@@ -435,6 +435,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PMMatrix_CPv
+List PMMatrix_CPv(const double& LPM_degree, const double& UPM_degree, const NumericVector& target, const NumericMatrix& variable, const bool& pop_adj, const bool& norm);
+RcppExport SEXP _NNS_PMMatrix_CPv(SEXP LPM_degreeSEXP, SEXP UPM_degreeSEXP, SEXP targetSEXP, SEXP variableSEXP, SEXP pop_adjSEXP, SEXP normSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double& >::type LPM_degree(LPM_degreeSEXP);
+    Rcpp::traits::input_parameter< const double& >::type UPM_degree(UPM_degreeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type variable(variableSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type pop_adj(pop_adjSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type norm(normSEXP);
+    rcpp_result_gen = Rcpp::wrap(PMMatrix_CPv(LPM_degree, UPM_degree, target, variable, pop_adj, norm));
+    return rcpp_result_gen;
+END_RCPP
+}
 // CoLPM_nD_RCPP
 double CoLPM_nD_RCPP(const NumericMatrix& data, const NumericVector& target, const double& degree, const bool& norm);
 RcppExport SEXP _NNS_CoLPM_nD_RCPP(SEXP dataSEXP, SEXP targetSEXP, SEXP degreeSEXP, SEXP normSEXP) {
@@ -659,6 +675,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_upSample", (DL_FUNC) &_NNS_upSample, 4},
     {"_NNS_LPM_CPv", (DL_FUNC) &_NNS_LPM_CPv, 3},
     {"_NNS_UPM_CPv", (DL_FUNC) &_NNS_UPM_CPv, 3},
+    {"_NNS_PMMatrix_CPv", (DL_FUNC) &_NNS_PMMatrix_CPv, 6},
     {"_NNS_CoLPM_nD_RCPP", (DL_FUNC) &_NNS_CoLPM_nD_RCPP, 4},
     {"_NNS_CoUPM_nD_RCPP", (DL_FUNC) &_NNS_CoUPM_nD_RCPP, 4},
     {"_NNS_DPM_nD_RCPP", (DL_FUNC) &_NNS_DPM_nD_RCPP, 4},

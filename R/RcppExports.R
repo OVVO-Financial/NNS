@@ -129,6 +129,10 @@ UPM_CPv <- function(degree, target, variable) {
     .Call(`_NNS_UPM_CPv`, degree, target, variable)
 }
 
+PMMatrix_CPv <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm) {
+    .Call(`_NNS_PMMatrix_CPv`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
+}
+
 CoLPM_nD_RCPP <- function(data, target, degree, norm) {
     .Call(`_NNS_CoLPM_nD_RCPP`, data, target, degree, norm)
 }

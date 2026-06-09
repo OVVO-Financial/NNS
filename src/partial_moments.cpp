@@ -30,13 +30,6 @@ static inline double upper_component(double diff, double degree, bool degree_is_
     : std::pow(diff, degree);
 }
 
-//static double fastPow(double a, double b) {
-//  union { double d; int x[2]; } u = { a };
-//  u.x[1] = static_cast<int>(b * (u.x[1] - 1072632447) + 1072632447);
-//  u.x[0] = 0;
-//  return u.d;
-//}
-
 inline bool isInteger(double v) {
   return v == static_cast<int>(v);
 }
@@ -58,11 +51,9 @@ double LPM_C(const double &degree, const double &target, const RVector<double> &
         } else if (degree == 1) {
           out += value;
         } else {
-          // Use repeatMultiplication function for integer degrees
           out += repeatMultiplication(value, static_cast<int>(degree));
         }
       } else {
-        // Use fastPow for non-integer degrees
         out += std::pow(value, degree);
       }
     } else out+= 0;
@@ -85,11 +76,9 @@ double UPM_C(const double &degree, const double &target, const RVector<double> &
         } else if (degree == 1) {
           out += value;
         } else {
-          // Use repeatMultiplication function for integer degrees
           out += repeatMultiplication(value, static_cast<int>(degree));
         }
       } else {
-        // Use fastPow for non-integer degrees
         out += std::pow(value, degree);
       }
     } else out+= 0;
@@ -337,7 +326,7 @@ size_t target_size=target.size();                        \
 NumericVector output = NumericVector(target_size);       \
 WORKER_CLASS tmp_func(degree, target, variable, output); \
 parallelFor(0, target_size, tmp_func);                   \
-return(output);                                         
+return(output);
 
 // [[Rcpp::export]]
 NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
@@ -348,7 +337,6 @@ NumericVector LPM_CPv(const double &degree, const NumericVector &target, const N
 NumericVector UPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(UPM_Worker);
 }
-
 
 NumericVector LPM_ratio_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
   if (degree>0) {
@@ -373,8 +361,8 @@ NumericVector UPM_ratio_CPv(const double &degree, const NumericVector &target, c
 
 double CoUPM_C(
     const double &degree_x, const double &degree_y,
-    const RVector<double> &x, const RVector<double> &y, 
-    const double &target_x, const double &target_y 
+    const RVector<double> &x, const RVector<double> &y,
+    const double &target_x, const double &target_y
 ){
   size_t n_x = x.size(), n_y = y.size();
   size_t max_size = (n_x>n_y ? n_x : n_y);
@@ -414,8 +402,8 @@ double CoUPM_C(
 
 double CoLPM_C(
     const double &degree_x, const double &degree_y,
-    const RVector<double> &x, const RVector<double> &y, 
-    const double &target_x, const double &target_y 
+    const RVector<double> &x, const RVector<double> &y,
+    const double &target_x, const double &target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
@@ -453,8 +441,8 @@ double CoLPM_C(
 }
 
 double DLPM_C(
-    const double &degree_lpm, const double &degree_upm, 
-    const RVector<double> &x, const RVector<double> &y, 
+    const double &degree_lpm, const double &degree_upm,
+    const RVector<double> &x, const RVector<double> &y,
     const double &target_x, const double &target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -465,7 +453,7 @@ double DLPM_C(
   if (min_size<=0)
     return 0;
   double out=0;
-  bool dont_use_pow_lpm=isInteger(degree_lpm), 
+  bool dont_use_pow_lpm=isInteger(degree_lpm),
     dont_use_pow_upm=isInteger(degree_upm),
     d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
@@ -494,8 +482,8 @@ double DLPM_C(
 }
 
 double DUPM_C(
-    const double &degree_lpm, const double &degree_upm, 
-    const RVector<double> &x, const RVector<double> &y, 
+    const double &degree_lpm, const double &degree_upm,
+    const RVector<double> &x, const RVector<double> &y,
     const double &target_x, const double &target_y
 ){
   size_t n_x=x.size(), n_y=y.size();
@@ -507,7 +495,7 @@ double DUPM_C(
     return 0;
   double out=0;
   
-  bool dont_use_pow_lpm=(isInteger(degree_lpm)), 
+  bool dont_use_pow_lpm=(isInteger(degree_lpm)),
     dont_use_pow_upm=(isInteger(degree_upm)),
     d_lpm_0=(degree_lpm==0), d_upm_0=(degree_upm==0);
   for(size_t i=0; i<min_size; i++){
@@ -535,7 +523,6 @@ double DUPM_C(
   return out/max_size;
 }
 
-// parallelFor
 #define NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS, LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE) \
 size_t target_x_size=target_x.size();                                                               \
 size_t target_y_size=target_y.size();                                                               \
@@ -544,6 +531,7 @@ NumericVector output = NumericVector(max_target_size);                          
 WORKER_CLASS tmp_func(LPM_DEGREE_VARIABLE, UPM_DEGREE_VARIABLE, x, y, target_x, target_y, output);  \
 parallelFor(0, output.size(), tmp_func);                                                            \
 return(output);
+
 NumericVector CoLPM_CPv(
     const double &degree_x, const double &degree_y,
     const NumericVector &x, const NumericVector &y,
@@ -559,33 +547,34 @@ NumericVector CoUPM_CPv(
   NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(CoUPM_Worker, degree_x, degree_y);
 }
 NumericVector DLPM_CPv(
-    const double &degree_lpm, const double &degree_upm, 
-    const NumericVector &x, const NumericVector &y, 
+    const double &degree_lpm, const double &degree_upm,
+    const NumericVector &x, const NumericVector &y,
     const NumericVector &target_x, const NumericVector &target_y
 ) {
   NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(DLPM_Worker, degree_lpm, degree_upm);
 }
 NumericVector DUPM_CPv(
-    const double &degree_lpm, const double &degree_upm, 
-    const NumericVector &x, const NumericVector &y, 
+    const double &degree_lpm, const double &degree_upm,
+    const NumericVector &x, const NumericVector &y,
     const NumericVector &target_x, const NumericVector &target_y
 ) {
   NNS_CO_DE_LPM_UPM_PARALLEL_FOR_FUNC(DUPM_Worker, degree_lpm, degree_upm);
 }
 
+// Retained for absolute backward compatibility with internal single-pair calls
 void PMMatrix_Cv(
-    const double &degree_lpm, 
-    const double &degree_upm, 
-    const RMatrix<double>::Column &x, 
-    const RMatrix<double>::Column &y, 
+    const double &degree_lpm,
+    const double &degree_upm,
+    const RMatrix<double>::Column &x,
+    const RMatrix<double>::Column &y,
     const double &target_x,
-    const double &target_y, 
-    const bool &pop_adj, 
+    const double &target_y,
+    const bool &pop_adj,
     const double &adjust,
-    const size_t &rows, 
+    const size_t &rows,
     double &coLpm,
-    double &coUpm,   
-    double &dLpm, 
+    double &coUpm,
+    double &dLpm,
     double &dUpm,
     double &covMat
 ){
@@ -629,6 +618,115 @@ void PMMatrix_Cv(
   covMat = coUpm + coLpm - dUpm - dLpm;
 }
 
+// ============================================================================
+// ULTRA-OPTIMIZED TENSORIZED MULTIVARIATE INTERNALS
+// ============================================================================
+
+// Worker 1: Compute Deviation Matrices exactly ONCE per element.
+// Perfectly column-contiguous, cache-friendly SIMD streaming.
+struct PrecomputeDeviationsWorker : public Worker {
+  const RMatrix<double> variable;
+  const RVector<double> target;
+  double degree_lpm;
+  double degree_upm;
+  bool lpm_is_int;
+  bool upm_is_int;
+  
+  RMatrix<double> D_lower;
+  RMatrix<double> D_upper;
+  
+  PrecomputeDeviationsWorker(const NumericMatrix& variable_, const NumericVector& target_,
+                             double degree_lpm_, double degree_upm_,
+                             NumericMatrix& D_lower_, NumericMatrix& D_upper_)
+    : variable(variable_), target(target_),
+      degree_lpm(degree_lpm_), degree_upm(degree_upm_),
+      lpm_is_int(isInteger(degree_lpm_)), upm_is_int(isInteger(degree_upm_)),
+      D_lower(D_lower_), D_upper(D_upper_) {}
+  
+  void operator()(std::size_t begin, std::size_t end) override {
+    size_t rows = variable.nrow();
+    for (std::size_t j = begin; j < end; ++j) {
+      double t_j = target[j];
+      for (size_t i = 0; i < rows; ++i) {
+        double val = variable(i, j);
+        D_lower(i, j) = lower_component(t_j - val, degree_lpm, lpm_is_int);
+        D_upper(i, j) = upper_component(val - t_j, degree_upm, upm_is_int);
+      }
+    }
+  }
+};
+
+// Worker 2: Blistering Fused Matrix Multiplication (t(D) %*% D)
+// Completely stripped of all conditions, branching, and pow() calls.
+struct FusedMatrixMultiplicationWorker : public Worker {
+  const RMatrix<double> D_lower;
+  const RMatrix<double> D_upper;
+  bool apply_adj;
+  double adjust;
+  size_t rows;
+  
+  RMatrix<double> coLpm;
+  RMatrix<double> coUpm;
+  RMatrix<double> dLpm;
+  RMatrix<double> dUpm;
+  RMatrix<double> covMat;
+  
+  FusedMatrixMultiplicationWorker(const NumericMatrix& D_lower_, const NumericMatrix& D_upper_,
+                                  bool apply_adj_, double adjust_, size_t rows_,
+                                  NumericMatrix& coLpm_, NumericMatrix& coUpm_,
+                                  NumericMatrix& dLpm_, NumericMatrix& dUpm_, NumericMatrix& covMat_)
+    : D_lower(D_lower_), D_upper(D_upper_), apply_adj(apply_adj_), adjust(adjust_), rows(rows_),
+      coLpm(coLpm_), coUpm(coUpm_), dLpm(dLpm_), dUpm(dUpm_), covMat(covMat_) {}
+  
+  void operator()(std::size_t begin, std::size_t end) override {
+    size_t cols = D_lower.ncol();
+    double inv_rows = 1.0 / static_cast<double>(rows);
+    
+    for (std::size_t i = begin; i < end; ++i) {
+      for (std::size_t j = 0; j < cols; ++j) {
+        double sum_cupm = 0.0;
+        double sum_clpm = 0.0;
+        double sum_dupm = 0.0;
+        double sum_dlpm = 0.0;
+        
+        // Loop fusion: Compute all 4 co-moment quadrants in a single hot-cache row scan
+        for (size_t k = 0; k < rows; ++k) {
+          double u_i = D_upper(k, i);
+          double l_i = D_lower(k, i);
+          double u_j = D_upper(k, j);
+          double l_j = D_lower(k, j);
+          
+          sum_cupm += u_i * u_j;
+          sum_clpm += l_i * l_j;
+          sum_dupm += l_i * u_j;
+          sum_dlpm += u_i * l_j;
+        }
+        
+        sum_cupm *= inv_rows;
+        sum_clpm *= inv_rows;
+        sum_dupm *= inv_rows;
+        sum_dlpm *= inv_rows;
+        
+        if (apply_adj) {
+          sum_cupm *= adjust;
+          sum_clpm *= adjust;
+          sum_dupm *= adjust;
+          sum_dlpm *= adjust;
+        }
+        
+        coUpm(i, j) = sum_cupm;
+        coLpm(i, j) = sum_clpm;
+        dUpm(i, j)  = sum_dupm;
+        dLpm(i, j)  = sum_dlpm;
+        
+        // Populate standard covariance alignment ahead of any normalization steps
+        covMat(i, j) = sum_cupm + sum_clpm - sum_dupm - sum_dlpm;
+      }
+    }
+  }
+};
+
+// [[Rcpp::export]]
 List PMMatrix_CPv(
     const double &LPM_degree,
     const double &UPM_degree,
@@ -637,24 +735,45 @@ List PMMatrix_CPv(
     const bool &pop_adj,
     const bool &norm
 ) {
-  size_t variable_cols=variable.cols();
-  size_t target_length=target.size();
+  size_t variable_cols = variable.cols();
+  size_t target_length = target.size();
   if(variable_cols != target_length){
     Rcpp::stop("variable matrix cols != target vector length");
     return List::create();
   }
+  
+  size_t rows = variable.rows();
+  if (rows == 0) return List::create();
+  
+  // 1. Allocate continuous intermediate deviation matrices
+  NumericMatrix D_lower(rows, variable_cols);
+  NumericMatrix D_upper(rows, variable_cols);
+  
+  // 2. Step 1: Precompute all element deviation components in parallel
+  PrecomputeDeviationsWorker precalc_engine(variable, target, LPM_degree, UPM_degree, D_lower, D_upper);
+  parallelFor(0, variable_cols, precalc_engine);
+  
+  // 3. Allocate final return matrix structures
   NumericMatrix coLpm(variable_cols, variable_cols);
   NumericMatrix coUpm(variable_cols, variable_cols);
   NumericMatrix dLpm(variable_cols, variable_cols);
   NumericMatrix dUpm(variable_cols, variable_cols);
   NumericMatrix covMat(variable_cols, variable_cols);
   
-  PMMatrix_Worker tmp_func(LPM_degree, UPM_degree, variable, target, pop_adj, coLpm, coUpm, dLpm, dUpm, covMat);
-  parallelFor(0, variable_cols, tmp_func);
+  // 4. Determine population adjustment configurations
+  double adjust = 1.0;
+  if (pop_adj && rows > 1) {
+    adjust = static_cast<double>(rows) / static_cast<double>(rows - 1);
+  }
+  bool apply_adj = pop_adj && rows > 1 && LPM_degree > 0 && UPM_degree > 0;
   
+  // 5. Step 2: High-speed matrix contraction loops across available cores
+  FusedMatrixMultiplicationWorker matrix_engine(D_lower, D_upper, apply_adj, adjust, rows,
+                                                coLpm, coUpm, dLpm, dUpm, covMat);
+  parallelFor(0, variable_cols, matrix_engine);
+  
+  // 6. Apply cellular normalization adjustments if requested
   if (norm) {
-    // Normalize each quadrant matrix cell-wise so that at each (i,j):
-    // cupm + dupm + dlpm + clpm = 1 (if their sum > 0), else leave as zeros.
     for (size_t i = 0; i < variable_cols; ++i) {
       for (size_t j = 0; j < variable_cols; ++j) {
         double cupm_ij = coUpm(i, j);
@@ -664,8 +783,8 @@ List PMMatrix_CPv(
         double total = cupm_ij + dupm_ij + dlpm_ij + clpm_ij;
         if (total > 0.0) {
           coUpm(i, j) = cupm_ij / total;
-          dUpm(i, j) = dupm_ij / total;
-          dLpm(i, j) = dlpm_ij / total;
+          dUpm(i, j)  = dupm_ij / total;
+          dLpm(i, j)  = dlpm_ij / total;
           coLpm(i, j) = clpm_ij / total;
         } else {
           coUpm(i, j) = dUpm(i, j) = dLpm(i, j) = coLpm(i, j) = 0.0;
@@ -676,6 +795,7 @@ List PMMatrix_CPv(
     }
   }
   
+  // 7. Shape attribute text allocations
   rownames(coLpm) = colnames(variable);
   colnames(coLpm) = colnames(variable);
   
