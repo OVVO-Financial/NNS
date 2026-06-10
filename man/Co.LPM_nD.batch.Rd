@@ -19,6 +19,6 @@ Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE)
 Numeric vector, one value per row of targets.
 }
 \description{
-Internal batched backend for evaluating \\code{Co.LPM_nD} over many targets.
+Internal batched backend for evaluating \code{Co.LPM_nD} over many targets.
 }
 \keyword{internal}

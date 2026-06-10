@@ -104,7 +104,7 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 
 #' Batched Co-Lower Partial Moment nD
 #'
-#' Internal batched backend for evaluating \\code{Co.LPM_nD} over many targets.
+#' Internal batched backend for evaluating \code{Co.LPM_nD} over many targets.
 #'
 #' @param data A numeric matrix with observations in rows and variables in columns.
 #' @param targets A numeric matrix with target rows and the same number of columns as data.
