@@ -9,7 +9,7 @@ NNS.moments(x, population = TRUE)
 \arguments{
 \item{x}{a numeric vector.}
 
-\item{population}{logical; \code{TRUE} (default) Performs the population adjustment.  Otherwise returns the sample statistic.}
+\item{population}{logical; \code{TRUE} (default) Performs the population adjustment. Otherwise returns the sample statistic.}
 }
 \value{
 Returns:
@@ -17,7 +17,7 @@ Returns:
  \item{\code{"$mean"}} mean of the distribution.
  \item{\code{"$variance"}} variance of the distribution.
  \item{\code{"$skewness"}} skewness of the distribution.
- \item{\code{"$kurtosis"}} excess kurtosis of the distribution.
+ \item{\code{"$kurtosis"}} excess kurtosis.
 }
 }
 \description{

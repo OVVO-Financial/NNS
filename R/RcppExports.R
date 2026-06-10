@@ -25,6 +25,10 @@ NNS_distance_path_parallel_cpp <- function(RPM, yhat, Xtest, kmax, is_class, nth
     .Call(`_NNS_NNS_distance_path_parallel_cpp`, RPM, yhat, Xtest, kmax, is_class, nthreads)
 }
 
+NNS_distance_path_single_parallel_cpp <- function(RPM, yhat, Xtest, k, is_class, nthreads = -1L) {
+    .Call(`_NNS_NNS_distance_path_single_parallel_cpp`, RPM, yhat, Xtest, k, is_class, nthreads)
+}
+
 NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only = FALSE) {
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only)
 }
@@ -119,6 +123,10 @@ downSample <- function(x, y, list = FALSE, yname = "Class") {
 
 upSample <- function(x, y, list = FALSE, yname = "Class") {
     .Call(`_NNS_upSample`, x, y, list, yname)
+}
+
+CoLPM_nD_batch_RCPP <- function(data, targets, degree = 0.0, norm = TRUE) {
+    .Call(`_NNS_CoLPM_nD_batch_RCPP`, data, targets, degree, norm)
 }
 
 LPM_CPv <- function(degree, target, variable) {

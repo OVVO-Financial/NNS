@@ -38,10 +38,12 @@ NNS.ANOVA.bin <- function(control, treatment,
     LPM_ratio.2 <- LPM.ratio(0, mean.of.means, treatment)
   } else {
     # Mean: Use degree 1 (moment-based)
-    LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control) / 
-      (LPM.ratio(1, mean.of.means, control) + UPM.ratio(1, mean.of.means, control))
-    LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment) / 
-      (LPM.ratio(1, mean.of.means, treatment) + UPM.ratio(1, mean.of.means, treatment))
+    # LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control) / 
+    #   (LPM.ratio(1, mean.of.means, control) + UPM.ratio(1, mean.of.means, control))
+    # LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment) / 
+    #   (LPM.ratio(1, mean.of.means, treatment) + UPM.ratio(1, mean.of.means, treatment))
+    LPM_ratio.1 <- LPM.ratio(1, mean.of.means, control)
+    LPM_ratio.2 <- LPM.ratio(1, mean.of.means, treatment)
   }
   
   # Calculate partial moment ratios at thresholds

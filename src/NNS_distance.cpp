@@ -503,3 +503,210 @@ NumericMatrix NNS_distance_path_parallel_cpp(NumericMatrix RPM,
   
   return out;
 }
+
+
+// ---------- single-k path ensemble worker ----------
+// Computes exactly the kept column produced by NNS_distance_path_parallel_cpp(..., kmax = k)[, k]
+// without evaluating the discarded path for 1:(k - 1).
+struct SingleKWorker : public Worker {
+  RMatrix<double> RPM;
+  RVector<double> yhat;
+  RMatrix<double> Xtest;
+  std::vector<double> minRPM, maxRPM;
+  int l, n, m, k;
+  bool is_class;
+  std::vector<double> uniW, expW, lnormW, plW;
+  RVector<double> out;
+  
+  SingleKWorker(NumericMatrix RPM_, NumericVector yhat_, NumericMatrix Xtest_,
+                const std::vector<double>& minRPM_, const std::vector<double>& maxRPM_,
+                int k_, bool is_class_,
+                const std::vector<double>& uniW_,
+                const std::vector<double>& expW_,
+                const std::vector<double>& lnormW_,
+                const std::vector<double>& plW_,
+                NumericVector out_)
+    : RPM(RPM_), yhat(yhat_), Xtest(Xtest_), minRPM(minRPM_), maxRPM(maxRPM_),
+      l(RPM_.nrow()), n(RPM_.ncol()), m(Xtest_.nrow()), k(k_), is_class(is_class_),
+      uniW(uniW_), expW(expW_), lnormW(lnormW_), plW(plW_), out(out_) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    std::vector<double> invR(n), S(l), topS(k), topY(k);
+    std::vector<int> idx(l);
+    
+    for (std::size_t r = begin; r < end; ++r) {
+      for (int j = 0; j < n; ++j) {
+        double t = Xtest(r, j);
+        double mn = std::min(minRPM[j], t);
+        double mx = std::max(maxRPM[j], t);
+        double range = mx - mn;
+        invR[j] = (std::isfinite(range) && range > 0.0) ? (1.0 / range) : 0.0;
+      }
+      
+      for (int i = 0; i < l; ++i) {
+        double acc = 0.0;
+        for (int j = 0; j < n; ++j) {
+          double a = RPM(i, j), b = Xtest(r, j);
+          if (std::isfinite(a) && std::isfinite(b) && invR[j] > 0.0) {
+            double diff = (a - b) * invR[j];
+            acc += diff * diff + std::fabs(diff);
+          }
+        }
+        S[i] = (acc == 0.0 ? 1e-10 : acc);
+      }
+      
+      std::iota(idx.begin(), idx.end(), 0);
+      auto cmp = [&](int a, int b) { return S[a] < S[b]; };
+      if (k < l) std::partial_sort(idx.begin(), idx.begin() + k, idx.end(), cmp);
+      else       std::sort(idx.begin(), idx.end(), cmp);
+      
+      auto cmp2 = [&](int a, int b) {
+        if (S[a] < S[b]) return true;
+        if (S[b] < S[a]) return false;
+        return a < b;
+      };
+      std::stable_sort(idx.begin(), idx.begin() + k, cmp2);
+      
+      for (int t = 0; t < k; ++t) {
+        int i = idx[t];
+        topS[t] = S[i];
+        topY[t] = yhat[i];
+      }
+      
+      if (k == 1) {
+        out[r] = topY[0];
+        continue;
+      }
+      
+      std::vector<double> tw(k, 0.0), emp(k, 0.0), normw(k, 0.0), rbf(k, 0.0);
+      
+      for (int i = 0; i < k; ++i) {
+        tw[i] = std::pow(1.0 + (topS[i] * topS[i]) / (double)k,
+                         -(double)(k + 1) / 2.0);
+        emp[i] = (topS[i] > 0.0) ? 1.0 / topS[i] : 0.0;
+      }
+      
+      double tws = std::accumulate(tw.begin(), tw.end(), 0.0);
+      if (tws > 0.0) for (double &v : tw) v /= tws;
+      else std::fill(tw.begin(), tw.end(), 0.0);
+      
+      double emps = std::accumulate(emp.begin(), emp.end(), 0.0);
+      if (emps > 0.0) for (double &v : emp) v /= emps;
+      else std::fill(emp.begin(), emp.end(), 0.0);
+      
+      double sdS = sd_vec(topS);
+      if (std::isfinite(sdS) && sdS > 0.0) {
+        for (int i = 0; i < k; ++i) {
+          double z = topS[i] / sdS;
+          normw[i] = std::exp(-0.5 * z * z);
+        }
+        double ns = std::accumulate(normw.begin(), normw.end(), 0.0);
+        if (ns > 0.0) for (double &v : normw) v /= ns;
+        else std::fill(normw.begin(), normw.end(), 0.0);
+      }
+      
+      double vS = var_vec(topS);
+      if (std::isfinite(vS) && vS > 0.0) {
+        for (int i = 0; i < k; ++i) rbf[i] = std::exp(-topS[i] / (2.0 * vS));
+        double rs = std::accumulate(rbf.begin(), rbf.end(), 0.0);
+        if (rs > 0.0) for (double &v : rbf) v /= rs;
+        else std::fill(rbf.begin(), rbf.end(), 0.0);
+      }
+      
+      double dot = 0.0, tot = 0.0;
+      for (int i = 0; i < k; ++i) {
+        double wi = uniW[i] + expW[i] + lnormW[i] + plW[i]
+        + tw[i] + emp[i] + normw[i] + rbf[i];
+        tot += wi;
+        if (!is_class) dot += topY[i] * wi;
+      }
+      
+      double invTot = (tot > 0.0) ? (1.0 / tot) : (1.0 / (double)k);
+      
+      if (!is_class) {
+        if (tot > 0.0) {
+          out[r] = dot * invTot;
+        } else {
+          out[r] = std::accumulate(topY.begin(), topY.end(), 0.0) / (double)k;
+        }
+      } else {
+        std::vector<double> w(k);
+        if (tot > 0.0) {
+          for (int i = 0; i < k; ++i) {
+            w[i] = (uniW[i] + expW[i] + lnormW[i] + plW[i]
+                      + tw[i] + emp[i] + normw[i] + rbf[i]) * invTot;
+          }
+        } else {
+          std::fill(w.begin(), w.end(), 1.0 / (double)k);
+        }
+        out[r] = mode_class_weighted(topY, w);
+      }
+    }
+  }
+};
+
+// [[Rcpp::export]]
+NumericVector NNS_distance_path_single_parallel_cpp(NumericMatrix RPM,
+                                                    NumericVector yhat,
+                                                    NumericMatrix Xtest,
+                                                    int k,
+                                                    bool is_class,
+                                                    int nthreads = -1) {
+  const int l = RPM.nrow(), n = RPM.ncol(), m = Xtest.nrow();
+  if (yhat.size() != l) stop("yhat length must equal nrow(RPM)");
+  if (Xtest.ncol() != n) stop("Xtest and RPM must have same number of columns");
+  if (k <= 0) k = l;
+  if (k > l) k = l;
+  
+  std::vector<double> minRPM(n, R_PosInf), maxRPM(n, R_NegInf);
+  for (int j = 0; j < n; ++j) {
+    for (int i = 0; i < l; ++i) {
+      double v = RPM(i, j);
+      if (std::isfinite(v)) {
+        if (v < minRPM[j]) minRPM[j] = v;
+        if (v > maxRPM[j]) maxRPM[j] = v;
+      }
+    }
+    if (!std::isfinite(minRPM[j])) {
+      minRPM[j] = 0.0;
+      maxRPM[j] = 0.0;
+    }
+  }
+  
+  std::vector<double> uniW(k, 1.0 / (double)k);
+  
+  std::vector<double> expW(k);
+  for (int r = 1; r <= k; ++r) expW[r - 1] = ::Rf_dexp((double)r, 1.0 / (double)k, 0);
+  double exs = std::accumulate(expW.begin(), expW.end(), 0.0);
+  if (exs > 0.0) for (double &v : expW) v /= exs;
+  else std::fill(expW.begin(), expW.end(), 0.0);
+  
+  std::vector<double> plW(k);
+  for (int r = 1; r <= k; ++r) plW[r - 1] = std::pow((double)r, -2.0);
+  double pls = std::accumulate(plW.begin(), plW.end(), 0.0);
+  if (pls > 0.0) for (double &v : plW) v /= pls;
+  else std::fill(plW.begin(), plW.end(), 0.0);
+  
+  std::vector<double> lnormW(k, 0.0);
+  if (k >= 2) {
+    double sdlog = std::sqrt(((double)k * (double)k - 1.0) / 12.0);
+    for (int r = 1; r <= k; ++r) {
+      double lp = ::Rf_dlnorm((double)r, 0.0, sdlog, 1);
+      lnormW[r - 1] = std::fabs(lp);
+    }
+    std::reverse(lnormW.begin(), lnormW.end());
+    double lns = std::accumulate(lnormW.begin(), lnormW.end(), 0.0);
+    if (lns > 0.0) for (double &v : lnormW) v /= lns;
+    else std::fill(lnormW.begin(), lnormW.end(), 0.0);
+  }
+  
+  NumericVector out(m);
+  (void)nthreads;
+  
+  SingleKWorker w(RPM, yhat, Xtest, minRPM, maxRPM, k, is_class,
+                  uniW, expW, lnormW, plW, out);
+  RcppParallel::parallelFor(0, m, w);
+  
+  return out;
+}
+

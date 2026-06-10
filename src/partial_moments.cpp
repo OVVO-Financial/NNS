@@ -320,6 +320,144 @@ double dpm_nD_cpp(const NumericMatrix& data,
   return result;
 }
 
+
+// ============================================================================
+// Batched nD CoLPM backend
+// ============================================================================
+//
+// Computes CoLPM_nD(data, target_row, degree, norm) for every row of `targets`
+// in one C++ call.  This replaces the R-side pattern:
+//   apply(variable, 1, function(row) Co.LPM_nD(variable, row, degree = degree))
+//
+// Semantics match clpm_nD_cpp():
+//   degree == 0 returns the raw lower-count probability, regardless of norm.
+//   degree  > 0 returns raw CLPM if norm = false.
+//   degree  > 0 returns CLPM / (CLPM + CUPM + DPM) if norm = true.
+
+struct CoLPMnDBatchWorker : public Worker {
+  const RMatrix<double> data;
+  const RMatrix<double> targets;
+  const double degree;
+  const bool norm;
+  const bool degree_is_int;
+  RVector<double> output;
+  
+  CoLPMnDBatchWorker(const NumericMatrix& data_,
+                     const NumericMatrix& targets_,
+                     double degree_,
+                     bool norm_,
+                     NumericVector& output_)
+    : data(data_),
+      targets(targets_),
+      degree(degree_),
+      norm(norm_),
+      degree_is_int(isInteger(degree_)),
+      output(output_) {}
+  
+  void operator()(std::size_t begin, std::size_t end) override {
+    const std::size_t n_obs = data.nrow();
+    const std::size_t d = data.ncol();
+    
+    for (std::size_t r = begin; r < end; ++r) {
+      
+      // Match clpm_nD_cpp degree == 0 behavior:
+      // it returns raw count probability and does not apply norm.
+      if (degree == 0.0) {
+        double count = 0.0;
+        
+        for (std::size_t i = 0; i < n_obs; ++i) {
+          bool below_all = true;
+          
+          for (std::size_t j = 0; j < d; ++j) {
+            if (data(i, j) > targets(r, j)) {
+              below_all = false;
+              break;
+            }
+          }
+          
+          if (below_all) count += 1.0;
+        }
+        
+        output[r] = count / static_cast<double>(n_obs);
+        continue;
+      }
+      
+      double clpm_sum = 0.0;
+      double cupm_sum = 0.0;
+      double dpm_sum  = 0.0;
+      
+      for (std::size_t i = 0; i < n_obs; ++i) {
+        double lower_prod = 1.0;
+        double upper_prod = 1.0;
+        double dpm_prod   = 1.0;
+        
+        bool all_below_strict = true;
+        bool all_above_strict = true;
+        
+        for (std::size_t j = 0; j < d; ++j) {
+          const double diff = data(i, j) - targets(r, j);
+          
+          // CLPM component: target - data
+          lower_prod *= lower_component(-diff, degree, degree_is_int);
+          
+          // CUPM component: data - target
+          upper_prod *= upper_component(diff, degree, degree_is_int);
+          
+          // Match DpmSumWorker strict all-below/all-above logic.
+          if (diff >= 0.0) all_below_strict = false;
+          if (diff <= 0.0) all_above_strict = false;
+          
+          dpm_prod *= degree_is_int
+          ? repeatMultiplication(std::abs(diff), static_cast<int>(degree))
+            : std::pow(std::abs(diff), degree);
+        }
+        
+        clpm_sum += lower_prod;
+        cupm_sum += upper_prod;
+        
+        if (!(all_below_strict || all_above_strict)) {
+          dpm_sum += dpm_prod;
+        }
+      }
+      
+      const double inv_n = 1.0 / static_cast<double>(n_obs);
+      const double clpm_un = clpm_sum * inv_n;
+      
+      if (!norm) {
+        output[r] = clpm_un;
+      } else {
+        const double cupm_un = cupm_sum * inv_n;
+        const double dpm_un  = dpm_sum  * inv_n;
+        const double norm_const = clpm_un + cupm_un + dpm_un;
+        
+        output[r] = norm_const > 0.0 ? clpm_un / norm_const : 0.0;
+      }
+    }
+  }
+};
+
+
+// [[Rcpp::export]]
+NumericVector CoLPM_nD_batch_RCPP(const NumericMatrix& data,
+                                  const NumericMatrix& targets,
+                                  double degree = 0.0,
+                                  bool norm = true) {
+  if (data.ncol() != targets.ncol()) {
+    stop("`targets` must have the same number of columns as `data`");
+  }
+  
+  if (data.nrow() == 0) {
+    stop("`data` must have at least one row");
+  }
+  
+  NumericVector output(targets.nrow());
+  
+  CoLPMnDBatchWorker worker(data, targets, degree, norm, output);
+  parallelFor(0, targets.nrow(), worker);
+  
+  return output;
+}
+
 // parallelFor
 #define NNS_LPM_UPM_PARALLEL_FOR_FUNC(WORKER_CLASS)      \
 size_t target_size=target.size();                        \
@@ -683,13 +821,19 @@ struct FusedMatrixMultiplicationWorker : public Worker {
     double inv_rows = 1.0 / static_cast<double>(rows);
     
     for (std::size_t i = begin; i < end; ++i) {
-      for (std::size_t j = 0; j < cols; ++j) {
+      // PM.matrix quadrant symmetry:
+      //   CUPM(i,j) = CUPM(j,i)
+      //   CLPM(i,j) = CLPM(j,i)
+      //   DUPM(i,j) = DLPM(j,i)
+      //   DLPM(i,j) = DUPM(j,i)
+      // Therefore compute only the upper triangle and cross-mirror DUPM/DLPM.
+      for (std::size_t j = i; j < cols; ++j) {
         double sum_cupm = 0.0;
         double sum_clpm = 0.0;
         double sum_dupm = 0.0;
         double sum_dlpm = 0.0;
         
-        // Loop fusion: Compute all 4 co-moment quadrants in a single hot-cache row scan
+        // Loop fusion: Compute all 4 co-moment quadrants in a single hot-cache row scan.
         for (size_t k = 0; k < rows; ++k) {
           double u_i = D_upper(k, i);
           double l_i = D_lower(k, i);
@@ -714,13 +858,23 @@ struct FusedMatrixMultiplicationWorker : public Worker {
           sum_dlpm *= adjust;
         }
         
+        double cov_ij = sum_cupm + sum_clpm - sum_dupm - sum_dlpm;
+        
         coUpm(i, j) = sum_cupm;
         coLpm(i, j) = sum_clpm;
         dUpm(i, j)  = sum_dupm;
         dLpm(i, j)  = sum_dlpm;
+        covMat(i, j) = cov_ij;
         
-        // Populate standard covariance alignment ahead of any normalization steps
-        covMat(i, j) = sum_cupm + sum_clpm - sum_dupm - sum_dlpm;
+        if (j != i) {
+          coUpm(j, i) = sum_cupm;
+          coLpm(j, i) = sum_clpm;
+          
+          // Crossed mirror, not ordinary symmetry.
+          dUpm(j, i)  = sum_dlpm;
+          dLpm(j, i)  = sum_dupm;
+          covMat(j, i) = cov_ij;
+        }
       }
     }
   }
@@ -772,25 +926,46 @@ List PMMatrix_CPv(
                                                 coLpm, coUpm, dLpm, dUpm, covMat);
   parallelFor(0, variable_cols, matrix_engine);
   
-  // 6. Apply cellular normalization adjustments if requested
+  // 6. Apply cellular normalization adjustments if requested.
+  // Preserve the same cross-transpose relationship for DUPM and DLPM.
   if (norm) {
     for (size_t i = 0; i < variable_cols; ++i) {
-      for (size_t j = 0; j < variable_cols; ++j) {
+      for (size_t j = i; j < variable_cols; ++j) {
         double cupm_ij = coUpm(i, j);
         double dupm_ij = dUpm(i, j);
         double dlpm_ij = dLpm(i, j);
         double clpm_ij = coLpm(i, j);
         double total = cupm_ij + dupm_ij + dlpm_ij + clpm_ij;
+        
         if (total > 0.0) {
-          coUpm(i, j) = cupm_ij / total;
-          dUpm(i, j)  = dupm_ij / total;
-          dLpm(i, j)  = dlpm_ij / total;
-          coLpm(i, j) = clpm_ij / total;
+          cupm_ij /= total;
+          dupm_ij /= total;
+          dlpm_ij /= total;
+          clpm_ij /= total;
         } else {
-          coUpm(i, j) = dUpm(i, j) = dLpm(i, j) = coLpm(i, j) = 0.0;
+          cupm_ij = 0.0;
+          dupm_ij = 0.0;
+          dlpm_ij = 0.0;
+          clpm_ij = 0.0;
         }
         
-        covMat(i, j) = coUpm(i, j) + coLpm(i, j) - dUpm(i, j) - dLpm(i, j);
+        double cov_ij = cupm_ij + clpm_ij - dupm_ij - dlpm_ij;
+        
+        coUpm(i, j) = cupm_ij;
+        coLpm(i, j) = clpm_ij;
+        dUpm(i, j)  = dupm_ij;
+        dLpm(i, j)  = dlpm_ij;
+        covMat(i, j) = cov_ij;
+        
+        if (j != i) {
+          coUpm(j, i) = cupm_ij;
+          coLpm(j, i) = clpm_ij;
+          
+          // Crossed mirror after normalization too.
+          dUpm(j, i)  = dlpm_ij;
+          dLpm(j, i)  = dupm_ij;
+          covMat(j, i) = cov_ij;
+        }
       }
     }
   }

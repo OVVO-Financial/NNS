@@ -102,6 +102,30 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 }
 
 
+#' Batched Co-Lower Partial Moment nD
+#'
+#' Internal batched backend for evaluating \\code{Co.LPM_nD} over many targets.
+#'
+#' @param data A numeric matrix with observations in rows and variables in columns.
+#' @param targets A numeric matrix with target rows and the same number of columns as data.
+#' @param degree numeric; degree for lower deviations.
+#' @param norm logical; normalize result.
+#' @return Numeric vector, one value per row of targets.
+#' @keywords internal
+
+Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE) {
+  data    <- as.matrix(data)
+  targets <- as.matrix(targets)
+  degree  <- as.numeric(degree)
+  norm    <- as.logical(norm)
+  
+  if (!all(is.finite(data))) stop("`data` must be finite.")
+  if (!all(is.finite(targets))) stop("`targets` must be finite.")
+  
+  .Call("_NNS_CoLPM_nD_batch_RCPP", data, targets, degree, norm)
+}
+
+
 #' Co‑Upper Partial Moment nD
 #'
 #' This function generates an n‑dimensional co‑upper partial moment (n >= 2) for any degree or target.
@@ -292,8 +316,10 @@ NNS.CDF <- function(variable,
     xlab <- colnames(variable)[1]
     ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
     
-    # Compute joint conditional CDF using clpm_nD
-    CDF <- apply(variable, 1, function(row) Co.LPM_nD(variable, row, degree = degree))
+    # Compute joint conditional CDF using one batched C++ call.
+    # This replaces n R-level Co.LPM_nD dispatches and n parallel launches.
+    variable <- as.matrix(variable)
+    CDF <- Co.LPM_nD.batch(variable, variable, degree = degree, norm = TRUE)
     
     # Apply transformation based on type
     if (type == "survival") {
@@ -381,7 +407,7 @@ NNS.CDF <- function(variable,
     }
     
     outDT <- data.table::data.table(variable, CDF = CDF)
-    return(list(Function = outDT, target.value = Pv))(list(Function = outDT, target.value = Pv))(list(Function=outDT,target.value=Pv))
+    return(list(Function = outDT, target.value = Pv))
   }
 }
 
@@ -393,13 +419,13 @@ NNS.CDF <- function(variable,
 #' This function returns the first 4 moments of the distribution.
 #'
 #' @param x a numeric vector.
-#' @param population logical; \code{TRUE} (default) Performs the population adjustment.  Otherwise returns the sample statistic.
+#' @param population logical; \code{TRUE} (default) Performs the population adjustment. Otherwise returns the sample statistic.
 #' @return Returns:
 #' \itemize{
 #'  \item{\code{"$mean"}} mean of the distribution.
 #'  \item{\code{"$variance"}} variance of the distribution.
 #'  \item{\code{"$skewness"}} skewness of the distribution.
-#'  \item{\code{"$kurtosis"}} excess kurtosis of the distribution.
+#'  \item{\code{"$kurtosis"}} excess kurtosis.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -412,26 +438,39 @@ NNS.CDF <- function(variable,
 #' }
 #' @export
 
-NNS.moments <- function(x, population = TRUE){
-  n <- length(x)
-  mean <- UPM(1, 0, x) - LPM(1, 0, x)
-  variance <- (UPM(2, mean(x), x) + LPM(2, mean(x), x))
-  skew_base <- (UPM(3,mean(x),x) - LPM(3,mean(x),x))
-  kurt_base <- (UPM(4,mean(x),x) + LPM(4,mean(x),x))
+NNS.moments <- function(x, population = TRUE) {
+  x <- as.numeric(x)
   
-  if(population){
-    skewness <- skew_base / variance^(3/2)
+  if (!all(is.finite(x))) stop("`x` must be finite.")
+  
+  n <- length(x)
+  m <- mean(x)
+  z <- x - m
+  
+  variance <- mean(z^2)
+  skew_base <- mean(z^3)
+  kurt_base <- mean(z^4)
+  
+  if (population) {
+    skewness <- skew_base / variance^(3 / 2)
     kurtosis <- (kurt_base / variance^2) - 3
   } else {
-    skewness <- (n / ((n-1)*(n-2))) * ((n*skew_base) / variance^(3/2))
-    kurtosis <- ((n * (n+1)) / ((n-1)*(n-2)*(n-3))) * ((n*kurt_base) / (variance * (n / (n - 1)))^2) - ( (3 * ((n-1)^2)) / ((n-2)*(n-3)))
+    skewness <- (n / ((n - 1) * (n - 2))) *
+      ((n * skew_base) / variance^(3 / 2))
+    
+    kurtosis <- ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) *
+      ((n * kurt_base) / (variance * (n / (n - 1)))^2) -
+      ((3 * ((n - 1)^2)) / ((n - 2) * (n - 3)))
+    
     variance <- variance * (n / (n - 1))
   }
   
-  return(list("mean" = mean,
-              "variance" = variance,
-              "skewness" = skewness,
-              "kurtosis" = kurtosis))
+  return(list(
+    mean = m,
+    variance = variance,
+    skewness = skewness,
+    kurtosis = kurtosis
+  ))
 }
 
 

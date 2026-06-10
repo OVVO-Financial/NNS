@@ -1,31 +1,9 @@
 // NNS_dep.cpp
-//
 // C++ implementation of NNS.dep and NNS.dep.matrix.
 //
 // Exported functions (called from R):
-//   NNS_dep_pair_cpp    — bivariate dependence given pre-computed partition labels
-//   NNS_dep_matrix_cpp  — full pairwise dependence matrix, parallelised
-//
-// Design:
-//   The bottleneck in the original NNS.dep was the per-quadrant R dispatch
-//   loop: for each quadrant, R called NNS.copula() which called PM.matrix()
-//   twice plus DPM_nD() twice, each time paying the R->C++ round-trip cost.
-//   With order-3 partitions and two directions (xy, yx) that is ~16 R->C++
-//   dispatches per NNS.dep call, compounded across every predictor, fold,
-//   trial and epoch in NNS.boost / NNS.stack.
-//
-//   This file eliminates every one of those dispatches.  The per-quadrant
-//   copula computation is evaluated directly for the bivariate degree-0 and
-//   degree-1 partial moment terms used by NNS.dep.
-//
-//   Discrete-variable correction (triggered when both x and y have fewer
-//   unique values than sqrt(n)):
-//     Original used poly(x, degree) -> fast_lm_mult -> R2, which overfits
-//     when unique values ~= degree.  Replaced with the degree-0 copula on
-//     the full (x, y) pair -- a pure frequency / count measure that is the
-//     correct discrete dependence tool already in the partial moment framework.
-//     gravity(c(dependence, discrete_copula_full)) blends the per-quadrant
-//     weighted sum with the global discrete anchor.
+//   NNS_dep_pair_cpp    - bivariate dependence given pre-computed partition labels
+//   NNS_dep_matrix_cpp  - full pairwise dependence matrix, parallelized
 //
 // [[Rcpp::depends(RcppParallel)]]
 // [[Rcpp::plugins(cpp17)]]
@@ -37,7 +15,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <numeric>
-#include "central_tendencies.h" // NNS_gravity_cpp
+#include <cstdint>
 
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -46,10 +24,20 @@ using namespace RcppParallel;
 // INTERNAL HELPERS
 // ============================================================
 
-static inline double gravity_cpp(const std::vector<double>& v) {
-  if (v.empty()) return NA_REAL;
-  NumericVector nv(v.begin(), v.end());
-  return as<double>(NNS_gravity_cpp(nv, false));
+struct DepResult {
+  double correlation;
+  double dependence;
+};
+
+static inline double gravity_pure_cpp(const std::vector<double>& v) {
+  size_t n = v.size();
+  if (n == 0) return NA_REAL;
+  if (n == 1) return v[0];
+  if (n == 2) return (v[0] + v[1]) / 2.0;
+  
+  double sum = 0.0;
+  for (double val : v) sum += val;
+  return sum / n;
 }
 
 static inline int n_unique(const std::vector<double>& v) {
@@ -150,42 +138,33 @@ static double copula_degree0_unsigned(const std::vector<double>& xv,
   return std::sqrt((disc_dep + nd_disc) / 2.0);
 }
 
-// [[Rcpp::export]]
-List NNS_dep_pair_cpp(NumericVector x,
-                      NumericVector y,
-                      CharacterVector quad_xy,
-                      CharacterVector quad_yx,
-                      bool asym = false) {
-  int n = x.size();
-  if (y.size() != n || quad_xy.size() != n || quad_yx.size() != n) {
-    stop("x, y, quad_xy, quad_yx must all have the same length");
+static DepResult NNS_dep_pair_core(const std::vector<double>& xv,
+                                   const std::vector<double>& yv,
+                                   const std::vector<uint64_t>& quad_xy,
+                                   const std::vector<uint64_t>& quad_yx,
+                                   bool asym) {
+  int n = xv.size();
+  
+  bool cx = true, cy = true;
+  for (int i = 1; i < n; ++i) {
+    if (xv[i] != xv[0]) cx = false;
+    if (yv[i] != yv[0]) cy = false;
+    if (!cx && !cy) break;
   }
+  if (cx || cy) return {0.0, 0.0};
   
-  {
-    bool cx = true, cy = true;
-    for (int i = 1; i < n; ++i) {
-      if (x[i] != x[0]) cx = false;
-      if (y[i] != y[0]) cy = false;
-      if (!cx && !cy) break;
-    }
-    if (cx || cy) return List::create(_["Correlation"] = 0.0, _["Dependence"]  = 0.0);
-  }
-  
-  std::vector<double> xv(x.begin(), x.end());
-  std::vector<double> yv(y.begin(), y.end());
-  
-  std::unordered_map<std::string, std::vector<int>> grp_xy;
+  std::unordered_map<uint64_t, std::vector<int>> grp_xy;
   grp_xy.reserve(n);
   for (int i = 0; i < n; ++i)
-    grp_xy[std::string(quad_xy[i])].push_back(i);
+    grp_xy[quad_xy[i]].push_back(i);
   
-  std::unordered_map<std::string, std::vector<int>> grp_yx;
+  std::unordered_map<uint64_t, std::vector<int>> grp_yx;
   grp_yx.reserve(n);
   for (int i = 0; i < n; ++i)
-    grp_yx[std::string(quad_yx[i])].push_back(i);
+    grp_yx[quad_yx[i]].push_back(i);
   
   double global_cop = copula_signed(xv, yv);
-  if (!R_finite(global_cop)) global_cop = 0.0;
+  if (!std::isfinite(global_cop)) global_cop = 0.0;
   
   double corr_xy = 0.0, dep_xy = 0.0;
   for (auto& kv : grp_xy) {
@@ -197,7 +176,7 @@ List NNS_dep_pair_cpp(NumericVector x,
     for (int k = 0; k < nq; ++k) { xq[k] = xv[idx[k]]; yq[k] = yv[idx[k]]; }
     
     double cop = copula_signed(xq, yq);
-    if (!R_finite(cop)) cop = global_cop;
+    if (!std::isfinite(cop)) cop = global_cop;
     
     double w = static_cast<double>(nq) / static_cast<double>(n);
     corr_xy += cop           * w;
@@ -214,7 +193,7 @@ List NNS_dep_pair_cpp(NumericVector x,
     for (int k = 0; k < nq; ++k) { yq[k] = yv[idx[k]]; xq[k] = xv[idx[k]]; }
     
     double cop = copula_signed(yq, xq);
-    if (!R_finite(cop)) cop = global_cop;
+    if (!std::isfinite(cop)) cop = global_cop;
     
     double w = static_cast<double>(nq) / static_cast<double>(n);
     corr_yx += cop           * w;
@@ -228,45 +207,70 @@ List NNS_dep_pair_cpp(NumericVector x,
   
   if (discrete_case) {
     double disc_cop = copula_degree0_unsigned(xv, yv);
-    if (!R_finite(disc_cop)) disc_cop = std::max(dep_xy, dep_yx);
+    if (!std::isfinite(disc_cop)) disc_cop = std::max(dep_xy, dep_yx);
     
     if (asym) {
       std::vector<double> gv = {dep_xy, disc_cop};
-      dep_xy = gravity_cpp(gv);
+      dep_xy = gravity_pure_cpp(gv);
     } else {
       double dep_sym = std::max(dep_xy, dep_yx);
       std::vector<double> gv = {dep_sym, disc_cop};
-      double blended = gravity_cpp(gv);
+      double blended = gravity_pure_cpp(gv);
       dep_xy = blended;
       dep_yx = blended;
     }
   }
   
   if (asym) {
-    return List::create(_["Correlation"] = corr_xy, _["Dependence"]  = dep_xy);
+    return {corr_xy, dep_xy};
   }
   
-  return List::create(_["Correlation"] = std::max(corr_xy, corr_yx),
-                      _["Dependence"]  = std::max(dep_xy,  dep_yx));
+  return {std::max(corr_xy, corr_yx), std::max(dep_xy, dep_yx)};
 }
 
-// Worker 1: Parallel Precomputation of Space Partition Labels
+// [[Rcpp::export]]
+List NNS_dep_pair_cpp(NumericVector x,
+                      NumericVector y,
+                      CharacterVector quad_xy,
+                      CharacterVector quad_yx,
+                      bool asym = false) {
+  int n = x.size();
+  if (y.size() != n || quad_xy.size() != n || quad_yx.size() != n) {
+    stop("x, y, quad_xy, quad_yx must all have the same length");
+  }
+  
+  std::vector<double> xv(x.begin(), x.end());
+  std::vector<double> yv(y.begin(), y.end());
+  
+  std::hash<std::string> hasher;
+  std::vector<uint64_t> q_xy(n), q_yx(n);
+  for (int i = 0; i < n; ++i) {
+    q_xy[i] = hasher(std::string(quad_xy[i]));
+    q_yx[i] = hasher(std::string(quad_yx[i]));
+  }
+  
+  DepResult res = NNS_dep_pair_core(xv, yv, q_xy, q_yx, asym);
+  
+  return List::create(_["Correlation"] = res.correlation,
+                      _["Dependence"]  = res.dependence);
+}
+
 struct PrecomputePartitionsWorker : public Worker {
   const RMatrix<double> X;
   const int n_obs;
   const int obs_req;
-  std::vector<std::vector<std::string>>& all_quads;
+  std::vector<std::vector<uint64_t>>& all_quads;
   
-  PrecomputePartitionsWorker(const NumericMatrix& X_, int obs_req_, std::vector<std::vector<std::string>>& all_quads_)
+  PrecomputePartitionsWorker(const NumericMatrix& X_, int obs_req_, std::vector<std::vector<uint64_t>>& all_quads_)
     : X(X_), n_obs(X_.nrow()), obs_req(obs_req_), all_quads(all_quads_) {}
   
-  void operator()(std::size_t begin, std::size_t end) override {
+  void operator()(std::size_t begin, std::size_t end) {
     for (std::size_t j = begin; j < end; ++j) {
       int max_order = std::max(1, static_cast<int>(std::floor(std::log2(std::max(1, n_obs)))));
-      std::vector<std::string> quad(n_obs, "q");
+      std::vector<uint64_t> quad(n_obs, 1);
       
       for (int depth = 0; depth < max_order; ++depth) {
-        std::unordered_map<std::string, std::vector<int>> grp;
+        std::unordered_map<uint64_t, std::vector<int>> grp;
         grp.reserve(n_obs);
         for (int i = 0; i < n_obs; ++i) grp[quad[i]].push_back(i);
         
@@ -279,8 +283,9 @@ struct PrecomputePartitionsWorker : public Worker {
           for (int i : idx) cx += X(i, j);
           cx /= static_cast<double>(idx.size());
           
-          for (int i : idx)
-            quad[i] += (X(i, j) > cx) ? "2" : "1";
+          for (int i : idx) {
+            quad[i] = (quad[i] << 2) | ((X(i, j) > cx) ? 2 : 1);
+          }
           
           any_split = true;
         }
@@ -291,13 +296,12 @@ struct PrecomputePartitionsWorker : public Worker {
   }
 };
 
-// Worker 2: Concurrent Evaluation of Cross-Product Asset Dependencies
 struct DepMatrixWorker : public Worker {
   const RMatrix<double> X;
   const int n_obs;
   const int n_vars;
   const bool asym;
-  const std::vector<std::vector<std::string>>& all_quads;
+  const std::vector<std::vector<uint64_t>>& all_quads;
   
   RVector<double> corr_upper;
   RVector<double> dep_upper;
@@ -308,7 +312,7 @@ struct DepMatrixWorker : public Worker {
   
   DepMatrixWorker(const NumericMatrix& X_,
                   bool asym_,
-                  const std::vector<std::vector<std::string>>& all_quads_,
+                  const std::vector<std::vector<uint64_t>>& all_quads_,
                   NumericVector& cu,
                   NumericVector& du,
                   NumericVector& cl,
@@ -326,32 +330,28 @@ struct DepMatrixWorker : public Worker {
     }
   }
   
-  void operator()(std::size_t begin, std::size_t end) override {
+  void operator()(std::size_t begin, std::size_t end) {
     for (std::size_t p = begin; p < end; ++p) {
       int ci = pair_i[p];
       int cj = pair_j[p];
       
-      const std::vector<std::string>& q_xy = all_quads[ci];
-      const std::vector<std::string>& q_yx = all_quads[cj];
+      const std::vector<uint64_t>& q_xy = all_quads[ci];
+      const std::vector<uint64_t>& q_yx = all_quads[cj];
       
-      CharacterVector quad_xy(n_obs), quad_yx(n_obs);
-      NumericVector xnv(n_obs), ynv(n_obs);
-      
+      std::vector<double> xnv(n_obs), ynv(n_obs);
       for (int r = 0; r < n_obs; ++r) {
-        quad_xy[r] = q_xy[r];
-        quad_yx[r] = q_yx[r];
         xnv[r] = X(r, ci);
         ynv[r] = X(r, cj);
       }
       
-      List res_ij = NNS_dep_pair_cpp(xnv, ynv, quad_xy, quad_yx, asym);
-      corr_upper[p] = as<double>(res_ij["Correlation"]);
-      dep_upper[p]  = as<double>(res_ij["Dependence"]);
+      DepResult res_ij = NNS_dep_pair_core(xnv, ynv, q_xy, q_yx, asym);
+      corr_upper[p] = res_ij.correlation;
+      dep_upper[p]  = res_ij.dependence;
       
       if (asym) {
-        List res_ji = NNS_dep_pair_cpp(ynv, xnv, quad_yx, quad_xy, true);
-        corr_lower[p] = as<double>(res_ji["Correlation"]);
-        dep_lower[p]  = as<double>(res_ji["Dependence"]);
+        DepResult res_ji = NNS_dep_pair_core(ynv, xnv, q_yx, q_xy, true);
+        corr_lower[p] = res_ji.correlation;
+        dep_lower[p]  = res_ji.dependence;
       } else {
         corr_lower[p] = corr_upper[p];
         dep_lower[p]  = dep_upper[p];
@@ -370,7 +370,7 @@ List NNS_dep_matrix_cpp(NumericMatrix X, bool asym = false) {
   int n_pairs = n_vars * (n_vars - 1) / 2;
   
   int obs_req = std::max(8, n_obs / 8);
-  std::vector<std::vector<std::string>> all_quads(n_vars);
+  std::vector<std::vector<uint64_t>> all_quads(n_vars);
   PrecomputePartitionsWorker partitioner(X, obs_req, all_quads);
   parallelFor(0, n_vars, partitioner);
   

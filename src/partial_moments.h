@@ -6,6 +6,13 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
 // Backend API for the partial moment computations. These routines operate on
 // RcppParallel vector and matrix proxies so they can be reused from serial and
 // parallel workers. Higher-level wrappers that accept generic R objects live in
@@ -20,27 +27,341 @@ double LPM_C(const double &degree,
 double UPM_C(const double &degree,
              const double &target,
              const RcppParallel::RVector<double> &variable);
-// parallelFor
-#define NNS_PM_SINGLE_VARIABLE_WORKER(NAME, FUNC)                         \
-struct NAME : public RcppParallel::Worker                                 \
-{                                                                         \
-  const double degree;                                                    \
-  const RcppParallel::RVector<double> target;                             \
-  const RcppParallel::RVector<double> variable;                           \
-  RcppParallel::RVector<double> output;                                   \
-  NAME (                                                                  \
-      const double degree,                                                \
-      const Rcpp::NumericVector &target,                                  \
-      const Rcpp::NumericVector &variable,                                \
-      Rcpp::NumericVector &output                                         \
-  ): degree(degree), target(target), variable(variable), output(output) {}\
-  void operator()(std::size_t begin, std::size_t end) {                   \
-    for (size_t i = begin; i < end; i++)                                  \
-      output[i] = FUNC(degree, target[i], variable);                      \
-  }                                                                       \
+
+namespace nns_pm_detail {
+
+// Keep very large integer degrees on the legacy full-scan path. This prevents
+// accidental allocation of many prefix-power columns while still accelerating
+// the hot NNS use cases: degree 0, 1, 2, and other small integer degrees.
+static const int PREFIX_MAX_DEGREE = 32;
+
+inline bool prefix_supported_degree(const double degree, int &degree_int) {
+  if (!std::isfinite(degree) || degree < 0.0) return false;
+  
+  const double rounded = std::round(degree);
+  if (std::fabs(degree - rounded) > 1e-12) return false;
+  if (rounded > static_cast<double>(PREFIX_MAX_DEGREE)) return false;
+  
+  degree_int = static_cast<int>(rounded);
+  return true;
 }
-NNS_PM_SINGLE_VARIABLE_WORKER(LPM_Worker, LPM_C);
-NNS_PM_SINGLE_VARIABLE_WORKER(UPM_Worker, UPM_C);
+
+inline std::vector<double> binomial_coefficients(const int degree) {
+  std::vector<double> choose(static_cast<std::size_t>(degree) + 1U, 1.0);
+  for (int j = 1; j < degree; ++j) {
+    choose[static_cast<std::size_t>(j)] =
+      choose[static_cast<std::size_t>(j - 1)] *
+      static_cast<double>(degree - j + 1) /
+        static_cast<double>(j);
+  }
+  return choose;
+}
+
+struct PrefixPartialMomentBackend {
+  std::vector<double> sorted;
+  std::vector<std::vector<double> > prefix_power;
+  std::vector<double> total_power;
+  std::vector<double> choose;
+  std::size_t n;
+  int degree;
+  
+  PrefixPartialMomentBackend(const Rcpp::NumericVector &variable,
+                             const int degree_)
+    : sorted(variable.begin(), variable.end()),
+      prefix_power(static_cast<std::size_t>(degree_) + 1U),
+      total_power(static_cast<std::size_t>(degree_) + 1U, 0.0),
+      choose(binomial_coefficients(degree_)),
+      n(sorted.size()),
+      degree(degree_) {
+    
+    // Match the legacy path for missing/non-finite data by declining the prefix
+    // backend. The constructor is only called after this same condition is
+    // checked, so this is a defensive guard.
+    for (std::size_t i = 0; i < n; ++i) {
+      if (!std::isfinite(sorted[i])) {
+        sorted.clear();
+        n = 0;
+        return;
+      }
+    }
+    
+    std::sort(sorted.begin(), sorted.end());
+    
+    for (int p = 0; p <= degree; ++p) {
+      prefix_power[static_cast<std::size_t>(p)].assign(n + 1U, 0.0);
+    }
+    
+    for (std::size_t i = 0; i < n; ++i) {
+      const double x = sorted[i];
+      double x_power = 1.0;
+      
+      for (int p = 0; p <= degree; ++p) {
+        const std::size_t ps = static_cast<std::size_t>(p);
+        prefix_power[ps][i + 1U] = prefix_power[ps][i] + x_power;
+        x_power *= x;
+      }
+    }
+    
+    for (int p = 0; p <= degree; ++p) {
+      const std::size_t ps = static_cast<std::size_t>(p);
+      total_power[ps] = prefix_power[ps][n];
+    }
+  }
+  
+  bool ok() const {
+    return n > 0U;
+  }
+  
+  std::size_t count_leq(const double target) const {
+    return static_cast<std::size_t>(
+      std::upper_bound(sorted.begin(), sorted.end(), target) - sorted.begin()
+    );
+  }
+  
+  double lpm(const double target) const {
+    if (!std::isfinite(target)) return R_NaN;
+    
+    const std::size_t k = count_leq(target);
+    const double nd = static_cast<double>(n);
+    
+    if (degree == 0) return static_cast<double>(k) / nd;
+    
+    if (degree == 1) {
+      return (static_cast<double>(k) * target - prefix_power[1][k]) / nd;
+    }
+    
+    if (degree == 2) {
+      const double t2 = target * target;
+      return (static_cast<double>(k) * t2 -
+              2.0 * target * prefix_power[1][k] +
+              prefix_power[2][k]) / nd;
+    }
+    
+    double out = 0.0;
+    for (int j = 0; j <= degree; ++j) {
+      const std::size_t js = static_cast<std::size_t>(j);
+      const double sign = (j % 2 == 0) ? 1.0 : -1.0;
+      out += choose[js] * sign *
+        std::pow(target, static_cast<double>(degree - j)) *
+        prefix_power[js][k];
+    }
+    
+    return out / nd;
+  }
+  
+  double upm(const double target) const {
+    if (!std::isfinite(target)) return R_NaN;
+    
+    const std::size_t k = count_leq(target);
+    const std::size_t above = n - k;
+    const double nd = static_cast<double>(n);
+    
+    if (degree == 0) return static_cast<double>(above) / nd;
+    
+    const double suffix1 = total_power[1] - prefix_power[1][k];
+    
+    if (degree == 1) {
+      return (suffix1 - static_cast<double>(above) * target) / nd;
+    }
+    
+    if (degree == 2) {
+      const double suffix2 = total_power[2] - prefix_power[2][k];
+      const double t2 = target * target;
+      return (suffix2 -
+              2.0 * target * suffix1 +
+              static_cast<double>(above) * t2) / nd;
+    }
+    
+    double out = 0.0;
+    for (int j = 0; j <= degree; ++j) {
+      const std::size_t js = static_cast<std::size_t>(j);
+      const double suffix_j = total_power[js] - prefix_power[js][k];
+      const double sign = ((degree - j) % 2 == 0) ? 1.0 : -1.0;
+      out += choose[js] * sign *
+        std::pow(target, static_cast<double>(degree - j)) *
+        suffix_j;
+    }
+    
+    return out / nd;
+  }
+  
+  std::pair<double, double> both(const double target) const {
+    return std::make_pair(lpm(target), upm(target));
+  }
+};
+
+inline std::shared_ptr<const PrefixPartialMomentBackend>
+  make_prefix_backend(const double degree, const Rcpp::NumericVector &variable) {
+    int degree_int = 0;
+    if (variable.size() == 0) {
+      return std::shared_ptr<const PrefixPartialMomentBackend>();
+    }
+    
+    if (!prefix_supported_degree(degree, degree_int)) {
+      return std::shared_ptr<const PrefixPartialMomentBackend>();
+    }
+    
+    for (R_xlen_t i = 0; i < variable.size(); ++i) {
+      const double v = variable[i];
+      if (!std::isfinite(v)) {
+        return std::shared_ptr<const PrefixPartialMomentBackend>();
+      }
+    }
+    
+    return std::shared_ptr<const PrefixPartialMomentBackend>(
+        new PrefixPartialMomentBackend(variable, degree_int)
+    );
+  }
+
+} // namespace nns_pm_detail
+
+// parallelFor
+struct LPM_Worker : public RcppParallel::Worker
+{
+  const double degree;
+  const RcppParallel::RVector<double> target;
+  const RcppParallel::RVector<double> variable;
+  RcppParallel::RVector<double> output;
+  std::shared_ptr<const nns_pm_detail::PrefixPartialMomentBackend> prefix;
+  
+  LPM_Worker(
+    const double degree,
+    const Rcpp::NumericVector &target,
+    const Rcpp::NumericVector &variable,
+    Rcpp::NumericVector &output
+  ):
+    degree(degree), target(target), variable(variable), output(output),
+    prefix(nns_pm_detail::make_prefix_backend(degree, variable)) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    if (prefix) {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        output[i] = std::isfinite(t) ? prefix->lpm(t) : LPM_C(degree, t, variable);
+      }
+    } else {
+      for (std::size_t i = begin; i < end; ++i) {
+        output[i] = LPM_C(degree, target[i], variable);
+      }
+    }
+  }
+};
+
+struct UPM_Worker : public RcppParallel::Worker
+{
+  const double degree;
+  const RcppParallel::RVector<double> target;
+  const RcppParallel::RVector<double> variable;
+  RcppParallel::RVector<double> output;
+  std::shared_ptr<const nns_pm_detail::PrefixPartialMomentBackend> prefix;
+  
+  UPM_Worker(
+    const double degree,
+    const Rcpp::NumericVector &target,
+    const Rcpp::NumericVector &variable,
+    Rcpp::NumericVector &output
+  ):
+    degree(degree), target(target), variable(variable), output(output),
+    prefix(nns_pm_detail::make_prefix_backend(degree, variable)) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    if (prefix) {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        output[i] = std::isfinite(t) ? prefix->upm(t) : UPM_C(degree, t, variable);
+      }
+    } else {
+      for (std::size_t i = begin; i < end; ++i) {
+        output[i] = UPM_C(degree, target[i], variable);
+      }
+    }
+  }
+};
+
+// Use these workers in LPM_ratio_CPv / UPM_ratio_CPv to avoid computing the
+// lower and upper partial moments through two separate vectorized kernels.
+struct LPM_Ratio_Worker : public RcppParallel::Worker
+{
+  const double degree;
+  const RcppParallel::RVector<double> target;
+  const RcppParallel::RVector<double> variable;
+  RcppParallel::RVector<double> output;
+  std::shared_ptr<const nns_pm_detail::PrefixPartialMomentBackend> prefix;
+  
+  LPM_Ratio_Worker(
+    const double degree,
+    const Rcpp::NumericVector &target,
+    const Rcpp::NumericVector &variable,
+    Rcpp::NumericVector &output
+  ):
+    degree(degree), target(target), variable(variable), output(output),
+    prefix(nns_pm_detail::make_prefix_backend(degree, variable)) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    if (prefix) {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        if (std::isfinite(t)) {
+          const std::pair<double, double> pm = prefix->both(t);
+          output[i] = pm.first / (pm.first + pm.second);
+        } else {
+          const double lpm = LPM_C(degree, t, variable);
+          const double upm = UPM_C(degree, t, variable);
+          output[i] = lpm / (lpm + upm);
+        }
+      }
+    } else {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        const double lpm = LPM_C(degree, t, variable);
+        const double upm = UPM_C(degree, t, variable);
+        output[i] = lpm / (lpm + upm);
+      }
+    }
+  }
+};
+
+struct UPM_Ratio_Worker : public RcppParallel::Worker
+{
+  const double degree;
+  const RcppParallel::RVector<double> target;
+  const RcppParallel::RVector<double> variable;
+  RcppParallel::RVector<double> output;
+  std::shared_ptr<const nns_pm_detail::PrefixPartialMomentBackend> prefix;
+  
+  UPM_Ratio_Worker(
+    const double degree,
+    const Rcpp::NumericVector &target,
+    const Rcpp::NumericVector &variable,
+    Rcpp::NumericVector &output
+  ):
+    degree(degree), target(target), variable(variable), output(output),
+    prefix(nns_pm_detail::make_prefix_backend(degree, variable)) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    if (prefix) {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        if (std::isfinite(t)) {
+          const std::pair<double, double> pm = prefix->both(t);
+          output[i] = pm.second / (pm.first + pm.second);
+        } else {
+          const double lpm = LPM_C(degree, t, variable);
+          const double upm = UPM_C(degree, t, variable);
+          output[i] = upm / (lpm + upm);
+        }
+      }
+    } else {
+      for (std::size_t i = begin; i < end; ++i) {
+        const double t = target[i];
+        const double lpm = LPM_C(degree, t, variable);
+        const double upm = UPM_C(degree, t, variable);
+        output[i] = upm / (lpm + upm);
+      }
+    }
+  }
+};
+
 Rcpp::NumericVector LPM_CPv(const double &degree,
                             const Rcpp::NumericVector &target,
                             const Rcpp::NumericVector &variable);
@@ -225,7 +546,7 @@ Rcpp::List PMMatrix_CPv(
     const bool &norm
 );
 
-// n‐D co‐partial‐moments prototypes (parallel back‐ends)
+// n-D co-partial-moments prototypes (parallel back-ends)
 double clpm_nD_cpp(const Rcpp::NumericMatrix &data,
                    const Rcpp::NumericVector &target,
                    double degree,

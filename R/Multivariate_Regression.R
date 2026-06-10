@@ -158,10 +158,16 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     n.best <- max(1L, min(n.best, rpm_n))
   }
   
-  # OPTIMIZED: Bulk prediction calculation bypasses row-by-row mapping loops
+  # OPTIMIZED: Bulk prediction calculation bypasses row-by-row mapping loops.
+  # Use the single-k path kernel because only column n.best was consumed.
   if(n.best > 1 && !point.only){
-    bulk_res <- NNS.distance.path.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = original.IVs, kmax = n.best, class = type, ncores = num_cores)
-    fitted.matrix$y.hat <- as.numeric(bulk_res[, n.best])
+    fitted.matrix$y.hat <- as.numeric(NNS.distance.path.single.bulk(
+      rpm = REGRESSION.POINT.MATRIX,
+      Xtest = original.IVs,
+      k = n.best,
+      class = type,
+      ncores = num_cores
+    ))
     
     y.hat <- fitted.matrix$y.hat
     if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
@@ -222,9 +228,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     
     # Multiple point estimation
     if (!is.null(np)) {
-      # OPTIMIZED: Replaced row-by-row distance operations with bulk call
-      bulk_pred <- NNS.distance.path.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = point.est, kmax = n.best, class = type, ncores = num_cores)
-      DISTANCES <- as.numeric(bulk_pred[, n.best])
+      # OPTIMIZED: Replaced row-by-row distance operations with a single-k bulk call.
+      DISTANCES <- as.numeric(NNS.distance.path.single.bulk(
+        rpm = REGRESSION.POINT.MATRIX,
+        Xtest = point.est,
+        k = n.best,
+        class = type,
+        ncores = num_cores
+      ))
       
       # OPTIMIZED: Fully vectorized matrix handling for out-of-bounds outliers
       if (any(rowSums(outsiders) > 0)) {
@@ -243,9 +254,9 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
         last.known.distances_2 <- sqrt(rowSums((boundary.points_matrix - mid.points_matrix)^2))
         last.known.distances_3 <- sqrt(rowSums((boundary.points_matrix - mid.points_2_matrix)^2))
         
-        boundary.estimates <- as.numeric(NNS.distance.path.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = boundary.points_matrix, kmax = n.best, class = type, ncores = num_cores)[, n.best])
-        mid.estimates <- as.numeric(NNS.distance.path.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_matrix, kmax = n.best, class = type, ncores = num_cores)[, n.best])
-        mid_2.estimates <- as.numeric(NNS.distance.path.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_2_matrix, kmax = n.best, class = type, ncores = num_cores)[, n.best])
+        boundary.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = boundary.points_matrix, k = n.best, class = type, ncores = num_cores))
+        mid.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_matrix, k = n.best, class = type, ncores = num_cores))
+        mid_2.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_2_matrix, k = n.best, class = type, ncores = num_cores))
         
         central.estimate_single <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, k = n.best, class = type)[1]
         

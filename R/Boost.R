@@ -410,8 +410,7 @@ NNS.boost <- function(IVs.train,
     return(list("results"           = estimates,
                 "pred.int"          = final_fit$pred.int,
                 "feature.weights"   = plot.table / sum(plot.table),
-                "feature.frequency" = plot.table,
-                "n.best"            = final_fit$NNS.reg.n.best))
+                "feature.frequency" = plot.table))
   } # end .core
   
   out <- tryCatch(
