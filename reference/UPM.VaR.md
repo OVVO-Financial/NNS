@@ -1,7 +1,7 @@
 # UPM VaR
 
 Generates an upside value at risk (VaR) quantile based on the Upper
-Partial Moment ratio
+Partial Moment ratio.
 
 ## Usage
 
@@ -13,7 +13,7 @@ UPM.VaR(percentile, degree, x)
 
 - percentile:
 
-  numeric \[0, 1\]; The percentile for right-tail VaR (vectorized).
+  numeric \[0, 1\]; The percentile for right-tail VaR.
 
 - degree:
 

@@ -29,7 +29,7 @@ Returns:
 
 - `"$skewness"` skewness of the distribution.
 
-- `"$kurtosis"` excess kurtosis of the distribution.
+- `"$kurtosis"` excess kurtosis.
 
 ## References
 

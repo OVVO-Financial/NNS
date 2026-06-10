@@ -13,7 +13,7 @@ LPM.VaR(percentile, degree, x)
 
 - percentile:
 
-  numeric \[0, 1\]; The percentile for left-tail VaR (vectorized).
+  numeric \[0, 1\]; The percentile for left-tail VaR.
 
 - degree:
 

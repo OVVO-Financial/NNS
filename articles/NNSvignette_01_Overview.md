@@ -406,7 +406,7 @@ NNS.ANOVA(control=ctrl, treatment=trt, means.only=FALSE, plot=FALSE)
     ## [1] 0.4385169
     ## 
     ## $Certainty
-    ## [1] 0.6905166
+    ## [1] 0.6905098
     ## 
     ## $Effect_Size_LB
     ##        2.5% 

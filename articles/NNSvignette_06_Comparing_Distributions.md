@@ -73,13 +73,13 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.01293582
+    ## [1] 0.01293583
     ## 
     ## $`Lower 95% CI`
     ## [1] 0
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.08849623
+    ## [1] 0.08849699
 
 The `Certainty` shows that these two distributions clearly do not come
 from the same population. This is verified with the
