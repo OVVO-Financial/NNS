@@ -1,7 +1,6 @@
 # Batched Co-Lower Partial Moment nD
 
-Internal batched backend for evaluating \codeCo.LPM_nD over many
-targets.
+Internal batched backend for evaluating `Co.LPM_nD` over many targets.
 
 ## Usage
 
