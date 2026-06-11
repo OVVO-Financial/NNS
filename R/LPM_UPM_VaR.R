@@ -136,11 +136,16 @@ UPM.VaR <- function(percentile, degree, x) {
   
   n <- length(x)
   x_sorted <- sort(x)
+  # Center at the sorted median: (t - x) is translation-invariant, so results
+  # are mathematically identical, but prefix powers are built at deviation
+  # scale, eliminating catastrophic cancellation for level-shifted data.
+  .vshift <- x_sorted[(n + 1L) %/% 2L]
+  x_sorted <- x_sorted - .vshift
   x_min <- x_sorted[1L]
   x_max <- x_sorted[n]
   
   if (n == 1L || x_min == x_max) {
-    return(rep(x_min, length(p)))
+    return(rep(x_min + .vshift, length(p)))
   }
   
   prep <- .NNS_prepare_integer_VaR_backend(x_sorted, degree)
@@ -188,7 +193,7 @@ UPM.VaR <- function(percentile, degree, x) {
     out[middle] <- out_mid
   }
   
-  out
+  out + .vshift
 }
 
 

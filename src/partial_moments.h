@@ -64,6 +64,7 @@ struct PrefixPartialMomentBackend {
   std::vector<double> choose;
   std::size_t n;
   int degree;
+  double shift;
   
   PrefixPartialMomentBackend(const Rcpp::NumericVector &variable,
                              const int degree_)
@@ -72,7 +73,8 @@ struct PrefixPartialMomentBackend {
       total_power(static_cast<std::size_t>(degree_) + 1U, 0.0),
       choose(binomial_coefficients(degree_)),
       n(sorted.size()),
-      degree(degree_) {
+      degree(degree_),
+      shift(0.0) {
     
     // Match the legacy path for missing/non-finite data by declining the prefix
     // backend. The constructor is only called after this same condition is
@@ -86,13 +88,14 @@ struct PrefixPartialMomentBackend {
     }
     
     std::sort(sorted.begin(), sorted.end());
+    shift = sorted[n / 2U];
     
     for (int p = 0; p <= degree; ++p) {
       prefix_power[static_cast<std::size_t>(p)].assign(n + 1U, 0.0);
     }
     
     for (std::size_t i = 0; i < n; ++i) {
-      const double x = sorted[i];
+      const double x = sorted[i] - shift;
       double x_power = 1.0;
       
       for (int p = 0; p <= degree; ++p) {
@@ -122,18 +125,19 @@ struct PrefixPartialMomentBackend {
     if (!std::isfinite(target)) return R_NaN;
     
     const std::size_t k = count_leq(target);
+    const double tc = target - shift;
     const double nd = static_cast<double>(n);
     
     if (degree == 0) return static_cast<double>(k) / nd;
     
     if (degree == 1) {
-      return (static_cast<double>(k) * target - prefix_power[1][k]) / nd;
+      return (static_cast<double>(k) * tc - prefix_power[1][k]) / nd;
     }
     
     if (degree == 2) {
-      const double t2 = target * target;
+      const double t2 = tc * tc;
       return (static_cast<double>(k) * t2 -
-              2.0 * target * prefix_power[1][k] +
+              2.0 * tc * prefix_power[1][k] +
               prefix_power[2][k]) / nd;
     }
     
@@ -142,7 +146,7 @@ struct PrefixPartialMomentBackend {
       const std::size_t js = static_cast<std::size_t>(j);
       const double sign = (j % 2 == 0) ? 1.0 : -1.0;
       out += choose[js] * sign *
-        std::pow(target, static_cast<double>(degree - j)) *
+        std::pow(tc, static_cast<double>(degree - j)) *
         prefix_power[js][k];
     }
     
@@ -153,6 +157,7 @@ struct PrefixPartialMomentBackend {
     if (!std::isfinite(target)) return R_NaN;
     
     const std::size_t k = count_leq(target);
+    const double tc = target - shift;
     const std::size_t above = n - k;
     const double nd = static_cast<double>(n);
     
@@ -161,14 +166,14 @@ struct PrefixPartialMomentBackend {
     const double suffix1 = total_power[1] - prefix_power[1][k];
     
     if (degree == 1) {
-      return (suffix1 - static_cast<double>(above) * target) / nd;
+      return (suffix1 - static_cast<double>(above) * tc) / nd;
     }
     
     if (degree == 2) {
       const double suffix2 = total_power[2] - prefix_power[2][k];
-      const double t2 = target * target;
+      const double t2 = tc * tc;
       return (suffix2 -
-              2.0 * target * suffix1 +
+              2.0 * tc * suffix1 +
               static_cast<double>(above) * t2) / nd;
     }
     
@@ -178,7 +183,7 @@ struct PrefixPartialMomentBackend {
       const double suffix_j = total_power[js] - prefix_power[js][k];
       const double sign = ((degree - j) % 2 == 0) ? 1.0 : -1.0;
       out += choose[js] * sign *
-        std::pow(target, static_cast<double>(degree - j)) *
+        std::pow(tc, static_cast<double>(degree - j)) *
         suffix_j;
     }
     
