@@ -466,13 +466,45 @@ WORKER_CLASS tmp_func(degree, target, variable, output); \
 parallelFor(0, target_size, tmp_func);                   \
 return(output);
 
+// Scalar guard: the prefix backend costs O(n log n + n*degree) to build,
+// which only amortizes over many targets (crossover ~ log2(n) + degree).
+// For few targets, a direct O(n) scan per target via the legacy kernels is
+// faster and bit-identical to pre-13.0 semantics.
+static const R_xlen_t NNS_DIRECT_PATH_MAX_TARGETS = 32;
+
 // [[Rcpp::export]]
-NumericVector LPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
+NumericVector LPM_CPv(const double &degree,
+                      const NumericVector &target,
+                      const NumericVector &variable) {
+  if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
+    NumericVector output(target.size());
+    RcppParallel::RVector<double> v(variable);
+    
+    for (R_xlen_t i = 0; i < target.size(); ++i) {
+      output[i] = LPM_C(degree, target[i], v);
+    }
+    
+    return output;
+  }
+  
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(LPM_Worker);
 }
 
 // [[Rcpp::export]]
-NumericVector UPM_CPv(const double &degree, const NumericVector &target, const NumericVector &variable) {
+NumericVector UPM_CPv(const double &degree,
+                      const NumericVector &target,
+                      const NumericVector &variable) {
+  if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
+    NumericVector output(target.size());
+    RcppParallel::RVector<double> v(variable);
+    
+    for (R_xlen_t i = 0; i < target.size(); ++i) {
+      output[i] = UPM_C(degree, target[i], v);
+    }
+    
+    return output;
+  }
+  
   NNS_LPM_UPM_PARALLEL_FOR_FUNC(UPM_Worker);
 }
 
