@@ -2,7 +2,7 @@ name: Downstream sync dispatch
 
 on:
   push:
-    branches: [main]
+    branches: [NNS-Beta-Version]
   workflow_dispatch:
 
 permissions:
