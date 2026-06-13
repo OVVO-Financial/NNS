@@ -52,14 +52,8 @@ jobs:
           version="$(awk -F': *' '$1 == "Version" { print $2 }' DESCRIPTION)"
           echo "r_version=${version}" >> "$GITHUB_OUTPUT"
 
-          if [ -d src ]; then
-            src_hash="$(
-              git ls-files src \
-              | sort \
-              | xargs sha256sum \
-              | sha256sum \
-              | awk '{ print $1 }'
-            )"
+          if git rev-parse "${GITHUB_SHA}:src" >/dev/null 2>&1; then
+            src_hash="$(git rev-parse "${GITHUB_SHA}:src")"
           else
             src_hash="no-src-directory"
           fi
@@ -81,38 +75,70 @@ jobs:
         if: steps.detect.outputs.src_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.OVVO_SYNC_TOKEN }}
+          R_VERSION: ${{ steps.detect.outputs.r_version }}
+          R_SRC_TREE_HASH: ${{ steps.detect.outputs.r_src_tree_hash }}
+          SRC_CHANGED: ${{ steps.detect.outputs.src_changed }}
+          R_API_CHANGED: ${{ steps.detect.outputs.r_api_changed }}
+          DESCRIPTION_CHANGED: ${{ steps.detect.outputs.description_changed }}
         shell: bash
         run: |
           set -euo pipefail
-          files_json="$(cat changed_files.json)"
-          gh api repos/OVVO-Financial/NNS-core/dispatches \
-            -f event_type=nns-r-src-updated \
-            -f client_payload[r_repo]="OVVO-Financial/NNS" \
-            -f client_payload[r_commit]="${GITHUB_SHA}" \
-            -f client_payload[r_ref]="${GITHUB_REF_NAME}" \
-            -f client_payload[r_version]="${{ steps.detect.outputs.r_version }}" \
-            -f client_payload[r_src_tree_hash]="${{ steps.detect.outputs.r_src_tree_hash }}" \
-            -f client_payload[src_changed]="${{ steps.detect.outputs.src_changed }}" \
-            -f client_payload[r_api_changed]="${{ steps.detect.outputs.r_api_changed }}" \
-            -f client_payload[description_changed]="${{ steps.detect.outputs.description_changed }}" \
-            -f client_payload[changed_files]="${files_json}"
+          jq -n \
+            --arg r_repo "OVVO-Financial/NNS" \
+            --arg r_commit "${GITHUB_SHA}" \
+            --arg r_ref "${GITHUB_REF_NAME}" \
+            --arg r_version "${R_VERSION}" \
+            --arg r_src_tree_hash "${R_SRC_TREE_HASH}" \
+            --argjson src_changed "${SRC_CHANGED}" \
+            --argjson r_api_changed "${R_API_CHANGED}" \
+            --argjson description_changed "${DESCRIPTION_CHANGED}" \
+            --slurpfile changed_files changed_files.json \
+            '{event_type: "nns-r-src-updated",
+              client_payload: {
+                r_repo: $r_repo,
+                r_commit: $r_commit,
+                r_ref: $r_ref,
+                r_version: $r_version,
+                r_src_tree_hash: $r_src_tree_hash,
+                src_changed: $src_changed,
+                r_api_changed: $r_api_changed,
+                description_changed: $description_changed,
+                changed_files: $changed_files[0]
+              }}' > payload.json
+          gh api --method POST repos/OVVO-Financial/NNS-core/dispatches --input payload.json
 
       - name: Dispatch NNS-python API or version review
         if: steps.detect.outputs.r_api_changed == 'true' || steps.detect.outputs.description_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.OVVO_SYNC_TOKEN }}
+          R_VERSION: ${{ steps.detect.outputs.r_version }}
+          R_SRC_TREE_HASH: ${{ steps.detect.outputs.r_src_tree_hash }}
+          SRC_CHANGED: ${{ steps.detect.outputs.src_changed }}
+          R_API_CHANGED: ${{ steps.detect.outputs.r_api_changed }}
+          DESCRIPTION_CHANGED: ${{ steps.detect.outputs.description_changed }}
         shell: bash
         run: |
           set -euo pipefail
-          files_json="$(cat changed_files.json)"
-          gh api repos/OVVO-Financial/NNS-python/dispatches \
-            -f event_type=nns-r-api-or-version-updated \
-            -f client_payload[r_repo]="OVVO-Financial/NNS" \
-            -f client_payload[r_commit]="${GITHUB_SHA}" \
-            -f client_payload[r_ref]="${GITHUB_REF_NAME}" \
-            -f client_payload[r_version]="${{ steps.detect.outputs.r_version }}" \
-            -f client_payload[r_src_tree_hash]="${{ steps.detect.outputs.r_src_tree_hash }}" \
-            -f client_payload[src_changed]="${{ steps.detect.outputs.src_changed }}" \
-            -f client_payload[r_api_changed]="${{ steps.detect.outputs.r_api_changed }}" \
-            -f client_payload[description_changed]="${{ steps.detect.outputs.description_changed }}" \
-            -f client_payload[changed_files]="${files_json}"
+          jq -n \
+            --arg r_repo "OVVO-Financial/NNS" \
+            --arg r_commit "${GITHUB_SHA}" \
+            --arg r_ref "${GITHUB_REF_NAME}" \
+            --arg r_version "${R_VERSION}" \
+            --arg r_src_tree_hash "${R_SRC_TREE_HASH}" \
+            --argjson src_changed "${SRC_CHANGED}" \
+            --argjson r_api_changed "${R_API_CHANGED}" \
+            --argjson description_changed "${DESCRIPTION_CHANGED}" \
+            --slurpfile changed_files changed_files.json \
+            '{event_type: "nns-r-api-or-version-updated",
+              client_payload: {
+                r_repo: $r_repo,
+                r_commit: $r_commit,
+                r_ref: $r_ref,
+                r_version: $r_version,
+                r_src_tree_hash: $r_src_tree_hash,
+                src_changed: $src_changed,
+                r_api_changed: $r_api_changed,
+                description_changed: $description_changed,
+                changed_files: $changed_files[0]
+              }}' > payload.json
+          gh api --method POST repos/OVVO-Financial/NNS-python/dispatches --input payload.json
