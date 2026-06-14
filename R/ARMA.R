@@ -107,7 +107,7 @@ NNS.ARMA <- function(variable,
     lag <- seasonal.factor
     output <- numeric(length(seasonal.factor))
     for(i in 1 : length(seasonal.factor)){
-      rev.var <- variable[seq(length(variable), 1, -i)]
+      rev.var <- variable[seq(length(variable), 1, -seasonal.factor[i])]
       output[i] <- abs(sd(rev.var) / mean(rev.var))
     }
     
