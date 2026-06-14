@@ -270,7 +270,10 @@ NNS.ARMA <- function(variable,
   }
   
   if(!is.null(pred.int)){
-    if (method != "means") lin.resid <- mean(abs(Lin.Regression.Estimates - mean(Lin.Regression.Estimates)))
+    if (method != "means"){
+      Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
+      lin.resid <- mean(abs(Lin.Regression.Estimates - mean(Lin.Regression.Estimates)))
+    }
     PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = -1, upper_rho = 1, by = .2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
