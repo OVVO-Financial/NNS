@@ -93,8 +93,8 @@ factor_2_dummy_FR <- function(x) {
     .Call(`_NNS_factor_2_dummy_FR`, x)
 }
 
-generate.vectors <- function(x, l) {
-    .Call(`_NNS_generate_vectors`, x, l)
+generate.vectors <- function(x, l, len = -1L) {
+    .Call(`_NNS_generate_vectors`, x, l, len)
 }
 
 generate.lin.vectors <- function(x, l, h = 1L) {

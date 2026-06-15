@@ -319,14 +319,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // generate_vectors
-List generate_vectors(NumericVector x, IntegerVector l);
-RcppExport SEXP _NNS_generate_vectors(SEXP xSEXP, SEXP lSEXP) {
+List generate_vectors(NumericVector x, IntegerVector l, int len);
+RcppExport SEXP _NNS_generate_vectors(SEXP xSEXP, SEXP lSEXP, SEXP lenSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type l(lSEXP);
-    rcpp_result_gen = Rcpp::wrap(generate_vectors(x, l));
+    Rcpp::traits::input_parameter< int >::type len(lenSEXP);
+    rcpp_result_gen = Rcpp::wrap(generate_vectors(x, l, len));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -696,7 +697,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_is_discrete", (DL_FUNC) &_NNS_is_discrete, 1},
     {"_NNS_factor_2_dummy", (DL_FUNC) &_NNS_factor_2_dummy, 1},
     {"_NNS_factor_2_dummy_FR", (DL_FUNC) &_NNS_factor_2_dummy_FR, 1},
-    {"_NNS_generate_vectors", (DL_FUNC) &_NNS_generate_vectors, 2},
+    {"_NNS_generate_vectors", (DL_FUNC) &_NNS_generate_vectors, 3},
     {"_NNS_generate_lin_vectors", (DL_FUNC) &_NNS_generate_lin_vectors, 3},
     {"_NNS_ARMA_seas_weighting", (DL_FUNC) &_NNS_ARMA_seas_weighting, 2},
     {"_NNS_NNS_meboot_part", (DL_FUNC) &_NNS_NNS_meboot_part, 7},
