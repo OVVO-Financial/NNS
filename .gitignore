@@ -5,3 +5,5 @@ tests/testthat/*.pdf
 NNS.Rproj
 src/*.o
 src/*.dll
+src/*.so
+Rplots.pdf
