@@ -710,9 +710,15 @@ NNS.reg = function (x, y,
   regression.points$y <- pmin(pmax(regression.points$y, min(y)), max(y))
   
   if(!is.null(type) && type=="class") regression.points$y <- pmax(min(y), pmin(max(y), ifelse(regression.points$y %% 1 < 0.5, floor(regression.points$y), ceiling(regression.points$y))))
-  
-  
-  # Coefficients 
+
+  # Multivariate callers (e.g. NNS.ARMA, NNS.stack, NNS.boost) only consume the
+  # consolidated regression points.  regression.points is final at this stage;
+  # the downstream Regression.Coefficients / fitted-value computation below does
+  # not mutate it, so return early to skip that wasted work on every call.
+  if (multivariate.call) return(regression.points[, .(x, y)])
+
+
+  # Coefficients
   Regression.Coefficients <- regression.points[, .(rise, run)]
   Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
   upper.x <- regression.points[(2:.N), x]
