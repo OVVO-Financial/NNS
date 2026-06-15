@@ -176,8 +176,13 @@ SEXP factor_2_dummy_FR(SEXP x) {
 
 // ---------- 4) generate.vectors ----------
 // [[Rcpp::export(name = "generate.vectors")]]
-List generate_vectors(NumericVector x, IntegerVector l) {
-  int n = x.size();
+List generate_vectors(NumericVector x, IntegerVector l, int len = -1) {
+  // 'len' lets the caller treat only the first 'len' elements of 'x' as the
+  // active series, so a persistent pre-allocated buffer can be reused across
+  // recursive forecast steps without re-allocating or copying a growing
+  // vector each step.  len < 0 (default) preserves the original behaviour of
+  // using the full length of 'x'.
+  int n = (len < 0) ? x.size() : len;
   List comp_series(l.size()), comp_index(l.size());
   for (int t = 0; t < l.size(); ++t) {
     int lag = l[t];
