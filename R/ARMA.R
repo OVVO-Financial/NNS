@@ -182,21 +182,12 @@ NNS.ARMA <- function(variable,
     variable <- c(variable, Estimates)
     FV <- variable
   } else {
-
-    # Pre-allocate a single buffer holding the original series plus room for
-    # all h forecasts.  Each recursive step writes its estimate by index and
-    # passes the active length to generate.vectors, avoiding the O(N^2) growth
-    # of repeatedly re-allocating/copying via c(variable, Estimates[j]).
-    base.len <- length(variable)
-    variable.buf <- c(variable, numeric(h))
-
+    
     # Regression for each estimate in h
     for (j in 1:h) {
-      cur.len <- base.len + (j - 1)
-
       # Regenerate seasonal.factor if dynamic
       if (dynamic) {
-        seas.matrix <- NNS.seas(variable.buf[seq_len(cur.len)], plot = FALSE)
+        seas.matrix <- NNS.seas(variable, plot = FALSE)
         if (!is.list(seas.matrix)) {
           M <- t(1)
         } else {
@@ -217,7 +208,7 @@ NNS.ARMA <- function(variable,
       }
       
       # Re-Generate vectors for 1:lag if dynamic
-      GV <- generate.vectors(variable.buf, lag, cur.len)
+      GV <- generate.vectors(variable, lag)
       Component.index <- GV$Component.index
       Component.series <- GV$Component.series
       
@@ -272,12 +263,10 @@ NNS.ARMA <- function(variable,
       if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
       if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
       if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
-
-      variable.buf[cur.len + 1] <- Estimates[j]
+      
+      variable <- c(variable, Estimates[j])
+      FV <- variable
     } # j loop
-
-    variable <- variable.buf
-    FV <- variable
   }
   
   if(!is.null(pred.int)){
