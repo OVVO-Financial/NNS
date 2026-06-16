@@ -131,7 +131,25 @@ NNS.dep <- function(x,
   
   l   <- length(x)
   obs <- max(8L, as.integer(l / 8L))
-  
+
+  # Native fast path: NNS_dep_pair_cpp only needs the two quadrant vectors, so
+  # call NNS_part_cpp in quadrants-only mode and skip the data.table wrappers
+  # NNS.part() builds.  Quadrants are identical to the full path, so the result
+  # is bit-identical.  Only when not plotting (Voronoi/print.map needs the full
+  # partition).  Gated by getOption("NNS.native").
+  if (isTRUE(getOption("NNS.native", TRUE)) && !isTRUE(print.map)) {
+    ord <- max(ceiling(log(l, 2)), 1L)             # NNS.part default order
+    qxy <- NNS_part_cpp(x, y, type = "XONLY", order_in = as.integer(ord),
+                        obs_req = as.integer(obs), min_obs_stop = FALSE,
+                        noise_reduction = "off", quadrants_only = TRUE)$quadrant
+    qyx <- NNS_part_cpp(y, x, type = "XONLY", order_in = as.integer(ord),
+                        obs_req = as.integer(obs), min_obs_stop = FALSE,
+                        noise_reduction = "off", quadrants_only = TRUE)$quadrant
+    return(NNS_dep_pair_cpp(x = as.numeric(x), y = as.numeric(y),
+                            quad_xy = as.character(qxy), quad_yx = as.character(qyx),
+                            asym = isTRUE(asym)))
+  }
+
   PART_xy <- suppressWarnings(
     NNS.part(x, y, order = NULL, obs.req = obs,
              min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map)
