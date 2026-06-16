@@ -106,66 +106,74 @@ static void simple_bin_counts(const std::vector<double>& xs,
 
 // ---------- NNS.gravity ----------
 
-// [[Rcpp::export]]
-SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete) {
-  NumericVector xR(xSEXP);
-  std::vector<double> x;
-  x.reserve(xR.size());
-  for (double v : xR) if (R_finite(v)) x.push_back(v);
-  
+// Core gravity computation operating on a vector of finite values.
+// Shared by NNS_gravity_cpp and the NNS.reg regression-point builder.  The
+// result depends only on the set of values (x is sorted internally), so input
+// order is irrelevant.
+double gravity_value(std::vector<double> x, bool discrete) {
   const int l = (int)x.size();
-  if (l == 0) return Rf_ScalarReal(NA_REAL);
+  if (l == 0) return NA_REAL;
   if (l <= 3) {
     // median(x)
     std::vector<double> t = x;
     std::sort(t.begin(), t.end());
     double med = (l % 2 ? t[l/2] : 0.5*(t[l/2 - 1] + t[l/2]));
-    if (discrete) return Rf_ScalarReal( nearest_int_half_up(med) );
-    return Rf_ScalarReal(med);
+    if (discrete) return nearest_int_half_up(med);
+    return med;
   }
-  
+
   bool all_eq = true;
   for (int i = 1; i < l; ++i) if (x[i] != x[0]) { all_eq = false; break; }
-  if (all_eq) return Rf_ScalarReal(x[0]);
-  
+  if (all_eq) return x[0];
+
   std::sort(x.begin(), x.end());
   double range = std::fabs(x.back() - x.front());
-  if (range == 0.0) return Rf_ScalarReal(x.front());
-  
+  if (range == 0.0) return x.front();
+
   double q1, q2, q3;
   quartiles_like_R_code(x, q1, q2, q3);
-  
+
   double width = (q3 - q1) * std::pow((double)l, -0.5);
   if (!(width > 0.0) || !R_finite(width)) width = range / 128.0;
-  
+
   std::vector<double> z_names;
   std::vector<int> counts;
   simple_bin_counts(x, width, x.front(), z_names, counts);
   const int lz = (int)counts.size();
-  
+
   // If unique max, use neighborhood; else use all bins
   int maxc = 0;
   for (int c : counts) if (c > maxc) maxc = c;
   int ties = 0;
   for (int c : counts) if (c == maxc) ++ties;
-  
+
   int lo = 0, hi = lz - 1;
   if (ties == 1) {
     int zc = 0; for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { zc = i; break; }
     lo = std::max(0, zc - 1);
     hi = std::min(lz - 1, zc + 1);
   }
-  
+
   long double num = 0.0L, den = 0.0L;
   for (int i = lo; i <= hi; ++i) { num += (long double)z_names[i] * (long double)counts[i]; den += (long double)counts[i]; }
   double m = (den > 0.0L) ? (double)(num / den) : z_names[ (lo+hi)/2 ];
-  
+
   double mu = mean_vec(x);
   double mid = 0.25 * ( q2 + m + mu + 0.5*(q1 + q3) );
-  
+
   double out = R_finite(mid) ? mid : q2;
   if (discrete) out = nearest_int_half_up(out);
-  return Rf_ScalarReal(out);
+  return out;
+}
+
+// [[Rcpp::export]]
+SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete) {
+  NumericVector xR(xSEXP);
+  std::vector<double> x;
+  x.reserve(xR.size());
+  for (double v : xR) if (R_finite(v)) x.push_back(v);
+
+  return Rf_ScalarReal( gravity_value(x, discrete) );
 }
 
 // ---------- NNS.rescale ----------
