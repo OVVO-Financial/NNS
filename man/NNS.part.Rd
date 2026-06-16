@@ -37,7 +37,7 @@ Returns:
  \itemize{
   \item{\code{"dt"}} a \code{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
   \item{\code{"regression.points"}} the \code{data.table} of regression points for that given \code{(order = ...)}.
-  \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
+  \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
   }
 }
 \description{
