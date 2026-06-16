@@ -143,8 +143,9 @@ DataFrame NNS_reg_points_cpp(NumericVector x_, NumericVector y_,
   std::vector<double> bx = rx, by = ry;
   bx.push_back(central_x); by.push_back(central_y);
   std::vector<double> fx, fy;
+  // complete.cases() keeps Inf/-Inf and drops only NA/NaN (ISNAN covers both).
   for (size_t i = 0; i < bx.size(); ++i)
-    if (R_finite(bx[i]) && R_finite(by[i])) { fx.push_back(bx[i]); fy.push_back(by[i]); }
+    if (!ISNAN(bx[i]) && !ISNAN(by[i])) { fx.push_back(bx[i]); fy.push_back(by[i]); }
   std::vector<double> cx2, cy2;
   consolidate(fx, fy, cx2, cy2);
 
@@ -156,12 +157,13 @@ DataFrame NNS_reg_points_cpp(NumericVector x_, NumericVector y_,
 
   std::vector<double> y_min, y_midmin, x_midmin;
   std::vector<double> y_max, y_midmax, x_midmax;
+  // na.omit() (like complete.cases) keeps Inf/-Inf and drops only NA/NaN.
   for (size_t i = 0; i < x.size(); ++i) {
     const double xi = x[i], yi = y[i];
-    if (xi <= minr   && R_finite(yi)) y_min.push_back(yi);
-    if (xi <= mid_min) { if (R_finite(yi)) y_midmin.push_back(yi); if (R_finite(xi)) x_midmin.push_back(xi); }
-    if (xi >= maxr   && R_finite(yi)) y_max.push_back(yi);
-    if (xi >= mid_max) { if (R_finite(yi)) y_midmax.push_back(yi); if (R_finite(xi)) x_midmax.push_back(xi); }
+    if (xi <= minr   && !ISNAN(yi)) y_min.push_back(yi);
+    if (xi <= mid_min) { if (!ISNAN(yi)) y_midmin.push_back(yi); if (!ISNAN(xi)) x_midmin.push_back(xi); }
+    if (xi >= maxr   && !ISNAN(yi)) y_max.push_back(yi);
+    if (xi >= mid_max) { if (!ISNAN(yi)) y_midmax.push_back(yi); if (!ISNAN(xi)) x_midmax.push_back(xi); }
   }
   const int l_y_min  = (int) y_min.size();
   const int l_y_midmin = (int) y_midmin.size();
@@ -238,8 +240,9 @@ DataFrame NNS_reg_points_cpp(NumericVector x_, NumericVector y_,
   ex.push_back(maxx);      ey.push_back(max_rps_y);      // max.rps
   ex.push_back(central_x); ey.push_back(central_y);      // med.rps
   std::vector<double> gx, gy;
+  // complete.cases() keeps Inf/-Inf and drops only NA/NaN.
   for (size_t i = 0; i < ex.size(); ++i)
-    if (R_finite(ex[i]) && R_finite(ey[i])) { gx.push_back(ex[i]); gy.push_back(ey[i]); }
+    if (!ISNAN(ex[i]) && !ISNAN(ey[i])) { gx.push_back(ex[i]); gy.push_back(ey[i]); }
   std::vector<double> hx, hy;
   consolidate(gx, gy, hx, hy);
 

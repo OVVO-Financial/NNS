@@ -130,24 +130,6 @@
 #' @export
 
 
-# Lean XONLY partition for the native NNS.reg fast path: calls NNS_part_cpp
-# directly and returns the regression points as plain vectors, skipping the
-# data.table construction / setorder / coercion done by NNS.part().  Ordering
-# by quadrant uses radix (C locale), matching data.table::setorder; discrete-x
-# rounding mirrors NNS.part().  Bit-identical to NNS.part(...)$regression.points.
-.NNS.reg.part.xonly <- function(x, y, ord) {
-  out <- NNS_part_cpp(x = x, y = y, type = "XONLY",
-                      order_in = as.integer(ord), obs_req = 0L,
-                      min_obs_stop = TRUE, noise_reduction = "off")
-  rp <- out[["regression.points"]]
-  o  <- base::order(rp$quadrant, method = "radix")
-  rpx <- rp$x[o]
-  rpy <- rp$y[o]
-  if (is.discrete(x)) rpx <- ifelse(rpx %% 1 < 0.5, floor(rpx), ceiling(rpx))
-  list(x = rpx, y = rpy, dt_quadrant = out$dt$quadrant)
-}
-
-
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
                     dim.red.method = NULL, tau = NULL,
@@ -1043,4 +1025,26 @@ NNS.reg = function (x, y,
                    "Fitted.xy" = fitted))
   }
   
+}
+
+# Lean XONLY partition for the native NNS.reg fast path: calls NNS_part_cpp
+# directly and returns the regression points as plain vectors, skipping the
+# data.table construction / setorder / coercion done by NNS.part().  Ordering
+# by quadrant uses radix (C locale), matching data.table::setorder; discrete-x
+# rounding mirrors NNS.part() (round finite values only, preserving infinities).
+# Bit-identical to NNS.part(...)$regression.points.  Defined after NNS.reg (not
+# between its roxygen block and definition) so the docs stay attached to NNS.reg.
+.NNS.reg.part.xonly <- function(x, y, ord) {
+  out <- NNS_part_cpp(x = x, y = y, type = "XONLY",
+                      order_in = as.integer(ord), obs_req = 0L,
+                      min_obs_stop = TRUE, noise_reduction = "off")
+  rp <- out[["regression.points"]]
+  o  <- base::order(rp$quadrant, method = "radix")
+  rpx <- rp$x[o]
+  rpy <- rp$y[o]
+  if (is.discrete(x)) {
+    finite <- is.finite(rpx)
+    rpx[finite] <- ifelse(rpx[finite] %% 1 < 0.5, floor(rpx[finite]), ceiling(rpx[finite]))
+  }
+  list(x = rpx, y = rpy, dt_quadrant = out$dt$quadrant)
 }
