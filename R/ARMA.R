@@ -221,17 +221,18 @@ NNS.ARMA <- function(variable,
           x <- Component.index[[i]]
           y <- Component.series[[i]]
           
-          last.y <- tail(y, 1)
-          
+          last.y <- y[length(y)]
+
           reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
-          
+
           reg.points <- reg.points[complete.cases(reg.points), ]
-          
-          xs <- tail(reg.points$x, 1) - reg.points$x
-          ys <- tail(reg.points$y, 1) - reg.points$y
-          
-          xs <- head(xs, -1)
-          ys <- head(ys, -1)
+
+          rpx <- reg.points$x; rpy <- reg.points$y
+          xs <- rpx[length(rpx)] - rpx
+          ys <- rpy[length(rpy)] - rpy
+
+          xs <- xs[-length(xs)]
+          ys <- ys[-length(ys)]
           
           run <- mean(rep(xs, (1:length(xs))^2))
           rise <- mean(rep(ys, (1:length(ys))^2))
@@ -245,8 +246,9 @@ NNS.ARMA <- function(variable,
       
       if ((method %in% c("lin", "both", "means")) || is.numeric(pred.int)) {
         Lin.Regression.Estimates <- sapply(seq_along(lag), function(i) {
-          last.x <- tail(Component.index[[i]], 1)
-          lin.reg <- fast_lm(Component.index[[i]], Component.series[[i]])
+          ci <- Component.index[[i]]
+          last.x <- ci[length(ci)]
+          lin.reg <- fast_lm(ci, Component.series[[i]])
           coefs <- lin.reg$coef
           return(as.numeric(coefs[1] + coefs[2] * (last.x + 1)))
         })
