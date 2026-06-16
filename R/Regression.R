@@ -150,7 +150,53 @@ NNS.reg = function (x, y,
   
   oldw <- getOption("warn")
   options(warn = -1)
-  
+
+  # ---- Lean fast path for multivariate callers (NNS.ARMA / NNS.stack / NNS.boost) ----
+  # Those call NNS.reg(x, y, multivariate.call = TRUE) on numeric vectors many
+  # times. Bypass the full argument-marshalling setup below (match.call/deparse,
+  # factor / dim-reduction handling, frame conversions) and go straight to the
+  # XONLY partition + native regression points. Bit-identical to the full path
+  # for the configuration it handles; every other case falls through unchanged.
+  if (isTRUE(getOption("NNS.native", TRUE)) &&
+      isTRUE(multivariate.call) && is.null(type) && is.null(dim.red.method) &&
+      !isTRUE(smooth) && identical(noise.reduction, "off") &&
+      is.null(dim(x)) && is.null(dim(y)) && is.numeric(x) && is.numeric(y) &&
+      (is.null(order) || (is.numeric(order) && length(order) == 1)) &&
+      !anyNA(x) && !anyNA(y) &&
+      !(is.discrete(y) && length(unique(y)) < sqrt(length(y)))) {
+
+    xv <- as.double(x)
+    yv <- as.numeric(y)
+
+    dependence <- tryCatch(NNS.dep(xv, yv, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
+    dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(xv, xv, yv), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
+    dependence[is.na(dependence)] <- 0.1
+
+    rounded_dep <- ifelse(dependence*10 %% 1 < .5, floor(dependence * 10), ceiling(dependence * 10))
+    if(length(yv) < 100){
+      rounded_dep <- rounded_dep / 2
+      rounded_dep <- floor(rounded_dep)
+    }
+    rounded_dep <- max(1, rounded_dep)
+    dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
+
+    if (dependence != 1 && !identical(dep.reduced.order, "max") && dependence < 1) {
+      part.map <- NNS.part(xv, yv, noise.reduction = "off", order = dep.reduced.order, type = "XONLY", obs.req = 0)
+      if(length(part.map$regression.points$x) == 0){
+        part.map <- NNS.part(xv, yv, type = "XONLY", noise.reduction = "off", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
+      }
+      if (length(part.map$regression.points$x) > 0) {
+        res <- NNS_reg_points_cpp(xv, yv,
+                                  as.numeric(part.map$regression.points$x),
+                                  as.numeric(part.map$regression.points$y),
+                                  as.numeric(dependence), 0.95)
+        data.table::setDT(res)
+        return(res)
+      }
+    }
+    # dependence == 1 / order == "max" / empty partition -> fall through to full path
+  }
+
   if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
   
   if(plot.regions && !is.null(order) && order == "max") stop('Please reduce the "order" or set "plot.regions = FALSE".')
