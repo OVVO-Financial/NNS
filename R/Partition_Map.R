@@ -14,7 +14,7 @@
 #'  \itemize{
 #'   \item{\code{"dt"}} a \code{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
 #'   \item{\code{"regression.points"}} the \code{data.table} of regression points for that given \code{(order = ...)}.
-#'   \item{\code{"order"}}  the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
+#'   \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
 #'   }
 #'
 #' @note \code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
@@ -75,7 +75,7 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   data.table::setorder(RP, quadrant)
   
 
-  if (is.discrete(x)) RP[, x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
+  if (is.discrete(x)) RP[is.finite(x), x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
   
   if (isTRUE(Voronoi)) {
     mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)
