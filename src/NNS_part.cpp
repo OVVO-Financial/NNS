@@ -10,15 +10,19 @@
 
 using namespace Rcpp;
 
+static inline bool complete_case_value(double x){
+  return !ISNAN(x);
+}
+
 static inline double mean_no_na(const NumericVector& v){
   long double s = 0.0L; std::size_t m = 0;
-  for(double xi : v) if(R_finite(xi)){ s += xi; ++m; }
+  for(double xi : v) if(complete_case_value(xi)){ s += xi; ++m; }
   return m ? static_cast<double>(s / m) : NA_REAL;
 }
 
 static inline double median_no_na(const NumericVector& v){
   std::vector<double> a; a.reserve(v.size());
-  for(double xi : v) if(R_finite(xi)) a.push_back(xi);
+  for(double xi : v) if(complete_case_value(xi)) a.push_back(xi);
   if(a.empty()) return NA_REAL;
   std::size_t n = a.size();
   std::nth_element(a.begin(), a.begin() + n / 2, a.end());
@@ -111,18 +115,18 @@ List NNS_part_cpp(NumericVector x,
         double yi = y[i];
         xv[k] = xi;
         yv[k] = yi;
-        if(R_finite(xi)){ if(xi < minx) minx = xi; if(xi > maxx) maxx = xi; }
-        if(R_finite(yi)){ if(yi < miny) miny = yi; if(yi > maxy) maxy = yi; }
+        if(complete_case_value(xi)){ if(xi < minx) minx = xi; if(xi > maxx) maxx = xi; }
+        if(complete_case_value(yi)){ if(yi < miny) miny = yi; if(yi > maxy) maxy = yi; }
       }
       
       Pair c{ agg.for_x(xv), agg.for_y(yv) };
       centers[q] = c;
       
       if(!xonly){
-        if(R_finite(c.y) && R_finite(minx) && R_finite(maxx)){
+        if(complete_case_value(c.y) && complete_case_value(minx) && complete_case_value(maxx)){
           H_x0.push_back(minx); H_x1.push_back(maxx); H_y.push_back(c.y);
         }
-        if(R_finite(c.x) && R_finite(miny) && R_finite(maxy)){
+        if(complete_case_value(c.x) && complete_case_value(miny) && complete_case_value(maxy)){
           V_x.push_back(c.x); V_y0.push_back(miny); V_y1.push_back(maxy);
         }
       }
@@ -133,10 +137,10 @@ List NNS_part_cpp(NumericVector x,
         const auto &idx = kv.second;
         double minx = R_PosInf, maxx = R_NegInf;
         for(int i : idx){
-          if(R_finite(x[i])){ if(x[i] < minx) minx = x[i]; if(x[i] > maxx) maxx = x[i]; }
+          if(complete_case_value(x[i])){ if(x[i] < minx) minx = x[i]; if(x[i] > maxx) maxx = x[i]; }
         }
-        if(R_finite(minx)) V_lines.push_back(minx);
-        if(R_finite(maxx)) V_lines.push_back(maxx);
+        if(complete_case_value(minx)) V_lines.push_back(minx);
+        if(complete_case_value(maxx)) V_lines.push_back(maxx);
       }
     }
     
@@ -146,11 +150,11 @@ List NNS_part_cpp(NumericVector x,
         prior_quadrant[i] = quadrant[i];
         int qn;
         if(!xonly){
-          int lox = (R_finite(x[i]) && R_finite(c.x)) ? (x[i] <= c.x) : 0;
-          int loy = (R_finite(y[i]) && R_finite(c.y)) ? (y[i] <= c.y) : 0;
+          int lox = (complete_case_value(x[i]) && complete_case_value(c.x)) ? (x[i] <= c.x) : 0;
+          int loy = (complete_case_value(y[i]) && complete_case_value(c.y)) ? (y[i] <= c.y) : 0;
           qn = 1 + lox + 2 * loy;
         }else{
-          int lox = (R_finite(x[i]) && R_finite(c.x)) ? (x[i] > c.x) : 0;
+          int lox = (complete_case_value(x[i]) && complete_case_value(c.x)) ? (x[i] > c.x) : 0;
           qn = 1 + lox;
         }
         // OPTIMIZATION 2: Bypass slow string allocators
