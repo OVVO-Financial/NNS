@@ -130,6 +130,24 @@
 #' @export
 
 
+# Lean XONLY partition for the native NNS.reg fast path: calls NNS_part_cpp
+# directly and returns the regression points as plain vectors, skipping the
+# data.table construction / setorder / coercion done by NNS.part().  Ordering
+# by quadrant uses radix (C locale), matching data.table::setorder; discrete-x
+# rounding mirrors NNS.part().  Bit-identical to NNS.part(...)$regression.points.
+.NNS.reg.part.xonly <- function(x, y, ord) {
+  out <- NNS_part_cpp(x = x, y = y, type = "XONLY",
+                      order_in = as.integer(ord), obs_req = 0L,
+                      min_obs_stop = TRUE, noise_reduction = "off")
+  rp <- out[["regression.points"]]
+  o  <- base::order(rp$quadrant, method = "radix")
+  rpx <- rp$x[o]
+  rpy <- rp$y[o]
+  if (is.discrete(x)) rpx <- ifelse(rpx %% 1 < 0.5, floor(rpx), ceiling(rpx))
+  list(x = rpx, y = rpy, dt_quadrant = out$dt$quadrant)
+}
+
+
 NNS.reg = function (x, y,
                     factor.2.dummy = TRUE, order = NULL,
                     dim.red.method = NULL, tau = NULL,
@@ -181,14 +199,13 @@ NNS.reg = function (x, y,
     dep.reduced.order <- max(1, ifelse(is.null(order), rounded_dep, order))
 
     if (dependence != 1 && !identical(dep.reduced.order, "max") && dependence < 1) {
-      part.map <- NNS.part(xv, yv, noise.reduction = "off", order = dep.reduced.order, type = "XONLY", obs.req = 0)
-      if(length(part.map$regression.points$x) == 0){
-        part.map <- NNS.part(xv, yv, type = "XONLY", noise.reduction = "off", order = min(nchar(part.map$dt$quadrant)), obs.req = 0)
+      pm <- .NNS.reg.part.xonly(xv, yv, dep.reduced.order)
+      if (length(pm$x) == 0) {
+        pm <- .NNS.reg.part.xonly(xv, yv, min(nchar(pm$dt_quadrant)))
       }
-      if (length(part.map$regression.points$x) > 0) {
+      if (length(pm$x) > 0) {
         res <- NNS_reg_points_cpp(xv, yv,
-                                  as.numeric(part.map$regression.points$x),
-                                  as.numeric(part.map$regression.points$y),
+                                  as.numeric(pm$x), as.numeric(pm$y),
                                   as.numeric(dependence), 0.95)
         data.table::setDT(res)
         return(res)
