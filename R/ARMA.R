@@ -81,8 +81,10 @@ NNS.ARMA <- function(variable,
   options(warn = -1)
   
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
-  mc <- match.call()
-  label <- deparse(mc$variable)
+  # label is only used for plot axis titles; deparse(match.call()) is otherwise
+  # pure per-call overhead (NNS.ARMA.optim calls NNS.ARMA hundreds of times with
+  # plot = FALSE).  Defer it to the plotting branch.
+  label <- if (isTRUE(plot)) deparse(match.call()$variable) else NULL
   variable <- as.numeric(variable)
   OV <- variable
   
