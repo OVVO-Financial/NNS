@@ -125,6 +125,10 @@ upSample <- function(x, y, list = FALSE, yname = "Class") {
     .Call(`_NNS_upSample`, x, y, list, yname)
 }
 
+NNS_reg_points_cpp <- function(x_, y_, rpx_, rpy_, dependence, stn) {
+    .Call(`_NNS_NNS_reg_points_cpp`, x_, y_, rpx_, rpy_, dependence, stn)
+}
+
 CoLPM_nD_batch_RCPP <- function(data, targets, degree = 0.0, norm = TRUE) {
     .Call(`_NNS_CoLPM_nD_batch_RCPP`, data, targets, degree, norm)
 }

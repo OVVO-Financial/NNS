@@ -13,6 +13,11 @@
 /// @return A scalar SEXP containing the estimated center of gravity.
 SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete);
 
+/// Core gravity computation operating on a vector of finite values.
+/// Shared by NNS_gravity_cpp and the NNS.reg regression-point builder so both
+/// produce bit-identical results.
+double gravity_value(std::vector<double> x, bool discrete);
+
 /// Compute the mode (or modal class) depending on the supplied flags.
 ///
 /// @param xSEXP Input vector supplied from R.

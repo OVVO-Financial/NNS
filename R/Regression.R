@@ -480,8 +480,28 @@ NNS.reg = function (x, y,
     }
   }
   
+  # Native fast path for multivariate callers (NNS.ARMA / NNS.stack / NNS.boost).
+  # Reproduces the regression.points pipeline below in C++, avoiding the per-call
+  # data.table overhead that dominates when NNS.reg is invoked many times on small
+  # inputs.  Bit-identical to the pure-R path; gated by getOption("NNS.native").
+  # Only the configuration the pure-R block reaches here is handled natively:
+  # type = NULL, noise.reduction = "off", dependence < 1, dep.reduced.order != "max".
+  if (isTRUE(getOption("NNS.native", TRUE)) &&
+      multivariate.call && is.null(type) && !isTRUE(smooth) &&
+      identical(noise.reduction, "off") && !is.character(order) &&
+      is.numeric(dependence) && length(dependence) == 1 && dependence < 1 &&
+      !identical(dep.reduced.order, "max") &&
+      length(part.map$regression.points$x) > 0) {
+    res <- NNS_reg_points_cpp(as.numeric(x), as.numeric(y),
+                              as.numeric(part.map$regression.points$x),
+                              as.numeric(part.map$regression.points$y),
+                              as.numeric(dependence), stn)
+    data.table::setDT(res)
+    return(res)
+  }
+
   nns.ids <- part.map$dt$quadrant
-  
+
   if(length(part.map$dt$y) > length(y)){
     part.map$dt$x <- pmax(min(x), pmin(part.map$dt$x, max(x)))
     part.map$dt[, y := gravity(y), by = "x"]
