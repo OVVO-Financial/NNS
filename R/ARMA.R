@@ -115,7 +115,11 @@ NNS.ARMA <- function(variable,
     
     if(is.null(weights)){
       Relative.seasonal <- output / abs(sd(variable)/mean(variable))
-      Seasonal.weighting <- 1 / Relative.seasonal
+      # Floor the CV ratio: a perfectly stable lag-subsample (CV 0) in an otherwise-
+      # varying series gives Relative.seasonal 0 -> 1/0 = Inf -> Inf/Inf = NaN in the
+      # normalisation below, silently poisoning the forecast.  pmax keeps a fully
+      # constant series (Relative.seasonal NaN) propagating NaN, matching prior behaviour.
+      Seasonal.weighting <- 1 / pmax(Relative.seasonal, .Machine$double.eps)
       Observation.weighting <- 1 / sqrt(seasonal.factor)
       Weights <- (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
       seasonal.plot <- FALSE
@@ -222,15 +226,15 @@ NNS.ARMA <- function(variable,
           y <- Component.series[[i]]
           
           last.y <- y[length(y)]
-
+          
           reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
-
+          
           reg.points <- reg.points[complete.cases(reg.points), ]
-
+          
           rpx <- reg.points$x; rpy <- reg.points$y
           xs <- rpx[length(rpx)] - rpx
           ys <- rpy[length(rpy)] - rpy
-
+          
           xs <- xs[-length(xs)]
           ys <- ys[-length(ys)]
           
