@@ -10,6 +10,16 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   original.DV <- Y
   n <- ncol(original.IVs)
   
+  feature.names <- colnames(original.IVs)
+  if(is.null(feature.names)){
+    feature.names <- paste0("x", 1:n)
+  } else {
+    missing.feature.names <- is.na(feature.names) | feature.names == ""
+    feature.names[missing.feature.names] <- paste0("x", which(missing.feature.names))
+    feature.names <- make.unique(feature.names, sep = ".")
+  }
+  colnames(original.IVs) <- feature.names
+  
   if(is.null(ncol(X_n))) X_n <- t(t(X_n))
   
   if(is.null(names(Y))){
@@ -30,6 +40,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     if(ncol(point.est) != n){
       stop("Please ensure 'point.est' is of compatible dimensions to 'x'")
     }
+    colnames(point.est) <- feature.names
   }
   
   original.matrix <- cbind.data.frame(original.DV, original.IVs)
@@ -67,10 +78,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     reg.points.matrix <- do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))
   }
   
-  if(is.null(colnames(original.IVs))){
-    colnames.list <- lapply(1 : ncol(original.IVs), function(i) paste0("x", i))
-    colnames(reg.points.matrix) <- as.character(colnames.list)
-  }
+  colnames(reg.points.matrix) <- feature.names
   
   if(is.numeric(order) || is.null(order)) reg.points.matrix <- unique(reg.points.matrix)
   
@@ -138,7 +146,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD[1], by = NNS.ID]
   REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD, .SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
   
-  data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, colnames(mean.by.id.matrix)[1:n])
+  data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, feature.names)
   
   if(is.null(n.best)){
     dependence <- NNS.copula(cbind(original.IVs, original.DV))
