@@ -177,34 +177,67 @@ NNS.meboot <- function(x,
   res_mat[ordxx, ] <- qseq
   
   # ===== Optional dependence targeting ρ in residual space (per replicate, time-aligned) =====
+  # Each replicate column is mixed as a convex combination comb = t*m + (1-t)*e
+  # of its anti-aligned (m) and aligned (e) reorderings, with the single weight
+  # t in [0, 1] chosen so comb's dependence on the original residuals matches the
+  # target rho. This mirrors the Python port (src/nns/meboot.py::_target_rho):
+  #   * one bounded 1-D solve via optimize() instead of a 2-D optim() search, and
+  #   * a closed-form correlation (centered dot product / norms) with the target
+  #     precomputed once, so no length-n vector is re-allocated per evaluation.
+  # The two ports thus use the same algorithm (results still differ by RNG).
   if (!is.null(rho)) {
     rho_vec <- if (length(rho) == 1L) rep(rho, reps) else rep_len(rho, reps)
-    
-    # Ranks of original residuals for aligned vs anti-aligned extremes
+
+    # Ranks of original residuals for aligned vs anti-aligned extremes. Average
+    # ranks can be fractional under ties; floor + clamp to valid 1..n indices
+    # (matching base R's integer truncation when indexing with a double).
     r_o    <- rank(orig_res, ties.method = "average")
     r_anti <- max(r_o) + 1 - r_o
-    
+    r_o_idx    <- pmin(pmax(as.integer(floor(r_o)),    1L), n)
+    r_anti_idx <- pmin(pmax(as.integer(floor(r_anti)), 1L), n)
+
+    # Correlation target, centered and normed ONCE. For Spearman the target is
+    # the ranks of the residuals; otherwise the residuals themselves.
+    use_spearman  <- type == "spearman"
+    use_corr_path <- type %in% c("spearman", "pearson")
+    target_values   <- if (use_spearman) r_o else orig_res
+    target_centered <- target_values - mean(target_values)
+    target_norm     <- sqrt(sum(target_centered^2))
+    if (target_norm == 0 || !is.finite(target_norm))
+      stop("function cannot be evaluated at initial parameters")
+
+    # Closed-form Pearson/Spearman correlation of a candidate vector against the
+    # precomputed target. No allocation beyond the (unavoidable) centered copy.
+    fast_corr <- function(v) {
+      xv <- if (use_spearman) rank(v, ties.method = "average") else v
+      xc <- xv - mean(xv)
+      xn <- sqrt(sum(xc * xc))
+      if (xn == 0) return(NA_real_)
+      sum(xc * target_centered) / (xn * target_norm)
+    }
+
     for (i in 1:reps) {
-      # start from each residual replicate column
-      res_i      <- res_mat[, i]
-      res_sorted <- sort(res_i)
-      e <- res_sorted[r_o]     # aligned with ranks of orig_res
-      m <- res_sorted[r_anti]  # anti-aligned
-      
+      res_sorted <- sort(res_mat[, i])
+      e <- res_sorted[r_o_idx]     # aligned with ranks of orig_res
+      m <- res_sorted[r_anti_idx]  # anti-aligned
+
       rho_target <- rho_vec[i]
-      obj <- function(ab){
-        a <- ab[1]; b <- ab[2]
-        comb <- (a*m + b*e) / (a + b)
-        if (type %in% c("spearman","pearson")) {
-          abs(cor(comb, orig_res, method = type) - rho_target)
+      obj <- function(t) {
+        comb <- t * m + (1 - t) * e
+        corr <- if (use_corr_path) {
+          fast_corr(comb)
         } else if (type == "nnsdep") {
-          abs(NNS.dep(comb, orig_res)$Dependence - rho_target)   
+          NNS.dep(comb, orig_res)$Dependence
         } else {
-          abs(NNS.dep(comb, orig_res)$Correlation - rho_target)
+          NNS.dep(comb, orig_res)$Correlation
         }
+        if (!is.finite(corr)) return(Inf)
+        abs(corr - rho_target)
       }
-      opt <- optim(c(0.5, 0.5), obj, control = list(abstol = 0.01))
-      res_mat[, i] <- (opt$par[1]*m + opt$par[2]*e) / sum(abs(opt$par))
+
+      opt <- optimize(obj, interval = c(0, 1), tol = 0.01)
+      t_hat <- opt$minimum
+      res_mat[, i] <- t_hat * m + (1 - t_hat) * e
     }
   }
   
