@@ -14,8 +14,8 @@ BugReports: https://github.com/OVVO-Financial/NNS/issues
 License: GPL-3
 URL: https://github.com/OVVO-Financial/NNS
 Depends: R (>= 3.6.0)
-Imports: data.table, doParallel, foreach, Rcpp, RcppParallel, Rfast, rgl, xts, zoo
-Suggests: 
+Imports: Rcpp, RcppParallel, rgl
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)

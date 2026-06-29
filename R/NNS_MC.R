@@ -70,9 +70,9 @@ NNS.MC <- function(x,
   }
 
 
-  ensemble <- Rfast::rowmeans(do.call(cbind, replicates))
+  ensemble <- rowMeans(do.call(cbind, replicates))
 
   names(replicates) <- paste0("rho = ", exp_rhos)
   
-  return(list("ensemble" = ensemble, "replicates" = replicates))
+  return(.NNS.out(list("ensemble" = ensemble, "replicates" = replicates)))
 }

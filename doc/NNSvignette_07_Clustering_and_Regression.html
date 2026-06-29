@@ -345,9 +345,8 @@ Regression</h1>
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
 <div id="clustering-and-regression" class="section level1">
 <h1>Clustering and Regression</h1>
 <p>Below are some examples demonstrating unsupervised learning with NNS
@@ -361,7 +360,7 @@ hierarchical clustering method. <code>NNS</code> iteratively partitions
 the joint distribution into partial moment quadrants, and then assigns a
 quadrant identification (1:4) at each partition.</p>
 <p><strong><code>NNS.part</code></strong> returns a
-<code>data.table</code> of observations along with their final quadrant
+<code>data.frame</code> of observations along with their final quadrant
 identification. It also returns the regression points, which are the
 quadrant means used in <strong><code>NNS.reg</code></strong>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, .<span class="dv">05</span>); y <span class="ot">=</span> x <span class="sc">^</span> <span class="dv">3</span></span>
@@ -383,31 +382,33 @@ and right of the partition respectively), not the 4 values per the <span class="
 ## [1] 4
 ## 
 ## $dt
-##          x         y quadrant prior.quadrant
-##      &lt;num&gt;     &lt;num&gt;   &lt;char&gt;         &lt;char&gt;
-##   1: -5.00 -125.0000    q1111           q111
-##   2: -4.95 -121.2874    q1111           q111
-##   3: -4.90 -117.6490    q1111           q111
-##   4: -4.85 -114.0841    q1111           q111
-##   5: -4.80 -110.5920    q1111           q111
-##  ---                                        
-## 197:  4.80  110.5920    q2222           q222
-## 198:  4.85  114.0841    q2222           q222
-## 199:  4.90  117.6490    q2222           q222
-## 200:  4.95  121.2874    q2222           q222
-## 201:  5.00  125.0000    q2222           q222
+##       x         y quadrant prior.quadrant
+## 1 -5.00 -125.0000    q1111           q111
+## 2 -4.95 -121.2874    q1111           q111
+## 3 -4.90 -117.6490    q1111           q111
+## 4 -4.85 -114.0841    q1111           q111
+## 5 -4.80 -110.5920    q1111           q111
+## 6 -4.75 -107.1719    q1111           q111
+## ---
+##        x        y quadrant prior.quadrant
+## 196 4.75 107.1719    q2222           q222
+## 197 4.80 110.5920    q2222           q222
+## 198 4.85 114.0841    q2222           q222
+## 199 4.90 117.6490    q2222           q222
+## 200 4.95 121.2874    q2222           q222
+## 201 5.00 125.0000    q2222           q222
+## --- [ 201 rows x 4 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $regression.points
-##    quadrant          x            y
-##      &lt;char&gt;      &lt;num&gt;        &lt;num&gt;
-## 1:     q111 -4.4523966 -89.31996002
-## 2:     q112 -3.2250000 -31.51531806
-## 3:     q121 -2.0023966  -7.46341667
-## 4:     q122 -0.7590415  -0.51890098
-## 5:     q211  0.3739355   0.08338409
-## 6:     q212  1.3499632   2.26930682
-## 7:     q221  2.6206250  16.42843100
-## 8:     q222  4.1955267  75.78894504</code></pre>
+##   quadrant          x            y
+## 1     q111 -4.4523966 -89.31996002
+## 2     q112 -3.2250000 -31.51531806
+## 3     q121 -2.0023966  -7.46341667
+## 4     q122 -0.7590415  -0.51890098
+## 5     q211  0.3739355   0.08338409
+## 6     q212  1.3499632   2.26930682
+## 7     q221  2.6206250  16.42843100
+## 8     q222  4.1955267  75.78894504</code></pre>
 </div>
 </div>
 <div id="clusters-used-in-regression" class="section level2">
@@ -444,75 +445,21 @@ of values provided below.</p>
 ## NULL
 ## 
 ## $derivative
-##     Coefficient X.Lower.Range X.Upper.Range
-##           &lt;num&gt;         &lt;num&gt;         &lt;num&gt;
-##  1: 74.25250000    -5.0000000    -4.9750000
-##  2: 72.47650000    -4.9750000    -4.8500000
-##  3: 68.69350000    -4.8500000    -4.7250000
-##  4: 64.88656716    -4.7250000    -4.5854167
-##  5: 61.01480519    -4.5854167    -4.4250000
-##  6: 57.64628788    -4.4250000    -4.2875000
-##  7: 52.29438889    -4.2875000    -4.1000000
-##  8: 55.28971014    -4.1000000    -3.9562500
-##  9: 39.55816092    -3.9562500    -3.7750000
-## 10: 41.08694030    -3.7750000    -3.6354167
-## 11: 38.01863636    -3.6354167    -3.4750000
-## 12: 34.69626866    -3.4750000    -3.3354167
-## 13: 31.88168831    -3.3354167    -3.1750000
-## 14: 29.28265152    -3.1750000    -3.0375000
-## 15: 25.79438889    -3.0375000    -2.8500000
-## 16: 23.18416667    -2.8500000    -2.6875000
-## 17: 20.17544872    -2.6875000    -2.5250000
-## 18: 18.23350000    -2.5250000    -2.4000000
-## 19: 16.36150000    -2.4000000    -2.2750000
-## 20: 15.45634921    -2.2750000    -2.1437500
-## 21: 12.10506173    -2.1437500    -1.9750000
-## 22: 10.84291045    -1.9750000    -1.8354167
-## 23:  9.17837079    -1.8354167    -1.6500000
-## 24:  7.71713333    -1.6500000    -1.4937500
-## 25:  5.67487654    -1.4937500    -1.3250000
-## 26:  4.77015152    -1.3250000    -1.1875000
-## 27:  3.65525641    -1.1875000    -1.0250000
-## 28:  2.71828358    -1.0250000    -0.8854167
-## 29:  1.97577922    -0.8854167    -0.7250000
-## 30:  1.29696970    -0.7250000    -0.5875000
-## 31:  0.71536082    -0.5875000    -0.3854167
-## 32:  0.26031250    -0.3854167    -0.1854167
-## 33:  0.08077922    -0.1854167    -0.1052083
-## 34:  0.01168831    -0.1052083    -0.0250000
-## 35:  0.00625000    -0.0250000     0.0750000
-## 36:  0.05125000     0.0750000     0.1750000
-## 37:  0.17050000     0.1750000     0.3000000
-## 38:  0.40450000     0.3000000     0.4250000
-## 39:  0.68125000     0.4250000     0.5250000
-## 40:  0.99625000     0.5250000     0.6250000
-## 41:  1.30261905     0.6250000     0.7562500
-## 42:  2.23351852     0.7562500     0.9250000
-## 43:  2.85625000     0.9250000     1.0250000
-## 44:  3.47125000     1.0250000     1.1250000
-## 45:  4.21750000     1.1250000     1.2500000
-## 46:  5.19250000     1.2500000     1.3750000
-## 47:  6.18250000     1.3750000     1.5000000
-## 48:  7.35250000     1.5000000     1.6250000
-## 49:  7.76690476     1.6250000     1.7562500
-## 50: 10.84596774     1.7562500     1.9500000
-## 51: 10.93692308     1.9500000     2.1125000
-## 52: 14.30505155     2.1125000     2.3145833
-## 53: 17.95467391     2.3145833     2.5062500
-## 54: 21.46451613     2.5062500     2.7000000
-## 55: 20.50807692     2.7000000     2.8625000
-## 56: 26.01343750     2.8625000     3.0625000
-## 57: 32.71687737     3.0625000     3.2671585
-## 58: 34.19048114     3.2671585     3.5000000
-## 59: 33.57759494     3.5000000     3.6645833
-## 60: 46.95453488     3.6645833     3.8437500
-## 61: 42.67514286     3.8437500     4.0625000
-## 62: 57.09307692     4.0625000     4.2250000
-## 63: 55.24078947     4.2250000     4.3437500
-## 64: 59.68593153     4.3437500     4.5671585
-## 65: 66.33740696     4.5671585     4.8301031
-## 66: 72.01977335     4.8301031     5.0000000
-##     Coefficient X.Lower.Range X.Upper.Range
+##   Coefficient X.Lower.Range X.Upper.Range
+## 2    74.25250     -5.000000     -4.975000
+## 3    72.47650     -4.975000     -4.850000
+## 4    68.69350     -4.850000     -4.725000
+## 5    64.88657     -4.725000     -4.585417
+## 6    61.01481     -4.585417     -4.425000
+## 7    57.64629     -4.425000     -4.287500
+## ---
+## 62    42.67514      3.843750      4.062500
+## 63    57.09308      4.062500      4.225000
+## 64    55.24079      4.225000      4.343750
+## 65    59.68593      4.343750      4.567158
+## 66    66.33741      4.567158      4.830103
+## 67    72.01977      4.830103      5.000000
+## --- [ 66 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $Point.est
 ## NULL
@@ -521,91 +468,40 @@ of values provided below.</p>
 ## NULL
 ## 
 ## $regression.points
-##              x             y
-##          &lt;num&gt;         &lt;num&gt;
-##  1: -5.0000000 -1.250000e+02
-##  2: -4.9750000 -1.231437e+02
-##  3: -4.8500000 -1.140841e+02
-##  4: -4.7250000 -1.054974e+02
-##  5: -4.5854167 -9.644035e+01
-##  6: -4.4250000 -8.665256e+01
-##  7: -4.2875000 -7.872620e+01
-##  8: -4.1000000 -6.892100e+01
-##  9: -3.9562500 -6.097310e+01
-## 10: -3.7750000 -5.380319e+01
-## 11: -3.6354167 -4.806814e+01
-## 12: -3.4750000 -4.196931e+01
-## 13: -3.3354167 -3.712629e+01
-## 14: -3.1750000 -3.201194e+01
-## 15: -3.0375000 -2.798557e+01
-## 16: -2.8500000 -2.314913e+01
-## 17: -2.6875000 -1.938170e+01
-## 18: -2.5250000 -1.610319e+01
-## 19: -2.4000000 -1.382400e+01
-## 20: -2.2750000 -1.177881e+01
-## 21: -2.1437500 -9.750167e+00
-## 22: -1.9750000 -7.707437e+00
-## 23: -1.8354167 -6.193948e+00
-## 24: -1.6500000 -4.492125e+00
-## 25: -1.4937500 -3.286323e+00
-## 26: -1.3250000 -2.328687e+00
-## 27: -1.1875000 -1.672792e+00
-## 28: -1.0250000 -1.078812e+00
-## 29: -0.8854167 -6.993854e-01
-## 30: -0.7250000 -3.824375e-01
-## 31: -0.5875000 -2.041042e-01
-## 32: -0.3854167 -5.954167e-02
-## 33: -0.1854167 -7.479167e-03
-## 34: -0.1052083 -1.000000e-03
-## 35: -0.0250000 -6.250000e-05
-## 36:  0.0750000  5.625000e-04
-## 37:  0.1750000  5.687500e-03
-## 38:  0.3000000  2.700000e-02
-## 39:  0.4250000  7.756250e-02
-## 40:  0.5250000  1.456875e-01
-## 41:  0.6250000  2.453125e-01
-## 42:  0.7562500  4.162813e-01
-## 43:  0.9250000  7.931875e-01
-## 44:  1.0250000  1.078813e+00
-## 45:  1.1250000  1.425938e+00
-## 46:  1.2500000  1.953125e+00
-## 47:  1.3750000  2.602188e+00
-## 48:  1.5000000  3.375000e+00
-## 49:  1.6250000  4.294063e+00
-## 50:  1.7562500  5.313469e+00
-## 51:  1.9500000  7.414875e+00
-## 52:  2.1125000  9.192125e+00
-## 53:  2.3145833  1.208294e+01
-## 54:  2.5062500  1.552425e+01
-## 55:  2.7000000  1.968300e+01
-## 56:  2.8625000  2.301556e+01
-## 57:  3.0625000  2.821825e+01
-## 58:  3.2671585  3.491404e+01
-## 59:  3.5000000  4.287500e+01
-## 60:  3.6645833  4.840131e+01
-## 61:  3.8437500  5.681400e+01
-## 62:  4.0625000  6.614919e+01
-## 63:  4.2250000  7.542681e+01
-## 64:  4.3437500  8.198666e+01
-## 65:  4.5671585  9.532100e+01
-## 66:  4.8301031  1.127641e+02
-## 67:  5.0000000  1.250000e+02
-##              x             y
+##           x          y
+## 1 -5.000000 -125.00000
+## 2 -4.975000 -123.14369
+## 3 -4.850000 -114.08412
+## 4 -4.725000 -105.49744
+## 5 -4.585417  -96.44035
+## 6 -4.425000  -86.65256
+## ---
+##           x         y
+## 62 4.062500  66.14919
+## 63 4.225000  75.42681
+## 64 4.343750  81.98666
+## 65 4.567158  95.32100
+## 66 4.830103 112.76406
+## 67 5.000000 125.00000
+## --- [ 67 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $Fitted.xy
-##          x         y     y.hat   NNS.ID gradient  residuals standard.errors
-##      &lt;num&gt;     &lt;num&gt;     &lt;num&gt;   &lt;char&gt;    &lt;num&gt;      &lt;num&gt;           &lt;num&gt;
-##   1: -5.00 -125.0000 -125.0000 q1111111 74.25250  0.0000000      0.00000000
-##   2: -4.95 -121.2874 -121.3318 q1111112 72.47650 -0.0444000      0.07380015
-##   3: -4.90 -117.6490 -117.7080 q1111121 72.47650 -0.0589500      0.07380015
-##   4: -4.85 -114.0841 -114.0841 q1111121 68.69350  0.0000000      0.05069967
-##   5: -4.80 -110.5920 -110.6495 q1111122 68.69350 -0.0574500      0.05069967
-##  ---                                                                       
-## 197:  4.80  110.5920  110.7671 q2222221 66.33741  0.1751022      0.27620216
-## 198:  4.85  114.0841  114.1970 q2222222 72.01977  0.1129090      0.12572307
-## 199:  4.90  117.6490  117.7980 q2222222 72.01977  0.1490227      0.12572307
-## 200:  4.95  121.2874  121.3990 q2222222 72.01977  0.1116363      0.12572307
-## 201:  5.00  125.0000  125.0000 q2222222 72.01977  0.0000000      0.12572307</code></pre>
+##       x         y     y.hat   NNS.ID gradient residuals standard.errors
+## 1 -5.00 -125.0000 -125.0000 q1111111  74.2525   0.00000      0.00000000
+## 2 -4.95 -121.2874 -121.3318 q1111112  72.4765  -0.04440      0.07380015
+## 3 -4.90 -117.6490 -117.7080 q1111121  72.4765  -0.05895      0.07380015
+## 4 -4.85 -114.0841 -114.0841 q1111121  68.6935   0.00000      0.05069967
+## 5 -4.80 -110.5920 -110.6495 q1111122  68.6935  -0.05745      0.05069967
+## 6 -4.75 -107.1719 -107.2148 q1111211  68.6935  -0.04290      0.05069967
+## ---
+##        x        y    y.hat   NNS.ID gradient residuals standard.errors
+## 196 4.75 107.1719 107.4502 q2222221 66.33741 0.2783568       0.2762022
+## 197 4.80 110.5920 110.7671 q2222221 66.33741 0.1751022       0.2762022
+## 198 4.85 114.0841 114.1970 q2222222 72.01977 0.1129090       0.1257231
+## 199 4.90 117.6490 117.7980 q2222222 72.01977 0.1490227       0.1257231
+## 200 4.95 121.2874 121.3990 q2222222 72.01977 0.1116363       0.1257231
+## 201 5.00 125.0000 125.0000 q2222222 72.01977 0.0000000       0.1257231
+## --- [ 201 rows x 7 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</code></pre>
 </div>
 <div id="multivariate" class="section level2">
 <h2>Multivariate:</h2>
@@ -620,34 +516,39 @@ each regressor.</p>
 ## [1] 1
 ## 
 ## $rhs.partitions
-##         Var1  Var2
-##        &lt;num&gt; &lt;num&gt;
-##     1: -5.00    -5
-##     2: -4.95    -5
-##     3: -4.90    -5
-##     4: -4.85    -5
-##     5: -4.80    -5
-##    ---            
-## 40397:  4.80     5
-## 40398:  4.85     5
-## 40399:  4.90     5
-## 40400:  4.95     5
-## 40401:  5.00     5
+##    Var1 Var2
+## 1 -5.00   -5
+## 2 -4.95   -5
+## 3 -4.90   -5
+## 4 -4.85   -5
+## 5 -4.80   -5
+## 6 -4.75   -5
+## ---
+## 40396 4.75    5
+## 40397 4.80    5
+## 40398 4.85    5
+## 40399 4.90    5
+## 40400 4.95    5
+## 40401 5.00    5
+## --- [ 40401 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $RPM
-##         Var1  Var2         y.hat
-##        &lt;num&gt; &lt;num&gt;         &lt;num&gt;
-##     1:  -4.8 -4.80 -7.105427e-15
-##     2:  -4.8 -2.55 -8.726063e+01
-##     3:  -4.8 -2.50 -8.806700e+01
-##     4:  -4.8 -2.45 -8.883587e+01
-##     5:  -4.8 -2.40 -8.956800e+01
-##    ---                          
-## 40397:  -2.6 -2.80  3.776000e+00
-## 40398:  -2.6 -2.75  2.770875e+00
-## 40399:  -2.6 -2.70  1.807000e+00
-## 40400:  -2.6 -2.65  8.836250e-01
-## 40401:  -2.6 -2.60  1.776357e-15
+##   Var1  Var2         y.hat
+## 1 -4.8 -4.80 -7.105427e-15
+## 2 -4.8 -2.55 -8.726063e+01
+## 3 -4.8 -2.50 -8.806700e+01
+## 4 -4.8 -2.45 -8.883587e+01
+## 5 -4.8 -2.40 -8.956800e+01
+## 6 -4.8 -2.35 -9.026412e+01
+## ---
+##       Var1  Var2        y.hat
+## 40396 -2.6 -2.85 4.823125e+00
+## 40397 -2.6 -2.80 3.776000e+00
+## 40398 -2.6 -2.75 2.770875e+00
+## 40399 -2.6 -2.70 1.807000e+00
+## 40400 -2.6 -2.65 8.836250e-01
+## 40401 -2.6 -2.60 1.776357e-15
+## --- [ 40401 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $Point.est
 ## NULL
@@ -656,19 +557,22 @@ each regressor.</p>
 ## NULL
 ## 
 ## $Fitted.xy
-##         Var1  Var2          y      y.hat      NNS.ID residuals
-##        &lt;num&gt; &lt;num&gt;      &lt;num&gt;      &lt;num&gt;      &lt;char&gt;     &lt;num&gt;
-##     1: -5.00    -5   0.000000   0.000000     201.201         0
-##     2: -4.95    -5   3.562625   3.562625     402.201         0
-##     3: -4.90    -5   7.051000   7.051000     603.201         0
-##     4: -4.85    -5  10.465875  10.465875     804.201         0
-##     5: -4.80    -5  13.808000  13.808000    1005.201         0
-##    ---                                                        
-## 40397:  4.80     5 -13.808000 -13.808000 39597.40401         0
-## 40398:  4.85     5 -10.465875 -10.465875 39798.40401         0
-## 40399:  4.90     5  -7.051000  -7.051000 39999.40401         0
-## 40400:  4.95     5  -3.562625  -3.562625 40200.40401         0
-## 40401:  5.00     5   0.000000   0.000000 40401.40401         0</code></pre>
+##    Var1 Var2         y     y.hat   NNS.ID residuals
+## 1 -5.00   -5  0.000000  0.000000  201.201         0
+## 2 -4.95   -5  3.562625  3.562625  402.201         0
+## 3 -4.90   -5  7.051000  7.051000  603.201         0
+## 4 -4.85   -5 10.465875 10.465875  804.201         0
+## 5 -4.80   -5 13.808000 13.808000 1005.201         0
+## 6 -4.75   -5 17.078125 17.078125 1206.201         0
+## ---
+##       Var1 Var2          y      y.hat      NNS.ID residuals
+## 40396 4.75    5 -17.078125 -17.078125 39396.40401         0
+## 40397 4.80    5 -13.808000 -13.808000 39597.40401         0
+## 40398 4.85    5 -10.465875 -10.465875 39798.40401         0
+## 40399 4.90    5  -7.051000  -7.051000 39999.40401         0
+## 40400 4.95    5  -3.562625  -3.562625 40200.40401         0
+## 40401 5.00    5   0.000000   0.000000 40401.40401         0
+## --- [ 40401 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</code></pre>
 </div>
 <div id="interextrapolation" class="section level2">
 <h2>Inter/Extrapolation</h2>
@@ -687,13 +591,12 @@ equation
 <strong><code>NNS.reg(..., dim.red.method = &quot;cor&quot;, ...)$equation</code></strong>.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[ , <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>], iris[ , <span class="dv">5</span>], <span class="at">dim.red.method =</span> <span class="st">&quot;cor&quot;</span>, <span class="at">location =</span> <span class="st">&quot;topleft&quot;</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>equation</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
-<pre><code>##        Variable Coefficient
-##          &lt;char&gt;       &lt;num&gt;
-## 1: Sepal.Length   0.7980781
-## 2:  Sepal.Width  -0.4402896
-## 3: Petal.Length   0.9354305
-## 4:  Petal.Width   0.9381792
-## 5:  DENOMINATOR   4.0000000</code></pre>
+<pre><code>##                  Variable Coefficient
+## Sepal.Length Sepal.Length   0.7980781
+## Sepal.Width   Sepal.Width  -0.4402896
+## Petal.Length Petal.Length   0.9354305
+## Petal.Width   Petal.Width   0.9381792
+## 1             DENOMINATOR   4.0000000</code></pre>
 <p>Thus, our model for this regression would be: <span class="math display">\[Species = \frac{0.798*Sepal.Length
 -0.44*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{4}
 \]</span></p>
@@ -704,13 +607,12 @@ offers a method of reducing regressors further by controlling the
 absolute value of required correlation.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">NNS.reg</span>(iris[ , <span class="dv">1</span> <span class="sc">:</span> <span class="dv">4</span>], iris[ , <span class="dv">5</span>], <span class="at">dim.red.method =</span> <span class="st">&quot;cor&quot;</span>, <span class="at">threshold =</span> .<span class="dv">75</span>, <span class="at">location =</span> <span class="st">&quot;topleft&quot;</span>, <span class="at">ncores =</span> <span class="dv">1</span>)<span class="sc">$</span>equation</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
-<pre><code>##        Variable Coefficient
-##          &lt;char&gt;       &lt;num&gt;
-## 1: Sepal.Length   0.7980781
-## 2:  Sepal.Width   0.0000000
-## 3: Petal.Length   0.9354305
-## 4:  Petal.Width   0.9381792
-## 5:  DENOMINATOR   3.0000000</code></pre>
+<pre><code>##                  Variable Coefficient
+## Sepal.Length Sepal.Length   0.7980781
+## Sepal.Width   Sepal.Width   0.0000000
+## Petal.Length Petal.Length   0.9354305
+## Petal.Width   Petal.Width   0.9381792
+## 1             DENOMINATOR   3.0000000</code></pre>
 <p>Thus, our model for this further reduced dimension regression would
 be: <span class="math display">\[Species = \frac{\: 0.798*Sepal.Length +
 0*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{3} \]</span></p>

@@ -5,7 +5,7 @@
 #' @param x a numeric vector.
 #' @param y a numeric vector.
 #' @param eval.point numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
-#' @return Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative.
+#' @return Returns a \code{data.frame} of eval.point along with both 1st and 2nd derivative.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -18,10 +18,10 @@
 #' dy.dx(x, y, eval.point = 1.75)
 #' 
 #' # First derivative
-#' dy.dx(x, y, eval.point = 1.75)[ , first.derivative]
-#' 
+#' dy.dx(x, y, eval.point = 1.75)$first.derivative
+#'
 #' # Second derivative
-#' dy.dx(x, y, eval.point = 1.75)[ , second.derivative]
+#' dy.dx(x, y, eval.point = 1.75)$second.derivative
 #' 
 #' # Vector of derivatives
 #' dy.dx(x, y, eval.point = c(1.75, 2.5))
@@ -73,47 +73,52 @@ dy.dx <- function(x, y, eval.point = NULL){
     }
 
     deriv.points <- do.call(rbind.data.frame, deriv.points)
-    deriv.points <- data.table::data.table(deriv.points, key = "eval.point")
-    
+    # Order by eval.point using radix (C-locale) ordering to match data.table key
+    deriv.points <- deriv.points[order(deriv.points[, "eval.point"], method = "radix"), , drop = FALSE]
+    rownames(deriv.points) <- NULL
+
       n <- nrow(deriv.points)
 
       run_1 <- deriv.points[,3] - deriv.points[,2]
       run_2 <- deriv.points[,2] - deriv.points[,1]
-     
+
       if(any(run_1 == 0)||any(run_2 == 0)) {
         z_1 <- which(run_1 == 0); z_2 <- which(run_2 == 0)
         eval.point.max[z_1] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_1]; eval.point.max[z_2] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_2]
         eval.point.max[z_1] <- eval.point[z_1] - ((abs((max(x) - min(x)) ))/length(x)) * index; eval.point.max[z_2] <- eval.point[z_2] - ((abs((max(x) - min(x)) ))/length(x)) * index
         run_1[z_1] <- eval.point.max[z_1] - eval.point[z_1]; run_2[z_2] <- eval.point[z_2] - eval.point.min[z_2]
       }
-    
+
       reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1, smooth = TRUE)
-     
+
       combined.matrices <- cbind(deriv.points, matrix(unlist(reg.output$Point.est), ncol = 3, byrow = F))
       colnames(combined.matrices) <- c(colnames(deriv.points), "estimates.min", "estimates", "estimates.max")
-   
-      combined.matrices[, `:=` (
-        run_1 = eval.point.max - eval.point,
-        run_2 = eval.point - eval.point.min,
-        rise_1 = estimates.max - estimates,
-        rise_2 = estimates - estimates.min
-      )]
 
-      
-      combined.matrices[, `:=` (
-        first.deriv = (rise_1 + rise_2) / (run_1 + run_2),
-        second.deriv = (rise_1 / run_1 - rise_2 / run_2) / ((run_1 + run_2)/2)
-      )]
-      
-      first.deriv  <- combined.matrices[, .(first.derivative  = mean(first.deriv)), by = eval.point]
-      second.deriv <- combined.matrices[, .(second.derivative = mean(second.deriv)), by = eval.point]
+      # Per-row run/rise computed from the combined columns (matches prior data.table `:=` scoping)
+      eval.point.col <- combined.matrices[, "eval.point"]
+      run_1c  <- combined.matrices[, "eval.point.max"] - eval.point.col
+      run_2c  <- eval.point.col - combined.matrices[, "eval.point.min"]
+      rise_1c <- combined.matrices[, "estimates.max"] - combined.matrices[, "estimates"]
+      rise_2c <- combined.matrices[, "estimates"]     - combined.matrices[, "estimates.min"]
+
+      first.deriv.vec  <- (rise_1c + rise_2c) / (run_1c + run_2c)
+      second.deriv.vec <- (rise_1c / run_1c - rise_2c / run_2c) / ((run_1c + run_2c) / 2)
+
+      # Grouped means by eval.point (ascending), NA-preserving like data.table mean()
+      unique.eval  <- sort(unique(eval.point.col))
+      first.deriv  <- data.frame(eval.point = unique.eval,
+                                 first.derivative  = vapply(unique.eval,
+                                   function(p) mean(first.deriv.vec[eval.point.col == p]), numeric(1)))
+      second.deriv <- data.frame(eval.point = unique.eval,
+                                 second.derivative = vapply(unique.eval,
+                                   function(p) mean(second.deriv.vec[eval.point.col == p]), numeric(1)))
 
   }
 
   colnames(first.deriv) <- c("eval.point", "first.derivative")
   colnames(second.deriv) <- c("eval.point", "second.derivative")
   
-  return(merge(first.deriv, second.deriv, by = "eval.point"))
+  return(.NNS.out(merge(first.deriv, second.deriv, by = "eval.point")))
 }
 
 

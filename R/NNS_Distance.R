@@ -13,7 +13,7 @@
 
 
 NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
-  rpm <- data.table::as.data.table(rpm)
+  rpm <- as.data.frame(rpm)
   if (!"y.hat" %in% names(rpm)) stop("rpm must contain column 'y.hat'")
   
   # 1) target vector
@@ -30,13 +30,13 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
     feat <- names(dest)
   } else {
     # fall back: take the first n numeric columns, like the original
-    numerics <- vapply(rpm[, ..feat_all], is.numeric, logical(1L))
+    numerics <- vapply(rpm[, feat_all, drop = FALSE], is.numeric, logical(1L))
     feat <- feat_all[numerics]
     if (length(feat) < n) stop("Not enough numeric feature columns in rpm")
     feat <- feat[seq_len(n)]
   }
-  
-  X <- as.matrix(rpm[, ..feat])
+
+  X <- as.matrix(rpm[, feat, drop = FALSE])
   if (ncol(X) != n) {
     stop(sprintf(
       "after alignment, ncol(X)=%d != length(dist.estimate)=%d",

@@ -195,18 +195,18 @@ test_that(
 
 # SURVIVAL
 A<-c(1,1,2,2,3,3,4,4,5,5,2.5)
-T1<-data.table::data.table(matrix(
+T1<-data.frame(matrix(
   c(
-    1.0, 1.0, 2.0, 2.0, 2.5, 3.0, 3.0, 4.0, 4.0, 5.0, 5.0, 
+    1.0, 1.0, 2.0, 2.0, 2.5, 3.0, 3.0, 4.0, 4.0, 5.0, 5.0,
     0.8181818, 0.8181818, 0.6363636, 0.6363636, 0.5454545, 0.3636364, 0.3636364, 0.1818182, 0.1818182,0.0000000,0.0000000
-  ), 
+  ),
   ncol=2
 ))
 colnames(T1) <- c("x", "S(x)")
 B<-NNS.CDF(A, type="survival")
 test_that(
   "NNS.CDF", {
-    expect_equal(B$Function, T1, tolerance=1e-5)
+    expect_equal(as.data.frame(B$Function), T1, tolerance=1e-5)
     expect_equal(B$target.value, numeric(0), tolerance=1e-5)
   }
 )

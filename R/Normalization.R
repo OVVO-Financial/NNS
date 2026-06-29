@@ -43,7 +43,7 @@ NNS.norm <- function(X,
     m <- sapply(X, mean)
   } else { 
     X <- apply(X, 2, unlist)
-    m <- Rfast::colmeans(X)
+    m <- colMeans(X)
   }
   
   
@@ -57,9 +57,9 @@ NNS.norm <- function(X,
     } else {
       scale.factor <- abs(NNS.dep(X)$Dependence)
     }
-    scales <- Rfast::colmeans(RG * scale.factor)
+    scales <- colMeans(RG * scale.factor)
   } else {
-    scales <- Rfast::colmeans(RG)
+    scales <- colMeans(RG)
   }
   
 
@@ -130,6 +130,6 @@ NNS.norm <- function(X,
     
   }
   
-  return(X_Normalized)
+  return(.NNS.out(X_Normalized))
   
 }

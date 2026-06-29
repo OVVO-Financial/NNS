@@ -151,41 +151,33 @@ dy.d_ <- function(x, y, wrt,
         deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
       }
       
-      deriv.points <- data.table::data.table(do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE)))
-      
-      data.table::set(deriv.points, i = NULL, j = as.integer(wrt), value = rep(unlist(rbind(original.eval.points.min,
-                                                                                            eval.points,
-                                                                                            original.eval.points.max))
-                                                                               , each = sampsize, length.out = nrow(deriv.points) ))
-      
+      deriv.points <- do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE))
+
+      deriv.points[, as.integer(wrt)] <- rep(unlist(rbind(original.eval.points.min,
+                                                          eval.points,
+                                                          original.eval.points.max)),
+                                             each = sampsize, length.out = nrow(deriv.points))
+
       colnames(deriv.points) <- colnames(x)
-      
+
       distance_wrt <- h_step
-      
+
       position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = nrow(deriv.points))
       id <- rep(1:length(eval.points), each = 3*sampsize, length.out = nrow(deriv.points))
-      
+
       if(messages) message(paste("Currently evaluating the ", nrow(deriv.points), " required points "  ), index, " of ", length(h_s),"\r", appendLF=FALSE)
-      
+
       estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
-      
-      estimates <- data.table::data.table(cbind(estimates = estimates,
-                                                position = position,
-                                                id = id))
-      
-      lower_msd <- estimates[position=="l", sapply(.SD, function(x) list(mean=gravity(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-      lower <- lower_msd$V1
-      lower_sd <- lower_msd$V2
-      
-      fx_msd <- estimates[position=="m", sapply(.SD, function(x) list(mean=gravity(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-      f.x <- fx_msd$V1
-      f.x_sd <- fx_msd$V2
-      
-      upper_msd <- estimates[position=="u", sapply(.SD, function(x) list(mean=gravity(as.numeric(x)), sd=sd(as.numeric(x)))), .SDcols = "estimates", by = id]
-      upper <- upper_msd$V1
-      upper_msd <- upper_msd$V2
-      
-      rise_1 <- upper - f.x 
+      estimates <- as.numeric(estimates)
+
+      # Grouped central tendency (gravity) of estimates by id, per finite-difference position
+      ids    <- sort(unique(id))
+      mask_l <- position == "l"; mask_m <- position == "m"; mask_u <- position == "u"
+      lower  <- vapply(ids, function(g) gravity(estimates[mask_l & id == g]), numeric(1))
+      f.x    <- vapply(ids, function(g) gravity(estimates[mask_m & id == g]), numeric(1))
+      upper  <- vapply(ids, function(g) gravity(estimates[mask_u & id == g]), numeric(1))
+
+      rise_1 <- upper - f.x
       rise_2 <- f.x - lower
       
     } else {

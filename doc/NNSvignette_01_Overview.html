@@ -345,10 +345,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Prereqs (uncomment if needed):</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># install.packages(&quot;NNS&quot;)</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># install.packages(c(&quot;data.table&quot;,&quot;xts&quot;,&quot;zoo&quot;,&quot;Rfast&quot;))</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(NNS)</span></code></pre></div>
 <div id="orientation" class="section level1">
 <h1>Orientation</h1>
 <p><strong>Goal.</strong> A complete, hands‑on curriculum for Nonlinear
@@ -485,20 +483,19 @@ partial‑moment CDFs)</li>
 <li><code>UPM.VaR(p, degree, variable)</code></li>
 </ul>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>qgrid <span class="ot">&lt;-</span> <span class="fu">LPM.VaR</span>(<span class="fu">seq</span>(<span class="fl">0.05</span>,<span class="fl">0.95</span>,.<span class="dv">1</span>),<span class="dv">0</span>,z) <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,qgrid,z))</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>CDF_tbl <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">threshold =</span> <span class="fu">as.numeric</span>(qgrid), <span class="at">CDF =</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>,qgrid,z))</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>CDF_tbl</span></code></pre></div>
-<pre><code>##       threshold   CDF
-##           &lt;num&gt; &lt;num&gt;
-##  1: -0.94052127  0.05
-##  2: -0.83748109  0.15
-##  3: -0.71317882  0.25
-##  4: -0.57443327  0.35
-##  5: -0.41017671  0.45
-##  6: -0.20424962  0.55
-##  7:  0.06850182  0.65
-##  8:  0.41462712  0.75
-##  9:  0.94307172  0.85
-## 10:  2.09633977  0.95</code></pre>
+<pre><code>##      threshold  CDF
+## 1  -0.94052127 0.05
+## 2  -0.83748109 0.15
+## 3  -0.71317882 0.25
+## 4  -0.57443327 0.35
+## 5  -0.41017671 0.45
+## 6  -0.20424962 0.55
+## 7   0.06850182 0.65
+## 8   0.41462712 0.75
+## 9   0.94307172 0.85
+## 10  2.09633977 0.95</code></pre>
 <hr />
 </div>
 </div>
@@ -818,43 +815,21 @@ conditional dependence)</li>
 ## NULL
 ## 
 ## $derivative
-##     Coefficient X.Lower.Range X.Upper.Range
-##           &lt;num&gt;         &lt;num&gt;         &lt;num&gt;
-##  1:   3.0485215  -1.998138604  -1.934370540
-##  2:   3.5169373  -1.934370540  -1.804387149
-##  3:   1.8605016  -1.804387149  -1.692769075
-##  4:   0.6783073  -1.692769075  -1.590915710
-##  5:   0.4272848  -1.590915710  -1.465816449
-##  6:  -0.5144026  -1.465816449  -1.376464546
-##  7:  -1.9381128  -1.376464546  -1.229726997
-##  8:  -3.0106084  -1.229726997  -1.110428636
-##  9:  -2.5210796  -1.110428636  -0.976623793
-## 10:  -3.7347021  -0.976623793  -0.870193992
-## 11:  -2.0861598  -0.870193992  -0.754706576
-## 12:  -2.1796417  -0.754706576  -0.636846031
-## 13:  -0.9300308  -0.636846031  -0.533099369
-## 14:   1.0359249  -0.533099369  -0.417818767
-## 15:   0.9115004  -0.417818767  -0.323764665
-## 16:   2.3250859  -0.323764665  -0.184330858
-## 17:   3.0769180  -0.184330858  -0.132632209
-## 18:   3.3162510  -0.132632209  -0.080933560
-## 19:   3.5323950  -0.080933560  -0.004108338
-## 20:   2.1862481  -0.004108338   0.121863569
-## 21:   3.4805229   0.121863569   0.216987038
-## 22:   1.8001452   0.216987038   0.336388996
-## 23:   0.2295375   0.336388996   0.516729182
-## 24:  -0.5625172   0.516729182   0.668479078
-## 25:  -2.5532272   0.668479078   0.830264570
-## 26:  -2.4765129   0.830264570   0.988320504
-## 27:  -3.1248612   0.988320504   1.083380900
-## 28:  -2.9622550   1.083380900   1.218812429
-## 29:  -1.5047059   1.218812429   1.279773569
-## 30:  -1.5723118   1.279773569   1.445979675
-## 31:   0.1804598   1.445979675   1.571628940
-## 32:   0.8726461   1.571628940   1.689536565
-## 33:   3.4198918   1.689536565   1.860999223
-## 34:   1.5206901   1.860999223   1.997618112
-##     Coefficient X.Lower.Range X.Upper.Range
+##   Coefficient X.Lower.Range X.Upper.Range
+## 2   3.0485215     -1.998139     -1.934371
+## 3   3.5169373     -1.934371     -1.804387
+## 4   1.8605016     -1.804387     -1.692769
+## 5   0.6783073     -1.692769     -1.590916
+## 6   0.4272848     -1.590916     -1.465816
+## 7  -0.5144026     -1.465816     -1.376465
+## ---
+## 30  -1.5047059      1.218812      1.279774
+## 31  -1.5723118      1.279774      1.445980
+## 32   0.1804598      1.445980      1.571629
+## 33   0.8726461      1.571629      1.689537
+## 34   3.4198918      1.689537      1.860999
+## 35   1.5206901      1.860999      1.997618
+## --- [ 34 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $Point.est
 ##   [1]  0.01571202  0.10442684  0.23470933  0.37680781  0.51890629  0.65039140
@@ -879,72 +854,53 @@ conditional dependence)</li>
 ## NULL
 ## 
 ## $regression.points
-##                x           y
-##            &lt;num&gt;       &lt;num&gt;
-##  1: -1.998138604 -0.01307124
-##  2: -1.934370540  0.18132707
-##  3: -1.804387149  0.63847051
-##  4: -1.692769075  0.84613612
-##  5: -1.590915710  0.91522399
-##  6: -1.465816449  0.96867700
-##  7: -1.376464546  0.92271416
-##  8: -1.229726997  0.63832023
-##  9: -1.110428636  0.27915958
-## 10: -0.976623793 -0.05817308
-## 11: -0.870193992 -0.45565668
-## 12: -0.754706576 -0.69658188
-## 13: -0.636846031 -0.95347564
-## 14: -0.533099369 -1.04996323
-## 15: -0.417818767 -0.93054118
-## 16: -0.323764665 -0.84481083
-## 17: -0.184330858 -0.52061525
-## 18: -0.132632209 -0.36154275
-## 19: -0.080933560 -0.19009705
-## 20: -0.004108338  0.08127998
-## 21:  0.121863569  0.35668582
-## 22:  0.216987038  0.68776523
-## 23:  0.336388996  0.90270609
-## 24:  0.516729182  0.94410093
-## 25:  0.668479078  0.85873901
-## 26:  0.830264570  0.44566388
-## 27:  0.988320504  0.05423632
-## 28:  1.083380900 -0.24281423
-## 29:  1.218812429 -0.64399694
-## 30:  1.279773569 -0.73572553
-## 31:  1.445979675 -0.99705336
-## 32:  1.571628940 -0.97437872
-## 33:  1.689536565 -0.87148709
-## 34:  1.860999223 -0.28510334
-## 35:  1.997618112 -0.07734835
-##                x           y
+##           x           y
+## 1 -1.998139 -0.01307124
+## 2 -1.934371  0.18132707
+## 3 -1.804387  0.63847051
+## 4 -1.692769  0.84613612
+## 5 -1.590916  0.91522399
+## 6 -1.465816  0.96867700
+## ---
+## 30 1.279774 -0.73572553
+## 31 1.445980 -0.99705336
+## 32 1.571629 -0.97437872
+## 33 1.689537 -0.87148709
+## 34 1.860999 -0.28510334
+## 35 1.997618 -0.07734835
+## --- [ 35 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 ## 
 ## $Fitted.xy
-##                x          y      y.hat  NNS.ID   gradient    residuals
-##            &lt;num&gt;      &lt;num&gt;      &lt;num&gt;  &lt;char&gt;      &lt;num&gt;        &lt;num&gt;
-##    1: -0.8496899 -0.5752368 -0.4984314 q121122 -2.0861598  0.076805376
-##    2:  1.1532205 -0.6617217 -0.4496971 q221122 -2.9622550  0.212024652
-##    3: -0.3640923 -0.7048691 -0.8815695 q122122  0.9115004 -0.176700402
-##    4:  1.5320696 -0.8447168 -0.9815176 q222121  0.1804598 -0.136800802
-##    5:  1.7618691 -0.9820881 -0.6241175 q222212  3.4198918  0.357970569
-##   ---                                                                 
-##  996:  1.3184955 -0.7988901 -0.7966085 q221222 -1.5723118  0.002281548
-##  997:  0.5684553  1.1554781  0.9150041 q212122 -0.5625172 -0.240473993
-##  998: -0.4340050 -0.7748325 -0.9473089 q122121  1.0359249 -0.172476359
-##  999:  0.8383194  0.7041960  0.4257159 q212222 -2.4765129 -0.278480031
-## 1000: -1.5647037  0.9467853  0.9264240 q111222  0.4272848 -0.020361366
-##       standard.errors
-##                 &lt;num&gt;
-##    1:       0.1769692
-##    2:       0.1783713
-##    3:       0.1905081
-##    4:       0.2044300
-##    5:       0.2636784
-##   ---                
-##  996:       0.1971693
-##  997:       0.2137362
-##  998:       0.1831159
-##  999:       0.2108312
-## 1000:       0.2078031</code></pre>
+##            x          y      y.hat  NNS.ID   gradient   residuals
+## 1 -0.8496899 -0.5752368 -0.4984314 q121122 -2.0861598  0.07680538
+## 2  1.1532205 -0.6617217 -0.4496971 q221122 -2.9622550  0.21202465
+## 3 -0.3640923 -0.7048691 -0.8815695 q122122  0.9115004 -0.17670040
+## 4  1.5320696 -0.8447168 -0.9815176 q222121  0.1804598 -0.13680080
+## 5  1.7618691 -0.9820881 -0.6241175 q222212  3.4198918  0.35797057
+## 6 -1.8177740  0.5226887  0.5913898 q111121  3.5169373  0.06870110
+##   standard.errors
+## 1       0.1769692
+## 2       0.1783713
+## 3       0.1905081
+## 4       0.2044300
+## 5       0.2636784
+## 6       0.2228958
+## ---
+##               x          y      y.hat  NNS.ID   gradient    residuals
+## 995   0.2618615  0.5142993  0.7685458 q211222  1.8001452  0.254246501
+## 996   1.3184955 -0.7988901 -0.7966085 q221222 -1.5723118  0.002281548
+## 997   0.5684553  1.1554781  0.9150041 q212122 -0.5625172 -0.240473993
+## 998  -0.4340050 -0.7748325 -0.9473089 q122121  1.0359249 -0.172476359
+## 999   0.8383194  0.7041960  0.4257159 q212222 -2.4765129 -0.278480031
+## 1000 -1.5647037  0.9467853  0.9264240 q111222  0.4272848 -0.020361366
+##      standard.errors
+## 995        0.2001082
+## 996        0.1971693
+## 997        0.2137362
+## 998        0.1831159
+## 999        0.2108312
+## 1000       0.2078031
+## --- [ 1000 rows x 7 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</code></pre>
 <div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
 <span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
 <span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a> </span>
@@ -994,47 +950,64 @@ drivers.</p>
 <li><code>NNS.VAR</code></li>
 </ul>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
-<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
-<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(<span class="fu">sin</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">480</span><span class="sc">/</span><span class="dv">8</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">480</span>, <span class="at">sd=</span>.<span class="dv">35</span>)))</span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a><span class="co"># Seasonality detection (prints a summary)</span></span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a>seasonal_period <span class="ot">&lt;-</span> <span class="fu">NNS.seas</span>(z, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-7"><a href="#cb42-7" tabindex="-1"></a><span class="fu">head</span>(seasonal_period<span class="sc">$</span>all.periods)</span></code></pre></div>
 <pre><code>##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-## 1    200                0.4267885                      8.540159e+16
-## 2     96                0.4425880                      8.540159e+16
-## 3     49                0.4615546                      8.540159e+16
-## 4    198                0.4812956                      8.540159e+16
-## 5    199                0.4885608                      8.540159e+16
-## 6    146                0.4901054                      8.540159e+16</code></pre>
+## 1    149                0.5403978                      3.671725e+16
+## 2    146                0.5704652                      3.671725e+16
+## 3    193                0.5772260                      3.671725e+16
+## 4    145                0.6411224                      3.671725e+16
+## 5    195                0.6510130                      3.671725e+16
+## 6    194                0.6736148                      3.671725e+16</code></pre>
 <div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># Validate seasonal periods</span></span>
 <span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="fu">NNS.ARMA.optim</span>(z, <span class="at">h =</span> <span class="dv">48</span>, <span class="at">seasonal.factor =</span> seasonal_period<span class="sc">$</span>periods, <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;CURRNET METHOD: lin&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
-## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 51 ) ...)&quot;
-## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.398327414917885&quot;
-## [1] &quot;BEST method = &#39;lin&#39;, seasonal.factor = c( 51 )&quot;
-## [1] &quot;BEST lin OBJECTIVE FUNCTION = 0.398327414917885&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.425337970282028&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.314272381262221&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.288043942135049&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.269630388633394&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.264107018738235&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.261855687810987&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.259567580022873&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.259036260976855&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;lin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)&quot;
+## [1] &quot;CURRENT lin OBJECTIVE FUNCTION = 0.258819679908979&quot;
+## [1] &quot;BEST method = &#39;lin&#39;, seasonal.factor = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )&quot;
+## [1] &quot;BEST lin OBJECTIVE FUNCTION = 0.258819679908979&quot;
 ## [1] &quot;CURRNET METHOD: nonlin&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
-## [1] &quot;NNS.ARMA(... method =  &#39;nonlin&#39; , seasonal.factor =  c( 51 ) ...)&quot;
-## [1] &quot;CURRENT nonlin OBJECTIVE FUNCTION = 2.75408671013046&quot;
-## [1] &quot;BEST method = &#39;nonlin&#39; PATH MEMBER = c( 51 )&quot;
-## [1] &quot;BEST nonlin OBJECTIVE FUNCTION = 2.75408671013046&quot;
+## [1] &quot;NNS.ARMA(... method =  &#39;nonlin&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)&quot;
+## [1] &quot;CURRENT nonlin OBJECTIVE FUNCTION = 2.99141781480761&quot;
+## [1] &quot;BEST method = &#39;nonlin&#39; PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )&quot;
+## [1] &quot;BEST nonlin OBJECTIVE FUNCTION = 2.99141781480761&quot;
 ## [1] &quot;CURRNET METHOD: both&quot;
 ## [1] &quot;COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:&quot;
-## [1] &quot;NNS.ARMA(... method =  &#39;both&#39; , seasonal.factor =  c( 51 ) ...)&quot;
-## [1] &quot;CURRENT both OBJECTIVE FUNCTION = 0.778172239627562&quot;
-## [1] &quot;BEST method = &#39;both&#39; PATH MEMBER = c( 51 )&quot;
-## [1] &quot;BEST both OBJECTIVE FUNCTION = 0.778172239627562&quot;</code></pre>
-<p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+## [1] &quot;NNS.ARMA(... method =  &#39;both&#39; , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)&quot;
+## [1] &quot;CURRENT both OBJECTIVE FUNCTION = 0.625552444253532&quot;
+## [1] &quot;BEST method = &#39;both&#39; PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )&quot;
+## [1] &quot;BEST both OBJECTIVE FUNCTION = 0.625552444253532&quot;</code></pre>
+<p><img role="img" src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <pre><code>## $periods
-## [1] 51
+## [1] 49 51 48 77 53 61 47 52 39
 ## 
 ## $weights
 ## NULL
 ## 
 ## $obj.fn
-## [1] 0.3983274
+## [1] 0.2588197
 ## 
 ## $method
 ## [1] &quot;lin&quot;
@@ -1046,61 +1019,61 @@ drivers.</p>
 ## [1] FALSE
 ## 
 ## $bias.shift
-## [1] 0.01738357
+## [1] -0.009218256
 ## 
 ## $errors
-##  [1] -0.4754897523 -0.4609730867 -0.3018876142  0.0439513384 -0.1128600832
-##  [6]  0.9193835234  0.0160010547 -0.7516578805 -0.8195384972 -0.1274709629
-## [11] -0.0093477175  0.1480424491  0.0345888303  0.0009331215 -0.2819915138
-## [16] -0.3474821395 -1.2543849202 -0.5442948705 -0.0049610072 -0.4702036102
-## [21]  0.1846614137  1.6541950586 -0.2046795992  0.9691745476  1.1460606178
-## [26] -0.5141738440 -1.3562787956  0.3853973272 -0.3364881552 -0.5604890777
-## [31] -0.3175309175 -0.1677932189 -0.1511705981  0.4541183441 -0.1377055180
-## [36]  0.4279932502  1.3576081283 -0.0645315976  1.1430476887  0.1399600873
-## [41]  0.0874395694 -0.3703494531  0.3046994756  0.2057574931 -0.7602832912
-## [46]  0.6902933417  0.2238850985 -0.2775974238 -0.8250763050  0.5817787408
-## [51] -0.8733350647  0.2906911996  0.1863210948 -0.2484232855  0.1444232735
-## [56]  1.1655644133  0.0821221969 -0.2813315730 -0.7959981329 -0.3601165470
-## [61] -0.4617740020 -0.0593491905  0.0143389607  0.1016580238  0.0300275332
-## [66] -1.7237406556 -0.0930802461 -0.9348574200 -0.7189682901  0.0700766333
-## [71] -0.3547205444  0.2333233909  0.6840012123 -0.0779445509  0.8409902584
-## [76]  0.0130711684  0.8074727217 -1.1462424589  0.0926963526 -0.4674150054
-## [81]  0.1308248298 -0.6493713604  0.0713668583  0.4889233461  0.4293197750
-## [86] -0.4397639878  0.4261287370  0.7556075116  0.6016698079 -0.1086690282
-## [91]  0.6426872057 -0.4175612763  0.0250816728  0.9344147185  0.5444153587
-## [96] -0.8746369897
+##  [1]  0.037998635 -0.239228953 -0.316141990 -0.418117619 -0.823606681
+##  [6] -0.177864620 -0.273284145  0.199097260 -0.269078422  0.335736005
+## [11]  0.207001239 -0.260052866 -0.374098331 -0.028416380  0.269396784
+## [16] -0.182028248 -0.529811555  0.857804747 -0.057911905  0.117997928
+## [21]  0.424976020  0.645090011  0.078429020 -0.213553889 -0.791244537
+## [26]  0.920545733  0.153751505 -0.081285100  0.619661377  0.496442598
+## [31]  0.257396953  0.297846774  0.540597384  0.055491180  0.212429542
+## [36] -0.491954954 -0.289145299  0.660580259  0.052001332  0.279297027
+## [41] -0.806916112 -0.030591942  0.109210562 -0.135952107  0.045299836
+## [46]  0.148876853 -0.884313637  0.210474935  0.113092419  0.660054965
+## [51] -0.435314826 -0.782235750  0.656562239 -0.025353564  0.425236504
+## [56] -0.846555263 -0.601757846 -0.266020841 -0.513607767  0.451721860
+## [61] -0.289982748  0.190794363  0.096026418  0.310036015  0.424443802
+## [66] -0.167961571  1.046312612  0.298616962  0.082761450  0.534065617
+## [71]  0.261430044  0.122084342 -0.544005536 -0.120869841 -1.135291084
+## [76]  0.369271897 -0.492958216 -0.892193344  0.043885543  0.398073481
+## [81]  0.329804904 -0.278855424 -0.409283402 -0.437965243  1.323354381
+## [86]  0.044144199  0.093216425  0.592139742 -0.484191535  0.662806568
+## [91] -0.180633968 -0.170869946  0.370987867  0.008514349 -0.090696911
+## [96] -0.365429200
 ## 
 ## $results
-##  [1] -0.495145166 -0.629911085 -0.423647703 -1.217211533 -1.313660334
-##  [6] -1.507558621 -1.512809568 -1.244102492 -0.765300445 -2.402307464
-## [11] -1.325990243 -0.928756118 -1.819067479 -0.855732188 -1.152690586
-## [16] -1.039006594 -0.562011496 -1.103503510 -0.685097085 -0.727417601
-## [21] -0.044018500 -0.030435409  0.002633325 -0.314902491  0.232587264
-## [26]  1.030889038  0.556722546  0.680351082  1.101193382  0.941245213
-## [31]  1.648626820  1.225992916  1.806473740  0.964372963  1.627354696
-## [36]  0.460925955  1.318674310  1.692295367  0.854538440  0.768654797
-## [41]  0.739228654  1.582319086  0.402156303  0.902802567  0.718513288
-## [46]  0.086635865  0.193748286  0.283357285
+##  [1] -0.51693959 -0.68128383 -0.78458374 -0.93283301 -1.03903131 -0.87348694
+##  [7] -0.87884737 -1.01975206 -0.99207304 -0.94874121 -1.01358876 -0.86983927
+## [13] -0.94505909 -0.79370119 -0.80045643 -0.62238672 -0.49365177 -0.21357396
+## [19] -0.39782796 -0.33633239 -0.08206682  0.07442965  0.29167524  0.18543598
+## [25]  0.39554954  0.85664622  0.74166617  0.67340715  0.72779008  0.91300090
+## [31]  0.87514715  0.88928012  0.70838441  0.94122904  0.84877222  0.68921404
+## [37]  0.64739105  0.72700981  0.64361948  0.66902228  0.33304850  0.34791061
+## [43]  0.21002564  0.20985980  0.08722744 -0.03033825 -0.02028085 -0.29414843
 ## 
 ## $lower.pred.int
-##  [1] -1.67077922 -1.80554514 -1.59928176 -2.39284559 -2.48929439 -2.68319268
-##  [7] -2.68844363 -2.41973655 -1.94093450 -3.57794152 -2.50162430 -2.10439018
-## [13] -2.99470154 -2.03136624 -2.32832464 -2.21464065 -1.73764555 -2.27913757
-## [19] -1.86073114 -1.90305166 -1.21965256 -1.20606947 -1.17300073 -1.49053655
-## [25] -0.94304679 -0.14474502 -0.61891151 -0.49528298 -0.07444068 -0.23438884
-## [31]  0.47299276  0.05035886  0.63083968 -0.21126109  0.45172064 -0.71470810
-## [37]  0.14304025  0.51666131 -0.32109562 -0.40697926 -0.43640540  0.40668503
-## [43] -0.77347775 -0.27283149 -0.45712077 -1.08899819 -0.98188577 -0.89227677
+##  [1] -1.423175705 -1.587519952 -1.690819861 -1.839069129 -1.945267428
+##  [6] -1.779723063 -1.785083492 -1.925988180 -1.898309159 -1.854977325
+## [11] -1.919824884 -1.776075385 -1.851295208 -1.699937305 -1.706692545
+## [16] -1.528622842 -1.399887888 -1.119810077 -1.304064083 -1.242568507
+## [21] -0.988302944 -0.831806471 -0.614560884 -0.720800144 -0.510686578
+## [26] -0.049589898 -0.164569954 -0.232828971 -0.178446036  0.006764783
+## [31] -0.031088973 -0.016956002 -0.197851710  0.034992917 -0.057463903
+## [36] -0.217022077 -0.258845072 -0.179226309 -0.262616636 -0.237213835
+## [41] -0.573187621 -0.558325512 -0.696210481 -0.696376318 -0.819008679
+## [46] -0.936574370 -0.926516971 -1.200384552
 ## 
 ## $upper.pred.int
-##  [1]  0.68048889  0.54572297  0.75198635 -0.04157748 -0.13802628 -0.33192456
-##  [7] -0.33717551 -0.06846843  0.41033361 -1.22667341 -0.15035619  0.24687794
-## [13] -0.64343342  0.31990187  0.02294347  0.13662746  0.61362256  0.07213055
-## [19]  0.49053697  0.44821646  1.13161556  1.14519865  1.17826738  0.86073157
-## [25]  1.40822132  2.20652310  1.73235660  1.85598514  2.27682744  2.11687927
-## [31]  2.82426088  2.40162697  2.98210780  2.14000702  2.80298875  1.63656001
-## [37]  2.49430837  2.86792942  2.03017250  1.94428885  1.91486271  2.75795314
-## [43]  1.57779036  2.07843662  1.89414735  1.26226992  1.36938234  1.45899134</code></pre>
+##  [1]  0.38929653  0.22495229  0.12165238 -0.02659689 -0.13279519  0.03274918
+##  [7]  0.02738875 -0.11351594 -0.08583692 -0.04250509 -0.10735264  0.03639685
+## [13] -0.03882297  0.11253493  0.10577969  0.28384940  0.41258435  0.69266216
+## [19]  0.50840816  0.56990373  0.82416930  0.98066577  1.19791136  1.09167210
+## [25]  1.30178566  1.76288234  1.64790228  1.57964327  1.63402620  1.81923702
+## [31]  1.78138327  1.79551624  1.61462053  1.84746516  1.75500834  1.59545016
+## [37]  1.55362717  1.63324593  1.54985560  1.57525840  1.23928462  1.25414673
+## [43]  1.11626176  1.11609592  0.99346356  0.87589787  0.88595527  0.61208769</code></pre>
 <p><strong>Notes.</strong> NNS seasonality uses coefficient of variation
 instead of ACF/PACFs, and NNS ARMA blends multiple seasonal periods into
 the linear or nonlinear regression forecasts.</p>
@@ -1131,12 +1104,12 @@ the linear or nonlinear regression forecasts.</p>
 <pre><code>## [1] &quot;rho = 1&quot;    &quot;rho = 0.5&quot;  &quot;rho = 0&quot;    &quot;rho = -0.5&quot; &quot;rho = -1&quot;</code></pre>
 <div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">head</span>(mc<span class="sc">$</span>replicates<span class="sc">$</span><span class="st">`</span><span class="at">rho = 0</span><span class="st">`</span>)</span></code></pre></div>
 <pre><code>##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5
-## [1,]    8.561720   11.097841   12.140974    3.478574    16.25845
-## [2,]    4.989649    9.142348    6.298598    2.573488    11.23749
-## [3,]    5.489892   11.635826    9.151404    4.146175    13.61840
-## [4,]    7.175210   13.194315   11.614209    5.906763    19.23707
-## [5,]    8.443500   12.157572   13.263425    4.369562    13.40513
-## [6,]    7.386515   10.979258   11.705842    2.410838    15.31133</code></pre>
+## [1,]   11.938210    7.934172    8.104871    0.539019    5.320218
+## [2,]    3.851217   15.442072    8.408644    0.779101    5.250459
+## [3,]    0.873981   11.216516    9.257177    3.177528    3.544637
+## [4,]    2.716365    6.085424    4.314435    5.440431   13.054350
+## [5,]   -2.766933    8.503718    7.433186    6.121277   13.576794
+## [6,]    0.890925    7.262208    8.737673    6.457328   12.922429</code></pre>
 <hr />
 </div>
 </div>
@@ -1153,11 +1126,12 @@ estimators.</p>
 <li><code>NNS.SD.cluster(R)</code></li>
 <li><code>NNS.SD.efficient.set(R)</code></li>
 </ul>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
-<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
-<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
-<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a></span>
-<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a>RA <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>RB <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a>RC <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="fl">0.006</span>, <span class="fl">0.04</span>)</span>
+<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" tabindex="-1"></a><span class="fu">NNS.FSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
 <div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="fu">NNS.SSD.uni</span>(RA, RB)</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
@@ -1167,10 +1141,10 @@ estimators.</p>
 <span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.cluster</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## $Clusters
 ## $Clusters$Cluster_1
-## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+## [1] &quot;A&quot; &quot;C&quot; &quot;B&quot;</code></pre>
 <div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">NNS.SD.efficient.set</span>(Rmat, <span class="at">degree =</span> <span class="dv">1</span>))</span></code></pre></div>
 <pre><code>## Checking 1 of 2Checking 2 of 2</code></pre>
-<pre><code>## [1] &quot;C&quot; &quot;A&quot; &quot;B&quot;</code></pre>
+<pre><code>## [1] &quot;A&quot; &quot;C&quot; &quot;B&quot;</code></pre>
 <hr />
 </div>
 <div id="appendix-a-measuretheoretic-sketch-why-partial-moments-are-rigorous" class="section level1">

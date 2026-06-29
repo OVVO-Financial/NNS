@@ -345,9 +345,8 @@ Simulation</h1>
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">require</span>(knitr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">require</span>(rgl)</span></code></pre></div>
 <p><code>NNS</code> offers several novel sampling methods from any
 distribution, as well as simulating variables while maintaining their
 dependence.</p>
@@ -420,7 +419,7 @@ compared to our original <span class="math inline">\(X\)</span>.</p>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>degree.<span class="fl">1.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">x =</span> x)</span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>degree.<span class="fl">2.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="dv">2</span>, <span class="at">x =</span> x)</span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">head</span>(data.table<span class="sc">::</span><span class="fu">data.table</span>(<span class="fu">cbind</span>(<span class="st">&quot;original x&quot;</span> <span class="ot">=</span> <span class="fu">sort</span>(x), degree.<span class="fl">0.</span>samples, </span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="fu">cbind</span>(<span class="st">&quot;original x&quot;</span> <span class="ot">=</span> <span class="fu">sort</span>(x), degree.<span class="fl">0.</span>samples, </span>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                                                          degree.<span class="dv">0</span>.<span class="fl">25.</span>samples, </span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>                                                          degree.<span class="dv">0</span>.<span class="fl">5.</span>samples, </span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>                                                          degree.<span class="fl">1.</span>samples, </span>

@@ -1,7 +1,9 @@
 ---
 title: "Getting Started with NNS: Sampling and Simulation"
 author: "Fred Viole"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    check_title: false
 vignette: >
   %\VignetteIndexEntry{05. Getting Started with NNS: Sampling and Simulation}
   %\VignetteEngine{knitr::rmarkdown}
@@ -11,8 +13,6 @@ vignette: >
 ```{r setup, include=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(NNS)
-library(data.table)
-data.table::setDTthreads(1L)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
@@ -20,7 +20,6 @@ Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ```{r setup2, message=FALSE, warning = FALSE}
 library(NNS)
-library(data.table)
 require(knitr)
 require(rgl)
 ```
@@ -169,7 +168,7 @@ degree.0.5.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 
 degree.1.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 1, x = x)
 degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2, x = x)
 
-head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples, 
+head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samples, 
                                                           degree.0.25.samples, 
                                                           degree.0.5.samples, 
                                                           degree.1.samples, 

@@ -73,10 +73,10 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
   diag(p.value_matrix) <- 0
   p.value_matrix[is.na(p.value_matrix)] <- 0
   
-  return(list(
+  return(.NNS.out(list(
     causality = causes,
     lower_CI = lower_CI,
     upper_CI = upper_CI,
     p.value_matrix = p.value_matrix
-  ))
+  )))
 }

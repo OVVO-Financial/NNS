@@ -41,7 +41,7 @@
 #'  
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \code{data.table} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
 #' }
 #'
 #'
@@ -49,7 +49,7 @@
 #' \itemize{
 #'  \item{\code{"R2"}} provides the goodness of fit;
 #'
-#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.table} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} \code{data.table}.
+#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.frame} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} \code{data.frame}.
 #'
 #'  \item{\code{"x.star"}} returns the synthetic X* as a vector;
 #'
@@ -61,7 +61,7 @@
 #'  
 #'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \code{data.table} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
 #' }
 #'
 #' @note
@@ -189,7 +189,7 @@ NNS.reg = function (x, y,
         res <- NNS_reg_points_cpp(xv, yv,
                                   as.numeric(pm$x), as.numeric(pm$y),
                                   as.numeric(dependence), 0.95)
-        data.table::setDT(res)
+        # NNS_reg_points_cpp already returns a data.frame; return as-is (no copy).
         return(res)
       }
     }
@@ -253,17 +253,19 @@ NNS.reg = function (x, y,
     if(!is.null(point.est)){
       if(!is.null(dim(x)) && original.columns > 1){
         if(is.null(dim(point.est))) point.est <- data.frame(t(point.est)) else point.est <- data.frame(point.est)
-        new_x <- data.table::rbindlist(list(data.frame(x), point.est), use.names = FALSE)
+        new_x <- data.frame(x)
+        colnames(point.est) <- colnames(new_x)
+        new_x <- rbind(new_x, point.est)
       } else {
         new_x <- unlist(list(x, point.est))
       }
     } else new_x <- x
-    
+
     if(!is.null(dim(x)) && original.columns > 1){
-      new_x <- data.table::data.table(new_x)
+      new_x <- as.data.frame(new_x)
       dummies <- list()
       for(i in 1:original.columns){
-        dummies[[i]] <- factor_2_dummy_FR(new_x[,.SD, .SDcols = i])
+        dummies[[i]] <- factor_2_dummy_FR(new_x[, i, drop = FALSE])
         if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(original.names[i], "_", colnames(dummies[i][[1]])) else names(dummies)[i] <- original.names[i]
       }
       x <- do.call(cbind, dummies)
@@ -422,8 +424,10 @@ NNS.reg = function (x, y,
           x.star.coef[abs(x.star.coef) < threshold] <- 0
           
           norm.x <- apply(original.variable, 2, function(b) (b - min(b)) / (max(b) - min(b)))
-          
-          x.star.matrix <- Rfast::eachrow(norm.x, x.star.coef, "*")
+
+          # Column-scale each regressor by its coefficient (vectorized recycling,
+          # column-major) without helper dispatch overhead.
+          x.star.matrix <- norm.x * rep(x.star.coef, each = nrow(norm.x))
           x.star.matrix[is.na(x.star.matrix)] <- 0
           
           #In case all IVs have 0 correlation to DV
@@ -436,9 +440,9 @@ NNS.reg = function (x, y,
           
           if(is.numeric(dim.red.method)) DENOMINATOR <- sum(dim.red.method) else DENOMINATOR <- sum( abs( x.star.coef) > 0)
           
-          synthetic.x.equation.coef <- data.table::data.table(Variable = colnames.list, Coefficient = x.star.coef)
-          
-          synthetic.x.equation <- data.table::rbindlist( list( synthetic.x.equation.coef, list("DENOMINATOR", DENOMINATOR)))
+          synthetic.x.equation.coef <- data.frame(Variable = unlist(colnames.list), Coefficient = x.star.coef, stringsAsFactors = FALSE)
+
+          synthetic.x.equation <- rbind(synthetic.x.equation.coef, data.frame(Variable = "DENOMINATOR", Coefficient = DENOMINATOR, stringsAsFactors = FALSE))
           
           
           if(!is.null(point.est)){
@@ -461,8 +465,8 @@ NNS.reg = function (x, y,
             
           }
           
-          x <- Rfast::rowsums(x.star.matrix / sum( abs( x.star.coef) > 0), parallel = FALSE)
-          x.star <- data.table::data.table(x)
+          x <- rowSums(x.star.matrix / sum( abs( x.star.coef) > 0))
+          x.star <- data.frame(x)
           
           dependence <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence, error = function(e) .1)
           dependence <- tryCatch(mean(c(dependence, NNS.copula(cbind(apply(cbind(x, x, y), 2, function(z) NNS.rescale(z, 0, 1)))))), error = function(e) dependence)
@@ -541,7 +545,7 @@ NNS.reg = function (x, y,
                               as.numeric(part.map$regression.points$x),
                               as.numeric(part.map$regression.points$y),
                               as.numeric(dependence), stn)
-    data.table::setDT(res)
+    # NNS_reg_points_cpp already returns a data.frame; return as-is (no copy).
     return(res)
   }
 
@@ -549,42 +553,68 @@ NNS.reg = function (x, y,
 
   if(length(part.map$dt$y) > length(y)){
     part.map$dt$x <- pmax(min(x), pmin(part.map$dt$x, max(x)))
-    part.map$dt[, y := gravity(y), by = "x"]
-    data.table::setkey(part.map$dt, x)
-    part.map$dt <- unique(part.map$dt, by = "x")
+    part.map$dt$y <- ave(part.map$dt$y, part.map$dt$x, FUN = gravity)
+    part.map$dt <- part.map$dt[order(part.map$dt$x, method = "radix", na.last = FALSE), , drop = FALSE]
+    part.map$dt <- part.map$dt[!duplicated(part.map$dt$x), , drop = FALSE]
   }
-  
+
   Regression.Coefficients <- data.frame(matrix(ncol = 3))
   colnames(Regression.Coefficients) <- c('Coefficient', 'X Lower Range', 'X Upper Range')
-  
-  regression.points <- part.map$regression.points[,.(x,y)]
-  
+
+  # Native regression-point construction via the compiled NNS_reg_points_cpp,
+  # bit-identical to the base-R block below for the configuration it covers
+  # (type = NULL, noise.reduction = "off", no smoothing, dependence < 1, finite
+  # numeric order) -- the same routine the multivariate fast path uses. This is
+  # the univariate workhorse path (direct NNS.reg(x, y) calls, dy.dx, NNS.CDF).
+  native_rp <- isTRUE(getOption("NNS.native", TRUE)) && is.null(type) && !isTRUE(smooth) &&
+               identical(noise.reduction, "off") && !is.character(order) &&
+               is.numeric(dependence) && length(dependence) == 1 && dependence < 1 &&
+               !identical(dep.reduced.order, "max") && is.null(dim(x)) &&
+               length(part.map$regression.points$x) > 0
+
+  if (native_rp) {
+    rp_native <- NNS_reg_points_cpp(as.numeric(x), as.numeric(y),
+                                    as.numeric(part.map$regression.points$x),
+                                    as.numeric(part.map$regression.points$y),
+                                    as.numeric(dependence), stn)
+    regression.points <- data.frame(x = rp_native$x, y = rp_native$y)
+    regression.points$rise <- c(NA, diff(regression.points$y))
+    regression.points$run  <- c(NA, diff(regression.points$x))
+    p <- nrow(regression.points)
+    smooth_condition <- FALSE
+  } else {
+
+  regression.points <- part.map$regression.points[, c("x","y")]
+
   regression.points$x <- pmin(max(x), pmax(regression.points$x, min(x)))
-  
-  data.table::setkey(regression.points,x)
-  regression.points <- regression.points[, y := gravity(y), by = "x"]
-  regression.points <- unique(regression.points)
-  
-  
+
+  ### Consolidate: order by x, gravity-average y within each x, keep unique x
+  regression.points <- regression.points[order(regression.points$x, method = "radix", na.last = FALSE), , drop = FALSE]
+  regression.points$y <- .grouped_gravity(regression.points$x, regression.points$y)
+  regression.points <- regression.points[!duplicated(regression.points$x), , drop = FALSE]
+  rownames(regression.points) <- NULL
+
   if(type!="class" || is.null(type)){
     central_rows <- c(floor(median(1:nrow(regression.points))), ceiling(median(1:nrow(regression.points))))
-    central_x <- regression.points[central_rows,]$x
-    ifelse(length(unique(central_rows))>1, central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]]), central_y <- regression.points[central_rows[1],]$y)
+    central_x <- regression.points$x[central_rows]
+    ifelse(length(unique(central_rows))>1, central_y <- gravity(y[x>=central_x[1] & x<=central_x[2]]), central_y <- regression.points$y[central_rows[1]])
     central_x <- gravity(central_x)
     med.rps <- t(c(central_x, central_y))
   } else {
     med.rps <- t(c(NA, NA))
   }
-  
-  regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(med.rps)))), use.names = FALSE)
-  
-  regression.points <- regression.points[complete.cases(regression.points),]
-  regression.points <- regression.points[ , .(x,y)]
-  data.table::setkey(regression.points, x, y)
-  
-  ### Consolidate possible duplicated points
-  regression.points <- regression.points[, y := gravity(y), by = "x"]
-  regression.points <- unique(regression.points)
+
+  regression.points <- rbind(regression.points[, c("x","y")],
+                             data.frame(x = med.rps[1,1], y = med.rps[1,2]))
+
+  regression.points <- regression.points[complete.cases(regression.points), , drop = FALSE]
+  regression.points <- regression.points[ , c("x","y")]
+
+  ### Consolidate possible duplicated points (order by x then y)
+  regression.points <- regression.points[order(regression.points$x, regression.points$y, method = "radix", na.last = FALSE), , drop = FALSE]
+  regression.points$y <- .grouped_gravity(regression.points$x, regression.points$y)
+  regression.points <- regression.points[!duplicated(regression.points$x), , drop = FALSE]
+  rownames(regression.points) <- NULL
   
   
   if(dependence < 1){
@@ -688,138 +718,138 @@ NNS.reg = function (x, y,
   
   
   
-  regression.points <- data.table::rbindlist(list(regression.points,data.table::data.table(do.call(rbind, list(min.rps, max.rps, med.rps )))), use.names = FALSE)
-  
-  regression.points <- regression.points[complete.cases(regression.points),]
-  regression.points <- regression.points[ , .(x,y)]
-  data.table::setkey(regression.points, x, y)
-  
-  ### Consolidate possible duplicated points
-  regression.points <- regression.points[, y := gravity(y), by = "x"]
-  regression.points <- unique(regression.points)
-  
-  
-  if(dim(regression.points)[1] > 1){
-    rise <- regression.points[ , 'rise' := y - data.table::shift(y)]
-    run <- regression.points[ , 'run' := x - data.table::shift(x)]
+  regression.points <- rbind(regression.points[, c("x","y")],
+                             data.frame(x = c(min.rps[1,1], max.rps[1,1], med.rps[1,1]),
+                                        y = c(min.rps[1,2], max.rps[1,2], med.rps[1,2])))
+
+  regression.points <- regression.points[complete.cases(regression.points), , drop = FALSE]
+  regression.points <- regression.points[ , c("x","y")]
+
+  ### Consolidate possible duplicated points (order by x then y)
+  regression.points <- regression.points[order(regression.points$x, regression.points$y, method = "radix", na.last = FALSE), , drop = FALSE]
+  regression.points$y <- .grouped_gravity(regression.points$x, regression.points$y)
+  regression.points <- regression.points[!duplicated(regression.points$x), , drop = FALSE]
+  rownames(regression.points) <- NULL
+
+
+  if(nrow(regression.points) > 1){
+    regression.points$rise <- c(NA, diff(regression.points$y))
+    regression.points$run  <- c(NA, diff(regression.points$x))
   } else {
-    rise <- max(y) - min(y)
-    rise <- regression.points[ , 'rise' := rise]
+    regression.points$rise <- max(y) - min(y)
     run <- max(x) - min(x)
     if(run==0) run <- 1
-    run <- regression.points[ , 'run' := run]
-    regression.points <- data.table::rbindlist(list(regression.points, regression.points, regression.points), use.names = FALSE)
+    regression.points$run <- run
+    regression.points <- rbind(regression.points, regression.points, regression.points)
   }
-  
-  
+
+
   regression.points$x <- pmin(regression.points$x, max(x))
   regression.points$x <- pmax(regression.points$x, min(x))
-  
+
   regression.points$y <- pmin(regression.points$y, max(y))
   regression.points$y <- pmax(regression.points$y, min(y))
-  
-  
-  
-  Regression.Coefficients <- regression.points[ , .(rise,run)]
-  
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-  
-  upper.x <- regression.points[(2 : .N), x]
-  
+
+
+
+  Regression.Coefficients <- regression.points[ , c("rise","run")]
+
+  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), , drop = FALSE]
+
+  upper.x <- regression.points$x[2 : nrow(regression.points)]
+
   if(length(unique(upper.x)) > 1){
-    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'=(rise / run),'X.Lower.Range' = regression.points[-.N, x], 'X.Upper.Range' = upper.x)]
+    Regression.Coefficients$Coefficient   <- Regression.Coefficients$rise / Regression.Coefficients$run
+    Regression.Coefficients$X.Lower.Range <- regression.points$x[-nrow(regression.points)]
+    Regression.Coefficients$X.Upper.Range <- upper.x
   } else {
-    Regression.Coefficients <- Regression.Coefficients[ , `:=` ('Coefficient'= 0,'X.Lower.Range' = unique(upper.x), 'X.Upper.Range' = unique(upper.x))]
+    Regression.Coefficients$Coefficient   <- 0
+    Regression.Coefficients$X.Lower.Range <- unique(upper.x)
+    Regression.Coefficients$X.Upper.Range <- unique(upper.x)
   }
-  
-  Regression.Coefficients <- Regression.Coefficients[ , .(Coefficient,X.Lower.Range, X.Upper.Range)]
-  
-  
-  Regression.Coefficients <- unique(Regression.Coefficients)
+
+  Regression.Coefficients <- Regression.Coefficients[ , c("Coefficient","X.Lower.Range", "X.Upper.Range")]
+
+
+  Regression.Coefficients <- Regression.Coefficients[!duplicated(Regression.Coefficients), , drop = FALSE]
   Regression.Coefficients[Regression.Coefficients == Inf] <- 1
   Regression.Coefficients[is.na(Regression.Coefficients)] <- 0
   
   ### Fitted Values
-  p <- length(unlist(regression.points[ , 1]))
-  
+  p <- nrow(regression.points)
+
   smooth_condition <- smooth && p >= 4 && !is.character(order)
-  
+
   if (smooth_condition) {
     spline_fit <- stats::smooth.spline(
-      x    = regression.points[, x],
-      y    = regression.points[, y],
+      x    = regression.points$x,
+      y    = regression.points$y,
       spar = (dependence + 0.5) / 2
     )
-    
+
     # return smoothed regression points
-    regression.points[, y := stats::predict(spline_fit, regression.points$x)$y]
+    regression.points$y <- stats::predict(spline_fit, regression.points$x)$y
   }
-  
+
   # Slopes
   if (nrow(regression.points) > 1) {
-    rise <- regression.points[, 'rise' := y - data.table::shift(y)]
-    run  <- regression.points[, 'run'  := x - data.table::shift(x)]
+    regression.points$rise <- c(NA, diff(regression.points$y))
+    regression.points$run  <- c(NA, diff(regression.points$x))
   } else {
-    rise <- max(y) - min(y)
-    rise <- regression.points[, 'rise' := rise]
+    regression.points$rise <- max(y) - min(y)
     run  <- max(x) - min(x); if (run == 0) run <- 1
-    run  <- regression.points[, 'run'  := run]
-    regression.points <- data.table::rbindlist(
-      list(regression.points, regression.points, regression.points),
-      use.names = FALSE
-    )
+    regression.points$run  <- run
+    regression.points <- rbind(regression.points, regression.points, regression.points)
   }
-  
+
   # Clamp
   regression.points$x <- pmin(pmax(regression.points$x, min(x)), max(x))
   regression.points$y <- pmin(pmax(regression.points$y, min(y)), max(y))
-  
+
   if(!is.null(type) && type=="class") regression.points$y <- pmax(min(y), pmin(max(y), ifelse(regression.points$y %% 1 < 0.5, floor(regression.points$y), ceiling(regression.points$y))))
+
+  } # end base-R (non-native) regression-point construction
 
   # Multivariate callers (e.g. NNS.ARMA, NNS.stack, NNS.boost) only consume the
   # consolidated regression points.  regression.points is final at this stage;
   # the downstream Regression.Coefficients / fitted-value computation below does
   # not mutate it, so return early to skip that wasted work on every call.
-  if (multivariate.call) return(regression.points[, .(x, y)])
+  if (multivariate.call) return(regression.points[, c("x", "y")])
 
 
   # Coefficients
-  Regression.Coefficients <- regression.points[, .(rise, run)]
-  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), ]
-  upper.x <- regression.points[(2:.N), x]
+  Regression.Coefficients <- regression.points[, c("rise", "run")]
+  Regression.Coefficients <- Regression.Coefficients[complete.cases(Regression.Coefficients), , drop = FALSE]
+  upper.x <- regression.points$x[2:nrow(regression.points)]
   if (length(unique(upper.x)) > 1) {
-    Regression.Coefficients <- Regression.Coefficients[
-      , `:=`('Coefficient' = (rise / run),
-             'X.Lower.Range' = regression.points[-.N, x],
-             'X.Upper.Range'  = upper.x)
-    ]
+    Regression.Coefficients$Coefficient   <- Regression.Coefficients$rise / Regression.Coefficients$run
+    Regression.Coefficients$X.Lower.Range <- regression.points$x[-nrow(regression.points)]
+    Regression.Coefficients$X.Upper.Range <- upper.x
   } else {
-    Regression.Coefficients <- Regression.Coefficients[
-      , `:=`('Coefficient' = 0,
-             'X.Lower.Range' = unique(upper.x),
-             'X.Upper.Range'  = unique(upper.x))
-    ]
+    Regression.Coefficients$Coefficient   <- 0
+    Regression.Coefficients$X.Lower.Range <- unique(upper.x)
+    Regression.Coefficients$X.Upper.Range <- unique(upper.x)
   }
-  Regression.Coefficients <- Regression.Coefficients[, .(Coefficient, X.Lower.Range, X.Upper.Range)]
-  Regression.Coefficients <- unique(Regression.Coefficients)
+  Regression.Coefficients <- Regression.Coefficients[, c("Coefficient", "X.Lower.Range", "X.Upper.Range")]
+  Regression.Coefficients <- Regression.Coefficients[!duplicated(Regression.Coefficients), , drop = FALSE]
   Regression.Coefficients[Regression.Coefficients == Inf] <- 1
   Regression.Coefficients[is.na(Regression.Coefficients)] <- 0
-  
+
   ### Fitted values
-  if (is.na(Regression.Coefficients[1, Coefficient]))  Regression.Coefficients[1,  Coefficient := Regression.Coefficients[2,  Coefficient]]
-  if (is.na(Regression.Coefficients[.N, Coefficient])) Regression.Coefficients[.N, Coefficient := Regression.Coefficients[.N-1, Coefficient]]
-  
-  coef.interval <- findInterval(x, Regression.Coefficients[, (X.Lower.Range)], left.open = FALSE)
-  reg.interval  <- findInterval(x, regression.points[, x], left.open = FALSE)
-  
+  if (is.na(Regression.Coefficients$Coefficient[1]))  Regression.Coefficients$Coefficient[1] <- Regression.Coefficients$Coefficient[2]
+  if (is.na(Regression.Coefficients$Coefficient[nrow(Regression.Coefficients)])) Regression.Coefficients$Coefficient[nrow(Regression.Coefficients)] <- Regression.Coefficients$Coefficient[nrow(Regression.Coefficients)-1]
+
+  coef.interval <- findInterval(x, Regression.Coefficients$X.Lower.Range, left.open = FALSE)
+  reg.interval  <- findInterval(x, regression.points$x, left.open = FALSE)
+
   if (is.fcl(order) || ifelse(is.null(order), FALSE, ifelse(order >= length(y), TRUE, FALSE))) {
     estimate <- y
   } else if (smooth_condition) {
     # spline predictions
     if (!exists("spline_fit")) {
       spline_fit <- stats::smooth.spline(
-        x    = regression.points[, x],
-        y    = regression.points[, y],
+        x    = regression.points$x,
+        y    = regression.points$y,
         spar = (dependence + 0.5) / 2
       )
     }
@@ -830,27 +860,27 @@ NNS.reg = function (x, y,
     estimate[orig.order] <- plot_estimate
   } else {
     # piecewise predictions
-    estimate <- ((x - regression.points[reg.interval, x]) *
-                   Regression.Coefficients[coef.interval, Coefficient]) +
-      regression.points[reg.interval, y]
+    estimate <- ((x - regression.points$x[reg.interval]) *
+                   Regression.Coefficients$Coefficient[coef.interval]) +
+      regression.points$y[reg.interval]
   }
-  
-  
+
+
   ### Regression Equation
-  if (multivariate.call) return(regression.points[, .(x, y)])
+  if (multivariate.call) return(regression.points[, c("x", "y")])
   
   if(!is.null(point.est)){
-    coef.point.interval <- findInterval(point.est, Regression.Coefficients[ , (X.Lower.Range)], left.open = FALSE, rightmost.closed = TRUE)
-    reg.point.interval <- findInterval(point.est, regression.points[ , x], left.open = FALSE, rightmost.closed = TRUE)
+    coef.point.interval <- findInterval(point.est, Regression.Coefficients$X.Lower.Range, left.open = FALSE, rightmost.closed = TRUE)
+    reg.point.interval <- findInterval(point.est, regression.points$x, left.open = FALSE, rightmost.closed = TRUE)
     coef.point.interval[coef.point.interval == 0] <- 1
     reg.point.interval[reg.point.interval == 0] <- 1
-    if(smooth && p >= 4) point.est.y <- predict(spline_fit, point.est)$y else point.est.y <- as.vector(((point.est - regression.points[reg.point.interval, x]) * Regression.Coefficients[coef.point.interval, Coefficient]) + regression.points[reg.point.interval, y])
-    
+    if(smooth && p >= 4) point.est.y <- predict(spline_fit, point.est)$y else point.est.y <- as.vector(((point.est - regression.points$x[reg.point.interval]) * Regression.Coefficients$Coefficient[coef.point.interval]) + regression.points$y[reg.point.interval])
+
     if(any(point.est > max(x) | point.est < min(x) ) & length(na.omit(point.est)) > 0){
-      upper.slope <- mean(tail(Regression.Coefficients[, unique(Coefficient)], 2))
+      upper.slope <- mean(tail(unique(Regression.Coefficients$Coefficient), 2))
       point.est.y[point.est>max(x)] <- ((point.est[point.est>max(x)] - max(x)) * upper.slope + mode(y[which.max(x)]))
-      
-      lower.slope <- mean(head(Regression.Coefficients[, unique(Coefficient)], 2))
+
+      lower.slope <- mean(head(unique(Regression.Coefficients$Coefficient), 2))
       point.est.y[point.est<min(x)] <- ((point.est[point.est<min(x)] - min(x)) * lower.slope + mode(y[which.min(x)]))
     }
     
@@ -859,73 +889,100 @@ NNS.reg = function (x, y,
     
   }
   
-  colnames(estimate) <- NULL
-  
-  if(!is.null(type) && type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
-  
-  
-  fitted <- data.table::data.table(x = x,
-                                   y = original.y,
-                                   y.hat = estimate,
-                                   NNS.ID = nns.ids)
-  
-  colnames(fitted) <- gsub("y.hat.V1", "y.hat", colnames(fitted))
-  
-  fitted$y.hat[is.na(fitted$y.hat)] <- gravity(na.omit(fitted$y.hat))
-  
-  Values <- cbind(x, Fitted = fitted[ , y.hat], Actual = original.y, Difference = fitted[ , y.hat] - original.y,  Accuracy = abs(round(fitted[ , y.hat]) - original.y))
-  
-  SE <- sqrt( sum(fitted[ , ( (y.hat - y)^2) ]) / (length(y) - 1 ))
-  
-  gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
-  
-  fitted <- cbind(fitted, gradient)
-  fitted$residuals <- fitted$y.hat - original.y 
-  
-  if(!is.numeric(order) && !is.null(order)){
-    regression.points <- part.map$dt[, .(x,y)]
-    data.table::setkey(regression.points, x)
+  # Abbreviated output: point.only callers (dy.dx, dy.d_, NNS.stack, NNS.VAR)
+  # consume only Point.est / equation, so skip the full fitted table, grouped
+  # standard errors, R2, intervals, and plotting.
+  if (isTRUE(point.only)) {
+    options(warn = oldw)
+    return(list("R2" = NULL, "SE" = NULL, "Prediction.Accuracy" = NULL,
+                "equation" = .NNS.df(synthetic.x.equation), "x.star" = .NNS.df(x.star),
+                "derivative" = .NNS.df(Regression.Coefficients),
+                "Point.est" = point.est.y, "pred.int" = NULL,
+                "regression.points" = .NNS.df(regression.points[, c("x","y")]),
+                "Fitted.xy" = NULL))
   }
-  
+
+  estimate <- as.numeric(estimate)
+
+  if(!is.null(type) && type=="class") estimate <- pmin(max(y), pmax(min(y), ifelse(estimate%%1 < .5, floor(estimate), ceiling(estimate))))
+
+
+  fitted <- data.frame(x = as.numeric(x),
+                       y = original.y,
+                       y.hat = estimate,
+                       NNS.ID = nns.ids,
+                       stringsAsFactors = FALSE)
+
+  fitted$y.hat[is.na(fitted$y.hat)] <- gravity(na.omit(fitted$y.hat))
+
+  Values <- cbind(x, Fitted = fitted$y.hat, Actual = original.y, Difference = fitted$y.hat - original.y,  Accuracy = abs(round(fitted$y.hat) - original.y))
+
+  SE <- sqrt( sum( (fitted$y.hat - fitted$y)^2 ) / (length(y) - 1 ))
+
+  gradient <- Regression.Coefficients$Coefficient[findInterval(fitted$x, Regression.Coefficients$X.Lower.Range)]
+
+  fitted$gradient <- gradient
+  fitted$residuals <- fitted$y.hat - original.y
+
+  if(!is.numeric(order) && !is.null(order)){
+    regression.points <- part.map$dt[, c("x","y")]
+    regression.points <- regression.points[order(regression.points$x, method = "radix", na.last = FALSE), , drop = FALSE]
+  }
+
   Prediction.Accuracy <- NULL
-  
-  
+
+
   if(!is.null(type) && type=="class") Prediction.Accuracy <- (length(y) - sum( abs( round(fitted$y.hat) - (y)) > 0)) / length(y) else Prediction.Accuracy <- NULL
-  
-  
+
+
   y.mean <- mean(y)
   R2 <- (sum((fitted$y - y.mean)*(fitted$y.hat - y.mean))^2)/(sum((fitted$y - y.mean)^2)*sum((fitted$y.hat - y.mean)^2))
-  
-  
-  ###Standard errors estimation
-  fitted[, `:=` ( 'standard.errors' = sqrt( sum((y.hat - y) ^ 2) / ( max(1,(.N - 1))) ) ), by = gradient]
-  
-  
+
+
+  ###Standard errors estimation (grouped by gradient)
+  grad.vals <- unique(fitted$gradient)
+  fitted$standard.errors <- NA_real_
+  for(gv in grad.vals){
+    idx <- if(is.na(gv)) which(is.na(fitted$gradient)) else which(fitted$gradient == gv)
+    fitted$standard.errors[idx] <- sqrt( sum((fitted$y.hat[idx] - fitted$y[idx]) ^ 2) / ( max(1, (length(idx) - 1)) ) )
+  }
+
+
   ###Confidence and prediction intervals
   pred.int = NULL
   if(is.numeric(confidence.interval)){
-    fitted[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat) , by = gradient]
-    fitted[, `:=` ( 'conf.int.neg' = y.hat - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals))) , by = gradient]
-    
+    fitted$conf.int.pos <- NA_real_
+    fitted$conf.int.neg <- NA_real_
+    for(gv in grad.vals){
+      idx <- if(is.na(gv)) which(is.na(fitted$gradient)) else which(fitted$gradient == gv)
+      cv <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted$residuals[idx]))
+      fitted$conf.int.pos[idx] <- fitted$y.hat[idx] + cv
+      fitted$conf.int.neg[idx] <- fitted$y.hat[idx] - cv
+    }
+
     if(!is.null(point.est)){
-      
-      
-      fitted[, `:=` ( 'pred.int.pos' = (UPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
-      fitted[, `:=` ( 'pred.int.neg' = (LPM.VaR((1-confidence.interval)/2, degree = 0, y))) , by = gradient]
-      
+
+      fitted$pred.int.pos <- NA_real_
+      fitted$pred.int.neg <- NA_real_
+      for(gv in grad.vals){
+        idx <- if(is.na(gv)) which(is.na(fitted$gradient)) else which(fitted$gradient == gv)
+        fitted$pred.int.pos[idx] <- UPM.VaR((1-confidence.interval)/2, degree = 0, fitted$y[idx])
+        fitted$pred.int.neg[idx] <- LPM.VaR((1-confidence.interval)/2, degree = 0, fitted$y[idx])
+      }
+
       reduced_fitted <- fitted[, c("x", "pred.int.neg", "pred.int.pos")]
-      data.table::setkey(reduced_fitted, "x")
-      
-      pi_idx <- (findInterval(point.est, reduced_fitted[ , x], left.open = FALSE, rightmost.closed = TRUE))
-      
-      lower.pred.int <- reduced_fitted[pi_idx, 'pred.int.neg']   
-      upper.pred.int <- reduced_fitted[pi_idx, 'pred.int.pos']  
-      
-      fitted[,'pred.int.neg' := NULL]
-      fitted[,'pred.int.pos' := NULL]
-      
-      pred.int <- data.table::data.table(lower.pred.int, upper.pred.int)
-      if(!is.null(type)&&type=="class") pred.int <- data.table::data.table(apply(pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
+      reduced_fitted <- reduced_fitted[order(reduced_fitted$x, method = "radix", na.last = FALSE), , drop = FALSE]
+
+      pi_idx <- (findInterval(point.est, reduced_fitted$x, left.open = FALSE, rightmost.closed = TRUE))
+
+      lower.pred.int <- reduced_fitted$pred.int.neg[pi_idx]
+      upper.pred.int <- reduced_fitted$pred.int.pos[pi_idx]
+
+      fitted$pred.int.neg <- NULL
+      fitted$pred.int.pos <- NULL
+
+      pred.int <- data.frame(pred.int.neg = lower.pred.int, pred.int.pos = upper.pred.int)
+      if(!is.null(type)&&type=="class") pred.int <- as.data.frame(lapply(pred.int, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
     }
   }
   
@@ -975,22 +1032,22 @@ NNS.reg = function (x, y,
     } # !confidence.intervals
     
     ### Plot Regression points and fitted values and legend
-    points(na.omit(regression.points[ , .(x,y)]), col = 'red', pch = 15)
+    points(na.omit(regression.points[ , c("x","y")]), col = 'red', pch = 15)
     if (smooth_condition) {
       lines(sorted_x$x, plot_estimate, col = "red", lwd = 2)
     } else {
-      lines(na.omit(regression.points[, .(x, y)]), col = 'red', lwd = 2, lty = 2)
+      lines(na.omit(regression.points[, c("x", "y")]), col = 'red', lwd = 2, lty = 2)
     }
-    
+
     if(!is.null(point.est)){
       points(point.est, point.est.y, col='green', pch = 18, cex = 1.5)
       legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
       if(any(point.est > max(x))){
-        if(!smooth) segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points[.N, x], regression.points[.N, y], col = "green", lty = 2)
+        if(!smooth) segments(point.est[point.est > max(x)], point.est.y[point.est > max(x)], regression.points$x[nrow(regression.points)], regression.points$y[nrow(regression.points)], col = "green", lty = 2)
       }
-      
+
       if(any(point.est < min(x))){
-        if(!smooth) segments(point.est[point.est < min(x)], point.est.y[point.est < min(x)], regression.points[1, x], regression.points[1, y], col = "green", lty = 2)
+        if(!smooth) segments(point.est[point.est < min(x)], point.est.y[point.est < min(x)], regression.points$x[1], regression.points$y[1], col = "green", lty = 2)
       }
     } else {
       legend(location, bty = "n", y.intersp = 0.75, legend = r2.leg)
@@ -1005,24 +1062,24 @@ NNS.reg = function (x, y,
     return(list("R2" = R2,
                 "SE" = SE,
                 "Prediction.Accuracy" = Prediction.Accuracy,
-                "equation" = synthetic.x.equation,
-                "x.star" = x.star,
-                "derivative" = Regression.Coefficients[],
+                "equation" = .NNS.df(synthetic.x.equation),
+                "x.star" = .NNS.df(x.star),
+                "derivative" = .NNS.df(Regression.Coefficients),
                 "Point.est" = point.est.y,
-                "pred.int" = pred.int,
-                "regression.points" = regression.points[, .(x,y)],
-                "Fitted.xy" = fitted))
+                "pred.int" = .NNS.df(pred.int),
+                "regression.points" = .NNS.df(regression.points[, c("x","y")]),
+                "Fitted.xy" = .NNS.df(fitted)))
   } else {
     invisible(list("R2" = R2,
                    "SE" = SE,
                    "Prediction.Accuracy" = Prediction.Accuracy,
-                   "equation" = synthetic.x.equation,
-                   "x.star" = x.star,
-                   "derivative" = Regression.Coefficients[],
+                   "equation" = .NNS.df(synthetic.x.equation),
+                   "x.star" = .NNS.df(x.star),
+                   "derivative" = .NNS.df(Regression.Coefficients),
                    "Point.est" = point.est.y,
-                   "pred.int" = pred.int,
-                   "regression.points" = regression.points[ ,.(x,y)],
-                   "Fitted.xy" = fitted))
+                   "pred.int" = .NNS.df(pred.int),
+                   "regression.points" = .NNS.df(regression.points[ , c("x","y")]),
+                   "Fitted.xy" = .NNS.df(fitted)))
   }
   
 }

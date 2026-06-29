@@ -14,7 +14,7 @@ dy.dx(x, y, eval.point = NULL)
 \item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
 }
 \value{
-Returns a \code{data.table} of eval.point along with both 1st and 2nd derivative.
+Returns a \code{data.frame} of eval.point along with both 1st and 2nd derivative.
 }
 \description{
 Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
@@ -25,10 +25,10 @@ x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # First derivative
-dy.dx(x, y, eval.point = 1.75)[ , first.derivative]
+dy.dx(x, y, eval.point = 1.75)$first.derivative
 
 # Second derivative
-dy.dx(x, y, eval.point = 1.75)[ , second.derivative]
+dy.dx(x, y, eval.point = 1.75)$second.derivative
 
 # Vector of derivatives
 dy.dx(x, y, eval.point = c(1.75, 2.5))

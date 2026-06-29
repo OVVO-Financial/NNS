@@ -162,15 +162,17 @@ NNS.meboot <- function(x,
   aux <- colSums(t(cbind(xx[-c(1,2)], xx[-c(1,n)], xx[-c((n-1),n)])) * c(0.25, 0.5, 0.25))
   desintxb <- c(0.75*xx[1] + 0.25*xx[2], aux, 0.25*xx[n-1] + 0.75*xx[n])
   
-  # Quantile draws from max-entropy bootstrap IN RESIDUAL SPACE
-  res_mat <- matrix(rr, nrow = n, ncol = reps)
-  res_mat <- apply(
-    res_mat,
-    2,
-    function(col) {
-      NNS.meboot.part(xx, n, z, xmin, xmax, desintxb, reachbnd)
-    }
+  # Quantile draws from max-entropy bootstrap IN RESIDUAL SPACE.
+  # Each replicate column is an independent draw (the per-column input is not
+  # used), so build the n x reps matrix directly with replicate() instead of
+  # allocating matrix(rr, n, reps) only to overwrite it column-by-column. The
+  # number and order of NNS.meboot.part() calls is unchanged, so the RNG stream
+  # (and result) is identical.
+  res_mat <- replicate(
+    reps,
+    NNS.meboot.part(xx, n, z, xmin, xmax, desintxb, reachbnd)
   )
+  if (is.null(dim(res_mat))) dim(res_mat) <- c(n, reps)
   qseq <- apply(res_mat, 2, sort)
   res_mat[ordxx, ] <- qseq
   
@@ -210,7 +212,9 @@ NNS.meboot <- function(x,
   res_mat <- NNS.meboot.expand.sd(x = orig_res, ensemble = res_mat, ...) 
   
   # ===== Reconstruct levels: baseline + residuals =====
-  ensemble <- sweep(res_mat, 1, baseline, "+")
+  # baseline has length n (= nrow); column-major recycling adds it down each
+  # column, identical to sweep(MARGIN = 1) but without aperm/array copies.
+  ensemble <- res_mat + baseline
   
   # Keep legacy “identical(ordxx_2, ordxx)” reshuffle 
   if (identical(ordxx_2, ordxx)) {
@@ -239,9 +243,11 @@ NNS.meboot <- function(x,
     ensemble <- ensemble + kappa * (ensemble - xb)
   } else kappa <- NULL
   
-  # Enforce min / max if provided
-  if (!is.null(trim[[2]])) ensemble <- apply(ensemble, 2, function(z) pmax(trim[[2]], z))
-  if (!is.null(trim[[3]])) ensemble <- apply(ensemble, 2, function(z) pmin(trim[[3]], z))
+  # Enforce min / max if provided. pmax/pmin recycle the scalar bound across the
+  # whole matrix elementwise and preserve its dimensions, so the per-column
+  # apply() (and its array reassembly) is unnecessary.
+  if (!is.null(trim[[2]])) ensemble <- pmax(trim[[2]], ensemble)
+  if (!is.null(trim[[3]])) ensemble <- pmin(trim[[3]], ensemble)
   
   # ts attributes
   if (is.ts(x)) {
@@ -253,11 +259,11 @@ NNS.meboot <- function(x,
   
   final <- list(x = x,
                 replicates = round(ensemble, digits = digits),
-                ensemble = Rfast::rowmeans(ensemble),
+                ensemble = rowMeans(ensemble),
                 xx = xx, z = z, dv = dv, dvtrim = dvtrim,
                 xmin = xmin, xmax = xmax, desintxb = desintxb,
                 ordxx = ordxx, kappa = kappa)
-  return(final)
+  return(.NNS.out(final))
 }
 
 NNS.meboot <- Vectorize(NNS.meboot,

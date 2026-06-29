@@ -101,52 +101,35 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   ### Match y to unique identifier
   obs <- c(1 : length(Y))
-  
-  mean.by.id.matrix <- data.table::data.table(original.IVs, original.DV, NNS.ID, obs)
-  data.table::setkey(mean.by.id.matrix, 'NNS.ID', 'obs')
-  
-  if(is.numeric(order) || is.null(order)){
-    if(noise.reduction == 'off'){
-      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) gravity(as.numeric(z))), .SDcols = seq_len(n+1) ,by = 'NNS.ID']
-    }
-    if(noise.reduction == 'mean'){
-      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mean(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
-    }
-    if(noise.reduction == 'median'){
-      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) median(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
-    }
-    if(noise.reduction == 'mode'){
-      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
-    }
-    if(noise.reduction == 'mode_class'){
-      mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := lapply(.SD, function(z) mode_class(as.numeric(z))), .SDcols = seq_len(n+1), by = 'NNS.ID']
-    }
-  } else {
-    mean.by.id.matrix <- mean.by.id.matrix[ , c(paste("RPM", 1:n), "y.hat") := .SD , .SDcols = seq_len(n+1), by = 'NNS.ID']
-  }
-  
-  ###Order y.hat to order of original Y
-  resid.plot <- mean.by.id.matrix[]
-  data.table::setkey(resid.plot, 'obs')
-  
-  y.hat <- unlist(mean.by.id.matrix[ , .(y.hat)])
-  
-  if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
-  
-  fitted.matrix <- data.table::data.table(original.IVs, y = original.DV, y.hat, mean.by.id.matrix[ , .(NNS.ID)])
-  
-  fitted.matrix$residuals <- fitted.matrix$y.hat - fitted.matrix$y
-  fitted.matrix[, bias := gravity(residuals),  by = NNS.ID]
-  fitted.matrix$y.hat <- fitted.matrix$y.hat - fitted.matrix$bias
-  fitted.matrix$bias <- NULL
-  
-  data.table::setkey(mean.by.id.matrix, 'NNS.ID')
-  REGRESSION.POINT.MATRIX <- mean.by.id.matrix[ , c("obs") := NULL]
-  
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD[1], by = NNS.ID]
-  REGRESSION.POINT.MATRIX <- REGRESSION.POINT.MATRIX[, .SD, .SDcols = colnames(mean.by.id.matrix)%in%c(paste("RPM", 1:n), "y.hat")]
-  
-  data.table::setnames(REGRESSION.POINT.MATRIX, 1:n, feature.names)
+
+  ### Grouped regression-point matrix and fitted values by NNS.ID, computed in
+  ### C++ (NNS_mreg_reduce_cpp): each group's central tendency (per
+  ### noise.reduction) of the IV columns and the DV, mapped back to every
+  ### observation, then the grouped residual-bias correction.
+  order_is_numeric <- is.numeric(order) || is.null(order)
+  reducer <- if(!order_is_numeric) 5L else switch(noise.reduction,
+                                                  "mean"       = 1L,
+                                                  "median"     = 2L,
+                                                  "mode"       = 3L,
+                                                  "mode_class" = 4L,
+                                                  0L)   # "off" / default -> gravity
+
+  red <- NNS_mreg_reduce_cpp(as.matrix(original.IVs), as.numeric(original.DV),
+                             as.character(NNS.ID), as.integer(reducer), !is.null(type))
+
+  ### REGRESSION.POINT.MATRIX: one row per unique NNS.ID (sorted-id order)
+  REGRESSION.POINT.MATRIX <- as.data.frame(red$rpm, stringsAsFactors = FALSE)
+  colnames(REGRESSION.POINT.MATRIX) <- c(feature.names, "y.hat")
+
+  ### Fitted y.hat in original observation order (bias-corrected)
+  y.hat <- red$yhat
+
+  fitted.matrix <- as.data.frame(original.IVs, stringsAsFactors = FALSE)
+  colnames(fitted.matrix) <- feature.names
+  fitted.matrix$y         <- original.DV
+  fitted.matrix$y.hat     <- red$yhat
+  fitted.matrix$NNS.ID    <- NNS.ID
+  fitted.matrix$residuals <- red$residuals
   
   if(is.null(n.best)){
     dependence <- NNS.copula(cbind(original.IVs, original.DV))
@@ -184,7 +167,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   ### Point Estimates
   if (!is.null(point.est)) {
     # Calculate central points
-    central.points <- apply(REGRESSION.POINT.MATRIX[, .SD, .SDcols = 1:n], 2, gravity)
+    central.points <- apply(REGRESSION.POINT.MATRIX[, 1:n, drop = FALSE], 2, gravity)
     
     predict.fit <- numeric()
     outsiders <- point.est < minimums | point.est > maximums
@@ -255,10 +238,14 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
           boundary.points_matrix[, j] <- pmin(pmax(boundary.points_matrix[, j], minimums[j]), maximums[j])
         }
         
-        mid.points_matrix <- sweep(boundary.points_matrix, 2, central.points, "+") / 2
+        # Add/subtract the central point by column using R's matrix recycling.
+        # This is equivalent to column-wise central-point offsets while
+        # avoiding helper dispatch in this high-level orchestration path.
+        central.offset_matrix <- rep(central.points, each = nrow(boundary.points_matrix))
+        mid.points_matrix <- (boundary.points_matrix + central.offset_matrix) / 2
         mid.points_2_matrix <- (boundary.points_matrix + mid.points_matrix) / 2
         
-        last.known.distances_1 <- sqrt(rowSums(sweep(boundary.points_matrix, 2, central.points, "-")^2))
+        last.known.distances_1 <- sqrt(rowSums((boundary.points_matrix - central.offset_matrix)^2))
         last.known.distances_2 <- sqrt(rowSums((boundary.points_matrix - mid.points_matrix)^2))
         last.known.distances_3 <- sqrt(rowSums((boundary.points_matrix - mid.points_2_matrix)^2))
         
@@ -281,7 +268,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     }
     
     if (point.only) {
-      return(list(Point.est = predict.fit, RPM = REGRESSION.POINT.MATRIX[]))
+      return(list(Point.est = predict.fit, RPM = REGRESSION.POINT.MATRIX))
     }
   } else {
     predict.fit <- NULL
@@ -296,7 +283,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     }
   }
   
-  rhs.partitions <- data.table::data.table(reg.points.matrix)
+  rhs.partitions <- as.data.frame(reg.points.matrix)
   fitted.matrix$residuals <-   fitted.matrix$y.hat - original.DV
   
   if(!is.null(type) && type=="class"){
@@ -311,57 +298,47 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   pred.int <- NULL
   
   if(is.numeric(confidence.interval)){
-    fitted.matrix[, `:=` ( 'conf.int.pos' = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)) + y.hat)]
-    fitted.matrix[, `:=` ( 'conf.int.neg' = y.hat - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, residuals)))]
-    
+    ci <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
+    fitted.matrix$conf.int.pos <- fitted.matrix$y.hat + ci
+    fitted.matrix$conf.int.neg <- fitted.matrix$y.hat - ci
+
     if(!is.null(point.est)){
-      lower.pred.int = predict.fit - abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
-      upper.pred.int = abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals)) + predict.fit
-      
-      pred.int = data.table::data.table(lower.pred.int, upper.pred.int)
+      lower.pred.int = predict.fit - ci
+      upper.pred.int = ci + predict.fit
+
+      pred.int = data.frame(lower.pred.int, upper.pred.int)
     }
   }
   
   ### 3d plot
   if(plot && n == 2){
-    region.1 <- mean.by.id.matrix[[1]]
-    region.2 <- mean.by.id.matrix[[2]]
-    region.3 <- mean.by.id.matrix[ , y.hat]
-    
     rgl::plot3d(x = original.IVs[ , 1], y = original.IVs[ , 2], z = original.DV, box = FALSE, size = 3, col='steelblue', xlab = colnames(reg.points.matrix)[1], ylab = colnames(reg.points.matrix)[2], zlab = y.label )
-    
+
     if(plot.regions){
-      region.matrix <- data.table::data.table(original.IVs, original.DV, NNS.ID)
-      region.matrix[ , `:=` (min.x1 = min(.SD), max.x1 = max(.SD)), by = NNS.ID, .SDcols = 1]
-      region.matrix[ , `:=` (min.x2 = min(.SD), max.x2 = max(.SD)), by = NNS.ID, .SDcols = 2]
-      if(noise.reduction == 'off'){
-        region.matrix[ , `:=` (y.hat = gravity(original.DV)), by = NNS.ID]
-      }
-      if(noise.reduction =="mean"){
-        region.matrix[ , `:=` (y.hat = mean(original.DV)), by = NNS.ID]
-      }
-      if(noise.reduction =="median"){
-        region.matrix[ , `:=` (y.hat = median(original.DV)), by = NNS.ID]
-      }
-      if(noise.reduction=="mode"|| noise.reduction=="mode_class"){
-        region.matrix[ , `:=` (y.hat = mode(original.DV)), by = NNS.ID]
-      }
-      
-      data.table::setkey(region.matrix, NNS.ID, min.x1, max.x1, min.x2, max.x2)
-      region.matrix[ ,{
-        rgl::quads3d(x = .(min.x1[1], min.x1[1], max.x1[1], max.x1[1]),
-                     y = .(min.x2[1], max.x2[1], max.x2[1], min.x2[1]),
-                     z = .(y.hat[1], y.hat[1], y.hat[1], y.hat[1]), col="pink", alpha=1)
-        if(identical(min.x1[1], max.x1[1]) || identical(min.x2[1], max.x2[1])){
-          rgl::segments3d(x = .(min.x1[1], max.x1[1]),
-                          y = .(min.x2[1], max.x2[1]),
-                          z = .(y.hat[1], y.hat[1]), col = "pink", alpha = 1)
+      region.yhat.fun <- switch(noise.reduction,
+                                "mean"       = mean,
+                                "median"     = median,
+                                "mode"       = mode,
+                                "mode_class" = mode,
+                                gravity)   # "off" / default
+      for(id in unique(NNS.ID)){
+        m   <- NNS.ID == id
+        x1v <- original.IVs[m, 1]; x2v <- original.IVs[m, 2]
+        min.x1 <- min(x1v); max.x1 <- max(x1v)
+        min.x2 <- min(x2v); max.x2 <- max(x2v)
+        yh     <- region.yhat.fun(original.DV[m])
+        rgl::quads3d(x = c(min.x1, min.x1, max.x1, max.x1),
+                     y = c(min.x2, max.x2, max.x2, min.x2),
+                     z = c(yh, yh, yh, yh), col = "pink", alpha = 1)
+        if(identical(min.x1, max.x1) || identical(min.x2, max.x2)){
+          rgl::segments3d(x = c(min.x1, max.x1),
+                          y = c(min.x2, max.x2),
+                          z = c(yh, yh), col = "pink", alpha = 1)
         }
       }
-      , by = NNS.ID]
     }#plot.regions = T
-    
-    rgl::points3d(x = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 1])), y = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 2])), z = as.numeric(unlist(REGRESSION.POINT.MATRIX[ , .SD, .SDcols = 3])), col = 'red', size = 5)
+
+    rgl::points3d(x = as.numeric(REGRESSION.POINT.MATRIX[[1]]), y = as.numeric(REGRESSION.POINT.MATRIX[[2]]), z = as.numeric(REGRESSION.POINT.MATRIX[[3]]), col = 'red', size = 5)
     if(!is.null(point.est)){
       if(is.null(np)){
         rgl::points3d(x = point.est[1], y = point.est[2], z = predict.fit, col = 'green', size = 5)
@@ -392,17 +369,17 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   ### Return Values
   if(return.values){
     return(list(R2 = R2,
-                rhs.partitions = rhs.partitions,
-                RPM = REGRESSION.POINT.MATRIX[] ,
+                rhs.partitions = .NNS.df(rhs.partitions),
+                RPM = .NNS.df(REGRESSION.POINT.MATRIX) ,
                 Point.est = predict.fit,
-                pred.int = pred.int,
-                Fitted.xy = fitted.matrix[]))
+                pred.int = .NNS.df(pred.int),
+                Fitted.xy = .NNS.df(fitted.matrix)))
   } else {
     invisible(list(R2 = R2,
-                   rhs.partitions = rhs.partitions,
-                   RPM = REGRESSION.POINT.MATRIX[],
+                   rhs.partitions = .NNS.df(rhs.partitions),
+                   RPM = .NNS.df(REGRESSION.POINT.MATRIX),
                    Point.est = predict.fit,
-                   pred.int = pred.int,
-                   Fitted.xy = fitted.matrix[]))
+                   pred.int = .NNS.df(pred.int),
+                   Fitted.xy = .NNS.df(fitted.matrix)))
   }
 }

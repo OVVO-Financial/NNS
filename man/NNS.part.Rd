@@ -35,8 +35,8 @@ NNS.part(
 \value{
 Returns:
  \itemize{
-  \item{\code{"dt"}} a \code{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-  \item{\code{"regression.points"}} the \code{data.table} of regression points for that given \code{(order = ...)}.
+  \item{\code{"dt"}} a \code{data.frame} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
+  \item{\code{"regression.points"}} the \code{data.frame} of regression points for that given \code{(order = ...)}.
   \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
   }
 }
@@ -52,7 +52,7 @@ set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
 NNS.part(x, y)
 
-## Data.table of observations and partitions
+## Data.frame of observations and partitions
 NNS.part(x, y, order = 1)$dt
 
 ## Regression points
@@ -63,7 +63,7 @@ NNS.part(x, y, Voronoi = TRUE)
 
 ## Examine final counts by quadrant
 DT <- NNS.part(x, y)$dt
-DT[ , counts := .N, by = quadrant]
+DT$counts <- ave(DT$quadrant, DT$quadrant, FUN = length)
 DT
 }
 }

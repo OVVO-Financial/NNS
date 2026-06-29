@@ -284,3 +284,7 @@ stoch_superiority_cpp <- function(x, y) {
     .Call(`_NNS_stoch_superiority_cpp`, x, y)
 }
 
+NNS_mreg_reduce_cpp <- function(X, dv, ids, reducer, class_mode) {
+    .Call(`_NNS_NNS_mreg_reduce_cpp`, X, dv, ids, reducer, class_mode)
+}
+

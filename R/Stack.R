@@ -755,7 +755,7 @@ NNS.stack <- function(IVs.train,
       estimates <- pmin(estimates, max(as.numeric(DV.train)))
       estimates <- pmax(estimates, min(as.numeric(DV.train)))
       
-      if(!is.null(pred.int)) stacked.pred.int <- data.table::data.table(apply(stacked.pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
+      if(!is.null(pred.int)) stacked.pred.int <- as.data.frame(apply(stacked.pred.int, 2, function(x) ifelse(x%%1 <0.5, floor(x), ceiling(x))))
     }
   } else {
     if(method==1){
@@ -780,10 +780,10 @@ NNS.stack <- function(IVs.train,
               OBJfn.dim.red = best.nns.ord,
               NNS.dim.red.threshold = nns.ord.threshold,
               reg = nns.method.1,
-              reg.pred.int = pred.int.1,
+              reg.pred.int = .NNS.df(pred.int.1),
               dim.red = nns.method.2,
-              dim.red.pred.int = pred.int.2,
+              dim.red.pred.int = .NNS.df(pred.int.2),
               stack = estimates,
-              pred.int = stacked.pred.int))
+              pred.int = .NNS.df(stacked.pred.int)))
   
 }

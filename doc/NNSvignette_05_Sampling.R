@@ -1,15 +1,12 @@
 ## ----setup, include=FALSE, message=FALSE--------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 library(NNS)
-library(data.table)
-data.table::setDTthreads(1L)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----setup2, message=FALSE, warning = FALSE-----------------------------------
 library(NNS)
-library(data.table)
 require(knitr)
 require(rgl)
 
@@ -110,7 +107,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 # degree.1.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 1, x = x)
 # degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2, x = x)
 # 
-# head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples,
+# head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samples,
 #                                                           degree.0.25.samples,
 #                                                           degree.0.5.samples,
 #                                                           degree.1.samples,

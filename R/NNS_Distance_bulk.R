@@ -1,9 +1,9 @@
 NNS.distance.bulk <- function(rpm, Xtest, k, class = NULL) {
-  rpm <- data.table::as.data.table(rpm)
+  rpm <- as.data.frame(rpm)
   stopifnot("y.hat" %in% names(rpm))
   
   # drop y.hat, align columns with Xtest by name if possible
-  Xrpm <- as.data.frame(rpm[, !"y.hat"])
+  Xrpm <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
   if (!is.null(colnames(Xrpm)) && !is.null(colnames(Xtest))) {
     cmn <- intersect(colnames(Xrpm), colnames(Xtest))
     if (length(cmn) == 0L) {
@@ -32,9 +32,9 @@ NNS.distance.bulk <- function(rpm, Xtest, k, class = NULL) {
 }
 
 NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) {
-  rpm   <- data.table::as.data.table(rpm)
+  rpm   <- as.data.frame(rpm)
   stopifnot("y.hat" %in% names(rpm))
-  Xrpm  <- as.data.frame(rpm[, !"y.hat"])
+  Xrpm  <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
   Xtest <- as.data.frame(Xtest)
   
   # Align by names if available
@@ -71,9 +71,9 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
 
 
 NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 1L) {
-  rpm <- data.table::as.data.table(rpm)
+  rpm <- as.data.frame(rpm)
   stopifnot("y.hat" %in% names(rpm))
-  Xrpm <- as.data.frame(rpm[, !"y.hat"])
+  Xrpm <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
   
   if (is.null(dim(Xtest))) {
     Xtest <- as.data.frame(t(Xtest))

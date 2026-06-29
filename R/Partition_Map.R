@@ -12,8 +12,8 @@
 #' @param noise.reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
 #' @return Returns:
 #'  \itemize{
-#'   \item{\code{"dt"}} a \code{data.table} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-#'   \item{\code{"regression.points"}} the \code{data.table} of regression points for that given \code{(order = ...)}.
+#'   \item{\code{"dt"}} a \code{data.frame} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
+#'   \item{\code{"regression.points"}} the \code{data.frame} of regression points for that given \code{(order = ...)}.
 #'   \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
 #'   }
 #'
@@ -27,7 +27,7 @@
 #' x <- rnorm(100) ; y <- rnorm(100)
 #' NNS.part(x, y)
 #'
-#' ## Data.table of observations and partitions
+#' ## Data.frame of observations and partitions
 #' NNS.part(x, y, order = 1)$dt
 #'
 #' ## Regression points
@@ -38,7 +38,7 @@
 #'
 #' ## Examine final counts by quadrant
 #' DT <- NNS.part(x, y)$dt
-#' DT[ , counts := .N, by = quadrant]
+#' DT$counts <- ave(DT$quadrant, DT$quadrant, FUN = length)
 #' DT
 #' }
 #' @export
@@ -70,12 +70,16 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
     noise_reduction = noise.reduction
   )
   
-  PART <- data.table::as.data.table(out$dt)
-  RP   <- data.table::as.data.table(out$`regression.points`)
-  data.table::setorder(RP, quadrant)
-  
+  PART <- as.data.frame(out$dt, stringsAsFactors = FALSE)
+  RP   <- as.data.frame(out$`regression.points`, stringsAsFactors = FALSE)
+  # Order by quadrant using radix (C-locale) ordering to match data.table::setorder
+  RP   <- RP[order(RP$quadrant, method = "radix"), , drop = FALSE]
+  rownames(RP) <- NULL
 
-  if (is.discrete(x)) RP[is.finite(x), x := ifelse(x %% 1 < 0.5, floor(x), ceiling(x))]
+  if (is.discrete(x)) {
+    fin <- is.finite(RP$x)
+    RP$x[fin] <- ifelse(RP$x[fin] %% 1 < 0.5, floor(RP$x[fin]), ceiling(RP$x[fin]))
+  }
   
   if (isTRUE(Voronoi)) {
     mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)
@@ -98,5 +102,5 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   }
   
   # Return the same shape as original
-  list(order = as.integer(out$order), dt = PART[], regression.points = RP[])
+  list(order = as.integer(out$order), dt = .NNS.df(PART), regression.points = .NNS.df(RP))
 }

@@ -688,6 +688,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NNS_mreg_reduce_cpp
+List NNS_mreg_reduce_cpp(NumericMatrix X, NumericVector dv, CharacterVector ids, int reducer, bool class_mode);
+RcppExport SEXP _NNS_NNS_mreg_reduce_cpp(SEXP XSEXP, SEXP dvSEXP, SEXP idsSEXP, SEXP reducerSEXP, SEXP class_modeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type dv(dvSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type ids(idsSEXP);
+    Rcpp::traits::input_parameter< int >::type reducer(reducerSEXP);
+    Rcpp::traits::input_parameter< bool >::type class_mode(class_modeSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_mreg_reduce_cpp(X, dv, ids, reducer, class_mode));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 5},
@@ -740,6 +755,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 6},
     {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
     {"_NNS_stoch_superiority_cpp", (DL_FUNC) &_NNS_stoch_superiority_cpp, 2},
+    {"_NNS_NNS_mreg_reduce_cpp", (DL_FUNC) &_NNS_NNS_mreg_reduce_cpp, 5},
     {NULL, NULL, 0}
 };
 

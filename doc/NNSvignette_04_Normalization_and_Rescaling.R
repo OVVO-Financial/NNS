@@ -1,14 +1,12 @@
 ## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 5)
 suppressPackageStartupMessages(library(NNS))
-data.table::setDTthreads(1L)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
 ## ----install,message=FALSE,warning = FALSE------------------------------------
 library(NNS)
-library(data.table)
 require(knitr)
 require(rgl)
 

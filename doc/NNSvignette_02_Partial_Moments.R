@@ -1,8 +1,6 @@
 ## ----setup, include=FALSE, message = FALSE------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 library(NNS)
-library(data.table)
-data.table::setDTthreads(1L)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)

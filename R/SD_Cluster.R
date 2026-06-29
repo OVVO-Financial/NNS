@@ -111,7 +111,7 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
     # Ensure there are at least two variables for hierarchical clustering
     if (length(all_vars) < 2) {
       warning("Not enough variables for hierarchical clustering. Returning clusters only.")
-      return(list("Clusters" = clusters, "Order" = NULL))
+      return(.NNS.out(list("Clusters" = clusters, "Order" = NULL)))
     }
     
     # Use the extraction order inherent in all_vars as a tie-breaker.
@@ -136,7 +136,7 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
 
     hc$order <- match(hc$labels, original_names)
     
-    return(list("Clusters" = clusters, "Dendrogram" = hc))
-  } else return(list("Clusters" = clusters))
+    return(.NNS.out(list("Clusters" = clusters, "Dendrogram" = hc)))
+  } else return(.NNS.out(list("Clusters" = clusters)))
 }
 

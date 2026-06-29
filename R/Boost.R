@@ -121,9 +121,9 @@ NNS.boost <- function(IVs.train,
       colnames(IVs.test) <- colnames(IVs.train)  
     }
     
-    x <- data.table::data.table(IVs.train)
+    x <- as.data.frame(IVs.train)
     y <- DV.train
-    z <- data.table::data.table(IVs.test)
+    z <- as.data.frame(IVs.test)
     
     
     n <- ncol(x)
@@ -137,8 +137,7 @@ NNS.boost <- function(IVs.train,
     if ((sets < length(y)) || n <= 10) {
       deterministic <- TRUE
       learner.trials <- sets
-      combn_vec <- Vectorize(Rfast::comb_n, vectorize.args = "k")
-      deterministic.sets <- unlist(lapply(combn_vec(n, 1:n), function(df) as.list(as.data.frame(df))), recursive = FALSE)
+      deterministic.sets <- unlist(lapply(seq_len(n), function(k) as.list(as.data.frame(utils::combn(n, k)))), recursive = FALSE)
     }
     
     if (is.null(threshold)) {
@@ -157,19 +156,20 @@ NNS.boost <- function(IVs.train,
         if (!is.null(ts.test)) new.index <- 1:(length(y) - ts.test)
         new.index <- unlist(new.index)
         
-        new.iv.train <- cbind(y[-new.index], x[-new.index,])
-        new.iv.train <- new.iv.train[, lapply(.SD, as.double)]
-        new.iv.train <- new.iv.train[, lapply(.SD, function(z) fivenum(as.numeric(z)))]
+        new.iv.train <- cbind.data.frame(V1 = y[-new.index], x[-new.index, , drop = FALSE])
+        new.iv.train <- as.data.frame(lapply(new.iv.train, as.double), check.names = FALSE)
+        new.iv.train <- as.data.frame(lapply(new.iv.train, function(z) fivenum(as.numeric(z))), check.names = FALSE)
         new.dv.train <- unlist(new.iv.train[,1])
-        new.iv.train <- as.data.frame(new.iv.train)
-        new.iv.train <- new.iv.train[, unlist(colnames(new.iv.train) %in% colnames(IVs.train)), drop = FALSE]
-        new.iv.train <- data.table::rbindlist(list(new.iv.train, x[-new.index,]), use.names = FALSE)
+        new.iv.train <- new.iv.train[, colnames(new.iv.train) %in% colnames(IVs.train), drop = FALSE]
+        rest <- x[-new.index, , drop = FALSE]
+        colnames(rest) <- colnames(new.iv.train)
+        new.iv.train <- rbind(new.iv.train, rest)
         new.dv.train <- c(new.dv.train, y[-new.index])
-        
+
         colnames(new.iv.train) <- c(colnames(IVs.train))
-        
+
         actual <- as.numeric(y[new.index])
-        new.iv.test <- x[new.index,]
+        new.iv.test <- x[new.index, , drop = FALSE]
         
         if (status) message("Current Threshold Iterations Remaining = ", learner.trials + 1 - i, " ", "\r", appendLF = FALSE)
         
@@ -218,7 +218,8 @@ NNS.boost <- function(IVs.train,
     # scale_factor_rf gives each feature index a count proportional to how often
     # it appeared across the surviving sets; feature.pool is a flat index vector
     # used for weighted random sampling inside the epoch loop.
-    rf <- data.table::data.table(table(as.character(reduced.test.features)))
+    rf <- as.data.frame(table(as.character(reduced.test.features)), stringsAsFactors = FALSE)
+    colnames(rf) <- c("V1", "N")
     rf$N <- rf$N / sum(rf$N)
     rf_reduced <- apply(rf, 1, function(x) eval(parse(text = x[1])))
     scale_factor_rf <- table(unlist(rf_reduced)) / min(table(unlist(rf_reduced)))
@@ -241,18 +242,19 @@ NNS.boost <- function(IVs.train,
         if (!is.null(ts.test)) new.index <- length(y) - (2 * ts.test):0
         new.index <- unlist(new.index)
         
-        new.iv.train <- cbind(y[-new.index], x[-new.index, ])
-        new.iv.train <- new.iv.train[, lapply(.SD, as.double)]
-        new.iv.train <- new.iv.train[, lapply(.SD, function(z) fivenum(as.numeric(z)))]
+        new.iv.train <- cbind.data.frame(V1 = y[-new.index], x[-new.index, , drop = FALSE])
+        new.iv.train <- as.data.frame(lapply(new.iv.train, as.double), check.names = FALSE)
+        new.iv.train <- as.data.frame(lapply(new.iv.train, function(z) fivenum(as.numeric(z))), check.names = FALSE)
         new.dv.train <- unlist(new.iv.train[, 1])
-        new.iv.train <- as.data.frame(new.iv.train)
-        new.iv.train <- new.iv.train[, unlist(colnames(new.iv.train) %in% colnames(IVs.train)), drop = FALSE]
-        new.iv.train <- data.table::rbindlist(list(new.iv.train, x[-new.index, ]), use.names = FALSE)
+        new.iv.train <- new.iv.train[, colnames(new.iv.train) %in% colnames(IVs.train), drop = FALSE]
+        rest <- x[-new.index, , drop = FALSE]
+        colnames(rest) <- colnames(new.iv.train)
+        new.iv.train <- rbind(new.iv.train, rest)
         new.dv.train <- c(new.dv.train, y[-new.index])
         colnames(new.iv.train) <- colnames(IVs.train)
-        
+
         actual <- as.numeric(y[new.index])
-        new.iv.test <- x[new.index, ]
+        new.iv.test <- x[new.index, , drop = FALSE]
         
         if (status) message("% of epochs = ", format(j / epochs, digits = 3, nsmall = 2), "     ", "\r", appendLF = FALSE)
         
@@ -313,8 +315,8 @@ NNS.boost <- function(IVs.train,
     names(plot.table) <- colnames(IVs.train)[as.numeric(names(plot.table))]
     if (features.only || feature.importance) plot.table <- plot.table[rev(order(plot.table))]
     if (features.only) {
-      return(list("feature.weights"   = plot.table / sum(plot.table),
-                  "feature.frequency" = plot.table))
+      return(.NNS.out(list("feature.weights"   = plot.table / sum(plot.table),
+                  "feature.frequency" = plot.table)))
     }
     
     if (status) message("\nGenerating Final Estimate", "\r", appendLF = TRUE)
@@ -407,10 +409,10 @@ NNS.boost <- function(IVs.train,
       par(mfrow = c(1,1))
     }
     
-    return(list("results"           = estimates,
+    return(.NNS.out(list("results"           = estimates,
                 "pred.int"          = final_fit$pred.int,
                 "feature.weights"   = plot.table / sum(plot.table),
-                "feature.frequency" = plot.table))
+                "feature.frequency" = plot.table)))
   } # end .core
   
   out <- tryCatch(

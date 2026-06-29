@@ -249,7 +249,7 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
   rownames(rhos) <- colnames(x)
   rownames(deps) <- colnames(x)
   
-  return(list("Correlation" = rhos,
-              "Dependence" = deps))
-  
+  return(.NNS.out(list("Correlation" = rhos,
+              "Dependence" = deps)))
+
 }

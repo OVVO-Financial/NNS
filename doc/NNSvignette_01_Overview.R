@@ -1,13 +1,10 @@
 ## ----setup, message=FALSE-----------------------------------------------------
 # Prereqs (uncomment if needed):
 # install.packages("NNS")
-# install.packages(c("data.table","xts","zoo","Rfast"))
 
 library(NNS)
-library(data.table)
 
 ## ----include=FALSE, message=FALSE---------------------------------------------
-data.table::setDTthreads(1L)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
@@ -42,7 +39,7 @@ NNS.mode(multimodal,multi = TRUE)
 
 ## -----------------------------------------------------------------------------
 qgrid <- LPM.VaR(seq(0.05,0.95,.1),0,z) # equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))
-CDF_tbl <- data.table(threshold = as.numeric(qgrid), CDF = LPM.ratio(0,qgrid,z))
+CDF_tbl <- data.frame(threshold = as.numeric(qgrid), CDF = LPM.ratio(0,qgrid,z))
 CDF_tbl
 
 ## -----------------------------------------------------------------------------
@@ -170,6 +167,7 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 
 ## ----fig.width=7, fig.align='center'------------------------------------------
 # Univariate nonlinear ARMA
+set.seed(42)
 z <- as.numeric(scale(sin(1:480/8) + rnorm(480, sd=.35)))
 
 # Seasonality detection (prints a summary)
@@ -191,6 +189,7 @@ length(mc$ensemble); names(mc$replicates)
 head(mc$replicates$`rho = 0`)
 
 ## -----------------------------------------------------------------------------
+set.seed(42)
 RA <- rnorm(240, 0.005, 0.03)
 RB <- rnorm(240, 0.003, 0.02)
 RC <- rnorm(240, 0.006, 0.04)

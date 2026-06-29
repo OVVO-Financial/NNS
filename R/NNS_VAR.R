@@ -164,25 +164,58 @@ NNS.VAR <- function(variables,
     mtx[, c(vars0, rest), drop = FALSE]
   }
   
-  # --------- Nowcast dates (keep flow) ---------
-  if(nowcast){
-    dates_try <- try(zoo::index(variables), silent = TRUE)
-    if (!inherits(dates_try, "try-error")) {
-      year_mon <- try(zoo::as.yearmon(format(dates_try, '%Y-%m')), silent = TRUE)
-      if (!inherits(year_mon, "try-error")) {
-        dates <- c(year_mon, tail(year_mon, h) + h/12)
-      }
+  # --------- Time-index dates (base R, no external date packages) ---------
+  # `dates` are used only as row labels on the returned matrices, so they are
+  # produced as "Mon YYYY" character labels.  Numerical forecasts never depend
+  # on them.  A yearmon-equivalent numeric (year + (month-1)/12) is used for the
+  # month arithmetic, then formatted -- matching zoo::as.yearmon's appearance.
+  .index_to_yearmon <- function(idx) {
+    if (inherits(idx, c("Date", "POSIXct", "POSIXt"))) {
+      lt <- as.POSIXlt(idx)
+      (lt$year + 1900) + lt$mon / 12
+    } else {
+      suppressWarnings(as.numeric(idx))
     }
   }
-  
+  .format_yearmon <- function(ym) {
+    yr <- floor(ym + 1e-8)
+    mo <- as.integer(round((ym - yr) * 12)) + 1L
+    roll <- !is.na(mo) & mo > 12L
+    yr[roll] <- yr[roll] + 1L; mo[roll] <- 1L
+    out <- rep(NA_character_, length(ym))
+    ok  <- !is.na(mo) & mo >= 1L & mo <= 12L
+    out[ok] <- paste(month.abb[mo[ok]], yr[ok])
+    out
+  }
+
+  # Extract a time index (best effort) without zoo/xts.
+  idx <- NULL
+  if (inherits(variables, "ts")) {
+    idx <- as.numeric(stats::time(variables))
+  } else if (inherits(variables, c("xts", "zoo"))) {
+    raw <- attr(variables, "index")
+    if (is.null(raw)) raw <- suppressWarnings(try(stats::time(variables), silent = TRUE))
+    if (!is.null(raw) && !inherits(raw, "try-error")) {
+      # xts/zoo store the index as numeric seconds since the epoch.
+      if (is.numeric(raw)) idx <- as.POSIXct(raw, origin = "1970-01-01", tz = "UTC") else idx <- raw
+    }
+  }
+
+  if (nowcast && !is.null(idx)) {
+    ym <- .index_to_yearmon(idx)
+    if (!any(is.na(ym))) dates <- .format_yearmon(c(ym, tail(ym, h) + h/12))
+  }
+
   if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
   if (inherits(variables, "xts")) {
-    if (is.null(dates)) dates <- zoo::index(variables)
-    variables <- data.frame(zoo::coredata(variables), check.names = FALSE)
+    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
+    variables <- data.frame(matrix(as.numeric(variables), nrow = NROW(variables),
+                                   dimnames = list(NULL, colnames(variables))),
+                            check.names = FALSE)
   }
   if (inherits(variables, "ts")) {
-    if (is.null(dates)) dates <- zoo::as.yearmon(zoo::index(variables))
-    variables <- data.frame(zoo::coredata(variables), check.names = FALSE)
+    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
+    variables <- data.frame(as.matrix(variables), check.names = FALSE)
   }
   
   dim.red.method <- tolower(dim.red.method)
@@ -205,17 +238,32 @@ NNS.VAR <- function(variables,
   
   # Parallel process...
   if (is.null(ncores)) {
-    num_cores <- as.integer(max(2L, parallel::detectCores(), na.rm = TRUE)) - 1
+    num_cores <- max(1L, as.integer(parallel::detectCores()) - 1L, na.rm = TRUE)
   } else {
-    num_cores <- ncores
+    num_cores <- max(1L, as.integer(ncores), na.rm = TRUE)
   }
-  
-  if(num_cores > 1){
-    doParallel::registerDoParallel(num_cores)
-    invisible(data.table::setDTthreads(1))
-  } else {
-    foreach::registerDoSEQ()
-    invisible(data.table::setDTthreads(0, throttle = NULL))
+
+  # Workload gate: standing up a process cluster costs ~1s (spawn + exporting
+  # data to workers). Each per-variable task (NNS.stack / NNS.ARMA.optim) scales
+  # with the series length, so for short series the fixed cost dominates and we
+  # stay serial. Gate on both series length and the number of variables (tasks).
+  use_parallel <- num_cores > 1 &&
+    nrow(variables) >= 500L &&
+    ncol(variables) >= 2L
+
+  # Create a single cluster shared by both parallel sections (fork-first, with a
+  # PSOCK fallback). Stopped at the end of the multi-variate estimate section.
+  cl <- NULL
+  if (use_parallel) {
+    forked <- FALSE
+    cl <- tryCatch(
+      { cl0 <- parallel::makeForkCluster(num_cores); forked <- TRUE; cl0 },
+      error = function(e) parallel::makeCluster(num_cores)
+    )
+    # Fork workers inherit the already-loaded NNS namespace; only the PSOCK
+    # fallback needs an explicit library() call on each worker.
+    if (!forked) parallel::clusterEvalQ(cl, library(NNS))
+    on.exit(if (!is.null(cl)) try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
   }
   
   if(status) message("Currently interpolating/extrapolating variables...","\r", appendLF=TRUE)
@@ -223,7 +271,7 @@ NNS.VAR <- function(variables,
   nns_IVs <- variable_interpolation <- variable_interpolation_and_extrapolation <- list(ncol(variables))
   
   # ===================== Interpolation / Extrapolation  =====================
-  nns_IVs <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{
+  .interp_worker <- function(i) {
     n <- nrow(variables)
     index <- seq_len(n)
     last_point <- n
@@ -280,10 +328,21 @@ NNS.VAR <- function(variables,
       variable_extrapolation <- b$results
       
     } else variable_extrapolation <- NULL
-    
-    return(list(variable_interpolation, variable_extrapolation))
+
+    list(variable_interpolation, variable_extrapolation)
   }
-  
+
+  nns_IVs <- if (use_parallel) {
+    parallel::clusterExport(
+      cl,
+      varlist = c("variables", "h", "tau", "obj.fn", "objective"),
+      envir = environment()
+    )
+    parallel::parLapply(cl, 1:ncol(variables), .interp_worker)
+  } else {
+    lapply(1:ncol(variables), .interp_worker)
+  }
+
   interpolation_results <- lapply(nns_IVs, `[[`, 1)
   
   nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, interpolation_results))
@@ -297,7 +356,7 @@ NNS.VAR <- function(variables,
   rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
   
-  if(h == 0) return(nns_IVs_interpolated_extrapolated)
+  if(h == 0) return(.NNS.df(nns_IVs_interpolated_extrapolated))
   
   extrapolation_results <- lapply(nns_IVs, `[[`, 2)
   nns_IVs_results <- data.frame(do.call(cbind, extrapolation_results))
@@ -325,13 +384,13 @@ NNS.VAR <- function(variables,
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
   
   
-  if(num_cores > 1){
+  if(use_parallel){
     if(status) message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     status <- FALSE
   }
   
   
-  lists <- foreach(i = 1:ncol(variables), .packages = c("NNS", "data.table"))%dopar%{                   
+  .model_worker <- function(i) {
     if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
     
     IV <- lagged_new_values_train[, -i]
@@ -384,17 +443,28 @@ NNS.VAR <- function(variables,
     
     nns_DVs <- cor_threshold$stack
     nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
-    
+
     list(nns_DVs, rel_vars)
   }
-  
-  if(num_cores > 1) {
-    doParallel::stopImplicitCluster()
-    foreach::registerDoSEQ()
-    invisible(data.table::setDTthreads(0, throttle = NULL))
+
+  lists <- if (use_parallel) {
+    parallel::clusterExport(
+      cl,
+      varlist = c("status", "variables", "lagged_new_values_train", "h",
+                  "obj.fn", "objective", "dim.red.method", "nns_IVs_results"),
+      envir = environment()
+    )
+    parallel::parLapply(cl, 1:ncol(variables), .model_worker)
+  } else {
+    lapply(1:ncol(variables), .model_worker)
+  }
+
+  if(use_parallel) {
+    parallel::stopCluster(cl)
+    cl <- NULL
     invisible(gc(verbose = FALSE))
   }
-  
+
   nns_DVs <- lapply(lists, `[[`, 1)
   relevant_vars <- lapply(lists, `[[`, 2)
   
@@ -443,10 +513,10 @@ NNS.VAR <- function(variables,
   options(warn = oldw)
   
   
-  return( list("interpolated_and_extrapolated" = nns_IVs_interpolated_extrapolated,
-               "relevant_variables" = data.frame(RV),
-               univariate = nns_IVs_results,
-               multivariate = nns_DVs,
-               ensemble = forecasts) )
+  return( list("interpolated_and_extrapolated" = .NNS.df(nns_IVs_interpolated_extrapolated),
+               "relevant_variables" = .NNS.df(data.frame(RV)),
+               univariate = .NNS.df(nns_IVs_results),
+               multivariate = .NNS.df(nns_DVs),
+               ensemble = .NNS.df(forecasts)) )
   
 }

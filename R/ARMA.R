@@ -361,7 +361,7 @@ NNS.ARMA <- function(variable,
     colnames(results) = c("Estimates",
                           paste0("Lower ", round(pred.int*100,2), "% pred.int"),
                           paste0("Upper ", round(pred.int*100,2), "% pred.int"))
-    return(data.table::data.table(results))
+    return(.NNS.df(results))
   } else {
     return(Estimates)
   }
