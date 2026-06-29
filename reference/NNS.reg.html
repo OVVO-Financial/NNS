@@ -167,15 +167,15 @@
 <li><p><code>"Point.est"</code> for the predicted value generated;</p></li>
 <li><p><code>"pred.int"</code> lower and upper prediction intervals for the <code>"Point.est"</code> returned using the <code>"confidence.interval"</code> provided;</p></li>
 <li><p><code>"regression.points"</code> provides the points used in the regression equation for the given order of partitions;</p></li>
-<li><p><code>"Fitted.xy"</code> returns a <code>data.table</code> of <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>resid</code>, <code>NNS.ID</code>, <code>gradient</code>;</p></li>
+<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>resid</code>, <code>NNS.ID</code>, <code>gradient</code>;</p></li>
 </ul><p>MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> provides the goodness of fit;</p></li>
-<li><p><code>"equation"</code> returns the numerator of the synthetic X* dimension reduction equation as a <code>data.table</code> consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients &gt; 0, returned in last row of <code>equation</code> <code>data.table</code>.</p></li>
+<li><p><code>"equation"</code> returns the numerator of the synthetic X* dimension reduction equation as a <code>data.frame</code> consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients &gt; 0, returned in last row of <code>equation</code> <code>data.frame</code>.</p></li>
 <li><p><code>"x.star"</code> returns the synthetic X* as a vector;</p></li>
 <li><p><code>"rhs.partitions"</code> returns the partition points for each regressor <code>x</code>;</p></li>
 <li><p><code>"RPM"</code> provides the Regression Point Matrix, the points for each <code>x</code> used in the regression equation for the given order of partitions;</p></li>
 <li><p><code>"Point.est"</code> returns the predicted value generated;</p></li>
 <li><p><code>"pred.int"</code> lower and upper prediction intervals for the <code>"Point.est"</code> returned using the <code>"confidence.interval"</code> provided;</p></li>
-<li><p><code>"Fitted.xy"</code> returns a <code>data.table</code> of <code>x</code>,<code>y</code>, <code>y.hat</code>, <code>gradient</code>, and <code>NNS.ID</code>.</p></li>
+<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of <code>x</code>,<code>y</code>, <code>y.hat</code>, <code>gradient</code>, and <code>NNS.ID</code>.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

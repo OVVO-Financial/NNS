@@ -27,7 +27,7 @@ dy.dx(x, y, eval.point = NULL)
 
 ## Value
 
-Returns a `data.table` of eval.point along with both 1st and 2nd
+Returns a `data.frame` of eval.point along with both 1st and 2nd
 derivative.
 
 ## References
@@ -51,10 +51,10 @@ x <- seq(0, 2 * pi, pi / 100) ; y <- sin(x)
 dy.dx(x, y, eval.point = 1.75)
 
 # First derivative
-dy.dx(x, y, eval.point = 1.75)[ , first.derivative]
+dy.dx(x, y, eval.point = 1.75)$first.derivative
 
 # Second derivative
-dy.dx(x, y, eval.point = 1.75)[ , second.derivative]
+dy.dx(x, y, eval.point = 1.75)$second.derivative
 
 # Vector of derivatives
 dy.dx(x, y, eval.point = c(1.75, 2.5))

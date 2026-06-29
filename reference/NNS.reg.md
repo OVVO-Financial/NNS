@@ -202,7 +202,7 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"regression.points"` provides the points used in the regression
   equation for the given order of partitions;
 
-- `"Fitted.xy"` returns a `data.table` of `x`, `y`, `y.hat`, `resid`,
+- `"Fitted.xy"` returns a `data.frame` of `x`, `y`, `y.hat`, `resid`,
   `NNS.ID`, `gradient`;
 
 MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
@@ -210,9 +210,9 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"R2"` provides the goodness of fit;
 
 - `"equation"` returns the numerator of the synthetic X\* dimension
-  reduction equation as a `data.table` consisting of regressor and its
+  reduction equation as a `data.frame` consisting of regressor and its
   coefficient. Denominator is simply the length of all coefficients \>
-  0, returned in last row of `equation` `data.table`.
+  0, returned in last row of `equation` `data.frame`.
 
 - `"x.star"` returns the synthetic X\* as a vector;
 
@@ -227,7 +227,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"pred.int"` lower and upper prediction intervals for the
   `"Point.est"` returned using the `"confidence.interval"` provided;
 
-- `"Fitted.xy"` returns a `data.table` of `x`,`y`, `y.hat`, `gradient`,
+- `"Fitted.xy"` returns a `data.frame` of `x`,`y`, `y.hat`, `gradient`,
   and `NNS.ID`.
 
 ## Note

@@ -60,7 +60,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a <code>data.table</code> of eval.point along with both 1st and 2nd derivative.</p>
+    <p>Returns a <code>data.frame</code> of eval.point along with both 1st and 2nd derivative.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -79,10 +79,10 @@
 <span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fl">1.75</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># First derivative</span></span></span>
-<span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fl">1.75</span><span class="op">)</span><span class="op">[</span> , <span class="va">first.derivative</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fl">1.75</span><span class="op">)</span><span class="op">$</span><span class="va">first.derivative</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Second derivative</span></span></span>
-<span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fl">1.75</span><span class="op">)</span><span class="op">[</span> , <span class="va">second.derivative</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fl">1.75</span><span class="op">)</span><span class="op">$</span><span class="va">second.derivative</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Vector of derivatives</span></span></span>
 <span class="r-in"><span><span class="fu">dy.dx</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, eval.point <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.75</span>, <span class="fl">2.5</span><span class="op">)</span><span class="op">)</span></span></span>

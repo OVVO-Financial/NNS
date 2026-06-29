@@ -78,11 +78,11 @@ NNS.part(
 
 Returns:
 
-- `"dt"` a `data.table` of `x` and `y` observations with their partition
+- `"dt"` a `data.frame` of `x` and `y` observations with their partition
   assignment `"quadrant"` in the 3rd column and their prior partition
   assignment `"prior.quadrant"` in the 4th column.
 
-- `"regression.points"` the `data.table` of regression points for that
+- `"regression.points"` the `data.frame` of regression points for that
   given `(order = ...)`.
 
 - `"order"` the `order` of the final partition given `"min.obs.stop"`
@@ -111,7 +111,7 @@ set.seed(123)
 x <- rnorm(100) ; y <- rnorm(100)
 NNS.part(x, y)
 
-## Data.table of observations and partitions
+## Data.frame of observations and partitions
 NNS.part(x, y, order = 1)$dt
 
 ## Regression points
@@ -122,7 +122,7 @@ NNS.part(x, y, Voronoi = TRUE)
 
 ## Examine final counts by quadrant
 DT <- NNS.part(x, y)$dt
-DT[ , counts := .N, by = quadrant]
+DT$counts <- ave(DT$quadrant, DT$quadrant, FUN = length)
 DT
 } # }
 ```

@@ -3,7 +3,6 @@
 ``` r
 
 library(NNS)
-library(data.table)
 require(knitr)
 require(rgl)
 ```
@@ -112,7 +111,7 @@ degree.0.5.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 
 degree.1.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 1, x = x)
 degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2, x = x)
 
-head(data.table::data.table(cbind("original x" = sort(x), degree.0.samples, 
+head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samples, 
                                                           degree.0.25.samples, 
                                                           degree.0.5.samples, 
                                                           degree.1.samples, 

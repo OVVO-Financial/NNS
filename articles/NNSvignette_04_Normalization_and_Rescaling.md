@@ -3,7 +3,6 @@
 ``` r
 
 library(NNS)
-library(data.table)
 require(knitr)
 require(rgl)
 ```

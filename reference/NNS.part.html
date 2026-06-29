@@ -89,8 +89,8 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns:</p><ul><li><p><code>"dt"</code> a <code>data.table</code> of <code>x</code> and <code>y</code> observations with their partition assignment <code>"quadrant"</code> in the 3rd column and their prior partition assignment <code>"prior.quadrant"</code> in the 4th column.</p></li>
-<li><p><code>"regression.points"</code> the <code>data.table</code> of regression points for that given <code>(order = ...)</code>.</p></li>
+    <p>Returns:</p><ul><li><p><code>"dt"</code> a <code>data.frame</code> of <code>x</code> and <code>y</code> observations with their partition assignment <code>"quadrant"</code> in the 3rd column and their prior partition assignment <code>"prior.quadrant"</code> in the 4th column.</p></li>
+<li><p><code>"regression.points"</code> the <code>data.frame</code> of regression points for that given <code>(order = ...)</code>.</p></li>
 <li><p><code>"order"</code> the <code>order</code> of the final partition given <code>"min.obs.stop"</code> stopping condition.</p></li>
 </ul></div>
     <div class="section level2">
@@ -113,7 +113,7 @@
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span> ; <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">NNS.part</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Data.table of observations and partitions</span></span></span>
+<span class="r-in"><span><span class="co">## Data.frame of observations and partitions</span></span></span>
 <span class="r-in"><span><span class="fu">NNS.part</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">dt</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Regression points</span></span></span>
@@ -124,7 +124,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Examine final counts by quadrant</span></span></span>
 <span class="r-in"><span><span class="va">DT</span> <span class="op">&lt;-</span> <span class="fu">NNS.part</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">dt</span></span></span>
-<span class="r-in"><span><span class="va">DT</span><span class="op">[</span> , <span class="va">counts</span> <span class="op">:=</span> <span class="va">.N</span>, by <span class="op">=</span> <span class="va">quadrant</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">DT</span><span class="op">$</span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/ave.html" class="external-link">ave</a></span><span class="op">(</span><span class="va">DT</span><span class="op">$</span><span class="va">quadrant</span>, <span class="va">DT</span><span class="op">$</span><span class="va">quadrant</span>, FUN <span class="op">=</span> <span class="va">length</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">DT</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
