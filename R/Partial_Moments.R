@@ -356,10 +356,11 @@ NNS.CDF <- function(variable,
     }
     
     if (plot && ncol(variable) == 2) {
+      .nns_require_rgl()
       x1 <- variable[, 1]; x2 <- variable[, 2]
       u1 <- LPM.ratio(degree, x1, x1)
       u2 <- LPM.ratio(degree, x2, x2)
-      
+
       rgl::plot3d(u1, u2, CDF,
                   xlab = paste0(xlab, " uniform"), ylab = paste0(ylab, " uniform"), zlab = toupper(type),
                   col  = "steelblue", pch = 19, box = FALSE)

@@ -6,7 +6,6 @@
 #' @importFrom utils globalVariables head tail combn flush.console
 #' @rawNamespace import(Rcpp, except = LdFlags)
 #' @import RcppParallel
-#' @import rgl
 #' @useDynLib NNS, .registration = TRUE
 
 
@@ -31,5 +30,15 @@
 
   requireNamespace("Rcpp")
   requireNamespace("RcppParallel")
-  requireNamespace("rgl")
+}
+
+
+# rgl is an optional (Suggests) dependency used only for the 3D plotting
+# branches. Defer the requirement to point-of-use so numerical-only users do
+# not need rgl (and its system OpenGL/X11 stack) installed to load NNS.
+.nns_require_rgl <- function() {
+  if (!requireNamespace("rgl", quietly = TRUE)) {
+    stop("3D plotting requires the 'rgl' package. Install it with install.packages('rgl').",
+         call. = FALSE)
+  }
 }

@@ -312,6 +312,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   ### 3d plot
   if(plot && n == 2){
+    .nns_require_rgl()
     rgl::plot3d(x = original.IVs[ , 1], y = original.IVs[ , 2], z = original.DV, box = FALSE, size = 3, col='steelblue', xlab = colnames(reg.points.matrix)[1], ylab = colnames(reg.points.matrix)[2], zlab = y.label )
 
     if(plot.regions){

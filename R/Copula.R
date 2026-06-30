@@ -42,6 +42,7 @@ NNS.copula <- function (
   if(is.null(colnames(X))) colnames(X) <- paste0("Var ", seq_len(n))
   
   if((plot||independence.overlay) && n == 3){
+    .nns_require_rgl()
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
                 col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
                            ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
