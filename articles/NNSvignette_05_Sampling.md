@@ -182,6 +182,23 @@ sapply(boots, function(r) cor(r, x, method = "spearman"))
 More replicates and ensembles thereof can be generated for any number of
 $`\rho`$ values.
 
+> **Note — where the $`\rho`$ target lives.** The dependence alignment
+> is applied to **each replicate individually**: every replicate is
+> mixed so that its dependence on the original series matches the
+> requested $`\rho`$ (the per-replicate correlations above confirm
+> this). Two things to keep in mind when checking a result: (1) measure
+> it in the **same metric** that `type` targets — a `type = "NNSdep"`
+> target with `NNS.dep(...)$Dependence` (unsigned), a
+> `"spearman"`/`"pearson"` target with rank/linear correlation; a
+> *signed* correlation taken on an unsigned `"NNSdep"` target is not
+> comparable to $`\rho`$ and can even read negative while the dependence
+> target is met. (2) The `ensemble` is the per-observation **mean** of
+> the replicates — a central summary, not a single series carrying the
+> target dependence — so a rank or linear correlation taken directly on
+> the `ensemble` tends to read **higher** than the per-replicate
+> $`\rho`$ (averaging amplifies the shared order). Calibrate $`\rho`$ on
+> the `replicates`, not the `ensemble`.
+
 #### `target_drift` Specification
 
 We can also specify a target drift in our replicates with the
@@ -303,11 +320,22 @@ Checking `ensemble` correlations with `original.data`:
 ``` r
 for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
 
-[1] 0.9452863
-[1] 0.9499478
-[1] 0.945878
-[1] 0.9442845
+[1] 0.9885851
+[1] 0.9965075
+[1] 0.9906302
+[1] 0.9901535
 ```
+
+> **Reading these numbers.** Here `ensemble` is the per-observation mean
+> of `reps = 100` replicates — a central summary, not a single path
+> carrying the exact target dependence — so a rank/linear correlation
+> taken directly on it tends to read **higher** than the per-replicate
+> $`\rho`$ (averaging amplifies the shared order). With $`\rho = 0.95`$
+> the gap is small because the target is already near the ceiling; at
+> moderate $`\rho`$ it is larger (e.g. a per-replicate Spearman
+> $`\rho = 0.75`$ typically reads ~0.9 once averaged into the
+> `ensemble`). The $`\rho`$ alignment is calibrated on the individual
+> `replicates`; treat the `ensemble` as a representative central path.
 
 #### Compare Multivariate Dependence Structures
 
@@ -318,7 +346,7 @@ NNS.copula(original.data)
 NNS.copula(new.boot.dep.matrix)
 
 [1] 0.4743531
-[1] 0.4517661
+[1] 0.4704039
 ```
 
 ``` r

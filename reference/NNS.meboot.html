@@ -77,7 +77,7 @@
 
 
 <dt id="arg-rho">rho<a class="anchor" aria-label="anchor" href="#arg-rho"></a></dt>
-<dd><p>numeric [-1,1] (vectorized); A <code>rho</code> must be provided, otherwise a blank list will be returned.</p></dd>
+<dd><p>numeric [-1,1] (vectorized); A <code>rho</code> must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual <code>replicate</code> (every replicate is mixed to the requested dependence with the original series); it is <strong>not</strong> applied to the <code>ensemble</code>.  See <code>Note</code>.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
@@ -158,7 +158,7 @@ is not a <code>pdata.frame</code> object.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns the following row names in a matrix:</p><ul><li><p>x original data provided as input.</p></li>
 <li><p>replicates maximum entropy bootstrap replicates.</p></li>
-<li><p>ensemble average observation over all replicates.</p></li>
+<li><p>ensemble average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the <code>ensemble</code> tends to read higher than <code>rho</code> (averaging amplifies the shared order), so assess <code>rho</code> on the <code>replicates</code>.</p></li>
 <li><p>xx sorted order stats (xx[1] is minimum value).</p></li>
 <li><p>z class intervals limits.</p></li>
 <li><p>dv deviations of consecutive data values.</p></li>
@@ -173,6 +173,7 @@ is not a <code>pdata.frame</code> object.</p></dd>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Vectorized <code>rho</code> and <code>drift</code> parameters will not vectorize both simultaneously.  Also, do not specify <code>target_drift = NULL</code>.</p>
+<p>The <code>rho</code> dependence alignment is calibrated on each individual <code>replicate</code>: every replicate is mixed so that its dependence on the original series matches <code>rho</code>, in the metric implied by <code>type</code>.  Assess a result in that <strong>same</strong> metric – a <code>"NNSdep"</code> target with <a href="NNS.dep.html">NNS.dep</a><code>$Dependence</code> (unsigned) and a <code>"spearman"</code>/<code>"pearson"</code> target with rank/linear correlation – because a signed correlation taken on an unsigned <code>"NNSdep"</code> target is not comparable to <code>rho</code> (it can even read negative while the dependence target is met).  Separately, the <code>ensemble</code> is the per-observation mean of the replicates – a central summary, not a single series carrying the target dependence – so a rank or linear correlation computed directly on the <code>ensemble</code> tends to read higher than the per-replicate <code>rho</code> (averaging amplifies the shared order).  Verify <code>rho</code> on the <code>replicates</code>, in the metric implied by <code>type</code>, rather than on the <code>ensemble</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

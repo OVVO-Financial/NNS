@@ -230,6 +230,33 @@ wrapper function for this functionality of
 of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
 values.</p>
+<blockquote>
+<p><strong>Note — where the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+target lives.</strong> The dependence alignment is applied to
+<strong>each replicate individually</strong>: every replicate is mixed
+so that its dependence on the original series matches the requested
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+(the per-replicate correlations above confirm this). Two things to keep
+in mind when checking a result: (1) measure it in the <strong>same
+metric</strong> that <code>type</code> targets — a
+<code>type = "NNSdep"</code> target with
+<code>NNS.dep(...)$Dependence</code> (unsigned), a
+<code>"spearman"</code>/<code>"pearson"</code> target with rank/linear
+correlation; a <em>signed</em> correlation taken on an unsigned
+<code>"NNSdep"</code> target is not comparable to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+and can even read negative while the dependence target is met. (2) The
+<code>ensemble</code> is the per-observation <strong>mean</strong> of
+the replicates — a central summary, not a single series carrying the
+target dependence — so a rank or linear correlation taken directly on
+the <code>ensemble</code> tends to read <strong>higher</strong> than the
+per-replicate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+(averaging amplifies the shared order). Calibrate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+on the <code>replicates</code>, not the <code>ensemble</code>.</p>
+</blockquote>
 <div class="section level4">
 <h4 id="target_drift-specification">
 <code>target_drift</code> Specification<a class="anchor" aria-label="anchor" href="#target_drift-specification"></a>
@@ -346,10 +373,29 @@ note the multivariate dependence among our
 <code>original.data</code>:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="fu">print</span>(<span class="fu">cor</span>(new.boot.dep.matrix[,i], original.data[,i], <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9452863</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9499478</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.945878</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9442845</span></span></code></pre></div>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9885851</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9965075</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9906302</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9901535</span></span></code></pre></div>
+<blockquote>
+<p><strong>Reading these numbers.</strong> Here <code>ensemble</code> is
+the per-observation mean of <code>reps = 100</code> replicates — a
+central summary, not a single path carrying the exact target dependence
+— so a rank/linear correlation taken directly on it tends to read
+<strong>higher</strong> than the per-replicate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+(averaging amplifies the shared order). With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\rho = 0.95</annotation></semantics></math>
+the gap is small because the target is already near the ceiling; at
+moderate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+it is larger (e.g. a per-replicate Spearman
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.75</mn></mrow><annotation encoding="application/x-tex">\rho = 0.75</annotation></semantics></math>
+typically reads ~0.9 once averaged into the <code>ensemble</code>). The
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+alignment is calibrated on the individual <code>replicates</code>; treat
+the <code>ensemble</code> as a representative central path.</p>
+</blockquote>
 <div class="section level4">
 <h4 id="compare-multivariate-dependence-structures-1">Compare Multivariate Dependence Structures<a class="anchor" aria-label="anchor" href="#compare-multivariate-dependence-structures-1"></a>
 </h4>
@@ -358,7 +404,7 @@ note the multivariate dependence among our
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.boot.dep.matrix)</span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4517661</span></span></code></pre></div>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4704039</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">head</span>(new.boot.dep.matrix)</span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>

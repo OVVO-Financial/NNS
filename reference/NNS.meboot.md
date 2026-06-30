@@ -44,7 +44,10 @@ NNS.meboot(
 - rho:
 
   numeric \[-1,1\] (vectorized); A `rho` must be provided, otherwise a
-  blank list will be returned.
+  blank list will be returned. The dependence target is applied to each
+  individual `replicate` (every replicate is mixed to the requested
+  dependence with the original series); it is **not** applied to the
+  `ensemble`. See `Note`.
 
 - type:
 
@@ -143,7 +146,11 @@ Returns the following row names in a matrix:
 
 - replicates maximum entropy bootstrap replicates.
 
-- ensemble average observation over all replicates.
+- ensemble average observation over all replicates. Being a
+  per-observation mean it is a central summary, not a single series
+  carrying the target dependence; a rank or linear correlation taken
+  directly on the `ensemble` tends to read higher than `rho` (averaging
+  amplifies the shared order), so assess `rho` on the `replicates`.
 
 - xx sorted order stats (xx\[1\] is minimum value).
 
@@ -169,6 +176,22 @@ Returns the following row names in a matrix:
 
 Vectorized `rho` and `drift` parameters will not vectorize both
 simultaneously. Also, do not specify `target_drift = NULL`.
+
+The `rho` dependence alignment is calibrated on each individual
+`replicate`: every replicate is mixed so that its dependence on the
+original series matches `rho`, in the metric implied by `type`. Assess a
+result in that **same** metric – a `"NNSdep"` target with
+[NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)`$Dependence`
+(unsigned) and a `"spearman"`/`"pearson"` target with rank/linear
+correlation – because a signed correlation taken on an unsigned
+`"NNSdep"` target is not comparable to `rho` (it can even read negative
+while the dependence target is met). Separately, the `ensemble` is the
+per-observation mean of the replicates – a central summary, not a single
+series carrying the target dependence – so a rank or linear correlation
+computed directly on the `ensemble` tends to read higher than the
+per-replicate `rho` (averaging amplifies the shared order). Verify `rho`
+on the `replicates`, in the metric implied by `type`, rather than on the
+`ensemble`.
 
 ## References
 
