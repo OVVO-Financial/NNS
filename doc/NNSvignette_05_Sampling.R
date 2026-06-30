@@ -212,17 +212,17 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval=FALSE---------------------------------------------------------------
 # for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
 # 
-# [1] 0.9452863
-# [1] 0.9499478
-# [1] 0.945878
-# [1] 0.9442845
+# [1] 0.9885851
+# [1] 0.9965075
+# [1] 0.9906302
+# [1] 0.9901535
 
 ## ----eval=FALSE---------------------------------------------------------------
 # NNS.copula(original.data)
 # NNS.copula(new.boot.dep.matrix)
 # 
 # [1] 0.4743531
-# [1] 0.4517661
+# [1] 0.4704039
 
 ## ----eval=FALSE---------------------------------------------------------------
 # head(original.data)

@@ -480,6 +480,27 @@ function for this functionality of
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a> <span class="fl">0.99732373</span>  <span class="fl">0.51147915</span>  <span class="fl">0.01036904</span> <span class="sc">-</span><span class="fl">0.48720072</span> <span class="sc">-</span><span class="fl">0.98294629</span> </span></code></pre></div>
 <p>More replicates and ensembles thereof can be generated for any number
 of <span class="math inline">\(\rho\)</span> values.</p>
+<blockquote>
+<p><strong>Note — where the <span class="math inline">\(\rho\)</span>
+target lives.</strong> The dependence alignment is applied to
+<strong>each replicate individually</strong>: every replicate is mixed
+so that its dependence on the original series matches the requested
+<span class="math inline">\(\rho\)</span> (the per-replicate
+correlations above confirm this). Two things to keep in mind when
+checking a result: (1) measure it in the <strong>same metric</strong>
+that <code>type</code> targets — a <code>type = &quot;NNSdep&quot;</code> target
+with <code>NNS.dep(...)$Dependence</code> (unsigned), a
+<code>&quot;spearman&quot;</code>/<code>&quot;pearson&quot;</code> target with rank/linear
+correlation; a <em>signed</em> correlation taken on an unsigned
+<code>&quot;NNSdep&quot;</code> target is not comparable to <span class="math inline">\(\rho\)</span> and can even read negative while the
+dependence target is met. (2) The <code>ensemble</code> is the
+per-observation <strong>mean</strong> of the replicates — a central
+summary, not a single series carrying the target dependence — so a rank
+or linear correlation taken directly on the <code>ensemble</code> tends
+to read <strong>higher</strong> than the per-replicate <span class="math inline">\(\rho\)</span> (averaging amplifies the shared
+order). Calibrate <span class="math inline">\(\rho\)</span> on the
+<code>replicates</code>, not the <code>ensemble</code>.</p>
+</blockquote>
 <div id="target_drift-specification" class="section level3">
 <h3><code>target_drift</code> Specification</h3>
 <p>We can also specify a target drift in our replicates with the
@@ -584,10 +605,23 @@ multivariate dependence among our <code>new.boot.dep.data</code>.</p>
 <code>original.data</code>:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="fu">print</span>(<span class="fu">cor</span>(new.boot.dep.matrix[,i], original.data[,i], <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>))</span>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9452863</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9499478</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.945878</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9442845</span></span></code></pre></div>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9885851</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9965075</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9906302</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9901535</span></span></code></pre></div>
+<blockquote>
+<p><strong>Reading these numbers.</strong> Here <code>ensemble</code> is
+the per-observation mean of <code>reps = 100</code> replicates — a
+central summary, not a single path carrying the exact target dependence
+— so a rank/linear correlation taken directly on it tends to read
+<strong>higher</strong> than the per-replicate <span class="math inline">\(\rho\)</span> (averaging amplifies the shared
+order). With <span class="math inline">\(\rho = 0.95\)</span> the gap is
+small because the target is already near the ceiling; at moderate <span class="math inline">\(\rho\)</span> it is larger (e.g. a per-replicate
+Spearman <span class="math inline">\(\rho = 0.75\)</span> typically
+reads ~0.9 once averaged into the <code>ensemble</code>). The <span class="math inline">\(\rho\)</span> alignment is calibrated on the
+individual <code>replicates</code>; treat the <code>ensemble</code> as a
+representative central path.</p>
+</blockquote>
 <div id="compare-multivariate-dependence-structures-1" class="section level3">
 <h3>Compare Multivariate Dependence Structures</h3>
 <p>Similar dependence with similar values.</p>
@@ -595,7 +629,7 @@ multivariate dependence among our <code>new.boot.dep.data</code>.</p>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.boot.dep.matrix)</span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4517661</span></span></code></pre></div>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4704039</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">head</span>(new.boot.dep.matrix)</span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>

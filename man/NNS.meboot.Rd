@@ -33,7 +33,7 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{rho}{numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.}
+\item{rho}{numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
@@ -78,7 +78,7 @@ Returns the following row names in a matrix:
 \itemize{
   \item{x} original data provided as input.
 \item{replicates} maximum entropy bootstrap replicates.
-\item{ensemble} average observation over all replicates.
+\item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 \item{xx} sorted order stats (xx[1] is minimum value).
 \item{z} class intervals limits.
 \item{dv} deviations of consecutive data values.
@@ -96,6 +96,8 @@ Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r
 }
 \note{
 Vectorized \code{rho} and \code{drift} parameters will not vectorize both simultaneously.  Also, do not specify \code{target_drift = NULL}.
+
+The \code{rho} dependence alignment is calibrated on each individual \code{replicate}: every replicate is mixed so that its dependence on the original series matches \code{rho}, in the metric implied by \code{type}.  Assess a result in that \strong{same} metric -- a \code{"NNSdep"} target with \link{NNS.dep}\code{$Dependence} (unsigned) and a \code{"spearman"}/\code{"pearson"} target with rank/linear correlation -- because a signed correlation taken on an unsigned \code{"NNSdep"} target is not comparable to \code{rho} (it can even read negative while the dependence target is met).  Separately, the \code{ensemble} is the per-observation mean of the replicates -- a central summary, not a single series carrying the target dependence -- so a rank or linear correlation computed directly on the \code{ensemble} tends to read higher than the per-replicate \code{rho} (averaging amplifies the shared order).  Verify \code{rho} on the \code{replicates}, in the metric implied by \code{type}, rather than on the \code{ensemble}.
 }
 \examples{
 \dontrun{

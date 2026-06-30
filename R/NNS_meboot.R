@@ -4,7 +4,7 @@
 #'
 #' @param x vector of data.
 #' @param reps numeric; number of replicates to generate.
-#' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.
+#' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
@@ -30,7 +30,7 @@
 #' \itemize{
 #'   \item{x} original data provided as input.
 #' \item{replicates} maximum entropy bootstrap replicates.
-#' \item{ensemble} average observation over all replicates.
+#' \item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 #' \item{xx} sorted order stats (xx[1] is minimum value).
 #' \item{z} class intervals limits.
 #' \item{dv} deviations of consecutive data values.
@@ -44,6 +44,8 @@
 #' }
 #' 
 #' @note Vectorized \code{rho} and \code{drift} parameters will not vectorize both simultaneously.  Also, do not specify \code{target_drift = NULL}.
+#'
+#' @note The \code{rho} dependence alignment is calibrated on each individual \code{replicate}: every replicate is mixed so that its dependence on the original series matches \code{rho}, in the metric implied by \code{type}.  Assess a result in that \strong{same} metric -- a \code{"NNSdep"} target with \link{NNS.dep}\code{$Dependence} (unsigned) and a \code{"spearman"}/\code{"pearson"} target with rank/linear correlation -- because a signed correlation taken on an unsigned \code{"NNSdep"} target is not comparable to \code{rho} (it can even read negative while the dependence target is met).  Separately, the \code{ensemble} is the per-observation mean of the replicates -- a central summary, not a single series carrying the target dependence -- so a rank or linear correlation computed directly on the \code{ensemble} tends to read higher than the per-replicate \code{rho} (averaging amplifies the shared order).  Verify \code{rho} on the \code{replicates}, in the metric implied by \code{type}, rather than on the \code{ensemble}.
 #'
 #' @references
 #' \itemize{
@@ -277,10 +279,12 @@ NNS.meboot <- function(x,
   } else kappa <- NULL
   
   # Enforce min / max if provided. pmax/pmin recycle the scalar bound across the
-  # whole matrix elementwise and preserve its dimensions, so the per-column
-  # apply() (and its array reassembly) is unnecessary.
-  if (!is.null(trim[[2]])) ensemble <- pmax(trim[[2]], ensemble)
-  if (!is.null(trim[[3]])) ensemble <- pmin(trim[[3]], ensemble)
+  # whole matrix elementwise, replacing the previous per-column apply(). Assign
+  # in place (ensemble[]) so the matrix dim/dimnames are preserved: pmax/pmin
+  # copy attributes from their FIRST argument, so pmax(scalar, matrix) would
+  # silently drop the dim and break the later dimnames() assignment.
+  if (!is.null(trim[[2]])) ensemble[] <- pmax(ensemble, trim[[2]])
+  if (!is.null(trim[[3]])) ensemble[] <- pmin(ensemble, trim[[3]])
   
   # ts attributes
   if (is.ts(x)) {
