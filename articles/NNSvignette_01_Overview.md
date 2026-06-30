@@ -8,11 +8,6 @@
 library(NNS)
 ```
 
-    ## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-
-    ## Warning: 'rgl.init' failed, will use the null device.
-    ## See '?rgl.useNULL' for ways to avoid this warning.
-
 ## Orientation
 
 **Goal.** A complete, hands‑on curriculum for Nonlinear Nonparametric

@@ -65,9 +65,6 @@
 <span><span class="co"># install.packages("NNS")</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/OVVO-Financial/NNS" class="external-link">NNS</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: 'rgl.init' failed, will use the null device.</span></span>
-<span><span class="co">## See '?rgl.useNULL' for ways to avoid this warning.</span></span></code></pre>
 <div class="section level2">
 <h2 id="orientation">Orientation<a class="anchor" aria-label="anchor" href="#orientation"></a>
 </h2>
@@ -148,7 +145,7 @@ contribution.</li>
 <div class="section level3">
 <h3 id="code-variance-decomposition-cdf">1.3 Code: variance decomposition &amp; CDF<a class="anchor" aria-label="anchor" href="#code-variance-decomposition-cdf"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Normal sample</span></span>
@@ -157,7 +154,7 @@ contribution.</li>
 <span><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LPM.html">LPM</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">mu</span>, <span class="va">y</span><span class="op">)</span>; <span class="va">U2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/UPM.html">UPM</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">mu</span>, <span class="va">y</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"LPM2 + UPM2 = %.6f vs var(y)=%.6f\n"</span>, <span class="op">(</span><span class="va">L2</span><span class="op">+</span><span class="va">U2</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## LPM2 + UPM2 = 1.011889 vs var(y)=1.011889</span></span></code></pre>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Empirical CDF via LPM.ratio(0, t, x)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">t</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">cdf_lpm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">t</span>, <span class="va">y</span><span class="op">)</span></span>
@@ -166,7 +163,7 @@ contribution.</li>
 <pre><code><span><span class="co">## CDF at t=-1.0 : LPM.ratio=0.1633 | empirical=0.1633</span></span>
 <span><span class="co">## CDF at t=+0.0 : LPM.ratio=0.5043 | empirical=0.5043</span></span>
 <span><span class="co">## CDF at t=+1.0 : LPM.ratio=0.8480 | empirical=0.8480</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Asymmetry on a skewed distribution</span></span>
 <span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="fl">3000</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span>; <span class="va">mu_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)\n"</span>, <span class="fu"><a href="../reference/LPM.html">LPM</a></span><span class="op">(</span><span class="fl">2</span>,<span class="va">mu_z</span>,<span class="va">z</span><span class="op">)</span>, <span class="fu"><a href="../reference/UPM.html">UPM</a></span><span class="op">(</span><span class="fl">2</span>,<span class="va">mu_z</span>,<span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -194,7 +191,7 @@ assumptions.</p>
 <ul>
 <li><code>NNS.moments(x)</code></li>
 </ul>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.moments.html">NNS.moments</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="va">M</span></span></code></pre></div>
 <pre><code><span><span class="co">## $mean</span></span>
@@ -216,7 +213,7 @@ assumptions.</p>
 <ul>
 <li><code>NNS.mode(x)</code></li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">23</span><span class="op">)</span></span>
 <span><span class="va">multimodal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1500</span>,<span class="op">-</span><span class="fl">2</span>,<span class="fl">.5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1500</span>,<span class="fl">2</span>,<span class="fl">.5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/NNS.mode.html">NNS.mode</a></span><span class="op">(</span><span class="va">multimodal</span>,multi <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -236,7 +233,7 @@ when <code>degree=0</code>)</li>
 partial‑moment CDFs)</li>
 <li><code>UPM.VaR(p, degree, variable)</code></li>
 </ul>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qgrid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">0.95</span>,<span class="fl">.1</span><span class="op">)</span>,<span class="fl">0</span>,<span class="va">z</span><span class="op">)</span> <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
 <span><span class="va">CDF_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>threshold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">qgrid</span><span class="op">)</span>, CDF <span class="op">=</span> <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">qgrid</span>,<span class="va">z</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">CDF_tbl</span></span></code></pre></div>
@@ -280,16 +277,16 @@ such structure.</p>
 <div class="section level3">
 <h3 id="code-nonlinear-dependence">3.2 Code: nonlinear dependence<a class="anchor" aria-label="anchor" href="#code-nonlinear-dependence"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">2000</span>,<span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span>, sd<span class="op">=</span><span class="fl">.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Pearson r = %.4f\n"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Pearson r = 0.0006</span></span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"NNS.dep  = %.4f\n"</span>, <span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">Dependence</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## NNS.dep  = 0.7097</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>a<span class="op">=</span><span class="va">x</span>, b<span class="op">=</span><span class="va">y</span>, c<span class="op">=</span><span class="va">x</span><span class="op">*</span><span class="va">y</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span>, sd<span class="op">=</span><span class="fl">.05</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/PM.matrix.html">PM.matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, target <span class="op">=</span> <span class="st">"means"</span>, variable<span class="op">=</span><span class="va">X</span>, pop_adj<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">pm</span></span></code></pre></div>
@@ -322,7 +319,7 @@ such structure.</p>
 <span><span class="co">## a 0.3418800141  0.0001011068  0.206234664</span></span>
 <span><span class="co">## b 0.0001011068  0.0927842833 -0.000789973</span></span>
 <span><span class="co">## c 0.2062346637 -0.0007899730  0.150159552</span></span></code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.copula.html">NNS.copula</a></span><span class="op">(</span><span class="va">X</span>, continuous<span class="op">=</span><span class="cn">TRUE</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">cop</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.5692785</span></span></code></pre>
@@ -330,7 +327,7 @@ such structure.</p>
 <div class="section level3">
 <h3 id="code-copula">3.3 Code: copula<a class="anchor" aria-label="anchor" href="#code-copula"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>; <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>; <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>; <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
 <span></span>
@@ -369,7 +366,7 @@ between variables influences the final normalized values.</p>
 <ul>
 <li><code>NNS.norm(x, linear=TRUE, chart.type = NULL)</code></li>
 </ul>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -394,7 +391,7 @@ transformations.</p>
 <ul>
 <li><code>NNS.rescale(x, a, b, method=c("minmax","riskneutral"), T=NULL, type=c("Terminal","Discounted"))</code></li>
 </ul>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">px</span> <span class="op">&lt;-</span> <span class="fl">100</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">260</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.rescale.html">NNS.rescale</a></span><span class="op">(</span><span class="va">px</span>, a<span class="op">=</span><span class="fl">100</span>, b<span class="op">=</span><span class="fl">0.03</span>, method<span class="op">=</span><span class="st">"riskneutral"</span>, T<span class="op">=</span><span class="fl">1</span>, type<span class="op">=</span><span class="st">"Terminal"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> target <span class="op">=</span> <span class="fl">100</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">0.03</span><span class="op">*</span><span class="fl">1</span><span class="op">)</span>, mean_rn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">rn</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
@@ -427,7 +424,7 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <div class="section level3">
 <h3 id="code-twosample-multigroup">5.2 Code: two‑sample &amp; multi‑group<a class="anchor" aria-label="anchor" href="#code-twosample-multigroup"></a>
 </h3>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctrl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">trt</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">180</span>, <span class="fl">0.35</span>, <span class="fl">1.2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/NNS.ANOVA.html">NNS.ANOVA</a></span><span class="op">(</span>control<span class="op">=</span><span class="va">ctrl</span>, treatment<span class="op">=</span><span class="va">trt</span>, means.only<span class="op">=</span><span class="cn">FALSE</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -459,7 +456,7 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Confidence_Level</span></span>
 <span><span class="co">## [1] 0.95</span></span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>g1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">150</span>,<span class="fl">0.0</span>,<span class="fl">1.1</span><span class="op">)</span>, g2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">150</span>,<span class="fl">0.2</span>,<span class="fl">1.0</span><span class="op">)</span>, g3<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.1</span>,<span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/NNS.ANOVA.html">NNS.ANOVA</a></span><span class="op">(</span>control<span class="op">=</span><span class="va">A</span>, means.only<span class="op">=</span><span class="cn">TRUE</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Certainty </span></span>
@@ -509,7 +506,7 @@ distribution to be preferred to another over the entire shared
 support.</p>
 <p>Below is an example comparing two distributions with unequal
 means.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">1</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -538,29 +535,29 @@ is less likely to exceed a draw from
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>.</p>
 <p>We can also obtain confidence intervals for the tie-adjusted
 superiority probability using maximum entropy bootstrap replicates.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
-<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a></span>
-<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
-<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
-<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a></span>
-<span id="cb34-12"><a href="#cb34-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
-<span id="cb34-13"><a href="#cb34-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
-<span id="cb34-14"><a href="#cb34-14" tabindex="-1"></a></span>
-<span id="cb34-15"><a href="#cb34-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
-<span id="cb34-16"><a href="#cb34-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
+<span id="cb32-11"><a href="#cb32-11" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
+<span id="cb32-13"><a href="#cb32-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
+<span id="cb32-14"><a href="#cb32-14" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
+<span id="cb32-16"><a href="#cb32-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
 <p>This provides an interpretable effect size for directional comparison
 between two distributions without requiring identical distributions or
 equal variances.</p>
 <p>For discrete variables, ties may occur with positive probability, and
 the reported <code>p_tie</code> and <code>p_star</code> values reflect
 that adjustment explicitly.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -601,7 +598,7 @@ conditional dependence)</li>
 <div class="section level3">
 <h3 id="code-classification-via-regression-ensembles">6.2 Code: classification via regression + ensembles<a class="anchor" aria-label="anchor" href="#code-classification-via-regression-ensembles"></a>
 </h3>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example 1: Nonlinear regression</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
@@ -713,7 +710,7 @@ conditional dependence)</li>
 <span><span class="co">## 999        0.2108312</span></span>
 <span><span class="co">## 1000       0.2078031</span></span>
 <span><span class="co">## --- [ 1000 rows x 7 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span></code></pre>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
 <span><span class="va">test.set</span> <span class="op">=</span> <span class="fl">141</span><span class="op">:</span><span class="fl">150</span></span>
 <span> </span>
@@ -742,11 +739,11 @@ conditional dependence)</li>
 <div class="section level3">
 <h3 id="code-directional-causality">6.3 Code: directional causality<a class="anchor" aria-label="anchor" href="#code-directional-causality"></a>
 </h3>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span>,  <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span>  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) </span></span>
 <span><span class="co">##           0.2607148           0.3863580           0.3933374</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span><span class="op">)</span>   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) </span></span>
 <span><span class="co">##           0.3863580           0.2607148           0.3933374</span></span></code></pre>
@@ -766,7 +763,7 @@ drivers.</p>
 <li><code>NNS.seas</code></li>
 <li><code>NNS.VAR</code></li>
 </ul>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Univariate nonlinear ARMA</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">480</span><span class="op">/</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">480</span>, sd<span class="op">=</span><span class="fl">.35</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -781,7 +778,7 @@ drivers.</p>
 <span><span class="co">## 4    145                0.6411224                      3.671725e+16</span></span>
 <span><span class="co">## 5    195                0.6510130                      3.671725e+16</span></span>
 <span><span class="co">## 6    194                0.6736148                      3.671725e+16</span></span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate seasonal periods</span></span>
 <span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">z</span>, h <span class="op">=</span> <span class="fl">48</span>, seasonal.factor <span class="op">=</span> <span class="va">seasonal_period</span><span class="op">$</span><span class="va">periods</span>, plot <span class="op">=</span> <span class="cn">TRUE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "CURRNET METHOD: lin"</span></span>
@@ -908,7 +905,7 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.meboot(x, reps=999, rho=NULL, type="spearman", drift=TRUE, ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x_ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">350</span>, sd<span class="op">=</span><span class="fl">.7</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">mb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.meboot.html">NNS.meboot</a></span><span class="op">(</span><span class="va">x_ts</span>, reps<span class="op">=</span><span class="fl">5</span>, rho <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mb</span><span class="op">[</span><span class="st">"replicates"</span>, <span class="op">]</span><span class="op">$</span><span class="va">replicates</span><span class="op">)</span></span></code></pre></div>
@@ -921,12 +918,12 @@ the linear or nonlinear regression forecasts.</p>
 <ul>
 <li><code>NNS.MC(x, reps=30, lower_rho=-1, upper_rho=1, by=.01, exp=1, type="spearman", ...)</code></li>
 </ul>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.MC.html">NNS.MC</a></span><span class="op">(</span><span class="va">x_ts</span>, reps<span class="op">=</span><span class="fl">5</span>, lower_rho<span class="op">=</span><span class="op">-</span><span class="fl">1</span>, upper_rho<span class="op">=</span><span class="fl">1</span>, by<span class="op">=</span><span class="fl">.5</span>, exp<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">ensemble</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 350</span></span></code></pre>
 <pre><code><span><span class="co">## [1] "rho = 1"    "rho = 0.5"  "rho = 0"    "rho = -0.5" "rho = -1"</span></span></code></pre>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">$</span><span class="va">`rho = 0`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5</span></span>
 <span><span class="co">## [1,]   12.080732    6.022924    6.587004    1.808137    8.560541</span></span>
@@ -952,7 +949,7 @@ estimators.</p>
 <li><code>NNS.SD.cluster(R)</code></li>
 <li><code>NNS.SD.efficient.set(R)</code></li>
 </ul>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">RA</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">0.005</span>, <span class="fl">0.03</span><span class="op">)</span></span>
 <span><span class="va">RB</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">0.003</span>, <span class="fl">0.02</span><span class="op">)</span></span>
@@ -960,19 +957,19 @@ estimators.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/NNS.FSD.uni.html">NNS.FSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.SSD.uni.html">NNS.SSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.TSD.uni.html">NNS.TSD.uni</a></span><span class="op">(</span><span class="va">RA</span>, <span class="va">RB</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Rmat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>A<span class="op">=</span><span class="va">RA</span>, B<span class="op">=</span><span class="va">RB</span>, C<span class="op">=</span><span class="va">RC</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.cluster.html">NNS.SD.cluster</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Clusters</span></span>
 <span><span class="co">## $Clusters$Cluster_1</span></span>
 <span><span class="co">## [1] "A" "C" "B"</span></span></code></pre>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/NNS.SD.efficient.set.html">NNS.SD.efficient.set</a></span><span class="op">(</span><span class="va">Rmat</span>, degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Checking 1 of 2Checking 2 of 2</span></span></code></pre>
 <pre><code><span><span class="co">## [1] "A" "C" "B"</span></span></code></pre>
