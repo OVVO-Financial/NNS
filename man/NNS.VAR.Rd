@@ -10,9 +10,13 @@ NNS.VAR(
   tau = 1,
   dim.red.method = "cor",
   naive.weights = TRUE,
-  obj.fn = expression(mean((predicted - actual)^2)/(NNS::Co.LPM(1, predicted, actual,
-    target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted,
-    actual, target_x = mean(predicted), target_y = mean(actual)))),
+  obj.fn = expression({
+     .denom <- NNS::Co.LPM(1, predicted, actual, target_x =
+    mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted, actual,
+    target_x = mean(predicted), target_y = mean(actual))
+     if (.denom == 0) Inf else
+    mean((predicted - actual)^2)/.denom
+ }),
   objective = "min",
   status = TRUE,
   ncores = NULL,

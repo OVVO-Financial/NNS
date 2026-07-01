@@ -107,7 +107,11 @@ NNS.VAR <- function(variables,
                     tau = 1,
                     dim.red.method = "cor",
                     naive.weights = TRUE,
-                    obj.fn = expression( mean((predicted - actual)^2) / (NNS::Co.LPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) + NNS::Co.UPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) )  ),
+                    obj.fn = expression( {
+                      .denom <- NNS::Co.LPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) +
+                                NNS::Co.UPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual))
+                      if (.denom == 0) Inf else mean((predicted - actual)^2) / .denom
+                    } ),
                     objective = "min",
                     status = TRUE,
                     ncores = NULL,
@@ -219,7 +223,9 @@ NNS.VAR <- function(variables,
   }
   
   dim.red.method <- tolower(dim.red.method)
-  if(sum(dim.red.method%in%c("cor","nns.dep","nns.caus","all"))==0){ stop('Please ensure the dimension reduction method is set to one of "cor", "nns.dep", "nns.caus" or "all".')}
+  # dim.red.method is scalar: the downstream selectors use scalar if() (which
+  # errors on a length > 1 condition in R >= 4.2). Use "all" to combine methods.
+  if(length(dim.red.method) != 1L || !(dim.red.method %in% c("cor","nns.dep","nns.caus","all"))){ stop('Please ensure the dimension reduction method is set to a single value: one of "cor", "nns.dep", "nns.caus" or "all".')}
   
   if(is.null(colnames(variables))){
     colnames.list <- lapply(1 : ncol(variables), function(i) paste0("x", i))
@@ -237,7 +243,8 @@ NNS.VAR <- function(variables,
   colnames(variables) <- gsub(" - ", "...", colnames(variables))
   
   # Parallel process...
-  if (is.null(ncores)) {
+  auto_cores <- is.null(ncores)
+  if (auto_cores) {
     num_cores <- max(1L, as.integer(parallel::detectCores()) - 1L, na.rm = TRUE)
   } else {
     num_cores <- max(1L, as.integer(ncores), na.rm = TRUE)
@@ -245,11 +252,13 @@ NNS.VAR <- function(variables,
 
   # Workload gate: standing up a process cluster costs ~1s (spawn + exporting
   # data to workers). Each per-variable task (NNS.stack / NNS.ARMA.optim) scales
-  # with the series length, so for short series the fixed cost dominates and we
-  # stay serial. Gate on both series length and the number of variables (tasks).
+  # with the series length, so for short series the fixed cost can dominate.
+  # The series-length heuristic only gates the AUTOMATIC default (ncores = NULL);
+  # an explicit ncores is an intentional request and is honored whenever there is
+  # more than one variable (task) to spread across cores.
   use_parallel <- num_cores > 1 &&
-    nrow(variables) >= 500L &&
-    ncol(variables) >= 2L
+    ncol(variables) >= 2L &&
+    (!auto_cores || nrow(variables) >= 500L)
 
   # Create a single cluster shared by both parallel sections (fork-first, with a
   # PSOCK fallback). Stopped at the end of the multi-variate estimate section.
@@ -434,7 +443,9 @@ NNS.VAR <- function(variables,
     if(dim.red.method == "all") rel_vars <- ((rel.1+rel.2+rel.3)/3)[1, -1]
     
     rel_vars <- names(rel_vars[rel_vars > cor_threshold$NNS.dim.red.threshold])
-    rel_vars <- rel_vars[rel_vars!=i]
+    # (The self-variable's tau_0 column is already excluded from IV via [, -i]
+    # above; the former rel_vars[rel_vars != i] compared character names to the
+    # integer index i and matched nothing -- a no-op -- so it is removed.)
     rel_vars <- na.omit(rel_vars)
     
     if(any(length(rel_vars)==0 | is.null(rel_vars))){
@@ -482,7 +493,7 @@ NNS.VAR <- function(variables,
   multi <- uni <- numeric(length(colnames(RV)))
   
   for(i in 1:length(colnames(RV))){
-    if(length(na.omit(RV[,i]) > 0)){
+    if(length(na.omit(RV[,i])) > 0){
       given_var <- unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]
       observed_var <- do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]
       
