@@ -14,12 +14,12 @@ Source:
 [`DESCRIPTION`](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/DESCRIPTION)
 
 Viole F (2026). *NNS: Nonlinear Nonparametric Statistics*. R package
-version 13.0, <https://github.com/OVVO-Financial/NNS>.
+version 13.1, <https://github.com/OVVO-Financial/NNS>.
 
     @Manual{,
       title = {NNS: Nonlinear Nonparametric Statistics},
       author = {Fred Viole},
       year = {2026},
-      note = {R package version 13.0},
+      note = {R package version 13.1},
       url = {https://github.com/OVVO-Financial/NNS},
     }
