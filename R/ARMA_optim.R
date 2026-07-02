@@ -97,7 +97,7 @@ NNS.ARMA.optim <- function(variable,
   
   if(min(variable) < 0) negative.values <- TRUE
   
-  if(!is.null(h) && h > 0) h_oos <- h_is <- h else {
+  if(!is.null(h) && h > 0) h_oos <- h else {
     h <- NULL
     h_oos <- NULL
   }
@@ -105,7 +105,7 @@ NNS.ARMA.optim <- function(variable,
   if(is.null(training.set)) training.set <- floor(.8 * n)
   training.set <- as.integer(training.set)
   
-  h_eval <- h_is <- as.integer(n - training.set)
+  h_eval <- as.integer(n - training.set)
   
   actual <- tail(variable, h_eval)
   

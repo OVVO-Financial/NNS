@@ -95,7 +95,6 @@ NNS.ARMA <- function(variable,
     FV <- variable[1 : training.set]
   } else {
     training.set <- length(variable)
-    variable <- variable
     FV <- variable
   }
   

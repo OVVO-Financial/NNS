@@ -187,10 +187,8 @@ NNS.stack <- function(IVs.train,
     CV.IVs.train <- data.frame(IVs.train[c(-test.set), ])
     
     if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
-    if(dim(CV.IVs.train)[2]!=dim(IVs.train)[2]) CV.IVs.train <- t(CV.IVs.train)
     
     CV.IVs.test <- data.frame(IVs.train[test.set, ])
-    if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
     if(dim(CV.IVs.test)[2]!=dim(IVs.train)[2]) CV.IVs.test <- t(CV.IVs.test)
     
     CV.DV.train <- DV.train[c(-test.set)]
@@ -441,8 +439,6 @@ NNS.stack <- function(IVs.train,
           CV.IVs.test  <- data.frame(CV.IVs.test[,  relevant_vars, drop = FALSE])
         }
         if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
-        if (ncol(CV.IVs.train) != n) CV.IVs.train <- t(CV.IVs.train)
-        if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
         if (ncol(CV.IVs.test)  != n) CV.IVs.test  <- t(CV.IVs.test)
       }
       

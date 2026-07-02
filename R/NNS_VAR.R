@@ -251,14 +251,21 @@ NNS.VAR <- function(variables,
   }
 
   # Workload gate: standing up a process cluster costs ~1s (spawn + exporting
-  # data to workers). Each per-variable task (NNS.stack / NNS.ARMA.optim) scales
-  # with the series length, so for short series the fixed cost can dominate.
-  # The series-length heuristic only gates the AUTOMATIC default (ncores = NULL);
-  # an explicit ncores is an intentional request and is honored whenever there is
-  # more than one variable (task) to spread across cores.
+  # data to workers). NNS.VAR parallelizes across VARIABLES -- one heavy task per
+  # column (NNS.stack + dimension reduction over the ~ncol*tau lagged regressors)
+  # -- so the parallel work grows with BOTH the number of variables (task count)
+  # and the series length. A wide VAR (many variables) therefore has ample
+  # parallel work even on a short series: e.g. a 35-variable monthly nowcast with
+  # ~300 rows is 35 heavy tasks that parallelize well, yet nrow < 500. Gate the
+  # AUTOMATIC default (ncores = NULL) on either dimension -- enough variables OR a
+  # long series -- and always honor an explicit ncores. (Thresholds are heuristic;
+  # tune ncol_parallel_min / the nrow cutoff against representative workloads.)
+  ncol_parallel_min <- 6L
   use_parallel <- num_cores > 1 &&
     ncol(variables) >= 2L &&
-    (!auto_cores || nrow(variables) >= 500L)
+    (!auto_cores ||
+       ncol(variables) >= ncol_parallel_min ||
+       nrow(variables) >= 500L)
 
   # Create a single cluster shared by both parallel sections (fork-first, with a
   # PSOCK fallback). Stopped at the end of the multi-variate estimate section.
@@ -277,19 +284,15 @@ NNS.VAR <- function(variables,
   
   if(status) message("Currently interpolating/extrapolating variables...","\r", appendLF=TRUE)
   
-  nns_IVs <- variable_interpolation <- variable_interpolation_and_extrapolation <- list(ncol(variables))
-  
   # ===================== Interpolation / Extrapolation  =====================
   .interp_worker <- function(i) {
     n <- nrow(variables)
     index <- seq_len(n)
-    last_point <- n
     a <- cbind.data.frame("index" = index, variables)
-    
+
     # For Interpolation / Extrapolation of all missing values
     selected_variable <- a[, c(1,(i+1))]
-    
-    interpolation_start <- which(!is.na(selected_variable[,2]))[1]
+
     interpolation_point <- tail(which(!is.na(selected_variable[,2])), 1)
     
     missing_index <- which(is.na(selected_variable[,2]))
@@ -370,11 +373,7 @@ NNS.VAR <- function(variables,
   extrapolation_results <- lapply(nns_IVs, `[[`, 2)
   nns_IVs_results <- data.frame(do.call(cbind, extrapolation_results))
   colnames(nns_IVs_results) <- colnames(variables)
-  
-  extrapolation_results <- lapply(nns_IVs, `[[`, 2)
-  nns_IVs_results <- data.frame(do.call(cbind, extrapolation_results))
-  colnames(nns_IVs_results) <- colnames(variables)
-  
+
   # Combine interpolated / extrapolated / forecasted IVs onto training data.frame
   new_values <- lapply(1:ncol(variables), function(i) c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i]))
   
@@ -422,15 +421,15 @@ NNS.VAR <- function(variables,
     
     
     
-    if(any(dim.red.method == "cor" | dim.red.method == "all")){
+    if(dim.red.method %in% c("cor", "all")){
       rel.1 <- abs(cor(cbind(DV, IV), method = "spearman"))
     }
     
-    if(any(dim.red.method == "nns.dep" | dim.red.method == "all")){
+    if(dim.red.method %in% c("nns.dep", "all")){
       rel.2 <- NNS.dep(cbind(DV, IV))$Dependence
     }
     
-    if(any(dim.red.method == "nns.caus" | dim.red.method == "all")){
+    if(dim.red.method %in% c("nns.caus", "all")){
       rel.3 <- NNS.caus(cbind(DV, IV))
     }
     
@@ -448,7 +447,7 @@ NNS.VAR <- function(variables,
     # integer index i and matched nothing -- a no-op -- so it is removed.)
     rel_vars <- na.omit(rel_vars)
     
-    if(any(length(rel_vars)==0 | is.null(rel_vars))){
+    if(length(rel_vars) == 0){
       rel_vars <- colnames(lagged_new_values_train)
     }
     

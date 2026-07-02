@@ -229,7 +229,7 @@ NNS.reg = function (x, y,
     noise.reduction <- "mode_class"
   }
   
-  if(any(class(y)==c("tbl", "data.table"))) y <- as.vector(unlist(y))
+  if(any(class(y) %in% c("tbl", "data.table"))) y <- as.vector(unlist(y))
   
   if(!plot) residual.plot <- FALSE
   

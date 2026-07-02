@@ -30,11 +30,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   np <- nrow(point.est)
   
-  if(is.null(np) & !is.null(point.est)){
-    point.est <- t(point.est)
-  } else {
-    point.est <- point.est
-  }
+  if(is.null(np) && !is.null(point.est)) point.est <- t(point.est)
   
   if(!is.null(point.est)){
     if(ncol(point.est) != n){
@@ -99,9 +95,6 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   ### Create unique identifier of each observation's interval
   NNS.ID <- gsub(do.call(paste, as.data.frame(NNS.ID)), pattern = " ", replacement = ".")
   
-  ### Match y to unique identifier
-  obs <- c(1 : length(Y))
-
   ### Grouped regression-point matrix and fitted values by NNS.ID, computed in
   ### C++ (NNS_mreg_reduce_cpp): each group's central tendency (per
   ### noise.reduction) of the IV columns and the DV, mapped back to every
