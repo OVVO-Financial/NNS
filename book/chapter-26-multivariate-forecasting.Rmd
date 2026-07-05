@@ -139,6 +139,30 @@ The final forecast is an ensemble of the univariate and multivariate components.
 
 So the “VAR” terminology remains conceptually appropriate, but the mechanism is no longer a linear matrix recursion. It is a **nonlinear regression surface over lagged multivariate data**.
 
+The Python workflow mirrors the five-stage architecture through `nns_var`, which returns the same five-part structure:
+
+```python
+import numpy as np
+from nns import nns_var
+
+rng = np.random.default_rng(123)
+n = 200
+x1 = np.cumsum(rng.normal(size=n))
+x2 = 0.5 * np.roll(x1, 3) + rng.normal(size=n)
+variables = np.column_stack((x1, x2))
+
+out = nns_var(variables, h=12, tau=12, naive_weights=True, status=False)
+
+out["interpolated_and_extrapolated"]   # completed panel
+out["relevant_variables"]              # selected lagged predictors per target
+out["univariate"]                      # standalone NNS.ARMA forecasts
+out["multivariate"]                    # nonlinear multivariate forecasts
+out["ensemble"]                        # combined forecast
+
+# Mixed-frequency nowcasting path (NNS.nowcast's core call)
+# out = nns_var(econ_variables, h=12, tau=12, nowcast=True)
+```
+
 ---
 
 ## Lagged Predictor Geometry

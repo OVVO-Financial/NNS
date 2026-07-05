@@ -276,6 +276,42 @@ NNS.copula(cbind(x, y, z3), plot = TRUE, independence.overlay = TRUE)
 
 The return value is a single scalar in \([0,1]\) for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, `continuous = TRUE` can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.
 
+The same workflow in Python:
+
+```python
+import numpy as np
+from nns import co_lpm, lpm_ratio, nns_copula
+
+rng = np.random.default_rng(123)
+
+Sigma = np.array([[1.0, 0.7], [0.7, 1.0]])
+xy = rng.multivariate_normal([0.0, 0.0], Sigma, size=100)
+
+x = xy[:, 0]
+y = xy[:, 1]
+
+# Grid of benchmark pairs (R's expand.grid)
+gx, gy = np.meshgrid(x, y, indexing="ij")
+z1, z2 = gx.ravel(), gy.ravel()
+
+# Co-LPM surface in original (x, y) space
+surface_raw = co_lpm(0, z1, z2, z1, z2)
+
+# Transform the marginals into probability space
+u_x = lpm_ratio(0, x, x)
+u_y = lpm_ratio(0, y, y)
+
+gux, guy = np.meshgrid(u_x, u_y, indexing="ij")
+u1, u2 = gux.ravel(), guy.ravel()
+
+# Same directional statistic on the copula domain [0, 1]^2
+surface_copula = co_lpm(0, u1, u2, u1, u2)
+
+# Direct multivariate dependence summary
+z3 = rng.normal(size=x.size)
+nns_copula(np.column_stack((x, y, z3)), continuous=True)
+```
+
 ---
 
 ## Tail Dependence and Directional Moments

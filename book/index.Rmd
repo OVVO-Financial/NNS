@@ -58,3 +58,28 @@ A useful way to navigate both resources together is:
 3. Adapt those scripts to your own data and evaluate with your domain constraints.
 
 The examples repository is intended for hands-on implementation, not as a substitute for the proofs and derivations developed in the text. Keep the repository disclaimer in mind when applying any script directly to production or policy settings; examples are instructional templates and should be validated, stress-tested, and context-calibrated before operational use.
+
+## About the Python Code {-}
+
+The NNS framework is also available as a Python package. Throughout the book, each R example is complemented by an equivalent Python workflow so that readers can follow the material in either language. The Python blocks show the functional calls only; outputs and figures are shown once through the R examples and are not reprinted.
+
+The distribution package is **`ovvo-nns`** and the import package is **`nns`**:
+
+```bash
+pip install ovvo-nns
+```
+
+```python
+import nns
+```
+
+Source code and documentation live in the companion repository:
+
+- <https://github.com/OVVO-Financial/NNS-python>
+
+Conventions used by the Python code in this book:
+
+- **Naming.** R's dot-separated names become snake_case: `NNS.dep` is `nns_dep`, `LPM.VaR` is `lpm_var`, `Co.LPM` is `co_lpm`, `PM.matrix` is `pm_matrix`, and so on. Argument names follow the same rule (`seasonal.factor` becomes `seasonal_factor`).
+- **Inputs and outputs.** Functions accept NumPy arrays and return NumPy arrays, Python scalars, or plain dictionaries keyed by the same names as the R list elements (for example `fit["Point.est"]`).
+- **Randomness.** NumPy's `default_rng` replaces `set.seed`; because the generators differ, seeded Python runs reproduce the *structure* of the R examples, not their bit-identical draws. Many `nns` functions also accept an explicit `random_seed` argument.
+- **Plotting.** Where an R example's purpose is a figure, the Python workflow either passes `plot=True` or calls the matching helper from `nns.plotting` (for example `plot_nns_part`, `plot_nns_reg`).

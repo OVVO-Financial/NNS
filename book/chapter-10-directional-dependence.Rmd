@@ -265,6 +265,25 @@ D.UPM(1, 1, x, y, mean(x), mean(y))
 ## [1] 0.08481611
 ```
 
+The same workflow in Python:
+
+```python
+import numpy as np
+from nns import co_lpm, co_upm, d_lpm, d_upm
+
+rng = np.random.default_rng(42)
+n = 500
+shock = rng.normal(size=n)
+
+x = np.where(shock < 0, shock, rng.normal(size=n))
+y = np.where(shock < 0, shock + rng.normal(0, 0.1, n), rng.normal(size=n))
+
+co_lpm(1, x, y, x.mean(), y.mean())
+co_upm(1, x, y, x.mean(), y.mean())
+d_lpm(1, 1, x, y, x.mean(), y.mean())
+d_upm(1, 1, x, y, x.mean(), y.mean())
+```
+
 In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.
 
 Correlation averages across all regions and may therefore appear moderate even when downside dependence dominates.

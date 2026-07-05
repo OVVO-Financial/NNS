@@ -124,6 +124,28 @@ points(sort(x), LPM(degree = 0, target = sort(x), variable = x), col = "red")
 legend("left", legend = c("ecdf", "LPM.CDF"), fill = c("black", "red"), border = NA, bty = "n")
 ```
 
+The same workflow in Python uses the `nns` package (installed as `ovvo-nns`):
+
+```python
+import numpy as np
+from nns import lpm
+
+rng = np.random.default_rng(123)
+x = rng.normal(size=100)
+
+# Empirical CDF evaluated at 0 and 1
+np.mean(x <= 0), np.mean(x <= 1)
+
+# Degree-zero LPM reproduces the empirical CDF
+lpm(0, 0.0, x), lpm(0, 1.0, x)
+
+# Vectorized targets:
+lpm(0, np.array([0.0, 1.0]), x)
+
+# Full CDF trace: degree-zero LPM at every sorted observation
+lpm(0, np.sort(x), x)
+```
+
 <center>
 ![Figure 3.1. Empirical CDF (black step function) and degree-zero LPM evaluation (red points) are identical, confirming \(LPM_0(t;X)=F_X(t)\).](images/ch3_cdf_lpm0.png)
 </center>

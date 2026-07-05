@@ -230,6 +230,21 @@ y <- x ^ 3
 for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
 ```
 
+In Python (the `plot_nns_part` helper reproduces the Voronoi view):
+
+```python
+import numpy as np
+from nns import nns_part
+from nns.plotting import plot_nns_part
+
+x = np.arange(-5, 5.05, 0.05)
+y = x ** 3
+
+for i in range(1, 5):
+    part = nns_part(x, y, order=i, obs_req=0)
+    plot_nns_part(part)
+```
+
 <center>
 ![Figure 18.1. `NNS.part` joint partitioning for orders 1–4 (Voronoi view), showing progressive recursive refinement.](images/ch18_part_1.png)
 </center>
@@ -277,6 +292,14 @@ x <- seq(-5, 5, .05)
 y <- x ^ 3
 
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE, obs.req = 0)}
+```
+
+In Python:
+
+```python
+for i in range(1, 5):
+    part = nns_part(x, y, order=i, type="XONLY", obs_req=0)
+    plot_nns_part(part)
 ```
 
 <center>

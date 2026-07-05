@@ -323,6 +323,31 @@ legend("topright", legend = c("LPM degree 0 (discrete)",
 
 The red line wanders; the blue line is flat at 0.5 for every $n \ge 1$.
 
+The full demonstration in Python:
+
+```python
+import numpy as np
+from nns import lpm_ratio
+
+rng = np.random.default_rng(12345)
+x = rng.normal(loc=5, scale=1, size=100)
+
+# Discrete CDF at the mean — biased
+lpm_ratio(0, float(np.mean(x)), x)
+
+# Continuous (area-based) probability at the mean — unbiased
+lpm_ratio(1, float(np.mean(x)), x)
+
+x2 = rng.normal(loc=5, scale=1, size=500)
+lpm_ratio(0, float(np.mean(x2)), x2)   # discrete — still biased
+lpm_ratio(1, float(np.mean(x2)), x2)   # continuous — exact
+
+# Sequential tracking across every observation
+x = rng.normal(size=500)
+lpm0 = np.array([lpm_ratio(0, float(np.mean(x[:i])), x[:i]) for i in range(1, x.size + 1)])
+lpm1 = np.array([lpm_ratio(1, float(np.mean(x[:i])), x[:i]) for i in range(1, x.size + 1)])
+```
+
 #### Implications for Distribution Comparison
 
 This property has direct consequences for the comparison methods developed in the remainder of this chapter.
@@ -697,6 +722,25 @@ y <- sample(1:5, 100, replace = TRUE)
 NNS.SS(x, y)
 ```
 
+Both calls in Python:
+
+```python
+import numpy as np
+from nns import nns_ss
+
+rng = np.random.default_rng(123)
+x = rng.normal(loc=0, scale=1, size=1000)
+y = rng.normal(loc=1, scale=1, size=1000)
+
+nns_ss(x, y)   # dict with p_gt, p_tie, p_star
+
+# Discrete data: ties reported rather than ignored
+xd = rng.integers(1, 6, size=100)
+yd = rng.integers(1, 6, size=100)
+
+nns_ss(xd, yd)
+```
+
 This is especially important in ordinal and categorical applications where equal outcomes are common. In practice, stochastic superiority is often the cleanest first effect-size summary to report, because it answers the most direct comparative question: how often does one distribution beat the other?
 
 
@@ -909,6 +953,27 @@ NNS.ANOVA(control = auto_mpg,
 # 3. Preference ordering over the full support
 NNS.FSD(manual_mpg, auto_mpg)
 # [1] "X FSD Y"
+```
+
+The same three-step workflow in Python (the `mtcars` mpg values are inlined by transmission type):
+
+```python
+import numpy as np
+from nns import nns_ss, nns_anova, fsd
+
+auto_mpg = np.array([21.4, 18.7, 18.1, 14.3, 24.4, 22.8, 19.2, 17.8, 16.4,
+                     17.3, 15.2, 10.4, 10.4, 14.7, 21.5, 15.5, 15.2, 13.3, 19.2])
+manual_mpg = np.array([21.0, 21.0, 22.8, 32.4, 30.4, 33.9, 27.3, 26.0, 30.4,
+                       15.8, 19.7, 15.0, 21.4])
+
+# 1. Pairwise directional advantage
+nns_ss(manual_mpg, auto_mpg)
+
+# 2. Full-distribution comparison
+nns_anova(control=auto_mpg, treatment=manual_mpg, robust=True)
+
+# 3. Preference ordering over the full support
+fsd(manual_mpg, auto_mpg)   # 1: "X FSD Y", -1: "Y FSD X", 0: no FSD
 ```
 
 For this comparison, `NNS.SS(manual_mpg, auto_mpg)` yields `p_gt = 0.8259109`, `p_tie = 0.008097166`, 

@@ -8,6 +8,46 @@ Unless otherwise noted, all functions in this appendix come from the **NNS** pac
 library(NNS)
 ```
 
+Every function referenced here has a Python counterpart in the `nns` package (distributed as `ovvo-nns`; see the Preface for conventions):
+
+```python
+import nns
+```
+
+## R–Python Function Crosswalk
+
+The R name is the canonical reference used throughout the book; the Python name follows the snake_case convention.
+
+| R function | Python function | Purpose |
+|---|---|---|
+| `LPM` / `UPM` | `nns.lpm` / `nns.upm` | Lower / upper partial moments |
+| `LPM.ratio` / `UPM.ratio` | `nns.lpm_ratio` / `nns.upm_ratio` | Directional CDF-style probabilities |
+| `LPM.VaR` / `UPM.VaR` | `nns.lpm_var` / `nns.upm_var` | Lower / upper tail quantile inversion |
+| `Co.LPM` / `Co.UPM` | `nns.co_lpm` / `nns.co_upm` | Concordant co-partial moments |
+| `D.LPM` / `D.UPM` | `nns.d_lpm` / `nns.d_upm` | Divergent co-partial moments |
+| `PM.matrix` | `nns.pm_matrix` | Partial-moment covariance decomposition |
+| `NNS.dep` | `nns.nns_dep` | Nonlinear dependence measure |
+| `NNS.copula` | `nns.nns_copula` | Multivariate dependence / copula view |
+| `NNS.caus` | `nns.nns_causation` | Directional causation diagnostic |
+| `NNS.CDF` | `nns.nns_cdf` | Partial-moment CDF estimation |
+| `NNS.ANOVA` | `nns.nns_anova` | Partial-moment ANOVA certainty |
+| `NNS.SS` | `nns.nns_ss` | Stochastic superiority |
+| `NNS.FSD` / `NNS.SSD` / `NNS.TSD` | `nns.fsd` / `nns.ssd` / `nns.tsd` | Stochastic dominance tests |
+| `NNS.part` | `nns.nns_part` | Recursive mean-split partitioning |
+| `NNS.reg` | `nns.nns_reg` | Nonparametric regression |
+| `NNS.boost` | `nns.nns_boost` | Feature-screening ensemble learner |
+| `NNS.stack` | `nns.nns_stack` | Optimized stacked ensemble |
+| `NNS.seas` | `nns.nns_seas` | Seasonality detection |
+| `NNS.ARMA` | `nns.nns_arma` | Nonlinear autoregressive forecasting |
+| `NNS.ARMA.optim` | `nns.nns_arma_optim` | Seasonal-factor optimization |
+| `NNS.VAR` | `nns.nns_var` | Nonparametric vector autoregression |
+| `NNS.meboot` | `nns.nns_meboot` | Maximum-entropy bootstrap |
+| `NNS.MC` | `nns.nns_mc` | Meboot-based Monte Carlo wrapper |
+| `NNS.mode` | `nns.nns_mode` | Mode estimation |
+| `NNS.moments` | `nns.nns_moments` | Partial-moment classical moments |
+| `NNS.diff` / `dy.dx` | `nns.nns_diff` / `nns.dy_dx` | Numerical differentiation |
+| `NNS.norm` / `NNS.rescale` | `nns.nns_norm` / `nns.nns_rescale` | Normalization and rescaling |
+
 ## Core directional operators and partial moments
 
 | Symbol | Definition | Interpretation | R function / pattern |

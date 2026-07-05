@@ -340,6 +340,31 @@ cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
 cov(cbind(x, y))
 ```
 
+The same workflow in Python:
+
+```python
+import numpy as np
+from nns import pm_matrix
+
+rng = np.random.default_rng(123)
+x = rng.normal(size=100)
+y = rng.normal(size=100)
+
+cov_mtx = pm_matrix(
+    lpm_degree=1,
+    upm_degree=1,
+    target="mean",
+    variable=np.column_stack((x, y)),
+    pop_adj=True,
+)
+
+# Reassembled covariance matrix
+cov_mtx["clpm"] + cov_mtx["cupm"] - cov_mtx["dlpm"] - cov_mtx["dupm"]
+
+# Standard covariance matrix
+np.cov(np.column_stack((x, y)), rowvar=False)
+```
+
 The reassembled matrix is identical to the standard covariance matrix, confirming the degree-1 directional decomposition in empirical form.
 
 ---

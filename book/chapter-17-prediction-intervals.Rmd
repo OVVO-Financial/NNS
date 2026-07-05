@@ -123,6 +123,16 @@ lower <- LPM.VaR(percentile = 0.025, degree = 1, x = x)
 upper <- UPM.VaR(percentile = 0.025, degree = 1, x = x)
 ```
 
+In Python the same quantile inversions are `lpm_var` and `upm_var`:
+
+```python
+from nns import lpm_var, upm_var
+
+# 95% prediction interval using continuous (degree = 1) quantiles
+lower = lpm_var(0.025, 1, x)
+upper = upm_var(0.025, 1, x)
+```
+
 The degree-one quantiles provide **smoother, less jagged interval boundaries** than their degree-zero counterparts, particularly in small samples where the step-function CDF may produce large jumps between adjacent order statistics.
 
 
@@ -228,6 +238,30 @@ UPM.VaR(percentile = 0.025, degree = 1, x = boot_out$t)
 ## [1] 0.8263255
 ```
 
+The bootstrap comparison in Python (the 15-observation `law` dataset is inlined; the resampling loop replaces `boot`):
+
+```python
+import numpy as np
+from nns import lpm_var, upm_var
+
+lsat = np.array([576, 635, 558, 578, 666, 580, 555, 661,
+                 651, 605, 653, 575, 545, 572, 594.0])
+gpa = np.array([3.39, 3.30, 2.81, 3.03, 3.44, 3.07, 3.00, 3.43,
+                3.36, 3.13, 3.12, 2.74, 2.76, 2.88, 2.96])
+
+rng = np.random.default_rng(12345)
+boot_t = np.array([
+    np.round(np.corrcoef(lsat[idx], gpa[idx])[0, 1], 3)
+    for idx in rng.integers(0, lsat.size, size=(500, lsat.size))
+])
+
+# Discrete lower and upper CI — corresponds to percentile method
+lpm_var(0.025, 0, boot_t), upm_var(0.025, 0, boot_t)
+
+# Continuous CI — bias-corrected, no double bootstrap needed
+lpm_var(0.025, 1, boot_t), upm_var(0.025, 1, boot_t)
+```
+
 The degree-one interval $(0.561,\, 0.826)$ is substantially tighter and more symmetric than the percentile interval $(0.461,\, 0.963)$ — and without requiring the computationally expensive double bootstrap needed for studentized intervals. The upper bound is comfortably below 1.0.
 
 Classical bootstrap corrections (BCa, studentized) attempt to fix asymmetry through additional resampling passes or acceleration constants. The degree-one partial moment approach achieves comparable correction by simply replacing the discrete counting measure with area-based probability on the **original** bootstrap sample — the same substitution that eliminates bias in the NNS ANOVA procedure (Chapter 15, Section 15.1.8).
@@ -283,6 +317,21 @@ LPM.VaR(percentile = 0.05, degree = 1, x = x)
 ## [1] -1.65
 UPM.VaR(percentile = 0.05, degree = 1, x = x)
 ## [1] 9.15
+```
+
+In Python:
+
+```python
+import numpy as np
+from nns import lpm_var, upm_var
+
+x = np.array([-2, -1, 0, 1, 2, 3, 5, 7, 9, 10.0])
+
+# Degree 0: classical empirical quantiles
+lpm_var(0.05, 0, x), upm_var(0.05, 0, x)
+
+# Degree 1: continuous area-based quantiles
+lpm_var(0.05, 1, x), upm_var(0.05, 1, x)
 ```
 
 The degree-zero interval is $[-2, 10]$ — anchored exactly at the observed extremes. The degree-one interval is tighter, reflecting the continuous probability mass that lies between order statistics. With only $n=10$ observations, this difference is practically meaningful.
@@ -352,6 +401,20 @@ x <- runif(1000, -2, 2)
 y <- sin(pi * x_train) + rnorm(1000, sd = 0.2)
 
 NNS.reg(x = x_train, y = y_train, order = NULL, confidence.interval = .95)
+```
+
+In Python:
+
+```python
+import numpy as np
+from nns import nns_reg
+
+rng = np.random.default_rng(12345)
+x_train = rng.uniform(-2, 2, 1000)
+y_train = np.sin(np.pi * x_train) + rng.normal(scale=0.2, size=1000)
+
+fit = nns_reg(x_train, y_train, order=None, confidence_interval=0.95)
+fit["pred.int"]   # local interval bounds from partition-specific distributions
 ```
 
 <center>

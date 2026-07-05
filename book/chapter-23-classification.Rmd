@@ -426,6 +426,28 @@ A practical classification workflow in NNS therefore proceeds in two layers.
 
 Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first improves stability through repeated resampling and aggregation; the second combines candidate classifiers through an optimized second-stage rule.
 
+The corresponding Python workflow (recall the implementation note above: recode `0/1` class labels to `1/2`):
+
+```python
+import numpy as np
+from nns import nns_boost, nns_stack
+
+rng = np.random.default_rng(123)
+X_train = rng.normal(size=(200, 4))
+y_train = (X_train[:, 0] + X_train[:, 1] ** 2 > 1).astype(int) + 1   # labels 1/2
+X_test = rng.normal(size=(50, 4))
+
+# Boosted classification
+boosted = nns_boost(X_train, y_train, X_test, type="CLASS",
+                    learner_trials=100, status=False)
+boosted["results"]             # predicted class labels
+boosted["feature.weights"]     # feature-stability weights
+
+# Stacked classification
+stacked = nns_stack(X_train, y_train, X_test, type="CLASS", status=False)
+stacked["stack"]               # combined out-of-sample predictions
+```
+
 Thus the package implementation mirrors the theory exactly: local directional partitions generate class probabilities, and ensemble aggregation improves robustness of the final decision boundary.
 
 ---
