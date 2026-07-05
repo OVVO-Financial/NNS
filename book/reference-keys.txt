@@ -145,6 +145,7 @@ rank-one-primitive-verification-in-r
 conditional-mean-eigenvector-recovery-in-r
 eigenvalue-attribution-in-r
 visualizing-the-clpm-mean-slope
+quadrant-decomposition-in-python
 practical-interpretation
 summary-5
 copula-interpretation
@@ -543,6 +544,7 @@ optimized-stacking-via-nns.stack
 optimizing-k-neighbor-count-selection-in-the-regression-point-search
 classification-threshold-optimization
 distance-options
+python-workflow
 cross-validation-in-nonparametric-settings
 what-cross-validation-is-optimizing
 general-formulation
@@ -660,6 +662,7 @@ conclusion-and-next-steps
 what-the-framework-has-achieved
 further-resources
 appendix-notation-and-function-reference
+rpython-function-crosswalk
 core-directional-operators-and-partial-moments
 co-partial-moments-dependence-and-causation
 distribution-comparison-dominance-and-interval-objects
