@@ -470,7 +470,7 @@ This dual structure helps explain why the method can be both flexible and interp
 
 ## Multivariate Interpretation
 
-The bandwidth interpretation extends naturally to multivariate predictors, and here it connects to the key architectural feature introduced in Chapter 18 and developed fully in Chapter 21.
+The bandwidth interpretation extends naturally to multivariate predictors, and here it connects to the key architectural feature introduced in Chapter 18 and developed fully in Chapter 22.
 
 In the NNS multivariate setting, each predictor is partitioned independently against the response, rather than partitioning the joint predictor space. The per-regressor bandwidths are therefore:
 
@@ -569,7 +569,7 @@ h_n(x)=\operatorname{diam}(A_n(x)).
 - This bandwidth is **stochastic, location-dependent, and endogenous**.
 - Regions where the conditional mean varies more sharply receive finer partitions and therefore smaller effective bandwidths.
 - The consistency conditions from Chapter 18 — shrinking diameter and growing occupancy — are exactly the shrinking-bandwidth and growing-local-sample-size conditions of classical nonparametric kernel theory. Consistency is inherited from the partition estimator class; the bandwidth interpretation makes this inheritance explicit.
-- In the multivariate case, per-regressor bandwidths are determined independently for each predictor's relationship with the response, avoiding the exponential deterioration of joint bandwidth in high dimensions and providing the bandwidth-level foundation for the curse-of-dimensionality mitigation developed in Chapter 21.
+- In the multivariate case, per-regressor bandwidths are determined independently for each predictor's relationship with the response, avoiding the exponential deterioration of joint bandwidth in high dimensions and providing the bandwidth-level foundation for the curse-of-dimensionality mitigation developed in Chapter 22.
 
 The next chapter turns from the smoothing interpretation of recursive mean splitting to one of its major practical consequences: **clustering**. If recursive partitioning can define local estimation neighborhoods, it can also define groups of structurally similar observations.
 
