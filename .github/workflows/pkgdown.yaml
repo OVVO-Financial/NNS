@@ -56,6 +56,22 @@ jobs:
           mkdir -p docs/book
           rsync -a --delete book/_book/ docs/book/
 
+      - name: Stage HTML examples for Pages
+        run: |
+          mkdir -p docs/examples
+          rsync -a --delete --include='*.html' --exclude='*' examples/ docs/examples/
+          {
+            echo '<!doctype html><html><head><meta charset="utf-8"><title>NNS Examples</title></head><body>'
+            echo '<h1>NNS Examples</h1><ul>'
+            for file in docs/examples/*.html; do
+              [ -e "$file" ] || continue
+              name=$(basename "$file")
+              title=${name%.html}
+              echo "<li><a href=\"$name\">$title</a></li>"
+            done
+            echo '</ul></body></html>'
+          } > docs/examples/index.html
+
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0
