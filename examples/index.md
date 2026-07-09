@@ -25,7 +25,7 @@ See the following for NNS detailed examples and specific applications:
 
    1.3 [CDFs and ANOVA](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Continuous_CDFs_and_ANOVA_with_NNS.pdf)
    
-   1.4 [Bias and Confidence Intervals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Bias_and_CI.html)
+   1.4 [Bias and Confidence Intervals](https://ovvo-financial.github.io/NNS/examples/Bias_and_CI.html)
 
    1.5 [Correlation and Dependence](https://cran.r-project.org/package=NNS/vignettes/NNSvignette_Correlation_and_Dependence.html)
 
@@ -38,19 +38,19 @@ See the following for NNS detailed examples and specific applications:
    
    2.1 [Overview](https://ssrn.com/abstract=3389938)
    
-   2.2 [Curve Fitting](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Curve_Fitting.html)
+   2.2 [Curve Fitting](https://ovvo-financial.github.io/NNS/examples/Curve_Fitting.html)
    
    2.3 [Nonparametric Regression Using Clusters](http://rdcu.be/tz0J)
    
    2.4 [Clustering and Curve Fitting By Line Segments](https://ssrn.com/abstract=2861339)
    
-   2.5 [Regression Residuals](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Regression_Residuals.html)
+   2.5 [Regression Residuals](https://ovvo-financial.github.io/NNS/examples/Regression_Residuals.html)
    
    2.6 [Multiple Imputation](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md)  
 
-   2.7 [Logistic Regression Binary Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Logistic_Comparison.html)
+   2.7 [Logistic Regression Binary Classification](https://ovvo-financial.github.io/NNS/examples/Logistic_Comparison.html)
    
-   2.8 [Boston Housing](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Boston_Housing.html)
+   2.8 [Boston Housing](https://ovvo-financial.github.io/NNS/examples/Boston_Housing.html)
 
    
 
@@ -61,11 +61,11 @@ See the following for NNS detailed examples and specific applications:
 
    3.3 [Classification Using NNS Clustering Analysis](https://ssrn.com/abstract=2864711)
    
-   3.4 [NNS vs. xgboost](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/xgboost_example.html)
+   3.4 [NNS vs. xgboost](https://ovvo-financial.github.io/NNS/examples/xgboost_example.html)
    
-   3.5 [Time-Series Classification](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification.html)
+   3.5 [Time-Series Classification](https://ovvo-financial.github.io/NNS/examples/Time_Series_Classification.html)
    
-   3.6 [Time-Series Classification II](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Time_Series_Classification_Expanded.html)
+   3.6 [Time-Series Classification II](https://ovvo-financial.github.io/NNS/examples/Time_Series_Classification_Expanded.html)
 
    3.7 [Spiral Matching Example](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Spiral%20Matching%20Example.pdf)
    
@@ -76,11 +76,11 @@ See the following for NNS detailed examples and specific applications:
 
    4.1 [Overview](https://ssrn.com/abstract=3382300)
    
-   4.2 [NNS vs. KERAS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Sunspots_example.html)
+   4.2 [NNS vs. KERAS](https://ovvo-financial.github.io/NNS/examples/Sunspots_example.html)
 
-   4.3 [NNS vs. prophet](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/prophet_NNS_comparison.html)
+   4.3 [NNS vs. prophet](https://ovvo-financial.github.io/NNS/examples/prophet_NNS_comparison.html)
    
-   4.4 [Tides](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html)
+   4.4 [Tides](https://ovvo-financial.github.io/NNS/examples/tides.html)
 
    4.5 [NNS vs. N-HiTS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS.ARMA%20vs%20N-Hits.md)
 
@@ -89,15 +89,15 @@ See the following for NNS detailed examples and specific applications:
 
 # 5. Econometrics
 
-   5.1 [Econometrics Critiques and Solutions](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/7_Econometric_Reasons.html)
+   5.1 [Econometrics Critiques and Solutions](https://ovvo-financial.github.io/NNS/examples/7_Econometric_Reasons.html)
    
-   5.2 [VAR Alternative](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/VAR_example.html)
+   5.2 [VAR Alternative](https://ovvo-financial.github.io/NNS/examples/VAR_example.html)
    
    5.3 [NOWCASTING](https://ssrn.com/abstract=3589816)
    
-   5.4 [Causal Analysis](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/PWT.html)
+   5.4 [Causal Analysis](https://ovvo-financial.github.io/NNS/examples/PWT.html)
    
-   5.5 [Federal Reserve Causal Analysis](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html)
+   5.5 [Federal Reserve Causal Analysis](https://ovvo-financial.github.io/NNS/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html)
 
    5.6 [Causal Inference](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_with_NNS_stack.pdf)
    
