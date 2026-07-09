@@ -1396,7 +1396,7 @@ Then two smaller subcells are created, each with smaller diameter. Their corresp
 </div>
 <div id="multivariate-interpretation" class="section level2 hasAnchor" number="19.12">
 <h2><span class="header-section-number">19.12</span> Multivariate Interpretation<a href="dynamic-bandwidth-interpretation.html#multivariate-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The bandwidth interpretation extends naturally to multivariate predictors, and here it connects to the key architectural feature introduced in Chapter 18 and developed fully in Chapter 21.</p>
+<p>The bandwidth interpretation extends naturally to multivariate predictors, and here it connects to the key architectural feature introduced in Chapter 18 and developed fully in Chapter 22.</p>
 <p>In the NNS multivariate setting, each predictor is partitioned independently against the response, rather than partitioning the joint predictor space. The per-regressor bandwidths are therefore:</p>
 <p><span class="math display">\[
 h_n^{(j)}(x^{(j)}) := \operatorname{diam}(A_n^{(j)}(x^{(j)})), \quad j = 1, \dots, d,
@@ -1479,7 +1479,7 @@ h_n(x)=\operatorname{diam}(A_n(x)).
 <li>This bandwidth is <strong>stochastic, location-dependent, and endogenous</strong>.</li>
 <li>Regions where the conditional mean varies more sharply receive finer partitions and therefore smaller effective bandwidths.</li>
 <li>The consistency conditions from Chapter 18 — shrinking diameter and growing occupancy — are exactly the shrinking-bandwidth and growing-local-sample-size conditions of classical nonparametric kernel theory. Consistency is inherited from the partition estimator class; the bandwidth interpretation makes this inheritance explicit.</li>
-<li>In the multivariate case, per-regressor bandwidths are determined independently for each predictor’s relationship with the response, avoiding the exponential deterioration of joint bandwidth in high dimensions and providing the bandwidth-level foundation for the curse-of-dimensionality mitigation developed in Chapter 21.</li>
+<li>In the multivariate case, per-regressor bandwidths are determined independently for each predictor’s relationship with the response, avoiding the exponential deterioration of joint bandwidth in high dimensions and providing the bandwidth-level foundation for the curse-of-dimensionality mitigation developed in Chapter 22.</li>
 </ul>
 <p>The next chapter turns from the smoothing interpretation of recursive mean splitting to one of its major practical consequences: <strong>clustering</strong>. If recursive partitioning can define local estimation neighborhoods, it can also define groups of structurally similar observations.</p>
 <hr />
