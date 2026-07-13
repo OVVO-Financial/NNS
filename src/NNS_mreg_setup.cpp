@@ -33,9 +33,13 @@ double reduce_numeric(std::vector<double>& v, int reducer, bool is_class) {
 int find_interval_one(double x, const NumericVector& b) {
   const int n = b.size();
   if (n == 0) return 0;
-  if (x <= b[0]) return 0;
-  if (x >= b[n - 1]) return n - 1;
-  return static_cast<int>(std::upper_bound(b.begin(), b.end(), x) - b.begin()) - 1;
+  // Match R's one-based findInterval(..., left.open = FALSE,
+  // rightmost.closed = TRUE) IDs.  The string IDs are sorted
+  // lexicographically by split(), so a zero-based one-off shift changes RPM
+  // row ordering once IDs reach two digits and can alter stable tie-breaks.
+  if (x <= b[0]) return 1;
+  if (x >= b[n - 1]) return n;
+  return static_cast<int>(std::upper_bound(b.begin(), b.end(), x) - b.begin());
 }
 
 std::string id_for_row(const NumericMatrix& X, const List& boundaries, int r) {
