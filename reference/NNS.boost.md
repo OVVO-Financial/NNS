@@ -135,6 +135,12 @@ NNS.boost(
 
   logical; `TRUE` (default) Prints status update message in console.
 
+- seed:
+
+  Optional integer random seed used for reproducible resampling, fold
+  construction, and stochastic fitting steps. If \`NULL\`, the current
+  random-number-generator state is used.
+
 ## Value
 
 Returns a vector of fitted values for the dependent variable test set
