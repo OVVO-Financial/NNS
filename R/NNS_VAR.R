@@ -313,10 +313,13 @@ NNS.VAR <- function(variables,
       variable_interpolation <- as.numeric(variables[, i])
       
     } else if (h_int > 0) {
-      # trailing NA(s): estimate them using NNS.stack on the index (as in original)
-      multi <- NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2],
+      # trailing NA(s): estimate them using NNS.stack on the index (as in original).
+      # The index is duplicated into two identical predictors so the multivariate
+      # machinery has >1 column; strip cbind's auto-generated column names so the
+      # duplicate labels do not trip NNS.stack's unique-predictor-name guard.
+      multi <- NNS.stack(unname(cbind(selected_variable[,1], selected_variable[,1])), selected_variable[,2],
                          order = NULL, ncores = 1, status = FALSE, folds = 5,
-                         IVs.test = cbind(missing_index, missing_index), method = 1)$stack
+                         IVs.test = unname(cbind(missing_index, missing_index)), method = 1)$stack
       variable_interpolation[missing_index] <- as.numeric(multi)
       
     } else {
