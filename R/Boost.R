@@ -142,6 +142,17 @@ NNS.boost <- function(IVs.train,
         x <- data.frame(x, check.names = FALSE)
         names(x) <- train_names
       } else if (length(x) == p) {
+        supplied <- names(x)
+        if (!is.null(supplied) && all(nzchar(supplied)) &&
+            !identical(make.unique(supplied, sep = "."), train_names)) {
+          # Align a named test row by the training predictor names rather
+          # than silently renaming positionally supplied values.
+          if (anyDuplicated(supplied) || !setequal(supplied, train_names)) {
+            stop("Named [IVs.test] values must exactly match the training predictors.",
+                 call. = FALSE)
+          }
+          x <- x[train_names]
+        }
         x <- as.data.frame(as.list(x), check.names = FALSE,
                            stringsAsFactors = FALSE)
         names(x) <- train_names
