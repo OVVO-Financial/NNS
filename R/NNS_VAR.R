@@ -117,10 +117,15 @@ NNS.VAR <- function(variables,
                     ncores = NULL,
                     nowcast = FALSE){
   
+  # Capture whether the built-in ratio objective is in force before anything
+  # touches obj.fn. Only then may NNS.VAR fall back to plain MSE when the
+  # co-movement denominator is degenerate for every candidate.
+  use_default_objective <- missing(obj.fn) && identical(objective, "min")
+
   oldw <- getOption("warn")
   options(warn = -1)
   on.exit(options(warn = oldw), add = TRUE)
-  
+
   dates <- NULL
   
   # ===================== Lag builder (robust names) =====================
@@ -408,16 +413,35 @@ NNS.VAR <- function(variables,
     ts <- max(ts, .2*length(DV))
     
     # Dimension reduction NNS.reg to reduce variables
-    cor_threshold <- NNS.stack(IVs.train = IV,
-                               DV.train = DV,
-                               IVs.test = tail(IV, h),
-                               ts.test = ts, 
-                               folds = 1,
-                               obj.fn = obj.fn,
-                               objective = objective,
-                               method = c(1,2),
-                               dim.red.method = dim.red.method,
-                               order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+    .run_var_stack <- function(stack_obj_fn, stack_objective) {
+      NNS.stack(IVs.train = IV,
+                DV.train = DV,
+                IVs.test = tail(IV, h),
+                ts.test = ts,
+                folds = 1,
+                obj.fn = stack_obj_fn,
+                objective = stack_objective,
+                method = c(1, 2),
+                dim.red.method = dim.red.method,
+                order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+    }
+
+    cor_threshold <- tryCatch(
+      .run_var_stack(obj.fn, objective),
+      error = function(e) {
+        no_finite_method1 <- identical(
+          conditionMessage(e),
+          paste0("No Method 1 candidate produced a finite ",
+                 "complete-coverage OOF objective.")
+        )
+        if (!use_default_objective || !no_finite_method1) stop(e)
+        if (status) {
+          message(paste0("NNS.VAR: the co-movement objective was undefined for ",
+                         "every candidate; retrying this variable using MSE."))
+        }
+        .run_var_stack(expression(mean((predicted - actual)^2)), "min")
+      }
+    )
     
     
     
@@ -461,7 +485,8 @@ NNS.VAR <- function(variables,
     parallel::clusterExport(
       cl,
       varlist = c("status", "variables", "lagged_new_values_train", "h",
-                  "obj.fn", "objective", "dim.red.method", "nns_IVs_results"),
+                  "obj.fn", "objective", "use_default_objective",
+                  "dim.red.method", "nns_IVs_results"),
       envir = environment()
     )
     parallel::parLapply(cl, 1:ncol(variables), .model_worker)
