@@ -94,7 +94,7 @@ a = NNS.boost(IVs.train = iris[-test.set, 1:4],
               IVs.test = iris[test.set, 1:4],
               epochs = 10, learner.trials = 10, 
               status = FALSE, balance = TRUE,
-              type = "CLASS", folds = 5)
+              type = "CLASS")
 
 a
 $results
@@ -105,11 +105,11 @@ NULL
 
 $feature.weights
  Petal.Width Petal.Length Sepal.Length 
-   0.4285714    0.4285714    0.1428571 
+   0.4444444    0.3333333    0.2222222 
 
 $feature.frequency
  Petal.Width Petal.Length Sepal.Length 
-           3            3            1 
+           4            3            2 
    
 mean( a$results == as.numeric(iris[test.set, 5]) )
 [1] 1
@@ -146,19 +146,19 @@ b
 
 ``` r
 $OBJfn.reg
-[1] 0.955787
+[1] 1 
 
 $NNS.reg.n.best
-[1] 1
+[1] 5
 
 $probability.threshold
-[1] 0.6429167
+[1] 0.41
 
 $OBJfn.dim.red
-[1] 0.955787
+[1] 0.9714286
 
 $NNS.dim.red.threshold
-[1] 0.925
+[1] 0.9335162
 
 $reg
  [1] 3 3 3 3 3 3 3 3 3 3
@@ -177,6 +177,13 @@ $stack
 
 $pred.int
 NULL
+
+$weights
+    reg dim.red 
+   0.66    0.34 
+
+$class.levels
+[1] "setosa"     "versicolor" "virginica" 
 ```
 
 ``` r

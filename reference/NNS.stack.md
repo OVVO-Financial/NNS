@@ -1,8 +1,9 @@
 # NNS Stack
 
-Prediction model using the predictions of the NNS base models
-[NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md) as
-features (i.e. meta-features) for the stacked model.
+Cross-validated ensemble of the full multivariate and
+synthetic-dimension
+[NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+models.
 
 ## Usage
 
@@ -26,7 +27,8 @@ NNS.stack(
   dim.red.method = "cor",
   pred.int = NULL,
   status = TRUE,
-  ncores = NULL
+  ncores = NULL,
+  seed = 123L
 )
 ```
 
@@ -34,195 +36,137 @@ NNS.stack(
 
 - IVs.train:
 
-  a vector, matrix or data frame of variables of numeric or factor data
-  types.
+  a vector, matrix, or data frame of numeric, logical, character,
+  factor, Date, or date-time predictors.
 
 - DV.train:
 
-  a numeric or factor vector with compatible dimensions to
-  `(IVs.train)`.
+  a numeric, logical, character, or factor response with one value per
+  row of `IVs.train`.
 
 - IVs.test:
 
-  a vector, matrix or data frame of variables of numeric or factor data
-  types with compatible dimensions to `(IVs.train)`. If NULL, will use
-  `(IVs.train)` as default.
+  a vector, matrix, or data frame with the same predictors as
+  `IVs.train`. If `NULL`, `IVs.train` is used.
 
 - type:
 
-  `NULL` (default). To perform a classification of discrete integer
-  classes from factor target variable `(DV.train)` with a base category
-  of 1, set to `(type = "CLASS")`, else for continuous `(DV.train)` set
-  to `(type = NULL)`. Like a logistic regression, this setting is not
-  necessary for target variable of two classes e.g. \[0, 1\].
+  `NULL` (default) for regression or `"CLASS"` for classification.
+  Factor, character, logical, and two-level numeric responses
+  automatically select classification.
 
 - obj.fn:
 
-  expression; `expression(sum((predicted - actual)^2))` (default) Sum of
-  squared errors is the default objective function. Any
-  [`expression()`](https://rdrr.io/r/base/expression.html) using the
-  specific terms `predicted` and `actual` can be used.
+  an expression using `predicted` and `actual`. Sum of squared errors is
+  the regression default. For classification, the untouched default is
+  replaced by mean classification accuracy.
 
 - objective:
 
-  options: ("min", "max") `"min"` (default) Select whether to minimize
-  or maximize the objective function `obj.fn`.
+  one of `"min"` or `"max"`.
 
 - optimize.threshold:
 
-  logical; `TRUE` (default) Will optimize the probability threshold
-  value for rounding in classification problems. If `FALSE`, returns
-  0.5.
+  logical; optimize the class-rounding threshold from out-of-fold
+  predictions. If `FALSE`, use 0.5.
 
 - dist:
 
-  options:("L1", "L2", "DTW", "FACTOR") the method of distance
-  calculation; Selects the distance calculation used. `dist = "L2"`
-  (default) selects the Euclidean distance and `(dist = "L1")` selects
-  the Manhattan distance; `(dist = "DTW")` selects the dynamic time
-  warping distance; `(dist = "FACTOR")` uses a frequency.
+  distance option. The corrected implementation currently accepts only
+  `"L2"`, because the production multivariate `NNS.reg` path does not
+  presently implement distinct L1, DTW, or FACTOR estimators.
 
 - CV.size:
 
-  numeric \[0, 1\]; `NULL` (default) Sets the cross-validation size if
-  `(IVs.test = NULL)`. Defaults to a random value between 0.2 and 0.33
-  for a random sampling of the training set.
+  optional validation fraction in `(0, 1)`. If supplied, `folds`
+  repeated stratified/random holdouts are used. If `NULL`, disjoint
+  k-fold cross-validation is used.
 
 - balance:
 
-  logical; `FALSE` (default) Uses both up and down sampling to balance
-  the classes. `type="CLASS"` required.
+  logical; balance only each fitting partition and the final fitting
+  data. Validation observations are never resampled.
 
 - ts.test:
 
-  integer; NULL (default) Sets the length of the test set for
-  time-series data; typically `2*h` parameter value from
-  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
-  or double known periods to forecast.
+  positive integer; validation-block length for chronological
+  rolling-origin cross-validation. The final block always contains the
+  most recent observations.
 
 - folds:
 
-  integer; `folds = 5` (default) Select the number of cross-validation
-  folds.
+  positive integer; number of ordinary or rolling-origin folds.
 
 - order:
 
-  options: (integer, "max", NULL); `NULL` (default) Sets the order for
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md),
-  where `(order = "max")` is the k-nearest neighbors equivalent, which
-  is suggested for mixed continuous and discrete (unordered, ordered)
-  data.
+  integer, `"max"`, or `NULL`; passed unchanged to
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md).
 
 - method:
 
-  numeric options: (1, 2); Select the NNS method to include in stack.
-  `(method = 1)` selects
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md);
-  `(method = 2)` selects
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression. Defaults to `method = c(1, 2)`, which
-  will reduce the dimension first, then find the optimal `n.best`.
+  any unique combination of `1` and `2`. Method 1 is the full
+  multivariate `NNS.reg` model with cross-validated `n.best`; Method 2
+  is a synthetic X\* dimension-reduction model.
 
 - stack:
 
-  logical; `TRUE` (default) Uses dimension reduction output in `n.best`
-  optimization, otherwise performs both analyses independently.
+  logical; when both methods are requested, use fold-local and
+  training-only X\* as Method 1's input. If `FALSE`, Method 1 uses the
+  full independently encoded predictor matrix.
 
 - dim.red.method:
 
-  options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for
-  determining synthetic X\* coefficients. `(dim.red.method = "cor")`
-  uses standard linear correlation for weights.
-  `(dim.red.method = "NNS.dep")` (default) uses
-  [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
-  for nonlinear dependence weights, while
-  `(dim.red.method = "NNS.caus")` uses
-  [NNS.caus](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-  for causal weights. `(dim.red.method = "all")` averages all methods
-  for further feature engineering.
+  one of `"cor"`, `"NNS.dep"`, `"NNS.caus"`, `"equal"`, `"all"`, or a
+  numeric coefficient vector aligned to the encoded design columns.
 
 - pred.int:
 
-  numeric \[0,1\]; `NULL` (default) Returns the associated prediction
-  intervals with each `method`.
+  numeric in `(0, 1)` or `NULL`; prediction interval level for the final
+  component fits.
 
 - status:
 
-  logical; `TRUE` (default) Prints status update message in console.
+  logical; print progress messages.
 
 - ncores:
 
-  integer; value specifying the number of cores to be used in the
-  parallelized subroutine
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md).
-  If NULL (default), the number of cores to be used is equal to the
-  number of cores of the machine - 1.
+  positive integer or `NULL`; native thread count.
+
+- seed:
+
+  non-negative integer or `NULL`; local random seed. The caller's
+  random-number state is restored on exit.
 
 ## Value
 
-Returns a vector of fitted values for the dependent variable test set
-for all models.
+A list retaining the historical fields:
 
-- `"NNS.reg.n.best"` returns the optimum `"n.best"` parameter for the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression. `"SSE.reg"` returns the SSE for the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression.
+- `OBJfn.reg`: selected Method 1 out-of-fold objective.
 
-- `"OBJfn.reg"` returns the `obj.fn` for the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  regression.
+- `NNS.reg.n.best`: selected Method 1 `n.best`.
 
-- `"NNS.dim.red.threshold"` returns the optimum `"threshold"` from the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression.
+- `probability.threshold`: threshold optimized directly on the
+  out-of-fold weighted ensemble, or 0.5 for regression.
 
-- `"OBJfn.dim.red"` returns the `obj.fn` for the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression.
+- `OBJfn.dim.red`: selected Method 2 out-of-fold objective.
 
-- `"probability.threshold"` returns the optimum probability threshold
-  for classification, else 0.5 when set to `FALSE`.
+- `NNS.dim.red.threshold`: full-data coefficient-magnitude cutoff
+  corresponding to the selected active-dimension count.
 
-- `"reg"` returns
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  output.
+- `reg`, `dim.red`, and `stack`: final predictions.
 
-- `"reg.pred.int"` returns the prediction intervals for the regression
-  output.
+- component and stacked prediction intervals.
 
-- `"dim.red"` returns
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression output.
-
-- `"dim.red.pred.int"` returns the prediction intervals for the
-  dimension reduction regression output.
-
-- `"stack"` returns the output of the stacked model.
-
-- `"pred.int"` returns the prediction intervals for the stacked model.
+Classification predictions are returned as numeric class codes, matching
+the historical NNS.stack interface. Additional fields `weights` and
+`class.levels` report the out-of-fold blend and the code-to-label map.
 
 ## Note
 
-- Incorporate any objective function from external packages (such as
-  `Metrics::mape`) via
-  `NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`
-
-- Like a logistic regression, the `(type = "CLASS")` setting is not
-  necessary for target variable of two classes e.g. \[0, 1\]. The
-  response variable base category should be 1 for multiple class
-  problems.
-
-- Missing data should be handled prior as well using
-  [na.omit](https://rdrr.io/r/stats/na.fail.html) or
-  [complete.cases](https://rdrr.io/r/stats/complete.cases.html) on the
-  full dataset.
-
-If error received:
-
-`"Error in is.data.frame(x) : object 'RP' not found"`
-
-reduce the `CV.size`.
+Categorical encoding and min-max normalization are fitted on each
+training partition only and then applied unchanged to its validation
+partition. The final transformations are fitted on the complete training
+data only; external test observations never affect training scales.
 
 ## References
 
@@ -236,12 +180,12 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
- if (FALSE) { # \dontrun{
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
- balance = TRUE)
-
- ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
- NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
- } # }
+if (FALSE) { # \dontrun{
+fit <- NNS.stack(
+  iris[1:140, 1:4], iris[1:140, 5],
+  IVs.test = iris[141:150, 1:4],
+  type = "CLASS", balance = TRUE
+)
+fit$stack
+} # }
 ```

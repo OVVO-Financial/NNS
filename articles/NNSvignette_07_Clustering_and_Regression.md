@@ -203,7 +203,7 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
 ```
 
     ## $R2
-    ## [1] 0.9999804
+    ## [1] 1
     ## 
     ## $rhs.partitions
     ##    Var1  Var2
@@ -233,13 +233,13 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
     ## 6   -5  0.10 -109.70100
     ## ---
     ##       Var1  Var2     y.hat
-    ## 39995 -0.1 -0.35 -0.708125
-    ## 39996 -0.1 -0.30 -0.574000
-    ## 39997 -0.1 -0.25 -0.435375
-    ## 39998 -0.1 -0.20 -0.293000
-    ## 39999 -0.1 -0.15 -0.147625
-    ## 40000 -0.1 -0.10  0.000000
-    ## --- [ 40000 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
+    ## 40396 -0.1 -0.35 -0.708125
+    ## 40397 -0.1 -0.30 -0.574000
+    ## 40398 -0.1 -0.25 -0.435375
+    ## 40399 -0.1 -0.20 -0.293000
+    ## 40400 -0.1 -0.15 -0.147625
+    ## 40401 -0.1 -0.10  0.000000
+    ## --- [ 40401 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
     ## 
     ## $Point.est
     ## NULL
@@ -256,13 +256,13 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
     ## 5 -4.80   -5 13.808000 13.808000    5.1         0
     ## 6 -4.75   -5 17.078125 17.078125    6.1         0
     ## ---
-    ##       Var1 Var2          y       y.hat  NNS.ID  residuals
-    ## 40396 4.75    5 -17.078125 -15.2968125 196.200  1.7813125
-    ## 40397 4.80    5 -13.808000 -12.0266875 197.200  1.7813125
-    ## 40398 4.85    5 -10.465875  -8.6845625 198.200  1.7813125
-    ## 40399 4.90    5  -7.051000  -5.2696875 199.200  1.7813125
-    ## 40400 4.95    5  -3.562625  -0.6679922 200.200  2.8946328
-    ## 40401 5.00    5   0.000000  -0.6679922 200.200 -0.6679922
+    ##       Var1 Var2          y      y.hat  NNS.ID residuals
+    ## 40396 4.75    5 -17.078125 -17.078125 196.201         0
+    ## 40397 4.80    5 -13.808000 -13.808000 197.201         0
+    ## 40398 4.85    5 -10.465875 -10.465875 198.201         0
+    ## 40399 4.90    5  -7.051000  -7.051000 199.201         0
+    ## 40400 4.95    5  -3.562625  -3.562625 200.201         0
+    ## 40401 5.00    5   0.000000   0.000000 201.201         0
     ## --- [ 40401 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
     ## 
     ## $n.best
@@ -389,28 +389,36 @@ NNS.stack(IVs.train = iris[ , 1 : 4],
 ```
 
 ``` r
-Folds Remaining = 0 
-Current NNS.reg(... , threshold = 0.9350 ) | eval(obj.fn) = 1.000000 | MAX Iterations Remaining = 2
-Current NNS.reg(... , threshold = 0.7950 ) | eval(obj.fn) = 0.973684 | MAX Iterations Remaining = 1
-Current NNS.reg(... , threshold = 0.4400 ) | eval(obj.fn) = 0.894737 | MAX Iterations Remaining = 0
-Current NNS.reg(. , n.best = 1 ) | eval(obj.fn) = 0.868421 | MAX Iterations Remaining = 12
-Current NNS.reg(. , n.best = 2 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 11
-Current NNS.reg(. , n.best = 3 ) | eval(obj.fn) = 0.763158 | MAX Iterations Remaining = 10
-Current NNS.reg(. , n.best = 4 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 9
+Method 2 fold 1/1: generating 4 cumulative projections
+Method 2 fold 1/1: evaluating 4 unique candidates
+Method 2 fold 1/1 complete
+Current dimension count = 1 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 3
+Current dimension count = 2 | OOF eval(obj.fn) = 0.972222 | Iterations remaining = 2
+Current dimension count = 3 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 1
+Current dimension count = 4 | OOF eval(obj.fn) = 0.916667 | Iterations remaining = 0
+Method 1 fold 1/1: preparing fold design
+Method 1 fold 1/1: building partitions
+RPM rows = 29; validation rows = 36
+  small candidates = 1...12
+  early stopping at k = 4
+  limit candidate = all (k = 29), score = 0.333333
+Best Method 1 candidate: k = 2, score = 0.972222
+Generating final estimates
 $OBJfn.reg
-[1] 0.9733333
+        2 
+0.9722222 
 
 $NNS.reg.n.best
-[1] 1
+[1] 2
 
 $probability.threshold
-[1] 0.495
+[1] 0.48
 
 $OBJfn.dim.red
-[1] 0.9666667
+[1] 0.9722222
 
 $NNS.dim.red.threshold
-[1] 0.935
+[1] 0.9354305
 
 $reg
  [1] 1 1 1 1 1 1 1 1 1 1
@@ -429,6 +437,13 @@ $stack
 
 $pred.int
 NULL
+
+$weights
+    reg dim.red 
+    0.5     0.5 
+
+$class.levels
+[1] "setosa"     "versicolor" "virginica" 
 ```
 
 ## Increasing Dimensions

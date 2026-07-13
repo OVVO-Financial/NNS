@@ -259,7 +259,7 @@ as well as the regression points (<code>$RPM</code>) and partitions
 <span><span class="va">g</span> <span class="op">=</span> <span class="fu">f</span><span class="op">(</span><span class="va">z</span><span class="op">[</span> , <span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span> , <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">z</span>, <span class="va">g</span>, order <span class="op">=</span> <span class="st">"max"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 0.9999804</span></span>
+<span><span class="co">## [1] 1</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $rhs.partitions</span></span>
 <span><span class="co">##    Var1  Var2</span></span>
@@ -289,13 +289,13 @@ as well as the regression points (<code>$RPM</code>) and partitions
 <span><span class="co">## 6   -5  0.10 -109.70100</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">##       Var1  Var2     y.hat</span></span>
-<span><span class="co">## 39995 -0.1 -0.35 -0.708125</span></span>
-<span><span class="co">## 39996 -0.1 -0.30 -0.574000</span></span>
-<span><span class="co">## 39997 -0.1 -0.25 -0.435375</span></span>
-<span><span class="co">## 39998 -0.1 -0.20 -0.293000</span></span>
-<span><span class="co">## 39999 -0.1 -0.15 -0.147625</span></span>
-<span><span class="co">## 40000 -0.1 -0.10  0.000000</span></span>
-<span><span class="co">## --- [ 40000 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## 40396 -0.1 -0.35 -0.708125</span></span>
+<span><span class="co">## 40397 -0.1 -0.30 -0.574000</span></span>
+<span><span class="co">## 40398 -0.1 -0.25 -0.435375</span></span>
+<span><span class="co">## 40399 -0.1 -0.20 -0.293000</span></span>
+<span><span class="co">## 40400 -0.1 -0.15 -0.147625</span></span>
+<span><span class="co">## 40401 -0.1 -0.10  0.000000</span></span>
+<span><span class="co">## --- [ 40401 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
 <span><span class="co">## NULL</span></span>
@@ -312,13 +312,13 @@ as well as the regression points (<code>$RPM</code>) and partitions
 <span><span class="co">## 5 -4.80   -5 13.808000 13.808000    5.1         0</span></span>
 <span><span class="co">## 6 -4.75   -5 17.078125 17.078125    6.1         0</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##       Var1 Var2          y       y.hat  NNS.ID  residuals</span></span>
-<span><span class="co">## 40396 4.75    5 -17.078125 -15.2968125 196.200  1.7813125</span></span>
-<span><span class="co">## 40397 4.80    5 -13.808000 -12.0266875 197.200  1.7813125</span></span>
-<span><span class="co">## 40398 4.85    5 -10.465875  -8.6845625 198.200  1.7813125</span></span>
-<span><span class="co">## 40399 4.90    5  -7.051000  -5.2696875 199.200  1.7813125</span></span>
-<span><span class="co">## 40400 4.95    5  -3.562625  -0.6679922 200.200  2.8946328</span></span>
-<span><span class="co">## 40401 5.00    5   0.000000  -0.6679922 200.200 -0.6679922</span></span>
+<span><span class="co">##       Var1 Var2          y      y.hat  NNS.ID residuals</span></span>
+<span><span class="co">## 40396 4.75    5 -17.078125 -17.078125 196.201         0</span></span>
+<span><span class="co">## 40397 4.80    5 -13.808000 -13.808000 197.201         0</span></span>
+<span><span class="co">## 40398 4.85    5 -10.465875 -10.465875 198.201         0</span></span>
+<span><span class="co">## 40399 4.90    5  -7.051000  -7.051000 199.201         0</span></span>
+<span><span class="co">## 40400 4.95    5  -3.562625  -3.562625 200.201         0</span></span>
+<span><span class="co">## 40401 5.00    5   0.000000   0.000000 201.201         0</span></span>
 <span><span class="co">## --- [ 40401 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $n.best</span></span>
@@ -423,46 +423,61 @@ classification:</p>
 <span>          obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">predicted</span><span class="op">)</span> <span class="op">==</span> <span class="va">actual</span><span class="op">)</span> <span class="op">)</span>,</span>
 <span>          objective <span class="op">=</span> <span class="st">"max"</span>, type <span class="op">=</span> <span class="st">"CLASS"</span>, </span>
 <span>          folds <span class="op">=</span> <span class="fl">1</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>Folds Remaining <span class="ot">=</span> <span class="dv">0</span> </span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(... , <span class="at">threshold =</span> <span class="fl">0.9350</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">1.000000</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">2</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(... , <span class="at">threshold =</span> <span class="fl">0.7950</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.973684</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(... , <span class="at">threshold =</span> <span class="fl">0.4400</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.894737</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(. , <span class="at">n.best =</span> <span class="dv">1</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.868421</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">12</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(. , <span class="at">n.best =</span> <span class="dv">2</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.736842</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">11</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(. , <span class="at">n.best =</span> <span class="dv">3</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.763158</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>Current <span class="fu">NNS.reg</span>(. , <span class="at">n.best =</span> <span class="dv">4</span> ) <span class="sc">|</span> <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.736842</span> <span class="sc">|</span> MAX Iterations Remaining <span class="ot">=</span> <span class="dv">9</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9733333</span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.495</span></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a></span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9666667</span></span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a></span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.935</span></span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a></span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a><span class="sc">$</span>reg</span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a></span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a></span>
-<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="sc">$</span>dim.red</span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a></span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="sc">$</span>dim.red.pred.int</span>
-<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a></span>
-<span id="cb19-36"><a href="#cb19-36" tabindex="-1"></a><span class="sc">$</span>stack</span>
-<span id="cb19-37"><a href="#cb19-37" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-38"><a href="#cb19-38" tabindex="-1"></a></span>
-<span id="cb19-39"><a href="#cb19-39" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
-<span id="cb19-40"><a href="#cb19-40" tabindex="-1"></a><span class="cn">NULL</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> generating <span class="dv">4</span> cumulative projections</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> evaluating <span class="dv">4</span> unique candidates</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span> complete</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">1</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.944444</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">3</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">2</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.972222</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">2</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">3</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.944444</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">4</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.916667</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>Method <span class="dv">1</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> preparing fold design</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>Method <span class="dv">1</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> building partitions</span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>RPM rows <span class="ot">=</span> <span class="dv">29</span>; validation rows <span class="ot">=</span> <span class="dv">36</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>  small candidates <span class="ot">=</span> <span class="dv">1</span>...<span class="dv">12</span></span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>  early stopping at k <span class="ot">=</span> <span class="dv">4</span></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>  limit candidate <span class="ot">=</span> <span class="fu">all</span> (<span class="at">k =</span> <span class="dv">29</span>), score <span class="ot">=</span> <span class="fl">0.333333</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>Best Method <span class="dv">1</span> candidate<span class="sc">:</span> k <span class="ot">=</span> <span class="dv">2</span>, score <span class="ot">=</span> <span class="fl">0.972222</span></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a>Generating final estimates</span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>        <span class="dv">2</span> </span>
+<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="fl">0.9722222</span> </span>
+<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
+<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">2</span></span>
+<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
+<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.48</span></span>
+<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
+<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9722222</span></span>
+<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a></span>
+<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
+<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9354305</span></span>
+<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a></span>
+<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="sc">$</span>reg</span>
+<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
+<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a></span>
+<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
+<span id="cb19-36"><a href="#cb19-36" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb19-37"><a href="#cb19-37" tabindex="-1"></a></span>
+<span id="cb19-38"><a href="#cb19-38" tabindex="-1"></a><span class="sc">$</span>dim.red</span>
+<span id="cb19-39"><a href="#cb19-39" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
+<span id="cb19-40"><a href="#cb19-40" tabindex="-1"></a></span>
+<span id="cb19-41"><a href="#cb19-41" tabindex="-1"></a><span class="sc">$</span>dim.red.pred.int</span>
+<span id="cb19-42"><a href="#cb19-42" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb19-43"><a href="#cb19-43" tabindex="-1"></a></span>
+<span id="cb19-44"><a href="#cb19-44" tabindex="-1"></a><span class="sc">$</span>stack</span>
+<span id="cb19-45"><a href="#cb19-45" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
+<span id="cb19-46"><a href="#cb19-46" tabindex="-1"></a></span>
+<span id="cb19-47"><a href="#cb19-47" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
+<span id="cb19-48"><a href="#cb19-48" tabindex="-1"></a><span class="cn">NULL</span></span>
+<span id="cb19-49"><a href="#cb19-49" tabindex="-1"></a></span>
+<span id="cb19-50"><a href="#cb19-50" tabindex="-1"></a><span class="sc">$</span>weights</span>
+<span id="cb19-51"><a href="#cb19-51" tabindex="-1"></a>    reg dim.red </span>
+<span id="cb19-52"><a href="#cb19-52" tabindex="-1"></a>    <span class="fl">0.5</span>     <span class="fl">0.5</span> </span>
+<span id="cb19-53"><a href="#cb19-53" tabindex="-1"></a></span>
+<span id="cb19-54"><a href="#cb19-54" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
+<span id="cb19-55"><a href="#cb19-55" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="increasing-dimensions">Increasing Dimensions<a class="anchor" aria-label="anchor" href="#increasing-dimensions"></a>
