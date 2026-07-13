@@ -213,14 +213,15 @@ SEXP NNS_distance_cpp(NumericMatrix X,
 namespace {
 inline double safe_eps() { return 1e-12; }
   
-  inline void compute_distances(const double* rpm, int n, int p,
-                                const double* test_row,
+  // R matrices are column-major: element (i, j) lives at i + j*nrow.
+  inline void compute_distances(const Rcpp::NumericMatrix& rpm,
+                                const Rcpp::NumericMatrix& xtest, int test_row,
                                 std::vector<double>& dist_out) {
+    const int n = rpm.nrow(), p = rpm.ncol();
     for (int i = 0; i < n; ++i) {
-      const double* xi = rpm + static_cast<std::size_t>(i) * p;
       double acc = 0.0;
       for (int j = 0; j < p; ++j) {
-        const double d = xi[j] - test_row[j];
+        const double d = rpm(i, j) - xtest(test_row, j);
         acc += d * d + std::fabs(d);
       }
       dist_out[i] = (acc == 0.0 ? safe_eps() : acc);
@@ -252,16 +253,13 @@ Rcpp::NumericMatrix NNS_distance_path_cpp(const Rcpp::NumericMatrix& RPM,
   if (kmax > n)                  kmax = n;
   
   Rcpp::NumericMatrix out(m, kmax);
-  const double* rpm_ptr  = REAL(RPM);
   const double* y_ptr    = REAL(yhat);
-  const double* tst_ptr  = REAL(Xtest);
   
   std::vector<double> dist(n), y_sorted(n), d_sorted(n);
   std::vector<int>    ord(n);
   
   for (int r = 0; r < m; ++r) {
-    const double* tr = tst_ptr + static_cast<std::size_t>(r) * p;
-    compute_distances(rpm_ptr, n, p, tr, dist);
+    compute_distances(RPM, Xtest, r, dist);
     argsort_by_distance(dist, ord);
     
     for (int i = 0; i < n; ++i) {
@@ -296,16 +294,13 @@ Rcpp::NumericVector NNS_distance_bulk_cpp(const Rcpp::NumericMatrix& RPM,
   if (k > n)                     k = n;
   
   Rcpp::NumericVector out(m);
-  const double* rpm_ptr  = REAL(RPM);
   const double* y_ptr    = REAL(yhat);
-  const double* tst_ptr  = REAL(Xtest);
   
   std::vector<double> dist(n);
   std::vector<int>    ord(n);
   
   for (int r = 0; r < m; ++r) {
-    const double* tr = tst_ptr + static_cast<std::size_t>(r) * p;
-    compute_distances(rpm_ptr, n, p, tr, dist);
+    compute_distances(RPM, Xtest, r, dist);
     argsort_by_distance(dist, ord);
     
     double csum_w = 0.0, csum_yw = 0.0;
