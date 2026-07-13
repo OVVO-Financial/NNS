@@ -1,89 +1,70 @@
 #' NNS Stack
 #'
-#' Cross-validated ensemble of the full multivariate and synthetic-dimension
-#' \link{NNS.reg} models.
+#' Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 #'
-#' @param IVs.train a vector, matrix, or data frame of numeric, logical,
-#'   character, factor, Date, or date-time predictors.
-#' @param DV.train a numeric, logical, character, or factor response with one
-#'   value per row of \code{IVs.train}.
-#' @param IVs.test a vector, matrix, or data frame with the same predictors as
-#'   \code{IVs.train}. If \code{NULL}, \code{IVs.train} is used.
-#' @param type \code{NULL} (default) for regression or \code{"CLASS"} for
-#'   classification. Factor, character, logical, and two-level numeric responses
-#'   automatically select classification.
-#' @param obj.fn an expression using \code{predicted} and \code{actual}.
-#'   Sum of squared errors is the regression default. For classification, the
-#'   untouched default is replaced by mean classification accuracy.
-#' @param objective one of \code{"min"} or \code{"max"}.
-#' @param optimize.threshold logical; optimize the class-rounding threshold from
-#'   out-of-fold predictions. If \code{FALSE}, use 0.5.
-#' @param dist distance option. The corrected implementation currently accepts
-#'   only \code{"L2"}, because the production multivariate \code{NNS.reg}
-#'   path does not presently implement distinct L1, DTW, or FACTOR estimators.
-#' @param CV.size optional validation fraction in \code{(0, 1)}. If supplied,
-#'   \code{folds} repeated stratified/random holdouts are used. If \code{NULL},
-#'   disjoint k-fold cross-validation is used.
-#' @param balance logical; balance only each fitting partition and the final
-#'   fitting data. Validation observations are never resampled.
-#' @param ts.test positive integer; validation-block length for chronological
-#'   rolling-origin cross-validation. The final block always contains the most
-#'   recent observations.
-#' @param folds positive integer; number of ordinary or rolling-origin folds.
-#' @param order integer, \code{"max"}, or \code{NULL}; passed unchanged to
-#'   \link{NNS.reg}.
-#' @param method any unique combination of \code{1} and \code{2}. Method 1 is
-#'   the full multivariate \code{NNS.reg} model with cross-validated
-#'   \code{n.best}; Method 2 is a synthetic X* dimension-reduction model.
-#' @param stack logical; when both methods are requested, use fold-local and
-#'   training-only X* as Method 1's input. If \code{FALSE}, Method 1 uses the
-#'   full independently encoded predictor matrix.
-#' @param dim.red.method one of \code{"cor"}, \code{"NNS.dep"},
-#'   \code{"NNS.caus"}, \code{"equal"}, \code{"all"}, or a numeric
-#'   coefficient vector aligned to the encoded design columns.
-#' @param pred.int numeric in \code{(0, 1)} or \code{NULL}; prediction interval
-#'   level for the final component fits.
-#' @param status logical; print progress messages.
-#' @param ncores positive integer or \code{NULL}; native thread count.
-#' @param seed non-negative integer or \code{NULL}; local random seed. The
-#'   caller's random-number state is restored on exit.
+#' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
+#' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
+#' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
+#' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
+#' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
+#' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
+#' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.
+#' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
+#' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
+#' @param folds integer; \code{folds = 5} (default) Select the number of cross-validation folds.
+#' @param order options: (integer, "max", NULL); \code{NULL} (default) Sets the order for \link{NNS.reg}, where \code{(order = "max")} is the k-nearest neighbors equivalent, which is suggested for mixed continuous and discrete (unordered, ordered) data.
+#' @param method numeric options: (1, 2); Select the NNS method to include in stack.  \code{(method = 1)} selects \link{NNS.reg}; \code{(method = 2)} selects \link{NNS.reg} dimension reduction regression.  Defaults to \code{method = c(1, 2)}, which will reduce the dimension first, then find the optimal \code{n.best}.
+#' @param stack logical; \code{TRUE} (default) Uses dimension reduction output in \code{n.best} optimization, otherwise performs both analyses independently.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} (default) uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param pred.int numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals with each \code{method}.
+#' @param status logical; \code{TRUE} (default) Prints status update message in console.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #'
-#' @return A list retaining the historical fields:
+#' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
-#'   \item \code{OBJfn.reg}: selected Method 1 out-of-fold objective.
-#'   \item \code{NNS.reg.n.best}: selected Method 1 \code{n.best}.
-#'   \item \code{probability.threshold}: threshold optimized directly on the
-#'     out-of-fold weighted ensemble, or 0.5 for regression.
-#'   \item \code{OBJfn.dim.red}: selected Method 2 out-of-fold objective.
-#'   \item \code{NNS.dim.red.threshold}: full-data coefficient-magnitude
-#'     cutoff corresponding to the selected active-dimension count.
-#'   \item \code{reg}, \code{dim.red}, and \code{stack}: final predictions.
-#'   \item component and stacked prediction intervals.
+#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+#' \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
+#' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
+#' \item{\code{"reg"}} returns \link{NNS.reg} output.
+#' \item{\code{"reg.pred.int"}} returns the prediction intervals for the regression output.
+#' \item{\code{"dim.red"}} returns \link{NNS.reg} dimension reduction regression output.
+#' \item{\code{"dim.red.pred.int"}} returns the prediction intervals for the dimension reduction regression output.
+#' \item{\code{"stack"}} returns the output of the stacked model.
+#' \item{\code{"pred.int"}} returns the prediction intervals for the stacked model.
 #' }
-#' Classification predictions are returned as numeric class codes, matching the
-#' historical NNS.stack interface. Additional fields \code{weights} and
-#' \code{class.levels} report the out-of-fold blend and the code-to-label map.
-#'
-#' @note
-#' Categorical encoding and min-max normalization are fitted on each training
-#' partition only and then applied unchanged to its validation partition. The
-#' final transformations are fitted on the complete training data only; external
-#' test observations never affect training scales.
 #'
 #' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"
-#'   \doi{10.2139/ssrn.2864711}
+#' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #'
-#' @examples
-#' \dontrun{
-#' fit <- NNS.stack(
-#'   iris[1:140, 1:4], iris[1:140, 5],
-#'   IVs.test = iris[141:150, 1:4],
-#'   type = "CLASS", balance = TRUE
-#' )
-#' fit$stack
+#' @note
+#' \itemize{
+#' \item Incorporate any objective function from external packages (such as \code{Metrics::mape}) via \code{NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")}
+#' 
+#' \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for multiple class problems.
+#'
+#' \item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 #' }
 #'
+#' If error received:
+#'
+#' \code{"Error in is.data.frame(x) : object 'RP' not found"}
+#'
+#' reduce the \code{CV.size}.
+#'
+#'
+#' @examples
+#'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+#'  \dontrun{
+#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
+#'  balance = TRUE)
+#'
+#'  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
+#'  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
+#'  }
 #' @export
 
 
@@ -1184,12 +1165,16 @@ NNS.stack <- function(IVs.train,
         active_coef
       )
       list(
-        train = data.frame(Xstar = projected$train,
-                           Xstar2 = projected$train,
-                           check.names = FALSE),
-        test = data.frame(Xstar = projected$test,
-                          Xstar2 = projected$test,
-                          check.names = FALSE)
+        train = data.frame(
+          Xstar = projected$train,
+          Xstar2 = projected$train,
+          check.names = FALSE
+        ),
+        test = data.frame(
+          Xstar = projected$test,
+          Xstar2 = projected$test,
+          check.names = FALSE
+        )
       )
     } else {
       list(train = fold_design$train, test = fold_design$test)
@@ -1197,13 +1182,18 @@ NNS.stack <- function(IVs.train,
   }
   
   if (1L %in% method) {
-    # Compute the small-k limit based on training observations count
+    # Intended NNS.stack search geometry:
+    #
+    #   local candidates = 1:floor(sqrt(n))
+    #   limit candidate  = ALL regression points
+    #
+    # Every local candidate is first evaluated across every fold. The
+    # diminishing-returns stop is then applied to the complete pooled OOF
+    # objectives. This prevents fold-specific early stopping from giving larger
+    # candidates partial or zero OOF coverage.
     l <- max(1L, floor(sqrt(n_obs)))
-    
-    # Structures to aggregate OOF predictions per candidate ID
-    # Candidate IDs: integer 1..l and the special "all"
     candidate_ids <- c(as.character(seq_len(l)), "all")
-    # We'll store sums and counts in lists keyed by candidate ID
+    
     sum_list <- setNames(vector("list", length(candidate_ids)), candidate_ids)
     count_list <- setNames(vector("list", length(candidate_ids)), candidate_ids)
     for (id in candidate_ids) {
@@ -1211,254 +1201,367 @@ NNS.stack <- function(IVs.train,
       count_list[[id]] <- rep(0L, n_obs)
     }
     
+    fold_small_kmax <- integer(length(splits))
+    
     for (b in seq_along(splits)) {
       split <- splits[[b]]
       train_idx <- split$train
       valid_idx <- split$validation
-      if (status) message(sprintf("Method 1 fold %d/%d: preparing fold design", b, length(splits)))
+      
+      if (status) {
+        message(sprintf(
+          "Method 1 fold %d/%d: preparing fold design",
+          b, length(splits)
+        ))
+      }
+      
       design <- .method1_design_for_split(train_idx, valid_idx)
       balanced_idx <- .balance_indices(y[train_idx])
       train_design <- design$train[balanced_idx, , drop = FALSE]
       train_y_fit <- y_fit_all[train_idx][balanced_idx]
       valid_design <- design$test
       
-      # We'll collect predictions for small candidates and the all candidate
-      # For univariate vs multivariate
       if (ncol(train_design) == 1L) {
-        # Univariate case: compute distances and cumulative averages for k=1..l
         train_x <- as.numeric(train_design[[1L]])
         test_x <- as.numeric(valid_design[[1L]])
-        # We'll compute predictions for k=1..small_kmax (where small_kmax = min(l, length(train_x)))
         small_kmax <- min(l, length(train_x))
-        # Sort distances and get indices
-        # For each test point, we need sorted distances; we'll do a loop or use R's order
-        # Efficient: compute distance matrix? For large train, we can compute per test point.
-        # Since this is univariate, we can simply loop over test points and sort distances.
-        # We'll compute a matrix of predictions for k=1..small_kmax.
-        pred_mat <- matrix(NA, nrow = length(test_x), ncol = small_kmax)
+        fold_small_kmax[b] <- small_kmax
+        
+        if (status) {
+          message(sprintf(
+            paste0(
+              "Method 1 fold %d/%d: local candidates = 1...%d; ",
+              "limit candidate = ALL (%d observations)"
+            ),
+            b, length(splits), small_kmax, length(train_x)
+          ))
+        }
+        
+        pred_mat <- matrix(
+          NA_real_,
+          nrow = length(test_x),
+          ncol = small_kmax
+        )
+        
         for (i in seq_along(test_x)) {
           dists <- abs(train_x - test_x[i])
           ord <- order(dists, method = "radix")
           cumsum_y <- cumsum(train_y_fit[ord])
-          pred_mat[i, ] <- cumsum_y[seq_len(small_kmax)] / seq_len(small_kmax)
+          pred_mat[i, ] <-
+            cumsum_y[seq_len(small_kmax)] / seq_len(small_kmax)
         }
-        # All candidate prediction: mean of train_y_fit (constant)
-        all_pred <- mean(train_y_fit)  # in offset scale
-        # Convert to raw (subtract offset) for scoring
-        # We'll subtract offset when evaluating
-        # For small candidates, we need to evaluate each k sequentially
-        # We'll store raw predictions for each candidate
-        small_raw <- vector("list", small_kmax)
-        for (k in seq_len(small_kmax)) {
-          raw <- pred_mat[, k] - response_offset
-          small_raw[[k]] <- raw
-        }
-        # All candidate raw
-        all_raw <- rep(all_pred - response_offset, length(test_x))
-        # Now evaluate small candidates with early stop
-        small_scores <- numeric(small_kmax)
-        small_thresholds <- numeric(small_kmax)
-        stopped_at <- small_kmax
-        for (k in seq_len(small_kmax)) {
-          raw <- small_raw[[k]]
-          eval <- .evaluate_raw(raw, y[valid_idx])
-          small_scores[k] <- eval$score
-          small_thresholds[k] <- eval$threshold
-          if (status && (k %% 10 == 0 || k == small_kmax)) {
-            message(sprintf("  k = %d, score = %s", k, format(eval$score, digits = 6)))
-          }
-          if (k >= 4) {
-            # early stop condition
-            cond <- if (objective == "min") {
-              small_scores[k] >= small_scores[k-1] && small_scores[k] >= small_scores[k-2]
-            } else {
-              small_scores[k] <= small_scores[k-1] && small_scores[k] <= small_scores[k-2]
-            }
-            if (cond) {
-              stopped_at <- k
-              if (status) message(sprintf("  early stopping at k = %d", k))
-              break
-            }
-          }
-        }
-        # Evaluate all candidate
-        all_eval <- .evaluate_raw(all_raw, y[valid_idx])
-        all_score <- all_eval$score
-        all_threshold <- all_eval$threshold
         
-        # Aggregate small candidates that were evaluated (up to stopped_at)
-        for (k in seq_len(stopped_at)) {
+        # Aggregate every available local candidate for this fold. No
+        # fold-specific early stopping is allowed because it creates
+        # incomparable OOF coverage across candidates.
+        for (k in seq_len(small_kmax)) {
           id <- as.character(k)
-          raw <- small_raw[[k]]
+          raw <- pred_mat[, k] - response_offset
           good <- is.finite(raw)
           if (any(good)) {
             rows <- valid_idx[good]
-            sum_list[[id]][rows] <- sum_list[[id]][rows] + raw[good]
-            count_list[[id]][rows] <- count_list[[id]][rows] + 1L
+            sum_list[[id]][rows] <-
+              sum_list[[id]][rows] + raw[good]
+            count_list[[id]][rows] <-
+              count_list[[id]][rows] + 1L
           }
         }
-        # Aggregate all candidate
-        id <- "all"
-        raw <- all_raw
-        good <- is.finite(raw)
+        
+        # ALL is the separate full-support limit condition and is always
+        # evaluated, irrespective of the later local stopping point.
+        all_raw <- rep(
+          mean(train_y_fit) - response_offset,
+          length(test_x)
+        )
+        good <- is.finite(all_raw)
         if (any(good)) {
           rows <- valid_idx[good]
-          sum_list[[id]][rows] <- sum_list[[id]][rows] + raw[good]
-          count_list[[id]][rows] <- count_list[[id]][rows] + 1L
+          sum_list[["all"]][rows] <-
+            sum_list[["all"]][rows] + all_raw[good]
+          count_list[["all"]][rows] <-
+            count_list[["all"]][rows] + 1L
         }
         
       } else {
-        # Multivariate case
-        if (status) message(sprintf("Method 1 fold %d/%d: building partitions", b, length(splits)))
-        setup <- .nns_mreg_prepare_model(train_design, train_y_fit, order = order,
-                                         noise.reduction = "off", is.class = FALSE,
-                                         use.native = isTRUE(getOption("NNS.native.mreg", TRUE)))
+        if (status) {
+          message(sprintf(
+            "Method 1 fold %d/%d: building partitions",
+            b, length(splits)
+          ))
+        }
+        
+        setup <- .nns_mreg_prepare_model(
+          train_design,
+          train_y_fit,
+          order = order,
+          noise.reduction = "off",
+          is.class = FALSE,
+          use.native = isTRUE(getOption("NNS.native.mreg", TRUE))
+        )
         rpm <- setup$RPM
-        if (is.null(rpm) || !is.data.frame(rpm) || nrow(rpm) < 1L || !"y.hat" %in% names(rpm)) {
-          stop("NNS.reg did not return a usable regression-point matrix.", call. = FALSE)
+        
+        if (is.null(rpm) || !is.data.frame(rpm) ||
+            nrow(rpm) < 1L || !"y.hat" %in% names(rpm)) {
+          stop(
+            "NNS.reg did not return a usable regression-point matrix.",
+            call. = FALSE
+          )
         }
+        
         nRPM <- nrow(rpm)
-        if (status) message(sprintf("RPM rows = %d; validation rows = %d", nRPM, length(valid_idx)))
-        
         small_kmax <- min(l, nRPM)
-        if (small_kmax >= 1) {
-          if (status) message(sprintf("  small candidates = 1...%d", small_kmax))
-          # Compute small path for k=1..small_kmax
-          small_path <- .production_multivariate_path(rpm = rpm, Xtest = valid_design,
-                                                      train_design = train_design,
-                                                      kmax = small_kmax)
-          # subtract offset
-          small_path <- small_path - response_offset
-          # Evaluate small candidates with early stop
-          small_scores <- numeric(small_kmax)
-          small_thresholds <- numeric(small_kmax)
-          stopped_at <- small_kmax
-          for (k in seq_len(small_kmax)) {
-            raw <- small_path[, k]
-            raw <- .sanitize_raw(raw, y[train_idx])
-            eval <- .evaluate_raw(raw, y[valid_idx])
-            small_scores[k] <- eval$score
-            small_thresholds[k] <- eval$threshold
-            if (status && (k %% 10 == 0 || k == small_kmax)) {
-              message(sprintf("  k = %d, score = %s", k, format(eval$score, digits = 6)))
-            }
-            if (k >= 4) {
-              cond <- if (objective == "min") {
-                small_scores[k] >= small_scores[k-1] && small_scores[k] >= small_scores[k-2]
-              } else {
-                small_scores[k] <= small_scores[k-1] && small_scores[k] <= small_scores[k-2]
-              }
-              if (cond) {
-                stopped_at <- k
-                if (status) message(sprintf("  early stopping at k = %d", k))
-                break
-              }
-            }
-          }
-          # Aggregate small candidates that were evaluated (up to stopped_at)
-          for (k in seq_len(stopped_at)) {
-            id <- as.character(k)
-            raw <- small_path[, k]
-            good <- is.finite(raw)
-            if (any(good)) {
-              rows <- valid_idx[good]
-              sum_list[[id]][rows] <- sum_list[[id]][rows] + raw[good]
-              count_list[[id]][rows] <- count_list[[id]][rows] + 1L
-            }
-          }
-        } else {
-          stopped_at <- 0
+        fold_small_kmax[b] <- small_kmax
+        
+        if (status) {
+          message(sprintf(
+            paste0(
+              "Method 1 fold %d/%d: RPM rows = %d; validation rows = %d; ",
+              "local candidates = 1...%d; limit candidate = ALL (%d)"
+            ),
+            b, length(splits), nRPM, length(valid_idx),
+            small_kmax, nRPM
+          ))
         }
         
-        # All candidate: prediction = mean of RPM$y.hat (or mean of train_y_fit)
-        # Use mean of train_y_fit (balanced) for consistency
-        all_raw <- rep(mean(train_y_fit) - response_offset, length(valid_idx))
-        # Evaluate all candidate
-        all_eval <- .evaluate_raw(all_raw, y[valid_idx])
-        all_score <- all_eval$score
-        all_threshold <- all_eval$threshold
-        if (status) message(sprintf("  limit candidate = all (k = %d), score = %s", nRPM, format(all_score, digits = 6)))
+        small_path <- .production_multivariate_path(
+          rpm = rpm,
+          Xtest = valid_design,
+          train_design = train_design,
+          kmax = small_kmax
+        )
+        small_path <- small_path - response_offset
         
-        # Aggregate all candidate
-        id <- "all"
-        raw <- all_raw
-        good <- is.finite(raw)
+        for (k in seq_len(small_kmax)) {
+          id <- as.character(k)
+          raw <- .sanitize_raw(
+            small_path[, k],
+            y[train_idx]
+          )
+          good <- is.finite(raw)
+          if (any(good)) {
+            rows <- valid_idx[good]
+            sum_list[[id]][rows] <-
+              sum_list[[id]][rows] + raw[good]
+            count_list[[id]][rows] <-
+              count_list[[id]][rows] + 1L
+          }
+        }
+        
+        # Preserve the current full-support limit behavior from this version:
+        # all RPM points reduce to the balanced fitting-response mean. The ALL
+        # candidate is always populated for every fold.
+        all_raw <- rep(
+          mean(train_y_fit) - response_offset,
+          length(valid_idx)
+        )
+        good <- is.finite(all_raw)
         if (any(good)) {
           rows <- valid_idx[good]
-          sum_list[[id]][rows] <- sum_list[[id]][rows] + raw[good]
-          count_list[[id]][rows] <- count_list[[id]][rows] + 1L
+          sum_list[["all"]][rows] <-
+            sum_list[["all"]][rows] + all_raw[good]
+          count_list[["all"]][rows] <-
+            count_list[["all"]][rows] + 1L
         }
-      } # end multivariate
-    } # end folds
+      }
+      
+      if (status) {
+        message(sprintf(
+          "Method 1 fold %d/%d complete",
+          b, length(splits)
+        ))
+      }
+    }
     
-    # Now compute scores for all candidates (small and all) from aggregated OOF predictions
-    candidate_scores <- setNames(rep(NA_real_, length(candidate_ids)), candidate_ids)
-    candidate_thresholds <- setNames(rep(0.5, length(candidate_ids)), candidate_ids)
-    candidate_raws <- setNames(vector("list", length(candidate_ids)), candidate_ids)
+    common_small_kmax <- min(fold_small_kmax)
+    if (!is.finite(common_small_kmax) || common_small_kmax < 1L) {
+      stop(
+        "No Method 1 local candidate was available in every fold.",
+        call. = FALSE
+      )
+    }
     
-    for (id in candidate_ids) {
+    candidate_scores <- setNames(
+      rep(NA_real_, length(candidate_ids)),
+      candidate_ids
+    )
+    candidate_thresholds <- setNames(
+      rep(0.5, length(candidate_ids)),
+      candidate_ids
+    )
+    candidate_raws <- setNames(
+      vector("list", length(candidate_ids)),
+      candidate_ids
+    )
+    
+    # Candidate 1 is evaluated in every valid Method 1 fold. Its count vector
+    # defines the required complete OOF coverage pattern. A candidate may
+    # compete only when it has exactly the same coverage.
+    reference_count <- count_list[["1"]]
+    
+    .score_method1_candidate <- function(id) {
       sum_vec <- sum_list[[id]]
       count_vec <- count_list[[id]]
-      # Aggregate raw predictions for this candidate
+      
       raw <- rep(NA_real_, n_obs)
-      valid <- count_vec > 0L
-      raw[valid] <- sum_vec[valid] / count_vec[valid]
-      valid <- valid & is.finite(raw)
-      candidate_raws[[id]] <- raw
-      if (!any(valid)) {
-        # A candidate that early stopping excluded from every fold has no
-        # out-of-fold coverage. Evaluating an empty vector would score 0
-        # (e.g. an empty SSE), letting an unevaluated candidate win the
-        # minimization; mark it invalid instead.
-        candidate_scores[id] <- NA_real_
-        candidate_thresholds[id] <- 0.5
-        next
+      covered <- count_vec > 0L
+      raw[covered] <- sum_vec[covered] / count_vec[covered]
+      candidate_raws[[id]] <<- raw
+      
+      complete_coverage <- identical(
+        as.integer(count_vec),
+        as.integer(reference_count)
+      )
+      valid <- covered & is.finite(raw)
+      
+      if (!complete_coverage || !any(valid)) {
+        candidate_scores[id] <<- NA_real_
+        candidate_thresholds[id] <<- 0.5
+        return(FALSE)
       }
-      eval <- .evaluate_raw(raw[valid], y[valid])
-      candidate_scores[id] <- eval$score
-      candidate_thresholds[id] <- eval$threshold
+      
+      evaluation <- .evaluate_raw(raw[valid], y[valid])
+      candidate_scores[id] <<-
+        unname(as.numeric(evaluation$score))
+      candidate_thresholds[id] <<-
+        unname(as.numeric(evaluation$threshold))
+      
+      is.finite(candidate_scores[id])
     }
     
-    # Select best among all candidates (including "all")
-    # We need to find the best score; objective min or max
-    valid_ids <- names(candidate_scores)[is.finite(candidate_scores)]
-    if (length(valid_ids) == 0) {
-      stop("No Method 1 candidate produced a finite OOF objective.", call. = FALSE)
+    evaluated_small_ids <- character()
+    
+    # Apply diminishing marginal returns only after each candidate has complete
+    # pooled OOF predictions. This is the statistically comparable stopping
+    # rule that the fold-local implementation was trying to approximate.
+    for (k in seq_len(common_small_kmax)) {
+      id <- as.character(k)
+      usable <- .score_method1_candidate(id)
+      
+      if (!usable) {
+        if (status) {
+          message(sprintf(
+            paste0(
+              "Method 1 local candidate k = %d lacks complete OOF coverage; ",
+              "stopping the local search"
+            ),
+            k
+          ))
+        }
+        break
+      }
+      
+      evaluated_small_ids <- c(evaluated_small_ids, id)
+      
+      if (status) {
+        message(sprintf(
+          paste0(
+            "Current NNS.reg(..., n.best = %d) | OOF eval(obj.fn) = %s | ",
+            "local iterations remaining = %d"
+          ),
+          k,
+          format(candidate_scores[id], digits = 6),
+          common_small_kmax - k
+        ))
+      }
+      
+      if (length(evaluated_small_ids) >= 4L) {
+        recent_ids <- tail(evaluated_small_ids, 3L)
+        recent <- as.numeric(candidate_scores[recent_ids])
+        
+        stop_local <- if (objective == "min") {
+          recent[3L] >= recent[2L] &&
+            recent[3L] >= recent[1L]
+        } else {
+          recent[3L] <= recent[2L] &&
+            recent[3L] <= recent[1L]
+        }
+        
+        if (stop_local) {
+          if (status) {
+            message(sprintf(
+              paste0(
+                "Method 1 local search stopped at k = %d; ",
+                "ALL remains eligible"
+              ),
+              k
+            ))
+          }
+          break
+        }
+      }
     }
+    
+    # ALL is a separate limit condition. It is always scored after the local
+    # sequence and is never subject to the diminishing-returns stop.
+    all_usable <- .score_method1_candidate("all")
+    if (status) {
+      message(sprintf(
+        "Current NNS.reg(..., n.best = ALL) | OOF eval(obj.fn) = %s",
+        if (all_usable) {
+          format(candidate_scores["all"], digits = 6)
+        } else {
+          "NA (incomplete OOF coverage)"
+        }
+      ))
+    }
+    
+    eligible_ids <- evaluated_small_ids
+    if (all_usable) eligible_ids <- c(eligible_ids, "all")
+    eligible_ids <- eligible_ids[
+      is.finite(candidate_scores[eligible_ids])
+    ]
+    
+    if (!length(eligible_ids)) {
+      stop(
+        "No Method 1 candidate produced a finite complete-coverage OOF objective.",
+        call. = FALSE
+      )
+    }
+    
     best_val <- if (objective == "min") {
-      min(candidate_scores[valid_ids])
+      min(candidate_scores[eligible_ids])
     } else {
-      max(candidate_scores[valid_ids])
+      max(candidate_scores[eligible_ids])
     }
-    best_ids <- valid_ids[candidate_scores[valid_ids] == best_val]
-    # if tie, take the first (or middle) - we'll take first
-    best_id <- best_ids[1]
+    best_ids <- eligible_ids[
+      candidate_scores[eligible_ids] == best_val
+    ]
     
-    # Set reg_best_k and other outputs
-    if (best_id == "all") {
-      # For all candidate, we need to know the full-data RPM row count for final fitting
-      # We'll compute later; for now set a placeholder, but we need to store that it's "all"
-      reg_best_k <- NA_integer_  # we'll set after full-data fit
+    # Preserve this version's first-candidate tie rule.
+    best_id <- best_ids[1L]
+    
+    if (identical(best_id, "all")) {
+      reg_best_k <- NA_integer_
       reg_best_label <- "all"
     } else {
       reg_best_k <- as.integer(best_id)
       reg_best_label <- "integer"
     }
-    reg_best_score <- as.numeric(candidate_scores[best_id])
-    reg_component_threshold <- as.numeric(candidate_thresholds[best_id])
+    
+    reg_best_score <-
+      unname(as.numeric(candidate_scores[best_id]))
+    reg_component_threshold <-
+      unname(as.numeric(candidate_thresholds[best_id]))
     reg_oof_raw <- candidate_raws[[best_id]]
     
-    # For final fitting, we need to know the full-data RPM row count when "all" wins
-    # We'll compute that later in the final fit section.
-    # Store best_id for use later.
     .reg_best_id <- best_id
-    .reg_best_label <- if (best_id == "all") "all" else "integer"
+    .reg_best_label <- reg_best_label
     
     if (status) {
-      if (best_id == "all") {
-        message(sprintf("Best Method 1 candidate: all (k = all RPM rows), score = %s", format(reg_best_score, digits = 6)))
+      if (identical(best_id, "all")) {
+        message(sprintf(
+          paste0(
+            "Best Method 1 candidate: ALL (all RPM rows), ",
+            "score = %s"
+          ),
+          format(reg_best_score, digits = 6)
+        ))
       } else {
-        message(sprintf("Best Method 1 candidate: k = %d, score = %s", reg_best_k, format(reg_best_score, digits = 6)))
+        message(sprintf(
+          "Best Method 1 candidate: k = %d, score = %s",
+          reg_best_k,
+          format(reg_best_score, digits = 6)
+        ))
       }
     }
   } else {
