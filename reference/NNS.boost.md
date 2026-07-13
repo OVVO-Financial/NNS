@@ -1,8 +1,8 @@
 # NNS Boost
 
-Ensemble feature-selection method using
+Ensemble method for classification using the NNS multivariate regression
 [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md) as
-the base learner.
+the base learner instead of trees.
 
 ## Usage
 
@@ -34,122 +34,124 @@ NNS.boost(
 
 - IVs.train:
 
-  a vector, matrix, or data frame of numeric, logical, character, or
-  factor predictors.
+  a matrix or data frame of variables of numeric or factor data types.
 
 - DV.train:
 
-  a numeric, logical, character, or factor response with one value per
-  row of `IVs.train`.
+  a numeric or factor vector with compatible dimensions to
+  `(IVs.train)`.
 
 - IVs.test:
 
-  a vector, matrix, or data frame with the same predictor columns as
-  `IVs.train`. If `NULL`, `IVs.train` is used.
+  a matrix or data frame of variables of numeric or factor data types
+  with compatible dimensions to `(IVs.train)`. If NULL, will use
+  `(IVs.train)` as default.
 
 - type:
 
-  `NULL` (default) for regression, or `"CLASS"` for classification.
-  Factor, character, and logical responses automatically select
-  classification.
+  `NULL` (default). To perform a classification of discrete integer
+  classes from factor target variable `(DV.train)` with a base category
+  of 1, set to `(type = "CLASS")`, else for continuous `(DV.train)` set
+  to `(type = NULL)`.
 
 - depth:
 
-  integer, `NULL`, or `"max"`; passed to the `order` argument of
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md).
+  options: (integer, NULL, "max"); `(depth = NULL)`(default) Specifies
+  the `order` parameter in the
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  routine, assigning a number of splits in the regressors, analogous to
+  tree depth.
 
 - learner.trials:
 
-  positive integer; maximum number of feature subsets used to estimate
-  the learner threshold. If every possible subset can be evaluated
-  within this limit, all subsets are evaluated.
+  integer; 100 (default) Sets the number of trials to obtain an accuracy
+  `threshold` level. If the number of all possible feature combinations
+  is less than selected value, the minimum of the two values will be
+  used.
 
 - epochs:
 
-  non-negative integer; number of weighted feature subsets evaluated
-  after the learner stage. Defaults to `2 * length(DV.train)`. Set to
-  zero to use the surviving learner subsets directly.
+  integer; `2*length(DV.train)` (default) Total number of feature
+  combinations to run.
 
 - CV.size:
 
-  numeric in `(0, 1)`; validation fraction for non-time-series data. If
-  `NULL`, one value between 0.2 and 1/3 is drawn under the local seed.
+  numeric \[0, 1\]; `NULL` (default) Sets the cross-validation size.
+  Defaults to a random value between 0.2 and 0.33 for a random sampling
+  of the training set.
 
 - balance:
 
-  logical; if `TRUE`, down- and up-sampling are applied only to the
-  fitting portion of each split. Validation observations are never
-  resampled.
+  logical; `FALSE` (default) Uses both up and down sampling to balance
+  the classes. `type="CLASS"` required.
 
 - ts.test:
 
-  positive integer smaller than the training sample size; the final
-  `ts.test` observations are used as the chronological validation block.
+  integer; NULL (default) Sets the length of the test set for
+  time-series data; typically `2*h` parameter value from
+  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
+  or double known periods to forecast.
 
 - threshold:
 
-  finite numeric scalar or `NULL`; objective cutoff used to retain
-  feature subsets. If `NULL`, the lower quartile is used for a
-  minimization objective and the upper quartile for a maximization
-  objective.
+  numeric; `NULL` (default) Sets the `obj.fn` threshold to keep feature
+  combinations.
 
 - obj.fn:
 
-  expression using the names `predicted` and `actual`. Defaults to sum
-  of squared errors. For explicit classification, the untouched default
-  is replaced by mean classification accuracy.
+  expression; `expression( sum((predicted - actual)^2) )` (default) Sum
+  of squared errors is the default objective function. Any
+  `expression(...)` using the specific terms `predicted` and `actual`
+  can be used. Automatically selects an accuracy measure when
+  `(type = "CLASS")`.
 
 - objective:
 
-  one of `"min"` or `"max"`; defaults to `"min"`.
+  options: ("min", "max") `"max"` (default) Select whether to minimize
+  or maximize the objective function `obj.fn`.
 
 - extreme:
 
-  logical; if `TRUE`, use the best learner score rather than a quartile
-  cutoff.
+  logical; `FALSE` (default) Uses the maximum (minimum) `threshold`
+  obtained from the `learner.trials`, rather than the upper (lower)
+  quintile level for maximization (minimization) `objective`.
 
 - features.only:
 
-  logical; return only feature weights and frequencies.
+  logical; `FALSE` (default) Returns only the final feature loadings
+  along with the final feature frequencies.
 
 - feature.importance:
 
-  logical; plot up to the ten most frequently retained features.
+  logical; `TRUE` (default) Plots the frequency of features used in the
+  final estimate.
 
 - pred.int:
 
-  numeric in `(0, 1)` or `NULL`; prediction interval level passed to the
-  final
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  fit.
+  numeric \[0,1\]; `NULL` (default) Returns the associated prediction
+  intervals for the final estimate.
 
 - status:
 
-  logical; print progress messages.
-
-- seed:
-
-  integer or `NULL`; local random seed. The caller's RNG state is
-  restored when the function exits.
+  logical; `TRUE` (default) Prints status update message in console.
 
 ## Value
 
-A list containing `results`, `pred.int`, `feature.weights`, and
-`feature.frequency`. With `features.only = TRUE`, only the last two
-elements are returned.
+Returns a vector of fitted values for the dependent variable test set
+`$results`, prediction intervals `$pred.int`, and the final feature
+loadings `$feature.weights`, along with final feature frequencies
+`$feature.frequency`.
 
 ## Note
 
-- Numeric class labels are returned on their original scale. Factor,
-  character, and logical responses retain the historical integer-code
-  output.
+- Like a logistic regression, the `(type = "CLASS")` setting is not
+  necessary for target variable of two classes e.g. \[0, 1\]. The
+  response variable base category should be 1 for classification
+  problems.
 
-- Categorical predictors are aligned to training levels. Unseen test
-  levels cause an explicit error rather than silent recoding.
-
-- Incorporate an objective from another package with, for example,
-  `obj.fn = expression(Metrics::mape(actual, predicted))` and
-  `objective = "min"`.
+- Incorporate any objective function from external packages (such as
+  `Metrics::mape`) via
+  `NNS.boost(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`
 
 ## References
 
@@ -163,14 +165,14 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-a <- NNS.boost(
-  iris[1:140, 1:4], iris[1:140, 5],
-  IVs.test = iris[141:150, 1:4],
-  epochs = 100, learner.trials = 100,
-  type = "CLASS", balance = TRUE
-)
+ ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+ if (FALSE) { # \dontrun{
+ a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
+ IVs.test = iris[141:150, 1:4],
+ epochs = 100, learner.trials = 100,
+ type = "CLASS", depth = NULL, balance = TRUE)
 
-mean(a$results == as.numeric(iris[141:150, 5]))
-} # }
+ ## Test accuracy
+ mean(a$results == as.numeric(iris[141:150, 5]))
+ } # }
 ```
