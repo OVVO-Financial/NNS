@@ -588,39 +588,6 @@
        minimums = mins, maximums = maxs)
 }
 
-#' NNS Regression
-#'
-#' Generates nonlinear nonparametric regression estimates from partial-moment
-#' partition regression points. The implementation uses a single consistent
-#' model for fitted values and point estimates, training-fitted encodings and
-#' normalization, explicit distance dispatch, and strict argument validation.
-#'
-#' @param x A vector, matrix, or data frame of predictors.
-#' @param y A numeric, factor, character, or logical response with one value per row of x.
-#' @param factor.2.dummy Logical; encode categorical predictors using training-fitted full dummy columns.
-#' @param order NULL, a positive integer, or "max".
-#' @param dim.red.method NULL, one of "cor", "NNS.dep", "NNS.caus", "all", "equal", or a numeric coefficient vector.
-#' @param tau NULL, "cs", or "ts" for causal dimension-reduction weights.
-#' @param type NULL, "CLASS", or "XONLY".
-#' @param point.est Optional prediction rows with the same raw predictors as x.
-#' @param location Plot legend location.
-#' @param return.values Logical; return visibly when TRUE and invisibly when FALSE.
-#' @param plot Logical; draw the fitted regression.
-#' @param plot.regions Logical; draw multivariate regions when available.
-#' @param residual.plot Logical; draw multivariate residual plot.
-#' @param confidence.interval NULL or a scalar strictly between zero and one.
-#' @param threshold Nonnegative coefficient threshold for dimension reduction.
-#' @param n.best NULL, "all", or a positive integer for multivariate regression.
-#' @param smooth Logical; use a smoothing spline for univariate regression.
-#' @param noise.reduction One of "mean", "median", "mode", or "off".
-#' @param dist One of "L1", "L2", or "FACTOR" for multivariate distance.
-#' @param ncores Positive integer. Retained for API compatibility.
-#' @param point.only Internal abbreviated-return flag.
-#' @param multivariate.call Internal flag returning only consolidated univariate regression points.
-#'
-#' @return A list containing model diagnostics, point estimates, intervals,
-#' regression points, fitted values, and dimension-reduction information where applicable.
-#' @export
 
 .nns_reg_partition_points_fast <- function(x, y, order = NULL,
                                            noise.reduction = "off",
@@ -645,6 +612,139 @@
        order = if (is.null(order)) .nns_reg_default_order(as.numeric(train_x), as.numeric(train_y)) else order)
 }
 
+
+#' NNS Regression
+#'
+#' Generates a nonlinear regression based on partial moment quadrant means.
+#'
+#' @param x a vector, matrix or data frame of variables of numeric or factor data types.
+#' @param y a numeric or factor vector with compatible dimensions to \code{x}.
+#' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
+#' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
+#' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
+#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
+#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
+#' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
+#' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
+#' @param plot logical; \code{TRUE} (default) To plot regression.
+#' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
+#' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
+#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.  Also applies the same level for the prediction intervals.
+#' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
+#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
+#' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
+#' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
+#' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
+#' @param dist options:("L1", "L2", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "FACTOR")} uses a frequency.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param multivariate.call Internal argument for multivariate regressions.
+#' @param point.only Internal argument for abbreviated output.
+#' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+#' \itemize{
+#'  \item{\code{"R2"}} provides the goodness of fit;
+#'
+#'  \item{\code{"SE"}} returns the overall standard error of the estimate between \code{y} and \code{y.hat};
+#'
+#'  \item{\code{"Prediction.Accuracy"}} returns the correct rounded \code{"Point.est"} used in classifications versus the categorical \code{y};
+#'
+#'  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
+#'
+#'  \item{\code{"Point.est"}} for the predicted value generated;
+#'  
+#'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
+#'  
+#'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
+#'
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
+#' }
+#'
+#'
+#' MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+#' \itemize{
+#'  \item{\code{"R2"}} provides the goodness of fit;
+#'
+#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.frame} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} \code{data.frame}.
+#'
+#'  \item{\code{"x.star"}} returns the synthetic X* as a vector;
+#'
+#'  \item{\code{"rhs.partitions"}} returns the partition points for each regressor \code{x};
+#'
+#'  \item{\code{"RPM"}} provides the Regression Point Matrix, the points for each \code{x} used in the regression equation for the given order of partitions;
+#'
+#'  \item{\code{"Point.est"}} returns the predicted value generated;
+#'  
+#'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
+#'
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
+#' }
+#'
+#' @note
+#' \itemize{
+#'  \item Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
+#'
+#'  \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
+#'
+#'  \item For low signal:noise instances, increasing the dimension may yield better results using \code{NNS.stack(cbind(x,x), y, method = 1, ...)}.
+#' }
+#'
+#' @author Fred Viole, OVVO Financial Systems
+#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
+#'
+#' Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"  \doi{10.1007/s10614-017-9713-5}
+#'
+#' Vinod, H. and Viole, F. (2018) "Clustering and Curve Fitting by Line Segments"  \doi{10.20944/preprints201801.0090.v1}
+#' 
+#' Viole, F. (2020) "Partitional Estimation Using Partial Moments" \doi{10.2139/ssrn.3592491}
+#' 
+#' Dana, J., and Dawes, R. M. (2004). The Superiority of Simple Alternatives to Regression for Social Science Predictions. Journal of Educational and Behavioral Statistics, 29(3), 317–331.
+#' 
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' NNS.reg(x, y)
+#'
+#' ## Manual {order} selection
+#' NNS.reg(x, y, order = 2)
+#'
+#' ## Maximum {order} selection
+#' NNS.reg(x, y, order = "max")
+#'
+#' ## x-only paritioning (Univariate only)
+#' NNS.reg(x, y, type = "XONLY")
+#'
+#' ## For Multiple Regression:
+#' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
+#' NNS.reg(x, y, point.est = c(.25, .5, .75))
+#'
+#' ## For Multiple Regression based on Synthetic X* (Dimension Reduction):
+#' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
+#' NNS.reg(x, y, point.est = c(.25, .5, .75), dim.red.method = "cor", ncores = 1)
+#'
+#' ## IRIS dataset examples:
+#' # Dimension Reduction:
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "cor", order = 5, ncores = 1)
+#'
+#' # Dimension Reduction using causal weights:
+#' NNS.reg(iris[,1:4], iris[,5], dim.red.method = "NNS.caus", order = 5, ncores = 1)
+#'
+#' # Multiple Regression:
+#' NNS.reg(iris[,1:4], iris[,5], order = 2, noise.reduction = "off")
+#'
+#' # Classification:
+#' NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point.est
+#'
+#' ## To call fitted values:
+#' x <- rnorm(100) ; y <- rnorm(100)
+#' NNS.reg(x, y)$Fitted
+#'
+#' ## To call partial derivative (univariate regression only):
+#' NNS.reg(x, y)$derivative
+#' }
+#' @export
+
+       
 NNS.reg <- function(x, y,
                     factor.2.dummy = TRUE, order = NULL,
                     dim.red.method = NULL, tau = NULL,
