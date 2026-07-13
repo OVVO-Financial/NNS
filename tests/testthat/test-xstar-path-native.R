@@ -6,3 +6,13 @@ test_that("native xstar path matches active coefficient projections including ze
   z <- NNS_xstar_path_cpp(train, test, c(0,0,0), seq_len(3), 1L)
   expect_equal(z$train[,2], rowMeans(train[,1:2]))
 })
+
+test_that("native xstar path is deterministic with multiple threads", {
+  train <- matrix(seq_len(60), 20, 3); test <- matrix(seq_len(15), 5, 3)
+  coef <- c(3, 0, -2); ord <- order(abs(coef), decreasing = TRUE, na.last = NA, method = "radix")
+  one <- NNS_xstar_path_cpp(train, test, coef, ord, 1L)
+  many <- NNS_xstar_path_cpp(train, test, coef, ord, 2L)
+  expect_equal(many$train, one$train, tolerance = 1e-14)
+  expect_equal(many$test, one$test, tolerance = 1e-14)
+  expect_identical(many$representative, one$representative)
+})
