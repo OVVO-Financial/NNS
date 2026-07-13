@@ -102,20 +102,26 @@
     stop("[point.est] contains missing or nonfinite values.", call. = FALSE)
   }
   
-  worker <- function(i) .nns_mreg_predict_one(
+  # Native serial kernel implementing exactly .nns_mreg_predict_one:
+  # same metric dispatch, stable tie ordering, k = 1 tie aggregation, ensemble
+  # weights, and exact weighted class mode. No global thread state is touched.
+  rpm.x <- as.matrix(rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE])
+  storage.mode(rpm.x) <- "double"
+  storage.mode(Xtest) <- "double"
+  dist.code <- match(dist, c("L2", "L1", "FACTOR")) - 1L
+  as.numeric(NNS_mreg_predict_cpp(
+    rpm.x, as.numeric(rpm$y.hat), Xtest, as.integer(k), dist.code,
+    as.numeric(minimums), as.numeric(maximums), isTRUE(is.class)
+  ))
+}
+
+# Reference pure-R implementation of the prediction rule, retained for
+# equivalence tests against NNS_mreg_predict_cpp.
+.nns_mreg_predict_reference <- function(Xtest, rpm, k, dist,
+                                        minimums, maximums, is.class) {
+  vapply(seq_len(nrow(Xtest)), function(i) .nns_mreg_predict_one(
     Xtest[i, ], rpm, k, dist, minimums, maximums, is.class
-  )
-  
-  # Use process-local parallelism only where fork is available. No global
-  # RcppParallel setting is mutated. Windows and single-core calls remain
-  # deterministic and sequential.
-  if (ncores > 1L && .Platform$OS.type != "windows" && nrow(Xtest) > 1L) {
-    unlist(parallel::mclapply(seq_len(nrow(Xtest)), worker,
-                              mc.cores = ncores, mc.preschedule = TRUE),
-           use.names = FALSE)
-  } else {
-    vapply(seq_len(nrow(Xtest)), worker, numeric(1L))
-  }
+  ), numeric(1L))
 }
 
 .nns_mreg_group_reduce <- function(z, noise.reduction, is.class) {
@@ -123,6 +129,17 @@
 }
 
 .nns_mreg_build_rpm <- function(X, y, ids, noise.reduction, is.class) {
+  # Fast path: every observation in its own cell (the common continuous case).
+  # Each reducer returns a singleton's own value, so the RPM is the data
+  # itself, ordered by interval ID exactly as split() would order the groups.
+  if (!anyDuplicated(ids)) {
+    o <- order(ids)
+    rpm <- as.data.frame(X[o, , drop = FALSE], stringsAsFactors = FALSE)
+    rpm$y.hat <- y[o]
+    names(rpm) <- c(colnames(X), "y.hat")
+    rownames(rpm) <- NULL
+    return(rpm)
+  }
   groups <- split(seq_len(nrow(X)), ids)
   rows <- lapply(groups, function(idx) {
     c(vapply(seq_len(ncol(X)), function(j) {

@@ -29,6 +29,14 @@ NNS_distance_path_single_parallel_cpp <- function(RPM, yhat, Xtest, k, is_class,
     .Call(`_NNS_NNS_distance_path_single_parallel_cpp`, RPM, yhat, Xtest, k, is_class, nthreads)
 }
 
+NNS_mreg_predict_path_cpp <- function(rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class) {
+    .Call(`_NNS_NNS_mreg_predict_path_cpp`, rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class)
+}
+
+NNS_mreg_predict_cpp <- function(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class) {
+    .Call(`_NNS_NNS_mreg_predict_cpp`, rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class)
+}
+
 NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only = FALSE) {
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only)
 }
