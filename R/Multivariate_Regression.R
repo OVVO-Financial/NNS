@@ -126,7 +126,7 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
   
   if(is.null(n.best)){
     dependence <- NNS.copula(cbind(original.IVs, original.DV))
-    n.best <- max(1, floor((1-dependence)*sqrt(n)))
+    n.best <- max(1, floor((1-dependence)*sqrt(nrow(original.IVs))))
   }
   
   ### Clamp n.best to available RPM rows.
