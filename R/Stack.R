@@ -949,8 +949,11 @@ NNS.stack <- function(IVs.train,
   }
   
   
-  # Reproduce the production NNS.M.reg multiple-point prediction path for every
-  # k, including its out-of-training-range gradient extrapolation.
+  # Score every k with exactly the estimator the final NNS.reg fit uses:
+  # NNS_mreg_predict_path_cpp implements the repaired multivariate prediction
+  # rule (range-normalized metric, stable ties, ensemble weights) for
+  # k = 1..kmax. The repaired NNS.M.reg no longer extrapolates outside the
+  # training support, so no gradient extension is applied here either.
   .production_multivariate_path <- function(rpm, Xtest, train_design) {
     Xtest <- as.data.frame(Xtest, check.names = FALSE)
     feature_names <- setdiff(names(rpm), "y.hat")
@@ -958,98 +961,26 @@ NNS.stack <- function(IVs.train,
     train_design <- as.data.frame(train_design, check.names = FALSE)
     train_design <- train_design[, feature_names, drop = FALSE]
     kmax <- nrow(rpm)
-    
-    path <- suppressWarnings(
-      NNS.distance.path.bulk(
-        rpm = rpm,
-        Xtest = Xtest,
-        kmax = kmax,
-        class = NULL,
-        ncores = ncores
-      )
+
+    rpm_x <- as.matrix(rpm[, feature_names, drop = FALSE])
+    storage.mode(rpm_x) <- "double"
+    test_matrix <- as.matrix(Xtest)
+    storage.mode(test_matrix) <- "double"
+    minimums <- vapply(train_design, min, numeric(1L))
+    maximums <- vapply(train_design, max, numeric(1L))
+    dist_code <- match(dist, c("L2", "L1", "FACTOR")) - 1L
+
+    path <- NNS_mreg_predict_path_cpp(
+      rpm_x, as.numeric(rpm$y.hat), test_matrix, as.integer(kmax),
+      dist_code, as.numeric(minimums), as.numeric(maximums), FALSE
     )
-    path <- as.matrix(path)
-    if (nrow(path) != nrow(Xtest) && ncol(path) == nrow(Xtest)) path <- t(path)
-    if (nrow(path) != nrow(Xtest)) {
+    if (nrow(path) != nrow(test_matrix)) {
       stop("The production distance path returned an invalid row count.",
            call. = FALSE)
     }
-    
-    minimums <- vapply(train_design, min, numeric(1L))
-    maximums <- vapply(train_design, max, numeric(1L))
-    test_matrix <- as.matrix(Xtest)
-    outsiders <- sweep(test_matrix, 2L, minimums, "<") |
-      sweep(test_matrix, 2L, maximums, ">")
-    outsiders[is.na(outsiders)] <- FALSE
-    outsider_rows <- which(rowSums(outsiders) > 0L)
-    
-    if (length(outsider_rows)) {
-      rpm_features <- rpm[, feature_names, drop = FALSE]
-      central_points <- vapply(rpm_features, gravity, numeric(1L))
-      outside_points <- test_matrix[outsider_rows, , drop = FALSE]
-      boundary_points <- outside_points
-      for (j in seq_len(ncol(boundary_points))) {
-        boundary_points[, j] <- pmin(
-          pmax(boundary_points[, j], minimums[j]),
-          maximums[j]
-        )
-      }
-      
-      central_matrix <- matrix(
-        rep(central_points, each = nrow(boundary_points)),
-        nrow = nrow(boundary_points),
-        byrow = FALSE,
-        dimnames = list(NULL, feature_names)
-      )
-      mid_points <- (boundary_points + central_matrix) / 2
-      mid_points_2 <- (boundary_points + mid_points) / 2
-      
-      distance_1 <- sqrt(rowSums((boundary_points - central_matrix)^2))
-      distance_2 <- sqrt(rowSums((boundary_points - mid_points)^2))
-      distance_3 <- sqrt(rowSums((boundary_points - mid_points_2)^2))
-      
-      path_for <- function(points) {
-        points <- as.data.frame(points, check.names = FALSE)
-        names(points) <- feature_names
-        out <- suppressWarnings(
-          NNS.distance.path.bulk(
-            rpm = rpm,
-            Xtest = points,
-            kmax = kmax,
-            class = NULL,
-            ncores = ncores
-          )
-        )
-        out <- as.matrix(out)
-        if (nrow(out) != nrow(points) && ncol(out) == nrow(points)) out <- t(out)
-        out
-      }
-      
-      boundary_path <- path_for(boundary_points)
-      mid_path <- path_for(mid_points)
-      mid_2_path <- path_for(mid_points_2)
-      central_path <- path_for(matrix(central_points, nrow = 1L,
-                                      dimnames = list(NULL, feature_names)))
-      central_path <- matrix(rep(as.numeric(central_path),
-                                 each = length(outsider_rows)),
-                             nrow = length(outsider_rows),
-                             byrow = FALSE)
-      
-      d1 <- pmax(distance_1, 1e-10)
-      d2 <- pmax(distance_2, 1e-10)
-      d3 <- pmax(distance_3, 1e-10)
-      g1 <- sweep(boundary_path - central_path, 1L, d1, "/")
-      g2 <- sweep(boundary_path - mid_path, 1L, d2, "/")
-      g3 <- sweep(boundary_path - mid_2_path, 1L, d3, "/")
-      gradient <- (3 * g1 + 2 * g2 + g3) / 6
-      last_distance <- sqrt(rowSums((outside_points - boundary_points)^2))
-      path[outsider_rows, ] <- boundary_path +
-        sweep(gradient, 1L, last_distance, "*")
-    }
-    
     path
   }
-  
+
   .candidate_from_oof <- function(sum_matrix, count_matrix, candidate) {
     count <- count_matrix[, candidate]
     valid <- count > 0L
