@@ -36,6 +36,26 @@ NNS_mreg_predict_path_cpp <- function(rpm_x, yhat, Xtest, kmax, dist_code, mins,
 NNS_mreg_predict_cpp <- function(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class) {
     .Call(`_NNS_NNS_mreg_predict_cpp`, rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class)
 }
+NNS_mreg_predict_path_v2_cpp <- function(rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class, nthreads) {
+    .Call(`_NNS_NNS_mreg_predict_path_v2_cpp`, rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class, nthreads)
+}
+
+NNS_mreg_predict_v2_cpp <- function(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads) {
+    .Call(`_NNS_NNS_mreg_predict_v2_cpp`, rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads)
+}
+
+NNS_duplicate_column_map_cpp <- function(X) {
+    .Call(`_NNS_NNS_duplicate_column_map_cpp`, X)
+}
+
+NNS_mreg_setup_cpp <- function(X, y, boundaries, reducer_code, is_class) {
+    .Call(`_NNS_NNS_mreg_setup_cpp`, X, y, boundaries, reducer_code, is_class)
+}
+
+NNS_xstar_path_cpp <- function(train_design, test_design, coefficients, column_order, nthreads) {
+    .Call(`_NNS_NNS_xstar_path_cpp`, train_design, test_design, coefficients, column_order, nthreads)
+}
+
 
 NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only = FALSE) {
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only)

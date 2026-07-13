@@ -105,18 +105,18 @@ NNS.stack <- function(IVs.train,
                       status = TRUE,
                       ncores = NULL,
                       seed = 123L) {
-  
+
   # -------------------------------------------------------------------------
   # Validation, coercion, and state helpers
   # -------------------------------------------------------------------------
-  
+
   .scalar_logical <- function(x, name) {
     if (!is.logical(x) || length(x) != 1L || is.na(x)) {
       stop(sprintf("[%s] must be TRUE or FALSE.", name), call. = FALSE)
     }
     x
   }
-  
+
   .scalar_integer <- function(x, name, minimum = 0L, allow_null = FALSE) {
     if (allow_null && is.null(x)) return(NULL)
     if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
@@ -126,7 +126,7 @@ NNS.stack <- function(IVs.train,
     }
     as.integer(x)
   }
-  
+
   .as_train_frame <- function(x) {
     if (any(class(x) %in% c("tbl", "data.table"))) x <- as.data.frame(x)
     if (is.null(dim(x))) x <- data.frame(X1 = x, check.names = FALSE)
@@ -142,17 +142,17 @@ NNS.stack <- function(IVs.train,
     }
     x
   }
-  
+
   .as_test_frame <- function(x, train_names) {
     p <- length(train_names)
     had_names <- !is.null(dim(x)) && !is.null(colnames(x)) &&
       length(colnames(x)) == NCOL(x) && all(colnames(x) != "")
-    
+
     if (any(class(x) %in% c("tbl", "data.table"))) {
       had_names <- !is.null(names(x)) && all(names(x) != "")
       x <- as.data.frame(x)
     }
-    
+
     if (is.null(dim(x))) {
       if (p == 1L) {
         x <- data.frame(x, check.names = FALSE)
@@ -181,12 +181,12 @@ NNS.stack <- function(IVs.train,
     } else {
       x <- as.data.frame(x, check.names = FALSE, stringsAsFactors = FALSE)
     }
-    
+
     if (ncol(x) != p) {
       stop("[IVs.test] must have the same number of predictors as [IVs.train].",
            call. = FALSE)
     }
-    
+
     if (!had_names) {
       names(x) <- train_names
     } else {
@@ -205,16 +205,16 @@ NNS.stack <- function(IVs.train,
       }
       x <- x[, train_names, drop = FALSE]
     }
-    
+
     x
   }
-  
+
   .align_predictors <- function(train, test) {
     for (j in seq_along(train)) {
       nm <- names(train)[j]
       tr <- train[[j]]
       te <- test[[j]]
-      
+
       if (inherits(tr, "Date")) {
         if (!inherits(te, "Date")) {
           stop(sprintf("Test predictor [%s] must also be a Date.", nm),
@@ -261,7 +261,7 @@ NNS.stack <- function(IVs.train,
     }
     list(train = train, test = test)
   }
-  
+
   .check_predictors <- function(x, name) {
     if (anyNA(x)) stop(sprintf("[%s] contains missing values.", name), call. = FALSE)
     for (j in seq_along(x)) {
@@ -271,7 +271,7 @@ NNS.stack <- function(IVs.train,
       }
     }
   }
-  
+
   .restore_rng <- local({
     existed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     old <- if (existed) get(".Random.seed", envir = .GlobalEnv,
@@ -286,7 +286,7 @@ NNS.stack <- function(IVs.train,
     }
   })
   on.exit(.restore_rng(), add = TRUE)
-  
+
   optimize.threshold <- .scalar_logical(optimize.threshold, "optimize.threshold")
   balance <- .scalar_logical(balance, "balance")
   stack <- .scalar_logical(stack, "stack")
@@ -294,31 +294,31 @@ NNS.stack <- function(IVs.train,
   folds <- .scalar_integer(folds, "folds", minimum = 1L)
   ts.test <- .scalar_integer(ts.test, "ts.test", minimum = 1L,
                              allow_null = TRUE)
-  
+
   if (!is.null(seed)) {
     seed <- .scalar_integer(seed, "seed", minimum = 0L)
     set.seed(seed)
   }
-  
+
   if (is.null(obj.fn) || !(is.expression(obj.fn) || is.call(obj.fn))) {
     stop("[obj.fn] must be a non-NULL expression or call.", call. = FALSE)
   }
   if (is.expression(obj.fn) && length(obj.fn) != 1L) {
     stop("[obj.fn] must contain exactly one expression.", call. = FALSE)
   }
-  
+
   if (!is.character(objective) || length(objective) != 1L || is.na(objective)) {
     stop("[objective] must be exactly 'min' or 'max'.", call. = FALSE)
   }
   objective <- match.arg(tolower(objective), c("min", "max"))
-  
+
   if (!is.null(type)) {
     if (!is.character(type) || length(type) != 1L || is.na(type)) {
       stop("[type] must be NULL or 'CLASS'.", call. = FALSE)
     }
     type <- match.arg(tolower(type), "class")
   }
-  
+
   if (!is.null(order)) {
     if (is.character(order)) {
       if (length(order) != 1L || tolower(order) != "max") {
@@ -330,7 +330,7 @@ NNS.stack <- function(IVs.train,
       order <- .scalar_integer(order, "order", minimum = 1L)
     }
   }
-  
+
   if (!is.numeric(method) || !length(method) || any(!is.finite(method)) ||
       any(method != floor(method))) {
     stop("[method] must contain only 1 and/or 2.", call. = FALSE)
@@ -339,7 +339,7 @@ NNS.stack <- function(IVs.train,
   if (!all(method %in% c(1L, 2L))) {
     stop("[method] must contain only 1 and/or 2.", call. = FALSE)
   }
-  
+
   if (!is.null(CV.size)) {
     if (!is.numeric(CV.size) || length(CV.size) != 1L ||
         !is.finite(CV.size) || CV.size <= 0 || CV.size >= 1) {
@@ -348,7 +348,7 @@ NNS.stack <- function(IVs.train,
     }
     CV.size <- as.numeric(CV.size)
   }
-  
+
   if (!is.null(pred.int)) {
     if (!is.numeric(pred.int) || length(pred.int) != 1L ||
         !is.finite(pred.int) || pred.int <= 0 || pred.int >= 1) {
@@ -357,7 +357,7 @@ NNS.stack <- function(IVs.train,
     }
     pred.int <- as.numeric(pred.int)
   }
-  
+
   if (is.null(ncores)) {
     detected <- suppressWarnings(parallel::detectCores())
     if (!is.finite(detected)) detected <- 2L
@@ -365,7 +365,7 @@ NNS.stack <- function(IVs.train,
   } else {
     ncores <- .scalar_integer(ncores, "ncores", minimum = 1L)
   }
-  
+
   if (!is.character(dist) || length(dist) != 1L || is.na(dist)) {
     stop("[dist] must be one character value.", call. = FALSE)
   }
@@ -379,13 +379,13 @@ NNS.stack <- function(IVs.train,
     ), call. = FALSE)
   }
   dist <- "L2"
-  
+
   # -------------------------------------------------------------------------
   # Input data and response coding
   # -------------------------------------------------------------------------
-  
+
   x <- .as_train_frame(IVs.train)
-  
+
   if (any(class(DV.train) %in% c("tbl", "data.table"))) {
     DV.train <- as.vector(unlist(DV.train))
   }
@@ -396,7 +396,7 @@ NNS.stack <- function(IVs.train,
     }
     DV.train <- as.vector(unlist(DV.train))
   }
-  
+
   if (length(DV.train) != nrow(x)) {
     stop("nrow(IVs.train) must equal length(DV.train).", call. = FALSE)
   }
@@ -411,27 +411,27 @@ NNS.stack <- function(IVs.train,
       any(!is.finite(DV.train))) {
     stop("[DV.train] contains non-finite values.", call. = FALSE)
   }
-  
+
   response_was_factor <- is.factor(DV.train)
   response_was_ordered <- is.ordered(DV.train)
   response_was_character <- is.character(DV.train)
   response_was_logical <- is.logical(DV.train)
   response_was_numeric <- is.numeric(DV.train) || is.integer(DV.train)
-  
+
   auto_class <- response_was_factor || response_was_character ||
     response_was_logical ||
     (response_was_numeric && length(unique(DV.train)) == 2L)
-  
+
   if (auto_class && is.null(type)) type <- "class"
   if (balance && is.null(type)) {
     warning("type = 'CLASS' selected because balance = TRUE.", call. = FALSE)
     type <- "class"
   }
   is_class <- identical(type, "class")
-  
+
   original_response <- DV.train
   class_values <- NULL
-  
+
   if (is_class) {
     if (response_was_factor) {
       response_factor <- droplevels(DV.train)
@@ -449,7 +449,7 @@ NNS.stack <- function(IVs.train,
     } else {
       stop("Unsupported classification response type.", call. = FALSE)
     }
-    
+
     y <- as.numeric(y)
     if (length(unique(y)) < 2L) {
       stop("Classification requires at least two response classes.",
@@ -459,7 +459,7 @@ NNS.stack <- function(IVs.train,
       stop("Each response class requires at least two observations for cross-validation.",
            call. = FALSE)
     }
-    
+
     if (identical(obj.fn, expression(sum((predicted - actual)^2)))) {
       obj.fn <- expression(mean(predicted == actual))
       objective <- "max"
@@ -470,38 +470,38 @@ NNS.stack <- function(IVs.train,
     }
     y <- as.numeric(DV.train)
   }
-  
+
   if (balance && !is_class) {
     stop("[balance = TRUE] requires classification.", call. = FALSE)
   }
-  
+
   if (is.null(IVs.test)) {
     z <- x
   } else {
     z <- .as_test_frame(IVs.test, names(x))
   }
-  
+
   aligned <- .align_predictors(x, z)
   x <- aligned$train
   z <- aligned$test
   .check_predictors(x, "IVs.train")
   .check_predictors(z, "IVs.test")
-  
+
   n_obs <- nrow(x)
   original_p <- ncol(x)
-  
+
   if (!is.null(ts.test) && ts.test >= n_obs) {
     stop("[ts.test] must be smaller than the number of training observations.",
          call. = FALSE)
   }
-  
+
   if (original_p == 1L && 2L %in% method) {
     warning("Method 2 was removed because dimension reduction requires more than one original predictor.",
             call. = FALSE)
     method <- setdiff(method, 2L)
     if (!length(method)) method <- 1L
   }
-  
+
   if (2L %in% method) {
     if (is.numeric(dim.red.method)) {
       if (!length(dim.red.method) || any(!is.finite(dim.red.method))) {
@@ -520,18 +520,18 @@ NNS.stack <- function(IVs.train,
       )
     }
   }
-  
+
   # Add a constant non-integer translation to every fitting response. This keeps
   # NNS.reg from silently auto-switching integer-valued regression or class-code
   # targets into its internal classification path. Predictions and intervals are
   # translated back before scoring or returning.
   response_offset <- 0.123456789
   y_fit_all <- y + response_offset
-  
+
   # -------------------------------------------------------------------------
   # Shared helpers
   # -------------------------------------------------------------------------
-  
+
   .score <- function(predicted, actual) {
     if (length(predicted) != length(actual)) {
       stop("The objective received predicted and actual vectors of different lengths.",
@@ -547,7 +547,7 @@ NNS.stack <- function(IVs.train,
     if (!is.finite(value)) return(NA_real_)
     value
   }
-  
+
   .sanitize_raw <- function(predicted, fallback_y) {
     predicted <- as.numeric(predicted)
     bad <- !is.finite(predicted)
@@ -562,7 +562,7 @@ NNS.stack <- function(IVs.train,
     }
     predicted
   }
-  
+
   .round_codes <- function(raw, threshold) {
     raw <- pmin(pmax(as.numeric(raw), 1), length(class_values))
     lo <- floor(raw)
@@ -571,7 +571,7 @@ NNS.stack <- function(IVs.train,
     out <- ifelse(frac < threshold, lo, hi)
     as.integer(pmin(pmax(out, 1L), length(class_values)))
   }
-  
+
   .best_threshold <- function(raw, actual) {
     if (!is_class || !optimize.threshold) return(0.5)
     grid <- seq(0.01, 0.99, by = 0.01)
@@ -588,20 +588,20 @@ NNS.stack <- function(IVs.train,
     tied <- valid[scores[valid] == best_value]
     grid[tied[ceiling(length(tied) / 2)]]
   }
-  
+
   .evaluate_raw <- function(raw, actual) {
     threshold <- if (is_class) .best_threshold(raw, actual) else 0.5
     predicted <- if (is_class) .round_codes(raw, threshold) else raw
     list(score = .score(predicted, actual), threshold = threshold)
   }
-  
+
   # Preserve the historical NNS.stack classification contract: predictions
   # are numeric factor codes 1, ..., K. The original labels remain available in
   # result$class.levels, so code j maps to result$class.levels[j].
   .decode_codes <- function(code) {
     as.numeric(as.integer(pmin(pmax(code, 1L), length(class_values))))
   }
-  
+
   .decode_interval <- function(interval, threshold) {
     if (is.null(interval)) return(NULL)
     interval <- as.data.frame(interval, check.names = FALSE)
@@ -610,18 +610,18 @@ NNS.stack <- function(IVs.train,
     })
     interval
   }
-  
+
   .translate_interval <- function(interval) {
     if (is.null(interval)) return(NULL)
     interval <- as.data.frame(interval, check.names = FALSE)
     interval[] <- lapply(interval, function(v) as.numeric(v) - response_offset)
     interval
   }
-  
+
   .has_all_classes <- function(train_y) {
     !is_class || identical(sort(unique(train_y)), sort(unique(y)))
   }
-  
+
   .balance_indices <- function(train_y) {
     if (!balance) return(seq_along(train_y))
     groups <- split(seq_along(train_y), train_y)
@@ -639,16 +639,16 @@ NNS.stack <- function(IVs.train,
     }), use.names = FALSE)
     sample(c(down_idx, up_idx), replace = FALSE)
   }
-  
+
   .numeric_design <- function(train, test) {
     train_blocks <- vector("list", ncol(train))
     test_blocks <- vector("list", ncol(train))
-    
+
     for (j in seq_along(train)) {
       nm <- names(train)[j]
       tr <- train[[j]]
       te <- test[[j]]
-      
+
       if (is.factor(tr)) {
         lev <- levels(tr)
         tr_chr <- as.character(tr)
@@ -670,38 +670,38 @@ NNS.stack <- function(IVs.train,
         te_block <- matrix(as.numeric(te), ncol = 1L,
                            dimnames = list(NULL, nm))
       }
-      
+
       train_blocks[[j]] <- tr_block
       test_blocks[[j]] <- te_block
     }
-    
+
     train_matrix <- do.call(cbind, train_blocks)
     test_matrix <- do.call(cbind, test_blocks)
     storage.mode(train_matrix) <- "double"
     storage.mode(test_matrix) <- "double"
     colnames(train_matrix) <- make.unique(colnames(train_matrix), sep = "_")
     colnames(test_matrix) <- colnames(train_matrix)
-    
+
     train_min <- apply(train_matrix, 2L, min)
     train_max <- apply(train_matrix, 2L, max)
     train_range <- train_max - train_min
     train_range[!is.finite(train_range) | train_range == 0] <- 1
-    
+
     train_scaled <- sweep(train_matrix, 2L, train_min, "-")
     train_scaled <- sweep(train_scaled, 2L, train_range, "/")
     test_scaled <- sweep(test_matrix, 2L, train_min, "-")
     test_scaled <- sweep(test_scaled, 2L, train_range, "/")
-    
+
     train_scaled <- as.data.frame(train_scaled, check.names = FALSE)
     test_scaled <- as.data.frame(test_scaled, check.names = FALSE)
-    
+
     list(train = train_scaled, test = test_scaled,
          minimum = train_min, range = train_range)
   }
-  
+
   .make_splits <- function() {
     all_index <- seq_len(n_obs)
-    
+
     if (!is.null(ts.test)) {
       possible <- floor((n_obs - 1L) / ts.test)
       if (possible < 1L) {
@@ -733,7 +733,7 @@ NNS.stack <- function(IVs.train,
       }
       return(out)
     }
-    
+
     # Historical compatibility: folds = 1 means one repeated holdout even when
     # CV.size is omitted. The original implementation drew a validation
     # fraction between 0.20 and 1/3, so retain that behavior under the local
@@ -742,7 +742,7 @@ NNS.stack <- function(IVs.train,
     if (is.null(holdout_size) && folds == 1L) {
       holdout_size <- round(stats::runif(1L, 0.20, 1 / 3), 3L)
     }
-    
+
     if (!is.null(holdout_size)) {
       out <- vector("list", folds)
       for (b in seq_len(folds)) {
@@ -770,7 +770,7 @@ NNS.stack <- function(IVs.train,
       }
       return(out)
     }
-    
+
     use_folds <- min(folds, n_obs)
     if (is_class) {
       class_counts <- table(y)
@@ -788,7 +788,7 @@ NNS.stack <- function(IVs.train,
       warning(sprintf("Cross-validation folds reduced to %d for the available data.",
                       use_folds), call. = FALSE)
     }
-    
+
     fold_id <- integer(n_obs)
     if (is_class) {
       groups <- split(all_index, y)
@@ -800,7 +800,7 @@ NNS.stack <- function(IVs.train,
       shuffled <- sample(all_index, n_obs, replace = FALSE)
       fold_id[shuffled] <- rep(seq_len(use_folds), length.out = n_obs)
     }
-    
+
     out <- lapply(seq_len(use_folds), function(b) {
       validation <- which(fold_id == b)
       training <- setdiff(all_index, validation)
@@ -817,13 +817,13 @@ NNS.stack <- function(IVs.train,
     }
     out
   }
-  
+
   splits <- .make_splits()
-  
+
   .coefficient_vector <- function(X, response) {
     X <- as.matrix(X)
     p <- ncol(X)
-    
+
     if (is.numeric(dim.red.method)) {
       coef <- as.numeric(dim.red.method)
       if (!is.null(names(dim.red.method))) {
@@ -842,7 +842,7 @@ NNS.stack <- function(IVs.train,
       coef[!is.finite(coef)] <- 0
       return(coef)
     }
-    
+
     cor_coef <- function() {
       out <- vapply(seq_len(p), function(j) {
         suppressWarnings(stats::cor(X[, j], response, method = "spearman"))
@@ -850,7 +850,7 @@ NNS.stack <- function(IVs.train,
       out[!is.finite(out)] <- 0
       out
     }
-    
+
     dep_coef <- function() {
       out <- vapply(seq_len(p), function(j) {
         tryCatch(
@@ -862,7 +862,7 @@ NNS.stack <- function(IVs.train,
       out[!is.finite(out)] <- 0
       out
     }
-    
+
     caus_coef <- function() {
       tau_value <- if (is.null(ts.test)) "cs" else "ts"
       out <- vapply(seq_len(p), function(j) {
@@ -875,7 +875,7 @@ NNS.stack <- function(IVs.train,
       out[!is.finite(out)] <- 0
       out
     }
-    
+
     coef <- switch(
       dim.red.method,
       "cor" = cor_coef(),
@@ -885,16 +885,16 @@ NNS.stack <- function(IVs.train,
       "all" = rowMeans(cbind(caus_coef(), dep_coef(), cor_coef(), rep(1, p))),
       stop("Unsupported [dim.red.method].", call. = FALSE)
     )
-    
+
     coef[!is.finite(coef)] <- 0
     if (!any(abs(coef) > 0)) coef <- rep(1, p)
     coef
   }
-  
+
   .active_coefficients <- function(coef, count) {
     coef <- as.numeric(coef)
     count <- max(1L, min(as.integer(count), length(coef)))
-    ord <- order(abs(coef), decreasing = TRUE, na.last = NA)
+    ord <- order(abs(coef), decreasing = TRUE, na.last = NA, method = "radix")
     active <- ord[seq_len(min(count, length(ord)))]
     out <- rep(0, length(coef))
     out[active] <- coef[active]
@@ -903,7 +903,7 @@ NNS.stack <- function(IVs.train,
     }
     out
   }
-  
+
   .project_xstar <- function(train_design, test_design, coef) {
     denom <- sum(abs(coef) > 0)
     if (denom < 1L) stop("No active dimension-reduction coefficients.",
@@ -913,28 +913,44 @@ NNS.stack <- function(IVs.train,
       test = as.numeric(as.matrix(test_design) %*% coef / denom)
     )
   }
-  
+
+  .xstar_path <- function(train_design, test_design, coef) {
+    ord <- order(abs(coef), decreasing = TRUE, na.last = NA, method = "radix")
+    if (isTRUE(getOption("NNS.native.stack", TRUE))) {
+      tryCatch(NNS_xstar_path_cpp(as.matrix(train_design), as.matrix(test_design),
+                                  as.numeric(coef), as.integer(ord), as.integer(ncores)),
+               error = function(e) NULL)
+    } else NULL
+  }
+
   .fit_univariate_raw <- function(train_x, train_y_fit, test_x,
                                   confidence.interval = NULL,
                                   point.only = TRUE,
                                   allow_failure = FALSE) {
     fit <- tryCatch(
-      suppressWarnings(
-        NNS.reg(
-          as.numeric(train_x),
-          as.numeric(train_y_fit),
-          point.est = as.numeric(test_x),
-          plot = FALSE,
-          residual.plot = FALSE,
-          order = order,
-          type = NULL,
-          factor.2.dummy = FALSE,
-          dist = dist,
-          ncores = ncores,
-          point.only = point.only,
-          confidence.interval = confidence.interval
-        )
-      ),
+      suppressWarnings({
+        if (point.only && isTRUE(getOption("NNS.native.univariate", TRUE))) {
+          fast <- .nns_reg_univariate_fast(as.numeric(train_x), as.numeric(train_y_fit),
+                                           as.numeric(test_x), order = order,
+                                           noise.reduction = "off", is.class = FALSE)
+          list(Point.est = fast$prediction)
+        } else {
+          NNS.reg(
+            as.numeric(train_x),
+            as.numeric(train_y_fit),
+            point.est = as.numeric(test_x),
+            plot = FALSE,
+            residual.plot = FALSE,
+            order = order,
+            type = NULL,
+            factor.2.dummy = FALSE,
+            dist = dist,
+            ncores = ncores,
+            point.only = point.only,
+            confidence.interval = confidence.interval
+          )
+        }
+      }),
       error = function(e) {
         if (allow_failure) return(NULL)
         stop(e)
@@ -947,8 +963,8 @@ NNS.stack <- function(IVs.train,
                          train_y_fit - response_offset)
     list(raw = raw, fit = fit)
   }
-  
-  
+
+
   # Score every k with exactly the estimator the final NNS.reg fit uses:
   # NNS_mreg_predict_path_cpp implements the repaired multivariate prediction
   # rule (range-normalized metric, stable ties, ensemble weights) for
@@ -970,10 +986,18 @@ NNS.stack <- function(IVs.train,
     maximums <- vapply(train_design, max, numeric(1L))
     dist_code <- match(dist, c("L2", "L1", "FACTOR")) - 1L
 
-    path <- NNS_mreg_predict_path_cpp(
-      rpm_x, as.numeric(rpm$y.hat), test_matrix, as.integer(kmax),
-      dist_code, as.numeric(minimums), as.numeric(maximums), FALSE
-    )
+    path <- if (isTRUE(getOption("NNS.native.stack", TRUE))) {
+      NNS_mreg_predict_path_v2_cpp(
+        rpm_x, as.numeric(rpm$y.hat), test_matrix, as.integer(kmax),
+        dist_code, as.numeric(minimums), as.numeric(maximums), FALSE,
+        as.integer(ncores)
+      )
+    } else {
+      NNS_mreg_predict_path_cpp(
+        rpm_x, as.numeric(rpm$y.hat), test_matrix, as.integer(kmax),
+        dist_code, as.numeric(minimums), as.numeric(maximums), FALSE
+      )
+    }
     if (nrow(path) != nrow(test_matrix)) {
       stop("The production distance path returned an invalid row count.",
            call. = FALSE)
@@ -995,7 +1019,7 @@ NNS.stack <- function(IVs.train,
          threshold = evaluation$threshold,
          raw = raw)
   }
-  
+
   .select_best <- function(scores) {
     valid <- which(is.finite(scores))
     if (!length(valid)) {
@@ -1010,11 +1034,11 @@ NNS.stack <- function(IVs.train,
     tied <- valid[scores[valid] == best_value]
     as.integer(tied[ceiling(length(tied) / 2)])
   }
-  
+
   # Full-data encoded design establishes the fixed encoded column domain.
   full_design <- .numeric_design(x, z)
   encoded_p <- ncol(full_design$train)
-  
+
   if (2L %in% method && is.numeric(dim.red.method) &&
       is.null(names(dim.red.method)) && length(dim.red.method) != encoded_p) {
     stop(sprintf(
@@ -1022,11 +1046,11 @@ NNS.stack <- function(IVs.train,
       encoded_p
     ), call. = FALSE)
   }
-  
+
   # -------------------------------------------------------------------------
   # Method 2: select active dimension count from OOF predictions
   # -------------------------------------------------------------------------
-  
+
   dim_best_count <- NA_integer_
   dim_best_score <- NA_real_
   dim_component_threshold <- 0.5
@@ -1035,11 +1059,11 @@ NNS.stack <- function(IVs.train,
   dim_full_coef <- NULL
   dim_full_xstar_train <- NULL
   dim_full_xstar_test <- NULL
-  
+
   if (2L %in% method) {
     dim_sum <- matrix(0, nrow = n_obs, ncol = encoded_p)
     dim_count <- matrix(0L, nrow = n_obs, ncol = encoded_p)
-    
+
     for (b in seq_along(splits)) {
       split <- splits[[b]]
       train_idx <- split$train
@@ -1050,41 +1074,43 @@ NNS.stack <- function(IVs.train,
       )
       coef_fold <- .coefficient_vector(fold_design$train, y[train_idx])
       balanced_idx <- .balance_indices(y[train_idx])
-      
+
+      if (status) message(sprintf("Method 2 fold %d/%d: generating %d cumulative projections", b, length(splits), encoded_p))
+      native_path <- .xstar_path(fold_design$train, fold_design$test, coef_fold)
+      representatives <- if (!is.null(native_path)) as.integer(native_path$representative) else seq_len(encoded_p)
+      unique_candidates <- unique(representatives)
+      if (status) message(sprintf("Method 2 fold %d/%d: evaluating %d unique candidates", b, length(splits), length(unique_candidates)))
+      candidate_raw <- vector("list", encoded_p)
+      for (m in unique_candidates) {
+        if (!is.null(native_path)) {
+          projected <- list(train = native_path$train[, m], test = native_path$test[, m])
+        } else {
+          active_coef <- .active_coefficients(coef_fold, m)
+          projected <- .project_xstar(fold_design$train, fold_design$test, active_coef)
+        }
+        fit <- .fit_univariate_raw(projected$train[balanced_idx],
+                                   y_fit_all[train_idx][balanced_idx],
+                                   projected$test,
+                                   point.only = TRUE,
+                                   allow_failure = TRUE)
+        candidate_raw[[m]] <- fit$raw
+      }
       for (m in seq_len(encoded_p)) {
-        active_coef <- .active_coefficients(coef_fold, m)
-        projected <- .project_xstar(
-          fold_design$train,
-          fold_design$test,
-          active_coef
-        )
-        fit <- .fit_univariate_raw(
-          projected$train[balanced_idx],
-          y_fit_all[train_idx][balanced_idx],
-          projected$test,
-          point.only = TRUE,
-          allow_failure = TRUE
-        )
-        good <- is.finite(fit$raw)
+        raw <- candidate_raw[[representatives[m]]]
+        good <- is.finite(raw)
         if (any(good)) {
           rows <- valid_idx[good]
-          dim_sum[rows, m] <- dim_sum[rows, m] + fit$raw[good]
+          dim_sum[rows, m] <- dim_sum[rows, m] + raw[good]
           dim_count[rows, m] <- dim_count[rows, m] + 1L
         }
       }
-      
-      if (status) {
-        message(sprintf(
-          "Dimension-reduction folds remaining = %d",
-          length(splits) - b
-        ))
-      }
+      if (status) message(sprintf("Method 2 fold %d/%d complete", b, length(splits)))
     }
-    
+
     dim_scores <- rep(NA_real_, encoded_p)
     dim_thresholds <- rep(0.5, encoded_p)
     dim_raw_candidates <- vector("list", encoded_p)
-    
+
     for (m in seq_len(encoded_p)) {
       candidate <- .candidate_from_oof(dim_sum, dim_count, m)
       dim_scores[m] <- candidate$score
@@ -1101,23 +1127,30 @@ NNS.stack <- function(IVs.train,
         ))
       }
     }
-    
+
     dim_best_count <- .select_best(dim_scores)
     dim_best_score <- dim_scores[dim_best_count]
     dim_component_threshold <- dim_thresholds[dim_best_count]
     dim_oof_raw <- dim_raw_candidates[[dim_best_count]]
-    
+
     dim_full_coef_original <- .coefficient_vector(full_design$train, y)
     dim_full_coef <- .active_coefficients(dim_full_coef_original,
                                           dim_best_count)
-    dim_full_projection <- .project_xstar(
-      full_design$train,
-      full_design$test,
-      dim_full_coef
-    )
-    dim_full_xstar_train <- dim_full_projection$train
-    dim_full_xstar_test <- dim_full_projection$test
-    
+    dim_full_projection <- .xstar_path(full_design$train, full_design$test,
+                                       dim_full_coef)
+    if (is.null(dim_full_projection)) {
+      dim_full_projection <- .project_xstar(
+        full_design$train,
+        full_design$test,
+        dim_full_coef
+      )
+      dim_full_xstar_train <- dim_full_projection$train
+      dim_full_xstar_test <- dim_full_projection$test
+    } else {
+      dim_full_xstar_train <- dim_full_projection$train[, dim_best_count]
+      dim_full_xstar_test <- dim_full_projection$test[, dim_best_count]
+    }
+
     active_magnitudes <- abs(dim_full_coef[abs(dim_full_coef) > 0])
     dim_threshold_report <- if (dim_best_count >= length(dim_full_coef)) {
       0
@@ -1128,22 +1161,22 @@ NNS.stack <- function(IVs.train,
     }
     if (!is.finite(dim_threshold_report)) dim_threshold_report <- 0
   }
-  
+
   # -------------------------------------------------------------------------
   # Method 1: use production RPM and production distance path for every k
   # -------------------------------------------------------------------------
-  
+
   reg_best_k <- NA_integer_
   reg_best_score <- NA_real_
   reg_component_threshold <- 0.5
   reg_oof_raw <- rep(NA_real_, n_obs)
-  
+
   .method1_design_for_split <- function(train_idx, valid_idx) {
     fold_design <- .numeric_design(
       x[train_idx, , drop = FALSE],
       x[valid_idx, , drop = FALSE]
     )
-    
+
     if (stack && 2L %in% method) {
       coef_fold <- .coefficient_vector(fold_design$train, y[train_idx])
       active_coef <- .active_coefficients(coef_fold, dim_best_count)
@@ -1164,21 +1197,22 @@ NNS.stack <- function(IVs.train,
       list(train = fold_design$train, test = fold_design$test)
     }
   }
-  
+
   if (1L %in% method) {
     fold_paths <- vector("list", length(splits))
     fold_kmax <- integer(length(splits))
-    
+
     for (b in seq_along(splits)) {
       split <- splits[[b]]
       train_idx <- split$train
       valid_idx <- split$validation
+      if (status) message(sprintf("Method 1 fold %d/%d: preparing fold design", b, length(splits)))
       design <- .method1_design_for_split(train_idx, valid_idx)
       balanced_idx <- .balance_indices(y[train_idx])
       train_design <- design$train[balanced_idx, , drop = FALSE]
       train_y_fit <- y_fit_all[train_idx][balanced_idx]
       valid_design <- design$test
-      
+
       if (ncol(train_design) == 1L) {
         direct <- .fit_univariate_raw(
           train_design[[1L]],
@@ -1189,58 +1223,38 @@ NNS.stack <- function(IVs.train,
         )
         path <- matrix(direct$raw, ncol = 1L)
       } else {
-        setup <- suppressWarnings(
-          NNS.reg(
-            train_design,
-            train_y_fit,
-            point.est = NULL,
-            plot = FALSE,
-            residual.plot = FALSE,
-            order = order,
-            type = NULL,
-            factor.2.dummy = FALSE,
-            dist = dist,
-            ncores = ncores,
-            point.only = FALSE
-          )
-        )
-        
+        if (status) message(sprintf("Method 1 fold %d/%d: building partitions", b, length(splits)))
+        setup <- .nns_mreg_prepare_model(train_design, train_y_fit, order = order,
+                                         noise.reduction = "off", is.class = FALSE,
+                                         use.native = isTRUE(getOption("NNS.native.mreg", TRUE)))
         rpm <- setup$RPM
-        if (is.null(rpm) || !is.data.frame(rpm) || nrow(rpm) < 1L ||
-            !"y.hat" %in% names(rpm)) {
-          stop("NNS.reg did not return a usable regression-point matrix.",
-               call. = FALSE)
+        if (is.null(rpm) || !is.data.frame(rpm) || nrow(rpm) < 1L || !"y.hat" %in% names(rpm)) {
+          stop("NNS.reg did not return a usable regression-point matrix.", call. = FALSE)
         }
-        
-        path <- .production_multivariate_path(
-          rpm = rpm,
-          Xtest = valid_design,
-          train_design = train_design
-        )
+        if (status) message(sprintf("Method 1 fold %d/%d: RPM rows = %d; validation rows = %d", b, length(splits), nrow(rpm), length(valid_idx)))
+        if (status) message(sprintf("Method 1 fold %d/%d: evaluating k = 1...%d", b, length(splits), nrow(rpm)))
+        path <- .production_multivariate_path(rpm = rpm, Xtest = valid_design, train_design = train_design)
         path <- path - response_offset
         for (k in seq_len(ncol(path))) {
           path[, k] <- .sanitize_raw(path[, k], y[train_idx])
         }
       }
-      
+
       fold_paths[[b]] <- list(path = path, validation = valid_idx)
       fold_kmax[b] <- ncol(path)
-      
-      if (status) {
-        message(sprintf("Method 1 folds remaining = %d",
-                        length(splits) - b))
-      }
+
+      if (status) message(sprintf("Method 1 fold %d/%d complete", b, length(splits)))
     }
-    
+
     common_kmax <- min(fold_kmax)
     if (!is.finite(common_kmax) || common_kmax < 1L) {
       stop("No common n.best candidate was available across folds.",
            call. = FALSE)
     }
-    
+
     reg_sum <- matrix(0, nrow = n_obs, ncol = common_kmax)
     reg_count <- matrix(0L, nrow = n_obs, ncol = common_kmax)
-    
+
     for (b in seq_along(fold_paths)) {
       valid_idx <- fold_paths[[b]]$validation
       path <- fold_paths[[b]]$path[, seq_len(common_kmax), drop = FALSE]
@@ -1253,11 +1267,11 @@ NNS.stack <- function(IVs.train,
         }
       }
     }
-    
+
     reg_scores <- rep(NA_real_, common_kmax)
     reg_thresholds <- rep(0.5, common_kmax)
     reg_raw_candidates <- vector("list", common_kmax)
-    
+
     for (k in seq_len(common_kmax)) {
       candidate <- .candidate_from_oof(reg_sum, reg_count, k)
       reg_scores[k] <- candidate$score
@@ -1274,20 +1288,20 @@ NNS.stack <- function(IVs.train,
         ))
       }
     }
-    
+
     reg_best_k <- .select_best(reg_scores)
     reg_best_score <- reg_scores[reg_best_k]
     reg_component_threshold <- reg_thresholds[reg_best_k]
     reg_oof_raw <- reg_raw_candidates[[reg_best_k]]
   }
-  
+
   # -------------------------------------------------------------------------
   # Optimize the actual OOF blend and its final classification threshold
   # -------------------------------------------------------------------------
-  
+
   component_weights <- c(reg = 0, dim.red = 0)
   probability.threshold <- if (is_class) 0.5 else 0.5
-  
+
   if (identical(method, 1L)) {
     component_weights["reg"] <- 1
     probability.threshold <- reg_component_threshold
@@ -1300,11 +1314,11 @@ NNS.stack <- function(IVs.train,
       stop("The two component models have no common finite OOF predictions.",
            call. = FALSE)
     }
-    
+
     weight_grid <- seq(0, 1, by = 0.01)
     blend_scores <- rep(NA_real_, length(weight_grid))
     blend_thresholds <- rep(0.5, length(weight_grid))
-    
+
     for (i in seq_along(weight_grid)) {
       w <- weight_grid[i]
       raw <- w * reg_oof_raw[valid] + (1 - w) * dim_oof_raw[valid]
@@ -1312,7 +1326,7 @@ NNS.stack <- function(IVs.train,
       blend_scores[i] <- evaluation$score
       blend_thresholds[i] <- evaluation$threshold
     }
-    
+
     valid_grid <- which(is.finite(blend_scores))
     if (!length(valid_grid)) {
       stop("No ensemble weight produced a finite OOF objective.",
@@ -1326,23 +1340,23 @@ NNS.stack <- function(IVs.train,
     tied <- valid_grid[blend_scores[valid_grid] == best_value]
     selected_index <- as.integer(tied[ceiling(length(tied) / 2)])
     selected_weight <- weight_grid[selected_index]
-    
+
     component_weights <- c(reg = selected_weight,
                            dim.red = 1 - selected_weight)
     probability.threshold <- blend_thresholds[selected_index]
   }
-  
+
   # -------------------------------------------------------------------------
   # Final production fits on complete training data
   # -------------------------------------------------------------------------
-  
+
   if (status) message("Generating final estimates")
-  
+
   reg_raw_final <- NULL
   reg_pred_int_raw <- NULL
   dim_raw_final <- NULL
   dim_pred_int_raw <- NULL
-  
+
   if (2L %in% method) {
     balanced_idx <- .balance_indices(y)
     dim_final_fit <- .fit_univariate_raw(
@@ -1355,7 +1369,7 @@ NNS.stack <- function(IVs.train,
     dim_raw_final <- dim_final_fit$raw
     dim_pred_int_raw <- .translate_interval(dim_final_fit$fit$pred.int)
   }
-  
+
   .method1_full_design <- function() {
     if (stack && 2L %in% method) {
       list(
@@ -1370,14 +1384,14 @@ NNS.stack <- function(IVs.train,
       list(train = full_design$train, test = full_design$test)
     }
   }
-  
+
   if (1L %in% method) {
     final_design <- .method1_full_design()
     balanced_idx <- .balance_indices(y)
     train_design <- final_design$train[balanced_idx, , drop = FALSE]
     train_y_fit <- y_fit_all[balanced_idx]
     test_design <- final_design$test
-    
+
     if (ncol(train_design) == 1L) {
       reg_final_fit <- .fit_univariate_raw(
         train_design[[1L]],
@@ -1413,7 +1427,7 @@ NNS.stack <- function(IVs.train,
       reg_pred_int_raw <- .translate_interval(reg_final_fit$pred.int)
     }
   }
-  
+
   # Component predictions retain their own OOF-optimized thresholds. The stack
   # uses the threshold optimized directly on the OOF weighted ensemble.
   if (is_class) {
@@ -1431,7 +1445,7 @@ NNS.stack <- function(IVs.train,
     reg_output <- if (!is.null(reg_raw_final)) reg_raw_final else NA_real_
     dim_output <- if (!is.null(dim_raw_final)) dim_raw_final else NA_real_
   }
-  
+
   if (identical(method, 1L)) {
     stacked_raw <- reg_raw_final
   } else if (identical(method, 2L)) {
@@ -1452,13 +1466,13 @@ NNS.stack <- function(IVs.train,
     stacked_raw <- component_weights["reg"] * reg_use +
       component_weights["dim.red"] * dim_use
   }
-  
+
   stacked_output <- if (is_class) {
     .decode_codes(.round_codes(stacked_raw, probability.threshold))
   } else {
     stacked_raw
   }
-  
+
   reg_pred_int <- if (is_class) {
     .decode_interval(reg_pred_int_raw, reg_component_threshold)
   } else {
@@ -1469,7 +1483,7 @@ NNS.stack <- function(IVs.train,
   } else {
     dim_pred_int_raw
   }
-  
+
   if (is.null(pred.int)) {
     stacked_pred_int_raw <- NULL
   } else if (identical(method, 1L)) {
@@ -1494,13 +1508,13 @@ NNS.stack <- function(IVs.train,
     )
     names(stacked_pred_int_raw) <- names(reg_pi)
   }
-  
+
   stacked_pred_int <- if (is_class) {
     .decode_interval(stacked_pred_int_raw, probability.threshold)
   } else {
     stacked_pred_int_raw
   }
-  
+
   result <- list(
     OBJfn.reg = reg_best_score,
     NNS.reg.n.best = reg_best_k,
@@ -1516,6 +1530,6 @@ NNS.stack <- function(IVs.train,
     weights = component_weights,
     class.levels = if (is_class) class_values else NULL
   )
-  
+
   .NNS.out(result)
 }

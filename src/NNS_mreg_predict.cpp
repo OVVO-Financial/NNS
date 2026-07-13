@@ -214,9 +214,87 @@ inline void active_columns(const NumericVector& mins, const NumericVector& maxs,
 
 }  // namespace
 
-// Prediction path for every k = 1..kmax under the same rule as
-// NNS_mreg_predict_cpp, so cross-validated n.best selection scores exactly
-// the estimator the final NNS.reg fit will use.
+
+inline void rank_components(int k, std::vector<double>& uniform,
+                            std::vector<double>& exponential,
+                            std::vector<double>& lognormal,
+                            std::vector<double>& power) {
+  uniform.assign(k, 1.0 / static_cast<double>(k));
+  exponential.resize(k); lognormal.assign(k, 0.0); power.resize(k);
+  const double kk = static_cast<double>(k);
+  for (int i = 0; i < k; ++i) exponential[i] = ::Rf_dexp(static_cast<double>(i + 1), kk, 0);
+  normalize_weights(exponential);
+  std::vector<double> ranks(k);
+  for (int i = 0; i < k; ++i) ranks[i] = static_cast<double>(i + 1);
+  const double rank_sd = sample_sd(ranks);
+  if (R_finite(rank_sd) && rank_sd > 0.0) {
+    for (int i = 0; i < k; ++i) lognormal[i] = std::fabs(::Rf_dlnorm(ranks[i], 0.0, rank_sd, 1));
+    normalize_weights(lognormal);
+    std::reverse(lognormal.begin(), lognormal.end());
+  }
+  for (int i = 0; i < k; ++i) { const double r = static_cast<double>(i + 1); power[i] = 1.0 / (r * r); }
+  normalize_weights(power);
+}
+
+inline double predict_sorted_k(const std::vector<double>& dk, const std::vector<double>& yk,
+                               int k, bool is_class,
+                               const std::vector<double>& uniform,
+                               const std::vector<double>& exponential,
+                               const std::vector<double>& lognormal,
+                               const std::vector<double>& power) {
+  std::vector<double> student(k), inverse(k), normal(k, 0.0), rbf(k, 0.0), total(k);
+  for (int i = 0; i < k; ++i) student[i] = ::Rf_dt(dk[i], static_cast<double>(k), 0);
+  normalize_weights(student);
+  for (int i = 0; i < k; ++i) inverse[i] = 1.0 / std::max(dk[i], 1e-12);
+  normalize_weights(inverse);
+  double mu = 0.0; for (int i = 0; i < k; ++i) mu += dk[i]; mu /= static_cast<double>(k);
+  double acc = 0.0; for (int i = 0; i < k; ++i) { double z = dk[i] - mu; acc += z*z; }
+  const double sd = (k > 1) ? std::sqrt(acc / static_cast<double>(k - 1)) : NA_REAL;
+  const double var = (R_finite(sd)) ? sd * sd : NA_REAL;
+  if (R_finite(sd) && sd > 0.0) { for (int i = 0; i < k; ++i) normal[i] = ::Rf_dnorm4(dk[i], 0.0, sd, 0); normalize_weights(normal); }
+  if (R_finite(var) && var > 0.0) { for (int i = 0; i < k; ++i) rbf[i] = std::exp(-dk[i] / (2.0 * var)); normalize_weights(rbf); }
+  for (int i = 0; i < k; ++i) total[i] = uniform[i] + student[i] + inverse[i] + exponential[i] + lognormal[i] + power[i] + normal[i] + rbf[i];
+  normalize_weights(total);
+  if (is_class) {
+    std::vector<double> yy(yk.begin(), yk.begin() + k);
+    return weighted_mode(yy, total);
+  }
+  double dot = 0.0; for (int i = 0; i < k; ++i) dot += yk[i] * total[i];
+  return dot;
+}
+
+// [[Rcpp::export]]
+NumericMatrix NNS_mreg_predict_path_v2_cpp(const NumericMatrix& rpm_x,
+                                           const NumericVector& yhat,
+                                           const NumericMatrix& Xtest,
+                                           int kmax,
+                                           int dist_code,
+                                           const NumericVector& mins,
+                                           const NumericVector& maxs,
+                                           bool is_class,
+                                           int nthreads) {
+  const int n = rpm_x.nrow(), p = rpm_x.ncol(), m = Xtest.nrow();
+  if (yhat.size() != n) stop("yhat length must equal nrow(rpm_x)");
+  if (Xtest.ncol() != p) stop("Xtest and rpm_x must have the same columns");
+  if (mins.size() != p || maxs.size() != p) stop("mins/maxs must have one value per column");
+  if (kmax < 1) stop("kmax must be >= 1");
+  if (kmax > n) kmax = n;
+  std::vector<int> active; std::vector<double> inv_range; active_columns(mins, maxs, active, inv_range);
+  std::vector< std::vector<double> > U(kmax+1), E(kmax+1), L(kmax+1), P(kmax+1);
+  for (int k=2; k<=kmax; ++k) rank_components(k, U[k], E[k], L[k], P[k]);
+  NumericMatrix out(m, kmax);
+  std::vector<double> d(n), dk(kmax), yk(kmax); std::vector<int> idx(n);
+  for (int r = 0; r < m; ++r) {
+    row_distances(rpm_x, Xtest, r, dist_code, active, inv_range, d);
+    for (int i = 0; i < n; ++i) idx[i] = i;
+    std::stable_sort(idx.begin(), idx.end(), [&d](int a, int b) { return d[a] < d[b]; });
+    for (int i = 0; i < kmax; ++i) { dk[i] = d[idx[i]]; yk[i] = yhat[idx[i]]; }
+    out(r,0) = aggregate_min_ties(d, yhat, is_class);
+    for (int k=2; k<=kmax; ++k) out(r,k-1) = predict_sorted_k(dk, yk, k, is_class, U[k], E[k], L[k], P[k]);
+  }
+  return out;
+}
+
 // [[Rcpp::export]]
 NumericMatrix NNS_mreg_predict_path_cpp(const NumericMatrix& rpm_x,
                                         const NumericVector& yhat,
@@ -226,49 +304,21 @@ NumericMatrix NNS_mreg_predict_path_cpp(const NumericMatrix& rpm_x,
                                         const NumericVector& mins,
                                         const NumericVector& maxs,
                                         bool is_class) {
-  const int n = rpm_x.nrow(), p = rpm_x.ncol(), m = Xtest.nrow();
-  if (yhat.size() != n) stop("yhat length must equal nrow(rpm_x)");
-  if (Xtest.ncol() != p) stop("Xtest and rpm_x must have the same columns");
-  if (mins.size() != p || maxs.size() != p) stop("mins/maxs must have one value per column");
-  if (kmax < 1) stop("kmax must be >= 1");
-  if (kmax > n) kmax = n;
+  return NNS_mreg_predict_path_v2_cpp(rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class, 1);
+}
 
-  std::vector<int> active;
-  std::vector<double> inv_range;
-  active_columns(mins, maxs, active, inv_range);
-
-  NumericMatrix out(m, kmax);
-  std::vector<double> d(n);
-  std::vector<int> idx(n);
-
-  for (int r = 0; r < m; ++r) {
-    row_distances(rpm_x, Xtest, r, dist_code, active, inv_range, d);
-
-    for (int i = 0; i < n; ++i) idx[i] = i;
-    std::stable_sort(idx.begin(), idx.end(),
-                     [&d](int a, int b) { return d[a] < d[b]; });
-
-    std::vector<double> dk(kmax), yk(kmax);
-    for (int i = 0; i < kmax; ++i) {
-      dk[i] = d[idx[i]];
-      yk[i] = yhat[idx[i]];
-    }
-
-    out(r, 0) = aggregate_min_ties(d, yhat, is_class);
-    for (int k = 2; k <= kmax; ++k) {
-      const std::vector<double> dsub(dk.begin(), dk.begin() + k);
-      const std::vector<double> w = ensemble_weights(dsub);
-      if (is_class) {
-        const std::vector<double> ysub(yk.begin(), yk.begin() + k);
-        out(r, k - 1) = weighted_mode(ysub, w);
-      } else {
-        double dot = 0.0;
-        for (int i = 0; i < k; ++i) dot += yk[i] * w[i];
-        out(r, k - 1) = dot;
-      }
-    }
-  }
-  return out;
+// [[Rcpp::export]]
+NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x,
+                                      const NumericVector& yhat,
+                                      const NumericMatrix& Xtest,
+                                      int k,
+                                      int dist_code,
+                                      const NumericVector& mins,
+                                      const NumericVector& maxs,
+                                      bool is_class,
+                                      int nthreads) {
+  NumericMatrix path = NNS_mreg_predict_path_v2_cpp(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads);
+  return path(_, k - 1);
 }
 
 // dist_code: 0 = L2, 1 = L1, 2 = FACTOR (Hamming over encoded columns).
