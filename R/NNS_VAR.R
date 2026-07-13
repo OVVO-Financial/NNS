@@ -412,9 +412,11 @@ NNS.VAR <- function(variables,
     IV <- lagged_new_values_train[, -i]
     DV <- lagged_new_values_train[, i]
     
-    ts <- 2*h
-    ts <- max(ts, .2*length(DV))
-    
+    # ts.test must be a whole number: NNS.stack now validates it as an integer
+    # >= 1, so round the 0.2 * length(DV) floor up rather than passing the raw
+    # fractional value through.
+    ts <- max(2 * h, ceiling(.2 * length(DV)))
+
     # Dimension reduction NNS.reg to reduce variables
     .run_var_stack <- function(stack_obj_fn, stack_objective) {
       NNS.stack(IVs.train = IV,
