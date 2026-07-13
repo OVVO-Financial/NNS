@@ -163,7 +163,11 @@ NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NUL
     central.points <- apply(REGRESSION.POINT.MATRIX[, 1:n, drop = FALSE], 2, gravity)
     
     predict.fit <- numeric()
-    outsiders <- point.est < minimums | point.est > maximums
+    # Compare each column against its own bound: direct matrix < vector
+    # comparison recycles the length-n bounds down the rows (column-major),
+    # misaligning the mask whenever point.est has more than one row.
+    point.est_matrix <- as.matrix(point.est)
+    outsiders <- sweep(point.est_matrix, 2, minimums, "<") | sweep(point.est_matrix, 2, maximums, ">")
     outsiders[is.na(outsiders)] <- 0
     
     # Single point estimation
