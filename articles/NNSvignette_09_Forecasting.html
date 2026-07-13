@@ -182,7 +182,7 @@ generates the same output.</p>
 <p><img src="NNSvignette_09_Forecasting_files/figure-html/best%20nonlinear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 18.1809</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 18.07676</span></span></code></pre>
 <p><strong>Note:</strong> You may experience instances with monthly data
 that report <code>seasonal.factor</code> close to multiples of 3, 4, 6
 or 12. For instance, if the reported

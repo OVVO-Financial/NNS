@@ -609,10 +609,10 @@ conditional dependence)</li>
 <span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_train</span>, y <span class="op">=</span> <span class="va">y_train</span>, order <span class="op">=</span> <span class="cn">NULL</span>, point.est <span class="op">=</span> <span class="va">x_test</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_01_Overview_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 0.9276761</span></span>
+<span><span class="co">## [1] 0.9270126</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $SE</span></span>
-<span><span class="co">## [1] 0.2015258</span></span>
+<span><span class="co">## [1] 0.2014571</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Prediction.Accuracy</span></span>
 <span><span class="co">## NULL</span></span>
@@ -625,30 +625,30 @@ conditional dependence)</li>
 <span><span class="co">## </span></span>
 <span><span class="co">## $derivative</span></span>
 <span><span class="co">##   Coefficient X.Lower.Range X.Upper.Range</span></span>
-<span><span class="co">## 2   3.0485215     -1.998139     -1.934371</span></span>
-<span><span class="co">## 3   3.5169373     -1.934371     -1.804387</span></span>
-<span><span class="co">## 4   1.8605016     -1.804387     -1.692769</span></span>
-<span><span class="co">## 5   0.6783073     -1.692769     -1.590916</span></span>
-<span><span class="co">## 6   0.4272848     -1.590916     -1.465816</span></span>
-<span><span class="co">## 7  -0.5144026     -1.465816     -1.376465</span></span>
+<span><span class="co">## 1   2.5013241     -1.998139     -1.934371</span></span>
+<span><span class="co">## 2   3.5169373     -1.934371     -1.804387</span></span>
+<span><span class="co">## 3   1.8605016     -1.804387     -1.692769</span></span>
+<span><span class="co">## 4   0.6783073     -1.692769     -1.590916</span></span>
+<span><span class="co">## 5   0.4272848     -1.590916     -1.465816</span></span>
+<span><span class="co">## 6  -0.5144026     -1.465816     -1.376465</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">## 30  -1.5047059      1.218812      1.279774</span></span>
-<span><span class="co">## 31  -1.5723118      1.279774      1.445980</span></span>
-<span><span class="co">## 32   0.1804598      1.445980      1.571629</span></span>
-<span><span class="co">## 33   0.8726461      1.571629      1.689537</span></span>
-<span><span class="co">## 34   3.4198918      1.689537      1.860999</span></span>
-<span><span class="co">## 35   1.5206901      1.860999      1.997618</span></span>
-<span><span class="co">## --- [ 34 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## 28  -1.5047059      1.218812      1.279774</span></span>
+<span><span class="co">## 29  -1.5723118      1.279774      1.445980</span></span>
+<span><span class="co">## 30   0.1804598      1.445980      1.571629</span></span>
+<span><span class="co">## 31   0.8726461      1.571629      1.689537</span></span>
+<span><span class="co">## 32   3.4198918      1.689537      1.860999</span></span>
+<span><span class="co">## 33   1.4928388      1.860999      1.997618</span></span>
+<span><span class="co">## --- [ 33 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
-<span><span class="co">##   [1]  0.01571202  0.10442684  0.23470933  0.37680781  0.51890629  0.65039140</span></span>
+<span><span class="co">##   [1]  0.01716652  0.11823012  0.23470933  0.37680781  0.51890629  0.65039140</span></span>
 <span><span class="co">##   [7]  0.72556318  0.80073496  0.85698998  0.88439634  0.91180269  0.93033285</span></span>
 <span><span class="co">##  [13]  0.94759688  0.96486091  0.95248720  0.93170326  0.87827479  0.79996720</span></span>
 <span><span class="co">##  [19]  0.72165961  0.64335202  0.52449573  0.40285499  0.28121424  0.17901835</span></span>
 <span><span class="co">##  [25]  0.07715655 -0.02470525 -0.15949123 -0.31038828 -0.45880078 -0.54309006</span></span>
 <span><span class="co">##  [31] -0.62737935 -0.71234468 -0.80041101 -0.88847734 -0.96331853 -1.00089554</span></span>
 <span><span class="co">##  [37] -1.03847254 -1.02090671 -0.97905116 -0.93719561 -0.89956805 -0.86273975</span></span>
-<span><span class="co">##  [43] -0.79660165 -0.70265879 -0.60871593 -0.51288396 -0.38856404 -0.25667590</span></span>
+<span><span class="co">##  [43] -0.79660165 -0.70265879 -0.60871593 -0.51258327 -0.38342834 -0.25427341</span></span>
 <span><span class="co">##  [49] -0.11829230  0.02443074  0.13442845  0.22276171  0.31109496  0.42473203</span></span>
 <span><span class="co">##  [55]  0.56535922  0.69718932  0.76992246  0.84265560  0.90432326  0.91359751</span></span>
 <span><span class="co">##  [61]  0.92287175  0.93214599  0.94142023  0.92794242  0.90521445  0.88248648</span></span>
@@ -657,59 +657,49 @@ conditional dependence)</li>
 <span><span class="co">##  [79] -0.44464525 -0.56433232 -0.66432673 -0.72512293 -0.78817431 -0.85170206</span></span>
 <span><span class="co">##  [85] -0.91522981 -0.97875756 -0.99186193 -0.98457062 -0.97727932 -0.95314667</span></span>
 <span><span class="co">##  [91] -0.91788824 -0.88262981 -0.77697785 -0.63880041 -0.50062296 -0.36244551</span></span>
-<span><span class="co">##  [97] -0.25805231 -0.19661029 -0.13516826 -0.07526941</span></span>
+<span><span class="co">##  [97] -0.25854775 -0.19823103 -0.13791431 -0.07759759</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $pred.int</span></span>
 <span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $regression.points</span></span>
-<span><span class="co">##           x           y</span></span>
-<span><span class="co">## 1 -1.998139 -0.01307124</span></span>
-<span><span class="co">## 2 -1.934371  0.18132707</span></span>
-<span><span class="co">## 3 -1.804387  0.63847051</span></span>
-<span><span class="co">## 4 -1.692769  0.84613612</span></span>
-<span><span class="co">## 5 -1.590916  0.91522399</span></span>
-<span><span class="co">## 6 -1.465816  0.96867700</span></span>
+<span><span class="co">##           x          y</span></span>
+<span><span class="co">## 1 -1.998139 0.02182248</span></span>
+<span><span class="co">## 2 -1.934371 0.18132707</span></span>
+<span><span class="co">## 3 -1.804387 0.63847051</span></span>
+<span><span class="co">## 4 -1.692769 0.84613612</span></span>
+<span><span class="co">## 5 -1.590916 0.91522399</span></span>
+<span><span class="co">## 6 -1.465816 0.96867700</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">## 30 1.279774 -0.73572553</span></span>
-<span><span class="co">## 31 1.445980 -0.99705336</span></span>
-<span><span class="co">## 32 1.571629 -0.97437872</span></span>
-<span><span class="co">## 33 1.689537 -0.87148709</span></span>
-<span><span class="co">## 34 1.860999 -0.28510334</span></span>
-<span><span class="co">## 35 1.997618 -0.07734835</span></span>
-<span><span class="co">## --- [ 35 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">##           x           y</span></span>
+<span><span class="co">## 29 1.279774 -0.73572553</span></span>
+<span><span class="co">## 30 1.445980 -0.99705336</span></span>
+<span><span class="co">## 31 1.571629 -0.97437872</span></span>
+<span><span class="co">## 32 1.689537 -0.87148709</span></span>
+<span><span class="co">## 33 1.860999 -0.28510334</span></span>
+<span><span class="co">## 34 1.997618 -0.08115337</span></span>
+<span><span class="co">## --- [ 34 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Fitted.xy</span></span>
-<span><span class="co">##            x          y      y.hat  NNS.ID   gradient   residuals</span></span>
-<span><span class="co">## 1 -0.8496899 -0.5752368 -0.4984314 q121122 -2.0861598  0.07680538</span></span>
-<span><span class="co">## 2  1.1532205 -0.6617217 -0.4496971 q221122 -2.9622550  0.21202465</span></span>
-<span><span class="co">## 3 -0.3640923 -0.7048691 -0.8815695 q122122  0.9115004 -0.17670040</span></span>
-<span><span class="co">## 4  1.5320696 -0.8447168 -0.9815176 q222121  0.1804598 -0.13680080</span></span>
-<span><span class="co">## 5  1.7618691 -0.9820881 -0.6241175 q222212  3.4198918  0.35797057</span></span>
-<span><span class="co">## 6 -1.8177740  0.5226887  0.5913898 q111121  3.5169373  0.06870110</span></span>
-<span><span class="co">##   standard.errors</span></span>
-<span><span class="co">## 1       0.1769692</span></span>
-<span><span class="co">## 2       0.1783713</span></span>
-<span><span class="co">## 3       0.1905081</span></span>
-<span><span class="co">## 4       0.2044300</span></span>
-<span><span class="co">## 5       0.2636784</span></span>
-<span><span class="co">## 6       0.2228958</span></span>
+<span><span class="co">##            x          y      y.hat NNS.ID   gradient   residuals</span></span>
+<span><span class="co">## 1 -0.8496899 -0.5752368 -0.4984314     11 -2.0861598  0.07680538</span></span>
+<span><span class="co">## 2  1.1532205 -0.6617217 -0.4496971     27 -2.9622550  0.21202465</span></span>
+<span><span class="co">## 3 -0.3640923 -0.7048691 -0.8815695     15  0.9115004 -0.17670040</span></span>
+<span><span class="co">## 4  1.5320696 -0.8447168 -0.9815176     30  0.1804598 -0.13680080</span></span>
+<span><span class="co">## 5  1.7618691 -0.9820881 -0.6241175     32  3.4198918  0.35797057</span></span>
+<span><span class="co">## 6 -1.8177740  0.5226887  0.5913898      2  3.5169373  0.06870110</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##               x          y      y.hat  NNS.ID   gradient    residuals</span></span>
-<span><span class="co">## 995   0.2618615  0.5142993  0.7685458 q211222  1.8001452  0.254246501</span></span>
-<span><span class="co">## 996   1.3184955 -0.7988901 -0.7966085 q221222 -1.5723118  0.002281548</span></span>
-<span><span class="co">## 997   0.5684553  1.1554781  0.9150041 q212122 -0.5625172 -0.240473993</span></span>
-<span><span class="co">## 998  -0.4340050 -0.7748325 -0.9473089 q122121  1.0359249 -0.172476359</span></span>
-<span><span class="co">## 999   0.8383194  0.7041960  0.4257159 q212222 -2.4765129 -0.278480031</span></span>
-<span><span class="co">## 1000 -1.5647037  0.9467853  0.9264240 q111222  0.4272848 -0.020361366</span></span>
-<span><span class="co">##      standard.errors</span></span>
-<span><span class="co">## 995        0.2001082</span></span>
-<span><span class="co">## 996        0.1971693</span></span>
-<span><span class="co">## 997        0.2137362</span></span>
-<span><span class="co">## 998        0.1831159</span></span>
-<span><span class="co">## 999        0.2108312</span></span>
-<span><span class="co">## 1000       0.2078031</span></span>
-<span><span class="co">## --- [ 1000 rows x 7 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span></code></pre>
+<span><span class="co">##               x          y      y.hat NNS.ID   gradient    residuals</span></span>
+<span><span class="co">## 995   0.2618615  0.5142993  0.7685458     21  1.8001452  0.254246501</span></span>
+<span><span class="co">## 996   1.3184955 -0.7988901 -0.7966085     29 -1.5723118  0.002281548</span></span>
+<span><span class="co">## 997   0.5684553  1.1554781  0.9150041     23 -0.5625172 -0.240473993</span></span>
+<span><span class="co">## 998  -0.4340050 -0.7748325 -0.9473089     14  1.0359249 -0.172476359</span></span>
+<span><span class="co">## 999   0.8383194  0.7041960  0.4257159     25 -2.4765129 -0.278480031</span></span>
+<span><span class="co">## 1000 -1.5647037  0.9467853  0.9264240      5  0.4272848 -0.020361366</span></span>
+<span><span class="co">## --- [ 1000 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $class.levels</span></span>
+<span><span class="co">## NULL</span></span></code></pre>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simple train/test for boosting &amp; stacking</span></span>
 <span><span class="va">test.set</span> <span class="op">=</span> <span class="fl">141</span><span class="op">:</span><span class="fl">150</span></span>
@@ -806,15 +796,15 @@ drivers.</p>
 <span><span class="co">## [1] "CURRNET METHOD: nonlin"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.99141781480761"</span></span>
+<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.73918547303925"</span></span>
 <span><span class="co">## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.99141781480761"</span></span>
+<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.73918547303925"</span></span>
 <span><span class="co">## [1] "CURRNET METHOD: both"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.625552444253532"</span></span>
+<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.602793969000443"</span></span>
 <span><span class="co">## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.625552444253532"</span></span></code></pre>
+<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.602793969000443"</span></span></code></pre>
 <p><img src="NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $periods</span></span>
 <span><span class="co">## [1] 49 51 48 77 53 61 47 52 39</span></span>

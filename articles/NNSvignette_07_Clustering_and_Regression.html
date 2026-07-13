@@ -168,10 +168,10 @@ values provided below.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 0.9999858</span></span>
+<span><span class="co">## [1] 0.9999856</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $SE</span></span>
-<span><span class="co">## [1] 0.1822738</span></span>
+<span><span class="co">## [1] 0.18182</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Prediction.Accuracy</span></span>
 <span><span class="co">## NULL</span></span>
@@ -184,20 +184,20 @@ values provided below.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $derivative</span></span>
 <span><span class="co">##   Coefficient X.Lower.Range X.Upper.Range</span></span>
-<span><span class="co">## 2    74.25250     -5.000000     -4.975000</span></span>
-<span><span class="co">## 3    72.47650     -4.975000     -4.850000</span></span>
-<span><span class="co">## 4    68.69350     -4.850000     -4.725000</span></span>
-<span><span class="co">## 5    64.88657     -4.725000     -4.585417</span></span>
-<span><span class="co">## 6    61.01481     -4.585417     -4.425000</span></span>
-<span><span class="co">## 7    57.64629     -4.425000     -4.287500</span></span>
+<span><span class="co">## 1    74.25250     -5.000000     -4.975000</span></span>
+<span><span class="co">## 2    72.47650     -4.975000     -4.850000</span></span>
+<span><span class="co">## 3    68.69350     -4.850000     -4.725000</span></span>
+<span><span class="co">## 4    64.88657     -4.725000     -4.585417</span></span>
+<span><span class="co">## 5    61.01481     -4.585417     -4.425000</span></span>
+<span><span class="co">## 6    57.64629     -4.425000     -4.287500</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">## 62    42.67514      3.843750      4.062500</span></span>
-<span><span class="co">## 63    57.09308      4.062500      4.225000</span></span>
-<span><span class="co">## 64    55.24079      4.225000      4.343750</span></span>
-<span><span class="co">## 65    59.68593      4.343750      4.567158</span></span>
-<span><span class="co">## 66    66.33741      4.567158      4.830103</span></span>
-<span><span class="co">## 67    72.01977      4.830103      5.000000</span></span>
-<span><span class="co">## --- [ 66 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## 60    42.67514      3.843750      4.062500</span></span>
+<span><span class="co">## 61    57.09308      4.062500      4.225000</span></span>
+<span><span class="co">## 62    55.24079      4.225000      4.343750</span></span>
+<span><span class="co">## 63    59.68593      4.343750      4.567158</span></span>
+<span><span class="co">## 64    66.33741      4.567158      4.830103</span></span>
+<span><span class="co">## 65    72.01977      4.830103      5.000000</span></span>
+<span><span class="co">## --- [ 65 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
 <span><span class="co">## NULL</span></span>
@@ -215,31 +215,34 @@ values provided below.</p>
 <span><span class="co">## 6 -4.425000  -86.65256</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">##           x         y</span></span>
-<span><span class="co">## 62 4.062500  66.14919</span></span>
-<span><span class="co">## 63 4.225000  75.42681</span></span>
-<span><span class="co">## 64 4.343750  81.98666</span></span>
-<span><span class="co">## 65 4.567158  95.32100</span></span>
-<span><span class="co">## 66 4.830103 112.76406</span></span>
-<span><span class="co">## 67 5.000000 125.00000</span></span>
-<span><span class="co">## --- [ 67 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## 61 4.062500  66.14919</span></span>
+<span><span class="co">## 62 4.225000  75.42681</span></span>
+<span><span class="co">## 63 4.343750  81.98666</span></span>
+<span><span class="co">## 64 4.567158  95.32100</span></span>
+<span><span class="co">## 65 4.830103 112.76406</span></span>
+<span><span class="co">## 66 5.000000 125.00000</span></span>
+<span><span class="co">## --- [ 66 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Fitted.xy</span></span>
-<span><span class="co">##       x         y     y.hat   NNS.ID gradient residuals standard.errors</span></span>
-<span><span class="co">## 1 -5.00 -125.0000 -125.0000 q1111111  74.2525   0.00000      0.00000000</span></span>
-<span><span class="co">## 2 -4.95 -121.2874 -121.3318 q1111112  72.4765  -0.04440      0.07380015</span></span>
-<span><span class="co">## 3 -4.90 -117.6490 -117.7080 q1111121  72.4765  -0.05895      0.07380015</span></span>
-<span><span class="co">## 4 -4.85 -114.0841 -114.0841 q1111121  68.6935   0.00000      0.05069967</span></span>
-<span><span class="co">## 5 -4.80 -110.5920 -110.6495 q1111122  68.6935  -0.05745      0.05069967</span></span>
-<span><span class="co">## 6 -4.75 -107.1719 -107.2148 q1111211  68.6935  -0.04290      0.05069967</span></span>
+<span><span class="co">##       x         y     y.hat NNS.ID gradient residuals</span></span>
+<span><span class="co">## 1 -5.00 -125.0000 -125.0000      1  74.2525   0.00000</span></span>
+<span><span class="co">## 2 -4.95 -121.2874 -121.3318      2  72.4765  -0.04440</span></span>
+<span><span class="co">## 3 -4.90 -117.6490 -117.7080      2  72.4765  -0.05895</span></span>
+<span><span class="co">## 4 -4.85 -114.0841 -114.0841      3  68.6935   0.00000</span></span>
+<span><span class="co">## 5 -4.80 -110.5920 -110.6495      3  68.6935  -0.05745</span></span>
+<span><span class="co">## 6 -4.75 -107.1719 -107.2148      3  68.6935  -0.04290</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##        x        y    y.hat   NNS.ID gradient residuals standard.errors</span></span>
-<span><span class="co">## 196 4.75 107.1719 107.4502 q2222221 66.33741 0.2783568       0.2762022</span></span>
-<span><span class="co">## 197 4.80 110.5920 110.7671 q2222221 66.33741 0.1751022       0.2762022</span></span>
-<span><span class="co">## 198 4.85 114.0841 114.1970 q2222222 72.01977 0.1129090       0.1257231</span></span>
-<span><span class="co">## 199 4.90 117.6490 117.7980 q2222222 72.01977 0.1490227       0.1257231</span></span>
-<span><span class="co">## 200 4.95 121.2874 121.3990 q2222222 72.01977 0.1116363       0.1257231</span></span>
-<span><span class="co">## 201 5.00 125.0000 125.0000 q2222222 72.01977 0.0000000       0.1257231</span></span>
-<span><span class="co">## --- [ 201 rows x 7 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span></code></pre>
+<span><span class="co">##        x        y    y.hat NNS.ID gradient residuals</span></span>
+<span><span class="co">## 196 4.75 107.1719 107.4502     64 66.33741 0.2783568</span></span>
+<span><span class="co">## 197 4.80 110.5920 110.7671     64 66.33741 0.1751022</span></span>
+<span><span class="co">## 198 4.85 114.0841 114.1970     65 72.01977 0.1129090</span></span>
+<span><span class="co">## 199 4.90 117.6490 117.7980     65 72.01977 0.1490227</span></span>
+<span><span class="co">## 200 4.95 121.2874 121.3990     65 72.01977 0.1116363</span></span>
+<span><span class="co">## 201 5.00 125.0000 125.0000     65 72.01977 0.0000000</span></span>
+<span><span class="co">## --- [ 201 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $class.levels</span></span>
+<span><span class="co">## NULL</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="multivariate">Multivariate:<a class="anchor" aria-label="anchor" href="#multivariate"></a>
@@ -256,42 +259,43 @@ as well as the regression points (<code>$RPM</code>) and partitions
 <span><span class="va">g</span> <span class="op">=</span> <span class="fu">f</span><span class="op">(</span><span class="va">z</span><span class="op">[</span> , <span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span> , <span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">z</span>, <span class="va">g</span>, order <span class="op">=</span> <span class="st">"max"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 1</span></span>
+<span><span class="co">## [1] 0.9999804</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $rhs.partitions</span></span>
-<span><span class="co">##    Var1 Var2</span></span>
-<span><span class="co">## 1 -5.00   -5</span></span>
-<span><span class="co">## 2 -4.95   -5</span></span>
-<span><span class="co">## 3 -4.90   -5</span></span>
-<span><span class="co">## 4 -4.85   -5</span></span>
-<span><span class="co">## 5 -4.80   -5</span></span>
-<span><span class="co">## 6 -4.75   -5</span></span>
+<span><span class="co">##    Var1  Var2</span></span>
+<span><span class="co">## 1 -5.00 -5.00</span></span>
+<span><span class="co">## 2 -4.95 -4.95</span></span>
+<span><span class="co">## 3 -4.90 -4.90</span></span>
+<span><span class="co">## 4 -4.85 -4.85</span></span>
+<span><span class="co">## 5 -4.80 -4.80</span></span>
+<span><span class="co">## 6 -4.75 -4.75</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">## 40396 4.75    5</span></span>
-<span><span class="co">## 40397 4.80    5</span></span>
-<span><span class="co">## 40398 4.85    5</span></span>
-<span><span class="co">## 40399 4.90    5</span></span>
-<span><span class="co">## 40400 4.95    5</span></span>
-<span><span class="co">## 40401 5.00    5</span></span>
-<span><span class="co">## --- [ 40401 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">##     Var1 Var2</span></span>
+<span><span class="co">## 196 4.75 4.75</span></span>
+<span><span class="co">## 197 4.80 4.80</span></span>
+<span><span class="co">## 198 4.85 4.85</span></span>
+<span><span class="co">## 199 4.90 4.90</span></span>
+<span><span class="co">## 200 4.95 4.95</span></span>
+<span><span class="co">## 201 5.00 5.00</span></span>
+<span><span class="co">## --- [ 201 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $RPM</span></span>
-<span><span class="co">##   Var1  Var2         y.hat</span></span>
-<span><span class="co">## 1 -4.8 -4.80  7.105427e-15</span></span>
-<span><span class="co">## 2 -4.8 -2.55 -8.726063e+01</span></span>
-<span><span class="co">## 3 -4.8 -2.50 -8.806700e+01</span></span>
-<span><span class="co">## 4 -4.8 -2.45 -8.883587e+01</span></span>
-<span><span class="co">## 5 -4.8 -2.40 -8.956800e+01</span></span>
-<span><span class="co">## 6 -4.8 -2.35 -9.026413e+01</span></span>
+<span><span class="co">##   Var1  Var2      y.hat</span></span>
+<span><span class="co">## 1   -5 -5.00    0.00000</span></span>
+<span><span class="co">## 2   -5 -4.55  -29.45363</span></span>
+<span><span class="co">## 3   -5 -0.05 -110.14988</span></span>
+<span><span class="co">## 4   -5  0.00 -110.00000</span></span>
+<span><span class="co">## 5   -5  0.05 -109.85012</span></span>
+<span><span class="co">## 6   -5  0.10 -109.70100</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##       Var1  Var2        y.hat</span></span>
-<span><span class="co">## 40396 -2.6 -2.85 4.823125e+00</span></span>
-<span><span class="co">## 40397 -2.6 -2.80 3.776000e+00</span></span>
-<span><span class="co">## 40398 -2.6 -2.75 2.770875e+00</span></span>
-<span><span class="co">## 40399 -2.6 -2.70 1.807000e+00</span></span>
-<span><span class="co">## 40400 -2.6 -2.65 8.836250e-01</span></span>
-<span><span class="co">## 40401 -2.6 -2.60 1.776357e-15</span></span>
-<span><span class="co">## --- [ 40401 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">##       Var1  Var2     y.hat</span></span>
+<span><span class="co">## 39995 -0.1 -0.35 -0.708125</span></span>
+<span><span class="co">## 39996 -0.1 -0.30 -0.574000</span></span>
+<span><span class="co">## 39997 -0.1 -0.25 -0.435375</span></span>
+<span><span class="co">## 39998 -0.1 -0.20 -0.293000</span></span>
+<span><span class="co">## 39999 -0.1 -0.15 -0.147625</span></span>
+<span><span class="co">## 40000 -0.1 -0.10  0.000000</span></span>
+<span><span class="co">## --- [ 40000 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
 <span><span class="co">## NULL</span></span>
@@ -300,22 +304,28 @@ as well as the regression points (<code>$RPM</code>) and partitions
 <span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Fitted.xy</span></span>
-<span><span class="co">##    Var1 Var2         y     y.hat   NNS.ID residuals</span></span>
-<span><span class="co">## 1 -5.00   -5  0.000000  0.000000  201.201         0</span></span>
-<span><span class="co">## 2 -4.95   -5  3.562625  3.562625  402.201         0</span></span>
-<span><span class="co">## 3 -4.90   -5  7.051000  7.051000  603.201         0</span></span>
-<span><span class="co">## 4 -4.85   -5 10.465875 10.465875  804.201         0</span></span>
-<span><span class="co">## 5 -4.80   -5 13.808000 13.808000 1005.201         0</span></span>
-<span><span class="co">## 6 -4.75   -5 17.078125 17.078125 1206.201         0</span></span>
+<span><span class="co">##    Var1 Var2         y     y.hat NNS.ID residuals</span></span>
+<span><span class="co">## 1 -5.00   -5  0.000000  0.000000    1.1         0</span></span>
+<span><span class="co">## 2 -4.95   -5  3.562625  3.562625    2.1         0</span></span>
+<span><span class="co">## 3 -4.90   -5  7.051000  7.051000    3.1         0</span></span>
+<span><span class="co">## 4 -4.85   -5 10.465875 10.465875    4.1         0</span></span>
+<span><span class="co">## 5 -4.80   -5 13.808000 13.808000    5.1         0</span></span>
+<span><span class="co">## 6 -4.75   -5 17.078125 17.078125    6.1         0</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##       Var1 Var2          y      y.hat      NNS.ID residuals</span></span>
-<span><span class="co">## 40396 4.75    5 -17.078125 -17.078125 39396.40401         0</span></span>
-<span><span class="co">## 40397 4.80    5 -13.808000 -13.808000 39597.40401         0</span></span>
-<span><span class="co">## 40398 4.85    5 -10.465875 -10.465875 39798.40401         0</span></span>
-<span><span class="co">## 40399 4.90    5  -7.051000  -7.051000 39999.40401         0</span></span>
-<span><span class="co">## 40400 4.95    5  -3.562625  -3.562625 40200.40401         0</span></span>
-<span><span class="co">## 40401 5.00    5   0.000000   0.000000 40401.40401         0</span></span>
-<span><span class="co">## --- [ 40401 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span></code></pre>
+<span><span class="co">##       Var1 Var2          y       y.hat  NNS.ID  residuals</span></span>
+<span><span class="co">## 40396 4.75    5 -17.078125 -15.2968125 196.200  1.7813125</span></span>
+<span><span class="co">## 40397 4.80    5 -13.808000 -12.0266875 197.200  1.7813125</span></span>
+<span><span class="co">## 40398 4.85    5 -10.465875  -8.6845625 198.200  1.7813125</span></span>
+<span><span class="co">## 40399 4.90    5  -7.051000  -5.2696875 199.200  1.7813125</span></span>
+<span><span class="co">## 40400 4.95    5  -3.562625  -0.6679922 200.200  2.8946328</span></span>
+<span><span class="co">## 40401 5.00    5   0.000000  -0.6679922 200.200 -0.6679922</span></span>
+<span><span class="co">## --- [ 40401 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $n.best</span></span>
+<span><span class="co">## [1] 1</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $dist</span></span>
+<span><span class="co">## [1] "L2"</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="interextrapolation">Inter/Extrapolation<a class="anchor" aria-label="anchor" href="#interextrapolation"></a>
@@ -339,12 +349,12 @@ equation
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear_class-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">##                  Variable Coefficient</span></span>
-<span><span class="co">## Sepal.Length Sepal.Length   0.7980781</span></span>
-<span><span class="co">## Sepal.Width   Sepal.Width  -0.4402896</span></span>
-<span><span class="co">## Petal.Length Petal.Length   0.9354305</span></span>
-<span><span class="co">## Petal.Width   Petal.Width   0.9381792</span></span>
-<span><span class="co">## 1             DENOMINATOR   4.0000000</span></span></code></pre>
+<pre><code><span><span class="co">##       Variable Coefficient</span></span>
+<span><span class="co">## 1 Sepal.Length   0.7980781</span></span>
+<span><span class="co">## 2  Sepal.Width  -0.4402896</span></span>
+<span><span class="co">## 3 Petal.Length   0.9354305</span></span>
+<span><span class="co">## 4  Petal.Width   0.9381792</span></span>
+<span><span class="co">## 5  DENOMINATOR   4.0000000</span></span></code></pre>
 <p>Thus, our model for this regression would be:
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo>=</mo><mfrac><mrow><mn>0.798</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>−</mo><mn>0.44</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.935</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.938</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>4</mn></mfrac></mrow><annotation encoding="application/x-tex">Species = \frac{0.798*Sepal.Length -0.44*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{4} </annotation></semantics></math></p>
 <div class="section level4">
@@ -356,12 +366,12 @@ absolute value of required correlation.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, threshold <span class="op">=</span> <span class="fl">.75</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear%20class%20threshold-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">##                  Variable Coefficient</span></span>
-<span><span class="co">## Sepal.Length Sepal.Length   0.7980781</span></span>
-<span><span class="co">## Sepal.Width   Sepal.Width   0.0000000</span></span>
-<span><span class="co">## Petal.Length Petal.Length   0.9354305</span></span>
-<span><span class="co">## Petal.Width   Petal.Width   0.9381792</span></span>
-<span><span class="co">## 1             DENOMINATOR   3.0000000</span></span></code></pre>
+<pre><code><span><span class="co">##       Variable Coefficient</span></span>
+<span><span class="co">## 1 Sepal.Length   0.7980781</span></span>
+<span><span class="co">## 2  Sepal.Width   0.0000000</span></span>
+<span><span class="co">## 3 Petal.Length   0.9354305</span></span>
+<span><span class="co">## 4  Petal.Width   0.9381792</span></span>
+<span><span class="co">## 5  DENOMINATOR   3.0000000</span></span></code></pre>
 <p>Thus, our model for this further reduced dimension regression would
 be:
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo>=</mo><mfrac><mrow><mspace width="0.222em"></mspace><mn>0.798</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.935</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.938</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>3</mn></mfrac></mrow><annotation encoding="application/x-tex">Species = \frac{\: 0.798*Sepal.Length + 0*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{3} </annotation></semantics></math></p>
