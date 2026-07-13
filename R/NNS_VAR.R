@@ -117,10 +117,15 @@ NNS.VAR <- function(variables,
                     ncores = NULL,
                     nowcast = FALSE){
   
+  # Capture whether the built-in ratio objective is in force before anything
+  # touches obj.fn. Only then may NNS.VAR fall back to plain MSE when the
+  # co-movement denominator is degenerate for every candidate.
+  use_default_objective <- missing(obj.fn) && identical(objective, "min")
+
   oldw <- getOption("warn")
   options(warn = -1)
   on.exit(options(warn = oldw), add = TRUE)
-  
+
   dates <- NULL
   
   # ===================== Lag builder (robust names) =====================
@@ -308,10 +313,13 @@ NNS.VAR <- function(variables,
       variable_interpolation <- as.numeric(variables[, i])
       
     } else if (h_int > 0) {
-      # trailing NA(s): estimate them using NNS.stack on the index (as in original)
-      multi <- NNS.stack(cbind(selected_variable[,1], selected_variable[,1]), selected_variable[,2],
+      # trailing NA(s): estimate them using NNS.stack on the index (as in original).
+      # The index is duplicated into two identical predictors so the multivariate
+      # machinery has >1 column; strip cbind's auto-generated column names so the
+      # duplicate labels do not trip NNS.stack's unique-predictor-name guard.
+      multi <- NNS.stack(unname(cbind(selected_variable[,1], selected_variable[,1])), selected_variable[,2],
                          order = NULL, ncores = 1, status = FALSE, folds = 5,
-                         IVs.test = cbind(missing_index, missing_index), method = 1)$stack
+                         IVs.test = unname(cbind(missing_index, missing_index)), method = 1)$stack
       variable_interpolation[missing_index] <- as.numeric(multi)
       
     } else {
@@ -404,20 +412,41 @@ NNS.VAR <- function(variables,
     IV <- lagged_new_values_train[, -i]
     DV <- lagged_new_values_train[, i]
     
-    ts <- 2*h
-    ts <- max(ts, .2*length(DV))
-    
+    # ts.test must be a whole number: NNS.stack now validates it as an integer
+    # >= 1, so round the 0.2 * length(DV) floor up rather than passing the raw
+    # fractional value through.
+    ts <- max(2 * h, ceiling(.2 * length(DV)))
+
     # Dimension reduction NNS.reg to reduce variables
-    cor_threshold <- NNS.stack(IVs.train = IV,
-                               DV.train = DV,
-                               IVs.test = tail(IV, h),
-                               ts.test = ts, 
-                               folds = 1,
-                               obj.fn = obj.fn,
-                               objective = objective,
-                               method = c(1,2),
-                               dim.red.method = dim.red.method,
-                               order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+    .run_var_stack <- function(stack_obj_fn, stack_objective) {
+      NNS.stack(IVs.train = IV,
+                DV.train = DV,
+                IVs.test = tail(IV, h),
+                ts.test = ts,
+                folds = 1,
+                obj.fn = stack_obj_fn,
+                objective = stack_objective,
+                method = c(1, 2),
+                dim.red.method = dim.red.method,
+                order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+    }
+
+    cor_threshold <- tryCatch(
+      .run_var_stack(obj.fn, objective),
+      error = function(e) {
+        no_finite_method1 <- identical(
+          conditionMessage(e),
+          paste0("No Method 1 candidate produced a finite ",
+                 "complete-coverage OOF objective.")
+        )
+        if (!use_default_objective || !no_finite_method1) stop(e)
+        if (status) {
+          message(paste0("NNS.VAR: the co-movement objective was undefined for ",
+                         "every candidate; retrying this variable using MSE."))
+        }
+        .run_var_stack(expression(mean((predicted - actual)^2)), "min")
+      }
+    )
     
     
     
@@ -461,7 +490,8 @@ NNS.VAR <- function(variables,
     parallel::clusterExport(
       cl,
       varlist = c("status", "variables", "lagged_new_values_train", "h",
-                  "obj.fn", "objective", "dim.red.method", "nns_IVs_results"),
+                  "obj.fn", "objective", "use_default_objective",
+                  "dim.red.method", "nns_IVs_results"),
       envir = environment()
     )
     parallel::parLapply(cl, 1:ncol(variables), .model_worker)
