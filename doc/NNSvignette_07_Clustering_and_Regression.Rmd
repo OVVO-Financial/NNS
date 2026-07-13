@@ -145,28 +145,36 @@ NNS.stack(IVs.train = iris[ , 1 : 4],
 ```
 
 ```{r stackevalres, eval = FALSE}
-Folds Remaining = 0 
-Current NNS.reg(... , threshold = 0.9350 ) | eval(obj.fn) = 1.000000 | MAX Iterations Remaining = 2
-Current NNS.reg(... , threshold = 0.7950 ) | eval(obj.fn) = 0.973684 | MAX Iterations Remaining = 1
-Current NNS.reg(... , threshold = 0.4400 ) | eval(obj.fn) = 0.894737 | MAX Iterations Remaining = 0
-Current NNS.reg(. , n.best = 1 ) | eval(obj.fn) = 0.868421 | MAX Iterations Remaining = 12
-Current NNS.reg(. , n.best = 2 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 11
-Current NNS.reg(. , n.best = 3 ) | eval(obj.fn) = 0.763158 | MAX Iterations Remaining = 10
-Current NNS.reg(. , n.best = 4 ) | eval(obj.fn) = 0.736842 | MAX Iterations Remaining = 9
+Method 2 fold 1/1: generating 4 cumulative projections
+Method 2 fold 1/1: evaluating 4 unique candidates
+Method 2 fold 1/1 complete
+Current dimension count = 1 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 3
+Current dimension count = 2 | OOF eval(obj.fn) = 0.972222 | Iterations remaining = 2
+Current dimension count = 3 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 1
+Current dimension count = 4 | OOF eval(obj.fn) = 0.916667 | Iterations remaining = 0
+Method 1 fold 1/1: preparing fold design
+Method 1 fold 1/1: building partitions
+RPM rows = 29; validation rows = 36
+  small candidates = 1...12
+  early stopping at k = 4
+  limit candidate = all (k = 29), score = 0.333333
+Best Method 1 candidate: k = 2, score = 0.972222
+Generating final estimates
 $OBJfn.reg
-[1] 0.9733333
+        2 
+0.9722222 
 
 $NNS.reg.n.best
-[1] 1
+[1] 2
 
 $probability.threshold
-[1] 0.495
+[1] 0.48
 
 $OBJfn.dim.red
-[1] 0.9666667
+[1] 0.9722222
 
 $NNS.dim.red.threshold
-[1] 0.935
+[1] 0.9354305
 
 $reg
  [1] 1 1 1 1 1 1 1 1 1 1
@@ -185,6 +193,13 @@ $stack
 
 $pred.int
 NULL
+
+$weights
+    reg dim.red 
+    0.5     0.5 
+
+$class.levels
+[1] "setosa"     "versicolor" "virginica" 
 ```
 
 # Increasing Dimensions

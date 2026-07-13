@@ -22,75 +22,105 @@ NNS.boost(
   features.only = FALSE,
   feature.importance = TRUE,
   pred.int = NULL,
-  status = TRUE
+  status = TRUE,
+  seed = 123L
 )
 }
 \arguments{
-\item{IVs.train}{a matrix or data frame of variables of numeric or factor data types.}
+\item{IVs.train}{a vector, matrix, or data frame of numeric, logical, character,
+or factor predictors.}
 
-\item{DV.train}{a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.}
+\item{DV.train}{a numeric, logical, character, or factor response with one value
+per row of \code{IVs.train}.}
 
-\item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.}
+\item{IVs.test}{a vector, matrix, or data frame with the same predictor columns
+as \code{IVs.train}. If \code{NULL}, \code{IVs.train} is used.}
 
-\item{type}{\code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
+\item{type}{\code{NULL} (default) for regression, or \code{"CLASS"} for
+classification. Factor, character, and logical responses automatically select
+classification.}
 
-\item{depth}{options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.}
+\item{depth}{integer, \code{NULL}, or \code{"max"}; passed to the \code{order}
+argument of \link{NNS.reg}.}
 
-\item{learner.trials}{integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.}
+\item{learner.trials}{positive integer; maximum number of feature subsets used to
+estimate the learner threshold. If every possible subset can be evaluated within
+this limit, all subsets are evaluated.}
 
-\item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
+\item{epochs}{non-negative integer; number of weighted feature subsets evaluated
+after the learner stage. Defaults to \code{2 * length(DV.train)}. Set to zero to
+use the surviving learner subsets directly.}
 
-\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.}
+\item{CV.size}{numeric in \code{(0, 1)}; validation fraction for non-time-series
+data. If \code{NULL}, one value between 0.2 and 1/3 is drawn under the local seed.}
 
-\item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.}
+\item{balance}{logical; if \code{TRUE}, down- and up-sampling are applied only to
+the fitting portion of each split. Validation observations are never resampled.}
 
-\item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
+\item{ts.test}{positive integer smaller than the training sample size; the final
+\code{ts.test} observations are used as the chronological validation block.}
 
-\item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+\item{threshold}{finite numeric scalar or \code{NULL}; objective cutoff used to
+retain feature subsets. If \code{NULL}, the lower quartile is used for a
+minimization objective and the upper quartile for a maximization objective.}
 
-\item{obj.fn}{expression;
-\code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.}
+\item{obj.fn}{expression using the names \code{predicted} and \code{actual}.
+Defaults to sum of squared errors. For explicit classification, the untouched
+default is replaced by mean classification accuracy.}
 
-\item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+\item{objective}{one of \code{"min"} or \code{"max"}; defaults to \code{"min"}.}
 
-\item{extreme}{logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.}
+\item{extreme}{logical; if \code{TRUE}, use the best learner score rather than a
+quartile cutoff.}
 
-\item{features.only}{logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.}
+\item{features.only}{logical; return only feature weights and frequencies.}
 
-\item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
+\item{feature.importance}{logical; plot up to the ten most frequently retained
+features.}
 
-\item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.}
+\item{pred.int}{numeric in \code{(0, 1)} or \code{NULL}; prediction interval level
+passed to the final \link{NNS.reg} fit.}
 
-\item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
+\item{status}{logical; print progress messages.}
+
+\item{seed}{integer or \code{NULL}; local random seed. The caller's RNG state is
+restored when the function exits.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
+A list containing \code{results}, \code{pred.int},
+  \code{feature.weights}, and \code{feature.frequency}. With
+  \code{features.only = TRUE}, only the last two elements are returned.
 }
 \description{
-Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.
+Ensemble feature-selection method using \link{NNS.reg} as the base learner.
 }
 \note{
 \itemize{
-\item{} Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
-
-\item{} Incorporate any objective function from external packages (such as \code{Metrics::mape}) via \code{NNS.boost(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")}
+  \item Numeric class labels are returned on their original scale. Factor,
+    character, and logical responses retain the historical integer-code output.
+  \item Categorical predictors are aligned to training levels. Unseen test levels
+    cause an explicit error rather than silent recoding.
+  \item Incorporate an objective from another package with, for example,
+    \code{obj.fn = expression(Metrics::mape(actual, predicted))} and
+    \code{objective = "min"}.
 }
 }
 \examples{
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
- \dontrun{
- a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
- IVs.test = iris[141:150, 1:4],
- epochs = 100, learner.trials = 100,
- type = "CLASS", depth = NULL, balance = TRUE)
+\dontrun{
+a <- NNS.boost(
+  iris[1:140, 1:4], iris[1:140, 5],
+  IVs.test = iris[141:150, 1:4],
+  epochs = 100, learner.trials = 100,
+  type = "CLASS", balance = TRUE
+)
 
- ## Test accuracy
- mean(a$results == as.numeric(iris[141:150, 5]))
- }
+mean(a$results == as.numeric(iris[141:150, 5]))
+}
 
 }
 \references{
-Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
+Viole, F. (2016) "Classification Using NNS Clustering Analysis"
+  \doi{10.2139/ssrn.2864711}
 }
 \author{
 Fred Viole, OVVO Financial Systems

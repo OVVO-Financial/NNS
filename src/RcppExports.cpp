@@ -133,26 +133,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-// NNS_mreg_predict_v2_cpp
-NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x, const NumericVector& yhat, const NumericMatrix& Xtest, int k, int dist_code, const NumericVector& mins, const NumericVector& maxs, bool is_class, int nthreads);
-RcppExport SEXP _NNS_NNS_mreg_predict_v2_cpp(SEXP rpm_xSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kSEXP, SEXP dist_codeSEXP, SEXP minsSEXP, SEXP maxsSEXP, SEXP is_classSEXP, SEXP nthreadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen; Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type rpm_x(rpm_xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type yhat(yhatSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type Xtest(XtestSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int >::type dist_code(dist_codeSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type mins(minsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type maxs(maxsSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_mreg_predict_v2_cpp(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
-
 // NNS_mreg_predict_path_cpp
 NumericMatrix NNS_mreg_predict_path_cpp(const NumericMatrix& rpm_x, const NumericVector& yhat, const NumericMatrix& Xtest, int kmax, int dist_code, const NumericVector& mins, const NumericVector& maxs, bool is_class);
 RcppExport SEXP _NNS_NNS_mreg_predict_path_cpp(SEXP rpm_xSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kmaxSEXP, SEXP dist_codeSEXP, SEXP minsSEXP, SEXP maxsSEXP, SEXP is_classSEXP) {
@@ -171,6 +151,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// NNS_mreg_predict_v2_cpp
+NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x, const NumericVector& yhat, const NumericMatrix& Xtest, int k, int dist_code, const NumericVector& mins, const NumericVector& maxs, bool is_class, int nthreads);
+RcppExport SEXP _NNS_NNS_mreg_predict_v2_cpp(SEXP rpm_xSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kSEXP, SEXP dist_codeSEXP, SEXP minsSEXP, SEXP maxsSEXP, SEXP is_classSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type rpm_x(rpm_xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type yhat(yhatSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type Xtest(XtestSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type dist_code(dist_codeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type mins(minsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type maxs(maxsSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_mreg_predict_v2_cpp(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NNS_mreg_predict_cpp
 NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x, const NumericVector& yhat, const NumericMatrix& Xtest, int k, int dist_code, const NumericVector& mins, const NumericVector& maxs, bool is_class);
 RcppExport SEXP _NNS_NNS_mreg_predict_cpp(SEXP rpm_xSEXP, SEXP yhatSEXP, SEXP XtestSEXP, SEXP kSEXP, SEXP dist_codeSEXP, SEXP minsSEXP, SEXP maxsSEXP, SEXP is_classSEXP) {
@@ -186,6 +185,32 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type maxs(maxsSEXP);
     Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_mreg_predict_cpp(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_duplicate_column_map_cpp
+IntegerVector NNS_duplicate_column_map_cpp(const NumericMatrix& X);
+RcppExport SEXP _NNS_NNS_duplicate_column_map_cpp(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_duplicate_column_map_cpp(X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_mreg_setup_cpp
+List NNS_mreg_setup_cpp(const NumericMatrix& X, const NumericVector& y, const List& boundaries, int reducer_code, bool is_class);
+RcppExport SEXP _NNS_NNS_mreg_setup_cpp(SEXP XSEXP, SEXP ySEXP, SEXP boundariesSEXP, SEXP reducer_codeSEXP, SEXP is_classSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const List& >::type boundaries(boundariesSEXP);
+    Rcpp::traits::input_parameter< int >::type reducer_code(reducer_codeSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_mreg_setup_cpp(X, y, boundaries, reducer_code, is_class));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -217,6 +242,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type modulo(moduloSEXP);
     Rcpp::traits::input_parameter< bool >::type mod_only(mod_onlySEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_xstar_path_cpp
+List NNS_xstar_path_cpp(const NumericMatrix& train_design, const NumericMatrix& test_design, const NumericVector& coefficients, const IntegerVector& column_order, int nthreads);
+RcppExport SEXP _NNS_NNS_xstar_path_cpp(SEXP train_designSEXP, SEXP test_designSEXP, SEXP coefficientsSEXP, SEXP column_orderSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type train_design(train_designSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type test_design(test_designSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type coefficients(coefficientsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type column_order(column_orderSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_xstar_path_cpp(train_design, test_design, coefficients, column_order, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -779,47 +819,6 @@ BEGIN_RCPP
 END_RCPP
 }
 
-// NNS_duplicate_column_map_cpp
-IntegerVector NNS_duplicate_column_map_cpp(const NumericMatrix& X);
-RcppExport SEXP _NNS_NNS_duplicate_column_map_cpp(SEXP XSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen; Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_duplicate_column_map_cpp(X));
-    return rcpp_result_gen;
-END_RCPP
-}
-
-// NNS_mreg_setup_cpp
-List NNS_mreg_setup_cpp(const NumericMatrix& X, const NumericVector& y, const List& boundaries, int reducer_code, bool is_class);
-RcppExport SEXP _NNS_NNS_mreg_setup_cpp(SEXP XSEXP, SEXP ySEXP, SEXP boundariesSEXP, SEXP reducer_codeSEXP, SEXP is_classSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen; Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const List& >::type boundaries(boundariesSEXP);
-    Rcpp::traits::input_parameter< int >::type reducer_code(reducer_codeSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_mreg_setup_cpp(X, y, boundaries, reducer_code, is_class));
-    return rcpp_result_gen;
-END_RCPP
-}
-
-// NNS_xstar_path_cpp
-List NNS_xstar_path_cpp(const NumericMatrix& train_design, const NumericMatrix& test_design, const NumericVector& coefficients, const IntegerVector& column_order, int nthreads);
-RcppExport SEXP _NNS_NNS_xstar_path_cpp(SEXP train_designSEXP, SEXP test_designSEXP, SEXP coefficientsSEXP, SEXP column_orderSEXP, SEXP nthreadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen; Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type train_design(train_designSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type test_design(test_designSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type coefficients(coefficientsSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type column_order(column_orderSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_xstar_path_cpp(train_design, test_design, coefficients, column_order, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
-
 static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 5},
     {"_NNS_NNS_dep_matrix_cpp", (DL_FUNC) &_NNS_NNS_dep_matrix_cpp, 2},
@@ -829,11 +828,14 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_distance_path_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_parallel_cpp, 6},
     {"_NNS_NNS_distance_path_single_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_single_parallel_cpp, 6},
     {"_NNS_NNS_mreg_predict_path_v2_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_path_v2_cpp, 9},
-    {"_NNS_NNS_mreg_predict_v2_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_v2_cpp, 9},
     {"_NNS_NNS_mreg_predict_path_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_path_cpp, 8},
+    {"_NNS_NNS_mreg_predict_v2_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_v2_cpp, 9},
     {"_NNS_NNS_mreg_predict_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_cpp, 8},
+    {"_NNS_NNS_duplicate_column_map_cpp", (DL_FUNC) &_NNS_NNS_duplicate_column_map_cpp, 1},
+    {"_NNS_NNS_mreg_setup_cpp", (DL_FUNC) &_NNS_NNS_mreg_setup_cpp, 5},
     {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 8},
     {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 3},
+    {"_NNS_NNS_xstar_path_cpp", (DL_FUNC) &_NNS_NNS_xstar_path_cpp, 5},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
     {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},
     {"_NNS_NNS_FSD_uni_cpp", (DL_FUNC) &_NNS_NNS_FSD_uni_cpp, 3},
@@ -875,9 +877,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_PMMatrix_RCPP", (DL_FUNC) &_NNS_PMMatrix_RCPP, 6},
     {"_NNS_NNS_bin", (DL_FUNC) &_NNS_NNS_bin, 4},
     {"_NNS_stoch_superiority_cpp", (DL_FUNC) &_NNS_stoch_superiority_cpp, 2},
-    {"_NNS_NNS_duplicate_column_map_cpp", (DL_FUNC) &_NNS_NNS_duplicate_column_map_cpp, 1},
-    {"_NNS_NNS_mreg_setup_cpp", (DL_FUNC) &_NNS_NNS_mreg_setup_cpp, 5},
-    {"_NNS_NNS_xstar_path_cpp", (DL_FUNC) &_NNS_NNS_xstar_path_cpp, 5},
     {"_NNS_NNS_mreg_reduce_cpp", (DL_FUNC) &_NNS_NNS_mreg_reduce_cpp, 5},
     {NULL, NULL, 0}
 };

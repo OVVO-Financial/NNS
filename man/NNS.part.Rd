@@ -16,60 +16,27 @@ NNS.part(
 )
 }
 \arguments{
-\item{x}{a numeric vector.}
+\item{x}{Numeric vector.}
 
-\item{y}{a numeric vector with compatible dimensions to \code{x}.}
+\item{y}{Numeric vector of the same length as x.}
 
-\item{Voronoi}{logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.}
+\item{Voronoi}{Logical; draw the partition map.}
 
-\item{type}{\code{NULL} (default) Controls the partitioning basis.  Set to \code{(type = "XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.}
+\item{type}{NULL or "XONLY".}
 
-\item{order}{integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.}
+\item{order}{NULL, a positive integer, or "max".}
 
-\item{obs.req}{integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.}
+\item{obs.req}{Nonnegative integer minimum-observation stopping control.}
 
-\item{min.obs.stop}{logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.}
+\item{min.obs.stop}{Logical stopping control.}
 
-\item{noise.reduction}{the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.}
+\item{noise.reduction}{One of "mean", "median", "mode", "mode_class", or "off".}
 }
 \value{
-Returns:
- \itemize{
-  \item{\code{"dt"}} a \code{data.frame} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-  \item{\code{"regression.points"}} the \code{data.frame} of regression points for that given \code{(order = ...)}.
-  \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
-  }
+A list containing `order`, `dt`, and `regression.points`.
 }
 \description{
-Creates partitions based on partial moment quadrant centroids, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchical clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
-}
-\note{
-\code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
-}
-\examples{
-\dontrun{
-set.seed(123)
-x <- rnorm(100) ; y <- rnorm(100)
-NNS.part(x, y)
-
-## Data.frame of observations and partitions
-NNS.part(x, y, order = 1)$dt
-
-## Regression points
-NNS.part(x, y, order = 1)$regression.points
-
-## Voronoi style plot
-NNS.part(x, y, Voronoi = TRUE)
-
-## Examine final counts by quadrant
-DT <- NNS.part(x, y)$dt
-DT$counts <- ave(DT$quadrant, DT$quadrant, FUN = length)
-DT
-}
-}
-\references{
-Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
-}
-\author{
-Fred Viole, OVVO Financial Systems
+Creates partitions based on partial-moment quadrant centroids. Numeric orders
+use the compiled recursive partitioner. `order = "max"` returns the maximum
+observable partition representation without passing an invalid integer to C++.
 }
