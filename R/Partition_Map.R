@@ -37,11 +37,18 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   
   if (length(x) != length(y)) stop("[x] and [y] must have the same length.", call. = FALSE)
   if (length(x) < 1L) stop("[x] and [y] must not be empty.", call. = FALSE)
-  if (anyNA(x) || anyNA(y)) stop("[x] and [y] must not contain missing values.", call. = FALSE)
   x <- as.numeric(x)
   y <- as.numeric(y)
-  if (any(!is.finite(x)) || any(!is.finite(y))) {
-    stop("[x] and [y] must contain only finite values.", call. = FALSE)
+  # Complete-case handling: drop pairs with NA/NaN in either variable but
+  # keep infinities, matching the historical NNS.part contract.
+  complete <- !(is.na(x) | is.na(y))
+  if (!all(complete)) {
+    x <- x[complete]
+    y <- y[complete]
+  }
+  if (length(x) < 1L) {
+    stop("[x] and [y] must contain at least one complete (non-missing) pair.",
+         call. = FALSE)
   }
   
   Voronoi <- .nns_reg_scalar_logical(Voronoi, "Voronoi")
