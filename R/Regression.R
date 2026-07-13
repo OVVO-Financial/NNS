@@ -170,10 +170,14 @@
     }
     supplied <- names(point.est)
     if (!is.null(supplied) && all(nzchar(supplied))) {
+      # Apply the same duplicate-name normalization used for the training frame.
+      # Example: c(x = ..., x = ...) becomes c("x", "x.1") on both sides.
+      supplied <- make.unique(supplied, sep = ".")
       if (!setequal(supplied, train.names)) {
         stop("Named [point.est] values must exactly match the training predictors.",
              call. = FALSE)
       }
+      names(point.est) <- supplied
       point.est <- point.est[train.names]
     }
     out <- as.data.frame(as.list(point.est), check.names = FALSE,
@@ -190,6 +194,10 @@
   }
   
   if (has.supplied.names) {
+    # Training names are normalized with make.unique() in .nns_reg_as_frame().
+    # Normalize prediction names identically before validating/reordering so
+    # cbind(x, x) matches training columns c("x", "x.1") by position.
+    supplied.names <- make.unique(supplied.names, sep = ".")
     if (!setequal(supplied.names, train.names)) {
       stop("Named [point.est] columns must exactly match the training predictors.",
            call. = FALSE)
