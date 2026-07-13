@@ -21,8 +21,18 @@ test_that("native mreg setup preserves one-based rightmost-closed findInterval I
                                        "off", FALSE)
   expect_identical(native_rpm$x, reference_rpm$x)
   expect_identical(native_rpm$y.hat, reference_rpm$y.hat)
-  expect_equal(tail(native_rpm$x, 1), 11.5)
-  expect_equal(tail(native_rpm$y.hat, 1), 11.5)
+
+  reference_groups <- split(seq_len(nrow(X)), reference_ids)
+  expect_identical(
+    names(reference_groups),
+    c("1", "10", "11", "2", "3", "4", "5", "6", "7", "8", "9")
+  )
+  merged_group_position <- match("11", names(reference_groups))
+  expect_false(is.na(merged_group_position))
+  expect_equal(native_rpm$x[merged_group_position], 11.5)
+  expect_equal(native_rpm$y.hat[merged_group_position], 11.5)
+  expect_equal(tail(native_rpm$x, 1), 9)
+  expect_equal(tail(native_rpm$y.hat, 1), 9)
 })
 
 test_that("native interval IDs match R for below first, exact boundaries, and above final", {
