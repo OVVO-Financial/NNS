@@ -63,6 +63,8 @@ NNS.boost(
 \item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
+
+\item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
