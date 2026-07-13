@@ -1403,8 +1403,18 @@ NNS.stack <- function(IVs.train,
       raw <- rep(NA_real_, n_obs)
       valid <- count_vec > 0L
       raw[valid] <- sum_vec[valid] / count_vec[valid]
+      valid <- valid & is.finite(raw)
       candidate_raws[[id]] <- raw
-      eval <- .evaluate_raw(raw[valid], y[valid])  # only evaluate where valid
+      if (!any(valid)) {
+        # A candidate that early stopping excluded from every fold has no
+        # out-of-fold coverage. Evaluating an empty vector would score 0
+        # (e.g. an empty SSE), letting an unevaluated candidate win the
+        # minimization; mark it invalid instead.
+        candidate_scores[id] <- NA_real_
+        candidate_thresholds[id] <- 0.5
+        next
+      }
+      eval <- .evaluate_raw(raw[valid], y[valid])
       candidate_scores[id] <- eval$score
       candidate_thresholds[id] <- eval$threshold
     }
