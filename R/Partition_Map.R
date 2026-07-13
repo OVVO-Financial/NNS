@@ -1,106 +1,173 @@
 #' NNS Partition Map
 #'
-#' Creates partitions based on partial moment quadrant centroids, iteratively assigning identifications to observations based on those quadrants (unsupervised partitional and hierarchical clustering method).  Basis for correlation, dependence \link{NNS.dep}, regression \link{NNS.reg} routines.
+#' Creates partitions based on partial-moment quadrant centroids. Numeric orders
+#' use the compiled recursive partitioner. `order = "max"` returns the maximum
+#' observable partition representation without passing an invalid integer to C++.
 #'
-#' @param x a numeric vector.
-#' @param y a numeric vector with compatible dimensions to \code{x}.
-#' @param Voronoi logical; \code{FALSE} (default) Displays a Voronoi type diagram using partial moment quadrants.
-#' @param type \code{NULL} (default) Controls the partitioning basis.  Set to \code{(type = "XONLY")} for X-axis based partitioning.  Defaults to \code{NULL} for both X and Y-axis partitioning.
-#' @param order integer; Number of partial moment quadrants to be generated.  \code{(order = "max")} will institute a perfect fit.
-#' @param obs.req integer; (8 default) Required observations per cluster where quadrants will not be further partitioned if observations are not greater than the entered value.  Reduces minimum number of necessary observations in a quadrant to 1 when \code{(obs.req = 1)}.
-#' @param min.obs.stop logical; \code{TRUE} (default) Stopping condition where quadrants will not be further partitioned if a single cluster contains less than the entered value of \code{obs.req}.
-#' @param noise.reduction the method of determining regression points options for the dependent variable \code{y}: ("mean", "median", "mode", "off"); \code{(noise.reduction = "mean")} uses means for partitions.  \code{(noise.reduction = "median")} uses medians instead of means for partitions, while \code{(noise.reduction = "mode")} uses modes instead of means for partitions.  Defaults to \code{(noise.reduction = "off")} where an overall central tendency measure is used, which is the default for the independent variable \code{x}.
-#' @return Returns:
-#'  \itemize{
-#'   \item{\code{"dt"}} a \code{data.frame} of \code{x} and \code{y} observations with their partition assignment \code{"quadrant"} in the 3rd column and their prior partition assignment \code{"prior.quadrant"} in the 4th column.
-#'   \item{\code{"regression.points"}} the \code{data.frame} of regression points for that given \code{(order = ...)}.
-#'   \item{\code{"order"}} the \code{order} of the final partition given \code{"min.obs.stop"} stopping condition.
-#'   }
+#' @param x Numeric vector.
+#' @param y Numeric vector of the same length as x.
+#' @param Voronoi Logical; draw the partition map.
+#' @param type NULL or "XONLY".
+#' @param order NULL, a positive integer, or "max".
+#' @param obs.req Nonnegative integer minimum-observation stopping control.
+#' @param min.obs.stop Logical stopping control.
+#' @param noise.reduction One of "mean", "median", "mode", "mode_class", or "off".
 #'
-#' @note \code{min.obs.stop = FALSE} will not generate regression points due to unequal partitioning of quadrants from individual cluster observations.
-#'
-#' @author Fred Viole, OVVO Financial Systems
-#' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
-#' @examples
-#' \dontrun{
-#' set.seed(123)
-#' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS.part(x, y)
-#'
-#' ## Data.frame of observations and partitions
-#' NNS.part(x, y, order = 1)$dt
-#'
-#' ## Regression points
-#' NNS.part(x, y, order = 1)$regression.points
-#'
-#' ## Voronoi style plot
-#' NNS.part(x, y, Voronoi = TRUE)
-#'
-#' ## Examine final counts by quadrant
-#' DT <- NNS.part(x, y)$dt
-#' DT$counts <- ave(DT$quadrant, DT$quadrant, FUN = length)
-#' DT
-#' }
+#' @return A list containing `order`, `dt`, and `regression.points`.
 #' @export
-
 NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
                      order = NULL, obs.req = 8, min.obs.stop = TRUE,
                      noise.reduction = "off") {
-  noise.reduction <- tolower(noise.reduction)
-  ok <- c("mean","median","mode","mode_class","off")
-  if (!noise.reduction %in% ok)
-    stop("noise.reduction must be one of ", paste(shQuote(ok), collapse = ", "))
+  if (inherits(x, c("tbl", "data.table")) || is.data.frame(x)) {
+    if (NCOL(x) != 1L) stop("[x] must be a vector or one-column object.", call. = FALSE)
+    x <- x[[1L]]
+  }
+  if (inherits(y, c("tbl", "data.table")) || is.data.frame(y)) {
+    if (NCOL(y) != 1L) stop("[y] must be a vector or one-column object.", call. = FALSE)
+    y <- y[[1L]]
+  }
+  if (is.matrix(x)) {
+    if (ncol(x) != 1L) stop("[x] must be a vector or one-column object.", call. = FALSE)
+    x <- x[, 1L]
+  }
+  if (is.matrix(y)) {
+    if (ncol(y) != 1L) stop("[y] must be a vector or one-column object.", call. = FALSE)
+    y <- y[, 1L]
+  }
   
-  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+  if (length(x) != length(y)) stop("[x] and [y] must have the same length.", call. = FALSE)
+  if (length(x) < 1L) stop("[x] and [y] must not be empty.", call. = FALSE)
+  if (anyNA(x) || anyNA(y)) stop("[x] and [y] must not contain missing values.", call. = FALSE)
+  x <- as.numeric(x)
+  y <- as.numeric(y)
+  if (any(!is.finite(x)) || any(!is.finite(y))) {
+    stop("[x] and [y] must contain only finite values.", call. = FALSE)
+  }
+  
+  Voronoi <- .nns_reg_scalar_logical(Voronoi, "Voronoi")
+  min.obs.stop <- .nns_reg_scalar_logical(min.obs.stop, "min.obs.stop")
+  
+  if (!is.null(type)) {
+    if (!is.character(type) || length(type) != 1L || is.na(type) ||
+        tolower(type) != "xonly") {
+      stop("[type] must be NULL or 'XONLY'.", call. = FALSE)
+    }
+    type <- "XONLY"
+  }
+  
+  if (!is.character(noise.reduction) || length(noise.reduction) != 1L ||
+      is.na(noise.reduction)) {
+    stop("Invalid [noise.reduction].", call. = FALSE)
+  }
+  noise.reduction <- tolower(noise.reduction)
+  allowed <- c("mean", "median", "mode", "mode_class", "off")
+  if (!noise.reduction %in% allowed) {
+    stop("[noise.reduction] must be one of ",
+         paste(shQuote(allowed), collapse = ", "), ".", call. = FALSE)
+  }
   
   if (is.null(obs.req)) obs.req <- 8L
-  if (!is.null(order) && order == 0) order <- 1L
+  if (!is.numeric(obs.req) || length(obs.req) != 1L || !is.finite(obs.req) ||
+      obs.req < 0 || obs.req != floor(obs.req)) {
+    stop("[obs.req] must be a nonnegative integer.", call. = FALSE)
+  }
+  obs.req <- as.integer(obs.req)
+  
+  order.max <- is.character(order) && length(order) == 1L &&
+    !is.na(order) && tolower(order) == "max"
+  if (!is.null(order) && !order.max) {
+    if (!is.numeric(order) || length(order) != 1L || !is.finite(order) ||
+        order < 1 || order != floor(order)) {
+      stop("[order] must be NULL, 'max', or a positive integer.", call. = FALSE)
+    }
+    order <- as.integer(order)
+  }
+  
+  # Explicit maximum representation. For two-axis partitioning each observation
+  # is retained as its own limiting point. For XONLY, equal x values necessarily
+  # share a partition and their y values are reduced coherently.
+  if (order.max) {
+    if (is.null(type)) {
+      quadrant <- paste0("q", seq_along(x))
+      prior <- rep("pq", length(x))
+      PART <- data.frame(x = x, y = y, quadrant = quadrant,
+                         prior.quadrant = prior, stringsAsFactors = FALSE)
+      RP <- data.frame(x = x, y = y, quadrant = quadrant,
+                       stringsAsFactors = FALSE)
+      final.order <- length(x)
+    } else {
+      ux <- sort(unique(x))
+      reducer <- function(z) {
+        if (noise.reduction == "mean") mean(z)
+        else if (noise.reduction == "median") stats::median(z)
+        else if (noise.reduction %in% c("mode", "mode_class")) mode_class(z)
+        else gravity(z)
+      }
+      y.by.x <- vapply(ux, function(v) reducer(y[x == v]), numeric(1L))
+      match.id <- match(x, ux)
+      quadrant <- paste0("q", match.id)
+      PART <- data.frame(x = x, y = y, quadrant = quadrant,
+                         prior.quadrant = rep("pq", length(x)),
+                         stringsAsFactors = FALSE)
+      RP <- data.frame(x = ux, y = y.by.x,
+                       quadrant = paste0("q", seq_along(ux)),
+                       stringsAsFactors = FALSE)
+      final.order <- length(ux)
+    }
+    
+    if (Voronoi) {
+      graphics::plot(x, y, col = "steelblue", cex.lab = 1.5,
+                     xlab = deparse(substitute(x)), ylab = deparse(substitute(y)))
+      graphics::points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+      graphics::title(main = "NNS Order = max", cex.main = 2)
+    }
+    
+    return(list(order = as.integer(final.order),
+                dt = .NNS.df(PART),
+                regression.points = .NNS.df(RP)))
+  }
   
   n <- length(x)
-  default.order <- max(ceiling(log(n, 2)), 1L)
-  if (is.null(order)) order <- default.order
+  if (is.null(order)) order <- max(ceiling(log(n, 2)), 1L)
   
   out <- NNS_part_cpp(
-    x = x, y = y,
-    type = if (is.null(type)) NULL else as.character(type),
+    x = x,
+    y = y,
+    type = if (is.null(type)) NULL else type,
     order_in = as.integer(order),
-    obs_req = as.integer(obs.req),
-    min_obs_stop = isTRUE(min.obs.stop),
+    obs_req = obs.req,
+    min_obs_stop = min.obs.stop,
     noise_reduction = noise.reduction
   )
   
   PART <- as.data.frame(out$dt, stringsAsFactors = FALSE)
-  RP   <- as.data.frame(out$`regression.points`, stringsAsFactors = FALSE)
-  # Order by quadrant using radix (C-locale) ordering to match data.table::setorder
-  RP   <- RP[order(RP$quadrant, method = "radix"), , drop = FALSE]
+  RP <- as.data.frame(out$regression.points, stringsAsFactors = FALSE)
+  RP <- RP[order(RP$quadrant, method = "radix"), , drop = FALSE]
   rownames(RP) <- NULL
-
+  
   if (is.discrete(x)) {
-    fin <- is.finite(RP$x)
-    RP$x[fin] <- ifelse(RP$x[fin] %% 1 < 0.5, floor(RP$x[fin]), ceiling(RP$x[fin]))
+    finite <- is.finite(RP$x)
+    RP$x[finite] <- ifelse(RP$x[finite] %% 1 < 0.5,
+                           floor(RP$x[finite]), ceiling(RP$x[finite]))
   }
   
-  if (isTRUE(Voronoi)) {
-    mc <- match.call(); x.label <- deparse(mc$x); y.label <- deparse(mc$y)
-    plot(x, y, col = "steelblue", cex.lab = 1.5, xlab = x.label, ylab = y.label)
-    
+  if (Voronoi) {
+    graphics::plot(x, y, col = "steelblue", cex.lab = 1.5,
+                   xlab = deparse(substitute(x)), ylab = deparse(substitute(y)))
     if (is.null(type)) {
-      # draw dashed split segments (per-iteration, per-split group)
       sh <- out$segments_h
-      if (NROW(sh)) segments(sh$x0, sh$y, sh$x1, sh$y, lty = 3)
+      if (NROW(sh)) graphics::segments(sh$x0, sh$y, sh$x1, sh$y, lty = 3)
       sv <- out$segments_v
-      if (NROW(sv)) segments(sv$x,  sv$y0, sv$x,  sv$y1, lty = 3)
+      if (NROW(sv)) graphics::segments(sv$x, sv$y0, sv$x, sv$y1, lty = 3)
     } else {
-      # XONLY: vertical ablines at group bounds each iteration
       vl <- out$vlines
-      if (length(vl)) abline(v = vl, lty = 3)
+      if (length(vl)) graphics::abline(v = vl, lty = 3)
     }
-    
-    points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
-    title(main = paste0("NNS Order = ", out$order), cex.main = 2)
+    graphics::points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
+    graphics::title(main = paste0("NNS Order = ", out$order), cex.main = 2)
   }
   
-  # Return the same shape as original
-  list(order = as.integer(out$order), dt = .NNS.df(PART), regression.points = .NNS.df(RP))
+  list(order = as.integer(out$order),
+       dt = .NNS.df(PART),
+       regression.points = .NNS.df(RP))
 }

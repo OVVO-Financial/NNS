@@ -1,383 +1,366 @@
-NNS.M.reg <- function (X_n, Y, factor.2.dummy = TRUE, order = NULL, n.best = NULL, type = NULL, point.est = NULL, point.only = FALSE,
-                       plot = FALSE, residual.plot = TRUE, location = NULL, noise.reduction = 'off', dist = "L2",
-                       return.values = FALSE, plot.regions = FALSE, ncores = NULL, confidence.interval = NULL){
+.nns_mreg_weighted_mode <- function(values, weights) {
+  keep <- is.finite(values) & is.finite(weights) & weights >= 0
+  values <- values[keep]
+  weights <- weights[keep]
+  if (!length(values)) return(NA_real_)
+  totals <- tapply(weights, values, sum)
+  winners <- as.numeric(names(totals)[totals == max(totals)])
+  min(winners)
+}
+
+.nns_mreg_normalize_weights <- function(w) {
+  w[!is.finite(w) | w < 0] <- 0
+  s <- sum(w)
+  if (s <= 0) rep(1 / length(w), length(w)) else w / s
+}
+
+.nns_mreg_ensemble_weights <- function(distances) {
+  k <- length(distances)
+  if (k == 1L) return(1)
   
-  dist <- tolower(dist)
+  ranks <- seq_len(k)
+  uniform <- rep(1 / k, k)
+  student <- .nns_mreg_normalize_weights(stats::dt(distances, df = k))
+  inverse <- .nns_mreg_normalize_weights(1 / pmax(distances, 1e-12))
+  exponential <- .nns_mreg_normalize_weights(stats::dexp(ranks, rate = 1 / k))
   
-  ### For Multiple regressions
-  ###  Turn each column into numeric values
-  original.IVs <- X_n
-  original.DV <- Y
-  n <- ncol(original.IVs)
+  rank.sd <- stats::sd(ranks)
+  lognormal <- if (is.finite(rank.sd) && rank.sd > 0) {
+    rev(.nns_mreg_normalize_weights(abs(stats::dlnorm(ranks, 0, rank.sd, log = TRUE))))
+  } else rep(0, k)
   
-  feature.names <- colnames(original.IVs)
-  if(is.null(feature.names)){
-    feature.names <- paste0("x", 1:n)
-  } else {
-    missing.feature.names <- is.na(feature.names) | feature.names == ""
-    feature.names[missing.feature.names] <- paste0("x", which(missing.feature.names))
-    feature.names <- make.unique(feature.names, sep = ".")
+  power <- .nns_mreg_normalize_weights(ranks^(-2))
+  distance.sd <- stats::sd(distances)
+  normal <- if (is.finite(distance.sd) && distance.sd > 0) {
+    .nns_mreg_normalize_weights(stats::dnorm(distances, 0, distance.sd))
+  } else rep(0, k)
+  
+  distance.var <- stats::var(distances)
+  rbf <- if (is.finite(distance.var) && distance.var > 0) {
+    .nns_mreg_normalize_weights(exp(-distances / (2 * distance.var)))
+  } else rep(0, k)
+  
+  .nns_mreg_normalize_weights(
+    uniform + student + inverse + exponential + lognormal + power + normal + rbf
+  )
+}
+
+.nns_mreg_distance_vector <- function(rpm.x, destination, dist,
+                                      minimums, maximums) {
+  if (any(!is.finite(destination))) {
+    stop("[point.est] contains missing or nonfinite values.", call. = FALSE)
   }
-  colnames(original.IVs) <- feature.names
   
-  if(is.null(ncol(X_n))) X_n <- t(t(X_n))
-  
-  if(is.null(names(Y))){
-    y.label <- "Y"
-  } else {
-    y.label <- names(Y)
+  if (dist == "FACTOR") {
+    # Encoded categorical predictors are represented by stable training-fitted
+    # dummy/code columns. Hamming distance is therefore the coherent categorical
+    # metric and does not invent an ordering among unequal categories.
+    return(rowMeans(sweep(rpm.x, 2L, destination, "!=") * 1))
   }
   
-  np <- nrow(point.est)
+  ranges <- maximums - minimums
+  active <- is.finite(ranges) & ranges > 0
+  if (!any(active)) return(rep(0, nrow(rpm.x)))
+  z <- sweep(rpm.x[, active, drop = FALSE], 2L, destination[active], "-")
+  z <- sweep(z, 2L, ranges[active], "/")
   
-  if(is.null(np) && !is.null(point.est)) point.est <- t(point.est)
+  if (dist == "L1") rowSums(abs(z)) else sqrt(rowSums(z^2))
+}
+
+.nns_mreg_predict_one <- function(destination, rpm, k, dist,
+                                  minimums, maximums, is.class) {
+  rpm.x <- as.matrix(rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE])
+  d <- .nns_mreg_distance_vector(rpm.x, destination, dist, minimums, maximums)
+  ord <- order(d, seq_along(d), method = "radix")
+  k <- min(k, length(ord))
   
-  if(!is.null(point.est)){
-    if(ncol(point.est) != n){
-      stop("Please ensure 'point.est' is of compatible dimensions to 'x'")
+  # For k = 1, aggregate all exact nearest-distance ties deterministically.
+  if (k == 1L) {
+    tied <- which(d == min(d))
+    vals <- rpm$y.hat[tied]
+    if (is.class) return(.nns_mreg_weighted_mode(vals, rep(1, length(vals))))
+    return(gravity(vals))
+  }
+  
+  idx <- ord[seq_len(k)]
+  w <- .nns_mreg_ensemble_weights(d[idx])
+  if (is.class) .nns_mreg_weighted_mode(rpm$y.hat[idx], w) else
+    sum(rpm$y.hat[idx] * w)
+}
+
+.nns_mreg_predict <- function(Xtest, rpm, k, dist,
+                              minimums, maximums, is.class,
+                              ncores = 1L) {
+  if (is.null(Xtest)) return(NULL)
+  Xtest <- as.matrix(Xtest)
+  if (!nrow(Xtest)) return(numeric())
+  if (ncol(Xtest) != length(minimums)) {
+    stop("Prediction data and the fitted RPM have incompatible dimensions.",
+         call. = FALSE)
+  }
+  if (any(!is.finite(Xtest))) {
+    stop("[point.est] contains missing or nonfinite values.", call. = FALSE)
+  }
+  
+  worker <- function(i) .nns_mreg_predict_one(
+    Xtest[i, ], rpm, k, dist, minimums, maximums, is.class
+  )
+  
+  # Use process-local parallelism only where fork is available. No global
+  # RcppParallel setting is mutated. Windows and single-core calls remain
+  # deterministic and sequential.
+  if (ncores > 1L && .Platform$OS.type != "windows" && nrow(Xtest) > 1L) {
+    unlist(parallel::mclapply(seq_len(nrow(Xtest)), worker,
+                              mc.cores = ncores, mc.preschedule = TRUE),
+           use.names = FALSE)
+  } else {
+    vapply(seq_len(nrow(Xtest)), worker, numeric(1L))
+  }
+}
+
+.nns_mreg_group_reduce <- function(z, noise.reduction, is.class) {
+  .nns_reg_reduce_value(z, noise.reduction, is.class)
+}
+
+.nns_mreg_build_rpm <- function(X, y, ids, noise.reduction, is.class) {
+  groups <- split(seq_len(nrow(X)), ids)
+  rows <- lapply(groups, function(idx) {
+    c(vapply(seq_len(ncol(X)), function(j) {
+      .nns_mreg_group_reduce(X[idx, j], noise.reduction, FALSE)
+    }, numeric(1L)),
+    y.hat = .nns_mreg_group_reduce(y[idx], noise.reduction, is.class))
+  })
+  rpm <- as.data.frame(do.call(rbind, rows), stringsAsFactors = FALSE)
+  names(rpm) <- c(colnames(X), "y.hat")
+  rownames(rpm) <- NULL
+  rpm
+}
+
+.nns_mreg_partition_matrix <- function(X, y, order, noise.reduction, is.class) {
+  p <- ncol(X)
+  boundaries <- vector("list", p)
+  
+  if (identical(order, "max")) {
+    for (j in seq_len(p)) boundaries[[j]] <- sort(unique(X[, j]))
+  } else {
+    for (j in seq_len(p)) {
+      rp <- NNS.reg(
+        X[, j], y,
+        factor.2.dummy = FALSE,
+        order = order,
+        type = if (is.class) "CLASS" else NULL,
+        plot = FALSE,
+        smooth = FALSE,
+        noise.reduction = noise.reduction,
+        point.only = FALSE,
+        multivariate.call = TRUE
+      )
+      boundaries[[j]] <- sort(unique(as.numeric(rp$x)))
+      if (!length(boundaries[[j]])) boundaries[[j]] <- sort(unique(X[, j]))
     }
-    colnames(point.est) <- feature.names
   }
   
-  original.matrix <- cbind.data.frame(original.DV, original.IVs)
-  norm.matrix <- apply(original.matrix, 2, function(z) NNS.rescale(z, 0, 1))
+  max.length <- max(lengths(boundaries))
+  rhs <- do.call(cbind, lapply(boundaries, function(z) {
+    length(z) <- max.length
+    z
+  }))
+  colnames(rhs) <- colnames(X)
   
-  minimums <- apply(original.IVs, 2, min)
-  maximums <- apply(original.IVs, 2, max)
+  id.parts <- lapply(seq_len(p), function(j) {
+    findInterval(X[, j], boundaries[[j]], left.open = FALSE,
+                 rightmost.closed = TRUE)
+  })
+  ids <- do.call(paste, c(as.data.frame(id.parts), sep = "."))
+  list(rhs = rhs, ids = ids, boundaries = boundaries)
+}
+
+.nns_mreg_default_nbest <- function(X, y, rpm.rows) {
+  dep <- tryCatch(NNS.copula(cbind(X, y)), error = function(e) NA_real_)
+  if (!is.finite(dep)) dep <- 0.5
+  k <- max(1L, as.integer(floor((1 - dep) * sqrt(nrow(X)))))
+  min(k, rpm.rows)
+}
+
+.nns_mreg_validate_cores <- function(ncores) {
+  if (is.null(ncores)) return(1L)
+  if (!is.numeric(ncores) || length(ncores) != 1L || !is.finite(ncores) ||
+      ncores < 1 || ncores != floor(ncores)) {
+    stop("[ncores] must be NULL or a positive integer.", call. = FALSE)
+  }
+  as.integer(ncores)
+}
+
+# Internal multivariate regression engine used by NNS.reg.
+NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
+                      n.best = NULL, type = NULL, point.est = NULL,
+                      point.only = FALSE, plot = FALSE,
+                      residual.plot = TRUE, location = NULL,
+                      noise.reduction = "off", dist = "L2",
+                      return.values = FALSE, plot.regions = FALSE,
+                      ncores = NULL, confidence.interval = NULL) {
   
-  ###  Regression Point Matrix
-  if(is.numeric(order) || is.null(order)){
-    reg.points <- lapply(1:ncol(original.IVs), function(b) NNS.reg(original.IVs[, b], original.DV, factor.2.dummy = factor.2.dummy, order = order, type = type, noise.reduction = noise.reduction, plot = FALSE, multivariate.call = TRUE, ncores = 1)$x)
-    
-    if(length(unique(sapply(reg.points, length))) != 1){
-      reg.points.matrix <- do.call(cbind, lapply(reg.points, `length<-`, max(lengths(reg.points))))
-    } else {
-      reg.points.matrix <- do.call(cbind, reg.points)
-    }
+  factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
+  point.only <- .nns_reg_scalar_logical(point.only, "point.only")
+  plot <- .nns_reg_scalar_logical(plot, "plot")
+  residual.plot <- .nns_reg_scalar_logical(residual.plot, "residual.plot")
+  return.values <- .nns_reg_scalar_logical(return.values, "return.values")
+  plot.regions <- .nns_reg_scalar_logical(plot.regions, "plot.regions")
+  order <- .nns_reg_validate_order(order)
+  n.best <- .nns_reg_validate_nbest(n.best)
+  dist <- .nns_reg_validate_dist(dist)
+  noise.reduction <- .nns_reg_validate_noise(noise.reduction)
+  confidence.interval <- .nns_reg_validate_ci(confidence.interval)
+  ncores <- .nns_mreg_validate_cores(ncores)
+  
+  if (!is.null(type) && (!is.character(type) || length(type) != 1L ||
+                         is.na(type) || tolower(type) != "class")) {
+    stop("NNS.M.reg [type] must be NULL or 'CLASS'.", call. = FALSE)
+  }
+  Y <- .nns_reg_response_vector(Y)
+  task <- .nns_reg_type(if (is.null(type)) NULL else "CLASS", Y)
+  is.class <- task$is.class
+  
+  encoded <- .nns_reg_encode_predictors(X_n, point.est, factor.2.dummy)
+  X <- encoded$x
+  Xpoint <- encoded$point.est
+  y <- task$y
+  
+  if (nrow(X) != length(y)) {
+    stop(sprintf("[X_n] has %d rows but [Y] has %d values.",
+                 nrow(X), length(y)), call. = FALSE)
+  }
+  if (ncol(X) < 2L) {
+    stop("NNS.M.reg requires at least two encoded predictors.", call. = FALSE)
+  }
+  if (length(y) < 2L || any(!is.finite(y))) {
+    stop("[Y] must contain at least two finite values.", call. = FALSE)
+  }
+  
+  minimums <- apply(X, 2L, min)
+  maximums <- apply(X, 2L, max)
+  
+  partition <- .nns_mreg_partition_matrix(
+    X, y, order, noise.reduction, is.class
+  )
+  rpm <- .nns_mreg_build_rpm(
+    X, y, partition$ids, noise.reduction, is.class
+  )
+  if (!nrow(rpm)) stop("NNS.M.reg produced an empty RPM.", call. = FALSE)
+  
+  if (is.null(n.best) && identical(order, "max")) {
+    k <- 1L
+  } else if (is.null(n.best)) {
+    k <- .nns_mreg_default_nbest(X, y, nrow(rpm))
+  } else if (identical(n.best, "all")) {
+    k <- nrow(rpm)
   } else {
-    reg.points.matrix <- original.IVs
+    k <- min(as.integer(n.best), nrow(rpm))
+  }
+  k <- max(1L, k)
+  
+  # Fitted values and point estimates always use the same exact prediction rule.
+  fitted.pred <- .nns_mreg_predict(
+    X, rpm, k, dist, minimums, maximums, is.class, ncores
+  )
+  point.pred <- .nns_mreg_predict(
+    Xpoint, rpm, k, dist, minimums, maximums, is.class, ncores
+  )
+  
+  if (is.class) {
+    observed <- sort(unique(y))
+    fitted.pred <- .nns_reg_snap_class(fitted.pred, observed)
+    if (!is.null(point.pred)) point.pred <- .nns_reg_snap_class(point.pred, observed)
   }
   
-  ### If regression points are error (not likely)...
-  if(length(reg.points.matrix[ , 1]) == 0  || is.null(reg.points.matrix)){
-    stn <- .95
-    for(i in 1 : n){
-      part.map <- NNS.part(original.IVs[ , i], original.DV, order = order, type = type, noise.reduction = noise.reduction, obs.req = 0)
-      dep <- NNS.dep(original.IVs[ , i], original.DV)$Dependence
-      char_length_order <- dep * max(nchar(part.map$df$quadrant))
-      if(dep > stn){
-        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = ifelse(char_length_order%%1 < .5, floor(char_length_order), ceiling(char_length_order)), type = type, noise.reduction = 'off', obs.req = 0)$regression.points$x
-      } else {
-        reg.points[[i]] <- NNS.part(original.IVs[ , i], original.DV, order = ifelse(char_length_order%%1 < .5, floor(char_length_order), ceiling(char_length_order)), noise.reduction = noise.reduction, type = "XONLY", obs.req = 1)$regression.points$x
-      }
-    }
-    reg.points.matrix <- do.call('cbind', lapply(reg.points, `length<-`, max(lengths(reg.points))))
+  fitted <- as.data.frame(X, stringsAsFactors = FALSE)
+  fitted$y <- y
+  fitted$y.hat <- fitted.pred
+  fitted$NNS.ID <- partition$ids
+  fitted$residuals <- fitted.pred - y
+  
+  metric <- if (is.class) mean(fitted.pred == y) else
+    .nns_reg_r2(y, fitted.pred)
+  intervals <- .nns_reg_intervals(
+    y, fitted.pred, point.pred, confidence.interval,
+    is.class, if (is.class) sort(unique(y)) else NULL
+  )
+  if (!is.null(intervals$conf.lower)) {
+    fitted$conf.int.neg <- intervals$conf.lower
+    fitted$conf.int.pos <- intervals$conf.upper
   }
   
-  colnames(reg.points.matrix) <- feature.names
-  
-  if(is.numeric(order) || is.null(order)) reg.points.matrix <- unique(reg.points.matrix)
-  
-  if(!is.null(order) && order=="max" && is.null(n.best)) n.best <- 1
-  
-  ### Determine core configuration for native C++ multi-threading
-  if(is.null(ncores)){
-    num_cores <- as.integer(max(1L, parallel::detectCores(), na.rm = TRUE)) - 1
-    if(num_cores < 1L) num_cores <- 1L
-  } else {
-    num_cores <- as.integer(ncores)
-  }
-  
-  NNS.ID <- lapply(1:n, function(j) findInterval(original.IVs[ , j], vec = na.omit(sort(reg.points.matrix[ , j])), left.open = FALSE))
-  
-  NNS.ID <- do.call(cbind, NNS.ID)
-  
-  ### Create unique identifier of each observation's interval
-  NNS.ID <- gsub(do.call(paste, as.data.frame(NNS.ID)), pattern = " ", replacement = ".")
-  
-  ### Grouped regression-point matrix and fitted values by NNS.ID, computed in
-  ### C++ (NNS_mreg_reduce_cpp): each group's central tendency (per
-  ### noise.reduction) of the IV columns and the DV, mapped back to every
-  ### observation, then the grouped residual-bias correction.
-  order_is_numeric <- is.numeric(order) || is.null(order)
-  reducer <- if(!order_is_numeric) 5L else switch(noise.reduction,
-                                                  "mean"       = 1L,
-                                                  "median"     = 2L,
-                                                  "mode"       = 3L,
-                                                  "mode_class" = 4L,
-                                                  0L)   # "off" / default -> gravity
-
-  red <- NNS_mreg_reduce_cpp(as.matrix(original.IVs), as.numeric(original.DV),
-                             as.character(NNS.ID), as.integer(reducer), !is.null(type))
-
-  ### REGRESSION.POINT.MATRIX: one row per unique NNS.ID (sorted-id order)
-  REGRESSION.POINT.MATRIX <- as.data.frame(red$rpm, stringsAsFactors = FALSE)
-  colnames(REGRESSION.POINT.MATRIX) <- c(feature.names, "y.hat")
-
-  ### Fitted y.hat in original observation order (bias-corrected)
-  y.hat <- red$yhat
-
-  fitted.matrix <- as.data.frame(original.IVs, stringsAsFactors = FALSE)
-  colnames(fitted.matrix) <- feature.names
-  fitted.matrix$y         <- original.DV
-  fitted.matrix$y.hat     <- red$yhat
-  fitted.matrix$NNS.ID    <- NNS.ID
-  fitted.matrix$residuals <- red$residuals
-  
-  if(is.null(n.best)){
-    dependence <- NNS.copula(cbind(original.IVs, original.DV))
-    n.best <- max(1, floor((1-dependence)*sqrt(nrow(original.IVs))))
-  }
-  
-  ### Clamp n.best to available RPM rows.
-  ### Oversized n.best means "use all available RPM".
-  rpm_n <- nrow(REGRESSION.POINT.MATRIX)
-  
-  if (identical(n.best, "all") ||
-      (is.numeric(n.best) && length(n.best) == 1L && is.infinite(n.best))) {
-    n.best <- rpm_n
-  } else {
-    n.best <- suppressWarnings(as.integer(n.best[1L]))
-    if (is.na(n.best)) n.best <- rpm_n
-    n.best <- max(1L, min(n.best, rpm_n))
-  }
-  
-  # OPTIMIZED: Bulk prediction calculation bypasses row-by-row mapping loops.
-  # Use the single-k path kernel because only column n.best was consumed.
-  if(n.best > 1 && !point.only){
-    fitted.matrix$y.hat <- as.numeric(NNS.distance.path.single.bulk(
-      rpm = REGRESSION.POINT.MATRIX,
-      Xtest = original.IVs,
-      k = n.best,
-      class = type,
-      ncores = num_cores
+  if (point.only) {
+    return(list(
+      R2 = NULL,
+      rhs.partitions = .NNS.df(as.data.frame(partition$rhs)),
+      RPM = .NNS.df(rpm),
+      Point.est = point.pred,
+      pred.int = .NNS.df(intervals$pred.int),
+      Fitted.xy = NULL,
+      n.best = k,
+      dist = dist,
+      class.levels = task$class.levels
     ))
-    
-    y.hat <- fitted.matrix$y.hat
-    if(!is.null(type)) y.hat <- ifelse(y.hat %% 1 < 0.5, floor(y.hat), ceiling(y.hat))
   }
   
-  ### Point Estimates
-  if (!is.null(point.est)) {
-    # Calculate central points
-    central.points <- apply(REGRESSION.POINT.MATRIX[, 1:n, drop = FALSE], 2, gravity)
-    
-    predict.fit <- numeric()
-    # Compare each column against its own bound: direct matrix < vector
-    # comparison recycles the length-n bounds down the rows (column-major),
-    # misaligning the mask whenever point.est has more than one row.
-    point.est_matrix <- as.matrix(point.est)
-    outsiders <- sweep(point.est_matrix, 2, minimums, "<") | sweep(point.est_matrix, 2, maximums, ">")
-    outsiders[is.na(outsiders)] <- 0
-    
-    # Single point estimation
-    if (is.null(np)) {
-      if (!any(outsiders)) {
-        predict.fit <- NNS::NNS.distance(
-          rpm = REGRESSION.POINT.MATRIX,
-          dist.estimate = point.est,
-          k = n.best,
-          class = type
-        )
-      } else {
-        boundary.points <- pmin(pmax(point.est, minimums), maximums)
-        mid.points <- (boundary.points + central.points) / 2
-        mid.points_2 <- (boundary.points + mid.points) / 2
-        
-        last.known.distances <- c(
-          sqrt(sum((boundary.points - central.points) ^ 2)),
-          sqrt(sum((boundary.points - mid.points) ^ 2)),
-          sqrt(sum((boundary.points - mid.points_2) ^ 2))
-        )
-        
-        boundary.estimates <- NNS::NNS.distance(
-          rpm = REGRESSION.POINT.MATRIX,
-          dist.estimate = boundary.points,
-          k = n.best,
-          class = type
-        )
-        
-        gradients <- sapply(1:3, function(i) {
-          compare.points <- list(central.points, mid.points, mid.points_2)[[i]]
-          (boundary.estimates - NNS::NNS.distance(
-            rpm = REGRESSION.POINT.MATRIX,
-            dist.estimate = compare.points,
-            k = n.best,
-            class = type
-          )) / last.known.distances[i]
-        })
-        
-        last.known.gradient <- sum(gradients * c(3, 2, 1)) / 6
-        last.distance <- sqrt(sum((point.est - boundary.points) ^ 2))
-        
-        predict.fit <- last.distance * last.known.gradient + boundary.estimates
-      }
-    }
-    
-    # Multiple point estimation
-    if (!is.null(np)) {
-      # OPTIMIZED: Replaced row-by-row distance operations with a single-k bulk call.
-      DISTANCES <- as.numeric(NNS.distance.path.single.bulk(
-        rpm = REGRESSION.POINT.MATRIX,
-        Xtest = point.est,
-        k = n.best,
-        class = type,
-        ncores = num_cores
-      ))
-      
-      # OPTIMIZED: Fully vectorized matrix handling for out-of-bounds outliers
-      if (any(rowSums(outsiders) > 0)) {
-        outsider.indices <- which(rowSums(outsiders) > 0)
-        outside.points_matrix <- as.matrix(point.est[outsider.indices, , drop = FALSE])
-        
-        boundary.points_matrix <- outside.points_matrix
-        for (j in 1:ncol(boundary.points_matrix)) {
-          boundary.points_matrix[, j] <- pmin(pmax(boundary.points_matrix[, j], minimums[j]), maximums[j])
-        }
-        
-        # Add/subtract the central point by column using R's matrix recycling.
-        # This is equivalent to column-wise central-point offsets while
-        # avoiding helper dispatch in this high-level orchestration path.
-        central.offset_matrix <- rep(central.points, each = nrow(boundary.points_matrix))
-        mid.points_matrix <- (boundary.points_matrix + central.offset_matrix) / 2
-        mid.points_2_matrix <- (boundary.points_matrix + mid.points_matrix) / 2
-        
-        last.known.distances_1 <- sqrt(rowSums((boundary.points_matrix - central.offset_matrix)^2))
-        last.known.distances_2 <- sqrt(rowSums((boundary.points_matrix - mid.points_matrix)^2))
-        last.known.distances_3 <- sqrt(rowSums((boundary.points_matrix - mid.points_2_matrix)^2))
-        
-        boundary.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = boundary.points_matrix, k = n.best, class = type, ncores = num_cores))
-        mid.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_matrix, k = n.best, class = type, ncores = num_cores))
-        mid_2.estimates <- as.numeric(NNS.distance.path.single.bulk(rpm = REGRESSION.POINT.MATRIX, Xtest = mid.points_2_matrix, k = n.best, class = type, ncores = num_cores))
-        
-        central.estimate_single <- NNS.distance(rpm = REGRESSION.POINT.MATRIX, dist.estimate = central.points, k = n.best, class = type)[1]
-        
-        g1 <- (boundary.estimates - central.estimate_single) / pmax(last.known.distances_1, 1e-10)
-        g2 <- (boundary.estimates - mid.estimates) / pmax(last.known.distances_2, 1e-10)
-        g3 <- (boundary.estimates - mid_2.estimates) / pmax(last.known.distances_3, 1e-10)
-        
-        last.known.gradient <- (g1 * 3 + g2 * 2 + g3 * 1) / 6
-        last.distance <- sqrt(rowSums((outside.points_matrix - boundary.points_matrix)^2))
-        
-        DISTANCES[outsider.indices] <- last.distance * last.known.gradient + boundary.estimates
-      }
-      predict.fit <- DISTANCES
-    }
-    
-    if (point.only) {
-      return(list(Point.est = predict.fit, RPM = REGRESSION.POINT.MATRIX))
-    }
-  } else {
-    predict.fit <- NULL
-  } # is.null point.est
-  
-  if(!is.null(type)){
-    fitted.matrix$y.hat <- ifelse(fitted.matrix$y.hat %% 1 < 0.5, floor(fitted.matrix$y.hat), ceiling(fitted.matrix$y.hat))
-    fitted.matrix$y.hat <- pmin(max(original.DV), pmax(min(original.DV), fitted.matrix$y.hat))
-    if(!is.null(predict.fit)){
-      predict.fit <- ifelse(predict.fit %% 1 < 0.5, floor(predict.fit), ceiling(predict.fit))
-      predict.fit <- pmin(max(original.DV), pmax(min(original.DV), predict.fit))
-    }
-  }
-  
-  rhs.partitions <- as.data.frame(reg.points.matrix)
-  fitted.matrix$residuals <-   fitted.matrix$y.hat - original.DV
-  
-  if(!is.null(type) && type=="class"){
-    R2 <- as.numeric(format(mean(fitted.matrix$y.hat==fitted.matrix$y), digits = 4))
-  } else {
-    y.mean <- mean(fitted.matrix$y)
-    R2 <- (sum((fitted.matrix$y - y.mean)*(fitted.matrix$y.hat - y.mean))^2)/(sum((fitted.matrix$y - y.mean)^2)*sum((fitted.matrix$y.hat - y.mean)^2))
-  }
-  
-  lower.pred.int <- NULL
-  upper.pred.int <- NULL
-  pred.int <- NULL
-  
-  if(is.numeric(confidence.interval)){
-    ci <- abs(UPM.VaR((1-confidence.interval)/2, degree = 1, fitted.matrix$residuals))
-    fitted.matrix$conf.int.pos <- fitted.matrix$y.hat + ci
-    fitted.matrix$conf.int.neg <- fitted.matrix$y.hat - ci
-
-    if(!is.null(point.est)){
-      lower.pred.int = predict.fit - ci
-      upper.pred.int = ci + predict.fit
-
-      pred.int = data.frame(lower.pred.int, upper.pred.int)
-    }
-  }
-  
-  ### 3d plot
-  if(plot && n == 2){
+  if (plot && ncol(X) == 2L) {
     .nns_require_rgl()
-    rgl::plot3d(x = original.IVs[ , 1], y = original.IVs[ , 2], z = original.DV, box = FALSE, size = 3, col='steelblue', xlab = colnames(reg.points.matrix)[1], ylab = colnames(reg.points.matrix)[2], zlab = y.label )
-
-    if(plot.regions){
-      region.yhat.fun <- switch(noise.reduction,
-                                "mean"       = mean,
-                                "median"     = median,
-                                "mode"       = mode,
-                                "mode_class" = mode,
-                                gravity)   # "off" / default
-      for(id in unique(NNS.ID)){
-        m   <- NNS.ID == id
-        x1v <- original.IVs[m, 1]; x2v <- original.IVs[m, 2]
-        min.x1 <- min(x1v); max.x1 <- max(x1v)
-        min.x2 <- min(x2v); max.x2 <- max(x2v)
-        yh     <- region.yhat.fun(original.DV[m])
-        rgl::quads3d(x = c(min.x1, min.x1, max.x1, max.x1),
-                     y = c(min.x2, max.x2, max.x2, min.x2),
-                     z = c(yh, yh, yh, yh), col = "pink", alpha = 1)
-        if(identical(min.x1, max.x1) || identical(min.x2, max.x2)){
-          rgl::segments3d(x = c(min.x1, max.x1),
-                          y = c(min.x2, max.x2),
-                          z = c(yh, yh), col = "pink", alpha = 1)
-        }
-      }
-    }#plot.regions = T
-
-    rgl::points3d(x = as.numeric(REGRESSION.POINT.MATRIX[[1]]), y = as.numeric(REGRESSION.POINT.MATRIX[[2]]), z = as.numeric(REGRESSION.POINT.MATRIX[[3]]), col = 'red', size = 5)
-    if(!is.null(point.est)){
-      if(is.null(np)){
-        rgl::points3d(x = point.est[1], y = point.est[2], z = predict.fit, col = 'green', size = 5)
-      } else {
-        rgl::points3d(x = point.est[,1], y = point.est[,2], z = predict.fit, col = 'green', size = 5)
+    rgl::plot3d(X[, 1L], X[, 2L], y, box = FALSE, size = 3,
+                col = "steelblue", xlab = colnames(X)[1L],
+                ylab = colnames(X)[2L], zlab = "Y")
+    rgl::points3d(rpm[[1L]], rpm[[2L]], rpm$y.hat,
+                  col = "red", size = 5)
+    if (!is.null(Xpoint)) {
+      rgl::points3d(Xpoint[, 1L], Xpoint[, 2L], point.pred,
+                    col = "green", size = 5)
+    }
+    
+    if (plot.regions) {
+      for (id in unique(partition$ids)) {
+        idx <- partition$ids == id
+        x1 <- range(X[idx, 1L])
+        x2 <- range(X[idx, 2L])
+        z <- .nns_mreg_group_reduce(y[idx], noise.reduction, is.class)
+        rgl::quads3d(
+          x = c(x1[1L], x1[1L], x1[2L], x1[2L]),
+          y = c(x2[1L], x2[2L], x2[2L], x2[1L]),
+          z = rep(z, 4L), col = "pink", alpha = 0.6
+        )
       }
     }
   }
   
-  ### Residual plot
-  if(residual.plot){
-    resids <- cbind(original.DV, y.hat)
-    r2.leg <- bquote(bold(R ^ 2 == .(format(R2, digits = 4))))
-    if(!is.null(type) && type=="class") r2.leg <- paste("Accuracy: ", R2)
-    plot(seq_along(original.DV), original.DV, pch = 1, lwd = 2, col = "steelblue", xlab = "Index", ylab = expression(paste("y (blue)   ", hat(y), " (red)")), cex.lab = 1.5, mgp = c(2, .5, 0))
-    lines(seq_along(fitted.matrix$y.hat), fitted.matrix$y.hat, col = 'red', lwd = 2, lty = 1)
-    
-    if(is.numeric(confidence.interval)){
-      polygon(c(seq_along(y.hat), rev(seq_along(y.hat))), c(na.omit(fitted.matrix$conf.int.pos), rev(na.omit(fitted.matrix$conf.int.neg))),
-              col = rgb(1, 192/255, 203/255, alpha = 0.375),
-              border = NA)
+  if (residual.plot) {
+    graphics::plot(seq_along(y), y, pch = 1, lwd = 2,
+                   col = "steelblue", xlab = "Index",
+                   ylab = expression(paste("y (blue)   ", hat(y), " (red)")))
+    graphics::lines(seq_along(fitted.pred), fitted.pred,
+                    col = "red", lwd = 2)
+    if (!is.null(intervals$conf.lower)) {
+      idx <- seq_along(y)
+      graphics::polygon(c(idx, rev(idx)),
+                        c(intervals$conf.upper, rev(intervals$conf.lower)),
+                        col = grDevices::rgb(1, 192 / 255, 203 / 255, alpha = 0.375),
+                        border = NA)
     }
-    
-    title(main = paste0("NNS Order = multiple"), cex.main = 2)
-    legend(location, legend = r2.leg, bty = 'n')
+    label <- if (is.class) paste("Accuracy:", format(metric, digits = 4)) else
+      bquote(bold(R^2 == .(format(metric, digits = 4))))
+    graphics::legend(if (is.null(location)) "top" else location,
+                     legend = label, bty = "n")
   }
   
-  ### Return Values
-  if(return.values){
-    return(list(R2 = R2,
-                rhs.partitions = .NNS.df(rhs.partitions),
-                RPM = .NNS.df(REGRESSION.POINT.MATRIX) ,
-                Point.est = predict.fit,
-                pred.int = .NNS.df(pred.int),
-                Fitted.xy = .NNS.df(fitted.matrix)))
-  } else {
-    invisible(list(R2 = R2,
-                   rhs.partitions = .NNS.df(rhs.partitions),
-                   RPM = .NNS.df(REGRESSION.POINT.MATRIX),
-                   Point.est = predict.fit,
-                   pred.int = .NNS.df(pred.int),
-                   Fitted.xy = .NNS.df(fitted.matrix)))
-  }
+  out <- list(
+    R2 = metric,
+    rhs.partitions = .NNS.df(as.data.frame(partition$rhs)),
+    RPM = .NNS.df(rpm),
+    Point.est = point.pred,
+    pred.int = .NNS.df(intervals$pred.int),
+    Fitted.xy = .NNS.df(fitted),
+    n.best = k,
+    dist = dist,
+    class.levels = task$class.levels
+  )
+  
+  if (return.values) out else invisible(out)
 }
