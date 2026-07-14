@@ -72,10 +72,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] 0.9595032
+    ## [1] 0.950153
     ## 
     ## $Dependence
-    ## [1] 0.9595032
+    ## [1] 0.950153
 
 ### Cyclic Relationship
 
@@ -103,10 +103,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] 0.202252
+    ## [1] 0.1092458
     ## 
     ## $Dependence
-    ## [1] 0.8197963
+    ## [1] 0.8897228
 
 ### Asymmetrical Analysis
 
@@ -131,10 +131,10 @@ NNS.dep(x, y, asym = TRUE)
 ```
 
     ## $Correlation
-    ## [1] 0.202252
+    ## [1] 0.1092458
     ## 
     ## $Dependence
-    ## [1] 0.8197963
+    ## [1] 0.8897228
 
 ``` r
 
@@ -149,10 +149,10 @@ NNS.dep(y, x, asym = TRUE)
 ```
 
     ## $Correlation
-    ## [1] 0.07270847
+    ## [1] -0.01060862
     ## 
     ## $Dependence
-    ## [1] 0.4086234
+    ## [1] 0.01060865
 
 ### Dependence
 
@@ -174,10 +174,10 @@ NNS.dep(df$x, df$y)
 ```
 
     ## $Correlation
-    ## [1] 0.05834412
+    ## [1] -0.02782733
     ## 
     ## $Dependence
-    ## [1] 0.46764
+    ## [1] 0.3489969
 
 ## p-values for `NNS.dep()`
 
@@ -206,24 +206,24 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 ![](NNSvignette_03_Correlation_and_Dependence_files/figure-html/permutattions_res-1.png)
 
     ## $Correlation
-    ## [1] 0.2957015
+    ## [1] 0.2350543
     ## 
     ## $`Correlation p.value`
-    ## [1] 0.18
+    ## [1] 0.17
     ## 
     ## $`Correlation 95% CIs`
     ##       2.5%      97.5% 
-    ## -0.1544429  0.4062421 
+    ## -0.1899710  0.3465982 
     ## 
     ## $Dependence
-    ## [1] 0.7932674
+    ## [1] 0.8197227
     ## 
     ## $`Dependence p.value`
     ## [1] 0
     ## 
     ## $`Dependence 95% CIs`
     ##      2.5%     97.5% 
-    ## 0.5467152 0.6782456
+    ## 0.4920102 0.6685294
 
 ## Multivariate Dependence `NNS.copula()`
 
@@ -240,7 +240,7 @@ x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
 NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
 ```
 
-    ## [1] 0.3278775
+    ## [1] 0.1977627
 
 ## References
 

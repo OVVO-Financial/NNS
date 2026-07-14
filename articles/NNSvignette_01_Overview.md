@@ -221,7 +221,7 @@ cat(sprintf("Pearson r = %.4f\n", cor(x,y)))
 cat(sprintf("NNS.dep  = %.4f\n", NNS.dep(x,y)$Dependence))
 ```
 
-    ## NNS.dep  = 0.7097
+    ## NNS.dep  = 0.7421
 
 ``` r
 
@@ -266,7 +266,7 @@ cop <- NNS.copula(X, continuous=TRUE, plot=FALSE)
 cop
 ```
 
-    ## [1] 0.5692785
+    ## [1] 0.521797
 
 ### 3.3 Code: copula
 
@@ -686,7 +686,7 @@ NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg
 ```
 
     ## Causation.x.given.y Causation.y.given.x           C(x--->y) 
-    ##           0.2607148           0.3863580           0.3933374
+    ##           0.2993174           0.3896713           0.2637990
 
 ``` r
 
@@ -694,7 +694,7 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 ```
 
     ## Causation.x.given.y Causation.y.given.x           C(y--->x) 
-    ##           0.3863580           0.2607148           0.3933374
+    ##           0.3896713           0.2993174           0.2637990
 
 **Interpretation.** Examine asymmetry in scores to infer direction. The
 method conditions partial‑moment dependence on candidate drivers.
@@ -760,15 +760,15 @@ NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE
     ## [1] "CURRNET METHOD: nonlin"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"
-    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.73918547303925"
+    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.7937143939678"
     ## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"
-    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.73918547303925"
+    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.7937143939678"
     ## [1] "CURRNET METHOD: both"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"
-    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.602793969000443"
+    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.607121592790574"
     ## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"
-    ## [1] "BEST both OBJECTIVE FUNCTION = 0.602793969000443"
+    ## [1] "BEST both OBJECTIVE FUNCTION = 0.607121592790574"
 
 ![](NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png)
 

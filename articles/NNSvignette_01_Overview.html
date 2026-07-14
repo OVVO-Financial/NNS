@@ -285,7 +285,7 @@ such structure.</p>
 <pre><code><span><span class="co">## Pearson r = 0.0006</span></span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"NNS.dep  = %.4f\n"</span>, <span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">Dependence</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## NNS.dep  = 0.7097</span></span></code></pre>
+<pre><code><span><span class="co">## NNS.dep  = 0.7421</span></span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>a<span class="op">=</span><span class="va">x</span>, b<span class="op">=</span><span class="va">y</span>, c<span class="op">=</span><span class="va">x</span><span class="op">*</span><span class="va">y</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span>, sd<span class="op">=</span><span class="fl">.05</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/PM.matrix.html">PM.matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, target <span class="op">=</span> <span class="st">"means"</span>, variable<span class="op">=</span><span class="va">X</span>, pop_adj<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
@@ -322,7 +322,7 @@ such structure.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cop</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.copula.html">NNS.copula</a></span><span class="op">(</span><span class="va">X</span>, continuous<span class="op">=</span><span class="cn">TRUE</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">cop</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.5692785</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.521797</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="code-copula">3.3 Code: copula<a class="anchor" aria-label="anchor" href="#code-copula"></a>
@@ -732,11 +732,11 @@ conditional dependence)</li>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span>,  <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span>  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) </span></span>
-<span><span class="co">##           0.2607148           0.3863580           0.3933374</span></span></code></pre>
+<span><span class="co">##           0.2993174           0.3896713           0.2637990</span></span></code></pre>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span><span class="op">)</span>   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) </span></span>
-<span><span class="co">##           0.3863580           0.2607148           0.3933374</span></span></code></pre>
+<span><span class="co">##           0.3896713           0.2993174           0.2637990</span></span></code></pre>
 <p><strong>Interpretation.</strong> Examine asymmetry in scores to infer
 direction. The method conditions partial‑moment dependence on candidate
 drivers.</p>
@@ -796,15 +796,15 @@ drivers.</p>
 <span><span class="co">## [1] "CURRNET METHOD: nonlin"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.73918547303925"</span></span>
+<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.7937143939678"</span></span>
 <span><span class="co">## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.73918547303925"</span></span>
+<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.7937143939678"</span></span>
 <span><span class="co">## [1] "CURRNET METHOD: both"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.602793969000443"</span></span>
+<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.607121592790574"</span></span>
 <span><span class="co">## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.602793969000443"</span></span></code></pre>
+<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.607121592790574"</span></span></code></pre>
 <p><img src="NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $periods</span></span>
 <span><span class="co">## [1] 49 51 48 77 53 61 47 52 39</span></span>
