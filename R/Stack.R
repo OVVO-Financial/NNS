@@ -121,9 +121,11 @@ NNS.stack <- function(IVs.train,
     if (is.null(names(x)) || any(names(x) == "")) {
       names(x) <- paste0("X", seq_len(ncol(x)))
     }
-    if (anyDuplicated(names(x))) {
-      stop("[IVs.train] predictor names must be unique.", call. = FALSE)
-    }
+    # De-duplicate repeated predictor names with make.unique() exactly as
+    # NNS.reg's .nns_reg_as_frame() does, so the cbind(x, x) dimension trick
+    # works in NNS.stack instead of erroring. c("x", "x") becomes
+    # c("x", "x.1").
+    names(x) <- make.unique(names(x), sep = ".")
     x
   }
   
@@ -172,9 +174,10 @@ NNS.stack <- function(IVs.train,
     if (!had_names) {
       names(x) <- train_names
     } else {
-      if (anyDuplicated(names(x))) {
-        stop("[IVs.test] predictor names must be unique.", call. = FALSE)
-      }
+      # Normalize duplicate names with make.unique() identically to the
+      # training frame (and to NNS.reg), so cbind(x, x) test input aligns
+      # with the c("x", "x.1") training columns rather than erroring.
+      names(x) <- make.unique(names(x), sep = ".")
       missing_names <- setdiff(train_names, names(x))
       extra_names <- setdiff(names(x), train_names)
       if (length(missing_names) || length(extra_names)) {
