@@ -26,12 +26,40 @@ jobs:
       - name: Install historical NNS 11.6.5 and current branch
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
           mkdir -p /tmp/nns-old /tmp/nns-new /tmp/nns-history
-          git clone --quiet https://github.com/OVVO-Financial/NNS.git /tmp/nns-history
-          git -C /tmp/nns-history checkout --quiet 045d5a08c48483b7031f1e5455df5f946d031a6a
-          R CMD INSTALL --library=/tmp/nns-old /tmp/nns-history
-          R CMD INSTALL --library=/tmp/nns-new .
+          git clone --quiet https://github.com/OVVO-Financial/NNS.git /tmp/nns-history > historical-install.log 2>&1
+          clone_status=$?
+          if [ "$clone_status" = "0" ]; then
+            git -C /tmp/nns-history checkout --quiet 045d5a08c48483b7031f1e5455df5f946d031a6a >> historical-install.log 2>&1
+          fi
+          checkout_status=$?
+          if [ "$clone_status" = "0" ] && [ "$checkout_status" = "0" ]; then
+            R CMD INSTALL --library=/tmp/nns-old /tmp/nns-history >> historical-install.log 2>&1
+          fi
+          old_status=$?
+          if [ "$old_status" = "0" ]; then
+            R CMD INSTALL --library=/tmp/nns-new . > current-install.log 2>&1
+          else
+            echo "Historical install failed; current install skipped." > current-install.log
+          fi
+          new_status=$?
+          printf '%s %s %s %s\n' "$clone_status" "$checkout_status" "$old_status" "$new_status" > install.status
+          cat historical-install.log
+          cat current-install.log
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-install-diagnostics
+          path: |
+            historical-install.log
+            current-install.log
+            install.status
+
+      - name: Require successful installations
+        shell: bash
+        run: test "$(cat install.status)" = "0 0 0 0"
 
       - name: Generate historical and current outputs
         shell: bash
