@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/restore-racine-hastie-r2
+  pull_request:
+    branches:
+      - NNS-Beta-Version
 
 permissions:
   contents: write
@@ -41,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py
+          git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py .r2-trigger
           git add R/Regression.R tests/testthat/test-racine-hastie-r2.R
           git commit -m "Restore bounded Racine-Hastie R2 for NNS regression"
           git push origin HEAD:fix/restore-racine-hastie-r2
