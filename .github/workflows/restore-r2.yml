@@ -1,0 +1,47 @@
+name: Restore Racine-Hastie R2
+
+on:
+  push:
+    branches:
+      - fix/restore-racine-hastie-r2
+
+permissions:
+  contents: write
+
+jobs:
+  restore-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/restore-racine-hastie-r2
+          fetch-depth: 0
+
+      - uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Apply guarded source repair
+        run: python scripts/restore_racine_hastie_r2.py
+
+      - name: Run focused R2 tests
+        shell: Rscript {0}
+        run: |
+          devtools::load_all(".")
+          testthat::test_file("tests/testthat/test-racine-hastie-r2.R")
+
+      - name: Run package tests
+        shell: Rscript {0}
+        run: devtools::test(".")
+
+      - name: Commit repaired source and remove temporary machinery
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py
+          git add R/Regression.R tests/testthat/test-racine-hastie-r2.R
+          git commit -m "Restore bounded Racine-Hastie R2 for NNS regression"
+          git push origin HEAD:fix/restore-racine-hastie-r2
