@@ -1,144 +1,108 @@
-name: Downstream sync dispatch
+name: Dispatch R package update downstream
 
 on:
   push:
     branches: [NNS-Beta-Version]
-  workflow_dispatch:
+    paths:
+      - 'NNS_*.tar.gz'
+      - 'NNS_*.tgz'
+      - 'NNS_*.zip'
 
 permissions:
   contents: read
 
 jobs:
-  detect-and-dispatch:
+  dispatch-python-cache-refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out R NNS repo
+      - name: Check out exact R package commit
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
-      - name: Detect upstream changes
-        id: detect
+      - name: Resolve updated package release
+        id: package
         shell: bash
         run: |
           set -euo pipefail
 
-          if [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ]; then
-            git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" > changed_files.txt
-          elif git rev-parse HEAD^ >/dev/null 2>&1; then
-            git diff --name-only HEAD^ HEAD > changed_files.txt
-          else
-            git ls-files > changed_files.txt
+          git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" > changed_files.txt
+          cat changed_files.txt
+
+          package_file="$(grep -E '^NNS_[0-9][0-9A-Za-z.-]*\.(tar\.gz|tgz|zip)$' changed_files.txt | tail -n 1 || true)"
+          if [ -z "${package_file}" ]; then
+            echo "No NNS package archive changed; refusing to dispatch."
+            exit 1
           fi
 
-          if grep -q '^src/' changed_files.txt; then
-            echo "src_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "src_changed=false" >> "$GITHUB_OUTPUT"
+          version="$(printf '%s' "${package_file}" | sed -E 's/^NNS_([^/]+)\.(tar\.gz|tgz|zip)$/\1/')"
+          if [ -z "${version}" ] || [ "${version}" = "${package_file}" ]; then
+            echo "Could not derive NNS version from ${package_file}."
+            exit 1
           fi
 
-          if grep -Eq '^(R/|NAMESPACE$|DESCRIPTION$)' changed_files.txt; then
-            echo "r_api_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "r_api_changed=false" >> "$GITHUB_OUTPUT"
-          fi
+          python - "${version}" <<'PY'
+          import re
+          import sys
 
-          if grep -q '^DESCRIPTION$' changed_files.txt; then
-            echo "description_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "description_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          version="$(awk -F': *' '$1 == "Version" { print $2 }' DESCRIPTION)"
-          echo "r_version=${version}" >> "$GITHUB_OUTPUT"
-
-          if git rev-parse "${GITHUB_SHA}:src" >/dev/null 2>&1; then
-            src_hash="$(git rev-parse "${GITHUB_SHA}:src")"
-          else
-            src_hash="no-src-directory"
-          fi
-          echo "r_src_tree_hash=${src_hash}" >> "$GITHUB_OUTPUT"
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          files = [
-              line.strip()
-              for line in Path("changed_files.txt").read_text().splitlines()
-              if line.strip()
-          ]
-          Path("changed_files.json").write_text(json.dumps(files), encoding="utf-8")
+          value = sys.argv[1]
+          match = re.fullmatch(r"(\d+)\.(\d+)(?:\.\d+)?(?:[-+].*)?", value)
+          if match is None:
+              raise SystemExit(f"Unsupported NNS package version: {value!r}")
+          if (int(match.group(1)), int(match.group(2))) < (13, 0):
+              raise SystemExit(f"NNS {value} is below the supported minimum 13.0")
           PY
 
-      - name: Dispatch NNS-core sync
-        if: steps.detect.outputs.src_changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.OVVO_SYNC_TOKEN }}
-          R_VERSION: ${{ steps.detect.outputs.r_version }}
-          R_SRC_TREE_HASH: ${{ steps.detect.outputs.r_src_tree_hash }}
-          SRC_CHANGED: ${{ steps.detect.outputs.src_changed }}
-          R_API_CHANGED: ${{ steps.detect.outputs.r_api_changed }}
-          DESCRIPTION_CHANGED: ${{ steps.detect.outputs.description_changed }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          jq -n \
-            --arg r_repo "OVVO-Financial/NNS" \
-            --arg r_commit "${GITHUB_SHA}" \
-            --arg r_ref "${GITHUB_REF_NAME}" \
-            --arg r_version "${R_VERSION}" \
-            --arg r_src_tree_hash "${R_SRC_TREE_HASH}" \
-            --argjson src_changed "${SRC_CHANGED}" \
-            --argjson r_api_changed "${R_API_CHANGED}" \
-            --argjson description_changed "${DESCRIPTION_CHANGED}" \
-            --slurpfile changed_files changed_files.json \
-            '{event_type: "nns-r-src-updated",
-              client_payload: {
-                r_repo: $r_repo,
-                r_commit: $r_commit,
-                r_ref: $r_ref,
-                r_version: $r_version,
-                r_src_tree_hash: $r_src_tree_hash,
-                src_changed: $src_changed,
-                r_api_changed: $r_api_changed,
-                description_changed: $description_changed,
-                changed_files: $changed_files[0]
-              }}' > payload.json
-          gh api --method POST repos/OVVO-Financial/NNS-core/dispatches --input payload.json
+          source_tarball="NNS_${version}.tar.gz"
+          if [ ! -f "${source_tarball}" ]; then
+            source_tarball="NNS_${version}.tgz"
+          fi
+          windows_binary="NNS_${version}.zip"
 
-      - name: Dispatch NNS-python API or version review
-        if: steps.detect.outputs.r_api_changed == 'true' || steps.detect.outputs.description_changed == 'true'
+          test -f "${source_tarball}" || {
+            echo "Missing source package for NNS ${version}."
+            exit 1
+          }
+          test -f "${windows_binary}" || {
+            echo "Missing Windows binary for NNS ${version}."
+            exit 1
+          }
+
+          {
+            echo "r_version=${version}"
+            echo "source_tarball=${source_tarball}"
+            echo "windows_binary=${windows_binary}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Dispatch exact R package to NNS-python
         env:
           GH_TOKEN: ${{ secrets.OVVO_SYNC_TOKEN }}
-          R_VERSION: ${{ steps.detect.outputs.r_version }}
-          R_SRC_TREE_HASH: ${{ steps.detect.outputs.r_src_tree_hash }}
-          SRC_CHANGED: ${{ steps.detect.outputs.src_changed }}
-          R_API_CHANGED: ${{ steps.detect.outputs.r_api_changed }}
-          DESCRIPTION_CHANGED: ${{ steps.detect.outputs.description_changed }}
+          R_VERSION: ${{ steps.package.outputs.r_version }}
+          SOURCE_TARBALL: ${{ steps.package.outputs.source_tarball }}
+          WINDOWS_BINARY: ${{ steps.package.outputs.windows_binary }}
         shell: bash
         run: |
           set -euo pipefail
+          test -n "${GH_TOKEN:-}" || {
+            echo "OVVO_SYNC_TOKEN is required to dispatch to NNS-python."
+            exit 1
+          }
+
           jq -n \
-            --arg r_repo "OVVO-Financial/NNS" \
+            --arg r_repo "${GITHUB_REPOSITORY}" \
             --arg r_commit "${GITHUB_SHA}" \
             --arg r_ref "${GITHUB_REF_NAME}" \
             --arg r_version "${R_VERSION}" \
-            --arg r_src_tree_hash "${R_SRC_TREE_HASH}" \
-            --argjson src_changed "${SRC_CHANGED}" \
-            --argjson r_api_changed "${R_API_CHANGED}" \
-            --argjson description_changed "${DESCRIPTION_CHANGED}" \
-            --slurpfile changed_files changed_files.json \
-            '{event_type: "nns-r-api-or-version-updated",
+            --arg source_tarball "${SOURCE_TARBALL}" \
+            --arg windows_binary "${WINDOWS_BINARY}" \
+            '{event_type: "nns-r-package-updated",
               client_payload: {
                 r_repo: $r_repo,
                 r_commit: $r_commit,
                 r_ref: $r_ref,
                 r_version: $r_version,
-                r_src_tree_hash: $r_src_tree_hash,
-                src_changed: $src_changed,
-                r_api_changed: $r_api_changed,
-                description_changed: $description_changed,
-                changed_files: $changed_files[0]
+                source_tarball: $source_tarball,
+                windows_binary: $windows_binary
               }}' > payload.json
+
           gh api --method POST repos/OVVO-Financial/NNS-python/dispatches --input payload.json
