@@ -30,21 +30,36 @@ jobs:
       - name: Apply guarded source repair
         run: python scripts/restore_racine_hastie_r2.py
 
-      - name: Run focused R2 tests
-        shell: Rscript {0}
+      - name: Run focused R2 tests and record result
+        shell: bash
         run: |
-          devtools::load_all(".")
-          testthat::test_file("tests/testthat/test-racine-hastie-r2.R")
+          set +e
+          mkdir -p diagnostics
+          Rscript -e 'devtools::load_all("."); testthat::test_file("tests/testthat/test-racine-hastie-r2.R", reporter = "summary")' > diagnostics/r2-test.log 2>&1
+          status=$?
+          echo "${status}" > diagnostics/r2-test.status
+          cat diagnostics/r2-test.log
+          exit 0
 
-      - name: Run package tests
-        shell: Rscript {0}
-        run: devtools::test(".")
+      - name: Run package tests when focused tests pass
+        shell: bash
+        run: |
+          if [ "$(cat diagnostics/r2-test.status)" != "0" ]; then
+            echo "Focused R2 tests failed; skipping package suite."
+            exit 0
+          fi
+          Rscript -e 'devtools::test(".")'
 
-      - name: Commit repaired source and remove temporary machinery
+      - name: Commit result
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py .r2-trigger
-          git add R/Regression.R tests/testthat/test-racine-hastie-r2.R
-          git commit -m "Restore bounded Racine-Hastie R2 for NNS regression"
+          if [ "$(cat diagnostics/r2-test.status)" = "0" ]; then
+            git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py .r2-trigger
+            git add R/Regression.R tests/testthat/test-racine-hastie-r2.R
+            git commit -m "Restore bounded Racine-Hastie R2 for NNS regression"
+          else
+            git add diagnostics/r2-test.log diagnostics/r2-test.status
+            git commit -m "Record Racine-Hastie R2 test failure"
+          fi
           git push origin HEAD:fix/restore-racine-hastie-r2
