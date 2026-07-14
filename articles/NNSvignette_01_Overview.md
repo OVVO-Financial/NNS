@@ -558,7 +558,7 @@ NNS.reg(x = x_train, y = y_train, order = NULL, point.est = x_test)
 ![](NNSvignette_01_Overview_files/figure-html/unnamed-chunk-11-1.png)
 
     ## $R2
-    ## [1] 0.9270126
+    ## [1] 0.9276657
     ## 
     ## $SE
     ## [1] 0.2014571

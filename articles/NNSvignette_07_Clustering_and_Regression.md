@@ -112,7 +112,7 @@ NNS.reg(x, y, ncores = 1)
 ![](NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear-1.png)
 
     ## $R2
-    ## [1] 0.9999856
+    ## [1] 0.9999863
     ## 
     ## $SE
     ## [1] 0.18182
