@@ -1,6 +1,6 @@
 historical_dep_11_6_5 <- function(x, y, asym = FALSE) {
   l <- length(x)
-  obs <- max(8, l / 8)
+  obs <- as.integer(max(8, l / 8))
 
   part_xy <- suppressWarnings(
     NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE,
@@ -16,46 +16,45 @@ historical_dep_11_6_5 <- function(x, y, asym = FALSE) {
   }
 
   part_xy <- part_xy$dt
-  part_xy <- part_xy[complete.cases(part_xy), ]
-  weights_xy <- part_xy[, .N / l, by = quadrant]$V1
-
+  part_xy <- part_xy[complete.cases(part_xy), , drop = FALSE]
   part_yx <- part_yx$dt
-  part_yx <- part_yx[complete.cases(part_yx), ]
-  weights_yx <- part_yx[, .N / l, by = quadrant]$V1
+  part_yx <- part_yx[complete.cases(part_yx), , drop = FALSE]
 
   dep_fn <- function(xx, yy) {
-    NNS.copula(cbind(xx, yy)) * sign(NNS:::fast_lm(xx, yy)$coef[2])
+    NNS.copula(cbind(xx, yy)) * sign(NNS:::fast_lm(xx, yy)$coef[2L])
   }
 
-  res_xy <- suppressWarnings(tryCatch(
-    part_xy[, dep_fn(.SD[[1L]], .SD[[2L]]),
-            by = quadrant, .SDcols = c(1L, 2L)],
-    error = function(e) {
-      part_xy[, dep_fn(.SD[[1L]], .SD[[2L]]),
-              by = prior.quadrant, .SDcols = c(1L, 2L)]
+  grouped <- function(part) {
+    group_name <- if ("quadrant" %in% names(part)) {
+      "quadrant"
+    } else {
+      "prior.quadrant"
     }
-  ))
+    ids <- part[[group_name]]
+    groups <- unique(ids)
+    values <- vapply(groups, function(id) {
+      idx <- which(ids == id)
+      dep_fn(part[idx, 1L], part[idx, 2L])
+    }, numeric(1L))
+    weights <- vapply(groups, function(id) {
+      sum(ids == id) / l
+    }, numeric(1L))
+    list(values = values, weights = weights)
+  }
 
-  res_yx <- suppressWarnings(tryCatch(
-    part_yx[, dep_fn(.SD[[1L]], .SD[[2L]]),
-            by = quadrant, .SDcols = c(1L, 2L)],
-    error = function(e) {
-      part_yx[, dep_fn(.SD[[1L]], .SD[[2L]]),
-              by = prior.quadrant, .SDcols = c(1L, 2L)]
-    }
-  ))
+  grouped_xy <- suppressWarnings(grouped(part_xy))
+  grouped_yx <- suppressWarnings(grouped(part_yx))
 
-  if (anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
-  if (is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
-  if (anyNA(res_yx)) res_yx[is.na(res_yx)] <- dep_fn(x, y)
-  if (is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
+  global_dep <- dep_fn(x, y)
+  grouped_xy$values[is.na(grouped_xy$values)] <- global_dep
+  grouped_yx$values[is.na(grouped_yx$values)] <- global_dep
 
-  dep_xy <- sum(abs(res_xy[, 2L]) * weights_xy)
-  dep_yx <- sum(abs(res_yx[, 2L]) * weights_yx)
+  dep_xy <- sum(abs(grouped_xy$values) * grouped_xy$weights)
+  dep_yx <- sum(abs(grouped_yx$values) * grouped_yx$weights)
   dependence <- if (asym) dep_xy else max(c(dep_yx, dep_xy))
 
-  lx <- part_xy[, length(unique(x))]
-  ly <- part_xy[, length(unique(y))]
+  lx <- length(unique(part_xy[[1L]]))
+  ly <- length(unique(part_xy[[2L]]))
   degree_x <- min(10, max(1, lx - 1), max(1, ly - 1))
 
   if ((lx < sqrt(l)) * (ly < sqrt(l)) == 1) {
@@ -72,8 +71,8 @@ historical_dep_11_6_5 <- function(x, y, asym = FALSE) {
     ))
   }
 
-  corr_xy <- sum(res_xy[, 2L] * weights_xy)
-  corr_yx <- sum(res_yx[, 2L] * weights_yx)
+  corr_xy <- sum(grouped_xy$values * grouped_xy$weights)
+  corr_yx <- sum(grouped_yx$values * grouped_yx$weights)
   correlation <- if (asym) corr_xy else max(c(corr_yx, corr_xy))
 
   list(Correlation = correlation, Dependence = dependence)
