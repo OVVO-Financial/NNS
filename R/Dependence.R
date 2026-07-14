@@ -33,7 +33,6 @@ NNS.dep <- function(x,
                     p.value   = FALSE,
                     print.map = FALSE) {
 
-  # ---- helper coercion ------------------------------------------------------
   .coerce_vec <- function(z, nm) {
     if (is.null(z)) return(NULL)
 
@@ -56,7 +55,6 @@ NNS.dep <- function(x,
     as.numeric(z)
   }
 
-  # ---- class coercions ------------------------------------------------------
   if (!is.null(y)) {
     x <- .coerce_vec(x, "x")
     y <- .coerce_vec(y, "y")
@@ -65,11 +63,9 @@ NNS.dep <- function(x,
     if (is.data.frame(x)) x <- data.matrix(x)
   }
 
-  # ---- missing values -------------------------------------------------------
   if (anyNA(x)) stop("x has missing values, please address.")
   if (!is.null(y) && anyNA(y)) stop("y has missing values, please address.")
 
-  # ---- p.value permutation setup --------------------------------------------
   if (p.value) {
     if (is.null(y)) stop("p.value = TRUE requires both x and y.")
     if (length(x) != length(y)) stop("x and y must have the same length.")
@@ -79,7 +75,6 @@ NNS.dep <- function(x,
     y   <- NULL
   }
 
-  # ---- matrix / p.value path ------------------------------------------------
   if (is.null(y)) {
     if (p.value) {
       original.par <- par(no.readonly = TRUE)
@@ -126,73 +121,71 @@ NNS.dep <- function(x,
     return(NNS.dep.matrix(x, asym = asym))
   }
 
-  # ---- bivariate path: restored from NNS 11.6.5 -----------------------------
+  # Bivariate estimator restored from NNS 11.6.5.
   if (length(x) != length(y)) stop("x and y must have the same length.")
 
   l <- length(x)
-  obs <- max(8, l / 8)
+  # NNS 11.6.5 passed max(8, n / 8) to an integer C++ argument. The current
+  # validator runs before coercion, so make the historical truncation explicit.
+  obs <- as.integer(max(8, l / 8))
 
-  # NNS 11.6.5 defines local segments using X-only partitions in both
-  # directions. The dependence estimator itself is then built from signed
-  # local NNS.copula values; this is distinct from NNS.reg's partition mode.
-  PART_xy <- suppressWarnings(
+  part_xy <- suppressWarnings(
     NNS.part(x, y, order = NULL, obs.req = obs, min.obs.stop = FALSE,
              type = "XONLY", Voronoi = print.map)
   )
-  PART_yx <- suppressWarnings(
+  part_yx <- suppressWarnings(
     NNS.part(y, x, order = NULL, obs.req = obs, min.obs.stop = FALSE,
              type = "XONLY", Voronoi = FALSE)
   )
 
-  if (nrow(PART_xy$regression.points) == 0L) {
+  if (nrow(part_xy$regression.points) == 0L) {
     return(list("Correlation" = 0, "Dependence" = 0))
   }
 
-  PART_xy <- PART_xy$dt
-  PART_xy <- PART_xy[complete.cases(PART_xy), ]
-  weights_xy <- PART_xy[, .N / l, by = quadrant]$V1
-
-  PART_yx <- PART_yx$dt
-  PART_yx <- PART_yx[complete.cases(PART_yx), ]
-  weights_yx <- PART_yx[, .N / l, by = quadrant]$V1
+  part_xy <- part_xy$dt
+  part_xy <- part_xy[complete.cases(part_xy), , drop = FALSE]
+  part_yx <- part_yx$dt
+  part_yx <- part_yx[complete.cases(part_yx), , drop = FALSE]
 
   dep_fn <- function(xx, yy) {
-    NNS.copula(cbind(xx, yy)) * sign(fast_lm(xx, yy)$coef[2])
+    NNS.copula(cbind(xx, yy)) * sign(fast_lm(xx, yy)$coef[2L])
   }
 
-  res_xy <- suppressWarnings(tryCatch(
-    PART_xy[, dep_fn(.SD[[1L]], .SD[[2L]]),
-            by = quadrant, .SDcols = c(1L, 2L)],
-    error = function(e) {
-      PART_xy[, dep_fn(.SD[[1L]], .SD[[2L]]),
-              by = prior.quadrant, .SDcols = c(1L, 2L)]
+  # Reproduce data.table's historical `by=` behavior using first-occurrence
+  # group order. Fall back to prior.quadrant exactly as 11.6.5 did.
+  grouped <- function(part) {
+    group_name <- if ("quadrant" %in% names(part)) {
+      "quadrant"
+    } else {
+      "prior.quadrant"
     }
-  ))
+    ids <- part[[group_name]]
+    groups <- unique(ids)
+    values <- vapply(groups, function(id) {
+      idx <- which(ids == id)
+      dep_fn(part[idx, 1L], part[idx, 2L])
+    }, numeric(1L))
+    weights <- vapply(groups, function(id) {
+      sum(ids == id) / l
+    }, numeric(1L))
+    list(values = values, weights = weights)
+  }
 
-  res_yx <- suppressWarnings(tryCatch(
-    PART_yx[, dep_fn(.SD[[1L]], .SD[[2L]]),
-            by = quadrant, .SDcols = c(1L, 2L)],
-    error = function(e) {
-      PART_yx[, dep_fn(.SD[[1L]], .SD[[2L]]),
-              by = prior.quadrant, .SDcols = c(1L, 2L)]
-    }
-  ))
+  grouped_xy <- suppressWarnings(grouped(part_xy))
+  grouped_yx <- suppressWarnings(grouped(part_yx))
 
-  if (anyNA(res_xy)) res_xy[is.na(res_xy)] <- dep_fn(x, y)
-  if (is.null(ncol(res_xy))) res_xy <- cbind(res_xy, res_xy)
+  global_dep <- dep_fn(x, y)
+  grouped_xy$values[is.na(grouped_xy$values)] <- global_dep
+  grouped_yx$values[is.na(grouped_yx$values)] <- global_dep
 
-  if (anyNA(res_yx)) res_yx[is.na(res_yx)] <- dep_fn(x, y)
-  if (is.null(ncol(res_yx))) res_yx <- cbind(res_yx, res_yx)
-
-  dep_xy <- sum(abs(res_xy[, 2L]) * weights_xy)
-  dep_yx <- sum(abs(res_yx[, 2L]) * weights_yx)
+  dep_xy <- sum(abs(grouped_xy$values) * grouped_xy$weights)
+  dep_yx <- sum(abs(grouped_yx$values) * grouped_yx$weights)
   dependence <- if (asym) dep_xy else max(c(dep_yx, dep_xy))
 
-  lx <- PART_xy[, length(unique(x))]
-  ly <- PART_xy[, length(unique(y))]
+  lx <- length(unique(part_xy[[1L]]))
+  ly <- length(unique(part_xy[[2L]]))
   degree_x <- min(10, max(1, lx - 1), max(1, ly - 1))
 
-  # Preserve the NNS 11.6.5 discrete/discrete fallback blend exactly.
   if ((lx < sqrt(l)) * (ly < sqrt(l)) == 1) {
     poly_base <- suppressWarnings(tryCatch(
       fast_lm_mult(poly(x, degree_x), abs(y))$r.squared,
@@ -207,8 +200,8 @@ NNS.dep <- function(x,
     ))
   }
 
-  corr_xy <- sum(res_xy[, 2L] * weights_xy)
-  corr_yx <- sum(res_yx[, 2L] * weights_yx)
+  corr_xy <- sum(grouped_xy$values * grouped_xy$weights)
+  corr_yx <- sum(grouped_yx$values * grouped_yx$weights)
   corr <- if (asym) corr_xy else max(c(corr_yx, corr_xy))
 
   list("Correlation" = corr, "Dependence" = dependence)
@@ -245,7 +238,6 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
   }
 
   raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym)))
-
 
   raw.both <- unlist(raw.both)
   l <- length(raw.both)
