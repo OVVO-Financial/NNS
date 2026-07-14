@@ -24,7 +24,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            any::devtools
           needs: check
 
       - name: Apply guarded source repair
@@ -55,7 +57,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ "$(cat diagnostics/r2-test.status)" = "0" ]; then
-            git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py .r2-trigger
+            git rm .github/workflows/restore-r2.yml scripts/restore_racine_hastie_r2.py .r2-trigger diagnostics/r2-test.log diagnostics/r2-test.status
             git add R/Regression.R tests/testthat/test-racine-hastie-r2.R
             git commit -m "Restore bounded Racine-Hastie R2 for NNS regression"
           else
