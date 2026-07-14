@@ -106,7 +106,12 @@ NNS.copula <- function (
   discrete_D_pm <- DPM_nD(data = X, target = target, degree = 0, norm = TRUE)
   if(continuous) continuous_D_pm <- DPM_nD(data = X, target = target, degree = 1, norm = TRUE) else continuous_D_pm <- discrete_D_pm
   
-  indep_D_pm <- 1-(0.5^n)
+  # DPM_nD counts a point as concordant when it is all-below OR all-above the
+  # target (both fully-aligned orthants), so under independence
+  # P(discordant) = 1 - 2*0.5^n (0.5 when n = 2), not 1 - 0.5^n. The old
+  # 1 - 0.5^n anchor left a fixed residual in the discordant terms and a
+  # non-vanishing dependence floor for independent data.
+  indep_D_pm <- 1 - 2*(0.5^n)
   
   n_dim_discrete_dep <- abs(discrete_D_pm - indep_D_pm)/indep_D_pm 
   n_dim_continuous_dep <- abs(continuous_D_pm - indep_D_pm)/indep_D_pm
