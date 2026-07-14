@@ -1,0 +1,106 @@
+name: Validate NNS.dep against 11.6.5
+
+on:
+  pull_request:
+    branches:
+      - NNS-Beta-Version
+
+permissions:
+  contents: read
+
+jobs:
+  compare-historical-dependence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::remotes
+          needs: check
+
+      - name: Install NNS 11.6.5 and current branch in isolated libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/nns-old /tmp/nns-new
+          curl -fsSL \
+            https://cran.r-project.org/src/contrib/Archive/NNS/NNS_11.6.5.tar.gz \
+            -o /tmp/NNS_11.6.5.tar.gz
+          R CMD INSTALL --library=/tmp/nns-old /tmp/NNS_11.6.5.tar.gz
+          R CMD INSTALL --library=/tmp/nns-new .
+
+      - name: Generate historical and current outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/dep-cases.R <<'RSCRIPT'
+          library(NNS)
+
+          set.seed(123)
+          x_null <- rnorm(100)
+          y_null <- rnorm(100)
+
+          set.seed(42)
+          x_nonlin <- seq(-3, 3, length.out = 160)
+          y_nonlin <- x_nonlin^2 + 0.15 * rnorm(length(x_nonlin))
+
+          x_disc <- rep(1:4, each = 30)
+          y_disc <- rep(c(1, 1, 2, 2), each = 30)
+
+          set.seed(7)
+          x_asym <- runif(140, -2, 2)
+          y_asym <- exp(x_asym) + rnorm(140, sd = 0.2)
+
+          set.seed(99)
+          x_matrix <- rnorm(90)
+          y_matrix <- x_matrix^2 + rnorm(90, sd = 0.3)
+          z_matrix <- rnorm(90)
+
+          matrix_result <- NNS.dep(cbind(
+            x = x_matrix,
+            y = y_matrix,
+            z = z_matrix
+          ))
+
+          result <- list(
+            null = NNS.dep(x_null, y_null),
+            nonlinear = NNS.dep(x_nonlin, y_nonlin),
+            discrete = NNS.dep(x_disc, y_disc),
+            asym_xy = NNS.dep(x_asym, y_asym, asym = TRUE),
+            asym_yx = NNS.dep(y_asym, x_asym, asym = TRUE),
+            matrix = list(
+              Correlation = unclass(matrix_result$Correlation),
+              Dependence = unclass(matrix_result$Dependence)
+            )
+          )
+
+          saveRDS(result, Sys.getenv("NNS_DEP_OUTPUT"))
+          RSCRIPT
+
+          NNS_DEP_OUTPUT=/tmp/old.rds R_LIBS=/tmp/nns-old Rscript --vanilla /tmp/dep-cases.R
+          NNS_DEP_OUTPUT=/tmp/new.rds R_LIBS=/tmp/nns-new Rscript --vanilla /tmp/dep-cases.R
+
+      - name: Require exact historical parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          Rscript --vanilla - <<'RSCRIPT'
+          old <- readRDS("/tmp/old.rds")
+          new <- readRDS("/tmp/new.rds")
+
+          comparison <- all.equal(new, old, tolerance = 1e-12, check.attributes = TRUE)
+          if (!isTRUE(comparison)) {
+            print(comparison)
+            print(list(old = old, new = new))
+            stop("Current NNS.dep does not match installed NNS 11.6.5.")
+          }
+
+          cat("NNS 11.6.5 seed-123 null result:\n")
+          print(old$null)
+          stopifnot(old$null$Dependence < 0.4)
+          RSCRIPT
