@@ -73,7 +73,7 @@ dy.dx <- function(x, y, eval.point = NULL){
     }
 
     deriv.points <- do.call(rbind.data.frame, deriv.points)
-    # Order by eval.point using radix (C-locale) ordering to match data.table key
+
     deriv.points <- deriv.points[order(deriv.points[, "eval.point"], method = "radix"), , drop = FALSE]
     rownames(deriv.points) <- NULL
 
