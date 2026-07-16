@@ -64,7 +64,7 @@
   z <- sweep(rpm.x[, active, drop = FALSE], 2L, destination[active], "-")
   z <- sweep(z, 2L, ranges[active], "/")
   
-  if (dist == "L1") rowSums(abs(z)) else sqrt(rowSums(z^2))
+  if (dist == "NNS") rowSums(abs(z) + z^2) else if (dist == "L1") rowSums(abs(z)) else sqrt(rowSums(z^2))
 }
 
 .nns_mreg_predict_one <- function(destination, rpm, k, dist,
@@ -105,7 +105,7 @@
   rpm.x <- as.matrix(rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE])
   storage.mode(rpm.x) <- "double"
   storage.mode(Xtest) <- "double"
-  dist.code <- match(dist, c("L2", "L1", "FACTOR")) - 1L
+  dist.code <- match(dist, c("NNS", "L2", "L1", "FACTOR")) - 1L
 
   as.numeric(if (isTRUE(getOption("NNS.native.mreg", TRUE))) {
     NNS_mreg_predict_v2_cpp(
@@ -345,7 +345,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
                       n.best = NULL, type = NULL, point.est = NULL,
                       point.only = FALSE, plot = FALSE,
                       residual.plot = TRUE, location = NULL,
-                      noise.reduction = "off", dist = "L2",
+                      noise.reduction = "off", dist = NULL,
                       return.values = FALSE, plot.regions = FALSE,
                       ncores = NULL, confidence.interval = NULL) {
   

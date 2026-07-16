@@ -23,7 +23,8 @@ NNS.boost(
   feature.importance = TRUE,
   pred.int = NULL,
   status = TRUE,
-  seed = 123L
+  seed = 123L,
+  dist = NULL
 )
 }
 \arguments{
@@ -65,6 +66,8 @@ NNS.boost(
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
 \item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
+
+\item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance. \code{dist = "NNS"} is an explicit alias for the default.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.

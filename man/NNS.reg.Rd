@@ -23,7 +23,7 @@ NNS.reg(
   n.best = NULL,
   smooth = FALSE,
   noise.reduction = "off",
-  dist = "L2",
+  dist = NULL,
   ncores = NULL,
   point.only = FALSE,
   multivariate.call = FALSE
@@ -67,7 +67,7 @@ NNS.reg(
 
 \item{noise.reduction}{the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.}
 
-\item{dist}{options:("L1", "L2", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "FACTOR")} uses a frequency.}
+\item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 

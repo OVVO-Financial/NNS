@@ -90,12 +90,13 @@
 }
 
 .nns_reg_validate_dist <- function(dist) {
+  if (is.null(dist)) return("NNS")
   if (!is.character(dist) || length(dist) != 1L || is.na(dist)) {
-    stop("[dist] must be one of 'L1', 'L2', or 'FACTOR'.", call. = FALSE)
+    stop("[dist] must be NULL or one of 'NNS', 'L1', 'L2', or 'FACTOR'.", call. = FALSE)
   }
   dist <- toupper(dist)
-  if (!dist %in% c("L1", "L2", "FACTOR")) {
-    stop("[dist] must be one of 'L1', 'L2', or 'FACTOR'.", call. = FALSE)
+  if (!dist %in% c("NNS", "L1", "L2", "FACTOR")) {
+    stop("[dist] must be NULL or one of 'NNS', 'L1', 'L2', or 'FACTOR'.", call. = FALSE)
   }
   dist
 }
@@ -658,7 +659,7 @@
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
-#' @param dist options:("L1", "L2", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "FACTOR")} uses a frequency.
+#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param multivariate.call Internal argument for multivariate regressions.
 #' @param point.only Internal argument for abbreviated output.
@@ -780,7 +781,7 @@ NNS.reg <- function(x, y,
                     n.best = NULL,
                     smooth = FALSE,
                     noise.reduction = "off",
-                    dist = "L2",
+                    dist = NULL,
                     ncores = NULL,
                     point.only = FALSE,
                     multivariate.call = FALSE) {
