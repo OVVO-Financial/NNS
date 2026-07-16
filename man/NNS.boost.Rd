@@ -16,6 +16,7 @@ NNS.boost(
   balance = FALSE,
   ts.test = NULL,
   threshold = NULL,
+  dist = NULL,
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
   extreme = FALSE,
@@ -48,6 +49,8 @@ NNS.boost(
 \item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
 \item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+
+\item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance. \code{dist = "NNS"} is an explicit alias for the default.}
 
 \item{obj.fn}{expression;
 \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.}

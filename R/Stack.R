@@ -9,7 +9,7 @@
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param optimize.threshold logical; \code{TRUE} (default) Will optimize the probability threshold value for rounding in classification problems.  If \code{FALSE}, returns 0.5.
-#' @param dist options:("L1", "L2", "DTW", "FACTOR") the method of distance calculation; Selects the distance calculation used. \code{dist = "L2"} (default) selects the Euclidean distance and \code{(dist = "L1")} selects the Manhattan distance; \code{(dist = "DTW")} selects the dynamic time warping distance; \code{(dist = "FACTOR")} uses a frequency.
+#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
 #' @param CV.size numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
@@ -76,7 +76,7 @@ NNS.stack <- function(IVs.train,
                       obj.fn = expression(sum((predicted - actual)^2)),
                       objective = "min",
                       optimize.threshold = TRUE,
-                      dist = "L2",
+                      dist = NULL,
                       CV.size = NULL,
                       balance = FALSE,
                       ts.test = NULL,
@@ -351,19 +351,7 @@ NNS.stack <- function(IVs.train,
     ncores <- .scalar_integer(ncores, "ncores", minimum = 1L)
   }
   
-  if (!is.character(dist) || length(dist) != 1L || is.na(dist)) {
-    stop("[dist] must be one character value.", call. = FALSE)
-  }
-  dist <- match.arg(tolower(dist), c("l2", "l1", "dtw", "factor"))
-  if (dist != "l2") {
-    stop(paste0(
-      "The corrected NNS.stack currently supports dist = 'L2' only. ",
-      "The production multivariate NNS.reg path does not yet implement ",
-      "distinct L1, DTW, or FACTOR estimators, so those values are rejected ",
-      "rather than silently treated as L2."
-    ), call. = FALSE)
-  }
-  dist <- "L2"
+  dist <- .nns_reg_validate_dist(dist)
   
   # -------------------------------------------------------------------------
   # Input data and response coding

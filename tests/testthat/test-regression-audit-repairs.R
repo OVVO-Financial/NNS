@@ -162,7 +162,7 @@ test_that("distance modes are validated and recorded", {
   set.seed(6)
   x <- cbind(a = rnorm(30), b = rnorm(30))
   y <- x[, 1] + x[, 2]
-  for (d in c("L1", "L2", "FACTOR")) {
+  for (d in c("NNS", "L1", "L2", "FACTOR")) {
     fit <- NNS.reg(x, y, point.est = x[1:2, ], dist = d,
                    plot = FALSE, residual.plot = FALSE)
     expect_identical(fit$dist, d)

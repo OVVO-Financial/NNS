@@ -13,6 +13,7 @@
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
+#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #' @param obj.fn expression;
 #' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -59,6 +60,7 @@ NNS.boost <- function(IVs.train,
                       balance = FALSE,
                       ts.test = NULL,
                       threshold = NULL,
+                      dist = NULL,
                       obj.fn = expression(sum((predicted - actual)^2)),
                       objective = "min",
                       extreme = FALSE,
@@ -67,6 +69,7 @@ NNS.boost <- function(IVs.train,
                       pred.int = NULL,
                       status = TRUE,
                       seed = 123L) {
+  dist <- .nns_reg_validate_dist(dist)
   # ---------------------------------------------------------------------------
   
   # Local validation and coercion helpers
@@ -610,7 +613,8 @@ NNS.boost <- function(IVs.train,
         order = depth,
         ncores = 1,
         type = type,
-        point.only = TRUE
+        point.only = TRUE,
+        dist = dist
       )
     )
     
@@ -968,7 +972,7 @@ NNS.boost <- function(IVs.train,
       obj.fn = obj.fn,
       objective = objective,
       optimize.threshold = FALSE,
-      dist = "L2",
+      dist = dist,
       CV.size = cv_fraction,
       balance = balance,
       ts.test = ts.test,

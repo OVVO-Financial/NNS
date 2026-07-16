@@ -171,6 +171,16 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       }
       d[i] = acc;
     }
+  } else if (dist_code == 3) {
+    for (int i = 0; i < n; ++i) {
+      double acc = 0.0;
+      for (std::size_t a = 0; a < active.size(); ++a) {
+        const int j = active[a];
+        const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+        acc += std::fabs(z) + z * z;
+      }
+      d[i] = acc;
+    }
   } else {
     for (int i = 0; i < n; ++i) {
       double acc = 0.0;
@@ -376,6 +386,14 @@ struct PredictPathWorker : public Worker {
         }
         d[i] = acc;
       }
+    } else if (dist_code == 3) {
+      for (int i = 0; i < n; ++i) {
+        double acc = 0.0;
+        for (std::size_t a = 0; a < active.size(); ++a) {
+          const int j = active[a]; const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a]; acc += std::fabs(z) + z * z;
+        }
+        d[i] = acc;
+      }
     } else {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
@@ -471,7 +489,7 @@ NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x,
   return path(_, k - 1);
 }
 
-// dist_code: 0 = L2, 1 = L1, 2 = FACTOR (Hamming over encoded columns).
+// dist_code: 0 = L2, 1 = L1, 2 = FACTOR (Hamming over encoded columns), 3 = native NNS.
 // [[Rcpp::export]]
 NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
                                    const NumericVector& yhat,
@@ -519,6 +537,16 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) * inv_range[a]);
+        }
+        d[i] = acc;
+      }
+    } else if (dist_code == 3) {
+      for (int i = 0; i < n; ++i) {
+        double acc = 0.0;
+        for (std::size_t a = 0; a < active.size(); ++a) {
+          const int j = active[a];
+          const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+          acc += std::fabs(z) + z * z;
         }
         d[i] = acc;
       }
