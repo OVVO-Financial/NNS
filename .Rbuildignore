@@ -4,3 +4,10 @@
 ^doc$
 ^Meta$
 ^\.github/
+^_pkgdown\.yml$
+^examples$
+^book$
+^benchmarks$
+^tools$
+^NNS_.*\.tar\.gz$
+^NNS_.*\.zip$
