@@ -79,10 +79,9 @@ NNS.stack(
 
   options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance
   calculation. `dist = NULL` is the default and selects the native
-  blended NNS distance over range-normalized coordinates. `dist = "NNS"`
-  is an explicit alias for the default. `dist = "L2"` selects Euclidean
-  distance; `dist = "L1"` selects Manhattan distance; `dist = "FACTOR"`
-  uses a frequency.
+  blended NNS distance; `dist = "NNS"` is an explicit alias for the
+  default. `dist = "L2"` selects Euclidean distance; `dist = "L1"`
+  selects Manhattan distance; `dist = "FACTOR"` uses a frequency.
 
 - CV.size:
 

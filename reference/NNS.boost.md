@@ -150,7 +150,7 @@ NNS.boost(
   and
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
   calls. `dist = NULL` is the default and selects the native blended NNS
-  distance. `dist = "NNS"` is an explicit alias for the default.
+  distance; `dist = "NNS"` is an explicit alias for the default.
 
 ## Value
 
