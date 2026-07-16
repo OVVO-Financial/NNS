@@ -11,15 +11,15 @@ sequence and treats R as the source of truth.
 
 | # | Topic | R vignette | Python companion |
 |---|---|---|---|
-| 01 | Overview | [Overview](../vignettes/NNSvignette_01_Overview.Rmd) | `01_overview.py` |
-| 02 | Partial Moments | [Partial Moments](../vignettes/NNSvignette_02_Partial_Moments.Rmd) | `02_partial_moments.py` |
-| 03 | Correlation and Dependence | [Correlation and Dependence](../vignettes/NNSvignette_03_Correlation_and_Dependence.Rmd) | `03_correlation_and_dependence.py` |
-| 04 | Normalization and Rescaling | [Normalization and Rescaling](../vignettes/NNSvignette_04_Normalization_and_Rescaling.Rmd) | `04_normalization_and_rescaling.py` |
-| 05 | Sampling and Simulation | [Sampling and Simulation](../vignettes/NNSvignette_05_Sampling.Rmd) | `05_sampling_and_simulation.py` |
-| 06 | Comparing Distributions | [Comparing Distributions](../vignettes/NNSvignette_06_Comparing_Distributions.Rmd) | `06_comparing_distributions.py` |
-| 07 | Clustering and Regression | [Clustering and Regression](../vignettes/NNSvignette_07_Clustering_and_Regression.Rmd) | `07_clustering_and_regression.py` |
-| 08 | Classification | [Classification](../vignettes/NNSvignette_08_Classification.Rmd) | `08_classification.py` |
-| 09 | Forecasting | [Forecasting](../vignettes/NNSvignette_09_Forecasting.Rmd) | `09_forecasting.py` |
+| 01 | Overview | [Overview](https://ovvo-financial.github.io/NNS/articles/NNSvignette_01_Overview.html) | [`01_overview.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/01_overview.py) |
+| 02 | Partial Moments | [Partial Moments](https://ovvo-financial.github.io/NNS/articles/NNSvignette_02_Partial_Moments.html) | [`02_partial_moments.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/02_partial_moments.py) |
+| 03 | Correlation and Dependence | [Correlation and Dependence](https://ovvo-financial.github.io/NNS/articles/NNSvignette_03_Correlation_and_Dependence.html) | [`03_correlation_and_dependence.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/03_correlation_and_dependence.py) |
+| 04 | Normalization and Rescaling | [Normalization and Rescaling](https://ovvo-financial.github.io/NNS/articles/NNSvignette_04_Normalization_and_Rescaling.html) | [`04_normalization_and_rescaling.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/04_normalization_and_rescaling.py) |
+| 05 | Sampling and Simulation | [Sampling and Simulation](https://ovvo-financial.github.io/NNS/articles/NNSvignette_05_Sampling.html) | [`05_sampling_and_simulation.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/05_sampling_and_simulation.py) |
+| 06 | Comparing Distributions | [Comparing Distributions](https://ovvo-financial.github.io/NNS/articles/NNSvignette_06_Comparing_Distributions.html) | [`06_comparing_distributions.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/06_comparing_distributions.py) |
+| 07 | Clustering and Regression | [Clustering and Regression](https://ovvo-financial.github.io/NNS/articles/NNSvignette_07_Clustering_and_Regression.html) | [`07_clustering_and_regression.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/07_clustering_and_regression.py) |
+| 08 | Classification | [Classification](https://ovvo-financial.github.io/NNS/articles/NNSvignette_08_Classification.html) | [`08_classification.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/08_classification.py) |
+| 09 | Forecasting | [Forecasting](https://ovvo-financial.github.io/NNS/articles/NNSvignette_09_Forecasting.html) | [`09_forecasting.py`](https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/09_forecasting.py) |
 
 Canonical changes should be made in the R vignette first. A companion port may
 use language-appropriate syntax and containers, but should preserve the same

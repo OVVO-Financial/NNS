@@ -31,3 +31,15 @@ articles:
 - title: "Applications"
   contents:
   - NNSvignette_09_Forecasting
+
+navbar:
+  structure:
+    left: [intro, reference, articles, examples, book]
+    right: [search, github]
+  components:
+    examples:
+      text: Examples
+      href: https://ovvo-financial.github.io/NNS/examples/
+    book:
+      text: Book
+      href: https://ovvo-financial.github.io/NNS/book/
