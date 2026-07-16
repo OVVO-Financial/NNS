@@ -2,11 +2,6 @@
 
 ![](articles/images/NNS_hex_sticker.png)
 
-[![packageversion](https://img.shields.io/badge/NNS%20version-13.1-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)
-[![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-
-## 
-
 NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the
 fundamental [elements of
 variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md)
@@ -45,7 +40,7 @@ requires [![minimal R
 version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/).
 See <https://cran.r-project.org/> or
 [![installr](https://img.shields.io/badge/installr-0.18.0-blue.svg)](https://cran.r-project.org/package=installr)
-for upgrading to latest R release.
+for upgrading to the latest R release.
 
 ``` r
 
@@ -61,10 +56,16 @@ install.packages('NNS')
 
 ## Examples
 
-Please see
-<https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md>
-for basic partial moments equivalences, hands-on statistics, machine
-learning and econometrics examples.
+The nine numbered files under
+[`vignettes/`](https://OVVO-Financial.github.io/NNS/vignettes/) are the
+canonical NNS example curriculum and the source of truth for companion
+language ports. Python follows the same 01–09 sequence while using
+Python-native syntax and containers.
+
+See
+[`examples/index.md`](https://OVVO-Financial.github.io/NNS/examples/index.md)
+for the canonical cross-language mapping plus applied studies in
+statistics, regression, machine learning, forecasting, and econometrics.
 
 ## Citation
 
