@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: Partial Moments Equivalences</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h2 id="partial-moments-equivalences">Partial Moments Equivalences</h2>
+<p>Why is it necessary to parse variance with partial moments? The
+additional information generated from partial moments permits a level of
+analysis simply not possible with traditional summary statistics.</p>
+<p>Below are some basic equivalences demonstrating partial moments' role
+as the elements of variance.</p>
+<h3 id="installation">Installation</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;NNS&quot;</span>)</span></code></pre></div>
+<h3 id="setup">Setup</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span></code></pre></div>
+<h3 id="mean">Mean</h3>
+<p>A difference between the upside area and the downside area of
+<code>f(x)</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.09040591</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, x) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, x)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.09040591</span></span></code></pre></div>
+<h3 id="variance">Variance</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample Variance (base R):</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(x)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8332328</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample Variance from partial moments:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8332328</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Population Adjustment of Sample Variance (base R):</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(x) <span class="sc">*</span> ((<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="fu">length</span>(x))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8249005</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Population Variance:</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8249005</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Variance is also the covariance of itself:</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>(<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">+</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">-</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)) <span class="sc">-</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, x, <span class="fu">mean</span>(x), <span class="fu">mean</span>(x)))</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8249005</span></span></code></pre></div>
+<h3 id="standard-deviation">Standard Deviation</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(x)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.9128159</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span> (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.9128159</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">NNS.moments</span>(x, <span class="at">population =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>variance)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.9128159</span></span></code></pre></div>
+<h3 id="first-4-moments">First 4 Moments</h3>
+<p>The first four moments are returned with <code>NNS.moments()</code>.
+For sample statistics, set <code>population = FALSE</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.moments</span>(x)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="do">## $mean</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.09040591</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## $variance</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8249005</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="do">## $skewness</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.06049948</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="do">## $kurtosis</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.161053</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.moments</span>(x, <span class="at">population =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="do">## $mean</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.09040591</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="do">## $variance</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.8332328</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="do">## $skewness</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.06235774</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="do">## $kurtosis</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.1069186</span></span></code></pre></div>
+<h3 id="statistical-mode-of-a-continuous-distribution">Statistical Mode
+of a Continuous Distribution</h3>
+<p><code>NNS.mode</code> offers support for discrete valued
+distributions as well as recognizing multiple modes.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Continuous</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.mode</span>(x)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.4132834</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Discrete and multiple modes</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.mode</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="at">discrete =</span> <span class="cn">TRUE</span>, <span class="at">multi =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 2 3 4</span></span></code></pre></div>
+<h3 id="covariance">Covariance</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(x, y)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.04372107</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>(<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))) <span class="sc">*</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.04372107</span></span></code></pre></div>
+<h3 id="covariance-elements-and-covariance-matrix">Covariance Elements
+and Covariance Matrix</h3>
+<p>The covariance matrix <span class="math inline">(<em>Σ</em>)</span>
+is equal to the sum of the co-partial moments matrices less the
+divergent partial moments matrices.</p>
+<p><span
+class="math display"><em>Σ</em> = <em>C</em><em>L</em><em>P</em><em>M</em> + <em>C</em><em>U</em><em>P</em><em>M</em> − <em>D</em><em>L</em><em>P</em><em>M</em> − <em>D</em><em>U</em><em>P</em><em>M</em></span></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cov.mtx <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable =</span> <span class="fu">cbind</span>(x, y),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_adj =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>cov.mtx</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="do">## $cupm</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="do">## x 0.4299250 0.1033601</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="do">## y 0.1033601 0.5411626</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="do">## $dupm</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="do">## x 0.0000000 0.1469182</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="do">## y 0.1560924 0.0000000</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="do">## $dlpm</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="do">## x 0.0000000 0.1560924</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="do">## y 0.1469182 0.0000000</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="do">## $clpm</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="do">##           x         y</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="do">## x 0.4033078 0.1559295</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="do">## y 0.1559295 0.3939005</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="do">## $cov.matrix</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Reassembled Covariance Matrix</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>cov.mtx<span class="sc">$</span>clpm <span class="sc">+</span> cov.mtx<span class="sc">$</span>cupm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dlpm <span class="sc">-</span> cov.mtx<span class="sc">$</span>dupm</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard Covariance Matrix</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(<span class="fu">cbind</span>(x, y))</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="do">##             x           y</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="do">## x  0.83323283 -0.04372107</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="do">## y -0.04372107  0.93506310</span></span></code></pre></div>
+<h3 id="pearson-correlation">Pearson Correlation</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(x, y)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.04953215</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>cov.xy <span class="ot">&lt;-</span> (<span class="fu">Co.LPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Co.UPM</span>(<span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.LPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y)) <span class="sc">-</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">D.UPM</span>(<span class="dv">1</span>, <span class="dv">1</span>, x, y, <span class="fu">mean</span>(x), <span class="fu">mean</span>(y))) <span class="sc">*</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>sd.x <span class="ot">&lt;-</span> ((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">*</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">length</span>(x) <span class="sc">/</span> (<span class="fu">length</span>(x) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>sd.y <span class="ot">&lt;-</span> ((<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(y), y) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(y), y)) <span class="sc">*</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">length</span>(y) <span class="sc">/</span> (<span class="fu">length</span>(y) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">^</span> .<span class="dv">5</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>cov.xy <span class="sc">/</span> (sd.x <span class="sc">*</span> sd.y)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.04953215</span></span></code></pre></div>
+<h3 id="skewness">Skewness</h3>
+<p>A normalized difference between upside area and downside area.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>PerformanceAnalytics<span class="sc">::</span><span class="fu">skewness</span>(x)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">3</span>, <span class="fu">mean</span>(x), x) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">3</span>, <span class="fu">mean</span>(x), x)) <span class="sc">/</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">^</span> (<span class="dv">3</span> <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.moments</span>(x)<span class="sc">$</span>skewness</span></code></pre></div>
+<h3 id="upm--lpm-ratio">UPM / LPM Ratio</h3>
+<p>A more intuitive skewness measure: upside area divided by downside
+area.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">/</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)</span></code></pre></div>
+<h3 id="kurtosis">Kurtosis</h3>
+<p>A normalized sum of upside area and downside area.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>PerformanceAnalytics<span class="sc">::</span><span class="fu">kurtosis</span>(x)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>((<span class="fu">UPM</span>(<span class="dv">4</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">4</span>, <span class="fu">mean</span>(x), x)) <span class="sc">/</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">UPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x) <span class="sc">+</span> <span class="fu">LPM</span>(<span class="dv">2</span>, <span class="fu">mean</span>(x), x)) <span class="sc">^</span> <span class="dv">2</span>) <span class="sc">-</span> <span class="dv">3</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.moments</span>(x)<span class="sc">$</span>kurtosis</span></code></pre></div>
+<h3 id="cdfs-discrete-and-continuous">CDFs (Discrete and
+Continuous)</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">ecdf</span>(x)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">P</span>(<span class="dv">0</span>) ; <span class="fu">P</span>(<span class="dv">1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">LPM</span>(<span class="dv">0</span>, <span class="dv">0</span>, x) ; <span class="fu">LPM</span>(<span class="dv">0</span>, <span class="dv">1</span>, x)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Vectorized targets:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">LPM</span>(<span class="dv">0</span>, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), x)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot CDF vs LPM:</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">ecdf</span>(x))</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">sort</span>(x), <span class="fu">LPM</span>(<span class="dv">0</span>, <span class="fu">sort</span>(x), x), <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;left&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;ecdf&quot;</span>, <span class="st">&quot;LPM.CDF&quot;</span>),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="at">border =</span> <span class="cn">NA</span>, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Joint CDF:</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, x, y, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Vectorized targets:</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, x, y, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Continuous CDF:</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># CDF with target:</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>, <span class="at">target =</span> <span class="fu">mean</span>(x))</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Survival Function:</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>, <span class="at">type =</span> <span class="st">&quot;survival&quot;</span>)</span></code></pre></div>
+<h3 id="copulas">Copulas</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform x and y to uniform marginals</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>u_x <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, x, x)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>u_y <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, y, y)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Value of copula at c(0.5, 0.5)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, u_x, u_y, <span class="fl">0.5</span>, <span class="fl">0.5</span>)</span></code></pre></div>
+<h3 id="numerical-integration">Numerical Integration</h3>
+<p>Partial moments are asymptotic area approximations of
+<code>f(x)</code> akin to the familiar Trapezoidal and Simpson's rules.
+More observations, more accuracy.</p>
+<p><span class="math display">$$[UPM(1,0,f(x)) - LPM(1,0,f(x))] \asymp
+\frac{F(b)-F(a)}{b-a}$$</span> <span
+class="math display">[<em>U</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>)) − <em>L</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>))] ⋅ (<em>b</em> − <em>a</em>) ≍ <em>F</em>(<em>b</em>) − <em>F</em>(<em>a</em>)</span></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">001</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">2</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">0</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.3335</span></span></code></pre></div>
+<p><span
+class="math display">0.3333 ⋅ [1 − 0] = ∫<sub>0</sub><sup>1</sup><em>x</em><sup>2</sup> <em>d</em><em>x</em></span></p>
+<p>For the total area, not just the definite integral, sum the partial
+moments and multiply by <span
+class="math inline">(<em>b</em> − <em>a</em>)</span>:</p>
+<p><span
+class="math display">[<em>U</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>)) + <em>L</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>))] ⋅ (<em>b</em> − <em>a</em>) ≍ |∫<sub><em>a</em></sub><sup><em>b</em></sup><em>f</em>(<em>x</em>)<em>d</em><em>x</em>|</span></p>
+<h3 id="bayes-theorem">Bayes' Theorem</h3>
+<p>For example, when ascertaining the probability of an increase in
+<span class="math inline"><em>A</em></span> given an increase in <span
+class="math inline"><em>B</em></span>, the
+<code>Co.UPM(degree_upm, x, y, target_x, target_y)</code> target
+parameters are set to <code>target_x = 0</code> and
+<code>target_y = 0</code> and the
+<code>UPM(degree, target, variable)</code> target parameter is also set
+to <code>target = 0</code>.</p>
+<p><span
+class="math display">$$P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$</span></p>
+<h3 id="references">References</h3>
+<ul>
+<li><a href="https://doi.org/10.2139/ssrn.6249658">Partial Moments as a
+Unifying Primitive: Distributional Structure, Benchmark-Relative
+Utility, Adaptive Estimation, and Learned Neural Nonlinearities</a></li>
+<li><a
+href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md">Nonlinear
+Nonparametric Statistics: Using Partial Moments</a></li>
+<li><a href="https://doi.org/10.2139/ssrn.2148482">Cumulative
+Distribution Functions and UPM/LPM Analysis</a></li>
+<li><a href="https://doi.org/10.2139/ssrn.3007373">Continuous CDFs and
+ANOVA with NNS</a></li>
+<li><a href="https://doi.org/10.2139/ssrn.2186471">f(Newton)</a></li>
+<li><a href="https://doi.org/10.2139/ssrn.3457377">Bayes' Theorem From
+Partial Moments</a></li>
+</ul>
+</body>
+</html>

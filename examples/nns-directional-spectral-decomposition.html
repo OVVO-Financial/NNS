@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: nns-directional-spectral-decomposition</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1
+id="nns-directional-spectral-decomposition-full-orthants-pairwise-matrices-and-scalable-pca-attribution">NNS
+Directional Spectral Decomposition: Full Orthants, Pairwise Matrices,
+and Scalable PCA Attribution</h1>
+<p>This note extends the <a
+href="https://ovvo-financial.github.io/NNS/book/directional-spectral-decomposition.html">Chapter
+11 directional spectral decomposition</a> workflow in three layers:</p>
+<ol type="1">
+<li><p><strong>Full orthant decomposition</strong><br />
+The complete mean-split partition gives an exact spectral genealogy of
+covariance and PCA, but it scales as <span
+class="math inline">2<sup><em>d</em></sup></span>.</p></li>
+<li><p><strong>Pairwise partial-moment matrices</strong><br />
+Pairwise directional matrices recover covariance and PCA exactly while
+scaling as <span
+class="math inline"><em>O</em>(<em>d</em><sup>2</sup>)</span>. This is
+the practical high-dimensional PCA attribution layer.</p></li>
+<li><p><strong><code>DPM_nD</code> aggregation</strong><br />
+The n-dimensional NNS functions collapse the full orthant partition into
+three global states: all-lower, all-upper, and mixed-sign. This is
+scalable and useful, but it is a coarse directional summary, not a full
+spectral genealogy.</p></li>
+</ol>
+<p>The main conclusion is:</p>
+<blockquote>
+<p>Full orthants explain PCA completely.<br />
+Pairwise partial-moment matrices scale PCA recovery and directional
+attribution to high dimensions.<br />
+<code>DPM_nD</code> gives a compact global diagnostic, not a replacement
+for spectral decomposition.</p>
+</blockquote>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>Classical PCA starts with a covariance matrix:</p>
+<p><span class="math display"><em>Σ</em>,</span></p>
+<p>and diagonalizes it:</p>
+<p><span
+class="math display"><em>Σ</em><em>v</em><sub><em>i</em></sub> = <em>λ</em><sub><em>i</em></sub><em>v</em><sub><em>i</em></sub>.</span></p>
+<p>PCA reports eigenvalues and eigenvectors, but it does not explain
+which directional regions of the data generated them.</p>
+<p>The NNS directional framework begins with observable directional
+structure. In the full orthant version, every observation is assigned to
+a mean-split orthant. For <span class="math inline"><em>d</em></span>
+variables, this gives:</p>
+<p><span class="math display">2<sup><em>d</em></sup></span></p>
+<p>possible states.</p>
+<p>Each occupied orthant <span class="math inline"><em>r</em></span>
+has:</p>
+<ul>
+<li>empirical probability <span
+class="math inline"><em>p</em><sub><em>r</em></sub></span>;</li>
+<li>conditional mean <span
+class="math inline"><em>m</em><sub><em>r</em></sub></span>;</li>
+<li>centered displacement <span
+class="math inline"><em>u</em><sub><em>r</em></sub> = <em>m</em><sub><em>r</em></sub> − <em>μ</em></span>;</li>
+<li>within-orthant covariance <span
+class="math inline"><em>Σ</em><sub><em>r</em></sub></span>.</li>
+</ul>
+<p>The covariance matrix decomposes exactly as:</p>
+<p><span
+class="math display"><em>Σ</em> = <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub>,</span></p>
+<p>where:</p>
+<p><span
+class="math display"><em>Σ</em><sub><em>Q</em></sub> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup>,</span></p>
+<p>and:</p>
+<p><span
+class="math display"><em>Σ</em><sub><em>W</em></sub> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>Σ</em><sub><em>r</em></sub>.</span></p>
+<p>Thus:</p>
+<p><span
+class="math display"><em>Σ</em> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup> + ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>Σ</em><sub><em>r</em></sub>.</span></p>
+<p>Diagonalizing the recovered matrix gives the same classical PCA
+eigensystem.</p>
+<p>The full orthant decomposition is exact, but it becomes infeasible in
+high dimensions. For <span
+class="math inline"><em>d</em> = 50</span>,</p>
+<p><span
+class="math display">2<sup>50</sup> ≈ 1.1259 × 10<sup>15</sup>.</span></p>
+<p>The practical high-dimensional alternative is to use pairwise
+partial-moment matrices. These recover covariance through:</p>
+<p><span
+class="math display"><em>Σ</em> = CLPM + CUPM − DLPM − DUPM.</span></p>
+<p>Then PCA is recovered from:</p>
+<p><span
+class="math display">(CLPM, CUPM, DLPM, DUPM) → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p>This preserves exact covariance and PCA recovery while scaling with
+four <span class="math inline"><em>d</em> × <em>d</em></span> matrices
+rather than <span class="math inline">2<sup><em>d</em></sup></span>
+orthant states.</p>
+<hr />
+<h1 id="part-i--full-orthant-decomposition">Part I — Full Orthant
+Decomposition</h1>
+<h2 id="1-setup">1. Setup</h2>
+<p>Generate <span class="math inline"><em>n</em> = 10, 000</span>
+observations from a five-dimensional distribution with approximately
+uniform pairwise correlation <span class="math inline">0.5</span>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2024</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fl">0.5</span>, d, d) <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">0.5</span>, d)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">chol</span>(R)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), n, d) <span class="sc">%*%</span> L</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(Z) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="fu">seq_len</span>(d))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span></code></pre></div>
+<p>The component mean vector is used as the target.</p>
+<p>In the reported run, the target vector was:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th style="text-align: right;">Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X1</td>
+<td style="text-align: right;">-0.006349</td>
+</tr>
+<tr>
+<td>X2</td>
+<td style="text-align: right;">-0.004824</td>
+</tr>
+<tr>
+<td>X3</td>
+<td style="text-align: right;">-0.002800</td>
+</tr>
+<tr>
+<td>X4</td>
+<td style="text-align: right;">0.004986</td>
+</tr>
+<tr>
+<td>X5</td>
+<td style="text-align: right;">0.001181</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-classical-pca">2. Classical PCA</h2>
+<p>Compute the population-denominator covariance matrix:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mu    <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Zc    <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, mu)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Sigma <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(Zc) <span class="sc">/</span> n</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pca   <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The classical eigenvalues were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Eigenvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">2.965193</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">0.510783</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.499329</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.493351</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.488601</td>
+</tr>
+</tbody>
+</table>
+<p>The first eigenvalue is much larger than the remaining four,
+consistent with a strong common direction induced by the uniform
+correlation structure.</p>
+<hr />
+<h2 id="3-mean-split-orthant-partition">3. Mean-Split Orthant
+Partition</h2>
+<p>Partition each variable at its component mean. For five variables,
+the full mean-split partition contains:</p>
+<p><span class="math display">2<sup>5</sup> = 32</span></p>
+<p>possible orthants.</p>
+<p>Each observation is encoded according to whether each variable is
+above or below its component mean:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>above_mean <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, mu, <span class="st">&quot;&gt;&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>orthant_label <span class="ot">&lt;-</span> <span class="fu">apply</span>(above_mean, <span class="dv">1</span>, <span class="cf">function</span>(row) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(row <span class="sc">*</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>(d <span class="sc">-</span> <span class="dv">1</span>)))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>The run occupied all orthants:</p>
+<pre class="text"><code>32 out of 32</code></pre>
+<p>This is the five-dimensional analogue of the bivariate quadrant
+partition.</p>
+<hr />
+<h2 id="4-between-within-orthant-decomposition">4. Between-Within
+Orthant Decomposition</h2>
+<p>For each orthant <span class="math inline"><em>r</em></span>,
+compute:</p>
+<ul>
+<li>empirical probability <span
+class="math inline"><em>p</em><sub><em>r</em></sub></span>;</li>
+<li>conditional mean <span
+class="math inline"><em>m</em><sub><em>r</em></sub></span>;</li>
+<li>centered displacement <span
+class="math inline"><em>u</em><sub><em>r</em></sub> = <em>m</em><sub><em>r</em></sub> − <em>μ</em></span>;</li>
+<li>within-orthant covariance <span
+class="math inline"><em>Σ</em><sub><em>r</em></sub></span>.</li>
+</ul>
+<p>Then accumulate:</p>
+<p><span class="math display">$$\Sigma_Q
+=
+\sum_{r=1}^{2^d}p_r u_r u_r^\top,$$</span></p>
+<p>and:</p>
+<p><span class="math display">$$\Sigma_W
+=
+\sum_{r=1}^{2^d}p_r\Sigma_r.$$</span></p>
+<p>The full covariance identity is:</p>
+<p><span
+class="math display"><em>Σ</em> = <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub>.</span></p>
+<p>In code:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Sigma_Q <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Sigma_W <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (lab <span class="cf">in</span> <span class="fu">unique</span>(orthant_label)) {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  mask <span class="ot">&lt;-</span> orthant_label <span class="sc">==</span> lab</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  n_r  <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  p_r  <span class="ot">&lt;-</span> n_r <span class="sc">/</span> n</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  Zr      <span class="ot">&lt;-</span> Z[mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  m_r     <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zr)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  u_r     <span class="ot">&lt;-</span> m_r <span class="sc">-</span> mu</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  Sigma_r <span class="ot">&lt;-</span> <span class="fu">crossprod</span>(<span class="fu">sweep</span>(Zr, <span class="dv">2</span>, m_r)) <span class="sc">/</span> n_r</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  Sigma_Q <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> p_r <span class="sc">*</span> <span class="fu">tcrossprod</span>(u_r)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  Sigma_W <span class="ot">&lt;-</span> Sigma_W <span class="sc">+</span> p_r <span class="sc">*</span> Sigma_r</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>Sigma_rec <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> Sigma_W</span></code></pre></div>
+<p>Each orthant contributes a rank-one between-orthant primitive:</p>
+<p><span
+class="math display"><em>B</em><sub><em>r</em></sub> = <em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup>.</span></p>
+<p>If <span
+class="math inline"><em>u</em><sub><em>r</em></sub> ≠ 0</span>,
+then:</p>
+<p><span
+class="math display"><em>B</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub> = <em>p</em><sub><em>r</em></sub>∥<em>u</em><sub><em>r</em></sub>∥<sup>2</sup><em>u</em><sub><em>r</em></sub>.</span></p>
+<p>So each centered orthant conditional mean is the nonzero eigenvector
+of its own rank-one between-orthant contribution.</p>
+<hr />
+<h2 id="5-covariance-and-pca-recovery">5. Covariance and PCA
+Recovery</h2>
+<p>The full orthant decomposition recovered the covariance matrix to
+floating-point precision:</p>
+<pre class="text"><code>Max absolute covariance recovery error:
+3.330669e-15</code></pre>
+<p>The recovered eigensystem also matched the classical eigensystem:</p>
+<pre class="text"><code>Full orthant eigenvalue recovery error:
+3.663736e-15
+
+Full orthant eigenvector alignments:
+1 1 1 1 1</code></pre>
+<p>Thus:</p>
+<p><span
+class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> → <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub> → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p>The full orthant decomposition recovers the covariance matrix and
+therefore recovers the classical PCA eigensystem.</p>
+<hr />
+<h2 id="6-eigenvalue-attribution-from-full-orthants">6. Eigenvalue
+Attribution from Full Orthants</h2>
+<p>Each classical eigenvalue decomposes into a between-orthant
+contribution and a within-orthant contribution.</p>
+<p>For unit eigenvector <span
+class="math inline"><em>v</em><sub><em>i</em></sub></span>:</p>
+<p><span
+class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><sub><em>Q</em></sub><em>v</em><sub><em>i</em></sub> + <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><sub><em>W</em></sub><em>v</em><sub><em>i</em></sub>.</span></p>
+<p>Using the orthant decomposition:</p>
+<p><span class="math display">$$\lambda_i
+=
+\sum_{r=1}^{2^d}p_r(v_i^\top u_r)^2
++
+\sum_{r=1}^{2^d}p_rv_i^\top\Sigma_rv_i.$$</span></p>
+<p>The attribution table was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Eigenvalue</th>
+<th style="text-align: right;">Between</th>
+<th style="text-align: right;">Within</th>
+<th style="text-align: right;">Total</th>
+<th style="text-align: right;">Between Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">2.965193</td>
+<td style="text-align: right;">2.439089</td>
+<td style="text-align: right;">0.526104</td>
+<td style="text-align: right;">2.965193</td>
+<td style="text-align: right;">82.25735</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">0.510783</td>
+<td style="text-align: right;">0.243905</td>
+<td style="text-align: right;">0.266878</td>
+<td style="text-align: right;">0.510783</td>
+<td style="text-align: right;">47.75114</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.499329</td>
+<td style="text-align: right;">0.241130</td>
+<td style="text-align: right;">0.258199</td>
+<td style="text-align: right;">0.499329</td>
+<td style="text-align: right;">48.29081</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.493351</td>
+<td style="text-align: right;">0.237770</td>
+<td style="text-align: right;">0.255581</td>
+<td style="text-align: right;">0.493351</td>
+<td style="text-align: right;">48.19483</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.488601</td>
+<td style="text-align: right;">0.235968</td>
+<td style="text-align: right;">0.252633</td>
+<td style="text-align: right;">0.488601</td>
+<td style="text-align: right;">48.29467</td>
+</tr>
+</tbody>
+</table>
+<p>For PC1:</p>
+<p><span class="math display">$$\frac{2.439089}{2.965193}
+=
+0.8225735.$$</span></p>
+<p>So about 82.3 percent of PC1 came from between-orthant conditional
+mean separation.</p>
+<p>A useful global summary is:</p>
+<p><span class="math display">$$D_{\mathrm{spectral}}
+=
+\frac{\mathrm{tr}(\Sigma_Q)}{\mathrm{tr}(\Sigma)}.$$</span></p>
+<p>In this run:</p>
+<pre class="text"><code>D_spectral = 0.685432</code></pre>
+<p>So about 68.5 percent of total variance came from between-orthant
+conditional mean displacement.</p>
+<hr />
+<h2 id="7-orthant-level-attribution-of-pc1">7. Orthant-Level Attribution
+of PC1</h2>
+<p>The between-orthant part of PC1 decomposes further into individual
+orthant contributions:</p>
+<p><span class="math display">$$\lambda_{1,Q}
+=
+\sum_{r=1}^{2^d}p_r(v_1^\top u_r)^2.$$</span></p>
+<p>The top ten orthant contributions to PC1 were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Rank</th>
+<th style="text-align: right;">Orthant</th>
+<th>Pattern</th>
+<th style="text-align: right;">Probability</th>
+<th style="text-align: right;">Contribution</th>
+<th style="text-align: right;">Percent of PC1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">31</td>
+<td>X1+ X2+ X3+ X4+ X5+</td>
+<td style="text-align: right;">0.1663</td>
+<td style="text-align: right;">0.9676085</td>
+<td style="text-align: right;">32.63223</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td>X1- X2- X3- X4- X5-</td>
+<td style="text-align: right;">0.1646</td>
+<td style="text-align: right;">0.9344073</td>
+<td style="text-align: right;">31.51253</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">16</td>
+<td>X1- X2- X3- X4- X5+</td>
+<td style="text-align: right;">0.0328</td>
+<td style="text-align: right;">0.0539840</td>
+<td style="text-align: right;">1.82059</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td>X1- X2- X3+ X4- X5-</td>
+<td style="text-align: right;">0.0342</td>
+<td style="text-align: right;">0.0517459</td>
+<td style="text-align: right;">1.74511</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td>X1- X2- X3- X4+ X5-</td>
+<td style="text-align: right;">0.0334</td>
+<td style="text-align: right;">0.0513473</td>
+<td style="text-align: right;">1.73167</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2</td>
+<td>X1- X2+ X3- X4- X5-</td>
+<td style="text-align: right;">0.0321</td>
+<td style="text-align: right;">0.0504620</td>
+<td style="text-align: right;">1.70181</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">23</td>
+<td>X1+ X2+ X3+ X4- X5+</td>
+<td style="text-align: right;">0.0332</td>
+<td style="text-align: right;">0.0498662</td>
+<td style="text-align: right;">1.68172</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">30</td>
+<td>X1- X2+ X3+ X4+ X5+</td>
+<td style="text-align: right;">0.0340</td>
+<td style="text-align: right;">0.0480060</td>
+<td style="text-align: right;">1.61899</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">27</td>
+<td>X1+ X2+ X3- X4+ X5+</td>
+<td style="text-align: right;">0.0330</td>
+<td style="text-align: right;">0.0475473</td>
+<td style="text-align: right;">1.60351</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">29</td>
+<td>X1+ X2- X3+ X4+ X5+</td>
+<td style="text-align: right;">0.0311</td>
+<td style="text-align: right;">0.0475126</td>
+<td style="text-align: right;">1.60234</td>
+</tr>
+</tbody>
+</table>
+<p>The top two orthants were the all-upper and all-lower states:</p>
+<pre class="text"><code>X1+ X2+ X3+ X4+ X5+
+X1- X2- X3- X4- X5-</code></pre>
+<p>Together they contributed:</p>
+<p><span
+class="math display">32.63223% + 31.51253% = 64.14476%</span></p>
+<p>of PC1.</p>
+<p>The orthant-level PC1 contributions summed exactly to the direct
+Rayleigh quotient:</p>
+<pre class="text"><code>Sum of orthant-level between contributions for PC1:
+2.439089
+
+Direct Sigma_Q between contribution for PC1:
+2.439089</code></pre>
+<p>This is the full orthant-level spectral genealogy.</p>
+<hr />
+<h2 id="8-converse-failure">8. Converse Failure</h2>
+<p>The decomposition runs in one direction.</p>
+<p>From the full orthant decomposition, one recovers the covariance
+matrix:</p>
+<p><span
+class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> → <em>Σ</em>.</span></p>
+<p>From the covariance matrix, one recovers the PCA eigensystem:</p>
+<p><span
+class="math display"><em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p>But PCA output alone does not recover the orthant probabilities,
+orthant assignments, or orthant conditional means.</p>
+<p>Therefore:</p>
+<p><span
+class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> ⇒ <em>Σ</em> ⇒ (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>),</span></p>
+<p>but generally:</p>
+<p><span
+class="math display">(<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>) ⇏ {<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup>.</span></p>
+<p>PCA is a downstream summary. The orthant decomposition contains
+strictly more directional information.</p>
+<hr />
+<h1 id="part-ii--dpm_nd-as-a-three-state-global-diagnostic">Part II —
+<code>DPM_nD</code> as a Three-State Global Diagnostic</h1>
+<h2 id="9-why-dpm_nd-is-useful-but-coarse">9. Why <code>DPM_nD</code> Is
+Useful but Coarse</h2>
+<p>The full orthant decomposition is exact, but it scales as:</p>
+<p><span class="math display">2<sup><em>d</em></sup>.</span></p>
+<p>For five variables:</p>
+<p><span class="math display">2<sup>5</sup> = 32.</span></p>
+<p>For 50 variables:</p>
+<p><span
+class="math display">2<sup>50</sup> ≈ 1.1259 × 10<sup>15</sup>.</span></p>
+<p>Most high-dimensional orthants would be empty or too sparsely
+populated to support stable conditional mean and covariance
+estimates.</p>
+<p>The NNS n-dimensional partial moment functions collapse the full
+orthant partition into three observable aggregate states:</p>
+<p><span
+class="math display">CLPM<sub><em>n</em><em>D</em></sub> = all variables below target,</span></p>
+<p><span
+class="math display">CUPM<sub><em>n</em><em>D</em></sub> = all variables above target,</span></p>
+<p><span
+class="math display">DPM<sub><em>n</em><em>D</em></sub> = all mixed sign configurations.</span></p>
+<p>So the state count is reduced from:</p>
+<p><span class="math display">2<sup><em>d</em></sup></span></p>
+<p>to:</p>
+<p><span class="math display">3.</span></p>
+<p>For <span class="math inline"><em>d</em> = 5</span>, the full
+partition has 32 orthants. The three-state aggregation is:</p>
+<p><span
+class="math display"><em>G</em><sub><em>L</em></sub> = {0},</span></p>
+<p><span
+class="math display"><em>G</em><sub><em>U</em></sub> = {31},</span></p>
+<p><span
+class="math display"><em>G</em><sub><em>D</em></sub> = {1, 2, …, 30}.</span></p>
+<p>Thus:</p>
+<p><span
+class="math display">CLPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>L</em></sub></sub><em>p</em><sub><em>r</em></sub>,</span></p>
+<p><span
+class="math display">CUPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>U</em></sub></sub><em>p</em><sub><em>r</em></sub>,</span></p>
+<p><span
+class="math display">DPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>D</em></sub></sub><em>p</em><sub><em>r</em></sub>.</span></p>
+<p>At degree zero, <code>DPM_nD</code> is not separate from the full
+orthant decomposition. It is the coarse three-state projection of
+it.</p>
+<hr />
+<h2 id="10-dpm_nd-r-example-using-the-nns-package">10.
+<code>DPM_nD</code> R Example Using the NNS Package</h2>
+<p>The exported NNS package functions are:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>NNS<span class="sc">::</span><span class="fu">Co.LPM_nD</span>(data, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>NNS<span class="sc">::</span><span class="fu">Co.UPM_nD</span>(data, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>NNS<span class="sc">::</span><span class="fu">DPM_nD</span>(data, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The direct full-orthant aggregation gave:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th style="text-align: right;">Full Orthant Aggregation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLPM_nD</code></td>
+<td style="text-align: right;">0.1646</td>
+</tr>
+<tr>
+<td><code>CUPM_nD</code></td>
+<td style="text-align: right;">0.1663</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">0.6691</td>
+</tr>
+</tbody>
+</table>
+<p>The NNS degree-zero values were identical:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th style="text-align: right;">NNS Degree-Zero Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLPM_nD</code></td>
+<td style="text-align: right;">0.1646</td>
+</tr>
+<tr>
+<td><code>CUPM_nD</code></td>
+<td style="text-align: right;">0.1663</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">0.6691</td>
+</tr>
+</tbody>
+</table>
+<p>The difference between the NNS output and the full orthant
+aggregation was:</p>
+<pre class="text"><code>0 0 0</code></pre>
+<p>This proves that, at degree zero, the NNS nD functions exactly
+recover the three-state aggregation of the full orthant partition.</p>
+<hr />
+<h2 id="11-degree-one-dpm_nd-directional-mass">11. Degree-One
+<code>DPM_nD</code> Directional Mass</h2>
+<p>The raw degree-one directional masses were:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th style="text-align: right;">Raw Degree-One Mass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLPM_nD</code></td>
+<td style="text-align: right;">0.605363</td>
+</tr>
+<tr>
+<td><code>CUPM_nD</code></td>
+<td style="text-align: right;">0.575106</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">0.086607</td>
+</tr>
+</tbody>
+</table>
+<p>The normalized degree-one directional mass shares were:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th style="text-align: right;">Normalized Share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLPM_nD</code></td>
+<td style="text-align: right;">0.477763</td>
+</tr>
+<tr>
+<td><code>CUPM_nD</code></td>
+<td style="text-align: right;">0.453885</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">0.068352</td>
+</tr>
+</tbody>
+</table>
+<p>Using <code>norm = TRUE</code> returned the same normalized
+shares:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th style="text-align: right;"><code>norm = TRUE</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLPM_nD</code></td>
+<td style="text-align: right;">0.47776331</td>
+</tr>
+<tr>
+<td><code>CUPM_nD</code></td>
+<td style="text-align: right;">0.45388455</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">0.06835214</td>
+</tr>
+</tbody>
+</table>
+<p>The interpretation is:</p>
+<blockquote>
+<p>Mixed-sign observations are frequent, but they contribute relatively
+little first-degree directional mass in this correlated five-variable
+example.</p>
+</blockquote>
+<p>This is consistent with the PCA attribution result: the leading
+covariance direction is dominated by concordant all-lower and all-upper
+conditional mean separation.</p>
+<hr />
+<h2 id="12-limitation-of-dpm_nd-for-spectral-genealogy">12. Limitation
+of <code>DPM_nD</code> for Spectral Genealogy</h2>
+<p>The full spectral decomposition requires more than probabilities. It
+requires each orthant displacement vector and each within-orthant
+covariance:</p>
+<p><span
+class="math display">{<em>p</em><sub><em>r</em></sub>, <em>u</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup>.</span></p>
+<p>The full between-orthant covariance is:</p>
+<p><span class="math display">$$\Sigma_Q
+=
+\sum_{r=1}^{2^d}p_r u_r u_r^\top.$$</span></p>
+<p>When the mixed orthants are collapsed into a single
+<code>DPM_nD</code> value, their individual displacement vectors are no
+longer separately retained.</p>
+<p>Therefore:</p>
+<p><span
+class="math display">full orthant decomposition ⇒ (CLPM<sub><em>n</em><em>D</em></sub>, CUPM<sub><em>n</em><em>D</em></sub>, DPM<sub><em>n</em><em>D</em></sub>),</span></p>
+<p>but:</p>
+<p><span
+class="math display">(CLPM<sub><em>n</em><em>D</em></sub>, CUPM<sub><em>n</em><em>D</em></sub>, DPM<sub><em>n</em><em>D</em></sub>) ⇏ full orthant decomposition.</span></p>
+<p>So the correct role of <code>DPM_nD</code> is:</p>
+<p><span
+class="math display">DPM<sub><em>n</em><em>D</em></sub> = scalable three state global directional diagnostic.</span></p>
+<p>It is not the main high-dimensional PCA recovery method.</p>
+<hr />
+<h1
+id="part-iii--pairwise-partial-moment-matrices-as-the-scalable-pca-method">Part
+III — Pairwise Partial-Moment Matrices as the Scalable PCA Method</h1>
+<h2 id="13-pairwise-directional-matrix-identity">13. Pairwise
+Directional Matrix Identity</h2>
+<p>The scalable alternative is to use pairwise directional
+partial-moment matrices.</p>
+<p>For a <span class="math inline"><em>d</em></span>-variable matrix
+<span class="math inline"><em>Z</em></span>, compute the four <span
+class="math inline"><em>d</em> × <em>d</em></span> matrices:</p>
+<p><span class="math display">CLPM,   CUPM,   DLPM,   DUPM.</span></p>
+<p>These reassemble covariance as:</p>
+<p><span
+class="math display"><em>Σ</em> = CLPM + CUPM − DLPM − DUPM.</span></p>
+<p>In R:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">PM.matrix</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">target     =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">variable   =</span> Z,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">pop_adj    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">norm       =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>CLPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>clpm</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>CUPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>cupm</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>DLPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>dlpm</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>DUPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>dupm</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>Sigma_nns <span class="ot">&lt;-</span> CLPM <span class="sc">+</span> CUPM <span class="sc">-</span> DLPM <span class="sc">-</span> DUPM</span></code></pre></div>
+<p>Then PCA is recovered by:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pca_nns <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_nns, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The recovery chain is:</p>
+<p><span
+class="math display">(CLPM, CUPM, DLPM, DUPM) → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p>This uses four <span
+class="math inline"><em>d</em> × <em>d</em></span> matrices rather than
+<span class="math inline">2<sup><em>d</em></sup></span> orthants.</p>
+<hr />
+<h2 id="14-pairwise-eigenvalue-attribution">14. Pairwise Eigenvalue
+Attribution</h2>
+<p>For any classical PCA direction <span
+class="math inline"><em>v</em><sub><em>i</em></sub></span>,</p>
+<p><span
+class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><em>v</em><sub><em>i</em></sub>.</span></p>
+<p>Substituting the pairwise directional decomposition gives:</p>
+<p><span
+class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup>CLPM<em>v</em><sub><em>i</em></sub> + <em>v</em><sub><em>i</em></sub><sup>⊤</sup>CUPM<em>v</em><sub><em>i</em></sub> − <em>v</em><sub><em>i</em></sub><sup>⊤</sup>DLPM<em>v</em><sub><em>i</em></sub> − <em>v</em><sub><em>i</em></sub><sup>⊤</sup>DUPM<em>v</em><sub><em>i</em></sub>.</span></p>
+<p>This identifies whether a principal component is generated by:</p>
+<ul>
+<li>lower concordance;</li>
+<li>upper concordance;</li>
+<li>lower-divergent movement;</li>
+<li>upper-divergent movement.</li>
+</ul>
+<p>This is not a full orthant genealogy. It does not recover complete
+simultaneous states such as:</p>
+<pre class="text"><code>X1+ X2- X3+ ... X50-</code></pre>
+<p>But it does recover exact covariance and PCA while preserving
+interpretable pairwise directional sources.</p>
+<hr />
+<h2 id="15-five-variable-pairwise-recovery">15. Five-Variable Pairwise
+Recovery</h2>
+<p>Using the same five-variable dataset, pairwise <code>PM.matrix</code>
+recovered covariance and PCA to numerical precision.</p>
+<pre class="text"><code>Pairwise PM.matrix covariance recovery error:
+1.776357e-15
+
+PM.matrix $cov.matrix vs manual reassembly error:
+1.110223e-16
+
+Directional aggregate asymmetry before symmetrization:
+1.110223e-16</code></pre>
+<p>The classical sample PCA eigenvalues were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Eigenvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">2.965489</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">0.510834</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.499379</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.493400</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.488650</td>
+</tr>
+</tbody>
+</table>
+<p>The pairwise NNS recovered eigenvalues were identical at displayed
+precision:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Recovered Eigenvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">2.965489</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">0.510834</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.499379</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.493400</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.488650</td>
+</tr>
+</tbody>
+</table>
+<p>The eigenvalue recovery error was:</p>
+<pre class="text"><code>2.720046e-15</code></pre>
+<p>The eigenvector alignments were:</p>
+<pre class="text"><code>1 1 1 1 1</code></pre>
+<hr />
+<h2 id="16-five-variable-pairwise-directional-attribution">16.
+Five-Variable Pairwise Directional Attribution</h2>
+<p>The pairwise attribution table was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">Eigenvalue</th>
+<th style="text-align: right;">CLPM</th>
+<th style="text-align: right;">CUPM</th>
+<th style="text-align: right;">DLPM</th>
+<th style="text-align: right;">DUPM</th>
+<th style="text-align: right;">Recovered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.965489</td>
+<td style="text-align: right;">1.693504</td>
+<td style="text-align: right;">1.708038</td>
+<td style="text-align: right;">0.218026</td>
+<td style="text-align: right;">0.218026</td>
+<td style="text-align: right;">2.965489</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.510834</td>
+<td style="text-align: right;">0.200757</td>
+<td style="text-align: right;">0.199162</td>
+<td style="text-align: right;">-0.055458</td>
+<td style="text-align: right;">-0.055458</td>
+<td style="text-align: right;">0.510834</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.499379</td>
+<td style="text-align: right;">0.198809</td>
+<td style="text-align: right;">0.190119</td>
+<td style="text-align: right;">-0.055225</td>
+<td style="text-align: right;">-0.055225</td>
+<td style="text-align: right;">0.499379</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.493400</td>
+<td style="text-align: right;">0.196324</td>
+<td style="text-align: right;">0.188517</td>
+<td style="text-align: right;">-0.054280</td>
+<td style="text-align: right;">-0.054280</td>
+<td style="text-align: right;">0.493400</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.488650</td>
+<td style="text-align: right;">0.190190</td>
+<td style="text-align: right;">0.192332</td>
+<td style="text-align: right;">-0.053064</td>
+<td style="text-align: right;">-0.053064</td>
+<td style="text-align: right;">0.488650</td>
+</tr>
+</tbody>
+</table>
+<p>The signed percentage attribution was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">CLPM %</th>
+<th style="text-align: right;">CUPM %</th>
+<th style="text-align: right;">DLPM signed %</th>
+<th style="text-align: right;">DUPM signed %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">57.11</td>
+<td style="text-align: right;">57.60</td>
+<td style="text-align: right;">-7.35</td>
+<td style="text-align: right;">-7.35</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">39.30</td>
+<td style="text-align: right;">38.99</td>
+<td style="text-align: right;">10.86</td>
+<td style="text-align: right;">10.86</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">39.81</td>
+<td style="text-align: right;">38.07</td>
+<td style="text-align: right;">11.06</td>
+<td style="text-align: right;">11.06</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">39.79</td>
+<td style="text-align: right;">38.21</td>
+<td style="text-align: right;">11.00</td>
+<td style="text-align: right;">11.00</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">38.92</td>
+<td style="text-align: right;">39.36</td>
+<td style="text-align: right;">10.86</td>
+<td style="text-align: right;">10.86</td>
+</tr>
+</tbody>
+</table>
+<p>For PC1:</p>
+<p><span
+class="math display">2.965489 = 1.693504 + 1.708038 − 0.218026 − 0.218026.</span></p>
+<p>So PC1 is dominated by pairwise lower and upper concordance, with
+divergent pairwise movement subtracting from the common direction.</p>
+<p>At the trace level:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: right;">Trace Contribution</th>
+<th style="text-align: right;">Trace Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLPM</td>
+<td style="text-align: right;">2.479584</td>
+<td style="text-align: right;">50.01</td>
+</tr>
+<tr>
+<td>CUPM</td>
+<td style="text-align: right;">2.478168</td>
+<td style="text-align: right;">49.99</td>
+</tr>
+<tr>
+<td>DLPM signed</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+<tr>
+<td>DUPM signed</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align: right;">4.957752</td>
+<td style="text-align: right;">100.00</td>
+</tr>
+</tbody>
+</table>
+<p>Total variance is evenly split between lower and upper concordant
+diagonal structure in this symmetric correlated example.</p>
+<hr />
+<h1 id="part-iv--50-variable-pairwise-scalability">Part IV — 50-Variable
+Pairwise Scalability</h1>
+<h2 id="17-why-full-orthants-fail-at-50-variables">17. Why Full Orthants
+Fail at 50 Variables</h2>
+<p>For <span class="math inline"><em>d</em> = 50</span>, the full
+orthant state count is:</p>
+<p><span
+class="math display">2<sup>50</sup> = 1.1259 × 10<sup>15</sup>.</span></p>
+<p>With <span class="math inline"><em>n</em> = 5000</span> observations,
+the observation-to-orthant ratio is:</p>
+<p><span class="math display">$$\frac{5000}{2^{50}}
+=
+4.440892\times 10^{-12}.$$</span></p>
+<p>This is not estimable as a full orthant partition. Almost every
+possible orthant is unobserved, and any occupied orthant would be too
+sparse for stable covariance estimation.</p>
+<p>Pairwise <code>PM.matrix</code> avoids this problem by estimating
+four <span class="math inline">50 × 50</span> matrices.</p>
+<hr />
+<h2 id="18-50-variable-commonsector-simulation">18. 50-Variable
+Common/Sector Simulation</h2>
+<p>The 50-variable simulation used:</p>
+<ul>
+<li>one common market factor;</li>
+<li>two sector factors;</li>
+<li>idiosyncratic noise.</li>
+</ul>
+<p>Variables 1–25 loaded on sector A. Variables 26–50 loaded on sector
+B.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>market  <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>sector_A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>sector_B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>E <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), <span class="at">nrow =</span> n, <span class="at">ncol =</span> d)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>Z50 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> d)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(d)) {</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (j <span class="sc">&lt;=</span> <span class="dv">25</span>) {</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    Z50[, j] <span class="ot">&lt;-</span> <span class="fl">0.60</span> <span class="sc">*</span> market <span class="sc">+</span> <span class="fl">0.90</span> <span class="sc">*</span> sector_A <span class="sc">+</span> <span class="fl">0.40</span> <span class="sc">*</span> E[, j]</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    Z50[, j] <span class="ot">&lt;-</span> <span class="fl">0.60</span> <span class="sc">*</span> market <span class="sc">+</span> <span class="fl">0.90</span> <span class="sc">*</span> sector_B <span class="sc">+</span> <span class="fl">0.40</span> <span class="sc">*</span> E[, j]</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The pairwise PM.matrix experiment ran quickly:</p>
+<pre class="text"><code>Runtime:
+elapsed = 0.12 seconds</code></pre>
+<p>The first five classical PCA eigenvalues were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Eigenvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">38.576663</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">20.499903</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.194593</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.188941</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.186759</td>
+</tr>
+</tbody>
+</table>
+<p>The pairwise NNS recovered eigenvalues were identical at displayed
+precision.</p>
+<p>Recovery diagnostics:</p>
+<pre class="text"><code>Pairwise covariance recovery error:
+3.774758e-15
+
+Pairwise eigenvalue recovery error:
+1.776357e-14
+
+Pairwise eigenvector alignments, first 5 PCs:
+1 1 1 1 1</code></pre>
+<p>Thus pairwise partial-moment matrices recover covariance and PCA
+exactly for this 50-variable example.</p>
+<hr />
+<h2 id="19-50-variable-directional-attribution">19. 50-Variable
+Directional Attribution</h2>
+<p>The directional eigenvalue attribution for the first five PCs
+was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">Eigenvalue</th>
+<th style="text-align: right;">CLPM</th>
+<th style="text-align: right;">CUPM</th>
+<th style="text-align: right;">DLPM</th>
+<th style="text-align: right;">DUPM</th>
+<th style="text-align: right;">Recovered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">38.576663</td>
+<td style="text-align: right;">22.634337</td>
+<td style="text-align: right;">22.669687</td>
+<td style="text-align: right;">3.363681</td>
+<td style="text-align: right;">3.363681</td>
+<td style="text-align: right;">38.576663</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20.499903</td>
+<td style="text-align: right;">7.000469</td>
+<td style="text-align: right;">7.585803</td>
+<td style="text-align: right;">-2.956815</td>
+<td style="text-align: right;">-2.956815</td>
+<td style="text-align: right;">20.499903</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.194593</td>
+<td style="text-align: right;">0.084791</td>
+<td style="text-align: right;">0.082119</td>
+<td style="text-align: right;">-0.013842</td>
+<td style="text-align: right;">-0.013842</td>
+<td style="text-align: right;">0.194593</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.188941</td>
+<td style="text-align: right;">0.082029</td>
+<td style="text-align: right;">0.082308</td>
+<td style="text-align: right;">-0.012302</td>
+<td style="text-align: right;">-0.012302</td>
+<td style="text-align: right;">0.188941</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.186759</td>
+<td style="text-align: right;">0.082447</td>
+<td style="text-align: right;">0.080548</td>
+<td style="text-align: right;">-0.011882</td>
+<td style="text-align: right;">-0.011882</td>
+<td style="text-align: right;">0.186759</td>
+</tr>
+</tbody>
+</table>
+<p>The signed percentage attribution was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">CLPM %</th>
+<th style="text-align: right;">CUPM %</th>
+<th style="text-align: right;">DLPM signed %</th>
+<th style="text-align: right;">DUPM signed %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">58.67</td>
+<td style="text-align: right;">58.77</td>
+<td style="text-align: right;">-8.72</td>
+<td style="text-align: right;">-8.72</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">34.15</td>
+<td style="text-align: right;">37.00</td>
+<td style="text-align: right;">14.42</td>
+<td style="text-align: right;">14.42</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">43.57</td>
+<td style="text-align: right;">42.20</td>
+<td style="text-align: right;">7.11</td>
+<td style="text-align: right;">7.11</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">43.42</td>
+<td style="text-align: right;">43.56</td>
+<td style="text-align: right;">6.51</td>
+<td style="text-align: right;">6.51</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">44.15</td>
+<td style="text-align: right;">43.13</td>
+<td style="text-align: right;">6.36</td>
+<td style="text-align: right;">6.36</td>
+</tr>
+</tbody>
+</table>
+<p>Interpretation:</p>
+<ul>
+<li>PC1 is dominated by lower and upper concordance.</li>
+<li>Divergent pairwise structure subtracts from PC1.</li>
+<li>PC2 has substantial positive signed divergent contribution,
+consistent with a sector/spread direction separating the two
+blocks.</li>
+</ul>
+<p>The trace-level decomposition was:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: right;">Trace Contribution</th>
+<th style="text-align: right;">Trace Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLPM</td>
+<td style="text-align: right;">33.08720</td>
+<td style="text-align: right;">49.57</td>
+</tr>
+<tr>
+<td>CUPM</td>
+<td style="text-align: right;">33.66671</td>
+<td style="text-align: right;">50.43</td>
+</tr>
+<tr>
+<td>DLPM signed</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+<tr>
+<td>DUPM signed</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.00</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align: right;">66.75391</td>
+<td style="text-align: right;">100.00</td>
+</tr>
+</tbody>
+</table>
+<p>The trace result says that total variance is evenly split between
+lower and upper concordant diagonal structure, while divergence affects
+off-diagonal covariance and eigenvector directions rather than total
+variance.</p>
+<hr />
+<h1 id="part-v--50-variable-pc1-not-market-stress-test">Part V —
+50-Variable PC1-Not-Market Stress Test</h1>
+<h2 id="20-motivation">20. Motivation</h2>
+<p>A common PCA interpretation mistake is to assume:</p>
+<blockquote>
+<p>PC1 is the market factor.</p>
+</blockquote>
+<p>But PC1 is only the largest variance direction. It is not necessarily
+the market direction.</p>
+<p>To test the pairwise directional framework, construct a 50-variable
+simulation where the spread factor is deliberately stronger than the
+market factor.</p>
+<p>The market vector is:</p>
+<p><span class="math display">$$m
+=
+\frac{1}{\sqrt{50}}(1,1,\ldots,1).$$</span></p>
+<p>The spread vector is:</p>
+<p><span class="math display">$$s
+=
+\frac{1}{\sqrt{50}}(\underbrace{1,\ldots,1}_{25},
+\underbrace{-1,\ldots,-1}_{25}).$$</span></p>
+<p>The two vectors are orthogonal:</p>
+<p><span
+class="math display"><em>m</em><sup>⊤</sup><em>s</em> = 0.</span></p>
+<p>The data are generated as:</p>
+<p><span
+class="math display"><em>Z</em> = <em>σ</em><sub><em>m</em></sub><em>M</em><em>m</em><sup>⊤</sup> + <em>σ</em><sub><em>s</em></sub><em>S</em><em>s</em><sup>⊤</sup> + <em>σ</em><sub><em>e</em></sub><em>E</em>,</span></p>
+<p>with:</p>
+<p><span
+class="math display"><em>σ</em><sub><em>m</em></sub> = 0.70,   <em>σ</em><sub><em>s</em></sub> = 1.80,   <em>σ</em><sub><em>e</em></sub> = 0.35.</span></p>
+<p>Because the spread factor is stronger than the market factor, PC1
+should be the spread factor, not the market factor.</p>
+<hr />
+<h2 id="21-pca-result-pc1-is-not-market">21. PCA Result: PC1 Is Not
+Market</h2>
+<p>The first five PCA eigenvalues were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Component</th>
+<th style="text-align: right;">Eigenvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">PC1</td>
+<td style="text-align: right;">3.492035</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC2</td>
+<td style="text-align: right;">0.618253</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC3</td>
+<td style="text-align: right;">0.144454</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC4</td>
+<td style="text-align: right;">0.141775</td>
+</tr>
+<tr>
+<td style="text-align: right;">PC5</td>
+<td style="text-align: right;">0.140824</td>
+</tr>
+</tbody>
+</table>
+<p>Alignment diagnostics were:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span
+class="math inline">|⟨<em>P</em><em>C</em>1, market⟩|</span></td>
+<td style="text-align: right;">0.00000742</td>
+</tr>
+<tr>
+<td><span
+class="math inline">|⟨<em>P</em><em>C</em>1, spread⟩|</span></td>
+<td style="text-align: right;">0.99982464</td>
+</tr>
+<tr>
+<td><span
+class="math inline">|⟨<em>P</em><em>C</em>2, market⟩|</span></td>
+<td style="text-align: right;">0.99827428</td>
+</tr>
+<tr>
+<td><span
+class="math inline">|⟨<em>P</em><em>C</em>2, spread⟩|</span></td>
+<td style="text-align: right;">0.00016201</td>
+</tr>
+</tbody>
+</table>
+<p>Thus PC1 is essentially the spread factor, while PC2 is essentially
+the market factor.</p>
+<p>This confirms:</p>
+<blockquote>
+<p>PC1 is not always the market factor.</p>
+</blockquote>
+<hr />
+<h2 id="22-pairwise-recovery-in-the-stress-test">22. Pairwise Recovery
+in the Stress Test</h2>
+<p>The pairwise PM.matrix decomposition again recovered covariance and
+PCA to numerical precision:</p>
+<pre class="text"><code>Pairwise covariance recovery error:
+4.440892e-16
+
+Pairwise eigenvalue recovery error:
+2.664535e-15
+
+Pairwise eigenvector alignments, first 5 PCs:
+1 1 1 1 1</code></pre>
+<p>So even when PC1 is not market, the pairwise directional matrices
+recover the full PCA eigensystem exactly.</p>
+<hr />
+<h2 id="23-directional-attribution-in-the-stress-test">23. Directional
+Attribution in the Stress Test</h2>
+<p>The directional eigenvalue attribution was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">Eigenvalue</th>
+<th style="text-align: right;">CLPM</th>
+<th style="text-align: right;">CUPM</th>
+<th style="text-align: right;">DLPM</th>
+<th style="text-align: right;">DUPM</th>
+<th style="text-align: right;">Recovered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.492035</td>
+<td style="text-align: right;">0.924240</td>
+<td style="text-align: right;">0.908033</td>
+<td style="text-align: right;">-0.829881</td>
+<td style="text-align: right;">-0.829881</td>
+<td style="text-align: right;">3.492035</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.618253</td>
+<td style="text-align: right;">1.851522</td>
+<td style="text-align: right;">1.846249</td>
+<td style="text-align: right;">1.539759</td>
+<td style="text-align: right;">1.539759</td>
+<td style="text-align: right;">0.618253</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0.144454</td>
+<td style="text-align: right;">0.052954</td>
+<td style="text-align: right;">0.050886</td>
+<td style="text-align: right;">-0.020307</td>
+<td style="text-align: right;">-0.020307</td>
+<td style="text-align: right;">0.144454</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.141775</td>
+<td style="text-align: right;">0.050863</td>
+<td style="text-align: right;">0.050608</td>
+<td style="text-align: right;">-0.020152</td>
+<td style="text-align: right;">-0.020152</td>
+<td style="text-align: right;">0.141775</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.140824</td>
+<td style="text-align: right;">0.051385</td>
+<td style="text-align: right;">0.052016</td>
+<td style="text-align: right;">-0.018711</td>
+<td style="text-align: right;">-0.018711</td>
+<td style="text-align: right;">0.140824</td>
+</tr>
+</tbody>
+</table>
+<p>The signed percentage attribution was:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">PC</th>
+<th style="text-align: right;">CLPM %</th>
+<th style="text-align: right;">CUPM %</th>
+<th style="text-align: right;">DLPM signed %</th>
+<th style="text-align: right;">DUPM signed %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">26.47</td>
+<td style="text-align: right;">26.00</td>
+<td style="text-align: right;">23.76</td>
+<td style="text-align: right;">23.76</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">299.48</td>
+<td style="text-align: right;">298.62</td>
+<td style="text-align: right;">-249.05</td>
+<td style="text-align: right;">-249.05</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">36.66</td>
+<td style="text-align: right;">35.23</td>
+<td style="text-align: right;">14.06</td>
+<td style="text-align: right;">14.06</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">35.88</td>
+<td style="text-align: right;">35.70</td>
+<td style="text-align: right;">14.21</td>
+<td style="text-align: right;">14.21</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">36.49</td>
+<td style="text-align: right;">36.94</td>
+<td style="text-align: right;">13.29</td>
+<td style="text-align: right;">13.29</td>
+</tr>
+</tbody>
+</table>
+<p>For PC1:</p>
+<p><span
+class="math display">3.492035 = 0.924240 + 0.908033 − (−0.829881) − (−0.829881).</span></p>
+<p>So PC1 is not only concordant. It is substantially generated by
+divergent pairwise structure.</p>
+<p>Interpretation:</p>
+<blockquote>
+<p>When PC1 is a market/common factor, concordant matrices dominate and
+divergence subtracts.<br />
+When PC1 is a spread factor, divergent pairwise structure becomes part
+of the positive explanatory mechanism.</p>
+</blockquote>
+<p>This is the high-dimensional pairwise analogue of the full orthant
+result: PCA finds the dominant axis, while NNS identifies the
+directional source of that axis.</p>
+<hr />
+<h1 id="part-vi--runtime-and-scaling">Part VI — Runtime and Scaling</h1>
+<h2 id="24-runtime-scaling-grid">24. Runtime Scaling Grid</h2>
+<p>The final experiment compared pairwise PM.matrix recovery across
+dimensions:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">d</th>
+<th style="text-align: right;">Full Orthant Count</th>
+<th style="text-align: right;">Runtime Seconds</th>
+<th style="text-align: right;">Covariance Error</th>
+<th style="text-align: right;">Eigenvalue Error</th>
+<th style="text-align: right;">PC1 Alignment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">8.8817842e-16</td>
+<td style="text-align: right;">1.7763568e-15</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1,024</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.1102230e-15</td>
+<td style="text-align: right;">3.5527137e-15</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">33,554,432</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">1.4432899e-15</td>
+<td style="text-align: right;">3.5527137e-15</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">1.1258999e15</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">1.5543122e-15</td>
+<td style="text-align: right;">2.1316282e-14</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>This table shows the scaling contrast directly:</p>
+<p><span
+class="math display">full orthants = <em>O</em>(2<sup><em>d</em></sup>),</span></p>
+<p>while:</p>
+<p><span
+class="math display">pairwise PM matrices = <em>O</em>(<em>d</em><sup>2</sup>).</span></p>
+<p>The pairwise method recovered covariance and PC1 exactly at displayed
+precision across all tested dimensions.</p>
+<hr />
+<h1 id="part-vii--final-hierarchy">Part VII — Final Hierarchy</h1>
+<p>The updated hierarchy is:</p>
+<p><span
+class="math display">full orthant decomposition ⇒ complete spectral genealogy, exact but exponential.</span></p>
+<p><span
+class="math display">pairwise PM matrices ⇒ exact covariance/PCA recovery and directional attribution, scalable.</span></p>
+<p><span
+class="math display">DPM<sub><em>n</em><em>D</em></sub> ⇒ three state global directional diagnostic, scalable but coarse.</span></p>
+<p>The three layers answer different questions.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th style="text-align: right;">State count / storage</th>
+<th>What it gives</th>
+<th>What it cannot give</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full orthants</td>
+<td style="text-align: right;"><span
+class="math inline">2<sup><em>d</em></sup></span> states</td>
+<td>Complete orthant-level PCA genealogy</td>
+<td>Practical high-dimensional estimation</td>
+</tr>
+<tr>
+<td>Pairwise PM matrices</td>
+<td style="text-align: right;">Four <span
+class="math inline"><em>d</em> × <em>d</em></span> matrices</td>
+<td>Exact covariance/PCA recovery; directional pairwise attribution</td>
+<td>Full simultaneous <span
+class="math inline"><em>d</em></span>-orthant labels</td>
+</tr>
+<tr>
+<td><code>DPM_nD</code></td>
+<td style="text-align: right;">Three values</td>
+<td>All-lower / all-upper / mixed global directional summary</td>
+<td>PCA recovery or full spectral genealogy</td>
+</tr>
+</tbody>
+</table>
+<p>The strongest practical conclusion is:</p>
+<blockquote>
+<p>Use full orthants when <span class="math inline"><em>d</em></span> is
+small and complete regime genealogy is desired.<br />
+Use pairwise <code>PM.matrix</code> for scalable high-dimensional PCA
+recovery and directional attribution.<br />
+Use <code>DPM_nD</code> as a compact global diagnostic of all-lower,
+all-upper, and mixed directional mass.</p>
+</blockquote>
+<hr />
+<h1 id="appendix-full-r-code">Appendix: Full R Code</h1>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiments for NNS Directional Spectral Decomposition</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Full Orthants, DPM_nD Aggregation, and Pairwise PM.matrix Scalability</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper functions</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>cat_section <span class="ot">&lt;-</span> <span class="cf">function</span>(title) {</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">============================================================</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(title, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;============================================================</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>pop_cov <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>  Zc <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, <span class="fu">colMeans</span>(Z))</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crossprod</span>(Zc) <span class="sc">/</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>align_eigenvectors <span class="ot">&lt;-</span> <span class="cf">function</span>(V_ref, V_test, <span class="at">k =</span> <span class="fu">ncol</span>(V_ref)) {</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="fu">seq_len</span>(k), <span class="cf">function</span>(j) {</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abs</span>(<span class="fu">sum</span>(V_ref[, j] <span class="sc">*</span> V_test[, j]))</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>decode_orthant <span class="ot">&lt;-</span> <span class="cf">function</span>(label, d, names_vec) {</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>  bits <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">intToBits</span>(<span class="fu">as.integer</span>(label)))[<span class="dv">1</span><span class="sc">:</span>d]</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>  signs <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(bits <span class="sc">==</span> <span class="dv">1</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;-&quot;</span>)</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="fu">paste0</span>(names_vec, signs), <span class="at">collapse =</span> <span class="st">&quot; &quot;</span>)</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>full_orthant_decomposition <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">ncol</span>(Z)</span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>  above_mean <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, mu, <span class="st">&quot;&gt;&quot;</span>)</span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>  orthant_label <span class="ot">&lt;-</span> <span class="fu">apply</span>(above_mean, <span class="dv">1</span>, <span class="cf">function</span>(row) {</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(row <span class="sc">*</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>(d <span class="sc">-</span> <span class="dv">1</span>)))</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>  Sigma <span class="ot">&lt;-</span> <span class="fu">pop_cov</span>(Z)</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>  Sigma_Q <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>  Sigma_W <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>  orthant_info <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant =</span> <span class="fu">integer</span>(),</span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern =</span> <span class="fu">character</span>(),</span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">integer</span>(),</span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">p =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">u_norm =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (lab <span class="cf">in</span> <span class="fu">sort</span>(<span class="fu">unique</span>(orthant_label))) {</span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> orthant_label <span class="sc">==</span> lab</span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a>    n_r <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask)</span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a>    p_r <span class="ot">&lt;-</span> n_r <span class="sc">/</span> n</span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a>    Zr <span class="ot">&lt;-</span> Z[mask, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a>    m_r <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Zr)</span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a>    u_r <span class="ot">&lt;-</span> m_r <span class="sc">-</span> mu</span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a>    Sigma_r <span class="ot">&lt;-</span> <span class="fu">pop_cov</span>(Zr)</span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a>    Sigma_Q <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> p_r <span class="sc">*</span> <span class="fu">tcrossprod</span>(u_r)</span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a>    Sigma_W <span class="ot">&lt;-</span> Sigma_W <span class="sc">+</span> p_r <span class="sc">*</span> Sigma_r</span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>    orthant_info <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a>      orthant_info,</span>
+<span id="cb23-76"><a href="#cb23-76" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data.frame</span>(</span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a>        <span class="at">orthant =</span> lab,</span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a>        <span class="at">pattern =</span> <span class="fu">decode_orthant</span>(lab, d, <span class="fu">colnames</span>(Z)),</span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a>        <span class="at">n =</span> n_r,</span>
+<span id="cb23-80"><a href="#cb23-80" aria-hidden="true" tabindex="-1"></a>        <span class="at">p =</span> p_r,</span>
+<span id="cb23-81"><a href="#cb23-81" aria-hidden="true" tabindex="-1"></a>        <span class="at">u_norm =</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(u_r<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb23-82"><a href="#cb23-82" aria-hidden="true" tabindex="-1"></a>        <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-87"><a href="#cb23-87" aria-hidden="true" tabindex="-1"></a>  Sigma_rec <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> Sigma_W</span>
+<span id="cb23-88"><a href="#cb23-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-89"><a href="#cb23-89" aria-hidden="true" tabindex="-1"></a>  pca <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-90"><a href="#cb23-90" aria-hidden="true" tabindex="-1"></a>  pca_rec <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_rec, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-91"><a href="#cb23-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-92"><a href="#cb23-92" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(d)) {</span>
+<span id="cb23-93"><a href="#cb23-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(pca<span class="sc">$</span>vectors[, j] <span class="sc">*</span> pca_rec<span class="sc">$</span>vectors[, j]) <span class="sc">&lt;</span> <span class="dv">0</span>) {</span>
+<span id="cb23-94"><a href="#cb23-94" aria-hidden="true" tabindex="-1"></a>      pca_rec<span class="sc">$</span>vectors[, j] <span class="ot">&lt;-</span> <span class="sc">-</span>pca_rec<span class="sc">$</span>vectors[, j]</span>
+<span id="cb23-95"><a href="#cb23-95" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb23-96"><a href="#cb23-96" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-97"><a href="#cb23-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-98"><a href="#cb23-98" aria-hidden="true" tabindex="-1"></a>  attrib <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-99"><a href="#cb23-99" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC =</span> <span class="fu">seq_len</span>(d),</span>
+<span id="cb23-100"><a href="#cb23-100" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvalue =</span> pca<span class="sc">$</span>values,</span>
+<span id="cb23-101"><a href="#cb23-101" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-102"><a href="#cb23-102" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-103"><a href="#cb23-103" aria-hidden="true" tabindex="-1"></a>    <span class="at">total =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-104"><a href="#cb23-104" aria-hidden="true" tabindex="-1"></a>    <span class="at">between_pct =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-105"><a href="#cb23-105" aria-hidden="true" tabindex="-1"></a>    <span class="at">error =</span> <span class="cn">NA_real_</span></span>
+<span id="cb23-106"><a href="#cb23-106" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-107"><a href="#cb23-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(d)) {</span>
+<span id="cb23-109"><a href="#cb23-109" aria-hidden="true" tabindex="-1"></a>    v <span class="ot">&lt;-</span> pca<span class="sc">$</span>vectors[, j, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb23-110"><a href="#cb23-110" aria-hidden="true" tabindex="-1"></a>    between_j <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_Q <span class="sc">%*%</span> v)</span>
+<span id="cb23-111"><a href="#cb23-111" aria-hidden="true" tabindex="-1"></a>    within_j  <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> Sigma_W <span class="sc">%*%</span> v)</span>
+<span id="cb23-112"><a href="#cb23-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-113"><a href="#cb23-113" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>between[j] <span class="ot">&lt;-</span> between_j</span>
+<span id="cb23-114"><a href="#cb23-114" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>within[j] <span class="ot">&lt;-</span> within_j</span>
+<span id="cb23-115"><a href="#cb23-115" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>total[j] <span class="ot">&lt;-</span> between_j <span class="sc">+</span> within_j</span>
+<span id="cb23-116"><a href="#cb23-116" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>between_pct[j] <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> between_j <span class="sc">/</span> attrib<span class="sc">$</span>total[j]</span>
+<span id="cb23-117"><a href="#cb23-117" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>error[j] <span class="ot">&lt;-</span> <span class="fu">abs</span>(attrib<span class="sc">$</span>eigenvalue[j] <span class="sc">-</span> attrib<span class="sc">$</span>total[j])</span>
+<span id="cb23-118"><a href="#cb23-118" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-119"><a href="#cb23-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-120"><a href="#cb23-120" aria-hidden="true" tabindex="-1"></a>  v1 <span class="ot">&lt;-</span> pca<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
+<span id="cb23-121"><a href="#cb23-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-122"><a href="#cb23-122" aria-hidden="true" tabindex="-1"></a>  orthant_pc1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-123"><a href="#cb23-123" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant =</span> <span class="fu">integer</span>(),</span>
+<span id="cb23-124"><a href="#cb23-124" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern =</span> <span class="fu">character</span>(),</span>
+<span id="cb23-125"><a href="#cb23-125" aria-hidden="true" tabindex="-1"></a>    <span class="at">p =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-126"><a href="#cb23-126" aria-hidden="true" tabindex="-1"></a>    <span class="at">contribution =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-127"><a href="#cb23-127" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_lambda1 =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-128"><a href="#cb23-128" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-129"><a href="#cb23-129" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-130"><a href="#cb23-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-131"><a href="#cb23-131" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (lab <span class="cf">in</span> <span class="fu">sort</span>(<span class="fu">unique</span>(orthant_label))) {</span>
+<span id="cb23-132"><a href="#cb23-132" aria-hidden="true" tabindex="-1"></a>    mask <span class="ot">&lt;-</span> orthant_label <span class="sc">==</span> lab</span>
+<span id="cb23-133"><a href="#cb23-133" aria-hidden="true" tabindex="-1"></a>    p_r <span class="ot">&lt;-</span> <span class="fu">sum</span>(mask) <span class="sc">/</span> n</span>
+<span id="cb23-134"><a href="#cb23-134" aria-hidden="true" tabindex="-1"></a>    u_r <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z[mask, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">-</span> mu</span>
+<span id="cb23-135"><a href="#cb23-135" aria-hidden="true" tabindex="-1"></a>    contrib <span class="ot">&lt;-</span> p_r <span class="sc">*</span> <span class="fu">sum</span>(v1 <span class="sc">*</span> u_r)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb23-136"><a href="#cb23-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-137"><a href="#cb23-137" aria-hidden="true" tabindex="-1"></a>    orthant_pc1 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb23-138"><a href="#cb23-138" aria-hidden="true" tabindex="-1"></a>      orthant_pc1,</span>
+<span id="cb23-139"><a href="#cb23-139" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data.frame</span>(</span>
+<span id="cb23-140"><a href="#cb23-140" aria-hidden="true" tabindex="-1"></a>        <span class="at">orthant =</span> lab,</span>
+<span id="cb23-141"><a href="#cb23-141" aria-hidden="true" tabindex="-1"></a>        <span class="at">pattern =</span> <span class="fu">decode_orthant</span>(lab, d, <span class="fu">colnames</span>(Z)),</span>
+<span id="cb23-142"><a href="#cb23-142" aria-hidden="true" tabindex="-1"></a>        <span class="at">p =</span> p_r,</span>
+<span id="cb23-143"><a href="#cb23-143" aria-hidden="true" tabindex="-1"></a>        <span class="at">contribution =</span> contrib,</span>
+<span id="cb23-144"><a href="#cb23-144" aria-hidden="true" tabindex="-1"></a>        <span class="at">pct_lambda1 =</span> <span class="dv">100</span> <span class="sc">*</span> contrib <span class="sc">/</span> pca<span class="sc">$</span>values[<span class="dv">1</span>],</span>
+<span id="cb23-145"><a href="#cb23-145" aria-hidden="true" tabindex="-1"></a>        <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-146"><a href="#cb23-146" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb23-147"><a href="#cb23-147" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-148"><a href="#cb23-148" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-149"><a href="#cb23-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-150"><a href="#cb23-150" aria-hidden="true" tabindex="-1"></a>  orthant_pc1 <span class="ot">&lt;-</span> orthant_pc1[<span class="fu">order</span>(<span class="sc">-</span>orthant_pc1<span class="sc">$</span>contribution), ]</span>
+<span id="cb23-151"><a href="#cb23-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-152"><a href="#cb23-152" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb23-153"><a href="#cb23-153" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma =</span> Sigma,</span>
+<span id="cb23-154"><a href="#cb23-154" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_Q =</span> Sigma_Q,</span>
+<span id="cb23-155"><a href="#cb23-155" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_W =</span> Sigma_W,</span>
+<span id="cb23-156"><a href="#cb23-156" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_rec =</span> Sigma_rec,</span>
+<span id="cb23-157"><a href="#cb23-157" aria-hidden="true" tabindex="-1"></a>    <span class="at">pca =</span> pca,</span>
+<span id="cb23-158"><a href="#cb23-158" aria-hidden="true" tabindex="-1"></a>    <span class="at">pca_rec =</span> pca_rec,</span>
+<span id="cb23-159"><a href="#cb23-159" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant_label =</span> orthant_label,</span>
+<span id="cb23-160"><a href="#cb23-160" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant_info =</span> orthant_info,</span>
+<span id="cb23-161"><a href="#cb23-161" aria-hidden="true" tabindex="-1"></a>    <span class="at">attrib =</span> attrib,</span>
+<span id="cb23-162"><a href="#cb23-162" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant_pc1 =</span> orthant_pc1,</span>
+<span id="cb23-163"><a href="#cb23-163" aria-hidden="true" tabindex="-1"></a>    <span class="at">recovery_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma <span class="sc">-</span> Sigma_rec)),</span>
+<span id="cb23-164"><a href="#cb23-164" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvalue_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(pca<span class="sc">$</span>values <span class="sc">-</span> pca_rec<span class="sc">$</span>values)),</span>
+<span id="cb23-165"><a href="#cb23-165" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvector_alignment =</span> <span class="fu">align_eigenvectors</span>(pca<span class="sc">$</span>vectors, pca_rec<span class="sc">$</span>vectors, d),</span>
+<span id="cb23-166"><a href="#cb23-166" aria-hidden="true" tabindex="-1"></a>    <span class="at">D_spectral =</span> <span class="fu">sum</span>(<span class="fu">diag</span>(Sigma_Q)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">diag</span>(Sigma))</span>
+<span id="cb23-167"><a href="#cb23-167" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-168"><a href="#cb23-168" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-169"><a href="#cb23-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-170"><a href="#cb23-170" aria-hidden="true" tabindex="-1"></a>pairwise_pm_pca <span class="ot">&lt;-</span> <span class="cf">function</span>(Z, <span class="at">pcs =</span> <span class="dv">5</span>) {</span>
+<span id="cb23-171"><a href="#cb23-171" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb23-172"><a href="#cb23-172" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">ncol</span>(Z)</span>
+<span id="cb23-173"><a href="#cb23-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-174"><a href="#cb23-174" aria-hidden="true" tabindex="-1"></a>  Sigma_classic <span class="ot">&lt;-</span> <span class="fu">cov</span>(Z)</span>
+<span id="cb23-175"><a href="#cb23-175" aria-hidden="true" tabindex="-1"></a>  pca_classic <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_classic, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-176"><a href="#cb23-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-177"><a href="#cb23-177" aria-hidden="true" tabindex="-1"></a>  pm <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">PM.matrix</span>(</span>
+<span id="cb23-178"><a href="#cb23-178" aria-hidden="true" tabindex="-1"></a>    <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb23-179"><a href="#cb23-179" aria-hidden="true" tabindex="-1"></a>    <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
+<span id="cb23-180"><a href="#cb23-180" aria-hidden="true" tabindex="-1"></a>    <span class="at">target     =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb23-181"><a href="#cb23-181" aria-hidden="true" tabindex="-1"></a>    <span class="at">variable   =</span> Z,</span>
+<span id="cb23-182"><a href="#cb23-182" aria-hidden="true" tabindex="-1"></a>    <span class="at">pop_adj    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb23-183"><a href="#cb23-183" aria-hidden="true" tabindex="-1"></a>    <span class="at">norm       =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-184"><a href="#cb23-184" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-185"><a href="#cb23-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-186"><a href="#cb23-186" aria-hidden="true" tabindex="-1"></a>  CLPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>clpm</span>
+<span id="cb23-187"><a href="#cb23-187" aria-hidden="true" tabindex="-1"></a>  CUPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>cupm</span>
+<span id="cb23-188"><a href="#cb23-188" aria-hidden="true" tabindex="-1"></a>  DLPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>dlpm</span>
+<span id="cb23-189"><a href="#cb23-189" aria-hidden="true" tabindex="-1"></a>  DUPM <span class="ot">&lt;-</span> pm<span class="sc">$</span>dupm</span>
+<span id="cb23-190"><a href="#cb23-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-191"><a href="#cb23-191" aria-hidden="true" tabindex="-1"></a>  Sigma_nns_raw <span class="ot">&lt;-</span> CLPM <span class="sc">+</span> CUPM <span class="sc">-</span> DLPM <span class="sc">-</span> DUPM</span>
+<span id="cb23-192"><a href="#cb23-192" aria-hidden="true" tabindex="-1"></a>  Sigma_nns <span class="ot">&lt;-</span> (Sigma_nns_raw <span class="sc">+</span> <span class="fu">t</span>(Sigma_nns_raw)) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb23-193"><a href="#cb23-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-194"><a href="#cb23-194" aria-hidden="true" tabindex="-1"></a>  pca_nns <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_nns, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-195"><a href="#cb23-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-196"><a href="#cb23-196" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(d)) {</span>
+<span id="cb23-197"><a href="#cb23-197" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(pca_classic<span class="sc">$</span>vectors[, j] <span class="sc">*</span> pca_nns<span class="sc">$</span>vectors[, j]) <span class="sc">&lt;</span> <span class="dv">0</span>) {</span>
+<span id="cb23-198"><a href="#cb23-198" aria-hidden="true" tabindex="-1"></a>      pca_nns<span class="sc">$</span>vectors[, j] <span class="ot">&lt;-</span> <span class="sc">-</span>pca_nns<span class="sc">$</span>vectors[, j]</span>
+<span id="cb23-199"><a href="#cb23-199" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb23-200"><a href="#cb23-200" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-201"><a href="#cb23-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-202"><a href="#cb23-202" aria-hidden="true" tabindex="-1"></a>  pcs <span class="ot">&lt;-</span> <span class="fu">min</span>(pcs, d)</span>
+<span id="cb23-203"><a href="#cb23-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-204"><a href="#cb23-204" aria-hidden="true" tabindex="-1"></a>  attrib <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-205"><a href="#cb23-205" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC =</span> <span class="fu">seq_len</span>(pcs),</span>
+<span id="cb23-206"><a href="#cb23-206" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvalue =</span> pca_classic<span class="sc">$</span>values[<span class="dv">1</span><span class="sc">:</span>pcs],</span>
+<span id="cb23-207"><a href="#cb23-207" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-208"><a href="#cb23-208" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-209"><a href="#cb23-209" aria-hidden="true" tabindex="-1"></a>    <span class="at">DLPM =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-210"><a href="#cb23-210" aria-hidden="true" tabindex="-1"></a>    <span class="at">DUPM =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-211"><a href="#cb23-211" aria-hidden="true" tabindex="-1"></a>    <span class="at">recovered =</span> <span class="cn">NA_real_</span>,</span>
+<span id="cb23-212"><a href="#cb23-212" aria-hidden="true" tabindex="-1"></a>    <span class="at">error =</span> <span class="cn">NA_real_</span></span>
+<span id="cb23-213"><a href="#cb23-213" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-214"><a href="#cb23-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-215"><a href="#cb23-215" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(pcs)) {</span>
+<span id="cb23-216"><a href="#cb23-216" aria-hidden="true" tabindex="-1"></a>    v <span class="ot">&lt;-</span> pca_classic<span class="sc">$</span>vectors[, j, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb23-217"><a href="#cb23-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-218"><a href="#cb23-218" aria-hidden="true" tabindex="-1"></a>    clpm_j <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> CLPM <span class="sc">%*%</span> v)</span>
+<span id="cb23-219"><a href="#cb23-219" aria-hidden="true" tabindex="-1"></a>    cupm_j <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> CUPM <span class="sc">%*%</span> v)</span>
+<span id="cb23-220"><a href="#cb23-220" aria-hidden="true" tabindex="-1"></a>    dlpm_j <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> DLPM <span class="sc">%*%</span> v)</span>
+<span id="cb23-221"><a href="#cb23-221" aria-hidden="true" tabindex="-1"></a>    dupm_j <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">t</span>(v) <span class="sc">%*%</span> DUPM <span class="sc">%*%</span> v)</span>
+<span id="cb23-222"><a href="#cb23-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-223"><a href="#cb23-223" aria-hidden="true" tabindex="-1"></a>    recovered_j <span class="ot">&lt;-</span> clpm_j <span class="sc">+</span> cupm_j <span class="sc">-</span> dlpm_j <span class="sc">-</span> dupm_j</span>
+<span id="cb23-224"><a href="#cb23-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-225"><a href="#cb23-225" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>CLPM[j] <span class="ot">&lt;-</span> clpm_j</span>
+<span id="cb23-226"><a href="#cb23-226" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>CUPM[j] <span class="ot">&lt;-</span> cupm_j</span>
+<span id="cb23-227"><a href="#cb23-227" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>DLPM[j] <span class="ot">&lt;-</span> dlpm_j</span>
+<span id="cb23-228"><a href="#cb23-228" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>DUPM[j] <span class="ot">&lt;-</span> dupm_j</span>
+<span id="cb23-229"><a href="#cb23-229" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>recovered[j] <span class="ot">&lt;-</span> recovered_j</span>
+<span id="cb23-230"><a href="#cb23-230" aria-hidden="true" tabindex="-1"></a>    attrib<span class="sc">$</span>error[j] <span class="ot">&lt;-</span> <span class="fu">abs</span>(attrib<span class="sc">$</span>eigenvalue[j] <span class="sc">-</span> recovered_j)</span>
+<span id="cb23-231"><a href="#cb23-231" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-232"><a href="#cb23-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-233"><a href="#cb23-233" aria-hidden="true" tabindex="-1"></a>  attrib_pct <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-234"><a href="#cb23-234" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC =</span> attrib<span class="sc">$</span>PC,</span>
+<span id="cb23-235"><a href="#cb23-235" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM_pct =</span> <span class="dv">100</span> <span class="sc">*</span> attrib<span class="sc">$</span>CLPM <span class="sc">/</span> attrib<span class="sc">$</span>eigenvalue,</span>
+<span id="cb23-236"><a href="#cb23-236" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM_pct =</span> <span class="dv">100</span> <span class="sc">*</span> attrib<span class="sc">$</span>CUPM <span class="sc">/</span> attrib<span class="sc">$</span>eigenvalue,</span>
+<span id="cb23-237"><a href="#cb23-237" aria-hidden="true" tabindex="-1"></a>    <span class="at">DLPM_signed_pct =</span> <span class="sc">-</span><span class="dv">100</span> <span class="sc">*</span> attrib<span class="sc">$</span>DLPM <span class="sc">/</span> attrib<span class="sc">$</span>eigenvalue,</span>
+<span id="cb23-238"><a href="#cb23-238" aria-hidden="true" tabindex="-1"></a>    <span class="at">DUPM_signed_pct =</span> <span class="sc">-</span><span class="dv">100</span> <span class="sc">*</span> attrib<span class="sc">$</span>DUPM <span class="sc">/</span> attrib<span class="sc">$</span>eigenvalue</span>
+<span id="cb23-239"><a href="#cb23-239" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-240"><a href="#cb23-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-241"><a href="#cb23-241" aria-hidden="true" tabindex="-1"></a>  trace_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(M) <span class="fu">sum</span>(<span class="fu">diag</span>(M))</span>
+<span id="cb23-242"><a href="#cb23-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-243"><a href="#cb23-243" aria-hidden="true" tabindex="-1"></a>  trace_decomp <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-244"><a href="#cb23-244" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM =</span> <span class="fu">trace_fun</span>(CLPM),</span>
+<span id="cb23-245"><a href="#cb23-245" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM =</span> <span class="fu">trace_fun</span>(CUPM),</span>
+<span id="cb23-246"><a href="#cb23-246" aria-hidden="true" tabindex="-1"></a>    <span class="at">DLPM_signed =</span> <span class="sc">-</span><span class="fu">trace_fun</span>(DLPM),</span>
+<span id="cb23-247"><a href="#cb23-247" aria-hidden="true" tabindex="-1"></a>    <span class="at">DUPM_signed =</span> <span class="sc">-</span><span class="fu">trace_fun</span>(DUPM),</span>
+<span id="cb23-248"><a href="#cb23-248" aria-hidden="true" tabindex="-1"></a>    <span class="at">Total =</span> <span class="fu">trace_fun</span>(Sigma_nns)</span>
+<span id="cb23-249"><a href="#cb23-249" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-250"><a href="#cb23-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-251"><a href="#cb23-251" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb23-252"><a href="#cb23-252" aria-hidden="true" tabindex="-1"></a>    <span class="at">pm =</span> pm,</span>
+<span id="cb23-253"><a href="#cb23-253" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM =</span> CLPM,</span>
+<span id="cb23-254"><a href="#cb23-254" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM =</span> CUPM,</span>
+<span id="cb23-255"><a href="#cb23-255" aria-hidden="true" tabindex="-1"></a>    <span class="at">DLPM =</span> DLPM,</span>
+<span id="cb23-256"><a href="#cb23-256" aria-hidden="true" tabindex="-1"></a>    <span class="at">DUPM =</span> DUPM,</span>
+<span id="cb23-257"><a href="#cb23-257" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_classic =</span> Sigma_classic,</span>
+<span id="cb23-258"><a href="#cb23-258" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_nns_raw =</span> Sigma_nns_raw,</span>
+<span id="cb23-259"><a href="#cb23-259" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sigma_nns =</span> Sigma_nns,</span>
+<span id="cb23-260"><a href="#cb23-260" aria-hidden="true" tabindex="-1"></a>    <span class="at">pca_classic =</span> pca_classic,</span>
+<span id="cb23-261"><a href="#cb23-261" aria-hidden="true" tabindex="-1"></a>    <span class="at">pca_nns =</span> pca_nns,</span>
+<span id="cb23-262"><a href="#cb23-262" aria-hidden="true" tabindex="-1"></a>    <span class="at">covariance_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma_classic <span class="sc">-</span> Sigma_nns_raw)),</span>
+<span id="cb23-263"><a href="#cb23-263" aria-hidden="true" tabindex="-1"></a>    <span class="at">pm_cov_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(pm<span class="sc">$</span>cov.matrix <span class="sc">-</span> Sigma_nns_raw)),</span>
+<span id="cb23-264"><a href="#cb23-264" aria-hidden="true" tabindex="-1"></a>    <span class="at">asymmetry =</span> <span class="fu">max</span>(<span class="fu">abs</span>(Sigma_nns_raw <span class="sc">-</span> <span class="fu">t</span>(Sigma_nns_raw))),</span>
+<span id="cb23-265"><a href="#cb23-265" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvalue_error =</span> <span class="fu">max</span>(<span class="fu">abs</span>(pca_classic<span class="sc">$</span>values <span class="sc">-</span> pca_nns<span class="sc">$</span>values)),</span>
+<span id="cb23-266"><a href="#cb23-266" aria-hidden="true" tabindex="-1"></a>    <span class="at">eigenvector_alignment =</span> <span class="fu">align_eigenvectors</span>(</span>
+<span id="cb23-267"><a href="#cb23-267" aria-hidden="true" tabindex="-1"></a>      pca_classic<span class="sc">$</span>vectors,</span>
+<span id="cb23-268"><a href="#cb23-268" aria-hidden="true" tabindex="-1"></a>      pca_nns<span class="sc">$</span>vectors,</span>
+<span id="cb23-269"><a href="#cb23-269" aria-hidden="true" tabindex="-1"></a>      pcs</span>
+<span id="cb23-270"><a href="#cb23-270" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb23-271"><a href="#cb23-271" aria-hidden="true" tabindex="-1"></a>    <span class="at">attrib =</span> attrib,</span>
+<span id="cb23-272"><a href="#cb23-272" aria-hidden="true" tabindex="-1"></a>    <span class="at">attrib_pct =</span> attrib_pct,</span>
+<span id="cb23-273"><a href="#cb23-273" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace_decomp =</span> trace_decomp,</span>
+<span id="cb23-274"><a href="#cb23-274" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace_pct =</span> <span class="dv">100</span> <span class="sc">*</span> trace_decomp <span class="sc">/</span> trace_decomp[<span class="st">&quot;Total&quot;</span>]</span>
+<span id="cb23-275"><a href="#cb23-275" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-276"><a href="#cb23-276" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-277"><a href="#cb23-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-278"><a href="#cb23-278" aria-hidden="true" tabindex="-1"></a>dpm_nd_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(Z) {</span>
+<span id="cb23-279"><a href="#cb23-279" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Z)</span>
+<span id="cb23-280"><a href="#cb23-280" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Z)</span>
+<span id="cb23-281"><a href="#cb23-281" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">ncol</span>(Z)</span>
+<span id="cb23-282"><a href="#cb23-282" aria-hidden="true" tabindex="-1"></a>  target <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(Z)</span>
+<span id="cb23-283"><a href="#cb23-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-284"><a href="#cb23-284" aria-hidden="true" tabindex="-1"></a>  above_target <span class="ot">&lt;-</span> <span class="fu">sweep</span>(Z, <span class="dv">2</span>, target, <span class="st">&quot;&gt;&quot;</span>)</span>
+<span id="cb23-285"><a href="#cb23-285" aria-hidden="true" tabindex="-1"></a>  orthant_label <span class="ot">&lt;-</span> <span class="fu">apply</span>(above_target, <span class="dv">1</span>, <span class="cf">function</span>(row) {</span>
+<span id="cb23-286"><a href="#cb23-286" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(row <span class="sc">*</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span>(d <span class="sc">-</span> <span class="dv">1</span>)))</span>
+<span id="cb23-287"><a href="#cb23-287" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb23-288"><a href="#cb23-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-289"><a href="#cb23-289" aria-hidden="true" tabindex="-1"></a>  orthant_tab <span class="ot">&lt;-</span> <span class="fu">table</span>(orthant_label)</span>
+<span id="cb23-290"><a href="#cb23-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-291"><a href="#cb23-291" aria-hidden="true" tabindex="-1"></a>  p_all_lower <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(orthant_tab[<span class="fu">as.character</span>(<span class="dv">0</span>)]) <span class="sc">/</span> n</span>
+<span id="cb23-292"><a href="#cb23-292" aria-hidden="true" tabindex="-1"></a>  p_all_upper <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(orthant_tab[<span class="fu">as.character</span>(<span class="dv">2</span><span class="sc">^</span>d <span class="sc">-</span> <span class="dv">1</span>)]) <span class="sc">/</span> n</span>
+<span id="cb23-293"><a href="#cb23-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-294"><a href="#cb23-294" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(p_all_lower)) p_all_lower <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb23-295"><a href="#cb23-295" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(p_all_upper)) p_all_upper <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb23-296"><a href="#cb23-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-297"><a href="#cb23-297" aria-hidden="true" tabindex="-1"></a>  p_mixed <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p_all_lower <span class="sc">-</span> p_all_upper</span>
+<span id="cb23-298"><a href="#cb23-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-299"><a href="#cb23-299" aria-hidden="true" tabindex="-1"></a>  orthant_aggregated <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-300"><a href="#cb23-300" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM_nD =</span> p_all_lower,</span>
+<span id="cb23-301"><a href="#cb23-301" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM_nD =</span> p_all_upper,</span>
+<span id="cb23-302"><a href="#cb23-302" aria-hidden="true" tabindex="-1"></a>    <span class="at">DPM_nD  =</span> p_mixed</span>
+<span id="cb23-303"><a href="#cb23-303" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-304"><a href="#cb23-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-305"><a href="#cb23-305" aria-hidden="true" tabindex="-1"></a>  clpm0 <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">Co.LPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-306"><a href="#cb23-306" aria-hidden="true" tabindex="-1"></a>  cupm0 <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">Co.UPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-307"><a href="#cb23-307" aria-hidden="true" tabindex="-1"></a>  dpm0  <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">DPM_nD</span>( Z, target, <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-308"><a href="#cb23-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-309"><a href="#cb23-309" aria-hidden="true" tabindex="-1"></a>  nns_degree0 <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-310"><a href="#cb23-310" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM_nD =</span> clpm0,</span>
+<span id="cb23-311"><a href="#cb23-311" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM_nD =</span> cupm0,</span>
+<span id="cb23-312"><a href="#cb23-312" aria-hidden="true" tabindex="-1"></a>    <span class="at">DPM_nD  =</span> dpm0</span>
+<span id="cb23-313"><a href="#cb23-313" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-314"><a href="#cb23-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-315"><a href="#cb23-315" aria-hidden="true" tabindex="-1"></a>  clpm1 <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">Co.LPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-316"><a href="#cb23-316" aria-hidden="true" tabindex="-1"></a>  cupm1 <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">Co.UPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-317"><a href="#cb23-317" aria-hidden="true" tabindex="-1"></a>  dpm1  <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">DPM_nD</span>( Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-318"><a href="#cb23-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-319"><a href="#cb23-319" aria-hidden="true" tabindex="-1"></a>  nns_degree1_raw <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-320"><a href="#cb23-320" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM_nD =</span> clpm1,</span>
+<span id="cb23-321"><a href="#cb23-321" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM_nD =</span> cupm1,</span>
+<span id="cb23-322"><a href="#cb23-322" aria-hidden="true" tabindex="-1"></a>    <span class="at">DPM_nD  =</span> dpm1</span>
+<span id="cb23-323"><a href="#cb23-323" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-324"><a href="#cb23-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-325"><a href="#cb23-325" aria-hidden="true" tabindex="-1"></a>  nns_degree1_norm_manual <span class="ot">&lt;-</span> nns_degree1_raw <span class="sc">/</span> <span class="fu">sum</span>(nns_degree1_raw)</span>
+<span id="cb23-326"><a href="#cb23-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-327"><a href="#cb23-327" aria-hidden="true" tabindex="-1"></a>  nns_degree1_norm_true <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-328"><a href="#cb23-328" aria-hidden="true" tabindex="-1"></a>    <span class="at">CLPM_nD =</span> NNS<span class="sc">::</span><span class="fu">Co.LPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb23-329"><a href="#cb23-329" aria-hidden="true" tabindex="-1"></a>    <span class="at">CUPM_nD =</span> NNS<span class="sc">::</span><span class="fu">Co.UPM_nD</span>(Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb23-330"><a href="#cb23-330" aria-hidden="true" tabindex="-1"></a>    <span class="at">DPM_nD  =</span> NNS<span class="sc">::</span><span class="fu">DPM_nD</span>( Z, target, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">norm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-331"><a href="#cb23-331" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-332"><a href="#cb23-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-333"><a href="#cb23-333" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb23-334"><a href="#cb23-334" aria-hidden="true" tabindex="-1"></a>    <span class="at">orthant_aggregated =</span> orthant_aggregated,</span>
+<span id="cb23-335"><a href="#cb23-335" aria-hidden="true" tabindex="-1"></a>    <span class="at">nns_degree0 =</span> nns_degree0,</span>
+<span id="cb23-336"><a href="#cb23-336" aria-hidden="true" tabindex="-1"></a>    <span class="at">degree0_difference =</span> nns_degree0 <span class="sc">-</span> orthant_aggregated,</span>
+<span id="cb23-337"><a href="#cb23-337" aria-hidden="true" tabindex="-1"></a>    <span class="at">nns_degree1_raw =</span> nns_degree1_raw,</span>
+<span id="cb23-338"><a href="#cb23-338" aria-hidden="true" tabindex="-1"></a>    <span class="at">nns_degree1_norm_manual =</span> nns_degree1_norm_manual,</span>
+<span id="cb23-339"><a href="#cb23-339" aria-hidden="true" tabindex="-1"></a>    <span class="at">nns_degree1_norm_true =</span> nns_degree1_norm_true</span>
+<span id="cb23-340"><a href="#cb23-340" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-341"><a href="#cb23-341" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-342"><a href="#cb23-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-343"><a href="#cb23-343" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-344"><a href="#cb23-344" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 1: 5-variable full orthant decomposition</span></span>
+<span id="cb23-345"><a href="#cb23-345" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-346"><a href="#cb23-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-347"><a href="#cb23-347" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 1: 5-VARIABLE FULL ORTHANT DECOMPOSITION&quot;</span>)</span>
+<span id="cb23-348"><a href="#cb23-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-349"><a href="#cb23-349" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2024</span>)</span>
+<span id="cb23-350"><a href="#cb23-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-351"><a href="#cb23-351" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb23-352"><a href="#cb23-352" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb23-353"><a href="#cb23-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-354"><a href="#cb23-354" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fl">0.5</span>, d, d) <span class="sc">+</span> <span class="fu">diag</span>(<span class="fl">0.5</span>, d)</span>
+<span id="cb23-355"><a href="#cb23-355" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">chol</span>(R)</span>
+<span id="cb23-356"><a href="#cb23-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-357"><a href="#cb23-357" aria-hidden="true" tabindex="-1"></a>Z5 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), n, d) <span class="sc">%*%</span> L</span>
+<span id="cb23-358"><a href="#cb23-358" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(Z5) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="fu">seq_len</span>(d))</span>
+<span id="cb23-359"><a href="#cb23-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-360"><a href="#cb23-360" aria-hidden="true" tabindex="-1"></a>res5_orth <span class="ot">&lt;-</span> <span class="fu">full_orthant_decomposition</span>(Z5)</span>
+<span id="cb23-361"><a href="#cb23-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-362"><a href="#cb23-362" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Target vector:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-363"><a href="#cb23-363" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(<span class="fu">colMeans</span>(Z5), <span class="dv">6</span>))</span>
+<span id="cb23-364"><a href="#cb23-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-365"><a href="#cb23-365" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Occupied orthants:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-366"><a href="#cb23-366" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">length</span>(<span class="fu">unique</span>(res5_orth<span class="sc">$</span>orthant_label)))</span>
+<span id="cb23-367"><a href="#cb23-367" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Out of:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-368"><a href="#cb23-368" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">2</span><span class="sc">^</span>d)</span>
+<span id="cb23-369"><a href="#cb23-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-370"><a href="#cb23-370" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Classical population PCA eigenvalues:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-371"><a href="#cb23-371" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_orth<span class="sc">$</span>pca<span class="sc">$</span>values, <span class="dv">6</span>))</span>
+<span id="cb23-372"><a href="#cb23-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-373"><a href="#cb23-373" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Full orthant covariance recovery error:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-374"><a href="#cb23-374" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_orth<span class="sc">$</span>recovery_error)</span>
+<span id="cb23-375"><a href="#cb23-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-376"><a href="#cb23-376" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Full orthant eigenvalue recovery error:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-377"><a href="#cb23-377" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_orth<span class="sc">$</span>eigenvalue_error)</span>
+<span id="cb23-378"><a href="#cb23-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-379"><a href="#cb23-379" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Full orthant eigenvector alignments:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-380"><a href="#cb23-380" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_orth<span class="sc">$</span>eigenvector_alignment, <span class="dv">12</span>))</span>
+<span id="cb23-381"><a href="#cb23-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-382"><a href="#cb23-382" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Eigenvalue attribution, full orthants:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-383"><a href="#cb23-383" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_orth<span class="sc">$</span>attrib, <span class="dv">6</span>))</span>
+<span id="cb23-384"><a href="#cb23-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-385"><a href="#cb23-385" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">D_spectral = trace(Sigma_Q) / trace(Sigma):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-386"><a href="#cb23-386" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_orth<span class="sc">$</span>D_spectral, <span class="dv">6</span>))</span>
+<span id="cb23-387"><a href="#cb23-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-388"><a href="#cb23-388" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Top 10 orthant contributions to PC1:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-389"><a href="#cb23-389" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(res5_orth<span class="sc">$</span>orthant_pc1, <span class="dv">10</span>), <span class="at">digits =</span> <span class="dv">6</span>)</span>
+<span id="cb23-390"><a href="#cb23-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-391"><a href="#cb23-391" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Check PC1 orthant contribution sum vs between attribution:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-392"><a href="#cb23-392" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">c</span>(</span>
+<span id="cb23-393"><a href="#cb23-393" aria-hidden="true" tabindex="-1"></a>  <span class="at">sum_orthant_PC1 =</span> <span class="fu">sum</span>(res5_orth<span class="sc">$</span>orthant_pc1<span class="sc">$</span>contribution),</span>
+<span id="cb23-394"><a href="#cb23-394" aria-hidden="true" tabindex="-1"></a>  <span class="at">direct_between_PC1 =</span> res5_orth<span class="sc">$</span>attrib<span class="sc">$</span>between[<span class="dv">1</span>]</span>
+<span id="cb23-395"><a href="#cb23-395" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb23-396"><a href="#cb23-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-397"><a href="#cb23-397" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-398"><a href="#cb23-398" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 2: 5-variable DPM_nD aggregation</span></span>
+<span id="cb23-399"><a href="#cb23-399" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-400"><a href="#cb23-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-401"><a href="#cb23-401" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 2: 5-VARIABLE DPM_nD AGGREGATION&quot;</span>)</span>
+<span id="cb23-402"><a href="#cb23-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-403"><a href="#cb23-403" aria-hidden="true" tabindex="-1"></a>res5_dpm <span class="ot">&lt;-</span> <span class="fu">dpm_nd_summary</span>(Z5)</span>
+<span id="cb23-404"><a href="#cb23-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-405"><a href="#cb23-405" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Three-state aggregation from full orthant labels:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-406"><a href="#cb23-406" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>orthant_aggregated, <span class="dv">6</span>))</span>
+<span id="cb23-407"><a href="#cb23-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-408"><a href="#cb23-408" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">NNS degree-zero values:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-409"><a href="#cb23-409" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>nns_degree0, <span class="dv">6</span>))</span>
+<span id="cb23-410"><a href="#cb23-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-411"><a href="#cb23-411" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Degree-zero difference, NNS minus full orthant aggregation:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-412"><a href="#cb23-412" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>degree0_difference, <span class="dv">12</span>))</span>
+<span id="cb23-413"><a href="#cb23-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-414"><a href="#cb23-414" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">NNS degree-one raw directional masses:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-415"><a href="#cb23-415" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>nns_degree1_raw, <span class="dv">6</span>))</span>
+<span id="cb23-416"><a href="#cb23-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-417"><a href="#cb23-417" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">NNS degree-one normalized shares, manual:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-418"><a href="#cb23-418" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>nns_degree1_norm_manual, <span class="dv">6</span>))</span>
+<span id="cb23-419"><a href="#cb23-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-420"><a href="#cb23-420" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">NNS degree-one normalized shares, norm = TRUE:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-421"><a href="#cb23-421" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_dpm<span class="sc">$</span>nns_degree1_norm_true, <span class="dv">8</span>))</span>
+<span id="cb23-422"><a href="#cb23-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-423"><a href="#cb23-423" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-424"><a href="#cb23-424" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 3: 5-variable pairwise PM.matrix recovery</span></span>
+<span id="cb23-425"><a href="#cb23-425" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-426"><a href="#cb23-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-427"><a href="#cb23-427" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 3: 5-VARIABLE PAIRWISE PM.matrix PCA RECOVERY&quot;</span>)</span>
+<span id="cb23-428"><a href="#cb23-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-429"><a href="#cb23-429" aria-hidden="true" tabindex="-1"></a>res5_pair <span class="ot">&lt;-</span> <span class="fu">pairwise_pm_pca</span>(Z5, <span class="at">pcs =</span> <span class="dv">5</span>)</span>
+<span id="cb23-430"><a href="#cb23-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-431"><a href="#cb23-431" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise PM.matrix covariance recovery error:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-432"><a href="#cb23-432" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_pair<span class="sc">$</span>covariance_error)</span>
+<span id="cb23-433"><a href="#cb23-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-434"><a href="#cb23-434" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">PM.matrix $cov.matrix vs manual reassembly error:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-435"><a href="#cb23-435" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_pair<span class="sc">$</span>pm_cov_error)</span>
+<span id="cb23-436"><a href="#cb23-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-437"><a href="#cb23-437" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Directional aggregate asymmetry before symmetrization:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-438"><a href="#cb23-438" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_pair<span class="sc">$</span>asymmetry)</span>
+<span id="cb23-439"><a href="#cb23-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-440"><a href="#cb23-440" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Classical sample PCA eigenvalues:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-441"><a href="#cb23-441" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>pca_classic<span class="sc">$</span>values, <span class="dv">6</span>))</span>
+<span id="cb23-442"><a href="#cb23-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-443"><a href="#cb23-443" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise NNS recovered PCA eigenvalues:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-444"><a href="#cb23-444" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>pca_nns<span class="sc">$</span>values, <span class="dv">6</span>))</span>
+<span id="cb23-445"><a href="#cb23-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-446"><a href="#cb23-446" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvalue recovery error:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-447"><a href="#cb23-447" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res5_pair<span class="sc">$</span>eigenvalue_error)</span>
+<span id="cb23-448"><a href="#cb23-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-449"><a href="#cb23-449" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvector alignments:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-450"><a href="#cb23-450" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>eigenvector_alignment, <span class="dv">12</span>))</span>
+<span id="cb23-451"><a href="#cb23-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-452"><a href="#cb23-452" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Directional eigenvalue attribution from pairwise matrices:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-453"><a href="#cb23-453" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>attrib, <span class="dv">6</span>))</span>
+<span id="cb23-454"><a href="#cb23-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-455"><a href="#cb23-455" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Signed percentage attribution from pairwise matrices:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-456"><a href="#cb23-456" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>attrib_pct, <span class="dv">2</span>))</span>
+<span id="cb23-457"><a href="#cb23-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-458"><a href="#cb23-458" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Trace-level pairwise directional decomposition:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-459"><a href="#cb23-459" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>trace_decomp, <span class="dv">6</span>))</span>
+<span id="cb23-460"><a href="#cb23-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-461"><a href="#cb23-461" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Trace-level pairwise directional percentages:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-462"><a href="#cb23-462" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res5_pair<span class="sc">$</span>trace_pct, <span class="dv">2</span>))</span>
+<span id="cb23-463"><a href="#cb23-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-464"><a href="#cb23-464" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-465"><a href="#cb23-465" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 4: 50-variable pairwise recovery</span></span>
+<span id="cb23-466"><a href="#cb23-466" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-467"><a href="#cb23-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-468"><a href="#cb23-468" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 4: 50-VARIABLE PAIRWISE PM.matrix SCALABILITY&quot;</span>)</span>
+<span id="cb23-469"><a href="#cb23-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-470"><a href="#cb23-470" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb23-471"><a href="#cb23-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-472"><a href="#cb23-472" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb23-473"><a href="#cb23-473" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb23-474"><a href="#cb23-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-475"><a href="#cb23-475" aria-hidden="true" tabindex="-1"></a>asset_names <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="fu">seq_len</span>(d))</span>
+<span id="cb23-476"><a href="#cb23-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-477"><a href="#cb23-477" aria-hidden="true" tabindex="-1"></a>market <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-478"><a href="#cb23-478" aria-hidden="true" tabindex="-1"></a>sector_A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-479"><a href="#cb23-479" aria-hidden="true" tabindex="-1"></a>sector_B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-480"><a href="#cb23-480" aria-hidden="true" tabindex="-1"></a>E <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), <span class="at">nrow =</span> n, <span class="at">ncol =</span> d)</span>
+<span id="cb23-481"><a href="#cb23-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-482"><a href="#cb23-482" aria-hidden="true" tabindex="-1"></a>Z50 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> d)</span>
+<span id="cb23-483"><a href="#cb23-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-484"><a href="#cb23-484" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(d)) {</span>
+<span id="cb23-485"><a href="#cb23-485" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (j <span class="sc">&lt;=</span> <span class="dv">25</span>) {</span>
+<span id="cb23-486"><a href="#cb23-486" aria-hidden="true" tabindex="-1"></a>    Z50[, j] <span class="ot">&lt;-</span> <span class="fl">0.60</span> <span class="sc">*</span> market <span class="sc">+</span> <span class="fl">0.90</span> <span class="sc">*</span> sector_A <span class="sc">+</span> <span class="fl">0.40</span> <span class="sc">*</span> E[, j]</span>
+<span id="cb23-487"><a href="#cb23-487" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb23-488"><a href="#cb23-488" aria-hidden="true" tabindex="-1"></a>    Z50[, j] <span class="ot">&lt;-</span> <span class="fl">0.60</span> <span class="sc">*</span> market <span class="sc">+</span> <span class="fl">0.90</span> <span class="sc">*</span> sector_B <span class="sc">+</span> <span class="fl">0.40</span> <span class="sc">*</span> E[, j]</span>
+<span id="cb23-489"><a href="#cb23-489" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-490"><a href="#cb23-490" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-491"><a href="#cb23-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-492"><a href="#cb23-492" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(Z50) <span class="ot">&lt;-</span> asset_names</span>
+<span id="cb23-493"><a href="#cb23-493" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-494"><a href="#cb23-494" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Full orthant state count for d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-495"><a href="#cb23-495" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">2</span><span class="sc">^</span><span class="dv">50</span>)</span>
+<span id="cb23-496"><a href="#cb23-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-497"><a href="#cb23-497" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Number of observations:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-498"><a href="#cb23-498" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(n)</span>
+<span id="cb23-499"><a href="#cb23-499" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-500"><a href="#cb23-500" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Observation-to-orthant ratio n / 2^50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-501"><a href="#cb23-501" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(n <span class="sc">/</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">50</span>)</span>
+<span id="cb23-502"><a href="#cb23-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-503"><a href="#cb23-503" aria-hidden="true" tabindex="-1"></a>time_50 <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb23-504"><a href="#cb23-504" aria-hidden="true" tabindex="-1"></a>  res50_pair <span class="ot">&lt;-</span> <span class="fu">pairwise_pm_pca</span>(Z50, <span class="at">pcs =</span> <span class="dv">5</span>)</span>
+<span id="cb23-505"><a href="#cb23-505" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb23-506"><a href="#cb23-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-507"><a href="#cb23-507" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Runtime for 50-variable pairwise PM.matrix experiment:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-508"><a href="#cb23-508" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(time_50)</span>
+<span id="cb23-509"><a href="#cb23-509" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-510"><a href="#cb23-510" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Classical PCA eigenvalues, first 5:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-511"><a href="#cb23-511" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>pca_classic<span class="sc">$</span>values[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">6</span>))</span>
+<span id="cb23-512"><a href="#cb23-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-513"><a href="#cb23-513" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise NNS recovered PCA eigenvalues, first 5:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-514"><a href="#cb23-514" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>pca_nns<span class="sc">$</span>values[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">6</span>))</span>
+<span id="cb23-515"><a href="#cb23-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-516"><a href="#cb23-516" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise covariance recovery error, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-517"><a href="#cb23-517" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res50_pair<span class="sc">$</span>covariance_error)</span>
+<span id="cb23-518"><a href="#cb23-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-519"><a href="#cb23-519" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvalue recovery error, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-520"><a href="#cb23-520" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res50_pair<span class="sc">$</span>eigenvalue_error)</span>
+<span id="cb23-521"><a href="#cb23-521" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-522"><a href="#cb23-522" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvector alignments, first 5 PCs, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-523"><a href="#cb23-523" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>eigenvector_alignment, <span class="dv">12</span>))</span>
+<span id="cb23-524"><a href="#cb23-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-525"><a href="#cb23-525" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Directional eigenvalue attribution, first 5 PCs, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-526"><a href="#cb23-526" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>attrib, <span class="dv">6</span>))</span>
+<span id="cb23-527"><a href="#cb23-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-528"><a href="#cb23-528" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Signed percentage attribution, first 5 PCs, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-529"><a href="#cb23-529" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>attrib_pct, <span class="dv">2</span>))</span>
+<span id="cb23-530"><a href="#cb23-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-531"><a href="#cb23-531" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Trace-level pairwise directional decomposition, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-532"><a href="#cb23-532" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>trace_decomp, <span class="dv">6</span>))</span>
+<span id="cb23-533"><a href="#cb23-533" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-534"><a href="#cb23-534" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Trace-level pairwise directional percentages, d = 50:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-535"><a href="#cb23-535" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_pair<span class="sc">$</span>trace_pct, <span class="dv">2</span>))</span>
+<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-537"><a href="#cb23-537" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-538"><a href="#cb23-538" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 5: 50-variable PC1 not market / spread-factor stress test</span></span>
+<span id="cb23-539"><a href="#cb23-539" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-540"><a href="#cb23-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-541"><a href="#cb23-541" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 5: 50-VARIABLE PC1 NOT MARKET STRESS TEST&quot;</span>)</span>
+<span id="cb23-542"><a href="#cb23-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-543"><a href="#cb23-543" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2027</span>)</span>
+<span id="cb23-544"><a href="#cb23-544" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-545"><a href="#cb23-545" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">6000</span></span>
+<span id="cb23-546"><a href="#cb23-546" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb23-547"><a href="#cb23-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-548"><a href="#cb23-548" aria-hidden="true" tabindex="-1"></a>market_vec <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span>, d)</span>
+<span id="cb23-549"><a href="#cb23-549" aria-hidden="true" tabindex="-1"></a>market_vec <span class="ot">&lt;-</span> market_vec <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(market_vec<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb23-550"><a href="#cb23-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-551"><a href="#cb23-551" aria-hidden="true" tabindex="-1"></a>spread_raw <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">25</span>), <span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">25</span>))</span>
+<span id="cb23-552"><a href="#cb23-552" aria-hidden="true" tabindex="-1"></a>spread_vec <span class="ot">&lt;-</span> spread_raw <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(spread_raw<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb23-553"><a href="#cb23-553" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-554"><a href="#cb23-554" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Market-spread inner product:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-555"><a href="#cb23-555" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sum</span>(market_vec <span class="sc">*</span> spread_vec))</span>
+<span id="cb23-556"><a href="#cb23-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-557"><a href="#cb23-557" aria-hidden="true" tabindex="-1"></a>sd_market <span class="ot">&lt;-</span> <span class="fl">0.70</span></span>
+<span id="cb23-558"><a href="#cb23-558" aria-hidden="true" tabindex="-1"></a>sd_spread <span class="ot">&lt;-</span> <span class="fl">1.80</span></span>
+<span id="cb23-559"><a href="#cb23-559" aria-hidden="true" tabindex="-1"></a>sd_noise <span class="ot">&lt;-</span> <span class="fl">0.35</span></span>
+<span id="cb23-560"><a href="#cb23-560" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-561"><a href="#cb23-561" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-562"><a href="#cb23-562" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-563"><a href="#cb23-563" aria-hidden="true" tabindex="-1"></a>E <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), <span class="at">nrow =</span> n, <span class="at">ncol =</span> d)</span>
+<span id="cb23-564"><a href="#cb23-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-565"><a href="#cb23-565" aria-hidden="true" tabindex="-1"></a>Z50_spread <span class="ot">&lt;-</span> sd_market <span class="sc">*</span> M <span class="sc">%*%</span> <span class="fu">t</span>(market_vec) <span class="sc">+</span></span>
+<span id="cb23-566"><a href="#cb23-566" aria-hidden="true" tabindex="-1"></a>  sd_spread <span class="sc">*</span> S <span class="sc">%*%</span> <span class="fu">t</span>(spread_vec) <span class="sc">+</span></span>
+<span id="cb23-567"><a href="#cb23-567" aria-hidden="true" tabindex="-1"></a>  sd_noise <span class="sc">*</span> E</span>
+<span id="cb23-568"><a href="#cb23-568" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-569"><a href="#cb23-569" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(Z50_spread) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="fu">seq_len</span>(d))</span>
+<span id="cb23-570"><a href="#cb23-570" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-571"><a href="#cb23-571" aria-hidden="true" tabindex="-1"></a>res50_spread <span class="ot">&lt;-</span> <span class="fu">pairwise_pm_pca</span>(Z50_spread, <span class="at">pcs =</span> <span class="dv">5</span>)</span>
+<span id="cb23-572"><a href="#cb23-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-573"><a href="#cb23-573" aria-hidden="true" tabindex="-1"></a>pca_spread <span class="ot">&lt;-</span> res50_spread<span class="sc">$</span>pca_classic</span>
+<span id="cb23-574"><a href="#cb23-574" aria-hidden="true" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> pca_spread<span class="sc">$</span>vectors[, <span class="dv">1</span>]</span>
+<span id="cb23-575"><a href="#cb23-575" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> pca_spread<span class="sc">$</span>vectors[, <span class="dv">2</span>]</span>
+<span id="cb23-576"><a href="#cb23-576" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-577"><a href="#cb23-577" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">sum</span>(v1 <span class="sc">*</span> spread_vec) <span class="sc">&lt;</span> <span class="dv">0</span>) v1 <span class="ot">&lt;-</span> <span class="sc">-</span>v1</span>
+<span id="cb23-578"><a href="#cb23-578" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">sum</span>(v2 <span class="sc">*</span> market_vec) <span class="sc">&lt;</span> <span class="dv">0</span>) v2 <span class="ot">&lt;-</span> <span class="sc">-</span>v2</span>
+<span id="cb23-579"><a href="#cb23-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-580"><a href="#cb23-580" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Classical PCA eigenvalues, first 5:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-581"><a href="#cb23-581" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(pca_spread<span class="sc">$</span>values[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">6</span>))</span>
+<span id="cb23-582"><a href="#cb23-582" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-583"><a href="#cb23-583" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Alignment diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-584"><a href="#cb23-584" aria-hidden="true" tabindex="-1"></a>alignment_diag <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb23-585"><a href="#cb23-585" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs_PC1_market =</span> <span class="fu">abs</span>(<span class="fu">sum</span>(v1 <span class="sc">*</span> market_vec)),</span>
+<span id="cb23-586"><a href="#cb23-586" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs_PC1_spread =</span> <span class="fu">abs</span>(<span class="fu">sum</span>(v1 <span class="sc">*</span> spread_vec)),</span>
+<span id="cb23-587"><a href="#cb23-587" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs_PC2_market =</span> <span class="fu">abs</span>(<span class="fu">sum</span>(v2 <span class="sc">*</span> market_vec)),</span>
+<span id="cb23-588"><a href="#cb23-588" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs_PC2_spread =</span> <span class="fu">abs</span>(<span class="fu">sum</span>(v2 <span class="sc">*</span> spread_vec))</span>
+<span id="cb23-589"><a href="#cb23-589" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-590"><a href="#cb23-590" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(alignment_diag, <span class="dv">8</span>))</span>
+<span id="cb23-591"><a href="#cb23-591" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-592"><a href="#cb23-592" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise covariance recovery error, 50-variable spread test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-593"><a href="#cb23-593" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res50_spread<span class="sc">$</span>covariance_error)</span>
+<span id="cb23-594"><a href="#cb23-594" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-595"><a href="#cb23-595" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvalue recovery error, 50-variable spread test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-596"><a href="#cb23-596" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res50_spread<span class="sc">$</span>eigenvalue_error)</span>
+<span id="cb23-597"><a href="#cb23-597" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-598"><a href="#cb23-598" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Pairwise eigenvector alignments, first 5 PCs, 50-variable spread test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-599"><a href="#cb23-599" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_spread<span class="sc">$</span>eigenvector_alignment, <span class="dv">12</span>))</span>
+<span id="cb23-600"><a href="#cb23-600" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-601"><a href="#cb23-601" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Directional eigenvalue attribution, first 5 PCs, 50-variable spread test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-602"><a href="#cb23-602" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_spread<span class="sc">$</span>attrib, <span class="dv">6</span>))</span>
+<span id="cb23-603"><a href="#cb23-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-604"><a href="#cb23-604" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Signed percentage attribution, first 5 PCs, 50-variable spread test:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-605"><a href="#cb23-605" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">round</span>(res50_spread<span class="sc">$</span>attrib_pct, <span class="dv">2</span>))</span>
+<span id="cb23-606"><a href="#cb23-606" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-607"><a href="#cb23-607" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-608"><a href="#cb23-608" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 6: Runtime and scaling grid</span></span>
+<span id="cb23-609"><a href="#cb23-609" aria-hidden="true" tabindex="-1"></a><span class="co"># =============================================================================</span></span>
+<span id="cb23-610"><a href="#cb23-610" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-611"><a href="#cb23-611" aria-hidden="true" tabindex="-1"></a><span class="fu">cat_section</span>(<span class="st">&quot;EXPERIMENT 6: PAIRWISE PM.matrix RUNTIME SCALING GRID&quot;</span>)</span>
+<span id="cb23-612"><a href="#cb23-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-613"><a href="#cb23-613" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2028</span>)</span>
+<span id="cb23-614"><a href="#cb23-614" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-615"><a href="#cb23-615" aria-hidden="true" tabindex="-1"></a>dims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>)</span>
+<span id="cb23-616"><a href="#cb23-616" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb23-617"><a href="#cb23-617" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-618"><a href="#cb23-618" aria-hidden="true" tabindex="-1"></a>scaling_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb23-619"><a href="#cb23-619" aria-hidden="true" tabindex="-1"></a>  <span class="at">d =</span> <span class="fu">integer</span>(),</span>
+<span id="cb23-620"><a href="#cb23-620" aria-hidden="true" tabindex="-1"></a>  <span class="at">impossible_orthants =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-621"><a href="#cb23-621" aria-hidden="true" tabindex="-1"></a>  <span class="at">runtime_elapsed_sec =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-622"><a href="#cb23-622" aria-hidden="true" tabindex="-1"></a>  <span class="at">covariance_error =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-623"><a href="#cb23-623" aria-hidden="true" tabindex="-1"></a>  <span class="at">eigenvalue_error =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb23-624"><a href="#cb23-624" aria-hidden="true" tabindex="-1"></a>  <span class="at">pc1_alignment =</span> <span class="fu">numeric</span>()</span>
+<span id="cb23-625"><a href="#cb23-625" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-626"><a href="#cb23-626" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-627"><a href="#cb23-627" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (dd <span class="cf">in</span> dims) {</span>
+<span id="cb23-628"><a href="#cb23-628" aria-hidden="true" tabindex="-1"></a>  common <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb23-629"><a href="#cb23-629" aria-hidden="true" tabindex="-1"></a>  E <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> dd), <span class="at">nrow =</span> n, <span class="at">ncol =</span> dd)</span>
+<span id="cb23-630"><a href="#cb23-630" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-631"><a href="#cb23-631" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> dd)</span>
+<span id="cb23-632"><a href="#cb23-632" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(dd)) {</span>
+<span id="cb23-633"><a href="#cb23-633" aria-hidden="true" tabindex="-1"></a>    Z[, j] <span class="ot">&lt;-</span> <span class="fl">0.75</span> <span class="sc">*</span> common <span class="sc">+</span> <span class="fl">0.50</span> <span class="sc">*</span> E[, j]</span>
+<span id="cb23-634"><a href="#cb23-634" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-635"><a href="#cb23-635" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(Z) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;X&quot;</span>, <span class="fu">seq_len</span>(dd))</span>
+<span id="cb23-636"><a href="#cb23-636" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-637"><a href="#cb23-637" aria-hidden="true" tabindex="-1"></a>  timing <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb23-638"><a href="#cb23-638" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">pairwise_pm_pca</span>(Z, <span class="at">pcs =</span> <span class="dv">1</span>)</span>
+<span id="cb23-639"><a href="#cb23-639" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb23-640"><a href="#cb23-640" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-641"><a href="#cb23-641" aria-hidden="true" tabindex="-1"></a>  scaling_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb23-642"><a href="#cb23-642" aria-hidden="true" tabindex="-1"></a>    scaling_results,</span>
+<span id="cb23-643"><a href="#cb23-643" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb23-644"><a href="#cb23-644" aria-hidden="true" tabindex="-1"></a>      <span class="at">d =</span> dd,</span>
+<span id="cb23-645"><a href="#cb23-645" aria-hidden="true" tabindex="-1"></a>      <span class="at">impossible_orthants =</span> <span class="dv">2</span><span class="sc">^</span>dd,</span>
+<span id="cb23-646"><a href="#cb23-646" aria-hidden="true" tabindex="-1"></a>      <span class="at">runtime_elapsed_sec =</span> timing[[<span class="st">&quot;elapsed&quot;</span>]],</span>
+<span id="cb23-647"><a href="#cb23-647" aria-hidden="true" tabindex="-1"></a>      <span class="at">covariance_error =</span> res<span class="sc">$</span>covariance_error,</span>
+<span id="cb23-648"><a href="#cb23-648" aria-hidden="true" tabindex="-1"></a>      <span class="at">eigenvalue_error =</span> res<span class="sc">$</span>eigenvalue_error,</span>
+<span id="cb23-649"><a href="#cb23-649" aria-hidden="true" tabindex="-1"></a>      <span class="at">pc1_alignment =</span> res<span class="sc">$</span>eigenvector_alignment[<span class="dv">1</span>]</span>
+<span id="cb23-650"><a href="#cb23-650" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-651"><a href="#cb23-651" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-652"><a href="#cb23-652" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-653"><a href="#cb23-653" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-654"><a href="#cb23-654" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Scaling results:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb23-655"><a href="#cb23-655" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(scaling_results, <span class="at">digits =</span> <span class="dv">8</span>)</span>
+<span id="cb23-656"><a href="#cb23-656" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-657"><a href="#cb23-657" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">DONE.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+</body>
+</html>

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: NNS_diff</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1 id="nnsdiff-for-noisy-gradients"><code>NNS.diff</code> for Noisy
+Gradients</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p><code>NNS.diff</code> is a core numerical differentiation routine in
+the NNS package. It determines the derivative of a univariate function
+by first solving for an appropriate perturbation scale <code>h</code>
+using a geometric procedure based on projected secant lines onto the
+y-axis. These projected points are then used to infer a finite step size
+<code>h</code> that is fed into multiple derivative estimators.</p>
+<p>The method works as follows:</p>
+<ol type="1">
+<li>Evaluate the function at the target <code>point</code> and at
+<code>point ± h</code> (initial <code>h</code> defaults to 0.1).</li>
+<li>Compute the y-intercepts (<code>B₁</code> and <code>B₂</code>) of
+the two secant lines connecting those points.</li>
+<li>Treat the interval between the two intercepts as a bracket and
+iteratively bisect it.</li>
+<li>At each candidate midpoint <code>B</code>, solve via
+<code>uniroot</code> for the step size <code>h*</code> that would make
+the left-hand secant project exactly to that <code>B</code>.</li>
+<li>The sign of <code>h*</code> tells the algorithm which side of the
+bracket to shrink. The process repeats until either
+<code>|h*| &lt; tol</code> or <code>max.iter</code> is reached.</li>
+</ol>
+<p>The final inferred <code>h*</code>, whether fully converged or
+stall-limited by noise, is then supplied to multiple downstream
+estimators. For <strong>analytic, complex-compatible functions</strong>,
+the strongest downstream output is the <strong>Complex Step Derivative
+(Inferred h)</strong>. For <strong>non-analytic, piecewise, thresholded,
+saturated, quantized, or real-only black-box functions</strong>, the
+core projected derivative itself, <code>DERIVATIVE</code>, becomes the
+most important output.</p>
+<p>So <code>NNS.diff</code> has a two-regime interpretation:</p>
+<ul>
+<li><strong>analytic regime:</strong> use the inferred step to drive the
+complex-step row</li>
+<li><strong>black-box real-only regime:</strong> use the
+projected-secant derivative as the all-terrain estimate</li>
+</ul>
+<p><strong>For analytic, complex-compatible functions, the strongest
+workflow is therefore:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">NNS.diff</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">f =</span> f,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">point =</span> x0,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">h =</span> <span class="fu">abs</span>(point) <span class="sc">*</span> <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.01</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">tol =</span> <span class="fl">1e-10</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">max.iter =</span> <span class="dv">1000</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">12</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">print.trace =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>grad <span class="ot">&lt;-</span> out[<span class="st">&quot;Complex Step Derivative (Inferred h)&quot;</span>, <span class="dv">1</span>]</span></code></pre></div>
+<p><strong>For non-analytic or real-only black-box functions, the
+preferred workflow is instead:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">NNS.diff</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">f =</span> f,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">point =</span> x0,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">h =</span> <span class="fu">abs</span>(point) <span class="sc">*</span> <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.01</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">tol =</span> <span class="fl">1e-10</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">max.iter =</span> <span class="dv">1000</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">12</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">print.trace =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>grad <span class="ot">&lt;-</span> out[<span class="st">&quot;DERIVATIVE&quot;</span>, <span class="dv">1</span>]</span></code></pre></div>
+<p><code>NNS.diff</code> does <strong>not</strong> simply return “a
+derivative.” Its real contribution is that it first solves the classic
+perturbation-scale problem geometrically, then hands that stable scale
+to a derivative formula that is far less numerically fragile than
+ordinary finite differences, or, when complex inputs are invalid, it
+returns a projected derivative that remains stable and directionally
+useful on real-only surfaces.</p>
+<hr />
+<h2 id="1-where-nnsdiff-sits-inside-nns">1. Where <code>NNS.diff</code>
+sits inside NNS</h2>
+<p><code>NNS.diff</code> is not an isolated add-on. In the official
+manual it appears as a named core routine within the NNS package,
+alongside other NNS procedures such as <code>NNS.dep</code>,
+<code>NNS.reg</code>, <code>NNS.ARMA</code>, and
+<code>NNS.copula</code>. The manual indexes <code>NNS.diff</code> as its
+own documented entry and defines it as <strong>“NNS Numerical
+Differentiation.”</strong></p>
+<p>The documented description is specific:</p>
+<blockquote>
+<p>“Determines numerical derivative of a given univariate function using
+projected secant lines on the y-axis. These projected points infer
+finite steps <code>h</code>, in the finite step method.”</p>
+</blockquote>
+<p>The original interface was:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.diff</span>(f, point, <span class="at">h =</span> <span class="fl">0.1</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>, <span class="at">digits =</span> <span class="dv">12</span>, <span class="at">print.trace =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>The current implementation adds <code>max.iter</code> and
+<code>plot</code>, and returns a matrix containing:</p>
+<ul>
+<li>the projected derivative</li>
+<li>the inferred step size</li>
+<li>finite-step estimates at the initial and inferred
+<code>h</code></li>
+<li>the complex-step estimate at the inferred <code>h</code></li>
+<li>convergence diagnostics</li>
+<li>the termination code</li>
+</ul>
+<p>That makes <code>NNS.diff</code> better understood as a <strong>small
+diagnostic framework for local differentiation</strong>, not just a
+single derivative formula.</p>
+<hr />
+<h2 id="2-the-innovative-idea-geometry-before-differencing">2. The
+innovative idea: geometry before differencing</h2>
+<p>Most numerical differentiation methods start by
+<strong>assuming</strong> you already know a good perturbation size
+<code>h</code>.</p>
+<h3 id="standard-finite-differences">Standard finite differences</h3>
+<p>They begin with</p>
+<p><span class="math display">$$
+\hat{f}'(x;h)=\frac{f(x+h)-f(x-h)}{2h}
+$$</span></p>
+<p>and then force the user to decide what <code>h</code> should be.</p>
+<h3 id="richardson-extrapolation">Richardson extrapolation</h3>
+<p>Richardson begins with finite differences too, then tries to cancel
+truncation error by shrinking <code>h</code> repeatedly.</p>
+<h3 id="nnsdiff"><code>NNS.diff</code></h3>
+<p><code>NNS.diff</code> <strong>flips the order</strong>.</p>
+<p>It treats the choice of <code>h</code> as the primary unknown and
+solves for it <strong>geometrically</strong> before any derivative
+formula is applied:</p>
+<ol type="1">
+<li>Evaluate <code>f</code> at <code>point</code>,
+<code>point - h</code>, and <code>point + h</code>.</li>
+<li>Compute the y-intercepts of the two secant lines: <span
+class="math inline">$B_1 = f(x) - \frac{f(x) - f(x-h)}{h} \cdot
+x$</span> and <span class="math inline">$B_2 = f(x) - \frac{f(x+h) -
+f(x)}{h} \cdot x$</span>.</li>
+<li>Bracket the interval
+<code>[min(B_1, B_2), max(B_1, B_2)]</code>.</li>
+<li>For a candidate midpoint <code>B</code>, solve <span
+class="math inline">$B = f(x) - \frac{f(x) - f(x-h^*)}{h^*} \cdot
+x$</span> for <code>h*</code> via <code>uniroot</code>.</li>
+<li>Use the sign of <code>h*</code> to decide which half of the bracket
+to discard.</li>
+<li>Repeat until either <code>|h*| &lt; tol</code> or
+<code>max.iter</code> is reached.</li>
+</ol>
+<p>In clean analytic functions the search converges quickly to a tiny
+<code>h*</code>, often around <span
+class="math inline">10<sup>−11</sup></span>. In noisy functions it
+naturally stalls at a <strong>larger</strong> <code>h*</code>,
+automatically moving away from the tiny steps that would amplify
+noise.</p>
+<p>This is the key innovation: <code>NNS.diff</code> converts the
+step-size problem into a <strong>stable geometric
+bisection</strong>.</p>
+<img src="/examples/secants.png"  style="border: none; outline: none; margin: 0; padding: 0; display: block;"/>
+
+<h2 id="3-what-the-updated-implementation-actually-does">3. What the
+updated implementation actually does</h2>
+<p>The current implementation adds several practical improvements.</p>
+<h3 id="a-explicit-bisection-with-termination-diagnostics">A. Explicit
+bisection with termination diagnostics</h3>
+<ul>
+<li><code>termination.code = 0</code> means clean convergence to
+tolerance</li>
+<li><code>termination.code = 1</code> means the search hit
+<code>max.iter</code> and stalled in a noisy regime</li>
+<li><code>termination.code = 2</code> means <code>uniroot</code>
+failed</li>
+</ul>
+<h3 id="b-multiple-downstream-estimators-using-the-same-inferred-h">B.
+Multiple downstream estimators using the same inferred
+<code>h</code></h3>
+<p>The returned matrix includes:</p>
+<ul>
+<li>Projected secant derivative (<code>DERIVATIVE</code>)</li>
+<li>Initial finite-step rows</li>
+<li>Inferred finite-step rows</li>
+<li><strong>Complex Step Derivative (Inferred h)</strong></li>
+</ul>
+<h3 id="c-noise-aware-defaults">C. Noise-aware defaults</h3>
+<p><code>max.iter</code> provides a hard upper bound so noisy functions
+cannot hang indefinitely.</p>
+<h3 id="d-correct-handling-of-locally-linear-real-only-regions">D.
+Correct handling of locally linear real-only regions</h3>
+<p>A crucial update is the fix for the case where the initial projected
+intercepts are identical, <span
+class="math inline"><em>B</em><sub>1</sub> = <em>B</em><sub>2</sub></span>.
+That situation does <strong>not</strong> mean the derivative fails to
+exist. It usually means the local slope has already been identified
+exactly.</p>
+<p>That correction matters for:</p>
+<ul>
+<li><code>abs(x)</code> away from the kink</li>
+<li><code>ReLU</code> away from the threshold</li>
+<li>clipped linear interiors</li>
+</ul>
+<p>After the fix, <code>NNS.diff</code> correctly returns the local
+common secant slope instead of incorrectly treating the case as a
+failure.</p>
+<p>This turns out to be essential for revealing the full value of
+<code>NNS_Proj</code> on piecewise and black-box surfaces.</p>
+<hr />
+<h2
+id="4-why-this-is-preferred-over-standard-methods-for-analytic-functions">4.
+Why this is preferred over standard methods for analytic functions</h2>
+<p>For analytic, complex-compatible functions, the preferred output
+is:</p>
+<p><span
+class="math display"><code>NNS.diff</code> → <code>"Complex Step Derivative (Inferred h)"</code></span></p>
+<p>because it combines the strongest feature of two different ideas.</p>
+<h3 id="existing-methods-leave-one-key-problem-unsolved">Existing
+methods leave one key problem unsolved</h3>
+<h4 id="fixed-finite-differences">Fixed finite differences</h4>
+<p>They require the user to choose <code>h</code>. In noise, that is
+exactly the hard part. If <code>h</code> is too small, the variance
+grows like</p>
+<p><span class="math display">$$
+\mathrm{Var}(\hat f'(x;h)) \propto \frac{\sigma^2}{h^2}.
+$$</span></p>
+<p>If <code>h</code> is too large, truncation bias dominates.</p>
+<h4 id="richardson-extrapolation-1">Richardson extrapolation</h4>
+<p>Richardson is excellent in clean smooth settings because it shrinks
+<code>h</code> and cancels truncation error asymptotically. But in noisy
+settings, repeated refinement can amplify noise instead of helping.</p>
+<h4 id="complex-step-alone">Complex step alone</h4>
+<p>Complex step is numerically excellent because it avoids the
+subtractive cancellation that plagues real-axis differences. But in
+practice you still need a <strong>useful perturbation
+scale</strong>.</p>
+<h3 id="what-nnsdiff---complex-step-inferred-h-adds">What
+<code>NNS.diff -&gt; Complex Step (Inferred h)</code> adds</h3>
+<p>This workflow solves both pieces at once:</p>
+<ol type="1">
+<li><code>NNS.diff</code> finds a <strong>geometry-informed perturbation
+scale</strong></li>
+<li>complex step uses that scale with a derivative formula that avoids
+the real-axis subtraction problem</li>
+</ol>
+<p>It is not that <code>NNS.diff</code> somehow replaces complex step.
+It is that <code>NNS.diff</code> supplies the missing piece that complex
+step usually does not address directly: <strong>how to choose a
+practical perturbation scale without manual tuning.</strong></p>
+<hr />
+<h2 id="5-what-problem-this-solves-in-practice">5. What problem this
+solves in practice</h2>
+<p>For analytic functions, this combination solves several concrete
+problems at once.</p>
+<h3 id="problem-1-manual-step-size-selection">Problem 1: manual
+step-size selection</h3>
+<p>Most users do not know the right <code>h</code> ahead of time.
+<code>NNS.diff</code> turns step-size selection into an inferred
+quantity rather than a hand-tuned hyperparameter.</p>
+<h3 id="problem-2-cancellation-fragility-in-finite-differences">Problem
+2: cancellation fragility in finite differences</h3>
+<p>Real-valued finite differences subtract nearby evaluations. Complex
+step avoids that subtraction route.</p>
+<h3 id="problem-3-richardsons-weakness-in-noise">Problem 3: Richardson’s
+weakness in noise</h3>
+<p>Richardson improves clean asymptotics but is not designed around
+noisy stability. <code>NNS.diff</code> instead searches for a practical
+scale region and explicitly exposes when the search has stalled by
+hitting <code>max.iter</code>.</p>
+<h3 id="problem-4-low-configuration-gradient-estimation">Problem 4:
+low-configuration gradient estimation</h3>
+<p>This is useful when you want a gradient estimate from a simulator or
+algorithmic model, but you do not want to tune a finite-difference step
+by hand, run a full step sweep, or trust aggressive extrapolation in
+noise.</p>
+<hr />
+<h2 id="6-benchmark-setup-recap-analytic-functions">6. Benchmark setup
+recap: analytic functions</h2>
+<p>We compared:</p>
+<ul>
+<li><code>NNS_Proj</code>: projected secant derivative from
+<code>NNS.diff</code></li>
+<li><code>NNS_FinInit</code>: averaged finite step at the initial
+<code>h</code></li>
+<li><code>NNS_FinInf</code>: averaged finite step at the inferred
+<code>h</code></li>
+<li><code>NNS_CplxInf</code>: complex-step derivative at the inferred
+<code>h</code></li>
+<li><code>Richardson</code></li>
+<li><code>OracleFD</code>: oracle centered finite-difference sweep over
+an external <code>h</code> grid</li>
+</ul>
+<p>Functions tested:</p>
+<ul>
+<li><code>sin(x)</code> at <code>x = 1</code></li>
+<li><code>exp(x)</code> at <code>x = 1</code></li>
+<li><code>x^3</code> at <code>x = 2</code></li>
+</ul>
+<p>Noise levels:</p>
+<ul>
+<li><code>sigma = 0</code></li>
+<li><code>1e-4</code></li>
+<li><code>1e-3</code></li>
+<li><code>1e-2</code></li>
+</ul>
+<p>Replications: <code>R = 100</code></p>
+<p>Important implementation detail: under noisy benchmarking, we used
+<strong>frozen-noise surfaces per replication</strong>, so
+<code>NNS.diff</code> sees a deterministic perturbed surface inside each
+call rather than a moving stochastic target.</p>
+<hr />
+<h2 id="7-results-table-analytic-benchmark-maxiter--1000">7. Results
+table: analytic benchmark (<code>max.iter = 1000</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th style="text-align: right;">Sigma</th>
+<th style="text-align: right;">NNS Proj RRMSE</th>
+<th style="text-align: right;">NNS FinInit RRMSE</th>
+<th style="text-align: right;">NNS FinInf RRMSE</th>
+<th style="text-align: right;">NNS CplxInf RRMSE</th>
+<th style="text-align: right;">Richardson RRMSE</th>
+<th style="text-align: right;">OracleFD RRMSE</th>
+<th style="text-align: right;">Median NNS h</th>
+<th style="text-align: right;">Median Iterations</th>
+<th style="text-align: right;">OracleFD h</th>
+<th style="text-align: right;">Termination</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sin(x) at x=1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.66e-07</td>
+<td style="text-align: right;">1.67e-03</td>
+<td style="text-align: right;">1.28e-06</td>
+<td style="text-align: right;">2.59e-13</td>
+<td style="text-align: right;">1.71e-14</td>
+<td style="text-align: right;">1.65e-10</td>
+<td style="text-align: right;">2.20e-11</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">3.16e-05</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>sin(x) at x=1</td>
+<td style="text-align: right;">1e-4</td>
+<td style="text-align: right;">8.87e-03</td>
+<td style="text-align: right;">2.16e-03</td>
+<td style="text-align: right;">7.12e-01</td>
+<td style="text-align: right;">3.88e-05</td>
+<td style="text-align: right;">6.25e-02</td>
+<td style="text-align: right;">2.06e-03</td>
+<td style="text-align: right;">8.35e-03</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">8.88e-02</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>sin(x) at x=1</td>
+<td style="text-align: right;">1e-3</td>
+<td style="text-align: right;">3.14e-02</td>
+<td style="text-align: right;">1.38e-02</td>
+<td style="text-align: right;">7.78e+00</td>
+<td style="text-align: right;">3.03e-04</td>
+<td style="text-align: right;">5.90e-01</td>
+<td style="text-align: right;">9.19e-03</td>
+<td style="text-align: right;">2.01e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1.68e-01</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>sin(x) at x=1</td>
+<td style="text-align: right;">1e-2</td>
+<td style="text-align: right;">1.72e-01</td>
+<td style="text-align: right;">1.43e-01</td>
+<td style="text-align: right;">6.14e+01</td>
+<td style="text-align: right;">1.63e-02</td>
+<td style="text-align: right;">6.30e+00</td>
+<td style="text-align: right;">3.74e-02</td>
+<td style="text-align: right;">5.20e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">3.16e-01</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>exp(x) at x=1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.64e-07</td>
+<td style="text-align: right;">1.67e-03</td>
+<td style="text-align: right;">3.52e-07</td>
+<td style="text-align: right;">1.67e-14</td>
+<td style="text-align: right;">1.19e-14</td>
+<td style="text-align: right;">1.70e-10</td>
+<td style="text-align: right;">3.20e-11</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">3.16e-05</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>exp(x) at x=1</td>
+<td style="text-align: right;">1e-4</td>
+<td style="text-align: right;">4.96e-03</td>
+<td style="text-align: right;">1.70e-03</td>
+<td style="text-align: right;">1.47e-01</td>
+<td style="text-align: right;">1.71e-05</td>
+<td style="text-align: right;">1.24e-02</td>
+<td style="text-align: right;">6.96e-04</td>
+<td style="text-align: right;">3.82e-03</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">4.70e-02</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>exp(x) at x=1</td>
+<td style="text-align: right;">1e-3</td>
+<td style="text-align: right;">9.22e-03</td>
+<td style="text-align: right;">2.84e-03</td>
+<td style="text-align: right;">5.39e-01</td>
+<td style="text-align: right;">1.27e-04</td>
+<td style="text-align: right;">1.17e-01</td>
+<td style="text-align: right;">3.03e-03</td>
+<td style="text-align: right;">1.37e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">8.88e-02</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>exp(x) at x=1</td>
+<td style="text-align: right;">1e-2</td>
+<td style="text-align: right;">3.53e-02</td>
+<td style="text-align: right;">2.86e-02</td>
+<td style="text-align: right;">6.34e+00</td>
+<td style="text-align: right;">1.58e-03</td>
+<td style="text-align: right;">1.25e+00</td>
+<td style="text-align: right;">1.48e-02</td>
+<td style="text-align: right;">4.88e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">2.30e-01</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>x^3 at x=2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.43e-06</td>
+<td style="text-align: right;">8.33e-04</td>
+<td style="text-align: right;">9.71e-07</td>
+<td style="text-align: right;">0.00e+00</td>
+<td style="text-align: right;">5.34e-14</td>
+<td style="text-align: right;">8.59e-11</td>
+<td style="text-align: right;">8.60e-11</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">3.16e-05</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>x^3 at x=2</td>
+<td style="text-align: right;">1e-4</td>
+<td style="text-align: right;">2.37e-03</td>
+<td style="text-align: right;">8.37e-04</td>
+<td style="text-align: right;">5.68e-02</td>
+<td style="text-align: right;">1.58e-06</td>
+<td style="text-align: right;">2.82e-03</td>
+<td style="text-align: right;">2.19e-04</td>
+<td style="text-align: right;">1.77e-03</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">3.42e-02</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>x^3 at x=2</td>
+<td style="text-align: right;">1e-3</td>
+<td style="text-align: right;">4.89e-03</td>
+<td style="text-align: right;">9.25e-04</td>
+<td style="text-align: right;">2.86e-01</td>
+<td style="text-align: right;">1.55e-05</td>
+<td style="text-align: right;">2.66e-02</td>
+<td style="text-align: right;">9.00e-04</td>
+<td style="text-align: right;">7.64e-03</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">6.46e-02</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>x^3 at x=2</td>
+<td style="text-align: right;">1e-2</td>
+<td style="text-align: right;">1.40e-02</td>
+<td style="text-align: right;">6.55e-03</td>
+<td style="text-align: right;">4.64e+00</td>
+<td style="text-align: right;">1.44e-04</td>
+<td style="text-align: right;">2.84e-01</td>
+<td style="text-align: right;">3.85e-03</td>
+<td style="text-align: right;">2.33e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1.68e-01</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-what-the-analytic-results-show">8. What the analytic results
+show</h2>
+<h3 id="a-in-clean-settings-richardson-still-wins">A. In clean settings,
+Richardson still wins</h3>
+<p>At <code>sigma = 0</code>, Richardson is best, exactly as one expects
+in clean smooth settings.</p>
+<h3 id="b-in-noisy-settings-the-inferred-scale-is-valuable">B. In noisy
+settings, the inferred scale is valuable</h3>
+<p>The median inferred <code>h</code> increases as noise increases. That
+is what a sensible scale selector should do.</p>
+<h3 id="c-the-complex-step-row-is-the-standout-result">C. The
+complex-step row is the standout result</h3>
+<p><code>NNS_CplxInf</code> remains extremely accurate across the
+analytic examples, even when the projected derivative and Richardson
+worsen under noise.</p>
+<p>So the benchmark supports a very specific conclusion:</p>
+<blockquote>
+<p>the most useful output of <code>NNS.diff</code> for analytic noisy
+functions is not necessarily the projected derivative itself, but the
+inferred step scale fed into the complex-step formula.</p>
+</blockquote>
+<h3 id="d-increasing-maxiter-does-not-materially-change-the-answer">D.
+Increasing <code>max.iter</code> does not materially change the
+answer</h3>
+<p>When <code>max.iter</code> increases from <code>100</code> to
+<code>1000</code>, the noisy results barely change while median
+iterations rise to <code>1000</code>. That means the search is
+<strong>stall-limited</strong>, not under-iterated.</p>
+<hr />
+<h2
+id="9-extending-the-story-why-nnsdiff-also-matters-for-non-analytic-and-black-box-functions">9.
+Extending the story: why <code>NNS.diff</code> also matters for
+non-analytic and black-box functions</h2>
+<p>The analytic conclusion is only half the story.</p>
+<p>The complex-step row is only valid when the function is analytic and
+accepts complex perturbations. But many practical objectives are not of
+that form. They may be:</p>
+<ul>
+<li>piecewise continuous</li>
+<li>thresholded</li>
+<li>clipped or saturated</li>
+<li>quantized</li>
+<li>rounded</li>
+<li>Monte Carlo based</li>
+<li>real-only black-box systems</li>
+</ul>
+<p>In those cases, the complex-step row is invalid or meaningless. This
+is where the projected derivative itself, <code>NNS_Proj</code>, becomes
+the key output.</p>
+<p>Rather than treating this as a fallback of lesser importance, the
+updated experiments show that <code>NNS_Proj</code> solves a
+<strong>different problem</strong>:</p>
+<blockquote>
+<p>how to obtain a stable, directionally meaningful local gradient proxy
+on a noisy real-only surface where complex perturbations are impossible
+or inappropriate.</p>
+</blockquote>
+<p>That is why <code>NNS_Proj</code> is best described as the
+<strong>all-terrain estimator</strong>.</p>
+<hr />
+<h2 id="10-black-box-benchmark-setup">10. Black-box benchmark setup</h2>
+<p>To reveal that value, a second benchmark focused on non-analytic and
+black-box-like functions.</p>
+<p>Categories included:</p>
+<ul>
+<li><strong>piecewise continuous</strong>
+<ul>
+<li><code>abs(x)</code> smooth side</li>
+<li><code>abs(x)</code> at kink</li>
+<li><code>ReLU</code> smooth side</li>
+<li><code>ReLU</code> at kink</li>
+</ul></li>
+<li><strong>saturation</strong>
+<ul>
+<li>clipped linear interior</li>
+<li>clipped linear threshold</li>
+</ul></li>
+<li><strong>discontinuous</strong>
+<ul>
+<li>indicator threshold</li>
+</ul></li>
+<li><strong>quantized</strong>
+<ul>
+<li>rounded quadratic</li>
+</ul></li>
+<li><strong>black-box payoff-like</strong>
+<ul>
+<li>Monte Carlo option payoff style</li>
+</ul></li>
+</ul>
+<p>For these functions, derivative existence at the evaluation point is
+not always the right evaluation criterion. So the benchmark also
+tracked:</p>
+<ul>
+<li>sign accuracy</li>
+<li>tangent prediction error</li>
+<li>estimator standard deviation</li>
+<li>iteration and termination diagnostics</li>
+</ul>
+<p>That is important, because for black-box systems a <strong>stable
+local directional estimate</strong> is often more useful than a
+classical smooth derivative in the textbook sense.</p>
+<hr />
+<h2 id="11-black-box-results-grouped-median-summary">11. Black-box
+results: grouped median summary</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th style="text-align: right;">Sigma</th>
+<th style="text-align: right;">NNS_Proj_RRMSE</th>
+<th style="text-align: right;">NNS_FinInit_RRMSE</th>
+<th style="text-align: right;">NNS_FinInf_RRMSE</th>
+<th style="text-align: right;">Richardson_RRMSE</th>
+<th style="text-align: right;">OracleFD_RRMSE</th>
+<th style="text-align: right;">NNS_Proj_SignAcc</th>
+<th style="text-align: right;">NNS_FinInit_SignAcc</th>
+<th style="text-align: right;">NNS_FinInf_SignAcc</th>
+<th style="text-align: right;">Richardson_SignAcc</th>
+<th style="text-align: right;">OracleFD_SignAcc</th>
+<th style="text-align: right;">NNS_Proj_TangentMAE</th>
+<th style="text-align: right;">NNS_FinInit_TangentMAE</th>
+<th style="text-align: right;">NNS_FinInf_TangentMAE</th>
+<th style="text-align: right;">Richardson_TangentMAE</th>
+<th style="text-align: right;">OracleFD_TangentMAE</th>
+<th style="text-align: right;">Median_NNS_h</th>
+<th style="text-align: right;">Median_NNS_Iterations</th>
+<th style="text-align: right;">Median_Termination_Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>piecewise_continuous</td>
+<td style="text-align: right;">1e-4</td>
+<td style="text-align: right;">1.0367e-03</td>
+<td style="text-align: right;">7.4347e-04</td>
+<td style="text-align: right;">3.5924e-01</td>
+<td style="text-align: right;">3.3314e-02</td>
+<td style="text-align: right;">2.9618e-04</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.9773</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.1129e-04</td>
+<td style="text-align: right;">1.1303e-04</td>
+<td style="text-align: right;">1.0471e-03</td>
+<td style="text-align: right;">2.9742e-04</td>
+<td style="text-align: right;">1.1356e-04</td>
+<td style="text-align: right;">5.0932e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>saturation</td>
+<td style="text-align: right;">1e-4</td>
+<td style="text-align: right;">7.4398e-04</td>
+<td style="text-align: right;">6.6351e-04</td>
+<td style="text-align: right;">1.1489e+01</td>
+<td style="text-align: right;">2.9752e-02</td>
+<td style="text-align: right;">2.0921e-04</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.9701</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.1972e-04</td>
+<td style="text-align: right;">1.1997e-04</td>
+<td style="text-align: right;">1.6204e-02</td>
+<td style="text-align: right;">2.4907e-04</td>
+<td style="text-align: right;">1.1922e-04</td>
+<td style="text-align: right;">4.4941e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>piecewise_continuous</td>
+<td style="text-align: right;">1e-3</td>
+<td style="text-align: right;">9.5846e-03</td>
+<td style="text-align: right;">6.8462e-03</td>
+<td style="text-align: right;">1.4168e+01</td>
+<td style="text-align: right;">3.1223e-01</td>
+<td style="text-align: right;">3.5651e-03</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.8647</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.1325e-03</td>
+<td style="text-align: right;">1.1427e-03</td>
+<td style="text-align: right;">3.7789e-02</td>
+<td style="text-align: right;">2.4987e-03</td>
+<td style="text-align: right;">1.1292e-03</td>
+<td style="text-align: right;">3.1348e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>saturation</td>
+<td style="text-align: right;">1e-3</td>
+<td style="text-align: right;">8.0072e-03</td>
+<td style="text-align: right;">7.0641e-03</td>
+<td style="text-align: right;">8.6091e+00</td>
+<td style="text-align: right;">3.4521e-01</td>
+<td style="text-align: right;">2.3545e-03</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.9286</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.2044e-03</td>
+<td style="text-align: right;">1.2107e-03</td>
+<td style="text-align: right;">2.5865e-02</td>
+<td style="text-align: right;">2.8792e-03</td>
+<td style="text-align: right;">1.2091e-03</td>
+<td style="text-align: right;">2.9158e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>piecewise_continuous</td>
+<td style="text-align: right;">1e-2</td>
+<td style="text-align: right;">7.7017e-02</td>
+<td style="text-align: right;">7.5496e-02</td>
+<td style="text-align: right;">4.9546e+01</td>
+<td style="text-align: right;">3.1399e+00</td>
+<td style="text-align: right;">2.9688e-02</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.8026</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.0507e-02</td>
+<td style="text-align: right;">1.0556e-02</td>
+<td style="text-align: right;">2.0036e-01</td>
+<td style="text-align: right;">2.6432e-02</td>
+<td style="text-align: right;">1.0441e-02</td>
+<td style="text-align: right;">4.4360e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>saturation</td>
+<td style="text-align: right;">1e-2</td>
+<td style="text-align: right;">8.3284e-02</td>
+<td style="text-align: right;">6.5639e-02</td>
+<td style="text-align: right;">5.0264e+01</td>
+<td style="text-align: right;">3.4355e+00</td>
+<td style="text-align: right;">2.3065e-02</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.8718</td>
+<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.2193e-02</td>
+<td style="text-align: right;">1.2141e-02</td>
+<td style="text-align: right;">1.7557e-01</td>
+<td style="text-align: right;">3.0687e-02</td>
+<td style="text-align: right;">1.2139e-02</td>
+<td style="text-align: right;">3.7506e-02</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-what-the-black-box-results-show">12. What the black-box
+results show</h2>
+<h3 id="a-nns_proj-is-exact-on-clean-locally-linear-regions">A.
+<code>NNS_Proj</code> is exact on clean locally linear regions</h3>
+<p>After the implementation fix, the projected derivative is exact
+on:</p>
+<ul>
+<li><code>abs(x)</code> smooth side</li>
+<li><code>ReLU</code> smooth side</li>
+<li>clipped linear interior</li>
+</ul>
+<p>at <code>sigma = 0</code>.</p>
+<p>That is exactly the behavior one wants on locally affine black-box
+surfaces.</p>
+<h3 id="b-nns_proj-is-highly-directionally-stable">B.
+<code>NNS_Proj</code> is highly directionally stable</h3>
+<p>Across the grouped non-analytic results:</p>
+<ul>
+<li><code>NNS_Proj_SignAcc = 1.00</code></li>
+<li><code>NNS_FinInit_SignAcc = 1.00</code></li>
+<li><code>OracleFD_SignAcc = 1.00</code></li>
+</ul>
+<p>while Richardson degrades sharply at high noise.</p>
+<p>For example, at <code>sigma = 1e-2</code>:</p>
+<ul>
+<li>piecewise continuous: <code>Richardson_SignAcc = 0.68</code></li>
+<li>saturation: <code>Richardson_SignAcc = 0.57</code></li>
+</ul>
+<p>So <code>NNS_Proj</code> preserves local direction much more reliably
+than Richardson in noisy non-analytic settings.</p>
+<h3 id="c-nns_proj-is-near-oracle-on-local-tangent-prediction">C.
+<code>NNS_Proj</code> is near-oracle on local tangent prediction</h3>
+<p>The tangent MAE columns are especially revealing.</p>
+<p>For both piecewise and saturation categories,
+<code>NNS_Proj_TangentMAE</code> is extremely close to
+<code>OracleFD_TangentMAE</code>. In other words:</p>
+<blockquote>
+<p><code>NNS_Proj</code> gives nearly oracle-quality local tangent
+prediction without requiring an external sweep over step sizes.</p>
+</blockquote>
+<p>That is a major practical advantage.</p>
+<h3
+id="d-the-inferred-scale-still-matters-but-the-projected-derivative-is-the-useful-output">D.
+The inferred scale still matters, but the projected derivative is the
+useful output</h3>
+<p>In these black-box settings, the inferred <code>h</code> still adapts
+upward under noise, but the main value is not a complex-step row. The
+main value is that the geometric search stabilizes the local scale
+enough for the <strong>projected derivative</strong> to remain
+useful.</p>
+<h3 id="e-stall-limited-does-not-mean-useless">E. Stall-limited does not
+mean useless</h3>
+<p>As in the analytic noisy case, median iterations frequently hit
+<code>1000</code> with termination code <code>1</code>.</p>
+<p>That means the search is <strong>stall-limited</strong>, not fully
+converged. But the projected derivative remains highly usable. So the
+correct interpretation is:</p>
+<blockquote>
+<p>in noise, <code>NNS.diff</code> often settles into a practical scale
+region rather than converging to an infinitesimal one, and that
+practical scale is enough to support a stable projected estimate.</p>
+</blockquote>
+<hr />
+<h2 id="13-why-nns_proj-is-the-all-terrain-estimator">13. Why
+<code>NNS_Proj</code> is the all-terrain estimator</h2>
+<p>For black-box and non-analytic functions, <code>NNS_Proj</code>
+solves a different practical problem than the complex-step row.</p>
+<h3 id="complex-step-row-solves">Complex-step row solves</h3>
+<p>How do I get an extremely accurate derivative for an analytic
+function once I have a good perturbation scale?</p>
+<h3 id="nns_proj-solves"><code>NNS_Proj</code> solves</h3>
+<p>How do I extract a stable local directional slope estimate from a
+noisy real-only system where complex inputs are invalid?</p>
+<p>That is why <code>NNS_Proj</code> is all-terrain:</p>
+<ul>
+<li>it uses only real evaluations</li>
+<li>it does not require analytic continuation</li>
+<li>it behaves correctly on locally linear regions</li>
+<li>it remains directionally stable under noise</li>
+<li>it gives near-oracle local tangent prediction on black-box-like
+examples</li>
+<li>it avoids the noise fragility of Richardson in non-analytic
+settings</li>
+</ul>
+<p>This makes it useful for:</p>
+<ul>
+<li>piecewise losses</li>
+<li>clipped controls</li>
+<li>threshold decision rules</li>
+<li>quantized simulators</li>
+<li>payoff functions</li>
+<li>Monte Carlo black-box objectives</li>
+<li>real-world physical systems that cannot accept complex
+perturbations</li>
+</ul>
+<hr />
+<h2 id="14-practical-recommendation-by-regime">14. Practical
+recommendation by regime</h2>
+<h3 id="analytic-complex-compatible-functions">Analytic,
+complex-compatible functions</h3>
+<p>Use:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>out[<span class="st">&quot;Complex Step Derivative (Inferred h)&quot;</span>, <span class="dv">1</span>]</span></code></pre></div>
+<p>because this combines automatic geometry-based scale selection with a
+highly stable derivative formula.</p>
+<h3
+id="non-analytic-piecewise-thresholded-quantized-or-real-only-black-box-functions">Non-analytic,
+piecewise, thresholded, quantized, or real-only black-box functions</h3>
+<p>Use:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>out[<span class="st">&quot;DERIVATIVE&quot;</span>, <span class="dv">1</span>]</span></code></pre></div>
+<p>because the projected derivative is the estimator that remains
+meaningful and robust when complex continuation is unavailable.</p>
+<hr />
+<h2 id="15-why-this-is-ultimately-useful">15. Why this is ultimately
+useful</h2>
+<p>The overall contribution of <code>NNS.diff</code> is broader than “it
+estimates derivatives.”</p>
+<p>It gives a practical answer to a question that standard methods
+usually leave unresolved:</p>
+<blockquote>
+<p><strong>What local perturbation scale should I use to obtain a stable
+gradient estimate in noise?</strong></p>
+</blockquote>
+<p>For analytic functions, that answer is:</p>
+<ul>
+<li>infer the scale geometrically</li>
+<li>then use the complex-step row</li>
+</ul>
+<p>For black-box real-only functions, that answer is:</p>
+<ul>
+<li>infer the scale geometrically</li>
+<li>then rely on the projected derivative itself</li>
+</ul>
+<p>This is useful because it avoids:</p>
+<ul>
+<li>hand-tuning <code>h</code></li>
+<li>blind trust in tiny steps</li>
+<li>aggressive Richardson refinement in noisy settings</li>
+<li>full external step sweeps in routine workflows</li>
+</ul>
+<hr />
+<h2 id="16-final-caveat">16. Final caveat</h2>
+<p>The “standout winner” status of the complex-step row applies only
+when the function is <strong>analytic and
+complex-compatible</strong>.</p>
+<p>Do <strong>not</strong> rely on the complex-step row when:</p>
+<ul>
+<li><code>f(z)</code> is not meaningful for complex <code>z</code></li>
+<li>the model is non-analytic or branch-heavy</li>
+<li>the function is piecewise, clipped, thresholded, rounded, or
+quantized in a way that breaks complex continuation</li>
+<li>the system is a real-world physical process with no meaningful
+complex perturbation interpretation</li>
+</ul>
+<p>In those cases, the projected derivative is not merely a fallback. It
+is the correct general-purpose output.</p>
+<hr />
+<h2 id="bottom-line">Bottom line</h2>
+<p>The historical and conceptual importance of <code>NNS.diff</code> is
+not that it is just another finite-difference routine.</p>
+<p>Its innovation is that it treats numerical differentiation as a
+<strong>geometry-driven scale-selection problem first</strong>, and only
+then as a derivative-estimation problem.</p>
+<p>That yields two distinct but complementary strengths:</p>
+<ul>
+<li>for <strong>analytic noisy models</strong>, <code>NNS.diff</code> is
+best used as an automatic inferred-step selector feeding<br />
+<strong><code>"Complex Step Derivative (Inferred h)"</code></strong></li>
+<li>for <strong>non-analytic, piecewise, thresholded, saturated,
+quantized, or black-box real-only models</strong>, the most useful
+output is the projected derivative,<br />
+<strong><code>"DERIVATIVE"</code></strong>, that is,
+<strong><code>NNS_Proj</code></strong></li>
+</ul>
+<p>So the full conclusion is:</p>
+<blockquote>
+<p><code>NNS.diff</code> is not just a derivative routine. It is a
+geometry-based local-scale inference method whose output should be
+chosen by regime. The complex-step row is the best endpoint for analytic
+functions, while <code>NNS_Proj</code> is the all-terrain estimator that
+makes the method broadly useful on real-world black-box surfaces.</p>
+</blockquote>
+<h3 id="experiments">Experiments</h3>
+<ul>
+<li><a
+href="https://github.com/OVVO-Financial/NNS/blob/Data-and-Simulation-Routines/NNS-Simulation-Routines/Benchmarks%20for%20NNS_diff.R">Benchmarks</a></li>
+<li><a
+href="https://github.com/OVVO-Financial/NNS/blob/Data-and-Simulation-Routines/NNS-Simulation-Routines/Non-Analytic%20Benchmarks%20for%20NNS_diff.R">Non-Analytic
+Benchmarks</a></li>
+</ul>
+</body>
+</html>

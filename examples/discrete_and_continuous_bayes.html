@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: discrete_and_continuous_bayes</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1
+id="numerical-example-degree-0-bayes-and-degree-1-hinge-surface-recovery">Numerical
+Example: Degree-0 Bayes and Degree-1 Hinge-Surface Recovery</h1>
+<p>This example illustrates the distinction between:</p>
+<ol type="1">
+<li><strong>Degree-0 Bayes</strong>, which gives the exact conditional
+event probability directly, and</li>
+<li><strong>Degree-1 hinge-surface recovery</strong>, which reconstructs
+the same event probability indirectly through recovery of the joint
+CDF.</li>
+</ol>
+<p>The point is not that degree 1 replaces degree 0 as a probability
+ratio. Rather, degree 1 supplies the hinge surface from which the joint
+law can be recovered.</p>
+<h2 id="setup">Setup</h2>
+<p>We simulate a dependent bivariate sample:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n) <span class="sc">+</span> <span class="fl">0.8</span> <span class="sc">*</span> x</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>t_x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>t_y <span class="ot">&lt;-</span> <span class="dv">0</span></span></code></pre></div>
+<p>Empirical sample quantities:</p>
+<ul>
+<li><span
+class="math inline"><em>P</em>(<em>X</em> &gt; 0) = 0.508</span></li>
+<li><span
+class="math inline"><em>P</em>(<em>Y</em> &gt; 0) = 0.500</span></li>
+<li><span
+class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0) = 0.362</span></li>
+<li><span
+class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0) = 0.7125984</span></li>
+</ul>
+<hr />
+<h2 id="1-degree-0-bayes">1. Degree-0 Bayes</h2>
+<p>At degree 0, the NNS operators coincide with quadrant
+probabilities:</p>
+<p><span
+class="math display">Co.UPM(0, <em>x</em>, <em>y</em>; <em>t</em><sub><em>x</em></sub>, <em>t</em><sub><em>y</em></sub>) = <em>P</em>(<em>X</em> &gt; <em>t</em><sub><em>x</em></sub>, <em>Y</em> &gt; <em>t</em><sub><em>y</em></sub>),   UPM(0, <em>t</em><sub><em>x</em></sub>, <em>x</em>) = <em>P</em>(<em>X</em> &gt; <em>t</em><sub><em>x</em></sub>).</span></p>
+<p>So the conditional event probability is obtained exactly as</p>
+<p><span class="math display">$$ P(Y&gt;t_y \mid X&gt;t_x) =
+\frac{\mathrm{Co.UPM}(0,x,y;t_x,t_y)}{\mathrm{UPM}(0,t_x,x)}.
+$$</span></p>
+<p>Using <span
+class="math inline"><em>t</em><sub><em>x</em></sub> = <em>t</em><sub><em>y</em></sub> = 0</span>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>joint_prob_deg0 <span class="ot">&lt;-</span> <span class="fu">Co.UPM</span>(<span class="dv">0</span>, x, y, <span class="at">target_x =</span> t_x, <span class="at">target_y =</span> t_y)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>marg_prob_x_deg0 <span class="ot">&lt;-</span> <span class="fu">UPM</span>(<span class="dv">0</span>, t_x, x)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cond_eventprob_deg0 <span class="ot">&lt;-</span> joint_prob_deg0 <span class="sc">/</span> marg_prob_x_deg0</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>cond_eventprob_deg0</span></code></pre></div>
+<p>Output:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.7125984</span></span></code></pre></div>
+<p>This matches the empirical conditional event probability exactly
+in-sample.</p>
+<hr />
+<h2 id="2-degree-1-hinge-surface-recovery">2. Degree-1 hinge-surface
+recovery</h2>
+<p>Define the raw lower hinge surface</p>
+<p><span
+class="math display"><em>H</em>(<em>t</em><sub><em>x</em></sub>, <em>t</em><sub><em>y</em></sub>) = <em>E</em>[(<em>t</em><sub><em>x</em></sub> − <em>X</em>)<sub>+</sub>(<em>t</em><sub><em>y</em></sub> − <em>Y</em>)<sub>+</sub>].</span></p>
+<p>The degree-1 recovery theorem states that</p>
+<p><span class="math display">$$
+\frac{\partial^2 H}{\partial t_x \partial
+t_y}(t_x,t_y)=F_{X,Y}(t_x,t_y).
+$$</span></p>
+<p>So we can recover the joint CDF at <span
+class="math inline">(0, 0)</span> numerically by mixed finite
+differences.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">61</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">diff</span>(targets)[<span class="dv">1</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>hinge_surface <span class="ot">&lt;-</span> <span class="fu">outer</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  targets,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  targets,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Vectorize</span>(<span class="cf">function</span>(tx, ty) {</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Co.LPM_nD</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> <span class="fu">cbind</span>(x, y),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">target =</span> <span class="fu">c</span>(tx, ty),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">degree =</span> <span class="dv">1</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">norm =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>i0 <span class="ot">&lt;-</span> <span class="fu">which.min</span>(<span class="fu">abs</span>(targets <span class="sc">-</span> <span class="dv">0</span>))</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>joint_cdf_from_hinge <span class="ot">&lt;-</span> (</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  hinge_surface[i0 <span class="sc">+</span> <span class="dv">1</span>, i0 <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">-</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  hinge_surface[i0 <span class="sc">+</span> <span class="dv">1</span>, i0] <span class="sc">-</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  hinge_surface[i0,     i0 <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">+</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  hinge_surface[i0,     i0]</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>) <span class="sc">/</span> h<span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
+<p>Recovered and empirical lower-left quadrant probabilities:</p>
+<ul>
+<li>Recovered <span class="math inline"><em>F</em>(0, 0)</span> from
+hinge surface: <code>0.372003</code></li>
+<li>Empirical <span
+class="math inline"><em>P</em>(<em>X</em> ≤ 0, <em>Y</em> ≤ 0)</span>:
+<code>0.354000</code></li>
+</ul>
+<hr />
+<h2 id="3-reconstructing-the-same-upper-right-event-probability">3.
+Reconstructing the same upper-right event probability</h2>
+<p>From the recovered joint CDF,</p>
+<p><span
+class="math display"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0) = 1 − <em>F</em><sub><em>X</em></sub>(0) − <em>F</em><sub><em>Y</em></sub>(0) + <em>F</em><sub><em>X</em>, <em>Y</em></sub>(0, 0).</span></p>
+<p>Using degree-0 marginal CDF values at zero:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FX0 <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t_x, x)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>FY0 <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t_y, y)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>joint_eventprob_from_hinge <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> FX0 <span class="sc">-</span> FY0 <span class="sc">+</span> joint_cdf_from_hinge</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>marg_eventprob_x <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> FX0</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>cond_eventprob_from_hinge <span class="ot">&lt;-</span> joint_eventprob_from_hinge <span class="sc">/</span> marg_eventprob_x</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>cond_eventprob_from_hinge</span></code></pre></div>
+<p>Output:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.7480377</span></span></code></pre></div>
+<p>Comparison:</p>
+<ul>
+<li>Recovered <span
+class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0)</span>:
+<code>0.380003</code></li>
+<li>Empirical <span
+class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0)</span>:
+<code>0.362000</code></li>
+<li>Recovered <span
+class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:
+<code>0.7480377</code></li>
+<li>Empirical <span
+class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:
+<code>0.7125984</code></li>
+</ul>
+<hr />
+<h2 id="4-interpretation">4. Interpretation</h2>
+<p>This example shows two different routes to the same event-level
+quantity <span
+class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:</p>
+<ul>
+<li><strong>Degree 0</strong> gives it directly and exactly through
+quadrant probabilities.</li>
+<li><strong>Degree 1</strong> gives it indirectly by recovering the
+joint CDF from the raw hinge surface and then applying
+inclusion-exclusion.</li>
+</ul>
+<p>The degree-1 reconstruction is close, but not exact, because the
+mixed derivative is approximated numerically on a finite grid. The
+discrepancy is therefore numerical, not conceptual.</p>
+<p>More importantly, degree 1 should be understood structurally:</p>
+<ul>
+<li>mixed second derivatives recover the joint CDF,</li>
+<li>further differentiation recovers the joint density when it
+exists,</li>
+<li>and only then does the full continuous analogue of Bayes arise
+through density ratios.</li>
+</ul>
+<p>Thus:</p>
+<ul>
+<li><strong>degree 0</strong> is the exact event-probability layer,</li>
+<li><strong>degree 1</strong> is the law-recovery layer.</li>
+</ul>
+<hr />
+<h2 id="5-summary-table">5. Summary table</h2>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exact degree-0 conditional event probability</td>
+<td style="text-align: right;">0.7125984</td>
+</tr>
+<tr>
+<td>Degree-1 hinge-surface reconstructed event probability</td>
+<td style="text-align: right;">0.7480377</td>
+</tr>
+<tr>
+<td>Empirical event probability truth</td>
+<td style="text-align: right;">0.7125984</td>
+</tr>
+</tbody>
+</table>
+<p>These results confirm that degree 0 and degree 1 do not play the same
+role. Degree 0 yields Bayes directly. Degree 1 recovers the joint law
+from which event probabilities, and ultimately continuous conditional
+densities, can be constructed.</p>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: Multivariate NNS Inference</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1 id="multivariate-nns-inference-workflow">Multivariate NNS Inference
+Workflow</h1>
+<h2 id="case-study-controlled-effect-of-transmission-am-on-mpg">Case
+Study: Controlled Effect of Transmission (<code>am</code>) on
+<code>mpg</code></h2>
+<p>This example illustrates a multivariate inference workflow using the
+NNS framework to estimate the controlled effect of a binary regressor.
+The response variable is miles per gallon (<code>mpg</code>), and the
+predictor set consists of transmission type (<code>am</code>), weight
+(<code>wt</code>), horsepower (<code>hp</code>), and displacement
+(<code>disp</code>). This section also includes a direct comparison to a
+traditional linear-inference workflow.</p>
+<pre class="{r"><code>library(NNS)
+library(effectsize)</code></pre>
+<pre class="{r"><code>data(mtcars)
+
+y &lt;- mtcars$mpg
+
+X &lt;- data.frame(
+  am   = mtcars$am,
+  wt   = mtcars$wt,
+  hp   = mtcars$hp,
+  disp = mtcars$disp
+)</code></pre>
+<h2 id="1-directional-relevance-screen">1. Directional Relevance
+Screen</h2>
+<p>The first step is to establish nonlinear dependence between each
+predictor and the response prior to fitting the multivariate model.</p>
+<pre class="{r"><code>dep_summary &lt;- data.frame(
+  variable   = colnames(X),
+  dependence = sapply(X, function(x) NNS.dep(x, y)$Dependence)
+)
+
+dep_summary &lt;- dep_summary[order(-dep_summary$dependence), ]
+
+print(&quot;--- Nonlinear Dependence Screen ---&quot;)
+dep_summary</code></pre>
+<p>The nonlinear dependence screen ranks the predictors in descending
+order of directional relevance to <code>mpg</code>. In this
+specification, <code>disp</code> is the strongest predictor, followed by
+<code>hp</code>, <code>wt</code>, and then <code>am</code>.</p>
+<h2 id="2-multivariate-nns-regression-fit">2. Multivariate NNS
+Regression Fit</h2>
+<p>The multivariate regression step estimates the conditional mean
+surface without imposing parametric linearity.</p>
+<pre class="{r"><code>fit_full &lt;- NNS.reg(x = X, y = y)
+
+cat(&quot;\nModel R2: &quot;, fit_full$R2, &quot;\n&quot;)
+cat(&quot;MAE:  &quot;, mean(abs(fit_full$Fitted.xy$residuals)), &quot;\n&quot;)
+cat(&quot;RMSE: &quot;, sqrt(mean(fit_full$Fitted.xy$residuals^2)), &quot;\n&quot;)</code></pre>
+<p>The model explains approximately 89.8 percent of the variation in
+<code>mpg</code>, with low in-sample absolute and quadratic error. This
+indicates that the fitted multivariate NNS surface provides a strong
+nonlinear representation of the data-generating structure.</p>
+<pre class="{r"><code>plot(
+  fit_full$Fitted.xy$y,
+  fit_full$Fitted.xy$y.hat,
+  xlab = &quot;Observed mpg&quot;,
+  ylab = &quot;Fitted mpg&quot;,
+  main = &quot;NNS Multivariate Fit: Observed vs Fitted&quot;,
+  pch = 16,
+  col = &quot;steelblue&quot;
+)
+abline(0, 1, lty = 2, col = &quot;red&quot;)</code></pre>
+<h2 id="3-benchmark-counterfactual-at-median-controls">3. Benchmark
+Counterfactual at Median Controls</h2>
+<p>To isolate the effect of transmission, two counterfactual points are
+constructed: one automatic and one manual, while holding
+<code>wt</code>, <code>hp</code>, and <code>disp</code> fixed at their
+median values.</p>
+<pre class="{r"><code>x_ref &lt;- data.frame(
+  am   = c(0, 1),
+  wt   = median(X$wt),
+  hp   = median(X$hp),
+  disp = median(X$disp)
+)
+
+preds_ref &lt;- NNS.reg(x = X, y = y, point.est = x_ref)$Point.est
+
+controlled_am_effect_at_medians &lt;- preds_ref[2] - preds_ref[1]
+
+cat(&quot;\n--- Counterfactual at Medians ---&quot;)
+cat(&quot;\nPredicted mpg (Automatic):&quot;, preds_ref[1])
+cat(&quot;\nPredicted mpg (Manual):   &quot;, preds_ref[2])
+cat(&quot;\nControlled Effect:        &quot;, controlled_am_effect_at_medians, &quot;\n&quot;)</code></pre>
+<p>At the benchmark covariate profile, the fitted manual-transmission
+effect is 1.8 miles per gallon relative to automatic transmission.</p>
+<h2 id="4-heterogeneous-controlled-effects">4. Heterogeneous Controlled
+Effects</h2>
+<p>Rather than relying on a single benchmark effect, the transmission
+variable can be flipped for every observed covariate profile in the
+sample. This produces a heterogeneous controlled-effect
+distribution.</p>
+<pre class="{r"><code>X0 &lt;- X
+X0$am &lt;- 0
+
+X1 &lt;- X
+X1$am &lt;- 1
+
+pred0 &lt;- NNS.reg(x = X, y = y, point.est = X0)$Point.est
+pred1 &lt;- NNS.reg(x = X, y = y, point.est = X1)$Point.est
+
+delta_am &lt;- pred1 - pred0
+
+cat(&quot;\n--- Distribution of Controlled am Effects ---&quot;)
+summary(delta_am)</code></pre>
+<p>This distribution shows that the controlled transmission effect is
+heterogeneous across the observed support of the covariates. The average
+effect is positive, but the full effect profile ranges from negative
+values to large positive gains.</p>
+<h2 id="5-uncertainty-quantification-with-meboot">5. Uncertainty
+Quantification with MEBoot</h2>
+<p>To quantify uncertainty in the heterogeneous controlled-effect
+distribution, a maximum-entropy bootstrap is applied to
+<code>delta_am</code>. Confidence intervals are then constructed for the
+mean and median controlled effects.</p>
+<pre class="{r"><code>set.seed(123)
+B &lt;- 1000
+alpha &lt;- 0.05
+
+boot_delta &lt;- NNS.meboot(x = delta_am, reps = B, rho = 1, drift = FALSE)
+boot_delta_mat &lt;- boot_delta[&quot;replicates&quot;, ]$replicates
+
+boot_mean_effect   &lt;- apply(boot_delta_mat, 2, mean)
+boot_median_effect &lt;- apply(boot_delta_mat, 2, median)
+
+mean_ci &lt;- c(
+  LPM.VaR(alpha / 2, 0, boot_mean_effect),
+  UPM.VaR(alpha / 2, 0, boot_mean_effect)
+)
+
+median_ci &lt;- c(
+  LPM.VaR(alpha / 2, 0, boot_median_effect),
+  UPM.VaR(alpha / 2, 0, boot_median_effect)
+)</code></pre>
+<h2 id="6-results-visualization-and-summary">6. Results Visualization
+and Summary</h2>
+<p>Pointwise interval estimates can be generated for the heterogeneous
+effect series, and summary intervals can be reported for the mean and
+median controlled effects.</p>
+<pre class="{r"><code>lower_effect &lt;- apply(boot_delta_mat, 1, function(z) LPM.VaR(alpha / 2, 0, z))
+upper_effect &lt;- apply(boot_delta_mat, 1, function(z) UPM.VaR(alpha / 2, 0, z))
+
+plot(
+  delta_am,
+  ylim = range(c(lower_effect, upper_effect)),
+  pch = 16,
+  xlab = &quot;Observation Index&quot;,
+  ylab = &quot;mpg Benefit (Manual - Auto)&quot;,
+  main = &quot;Heterogeneous am Effect with 95% MEBoot CIs&quot;
+)
+
+arrows(
+  seq_along(delta_am), lower_effect,
+  seq_along(delta_am), upper_effect,
+  angle = 90, code = 3, length = 0.03, col = &quot;grey&quot;
+)
+
+abline(h = 0, lty = 2)</code></pre>
+<pre class="{r"><code>summary_table &lt;- data.frame(
+  Statistic = c(&quot;Mean Controlled Effect&quot;, &quot;Median Controlled Effect&quot;),
+  Estimate  = c(mean(delta_am), median(delta_am)),
+  Lower_95  = c(mean_ci[1], median_ci[1]),
+  Upper_95  = c(mean_ci[2], median_ci[2])
+)
+
+cat(&quot;\n--- Final Inference Summary ---\n&quot;)
+summary_table</code></pre>
+<h2 id="7-traditional-statistical-inference-workflow">7. Traditional
+Statistical Inference Workflow</h2>
+<p>For comparison, the same question can be approached using a
+conventional linear workflow. This highlights the difference between a
+homogeneous coefficient-based framework and the multivariate NNS
+conditional-effect framework.</p>
+<h3 id="71-pearson-correlation-screen">7.1 Pearson Correlation
+Screen</h3>
+<pre class="{r"><code>cor_summary &lt;- data.frame(
+  variable    = colnames(X),
+  correlation = sapply(X, function(x) cor(x, y))
+)
+
+print(&quot;--- Pearson Correlation Screen ---&quot;)
+cor_summary[order(-abs(cor_summary$correlation)), ]</code></pre>
+<p>The Pearson screen shows the strongest linear associations with
+<code>mpg</code>. Weight and displacement dominate in absolute
+magnitude, followed by horsepower and then transmission.</p>
+<h3 id="72-multivariate-ols-regression">7.2 Multivariate OLS
+Regression</h3>
+<pre class="{r"><code>fit_ols &lt;- lm(mpg ~ am + wt + hp + disp, data = mtcars)
+
+print(&quot;--- OLS Model Summary ---&quot;)
+summary(fit_ols)</code></pre>
+<p>The OLS fit explains less of the variation in <code>mpg</code> than
+the NNS fit. More importantly, the coefficient on <code>am</code> is
+positive but not conventionally statistically significant at the 5
+percent level.</p>
+<h3 id="73-standardized-effect-sizes">7.3 Standardized Effect Sizes</h3>
+<pre class="{r"><code>print(&quot;--- Standardized Effect Sizes (Partial Eta-Squared) ---&quot;)
+eta_squared(fit_ols, partial = TRUE)</code></pre>
+<p>The partial effect-size view suggests that <code>am</code> and
+<code>wt</code> both carry substantial partial explanatory content, even
+though <code>am</code> is not declared statistically significant by the
+standard t-test.</p>
+<h3 id="74-controlled-effect-and-confidence-interval">7.4 Controlled
+Effect and Confidence Interval</h3>
+<pre class="{r"><code>am_coeff &lt;- coef(fit_ols)[&quot;am&quot;]
+am_ci &lt;- confint(fit_ols)[&quot;am&quot;, ]
+
+cat(&quot;\n--- Controlled Effect of Transmission ---&quot;)
+cat(&quot;\nCoefficient (Effect size in mpg):&quot;, am_coeff)
+cat(&quot;\n95% Confidence Interval:        &quot;, am_ci[1], &quot;to&quot;, am_ci[2], &quot;\n&quot;)</code></pre>
+<p>The OLS model estimates a positive average transmission effect of
+about 2.16 mpg, but its confidence interval crosses zero.</p>
+<h3 id="75-anova-f-test-for-transmission">7.5 ANOVA F-Test for
+Transmission</h3>
+<pre class="{r"><code>fit_reduced &lt;- lm(mpg ~ wt + hp + disp, data = mtcars)
+
+print(&quot;--- ANOVA F-test for Transmission Effect ---&quot;)
+anova(fit_reduced, fit_ols)</code></pre>
+<p>The nested-model ANOVA reaches the same inferential conclusion as the
+coefficient test: under the linear model, the added transmission term is
+not statistically significant at conventional thresholds.</p>
+<h2 id="8-discussion-nns-versus-traditional-inference">8. Discussion:
+NNS versus Traditional Inference</h2>
+<p>The contrast between the NNS workflow and the traditional OLS
+workflow is instructive.</p>
+<h3 id="81-predictor-hierarchy">8.1 Predictor Hierarchy</h3>
+<p>The Pearson screen shows that <code>wt</code> and <code>disp</code>
+have the strongest linear association with <code>mpg</code>, whereas the
+NNS directional screen ranks <code>disp</code>, <code>hp</code>,
+<code>wt</code>, and <code>am</code>. These are related but not
+identical views. Pearson correlation measures straight-line association,
+while <code>NNS.dep</code> is built to capture more general nonlinear
+dependence.</p>
+<h3 id="82-the-linear-significance-trap">8.2 The Linear Significance
+Trap</h3>
+<p>In the OLS model, the p-value on <code>am</code> is 0.14405. Under
+conventional inference, that leads to the conclusion that transmission
+type does not have a statistically significant effect on
+<code>mpg</code> once the controls are included. The NNS workflow
+reaches a different conclusion because it does not force the controlled
+effect of <code>am</code> into a single global linear coefficient.</p>
+<p>This matters when the transmission effect is not constant across the
+support of <code>wt</code>, <code>hp</code>, and <code>disp</code>. If
+the effect is positive for some car profiles and weaker or negative for
+others, a single global coefficient can become unstable and its standard
+error can expand. The NNS framework instead estimates the conditional
+surface and then studies the induced heterogeneous effect distribution
+directly.</p>
+<h3 id="83-effect-size-versus-statistical-significance">8.3 Effect Size
+versus Statistical Significance</h3>
+<p>The OLS output shows an estimated <code>am</code> effect of 2.159271
+mpg, which is directionally consistent with the NNS mean controlled
+effect of 2.526736 mpg and the benchmark controlled effect of 1.8 mpg.
+The difference is interpretive:</p>
+<ul>
+<li>OLS treats the effect as a homogeneous coefficient with one
+confidence interval.</li>
+<li>NNS treats the effect as a heterogeneous conditional contrast that
+varies by covariate profile.</li>
+</ul>
+<p>The OLS confidence interval for <code>am</code> crosses zero, whereas
+the NNS summary intervals for the mean and median controlled effects are
+both strictly positive.</p>
+<h3 id="84-model-fit">8.4 Model Fit</h3>
+<p>The NNS model achieves:</p>
+<ul>
+<li><code>R2 = 0.8978988</code></li>
+<li><code>MAE = 1.011309</code></li>
+<li><code>RMSE = 1.963105</code></li>
+</ul>
+<p>The OLS model achieves:</p>
+<ul>
+<li><code>R2 = 0.8402</code></li>
+<li>residual standard error <code>= 2.581</code></li>
+</ul>
+<p>So even at the level of fit, the multivariate NNS model provides a
+stronger representation of the observed response surface.</p>
+<h3 id="85-controlled-effect-interpretation">8.5 Controlled Effect
+Interpretation</h3>
+<p>The NNS benchmark counterfactual implies that, at the median values
+of <code>wt</code>, <code>hp</code>, and <code>disp</code>, manual
+transmission is associated with a fitted increase of 1.8 mpg. Across the
+observed covariate support, the effect distribution is
+heterogeneous:</p>
+<ul>
+<li>mean effect = <code>2.526736</code></li>
+<li>median effect = <code>1.800000</code></li>
+<li>minimum effect = <code>-3.400</code></li>
+<li>maximum effect = <code>8.900</code></li>
+</ul>
+<p>This reveals something the OLS coefficient cannot: the controlled
+effect of transmission is not constant across all car profiles.</p>
+<h2 id="9-comparative-summary">9. Comparative Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: right;">Multivariate NNS Results</th>
+<th style="text-align: right;">Traditional OLS Results</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model Fit</td>
+<td style="text-align: right;"><code>R2 = 0.8978988</code></td>
+<td style="text-align: right;"><code>R2 = 0.8402</code></td>
+</tr>
+<tr>
+<td>Error Structure</td>
+<td style="text-align: right;"><code>MAE = 1.011309</code>,
+<code>RMSE = 1.963105</code></td>
+<td style="text-align: right;">Residual SE = <code>2.581</code></td>
+</tr>
+<tr>
+<td>Transmission Effect</td>
+<td style="text-align: right;"><code>+1.8</code> at medians</td>
+<td style="text-align: right;"><code>+2.159271</code> average
+coefficient</td>
+</tr>
+<tr>
+<td>Heterogeneity</td>
+<td style="text-align: right;">Explicitly modeled</td>
+<td style="text-align: right;">Not modeled</td>
+</tr>
+<tr>
+<td>Mean Effect Interval</td>
+<td style="text-align: right;"><code>[2.322152, 2.731320]</code></td>
+<td style="text-align: right;">Coefficient CI crosses zero</td>
+</tr>
+<tr>
+<td>Median Effect Interval</td>
+<td style="text-align: right;"><code>[1.559981, 3.444243]</code></td>
+<td style="text-align: right;">Not available as an effect-distribution
+summary</td>
+</tr>
+<tr>
+<td>Inference</td>
+<td style="text-align: right;">Conditional, nonlinear,
+heterogeneous</td>
+<td style="text-align: right;">Linear, homogeneous,
+coefficient-based</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-conclusion">10. Conclusion</h2>
+<p>This example shows that the effect of transmission on fuel efficiency
+can be analyzed within a fully multivariate, nonlinear, nonparametric
+framework. The multivariate <code>NNS.reg</code> fit indicates strong
+predictive structure in the data, while the counterfactual contrast
+isolates the conditional effect of <code>am</code>. The resulting
+controlled-effect distribution shows that the transmission effect is
+positive on average, but heterogeneous across the observed support of
+the controls. The MEBoot intervals reinforce that the mean and median
+controlled effects remain positive.</p>
+<p>The traditional OLS workflow gives a positive point estimate for
+transmission, but because it forces the effect into a single linear
+coefficient, it fails to characterize the heterogeneity revealed by the
+NNS analysis and does not declare the effect statistically significant
+at conventional levels.</p>
+<p>Methodologically, the key distinction is that the NNS workflow
+answers a conditional and heterogeneous effect question, while the
+traditional workflow answers a homogeneous coefficient question.
+Although <code>mtcars</code> is only a toy dataset, the inferential
+structure of the NNS workflow is intended to generalize: nonlinear
+relevance screening, multivariate conditional mean estimation, fitted
+counterfactual contrasts for binary regressors, heterogeneous effect
+analysis, and bootstrap interval estimation can all be carried forward
+to richer empirical settings.</p>
+</body>
+</html>

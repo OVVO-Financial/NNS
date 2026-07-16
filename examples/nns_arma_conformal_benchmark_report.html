@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: nns_arma_conformal_benchmark_report</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1 id="nns-time-series-prediction-interval-benchmark">NNS Time-Series
+Prediction Interval Benchmark</h1>
+<p>This experiment was ported from Python to R in order to facilitate
+the <code>NNS</code> timeseries comparison. The original Python version
+is <a
+href="https://github.com/microprediction/conformalprediction/blob/main/benchmark/run_timeseries.py">here</a>.</p>
+<h2 id="outline">Outline</h2>
+<p>This benchmark compares prediction intervals for a simulated
+nonlinear, heteroskedastic time series. The goal is not only to check
+whether each method reaches the target marginal coverage of 90%, but
+also whether the intervals remain useful across changing volatility
+regimes.</p>
+<p>The R version performs the following steps:</p>
+<ol type="1">
+<li>Simulate five nonlinear time series with changing volatility
+regimes.</li>
+<li>Fit a lagged ridge-style baseline used by the conformal and
+probabilistic comparison methods.</li>
+<li>Evaluate conformal methods: fixed split CP, ACI, AgACI, conformal
+PID, and NexCP.</li>
+<li>Evaluate probabilistic baselines: EWMA-vol Gaussian, static Gaussian
+recalibration, true sigma on estimated mean, and the true conditional
+oracle.</li>
+<li>Run <code>NNS.ARMA.optim</code> in walk-forward chunks, with
+seasonal periods estimated from the available training history at each
+step using <code>NNS.seas()</code>.</li>
+<li>Convert the native NNS lower interval, point forecast, and upper
+interval into a non-Gaussian degree-2 <code>LPM.VaR</code> predictive
+distribution for CRPS and approximate logscore.</li>
+<li>Score all methods using marginal coverage, rolling-window coverage,
+volatility-stratified coverage, interval width, Winkler interval score,
+CRPS, and logscore where applicable.</li>
+</ol>
+<h2 id="fidelity-to-the-python-benchmark">Fidelity to the Python
+benchmark</h2>
+<p>The R script follows the structure of the Python benchmark as closely
+as practical. It uses the same train, calibration, and test layout, the
+same lag length, the same volatility-regime design, and the same broad
+families of comparison methods.</p>
+<p>Exact numerical identity should not be expected. Python and R use
+different random number generators, so the same seed labels do not
+produce identical simulated paths. The baseline ridge model is also not
+bit-for-bit identical: the Python version uses <code>sklearn</code>'s
+<code>StandardScaler()</code> plus <code>Ridge(alpha = 1.0)</code>,
+while the R script uses <code>glmnet</code> when available and falls
+back to <code>lm</code> otherwise.</p>
+<p>Some optional Python-specific methods, such as MAPIE and
+<code>timemachines</code> skaters, are not reproduced directly in this R
+version. The R version instead focuses on the common conformal methods,
+probabilistic baselines, and the native <code>NNS</code> time-series
+comparison.</p>
+<p>A key correction in the final R version is the oracle. The initial
+oracle used the deterministic level as the mean. Because the
+data-generating process contains an autoregressive component, the true
+conditional mean is:</p>
+<pre class="text"><code>level_t + 0.55 * (y_{t-1} - level_{t-1})</code></pre>
+<p>The final table below uses this corrected oracle.</p>
+<h2 id="nns-probabilistic-forecast-construction">NNS probabilistic
+forecast construction</h2>
+<p><code>NNS.ARMA.optim</code> natively returns a lower prediction
+interval, point forecast, and upper prediction interval. Rather than
+forcing those outputs into a Gaussian distribution, the R benchmark
+constructs a non-Gaussian predictive quantile function using degree-2
+<code>LPM.VaR</code>.</p>
+<p>For each forecast step, the predictive support is:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>support_t <span class="ot">&lt;-</span> <span class="fu">c</span>(lower_t, point_forecast_t, upper_t)</span></code></pre></div>
+<p>The forecast quantile function is then evaluated as:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Q_t</span>(p) <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">LPM.VaR</span>(p, <span class="at">degree =</span> <span class="dv">2</span>, <span class="at">variable =</span> support_t)</span></code></pre></div>
+<p>This construction preserves asymmetry. If the point forecast is
+closer to the upper bound than the lower bound, or vice versa, the
+implied predictive distribution reflects that directional imbalance
+directly. No normality assumption is imposed on the NNS predictive
+distribution.</p>
+<p>CRPS is computed directly from the NNS-implied quantile function.
+Logscore is also reported, but it should be interpreted more cautiously
+because it requires estimating a local density from the quantile curve.
+CRPS is the cleaner distributional comparison for this compact
+nonparametric predictive distribution.</p>
+<h2 id="metrics">Metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>marg_cov</code></td>
+<td>Overall empirical coverage. Target is 0.90.</td>
+</tr>
+<tr>
+<td><code>worst_win_cov</code></td>
+<td>Worst rolling-window coverage using a 100-step window. Higher is
+better.</td>
+</tr>
+<tr>
+<td><code>cov_lowvol</code></td>
+<td>Coverage in the lowest-volatility stratum.</td>
+</tr>
+<tr>
+<td><code>cov_hivol</code></td>
+<td>Coverage in the highest-volatility stratum.</td>
+</tr>
+<tr>
+<td><code>cond_cov_gap</code></td>
+<td>Largest absolute deviation from 0.90 across volatility strata. Lower
+is better.</td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>Mean interval width. Lower is sharper, conditional on adequate
+coverage.</td>
+</tr>
+<tr>
+<td><code>interval_score</code></td>
+<td>Winkler interval score. Lower is better. Penalizes both width and
+misses.</td>
+</tr>
+<tr>
+<td><code>CRPS</code></td>
+<td>Distributional score. Lower is better. For NNS, computed from the
+degree-2 <code>LPM.VaR</code> quantile distribution.</td>
+</tr>
+<tr>
+<td><code>logscore</code></td>
+<td>Density score. Lower is better. For NNS, approximated from the
+quantile curve and interpreted cautiously.</td>
+</tr>
+</tbody>
+</table>
+<p><code>NA</code> values in <code>CRPS</code> and <code>logscore</code>
+are expected for methods that output intervals only rather than full
+predictive distributions.</p>
+<h2 id="results">Results</h2>
+<p>Mean over 5 seeds, with <code>alpha = 0.10</code> and target coverage
+equal to <code>0.90</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Rank</th>
+<th>Method</th>
+<th>Family</th>
+<th style="text-align: right;">Marginal coverage</th>
+<th style="text-align: right;">Worst rolling coverage</th>
+<th style="text-align: right;">Low-vol coverage</th>
+<th style="text-align: right;">High-vol coverage</th>
+<th style="text-align: right;">Conditional coverage gap</th>
+<th style="text-align: right;">Width</th>
+<th style="text-align: right;">Interval score</th>
+<th style="text-align: right;">CRPS</th>
+<th style="text-align: right;">Logscore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>oracle (true conditional mu,sigma)</td>
+<td>oracle</td>
+<td style="text-align: right;">0.897</td>
+<td style="text-align: right;">0.820</td>
+<td style="text-align: right;">0.895</td>
+<td style="text-align: right;">0.900</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">4.472</td>
+<td style="text-align: right;">5.622</td>
+<td style="text-align: right;">0.774</td>
+<td style="text-align: right;">1.605</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>NNS.ARMA.optim (degree-2 LPM.VaR distribution)</td>
+<td>nns</td>
+<td style="text-align: right;">0.914</td>
+<td style="text-align: right;">0.784</td>
+<td style="text-align: right;">0.926</td>
+<td style="text-align: right;">0.897</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">5.582</td>
+<td style="text-align: right;">6.756</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">3.874</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>EWMA-vol Gaussian</td>
+<td>prob</td>
+<td style="text-align: right;">0.891</td>
+<td style="text-align: right;">0.838</td>
+<td style="text-align: right;">0.904</td>
+<td style="text-align: right;">0.887</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">5.409</td>
+<td style="text-align: right;">6.892</td>
+<td style="text-align: right;">0.939</td>
+<td style="text-align: right;">1.864</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>NexCP (weighted)</td>
+<td>cp</td>
+<td style="text-align: right;">0.895</td>
+<td style="text-align: right;">0.782</td>
+<td style="text-align: right;">0.922</td>
+<td style="text-align: right;">0.891</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">5.467</td>
+<td style="text-align: right;">6.937</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>AgACI</td>
+<td>cp</td>
+<td style="text-align: right;">0.905</td>
+<td style="text-align: right;">0.802</td>
+<td style="text-align: right;">0.948</td>
+<td style="text-align: right;">0.877</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">5.597</td>
+<td style="text-align: right;">7.035</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>ACI</td>
+<td>cp</td>
+<td style="text-align: right;">0.897</td>
+<td style="text-align: right;">0.844</td>
+<td style="text-align: right;">0.910</td>
+<td style="text-align: right;">0.890</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: right;">5.682</td>
+<td style="text-align: right;">7.130</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td>true sigma on est. mu</td>
+<td>oracle</td>
+<td style="text-align: right;">0.788</td>
+<td style="text-align: right;">0.546</td>
+<td style="text-align: right;">0.661</td>
+<td style="text-align: right;">0.862</td>
+<td style="text-align: right;">0.239</td>
+<td style="text-align: right;">4.472</td>
+<td style="text-align: right;">7.277</td>
+<td style="text-align: right;">0.949</td>
+<td style="text-align: right;">1.966</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td>static Gaussian (recal)</td>
+<td>prob</td>
+<td style="text-align: right;">0.908</td>
+<td style="text-align: right;">0.690</td>
+<td style="text-align: right;">0.999</td>
+<td style="text-align: right;">0.780</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">5.957</td>
+<td style="text-align: right;">7.942</td>
+<td style="text-align: right;">0.969</td>
+<td style="text-align: right;">1.988</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td>fixed split (CP)</td>
+<td>cp</td>
+<td style="text-align: right;">0.912</td>
+<td style="text-align: right;">0.696</td>
+<td style="text-align: right;">0.999</td>
+<td style="text-align: right;">0.787</td>
+<td style="text-align: right;">0.113</td>
+<td style="text-align: right;">6.066</td>
+<td style="text-align: right;">7.949</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td>conformal PID</td>
+<td>cp</td>
+<td style="text-align: right;">0.892</td>
+<td style="text-align: right;">0.572</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.746</td>
+<td style="text-align: right;">0.154</td>
+<td style="text-align: right;">6.091</td>
+<td style="text-align: right;">8.508</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+<h2 id="interpretation">Interpretation</h2>
+<p>The corrected oracle is the expected best method. It knows both the
+true conditional mean and the true conditional volatility, so it
+provides the natural lower bound for the experiment. Its marginal
+coverage is 0.897, high-volatility coverage is 0.900, and interval score
+is 5.622.</p>
+<p>The strongest empirical method is <code>NNS.ARMA.optim</code>. It
+ranks second overall, behind only the oracle. It achieves marginal
+coverage of 0.914, high-volatility coverage of 0.897, and the best
+non-oracle interval score at 6.756. This means that NNS produces
+efficient intervals without materially sacrificing coverage in the
+high-volatility regime.</p>
+<p>The distributional scores strengthen the result. The NNS degree-2
+<code>LPM.VaR</code> predictive distribution has the best empirical CRPS
+among non-oracle methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th style="text-align: right;">CRPS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>oracle (true conditional mu,sigma)</td>
+<td style="text-align: right;">0.774</td>
+</tr>
+<tr>
+<td>NNS.ARMA.optim degree-2 LPM.VaR distribution</td>
+<td style="text-align: right;">0.934</td>
+</tr>
+<tr>
+<td>EWMA-vol Gaussian</td>
+<td style="text-align: right;">0.939</td>
+</tr>
+<tr>
+<td>true sigma on estimated mu</td>
+<td style="text-align: right;">0.949</td>
+</tr>
+<tr>
+<td>static Gaussian recalibration</td>
+<td style="text-align: right;">0.969</td>
+</tr>
+</tbody>
+</table>
+<p>This is important because CRPS evaluates the entire predictive
+distribution, not only the interval endpoints. The NNS forecast
+therefore performs well both as an interval forecast and as a
+distributional forecast.</p>
+<p>ACI is the strongest pure calibration method. It has marginal
+coverage of 0.897, the best worst rolling-window coverage at 0.844, and
+the smallest conditional coverage gap at 0.012. This shows that adaptive
+conformal methods can repair much of the regime-misallocation problem
+found in fixed split conformal.</p>
+<p>However, ACI pays for that calibration with a wider interval and a
+worse interval score than NNS. Its mean width is 5.682 and interval
+score is 7.130, compared with NNS width of 5.582 and interval score of
+6.756. In this benchmark, NNS is the better efficiency performer, while
+ACI is the best calibration stabilizer.</p>
+<p>Fixed split conformal illustrates the global-pooling problem clearly.
+It reaches marginal coverage of 0.912, but the coverage is badly
+allocated across regimes. Low-volatility coverage is 0.999, while
+high-volatility coverage falls to 0.787. The method overcovers calm
+periods and undercovers volatile periods. This is the practical
+limitation of using a global calibration residual pool in a
+heteroskedastic time series.</p>
+<p>The <code>true sigma on est. mu</code> row shows the opposite
+failure. It knows the true volatility path, but it is centered on the
+estimated ridge mean. Its marginal coverage falls to 0.788, and worst
+rolling-window coverage falls to 0.546. This demonstrates that perfect
+volatility information cannot rescue a biased or structurally weak mean
+forecast. The center of the interval matters as much as the width.</p>
+<h2 id="main-takeaway">Main takeaway</h2>
+<p>The benchmark supports a balanced conclusion:</p>
+<ul>
+<li>The true conditional oracle remains the theoretical winner.</li>
+<li><code>NNS.ARMA.optim</code> is the strongest empirical method by
+interval score and CRPS.</li>
+<li>ACI is the strongest pure calibration method by conditional coverage
+stability.</li>
+<li>Fixed split conformal reaches marginal coverage only by
+misallocating coverage across volatility regimes.</li>
+<li>NNS does not need a conformal wrapper to produce competitive
+adaptive intervals in this experiment.</li>
+</ul>
+<h2 id="final-verdict">Final verdict</h2>
+<p>If the computational overhead is acceptable, especially with
+parallelized cores, <code>NNS.ARMA.optim</code> is an elite choice for
+time-series uncertainty quantification. In this experiment, it delivered
+the best non-oracle interval score and the best non-oracle CRPS while
+maintaining near-target marginal coverage and strong high-volatility
+coverage.</p>
+<p>The main advantage is that NNS does not require a separate two-layer
+architecture of base model plus conformal wrapper to obtain adaptive
+prediction intervals. Its native time-series procedure estimates
+seasonal structure with <code>NNS.seas()</code>, updates through
+walk-forward training, and produces prediction intervals directly from
+the fitted NNS forecasting process.</p>
+<p>Adaptive conformal methods such as ACI and NexCP remain valuable
+calibration tools. ACI achieved the best volatility-stratified
+calibration and the best worst-window coverage in this benchmark. But
+NNS achieved the strongest overall empirical efficiency, with sharper
+intervals and better CRPS than the conformal alternatives.</p>
+<p>The practical conclusion is that NNS is not merely an alternative
+point forecaster requiring post-hoc calibration. It is a native
+nonlinear, nonparametric forecasting framework that can produce highly
+efficient, asymmetric, naturally adaptive prediction intervals and
+predictive distributions directly.</p>
+<h2 id="appendix-r-code">Appendix: R code</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run_nns_arma_timeseries_benchmark.R</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Time-series benchmark in R.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Methods:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   Conformal:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     fixed split CP, ACI, AgACI, conformal PID, NexCP weighted</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   Probabilistic:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     true conditional oracle, true sigma on estimated mu,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     EWMA-vol Gaussian, GARCH(1,1) Gaussian, static Gaussian</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   NNS:</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     NNS.ARMA.optim walk-forward with built-in prediction intervals</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     NNS.ARMA.optim probabilistic scores from degree-2 LPM.VaR quantile distribution</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Important:</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   seasonal.factor is NOT hard-coded.</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   Each NNS.ARMA.optim walk-forward chunk estimates seasonal factors from</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   the current training data using NNS.seas(training_series, plot = FALSE).</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   NNS CRPS and logscore are NOT Gaussian-implied.</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   They are computed from the NNS-implied quantile distribution:</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#     support_t = c(lower_t, point_t, upper_t)</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     Q_t(p) = LPM.VaR(p, degree = 2, variable = support_t)</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>HAS_RUGARCH <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;rugarch&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span>HAS_RUGARCH) {</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;[INFO] rugarch not available - GARCH method will be skipped.&quot;</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>HAS_GLMNET <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;glmnet&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span>HAS_GLMNET) {</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;[INFO] glmnet not available - ridge baseline will fall back to lm.&quot;</span>)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="st">`</span><span class="at">%||%</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b) {</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(a)) a <span class="cf">else</span> b</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>ALPHA <span class="ot">&lt;-</span> <span class="fl">0.10</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>TARGET_COV <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> ALPHA</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>N_LAGS <span class="ot">&lt;-</span> <span class="dv">12</span><span class="dt">L</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>FIT_END <span class="ot">&lt;-</span> <span class="dv">700</span><span class="dt">L</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>CAL_END <span class="ot">&lt;-</span> <span class="dv">1000</span><span class="dt">L</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>WINDOW <span class="ot">&lt;-</span> <span class="dv">100</span><span class="dt">L</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>N_SEEDS <span class="ot">&lt;-</span> <span class="dv">5</span><span class="dt">L</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>TRAINING_FRAC <span class="ot">&lt;-</span> <span class="fl">0.90</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>MAX_H <span class="ot">&lt;-</span> <span class="dv">250</span><span class="dt">L</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>NNS_NCORES <span class="ot">&lt;-</span> <span class="dv">1</span><span class="dt">L</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>NNS_Q_PROBS <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.001</span>, <span class="fl">0.999</span>, <span class="at">by =</span> <span class="fl">0.001</span>)</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>NNS_Q_DEGREE <span class="ot">&lt;-</span> <span class="dv">2</span><span class="dt">L</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">&quot;results&quot;</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">&quot;figures&quot;</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>make_timeseries <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">T =</span> <span class="dv">3500</span><span class="dt">L</span>, <span class="at">seed =</span> <span class="dv">0</span><span class="dt">L</span>, <span class="at">heavy_tail =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>)</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>  tt <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(T)</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  level <span class="ot">&lt;-</span> <span class="fl">0.002</span> <span class="sc">*</span> tt <span class="sc">+</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    <span class="fl">1.50</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> tt <span class="sc">/</span> <span class="dv">50</span>) <span class="sc">+</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.75</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> tt <span class="sc">/</span> <span class="dv">200</span>)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fl">1.0</span>, T)</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>  sigma[tt <span class="sc">&gt;</span> <span class="dv">900</span> <span class="sc">&amp;</span> tt <span class="sc">&lt;=</span> <span class="dv">1400</span>] <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>  sigma[tt <span class="sc">&gt;</span> <span class="dv">1900</span> <span class="sc">&amp;</span> tt <span class="sc">&lt;=</span> <span class="dv">2450</span>] <span class="ot">&lt;-</span> <span class="fl">0.55</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>  sigma[tt <span class="sc">&gt;</span> <span class="dv">2800</span>] <span class="ot">&lt;-</span> <span class="fl">1.8</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>  eps <span class="ot">&lt;-</span> <span class="cf">if</span> (heavy_tail) <span class="fu">rt</span>(T, <span class="at">df =</span> <span class="dv">5</span>) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">5</span> <span class="sc">/</span> <span class="dv">3</span>) <span class="cf">else</span> <span class="fu">rnorm</span>(T)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  y[<span class="dv">1</span>] <span class="ot">&lt;-</span> level[<span class="dv">1</span>] <span class="sc">+</span> sigma[<span class="dv">1</span>] <span class="sc">*</span> eps[<span class="dv">1</span>]</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>T) {</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    y[i] <span class="ot">&lt;-</span> level[i] <span class="sc">+</span> <span class="fl">0.55</span> <span class="sc">*</span> (y[i <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">-</span> level[i <span class="sc">-</span> <span class="dv">1</span>]) <span class="sc">+</span> sigma[i] <span class="sc">*</span> eps[i]</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>(<span class="at">t =</span> tt, <span class="at">y =</span> <span class="fu">as.numeric</span>(y), <span class="at">level =</span> <span class="fu">as.numeric</span>(level), <span class="at">sigma =</span> <span class="fu">as.numeric</span>(sigma))</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>true_conditional_mean <span class="ot">&lt;-</span> <span class="cf">function</span>(d, raw_idx) {</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>  d<span class="sc">$</span>level[raw_idx] <span class="sc">+</span> <span class="fl">0.55</span> <span class="sc">*</span> (d<span class="sc">$</span>y[raw_idx <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>] <span class="sc">-</span> d<span class="sc">$</span>level[raw_idx <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>])</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>lag_features <span class="ot">&lt;-</span> <span class="cf">function</span>(y, <span class="at">n_lags =</span> N_LAGS) {</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>  yy <span class="ot">&lt;-</span> y[(n_lags <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>n]</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> <span class="fu">length</span>(yy), <span class="at">ncol =</span> n_lags)</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(n_lags)) {</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    X[, k] <span class="ot">&lt;-</span> y[(n_lags <span class="sc">+</span> <span class="dv">1</span> <span class="sc">-</span> k)<span class="sc">:</span>(n <span class="sc">-</span> k)]</span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(X) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;lag&quot;</span>, <span class="fu">seq_len</span>(n_lags))</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">X =</span> X, <span class="at">yy =</span> yy)</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>ridge_forecast <span class="ot">&lt;-</span> <span class="cf">function</span>(X, yy, fit_end) {</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (HAS_GLMNET) {</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    n_tr <span class="ot">&lt;-</span> fit_end</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    lambda <span class="ot">&lt;-</span> <span class="fl">1.0</span> <span class="sc">/</span> n_tr</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> glmnet<span class="sc">::</span><span class="fu">glmnet</span>(X[<span class="dv">1</span><span class="sc">:</span>n_tr, , <span class="at">drop =</span> <span class="cn">FALSE</span>], yy[<span class="dv">1</span><span class="sc">:</span>n_tr], <span class="at">alpha =</span> <span class="dv">0</span>, <span class="at">lambda =</span> lambda, <span class="at">standardize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(glmnet<span class="sc">::</span><span class="fu">predict.glmnet</span>(fit, <span class="at">newx =</span> X, <span class="at">s =</span> lambda))</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    df_tr <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(X[<span class="dv">1</span><span class="sc">:</span>fit_end, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>    df_tr<span class="sc">$</span>y <span class="ot">&lt;-</span> yy[<span class="dv">1</span><span class="sc">:</span>fit_end]</span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df_tr)</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">predict</span>(fit, <span class="at">newdata =</span> <span class="fu">as.data.frame</span>(X)))</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>  mu</span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi, y) <span class="fu">mean</span>(y <span class="sc">&gt;=</span> lo <span class="sc">&amp;</span> y <span class="sc">&lt;=</span> hi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>mean_width <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi) <span class="fu">mean</span>(hi <span class="sc">-</span> lo, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>frac_infinite <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi) <span class="fu">mean</span>(<span class="sc">!</span><span class="fu">is.finite</span>(lo) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.finite</span>(hi))</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>rolling_coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi, y, <span class="at">window =</span> WINDOW) {</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n <span class="sc">&lt;</span> window) <span class="fu">return</span>(<span class="fu">numeric</span>(<span class="dv">0</span>))</span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vapply</span>(<span class="fu">seq_len</span>(n <span class="sc">-</span> window <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>), <span class="cf">function</span>(i) {</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">&lt;-</span> i<span class="sc">:</span>(i <span class="sc">+</span> window <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>)</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coverage</span>(lo[idx], hi[idx], y[idx])</span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>worst_window_coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi, y, <span class="at">window =</span> WINDOW) {</span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>  rc <span class="ot">&lt;-</span> <span class="fu">rolling_coverage</span>(lo, hi, y, window)</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(rc) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) <span class="cn">NA_real_</span> <span class="cf">else</span> <span class="fu">min</span>(rc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>interval_score <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi, y, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>((hi <span class="sc">-</span> lo) <span class="sc">+</span> (<span class="dv">2</span> <span class="sc">/</span> alpha) <span class="sc">*</span> <span class="fu">pmax</span>(lo <span class="sc">-</span> y, <span class="dv">0</span>) <span class="sc">+</span> (<span class="dv">2</span> <span class="sc">/</span> alpha) <span class="sc">*</span> <span class="fu">pmax</span>(y <span class="sc">-</span> hi, <span class="dv">0</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>coverage_by_stratum <span class="ot">&lt;-</span> <span class="cf">function</span>(lo, hi, y, sigma, <span class="at">k =</span> <span class="dv">4</span><span class="dt">L</span>) {</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">rank</span>(sigma, <span class="at">ties.method =</span> <span class="st">&quot;first&quot;</span>)</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>  grp <span class="ot">&lt;-</span> <span class="fu">cut</span>(r, <span class="at">breaks =</span> k, <span class="at">labels =</span> <span class="cn">FALSE</span>, <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vapply</span>(<span class="fu">seq_len</span>(k), <span class="cf">function</span>(j) {</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">&lt;-</span> <span class="fu">which</span>(grp <span class="sc">==</span> j)</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(idx) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) <span class="cn">NA_real_</span> <span class="cf">else</span> <span class="fu">coverage</span>(lo[idx], hi[idx], y[idx])</span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>z_alpha <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">alpha =</span> ALPHA) <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>gaussian_interval <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, sigma, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">as.numeric</span>(sigma), <span class="fl">1e-8</span>)</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(alpha)</span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> mu <span class="sc">-</span> z <span class="sc">*</span> sigma, <span class="at">hi =</span> mu <span class="sc">+</span> z <span class="sc">*</span> sigma)</span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>crps_gaussian <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, sigma, y) {</span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">as.numeric</span>(sigma), <span class="fl">1e-8</span>)</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> (y <span class="sc">-</span> mu) <span class="sc">/</span> sigma</span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(sigma <span class="sc">*</span> (z <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">pnorm</span>(z) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">dnorm</span>(z) <span class="sc">-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">sqrt</span>(pi)), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>log_score_gaussian <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, sigma, y) {</span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">as.numeric</span>(sigma), <span class="fl">1e-8</span>)</span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="sc">-</span><span class="fu">dnorm</span>(y, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma, <span class="at">log =</span> <span class="cn">TRUE</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>safe_mean <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">is.na</span>(x))) <span class="cn">NA_real_</span> <span class="cf">else</span> <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>nns_lpmvar_quantile_matrix <span class="ot">&lt;-</span> <span class="cf">function</span>(mu, lo, hi, <span class="at">degree =</span> NNS_Q_DEGREE, <span class="at">probs =</span> NNS_Q_PROBS) {</span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(mu); lo <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(lo); hi <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(hi)</span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(mu) <span class="sc">!=</span> <span class="fu">length</span>(lo) <span class="sc">||</span> <span class="fu">length</span>(mu) <span class="sc">!=</span> <span class="fu">length</span>(hi)) <span class="fu">stop</span>(<span class="st">&quot;mu, lo, and hi must have the same length.&quot;</span>)</span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>  qmat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">vapply</span>(<span class="fu">seq_along</span>(mu), <span class="cf">function</span>(i) {</span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>    support_i <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">as.numeric</span>(<span class="fu">c</span>(lo[i], mu[i], hi[i])))</span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.numeric</span>(NNS<span class="sc">::</span><span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> probs, <span class="at">degree =</span> degree, <span class="at">variable =</span> support_i))</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>  }, <span class="fu">numeric</span>(<span class="fu">length</span>(probs))))</span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">probs =</span> probs, <span class="at">qmat =</span> qmat, <span class="at">degree =</span> degree)</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>crps_from_quantiles <span class="ot">&lt;-</span> <span class="cf">function</span>(q, probs, y) {</span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>  u <span class="ot">&lt;-</span> y <span class="sc">-</span> q</span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>  pinball <span class="ot">&lt;-</span> u <span class="sc">*</span> (probs <span class="sc">-</span> <span class="fu">as.numeric</span>(u <span class="sc">&lt;</span> <span class="dv">0</span>))</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> <span class="fu">mean</span>(pinball, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>logscore_from_quantiles <span class="ot">&lt;-</span> <span class="cf">function</span>(q, probs, y, <span class="at">eps =</span> <span class="fl">1e-12</span>) {</span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(q); probs <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(probs)</span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a>  ord <span class="ot">&lt;-</span> <span class="fu">order</span>(q)</span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> q[ord]; probs <span class="ot">&lt;-</span> probs[ord]</span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>  keep <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">duplicated</span>(q)</span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> q[keep]; probs <span class="ot">&lt;-</span> probs[keep]</span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(q) <span class="sc">&lt;</span> <span class="dv">2</span><span class="dt">L</span>) <span class="fu">return</span>(<span class="sc">-</span><span class="fu">log</span>(eps))</span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (y <span class="sc">&lt;</span> <span class="fu">min</span>(q) <span class="sc">||</span> y <span class="sc">&gt;</span> <span class="fu">max</span>(q)) <span class="fu">return</span>(<span class="sc">-</span><span class="fu">log</span>(eps))</span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>  j <span class="ot">&lt;-</span> <span class="fu">findInterval</span>(y, q, <span class="at">all.inside =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (j <span class="sc">&gt;=</span> <span class="fu">length</span>(q)) j <span class="ot">&lt;-</span> <span class="fu">length</span>(q) <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a>  dq <span class="ot">&lt;-</span> <span class="fu">max</span>(q[j <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>] <span class="sc">-</span> q[j], eps)</span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>  dp <span class="ot">&lt;-</span> <span class="fu">max</span>(probs[j <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>] <span class="sc">-</span> probs[j], eps)</span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a>  dens <span class="ot">&lt;-</span> <span class="fu">max</span>(dp <span class="sc">/</span> dq, eps)</span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">log</span>(dens)</span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>score_method <span class="ot">&lt;-</span> <span class="cf">function</span>(method, family, lo, hi, y_te, sig_te, <span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">q_probs =</span> <span class="cn">NULL</span>, <span class="at">q_mat =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>  lo_raw <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(lo); hi_raw <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(hi)</span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>  y_te <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(y_te); sig_te <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(sig_te)</span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(lo_raw) <span class="sc">!=</span> <span class="fu">length</span>(hi_raw) <span class="sc">||</span> <span class="fu">length</span>(lo_raw) <span class="sc">!=</span> <span class="fu">length</span>(y_te) <span class="sc">||</span> <span class="fu">length</span>(lo_raw) <span class="sc">!=</span> <span class="fu">length</span>(sig_te)) {</span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(method, <span class="st">&quot;: length mismatch. lo=&quot;</span>, <span class="fu">length</span>(lo_raw), <span class="st">&quot;, hi=&quot;</span>, <span class="fu">length</span>(hi_raw), <span class="st">&quot;, y=&quot;</span>, <span class="fu">length</span>(y_te), <span class="st">&quot;, sigma=&quot;</span>, <span class="fu">length</span>(sig_te))</span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>  lo2 <span class="ot">&lt;-</span> <span class="fu">pmin</span>(lo_raw, hi_raw); hi2 <span class="ot">&lt;-</span> <span class="fu">pmax</span>(lo_raw, hi_raw)</span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>  cbs <span class="ot">&lt;-</span> <span class="fu">coverage_by_stratum</span>(lo2, hi2, y_te, sig_te, <span class="at">k =</span> <span class="dv">4</span><span class="dt">L</span>)</span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>  row <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> method, <span class="at">family =</span> family,</span>
+<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a>    <span class="at">marg_cov =</span> <span class="fu">coverage</span>(lo2, hi2, y_te),</span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>    <span class="at">worst_win_cov =</span> <span class="fu">worst_window_coverage</span>(lo2, hi2, y_te, WINDOW),</span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>    <span class="at">cov_lowvol =</span> cbs[<span class="dv">1</span>], <span class="at">cov_hivol =</span> cbs[<span class="fu">length</span>(cbs)],</span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>    <span class="at">cond_cov_gap =</span> <span class="fu">max</span>(<span class="fu">abs</span>(cbs <span class="sc">-</span> TARGET_COV), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fu">mean_width</span>(lo2, hi2), <span class="at">frac_inf =</span> <span class="fu">frac_infinite</span>(lo2, hi2),</span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a>    <span class="at">interval_score =</span> <span class="fu">interval_score</span>(lo2, hi2, y_te, ALPHA),</span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>    <span class="at">CRPS =</span> <span class="cn">NA_real_</span>, <span class="at">logscore =</span> <span class="cn">NA_real_</span></span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(q_probs) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(q_mat)) {</span>
+<span id="cb4-214"><a href="#cb4-214" aria-hidden="true" tabindex="-1"></a>    crps_vals <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_along</span>(y_te), <span class="cf">function</span>(i) <span class="fu">crps_from_quantiles</span>(q_mat[i, ], q_probs, y_te[i]), <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb4-215"><a href="#cb4-215" aria-hidden="true" tabindex="-1"></a>    logscore_vals <span class="ot">&lt;-</span> <span class="fu">vapply</span>(<span class="fu">seq_along</span>(y_te), <span class="cf">function</span>(i) <span class="fu">logscore_from_quantiles</span>(q_mat[i, ], q_probs, y_te[i]), <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb4-216"><a href="#cb4-216" aria-hidden="true" tabindex="-1"></a>    row<span class="sc">$</span>CRPS <span class="ot">&lt;-</span> <span class="fu">mean</span>(crps_vals, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-217"><a href="#cb4-217" aria-hidden="true" tabindex="-1"></a>    row<span class="sc">$</span>logscore <span class="ot">&lt;-</span> <span class="fu">mean</span>(logscore_vals, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-218"><a href="#cb4-218" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(mu_) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(s_)) {</span>
+<span id="cb4-219"><a href="#cb4-219" aria-hidden="true" tabindex="-1"></a>    row<span class="sc">$</span>CRPS <span class="ot">&lt;-</span> <span class="fu">crps_gaussian</span>(mu_, s_, y_te)</span>
+<span id="cb4-220"><a href="#cb4-220" aria-hidden="true" tabindex="-1"></a>    row<span class="sc">$</span>logscore <span class="ot">&lt;-</span> <span class="fu">log_score_gaussian</span>(mu_, s_, y_te)</span>
+<span id="cb4-221"><a href="#cb4-221" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-222"><a href="#cb4-222" aria-hidden="true" tabindex="-1"></a>  row</span>
+<span id="cb4-223"><a href="#cb4-223" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-224"><a href="#cb4-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-225"><a href="#cb4-225" aria-hidden="true" tabindex="-1"></a>fixed_split_cp <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, resid_cal, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-226"><a href="#cb4-226" aria-hidden="true" tabindex="-1"></a>  scores <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">abs</span>(resid_cal))</span>
+<span id="cb4-227"><a href="#cb4-227" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">ceiling</span>((<span class="fu">length</span>(scores) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> alpha))</span>
+<span id="cb4-228"><a href="#cb4-228" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> <span class="cf">if</span> (k <span class="sc">&gt;</span> <span class="fu">length</span>(scores)) <span class="cn">Inf</span> <span class="cf">else</span> scores[k]</span>
+<span id="cb4-229"><a href="#cb4-229" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> mu_te <span class="sc">-</span> q, <span class="at">hi =</span> mu_te <span class="sc">+</span> q)</span>
+<span id="cb4-230"><a href="#cb4-230" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-231"><a href="#cb4-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-232"><a href="#cb4-232" aria-hidden="true" tabindex="-1"></a>aci <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, y_te, <span class="at">alpha =</span> ALPHA, <span class="at">gamma =</span> <span class="fl">0.03</span>, <span class="at">warm =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb4-233"><a href="#cb4-233" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y_te); lo <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); hi <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb4-234"><a href="#cb4-234" aria-hidden="true" tabindex="-1"></a>  alpha_t <span class="ot">&lt;-</span> alpha</span>
+<span id="cb4-235"><a href="#cb4-235" aria-hidden="true" tabindex="-1"></a>  hist_scores <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) <span class="fu">abs</span>(warm) <span class="cf">else</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb4-236"><a href="#cb4-236" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {</span>
+<span id="cb4-237"><a href="#cb4-237" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">ceiling</span>((<span class="fu">length</span>(hist_scores) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> alpha_t))</span>
+<span id="cb4-238"><a href="#cb4-238" aria-hidden="true" tabindex="-1"></a>    q_t <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">length</span>(hist_scores) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span> <span class="sc">||</span> k <span class="sc">&gt;</span> <span class="fu">length</span>(hist_scores)) <span class="cn">Inf</span> <span class="cf">else</span> <span class="fu">sort</span>(hist_scores)[k]</span>
+<span id="cb4-239"><a href="#cb4-239" aria-hidden="true" tabindex="-1"></a>    lo[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">-</span> q_t; hi[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">+</span> q_t</span>
+<span id="cb4-240"><a href="#cb4-240" aria-hidden="true" tabindex="-1"></a>    err_t <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(y_te[t] <span class="sc">&lt;</span> lo[t] <span class="sc">||</span> y_te[t] <span class="sc">&gt;</span> hi[t])</span>
+<span id="cb4-241"><a href="#cb4-241" aria-hidden="true" tabindex="-1"></a>    alpha_t <span class="ot">&lt;-</span> alpha_t <span class="sc">+</span> gamma <span class="sc">*</span> (alpha <span class="sc">-</span> err_t)</span>
+<span id="cb4-242"><a href="#cb4-242" aria-hidden="true" tabindex="-1"></a>    alpha_t <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fl">0.001</span>, <span class="fu">pmin</span>(<span class="fl">0.999</span>, alpha_t))</span>
+<span id="cb4-243"><a href="#cb4-243" aria-hidden="true" tabindex="-1"></a>    hist_scores <span class="ot">&lt;-</span> <span class="fu">c</span>(hist_scores, <span class="fu">abs</span>(y_te[t] <span class="sc">-</span> mu_te[t]))</span>
+<span id="cb4-244"><a href="#cb4-244" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-245"><a href="#cb4-245" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> lo, <span class="at">hi =</span> hi)</span>
+<span id="cb4-246"><a href="#cb4-246" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-247"><a href="#cb4-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-248"><a href="#cb4-248" aria-hidden="true" tabindex="-1"></a>agaci <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, y_te, <span class="at">alpha =</span> ALPHA, <span class="at">warm =</span> <span class="cn">NULL</span>, <span class="at">gammas =</span> <span class="fu">c</span>(<span class="fl">0.001</span>, <span class="fl">0.005</span>, <span class="fl">0.01</span>, <span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>)) {</span>
+<span id="cb4-249"><a href="#cb4-249" aria-hidden="true" tabindex="-1"></a>  experts <span class="ot">&lt;-</span> <span class="fu">lapply</span>(gammas, <span class="cf">function</span>(g) <span class="fu">aci</span>(mu_te, y_te, <span class="at">alpha =</span> alpha, <span class="at">gamma =</span> g, <span class="at">warm =</span> warm))</span>
+<span id="cb4-250"><a href="#cb4-250" aria-hidden="true" tabindex="-1"></a>  lo <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">&quot;+&quot;</span>, <span class="fu">lapply</span>(experts, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;lo&quot;</span>)) <span class="sc">/</span> <span class="fu">length</span>(experts)</span>
+<span id="cb4-251"><a href="#cb4-251" aria-hidden="true" tabindex="-1"></a>  hi <span class="ot">&lt;-</span> <span class="fu">Reduce</span>(<span class="st">&quot;+&quot;</span>, <span class="fu">lapply</span>(experts, <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">&quot;hi&quot;</span>)) <span class="sc">/</span> <span class="fu">length</span>(experts)</span>
+<span id="cb4-252"><a href="#cb4-252" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> lo, <span class="at">hi =</span> hi)</span>
+<span id="cb4-253"><a href="#cb4-253" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-254"><a href="#cb4-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-255"><a href="#cb4-255" aria-hidden="true" tabindex="-1"></a>conformal_pid <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, y_te, <span class="at">alpha =</span> ALPHA, <span class="at">warm =</span> <span class="cn">NULL</span>, <span class="at">Kp =</span> <span class="fl">0.1</span>, <span class="at">Ki =</span> <span class="fl">0.01</span>, <span class="at">Kd =</span> <span class="fl">0.001</span>) {</span>
+<span id="cb4-256"><a href="#cb4-256" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y_te); lo <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); hi <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb4-257"><a href="#cb4-257" aria-hidden="true" tabindex="-1"></a>  hist_scores <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) <span class="fu">abs</span>(warm) <span class="cf">else</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb4-258"><a href="#cb4-258" aria-hidden="true" tabindex="-1"></a>  err_prev <span class="ot">&lt;-</span> <span class="dv">0</span>; integral <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb4-259"><a href="#cb4-259" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {</span>
+<span id="cb4-260"><a href="#cb4-260" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">ceiling</span>((<span class="fu">length</span>(hist_scores) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> alpha))</span>
+<span id="cb4-261"><a href="#cb4-261" aria-hidden="true" tabindex="-1"></a>    q_t <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">length</span>(hist_scores) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span> <span class="sc">||</span> k <span class="sc">&gt;</span> <span class="fu">length</span>(hist_scores)) <span class="cn">Inf</span> <span class="cf">else</span> <span class="fu">sort</span>(hist_scores)[k]</span>
+<span id="cb4-262"><a href="#cb4-262" aria-hidden="true" tabindex="-1"></a>    lo[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">-</span> q_t; hi[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">+</span> q_t</span>
+<span id="cb4-263"><a href="#cb4-263" aria-hidden="true" tabindex="-1"></a>    err_t <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(y_te[t] <span class="sc">&lt;</span> lo[t] <span class="sc">||</span> y_te[t] <span class="sc">&gt;</span> hi[t]) <span class="sc">-</span> alpha</span>
+<span id="cb4-264"><a href="#cb4-264" aria-hidden="true" tabindex="-1"></a>    integral <span class="ot">&lt;-</span> integral <span class="sc">+</span> err_t</span>
+<span id="cb4-265"><a href="#cb4-265" aria-hidden="true" tabindex="-1"></a>    deriv <span class="ot">&lt;-</span> err_t <span class="sc">-</span> err_prev</span>
+<span id="cb4-266"><a href="#cb4-266" aria-hidden="true" tabindex="-1"></a>    delta <span class="ot">&lt;-</span> Kp <span class="sc">*</span> err_t <span class="sc">+</span> Ki <span class="sc">*</span> integral <span class="sc">+</span> Kd <span class="sc">*</span> deriv</span>
+<span id="cb4-267"><a href="#cb4-267" aria-hidden="true" tabindex="-1"></a>    err_prev <span class="ot">&lt;-</span> err_t</span>
+<span id="cb4-268"><a href="#cb4-268" aria-hidden="true" tabindex="-1"></a>    hist_scores <span class="ot">&lt;-</span> <span class="fu">c</span>(hist_scores, <span class="fu">abs</span>(y_te[t] <span class="sc">-</span> mu_te[t]) <span class="sc">*</span> <span class="fu">max</span>(<span class="fl">1e-6</span>, <span class="dv">1</span> <span class="sc">+</span> delta))</span>
+<span id="cb4-269"><a href="#cb4-269" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-270"><a href="#cb4-270" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> lo, <span class="at">hi =</span> hi)</span>
+<span id="cb4-271"><a href="#cb4-271" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-272"><a href="#cb4-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-273"><a href="#cb4-273" aria-hidden="true" tabindex="-1"></a>nexcp <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, y_te, <span class="at">alpha =</span> ALPHA, <span class="at">warm =</span> <span class="cn">NULL</span>, <span class="at">decay =</span> <span class="fl">0.99</span>) {</span>
+<span id="cb4-274"><a href="#cb4-274" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y_te); lo <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); hi <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb4-275"><a href="#cb4-275" aria-hidden="true" tabindex="-1"></a>  hist_scores <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) <span class="fu">abs</span>(warm) <span class="cf">else</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb4-276"><a href="#cb4-276" aria-hidden="true" tabindex="-1"></a>  hist_weights <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) decay <span class="sc">^</span> (<span class="fu">rev</span>(<span class="fu">seq_along</span>(warm)) <span class="sc">-</span> <span class="dv">1</span>) <span class="cf">else</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb4-277"><a href="#cb4-277" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {</span>
+<span id="cb4-278"><a href="#cb4-278" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(hist_scores) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) {</span>
+<span id="cb4-279"><a href="#cb4-279" aria-hidden="true" tabindex="-1"></a>      q_t <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb4-280"><a href="#cb4-280" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-281"><a href="#cb4-281" aria-hidden="true" tabindex="-1"></a>      w_norm <span class="ot">&lt;-</span> hist_weights <span class="sc">/</span> <span class="fu">sum</span>(hist_weights)</span>
+<span id="cb4-282"><a href="#cb4-282" aria-hidden="true" tabindex="-1"></a>      ord <span class="ot">&lt;-</span> <span class="fu">order</span>(hist_scores)</span>
+<span id="cb4-283"><a href="#cb4-283" aria-hidden="true" tabindex="-1"></a>      cum_w <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(w_norm[ord])</span>
+<span id="cb4-284"><a href="#cb4-284" aria-hidden="true" tabindex="-1"></a>      idx <span class="ot">&lt;-</span> <span class="fu">which</span>(cum_w <span class="sc">&gt;=</span> (<span class="dv">1</span> <span class="sc">-</span> alpha))[<span class="dv">1</span>]</span>
+<span id="cb4-285"><a href="#cb4-285" aria-hidden="true" tabindex="-1"></a>      q_t <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.na</span>(idx)) <span class="cn">Inf</span> <span class="cf">else</span> hist_scores[ord[idx]]</span>
+<span id="cb4-286"><a href="#cb4-286" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-287"><a href="#cb4-287" aria-hidden="true" tabindex="-1"></a>    lo[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">-</span> q_t; hi[t] <span class="ot">&lt;-</span> mu_te[t] <span class="sc">+</span> q_t</span>
+<span id="cb4-288"><a href="#cb4-288" aria-hidden="true" tabindex="-1"></a>    hist_scores <span class="ot">&lt;-</span> <span class="fu">c</span>(hist_scores, <span class="fu">abs</span>(y_te[t] <span class="sc">-</span> mu_te[t]))</span>
+<span id="cb4-289"><a href="#cb4-289" aria-hidden="true" tabindex="-1"></a>    hist_weights <span class="ot">&lt;-</span> <span class="fu">c</span>(hist_weights <span class="sc">*</span> decay, <span class="dv">1</span>)</span>
+<span id="cb4-290"><a href="#cb4-290" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-291"><a href="#cb4-291" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> lo, <span class="at">hi =</span> hi)</span>
+<span id="cb4-292"><a href="#cb4-292" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-293"><a href="#cb4-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-294"><a href="#cb4-294" aria-hidden="true" tabindex="-1"></a>recal_const <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, resid_cal, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-295"><a href="#cb4-295" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> <span class="fu">sd</span>(resid_cal, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-296"><a href="#cb4-296" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(alpha)</span>
+<span id="cb4-297"><a href="#cb4-297" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> mu_te <span class="sc">-</span> z <span class="sc">*</span> s, <span class="at">hi =</span> mu_te <span class="sc">+</span> z <span class="sc">*</span> s, <span class="at">mu =</span> mu_te, <span class="at">sigma =</span> <span class="fu">rep</span>(s, <span class="fu">length</span>(mu_te)))</span>
+<span id="cb4-298"><a href="#cb4-298" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-299"><a href="#cb4-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-300"><a href="#cb4-300" aria-hidden="true" tabindex="-1"></a>ewma_vol <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, y_te, <span class="at">alpha =</span> ALPHA, <span class="at">warm =</span> <span class="cn">NULL</span>, <span class="at">lam =</span> <span class="fl">0.94</span>) {</span>
+<span id="cb4-301"><a href="#cb4-301" aria-hidden="true" tabindex="-1"></a>  all_resid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) warm <span class="cf">else</span> <span class="fu">numeric</span>(<span class="dv">0</span>), y_te <span class="sc">-</span> mu_te)</span>
+<span id="cb4-302"><a href="#cb4-302" aria-hidden="true" tabindex="-1"></a>  n_warm <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(warm)) <span class="fu">length</span>(warm) <span class="cf">else</span> <span class="dv">0</span><span class="dt">L</span></span>
+<span id="cb4-303"><a href="#cb4-303" aria-hidden="true" tabindex="-1"></a>  var_vec <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(all_resid))</span>
+<span id="cb4-304"><a href="#cb4-304" aria-hidden="true" tabindex="-1"></a>  var_vec[<span class="dv">1</span>] <span class="ot">&lt;-</span> all_resid[<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-305"><a href="#cb4-305" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(all_resid)) {</span>
+<span id="cb4-306"><a href="#cb4-306" aria-hidden="true" tabindex="-1"></a>    var_vec[i] <span class="ot">&lt;-</span> lam <span class="sc">*</span> var_vec[i <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> lam) <span class="sc">*</span> all_resid[i <span class="sc">-</span> <span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb4-307"><a href="#cb4-307" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-308"><a href="#cb4-308" aria-hidden="true" tabindex="-1"></a>  sig_te <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(var_vec[(n_warm <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span><span class="fu">length</span>(all_resid)])</span>
+<span id="cb4-309"><a href="#cb4-309" aria-hidden="true" tabindex="-1"></a>  sig_te <span class="ot">&lt;-</span> <span class="fu">pmax</span>(sig_te, <span class="fl">1e-6</span>)</span>
+<span id="cb4-310"><a href="#cb4-310" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(alpha)</span>
+<span id="cb4-311"><a href="#cb4-311" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> mu_te <span class="sc">-</span> z <span class="sc">*</span> sig_te, <span class="at">hi =</span> mu_te <span class="sc">+</span> z <span class="sc">*</span> sig_te, <span class="at">mu =</span> mu_te, <span class="at">sigma =</span> sig_te)</span>
+<span id="cb4-312"><a href="#cb4-312" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-313"><a href="#cb4-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-314"><a href="#cb4-314" aria-hidden="true" tabindex="-1"></a>oracle_sigma_method <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_te, sig_te, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-315"><a href="#cb4-315" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(alpha)</span>
+<span id="cb4-316"><a href="#cb4-316" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">lo =</span> mu_te <span class="sc">-</span> z <span class="sc">*</span> sig_te, <span class="at">hi =</span> mu_te <span class="sc">+</span> z <span class="sc">*</span> sig_te, <span class="at">mu =</span> mu_te, <span class="at">sigma =</span> sig_te)</span>
+<span id="cb4-317"><a href="#cb4-317" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-318"><a href="#cb4-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-319"><a href="#cb4-319" aria-hidden="true" tabindex="-1"></a>garch_vol <span class="ot">&lt;-</span> <span class="cf">function</span>(resid_tr, resid_te, mu_te, <span class="at">alpha =</span> ALPHA) {</span>
+<span id="cb4-320"><a href="#cb4-320" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>HAS_RUGARCH) <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb4-321"><a href="#cb4-321" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tryCatch</span>({</span>
+<span id="cb4-322"><a href="#cb4-322" aria-hidden="true" tabindex="-1"></a>    spec <span class="ot">&lt;-</span> rugarch<span class="sc">::</span><span class="fu">ugarchspec</span>(</span>
+<span id="cb4-323"><a href="#cb4-323" aria-hidden="true" tabindex="-1"></a>      <span class="at">variance.model =</span> <span class="fu">list</span>(<span class="at">model =</span> <span class="st">&quot;sGARCH&quot;</span>, <span class="at">garchOrder =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)),</span>
+<span id="cb4-324"><a href="#cb4-324" aria-hidden="true" tabindex="-1"></a>      <span class="at">mean.model =</span> <span class="fu">list</span>(<span class="at">armaOrder =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">include.mean =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb4-325"><a href="#cb4-325" aria-hidden="true" tabindex="-1"></a>      <span class="at">distribution.model =</span> <span class="st">&quot;norm&quot;</span></span>
+<span id="cb4-326"><a href="#cb4-326" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-327"><a href="#cb4-327" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> rugarch<span class="sc">::</span><span class="fu">ugarchfit</span>(spec, <span class="at">data =</span> resid_tr, <span class="at">solver =</span> <span class="st">&quot;hybrid&quot;</span>)</span>
+<span id="cb4-328"><a href="#cb4-328" aria-hidden="true" tabindex="-1"></a>    fc <span class="ot">&lt;-</span> rugarch<span class="sc">::</span><span class="fu">ugarchforecast</span>(fit, <span class="at">n.ahead =</span> <span class="fu">length</span>(resid_te))</span>
+<span id="cb4-329"><a href="#cb4-329" aria-hidden="true" tabindex="-1"></a>    sig_te <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">as.numeric</span>(rugarch<span class="sc">::</span><span class="fu">sigma</span>(fc)), <span class="fl">1e-6</span>)</span>
+<span id="cb4-330"><a href="#cb4-330" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(alpha)</span>
+<span id="cb4-331"><a href="#cb4-331" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">lo =</span> mu_te <span class="sc">-</span> z <span class="sc">*</span> sig_te, <span class="at">hi =</span> mu_te <span class="sc">+</span> z <span class="sc">*</span> sig_te, <span class="at">mu =</span> mu_te, <span class="at">sigma =</span> sig_te)</span>
+<span id="cb4-332"><a href="#cb4-332" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">error =</span> <span class="cf">function</span>(e) {</span>
+<span id="cb4-333"><a href="#cb4-333" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;  [GARCH failed: &quot;</span>, <span class="fu">conditionMessage</span>(e), <span class="st">&quot;]&quot;</span>)</span>
+<span id="cb4-334"><a href="#cb4-334" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NULL</span></span>
+<span id="cb4-335"><a href="#cb4-335" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb4-336"><a href="#cb4-336" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-337"><a href="#cb4-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-338"><a href="#cb4-338" aria-hidden="true" tabindex="-1"></a>get_nns_seas_periods <span class="ot">&lt;-</span> <span class="cf">function</span>(training_series) {</span>
+<span id="cb4-339"><a href="#cb4-339" aria-hidden="true" tabindex="-1"></a>  seas <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">NNS.seas</span>(<span class="at">variable =</span> training_series, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-340"><a href="#cb4-340" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.character</span>(seas)) <span class="fu">stop</span>(<span class="st">&quot;NNS.seas returned character: &quot;</span>, <span class="fu">paste</span>(seas, <span class="at">collapse =</span> <span class="st">&quot; &quot;</span>))</span>
+<span id="cb4-341"><a href="#cb4-341" aria-hidden="true" tabindex="-1"></a>  periods <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb4-342"><a href="#cb4-342" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.list</span>(seas)) {</span>
+<span id="cb4-343"><a href="#cb4-343" aria-hidden="true" tabindex="-1"></a>    periods <span class="ot">&lt;-</span> seas<span class="sc">$</span>Periods <span class="sc">%||%</span> seas<span class="sc">$</span>periods <span class="sc">%||%</span> seas<span class="sc">$</span>all.periods <span class="sc">%||%</span> seas<span class="sc">$</span>best.period</span>
+<span id="cb4-344"><a href="#cb4-344" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-345"><a href="#cb4-345" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(periods)) <span class="fu">stop</span>(<span class="st">&quot;NNS.seas: cannot find Periods or periods. Names: &quot;</span>, <span class="fu">paste</span>(<span class="fu">names</span>(seas), <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>))</span>
+<span id="cb4-346"><a href="#cb4-346" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.matrix</span>(periods) <span class="sc">||</span> <span class="fu">is.data.frame</span>(periods) <span class="sc">||</span> data.table<span class="sc">::</span><span class="fu">is.data.table</span>(periods)) {</span>
+<span id="cb4-347"><a href="#cb4-347" aria-hidden="true" tabindex="-1"></a>    periods <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(periods[, <span class="dv">1</span>])</span>
+<span id="cb4-348"><a href="#cb4-348" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-349"><a href="#cb4-349" aria-hidden="true" tabindex="-1"></a>  periods <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">as.integer</span>(<span class="fu">na.omit</span>(<span class="fu">as.numeric</span>(periods)))))</span>
+<span id="cb4-350"><a href="#cb4-350" aria-hidden="true" tabindex="-1"></a>  periods <span class="ot">&lt;-</span> periods[<span class="fu">is.finite</span>(periods)]</span>
+<span id="cb4-351"><a href="#cb4-351" aria-hidden="true" tabindex="-1"></a>  periods <span class="ot">&lt;-</span> periods[periods <span class="sc">&gt;</span> <span class="dv">1</span>]</span>
+<span id="cb4-352"><a href="#cb4-352" aria-hidden="true" tabindex="-1"></a>  periods <span class="ot">&lt;-</span> periods[periods <span class="sc">&lt;</span> <span class="fu">length</span>(training_series)]</span>
+<span id="cb4-353"><a href="#cb4-353" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(periods) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) <span class="fu">stop</span>(<span class="st">&quot;NNS.seas returned no usable periods.&quot;</span>)</span>
+<span id="cb4-354"><a href="#cb4-354" aria-hidden="true" tabindex="-1"></a>  periods</span>
+<span id="cb4-355"><a href="#cb4-355" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-356"><a href="#cb4-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-357"><a href="#cb4-357" aria-hidden="true" tabindex="-1"></a>run_nns_arma_walkforward <span class="ot">&lt;-</span> <span class="cf">function</span>(d, <span class="at">training_frac =</span> TRAINING_FRAC, <span class="at">max_h =</span> MAX_H) {</span>
+<span id="cb4-358"><a href="#cb4-358" aria-hidden="true" tabindex="-1"></a>  T_raw <span class="ot">&lt;-</span> <span class="fu">nrow</span>(d)</span>
+<span id="cb4-359"><a href="#cb4-359" aria-hidden="true" tabindex="-1"></a>  current_train <span class="ot">&lt;-</span> N_LAGS <span class="sc">+</span> CAL_END</span>
+<span id="cb4-360"><a href="#cb4-360" aria-hidden="true" tabindex="-1"></a>  all_pred <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>); all_lo <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>); all_hi <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>); all_y <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>); all_sig <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="dv">0</span>)</span>
+<span id="cb4-361"><a href="#cb4-361" aria-hidden="true" tabindex="-1"></a>  chunks <span class="ot">&lt;-</span> <span class="fu">list</span>(); chunk_id <span class="ot">&lt;-</span> <span class="dv">0</span><span class="dt">L</span></span>
+<span id="cb4-362"><a href="#cb4-362" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (current_train <span class="sc">&lt;</span> T_raw) {</span>
+<span id="cb4-363"><a href="#cb4-363" aria-hidden="true" tabindex="-1"></a>    chunk_id <span class="ot">&lt;-</span> chunk_id <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span></span>
+<span id="cb4-364"><a href="#cb4-364" aria-hidden="true" tabindex="-1"></a>    remaining <span class="ot">&lt;-</span> T_raw <span class="sc">-</span> current_train</span>
+<span id="cb4-365"><a href="#cb4-365" aria-hidden="true" tabindex="-1"></a>    implied_h <span class="ot">&lt;-</span> <span class="fu">floor</span>(current_train <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> training_frac) <span class="sc">/</span> training_frac)</span>
+<span id="cb4-366"><a href="#cb4-366" aria-hidden="true" tabindex="-1"></a>    h_i <span class="ot">&lt;-</span> <span class="fu">min</span>(max_h, remaining, <span class="fu">max</span>(<span class="dv">1</span><span class="dt">L</span>, implied_h))</span>
+<span id="cb4-367"><a href="#cb4-367" aria-hidden="true" tabindex="-1"></a>    end_i <span class="ot">&lt;-</span> current_train <span class="sc">+</span> h_i</span>
+<span id="cb4-368"><a href="#cb4-368" aria-hidden="true" tabindex="-1"></a>    seas_i <span class="ot">&lt;-</span> <span class="fu">get_nns_seas_periods</span>(d<span class="sc">$</span>y[<span class="dv">1</span><span class="sc">:</span>current_train])</span>
+<span id="cb4-369"><a href="#cb4-369" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;  NNS chunk &quot;</span>, chunk_id, <span class="st">&quot;: train=&quot;</span>, current_train, <span class="st">&quot; h=&quot;</span>, h_i, <span class="st">&quot; seas=&quot;</span>, <span class="fu">paste</span>(seas_i, <span class="at">collapse =</span> <span class="st">&quot;,&quot;</span>))</span>
+<span id="cb4-370"><a href="#cb4-370" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">NNS.ARMA.optim</span>(</span>
+<span id="cb4-371"><a href="#cb4-371" aria-hidden="true" tabindex="-1"></a>      <span class="at">variable =</span> d<span class="sc">$</span>y[<span class="dv">1</span><span class="sc">:</span>end_i], <span class="at">h =</span> <span class="cn">NULL</span>, <span class="at">training.set =</span> current_train,</span>
+<span id="cb4-372"><a href="#cb4-372" aria-hidden="true" tabindex="-1"></a>      <span class="at">seasonal.factor =</span> seas_i, <span class="at">lin.only =</span> <span class="cn">FALSE</span>, <span class="at">negative.values =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-373"><a href="#cb4-373" aria-hidden="true" tabindex="-1"></a>      <span class="at">obj.fn =</span> <span class="fu">expression</span>(<span class="fu">mean</span>((predicted <span class="sc">-</span> actual)<span class="sc">^</span><span class="dv">2</span>)), <span class="at">objective =</span> <span class="st">&quot;min&quot;</span>,</span>
+<span id="cb4-374"><a href="#cb4-374" aria-hidden="true" tabindex="-1"></a>      <span class="at">linear.approximation =</span> <span class="cn">TRUE</span>, <span class="at">ncores =</span> NNS_NCORES, <span class="at">pred.int =</span> TARGET_COV,</span>
+<span id="cb4-375"><a href="#cb4-375" aria-hidden="true" tabindex="-1"></a>      <span class="at">print.trace =</span> <span class="cn">FALSE</span>, <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-376"><a href="#cb4-376" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-377"><a href="#cb4-377" aria-hidden="true" tabindex="-1"></a>    pred_i <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>results)</span>
+<span id="cb4-378"><a href="#cb4-378" aria-hidden="true" tabindex="-1"></a>    lo_i <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>lower.pred.int)</span>
+<span id="cb4-379"><a href="#cb4-379" aria-hidden="true" tabindex="-1"></a>    hi_i <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>upper.pred.int)</span>
+<span id="cb4-380"><a href="#cb4-380" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(pred_i) <span class="sc">!=</span> h_i <span class="sc">||</span> <span class="fu">length</span>(lo_i) <span class="sc">!=</span> h_i <span class="sc">||</span> <span class="fu">length</span>(hi_i) <span class="sc">!=</span> h_i) {</span>
+<span id="cb4-381"><a href="#cb4-381" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">&quot;NNS.ARMA.optim length mismatch in chunk &quot;</span>, chunk_id)</span>
+<span id="cb4-382"><a href="#cb4-382" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-383"><a href="#cb4-383" aria-hidden="true" tabindex="-1"></a>    pred_idx <span class="ot">&lt;-</span> (current_train <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>)<span class="sc">:</span>end_i</span>
+<span id="cb4-384"><a href="#cb4-384" aria-hidden="true" tabindex="-1"></a>    all_pred <span class="ot">&lt;-</span> <span class="fu">c</span>(all_pred, pred_i)</span>
+<span id="cb4-385"><a href="#cb4-385" aria-hidden="true" tabindex="-1"></a>    all_lo <span class="ot">&lt;-</span> <span class="fu">c</span>(all_lo, <span class="fu">pmin</span>(lo_i, hi_i))</span>
+<span id="cb4-386"><a href="#cb4-386" aria-hidden="true" tabindex="-1"></a>    all_hi <span class="ot">&lt;-</span> <span class="fu">c</span>(all_hi, <span class="fu">pmax</span>(lo_i, hi_i))</span>
+<span id="cb4-387"><a href="#cb4-387" aria-hidden="true" tabindex="-1"></a>    all_y <span class="ot">&lt;-</span> <span class="fu">c</span>(all_y, d<span class="sc">$</span>y[pred_idx])</span>
+<span id="cb4-388"><a href="#cb4-388" aria-hidden="true" tabindex="-1"></a>    all_sig <span class="ot">&lt;-</span> <span class="fu">c</span>(all_sig, d<span class="sc">$</span>sigma[pred_idx])</span>
+<span id="cb4-389"><a href="#cb4-389" aria-hidden="true" tabindex="-1"></a>    chunks[[chunk_id]] <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb4-390"><a href="#cb4-390" aria-hidden="true" tabindex="-1"></a>      <span class="at">chunk =</span> chunk_id, <span class="at">train_end =</span> current_train, <span class="at">h =</span> h_i, <span class="at">end =</span> end_i,</span>
+<span id="cb4-391"><a href="#cb4-391" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_seas_periods_input =</span> <span class="fu">length</span>(seas_i), <span class="at">seas_periods_input =</span> <span class="fu">paste</span>(seas_i, <span class="at">collapse =</span> <span class="st">&quot;,&quot;</span>),</span>
+<span id="cb4-392"><a href="#cb4-392" aria-hidden="true" tabindex="-1"></a>      <span class="at">period =</span> <span class="fu">paste</span>(fit<span class="sc">$</span>period, <span class="at">collapse =</span> <span class="st">&quot;,&quot;</span>), <span class="at">weights =</span> <span class="fu">paste</span>(fit<span class="sc">$</span>weights, <span class="at">collapse =</span> <span class="st">&quot;,&quot;</span>),</span>
+<span id="cb4-393"><a href="#cb4-393" aria-hidden="true" tabindex="-1"></a>      <span class="at">method =</span> <span class="fu">as.character</span>(fit<span class="sc">$</span>method), <span class="at">shrink =</span> <span class="fu">as.character</span>(fit<span class="sc">$</span>shrink),</span>
+<span id="cb4-394"><a href="#cb4-394" aria-hidden="true" tabindex="-1"></a>      <span class="at">nns_regress =</span> <span class="fu">as.character</span>(fit<span class="sc">$</span>nns.regress), <span class="at">obj_fn =</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>obj.fn),</span>
+<span id="cb4-395"><a href="#cb4-395" aria-hidden="true" tabindex="-1"></a>      <span class="at">bias_shift =</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>bias.shift)</span>
+<span id="cb4-396"><a href="#cb4-396" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-397"><a href="#cb4-397" aria-hidden="true" tabindex="-1"></a>    current_train <span class="ot">&lt;-</span> end_i</span>
+<span id="cb4-398"><a href="#cb4-398" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-399"><a href="#cb4-399" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">pred =</span> all_pred, <span class="at">lo =</span> all_lo, <span class="at">hi =</span> all_hi, <span class="at">y =</span> all_y, <span class="at">sigma =</span> all_sig, <span class="at">chunks =</span> <span class="fu">rbindlist</span>(chunks, <span class="at">fill =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb4-400"><a href="#cb4-400" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-401"><a href="#cb4-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-402"><a href="#cb4-402" aria-hidden="true" tabindex="-1"></a>run_once <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">seed =</span> <span class="dv">0</span><span class="dt">L</span>, <span class="at">heavy_tail =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb4-403"><a href="#cb4-403" aria-hidden="true" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">make_timeseries</span>(<span class="at">T =</span> <span class="dv">3500</span><span class="dt">L</span>, <span class="at">seed =</span> seed, <span class="at">heavy_tail =</span> heavy_tail)</span>
+<span id="cb4-404"><a href="#cb4-404" aria-hidden="true" tabindex="-1"></a>  lf <span class="ot">&lt;-</span> <span class="fu">lag_features</span>(d<span class="sc">$</span>y, N_LAGS)</span>
+<span id="cb4-405"><a href="#cb4-405" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> lf<span class="sc">$</span>X; yy <span class="ot">&lt;-</span> lf<span class="sc">$</span>yy</span>
+<span id="cb4-406"><a href="#cb4-406" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">ridge_forecast</span>(X, yy, FIT_END)</span>
+<span id="cb4-407"><a href="#cb4-407" aria-hidden="true" tabindex="-1"></a>  sig_all <span class="ot">&lt;-</span> d<span class="sc">$</span>sigma[(N_LAGS <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span><span class="fu">nrow</span>(d)]</span>
+<span id="cb4-408"><a href="#cb4-408" aria-hidden="true" tabindex="-1"></a>  resid <span class="ot">&lt;-</span> yy <span class="sc">-</span> mu</span>
+<span id="cb4-409"><a href="#cb4-409" aria-hidden="true" tabindex="-1"></a>  te_idx <span class="ot">&lt;-</span> (CAL_END <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>)<span class="sc">:</span><span class="fu">length</span>(yy)</span>
+<span id="cb4-410"><a href="#cb4-410" aria-hidden="true" tabindex="-1"></a>  mu_te <span class="ot">&lt;-</span> mu[te_idx]; y_te <span class="ot">&lt;-</span> yy[te_idx]; sig_te <span class="ot">&lt;-</span> sig_all[te_idx]</span>
+<span id="cb4-411"><a href="#cb4-411" aria-hidden="true" tabindex="-1"></a>  raw_te_idx <span class="ot">&lt;-</span> te_idx <span class="sc">+</span> N_LAGS</span>
+<span id="cb4-412"><a href="#cb4-412" aria-hidden="true" tabindex="-1"></a>  true_mu_te <span class="ot">&lt;-</span> <span class="fu">true_conditional_mean</span>(d, raw_te_idx)</span>
+<span id="cb4-413"><a href="#cb4-413" aria-hidden="true" tabindex="-1"></a>  resid_cal <span class="ot">&lt;-</span> resid[(FIT_END <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>)<span class="sc">:</span>CAL_END]</span>
+<span id="cb4-414"><a href="#cb4-414" aria-hidden="true" tabindex="-1"></a>  resid_tr <span class="ot">&lt;-</span> resid[<span class="dv">1</span><span class="sc">:</span>FIT_END]</span>
+<span id="cb4-415"><a href="#cb4-415" aria-hidden="true" tabindex="-1"></a>  warm <span class="ot">&lt;-</span> resid[<span class="dv">1</span><span class="sc">:</span>CAL_END]</span>
+<span id="cb4-416"><a href="#cb4-416" aria-hidden="true" tabindex="-1"></a>  methods <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb4-417"><a href="#cb4-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-418"><a href="#cb4-418" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;fixed split (CP)&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">fixed_split_cp</span>(mu_te, resid_cal), <span class="fu">list</span>(<span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">family =</span> <span class="st">&quot;cp&quot;</span>))</span>
+<span id="cb4-419"><a href="#cb4-419" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;ACI&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">aci</span>(mu_te, y_te, ALPHA, <span class="at">gamma =</span> <span class="fl">0.03</span>, <span class="at">warm =</span> warm), <span class="fu">list</span>(<span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">family =</span> <span class="st">&quot;cp&quot;</span>))</span>
+<span id="cb4-420"><a href="#cb4-420" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;AgACI&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">agaci</span>(mu_te, y_te, ALPHA, <span class="at">warm =</span> warm), <span class="fu">list</span>(<span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">family =</span> <span class="st">&quot;cp&quot;</span>))</span>
+<span id="cb4-421"><a href="#cb4-421" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;conformal PID&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">conformal_pid</span>(mu_te, y_te, ALPHA, <span class="at">warm =</span> warm), <span class="fu">list</span>(<span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">family =</span> <span class="st">&quot;cp&quot;</span>))</span>
+<span id="cb4-422"><a href="#cb4-422" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;NexCP (weighted)&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">nexcp</span>(mu_te, y_te, ALPHA, <span class="at">warm =</span> warm), <span class="fu">list</span>(<span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>, <span class="at">family =</span> <span class="st">&quot;cp&quot;</span>))</span>
+<span id="cb4-423"><a href="#cb4-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-424"><a href="#cb4-424" aria-hidden="true" tabindex="-1"></a>  oi <span class="ot">&lt;-</span> <span class="fu">gaussian_interval</span>(true_mu_te, sig_te, ALPHA)</span>
+<span id="cb4-425"><a href="#cb4-425" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;oracle (true conditional mu,sigma)&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lo =</span> oi<span class="sc">$</span>lo, <span class="at">hi =</span> oi<span class="sc">$</span>hi, <span class="at">mu_ =</span> true_mu_te, <span class="at">s_ =</span> sig_te, <span class="at">family =</span> <span class="st">&quot;oracle&quot;</span>)</span>
+<span id="cb4-426"><a href="#cb4-426" aria-hidden="true" tabindex="-1"></a>  os <span class="ot">&lt;-</span> <span class="fu">oracle_sigma_method</span>(mu_te, sig_te)</span>
+<span id="cb4-427"><a href="#cb4-427" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;true sigma on est. mu&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lo =</span> os<span class="sc">$</span>lo, <span class="at">hi =</span> os<span class="sc">$</span>hi, <span class="at">mu_ =</span> mu_te, <span class="at">s_ =</span> sig_te, <span class="at">family =</span> <span class="st">&quot;oracle&quot;</span>)</span>
+<span id="cb4-428"><a href="#cb4-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-429"><a href="#cb4-429" aria-hidden="true" tabindex="-1"></a>  ew <span class="ot">&lt;-</span> <span class="fu">ewma_vol</span>(mu_te, y_te, ALPHA, <span class="at">warm =</span> warm)</span>
+<span id="cb4-430"><a href="#cb4-430" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;EWMA-vol Gaussian&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lo =</span> ew<span class="sc">$</span>lo, <span class="at">hi =</span> ew<span class="sc">$</span>hi, <span class="at">mu_ =</span> ew<span class="sc">$</span>mu, <span class="at">s_ =</span> ew<span class="sc">$</span>sigma, <span class="at">family =</span> <span class="st">&quot;prob&quot;</span>)</span>
+<span id="cb4-431"><a href="#cb4-431" aria-hidden="true" tabindex="-1"></a>  rc <span class="ot">&lt;-</span> <span class="fu">recal_const</span>(mu_te, resid_cal)</span>
+<span id="cb4-432"><a href="#cb4-432" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;static Gaussian (recal)&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lo =</span> rc<span class="sc">$</span>lo, <span class="at">hi =</span> rc<span class="sc">$</span>hi, <span class="at">mu_ =</span> rc<span class="sc">$</span>mu, <span class="at">s_ =</span> rc<span class="sc">$</span>sigma, <span class="at">family =</span> <span class="st">&quot;prob&quot;</span>)</span>
+<span id="cb4-433"><a href="#cb4-433" aria-hidden="true" tabindex="-1"></a>  gv <span class="ot">&lt;-</span> <span class="fu">garch_vol</span>(resid_tr, resid[te_idx], mu_te)</span>
+<span id="cb4-434"><a href="#cb4-434" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(gv)) methods[[<span class="st">&quot;GARCH(1,1) Gaussian&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">lo =</span> gv<span class="sc">$</span>lo, <span class="at">hi =</span> gv<span class="sc">$</span>hi, <span class="at">mu_ =</span> gv<span class="sc">$</span>mu, <span class="at">s_ =</span> gv<span class="sc">$</span>sigma, <span class="at">family =</span> <span class="st">&quot;prob&quot;</span>)</span>
+<span id="cb4-435"><a href="#cb4-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-436"><a href="#cb4-436" aria-hidden="true" tabindex="-1"></a>  nns_wf <span class="ot">&lt;-</span> <span class="fu">run_nns_arma_walkforward</span>(d)</span>
+<span id="cb4-437"><a href="#cb4-437" aria-hidden="true" tabindex="-1"></a>  nns_qdist <span class="ot">&lt;-</span> <span class="fu">nns_lpmvar_quantile_matrix</span>(<span class="at">mu =</span> nns_wf<span class="sc">$</span>pred, <span class="at">lo =</span> nns_wf<span class="sc">$</span>lo, <span class="at">hi =</span> nns_wf<span class="sc">$</span>hi)</span>
+<span id="cb4-438"><a href="#cb4-438" aria-hidden="true" tabindex="-1"></a>  methods[[<span class="st">&quot;NNS.ARMA.optim (degree-2 LPM.VaR distribution)&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-439"><a href="#cb4-439" aria-hidden="true" tabindex="-1"></a>    <span class="at">lo =</span> nns_wf<span class="sc">$</span>lo, <span class="at">hi =</span> nns_wf<span class="sc">$</span>hi, <span class="at">mu_ =</span> <span class="cn">NULL</span>, <span class="at">s_ =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-440"><a href="#cb4-440" aria-hidden="true" tabindex="-1"></a>    <span class="at">q_probs =</span> nns_qdist<span class="sc">$</span>probs, <span class="at">q_mat =</span> nns_qdist<span class="sc">$</span>qmat, <span class="at">family =</span> <span class="st">&quot;nns&quot;</span></span>
+<span id="cb4-441"><a href="#cb4-441" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-442"><a href="#cb4-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-443"><a href="#cb4-443" aria-hidden="true" tabindex="-1"></a>  rows <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">names</span>(methods), <span class="cf">function</span>(nm) {</span>
+<span id="cb4-444"><a href="#cb4-444" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> methods[[nm]]; fam <span class="ot">&lt;-</span> m<span class="sc">$</span>family</span>
+<span id="cb4-445"><a href="#cb4-445" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (fam <span class="sc">==</span> <span class="st">&quot;nns&quot;</span>) {</span>
+<span id="cb4-446"><a href="#cb4-446" aria-hidden="true" tabindex="-1"></a>      lo_v <span class="ot">&lt;-</span> m<span class="sc">$</span>lo; hi_v <span class="ot">&lt;-</span> m<span class="sc">$</span>hi; y_v <span class="ot">&lt;-</span> nns_wf<span class="sc">$</span>y; sig_v <span class="ot">&lt;-</span> nns_wf<span class="sc">$</span>sigma</span>
+<span id="cb4-447"><a href="#cb4-447" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-448"><a href="#cb4-448" aria-hidden="true" tabindex="-1"></a>      lo_v <span class="ot">&lt;-</span> m<span class="sc">$</span>lo; hi_v <span class="ot">&lt;-</span> m<span class="sc">$</span>hi; y_v <span class="ot">&lt;-</span> y_te; sig_v <span class="ot">&lt;-</span> sig_te</span>
+<span id="cb4-449"><a href="#cb4-449" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-450"><a href="#cb4-450" aria-hidden="true" tabindex="-1"></a>    <span class="fu">score_method</span>(nm, fam, lo_v, hi_v, y_v, sig_v, m<span class="sc">$</span>mu_ <span class="sc">%||%</span> <span class="cn">NULL</span>, m<span class="sc">$</span>s_ <span class="sc">%||%</span> <span class="cn">NULL</span>, m<span class="sc">$</span>q_probs <span class="sc">%||%</span> <span class="cn">NULL</span>, m<span class="sc">$</span>q_mat <span class="sc">%||%</span> <span class="cn">NULL</span>)</span>
+<span id="cb4-451"><a href="#cb4-451" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb4-452"><a href="#cb4-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-453"><a href="#cb4-453" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">scores =</span> <span class="fu">rbindlist</span>(rows), <span class="at">methods =</span> methods, <span class="at">y_te =</span> y_te, <span class="at">sig_te =</span> sig_te, <span class="at">nns_wf =</span> nns_wf, <span class="at">mu_te =</span> mu_te, <span class="at">true_mu_te =</span> true_mu_te)</span>
+<span id="cb4-454"><a href="#cb4-454" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-455"><a href="#cb4-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-456"><a href="#cb4-456" aria-hidden="true" tabindex="-1"></a>make_figures <span class="ot">&lt;-</span> <span class="cf">function</span>(keep, agg) {</span>
+<span id="cb4-457"><a href="#cb4-457" aria-hidden="true" tabindex="-1"></a>  methods <span class="ot">&lt;-</span> keep<span class="sc">$</span>methods; y_te <span class="ot">&lt;-</span> keep<span class="sc">$</span>y_te; sig_te <span class="ot">&lt;-</span> keep<span class="sc">$</span>sig_te; nns_wf <span class="ot">&lt;-</span> keep<span class="sc">$</span>nns_wf</span>
+<span id="cb4-458"><a href="#cb4-458" aria-hidden="true" tabindex="-1"></a>  t_vec <span class="ot">&lt;-</span> <span class="fu">seq_along</span>(y_te)</span>
+<span id="cb4-459"><a href="#cb4-459" aria-hidden="true" tabindex="-1"></a>  nns_key <span class="ot">&lt;-</span> <span class="st">&quot;NNS.ARMA.optim (degree-2 LPM.VaR distribution)&quot;</span></span>
+<span id="cb4-460"><a href="#cb4-460" aria-hidden="true" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;fixed split (CP)&quot;</span>, <span class="st">&quot;ACI&quot;</span>, <span class="st">&quot;conformal PID&quot;</span>, nns_key, <span class="st">&quot;EWMA-vol Gaussian&quot;</span>)</span>
+<span id="cb4-461"><a href="#cb4-461" aria-hidden="true" tabindex="-1"></a>  <span class="fu">png</span>(<span class="st">&quot;figures/ts_coverage.png&quot;</span>, <span class="at">width =</span> <span class="dv">1100</span>, <span class="at">height =</span> <span class="dv">550</span>)</span>
+<span id="cb4-462"><a href="#cb4-462" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(<span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">length</span>(y_te) <span class="sc">-</span> WINDOW), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">1.02</span>), <span class="at">xlab =</span> <span class="fu">paste0</span>(<span class="st">&quot;test step, rolling coverage window = &quot;</span>, WINDOW), <span class="at">ylab =</span> <span class="st">&quot;coverage&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Rolling coverage under drift&quot;</span>)</span>
+<span id="cb4-463"><a href="#cb4-463" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;#1f4ed8&quot;</span>, <span class="st">&quot;#dc2626&quot;</span>, <span class="st">&quot;#16a34a&quot;</span>, <span class="st">&quot;#7e22ce&quot;</span>, <span class="st">&quot;#15803d&quot;</span>)</span>
+<span id="cb4-464"><a href="#cb4-464" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(sel)) {</span>
+<span id="cb4-465"><a href="#cb4-465" aria-hidden="true" tabindex="-1"></a>    nm <span class="ot">&lt;-</span> sel[i]</span>
+<span id="cb4-466"><a href="#cb4-466" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>nm <span class="sc">%in%</span> <span class="fu">names</span>(methods)) <span class="cf">next</span></span>
+<span id="cb4-467"><a href="#cb4-467" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> methods[[nm]]</span>
+<span id="cb4-468"><a href="#cb4-468" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (m<span class="sc">$</span>family <span class="sc">==</span> <span class="st">&quot;nns&quot;</span>) { lo_v <span class="ot">&lt;-</span> m<span class="sc">$</span>lo; hi_v <span class="ot">&lt;-</span> m<span class="sc">$</span>hi; y_v <span class="ot">&lt;-</span> nns_wf<span class="sc">$</span>y } <span class="cf">else</span> { lo_v <span class="ot">&lt;-</span> m<span class="sc">$</span>lo; hi_v <span class="ot">&lt;-</span> m<span class="sc">$</span>hi; y_v <span class="ot">&lt;-</span> y_te }</span>
+<span id="cb4-469"><a href="#cb4-469" aria-hidden="true" tabindex="-1"></a>    rc <span class="ot">&lt;-</span> <span class="fu">rolling_coverage</span>(lo_v, hi_v, y_v, WINDOW)</span>
+<span id="cb4-470"><a href="#cb4-470" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(<span class="fu">seq_along</span>(rc), rc, <span class="at">col =</span> cols[i], <span class="at">lwd =</span> <span class="fl">1.4</span>)</span>
+<span id="cb4-471"><a href="#cb4-471" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-472"><a href="#cb4-472" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">h =</span> TARGET_COV, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb4-473"><a href="#cb4-473" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="at">legend =</span> sel, <span class="at">col =</span> cols[<span class="fu">seq_along</span>(sel)], <span class="at">lwd =</span> <span class="fl">1.4</span>, <span class="at">cex =</span> <span class="fl">0.75</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb4-474"><a href="#cb4-474" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dev.off</span>()</span>
+<span id="cb4-475"><a href="#cb4-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-476"><a href="#cb4-476" aria-hidden="true" tabindex="-1"></a>  <span class="fu">png</span>(<span class="st">&quot;figures/ts_plane.png&quot;</span>, <span class="at">width =</span> <span class="dv">950</span>, <span class="at">height =</span> <span class="dv">700</span>)</span>
+<span id="cb4-477"><a href="#cb4-477" aria-hidden="true" tabindex="-1"></a>  fam_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">cp =</span> <span class="st">&quot;#1f4ed8&quot;</span>, <span class="at">prob =</span> <span class="st">&quot;#15803d&quot;</span>, <span class="at">oracle =</span> <span class="st">&quot;#c2410c&quot;</span>, <span class="at">nns =</span> <span class="st">&quot;#7e22ce&quot;</span>)</span>
+<span id="cb4-478"><a href="#cb4-478" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(agg, {</span>
+<span id="cb4-479"><a href="#cb4-479" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(worst_win_cov, interval_score, <span class="at">col =</span> fam_cols[family], <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.9</span>, <span class="at">xlab =</span> <span class="st">&quot;worst rolling-window coverage&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;interval score, lower is better&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Time-series efficiency versus worst-case coverage&quot;</span>)</span>
+<span id="cb4-480"><a href="#cb4-480" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abline</span>(<span class="at">v =</span> TARGET_COV, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">1</span>)</span>
+<span id="cb4-481"><a href="#cb4-481" aria-hidden="true" tabindex="-1"></a>    <span class="fu">text</span>(worst_win_cov, interval_score, <span class="at">labels =</span> method, <span class="at">cex =</span> <span class="fl">0.55</span>, <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">col =</span> fam_cols[family])</span>
+<span id="cb4-482"><a href="#cb4-482" aria-hidden="true" tabindex="-1"></a>    <span class="fu">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;conformal&quot;</span>, <span class="st">&quot;probabilistic&quot;</span>, <span class="st">&quot;oracle&quot;</span>, <span class="st">&quot;NNS&quot;</span>), <span class="at">col =</span> <span class="fu">unname</span>(fam_cols), <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span>
+<span id="cb4-483"><a href="#cb4-483" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb4-484"><a href="#cb4-484" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dev.off</span>()</span>
+<span id="cb4-485"><a href="#cb4-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-486"><a href="#cb4-486" aria-hidden="true" tabindex="-1"></a>  <span class="fu">png</span>(<span class="st">&quot;figures/ts_width.png&quot;</span>, <span class="at">width =</span> <span class="dv">1100</span>, <span class="at">height =</span> <span class="dv">500</span>)</span>
+<span id="cb4-487"><a href="#cb4-487" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">z_alpha</span>(ALPHA)</span>
+<span id="cb4-488"><a href="#cb4-488" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(t_vec, <span class="fu">pmin</span>(<span class="dv">2</span> <span class="sc">*</span> z <span class="sc">*</span> sig_te, <span class="dv">30</span>), <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">lwd =</span> <span class="fl">1.3</span>, <span class="at">xlab =</span> <span class="st">&quot;test step&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;interval width&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Does interval width track volatility?&quot;</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">30</span>))</span>
+<span id="cb4-489"><a href="#cb4-489" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (nns_key <span class="sc">%in%</span> <span class="fu">names</span>(methods)) {</span>
+<span id="cb4-490"><a href="#cb4-490" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> methods[[nns_key]]; w <span class="ot">&lt;-</span> <span class="fu">pmin</span>(m<span class="sc">$</span>hi <span class="sc">-</span> m<span class="sc">$</span>lo, <span class="dv">30</span>)</span>
+<span id="cb4-491"><a href="#cb4-491" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(<span class="fu">seq_along</span>(w), w, <span class="at">col =</span> <span class="st">&quot;#7e22ce&quot;</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>)</span>
+<span id="cb4-492"><a href="#cb4-492" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-493"><a href="#cb4-493" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">&quot;EWMA-vol Gaussian&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(methods)) {</span>
+<span id="cb4-494"><a href="#cb4-494" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> methods[[<span class="st">&quot;EWMA-vol Gaussian&quot;</span>]]</span>
+<span id="cb4-495"><a href="#cb4-495" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(t_vec, <span class="fu">pmin</span>(m<span class="sc">$</span>hi <span class="sc">-</span> m<span class="sc">$</span>lo, <span class="dv">30</span>), <span class="at">col =</span> <span class="st">&quot;#15803d&quot;</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>)</span>
+<span id="cb4-496"><a href="#cb4-496" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-497"><a href="#cb4-497" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="st">&quot;fixed split (CP)&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(methods)) {</span>
+<span id="cb4-498"><a href="#cb4-498" aria-hidden="true" tabindex="-1"></a>    m <span class="ot">&lt;-</span> methods[[<span class="st">&quot;fixed split (CP)&quot;</span>]]</span>
+<span id="cb4-499"><a href="#cb4-499" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(t_vec, <span class="fu">pmin</span>(m<span class="sc">$</span>hi <span class="sc">-</span> m<span class="sc">$</span>lo, <span class="dv">30</span>), <span class="at">col =</span> <span class="st">&quot;#1f4ed8&quot;</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>)</span>
+<span id="cb4-500"><a href="#cb4-500" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-501"><a href="#cb4-501" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;oracle 2*z*sigma_t&quot;</span>, nns_key, <span class="st">&quot;EWMA-vol Gaussian&quot;</span>, <span class="st">&quot;fixed split (CP)&quot;</span>), <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;#7e22ce&quot;</span>, <span class="st">&quot;#15803d&quot;</span>, <span class="st">&quot;#1f4ed8&quot;</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="fl">1.3</span>, <span class="fl">1.1</span>, <span class="fl">1.1</span>, <span class="fl">1.1</span>), <span class="at">cex =</span> <span class="fl">0.75</span>)</span>
+<span id="cb4-502"><a href="#cb4-502" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dev.off</span>()</span>
+<span id="cb4-503"><a href="#cb4-503" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-504"><a href="#cb4-504" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-505"><a href="#cb4-505" aria-hidden="true" tabindex="-1"></a>run_all <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb4-506"><a href="#cb4-506" aria-hidden="true" tabindex="-1"></a>  all_scores <span class="ot">&lt;-</span> <span class="fu">list</span>(); keep <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb4-507"><a href="#cb4-507" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (seed <span class="cf">in</span> <span class="dv">0</span><span class="sc">:</span>(N_SEEDS <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>)) {</span>
+<span id="cb4-508"><a href="#cb4-508" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">=== seed &quot;</span>, seed, <span class="st">&quot; ===&quot;</span>)</span>
+<span id="cb4-509"><a href="#cb4-509" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">run_once</span>(<span class="at">seed =</span> seed, <span class="at">heavy_tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-510"><a href="#cb4-510" aria-hidden="true" tabindex="-1"></a>    all_scores[[<span class="fu">length</span>(all_scores) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>]] <span class="ot">&lt;-</span> res<span class="sc">$</span>scores</span>
+<span id="cb4-511"><a href="#cb4-511" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (seed <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) keep <span class="ot">&lt;-</span> res</span>
+<span id="cb4-512"><a href="#cb4-512" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-513"><a href="#cb4-513" aria-hidden="true" tabindex="-1"></a>  scores_dt <span class="ot">&lt;-</span> <span class="fu">rbindlist</span>(all_scores, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-514"><a href="#cb4-514" aria-hidden="true" tabindex="-1"></a>  metric_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;marg_cov&quot;</span>, <span class="st">&quot;worst_win_cov&quot;</span>, <span class="st">&quot;cov_lowvol&quot;</span>, <span class="st">&quot;cov_hivol&quot;</span>, <span class="st">&quot;cond_cov_gap&quot;</span>, <span class="st">&quot;width&quot;</span>, <span class="st">&quot;frac_inf&quot;</span>, <span class="st">&quot;interval_score&quot;</span>, <span class="st">&quot;CRPS&quot;</span>, <span class="st">&quot;logscore&quot;</span>)</span>
+<span id="cb4-515"><a href="#cb4-515" aria-hidden="true" tabindex="-1"></a>  agg <span class="ot">&lt;-</span> scores_dt[, <span class="fu">lapply</span>(.SD, safe_mean), by <span class="ot">=</span> .(method, family), .SDcols <span class="ot">=</span> metric_cols][<span class="fu">order</span>(interval_score)]</span>
+<span id="cb4-516"><a href="#cb4-516" aria-hidden="true" tabindex="-1"></a>  col_order <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;method&quot;</span>, <span class="st">&quot;family&quot;</span>, <span class="st">&quot;marg_cov&quot;</span>, <span class="st">&quot;worst_win_cov&quot;</span>, <span class="st">&quot;cov_lowvol&quot;</span>, <span class="st">&quot;cov_hivol&quot;</span>, <span class="st">&quot;cond_cov_gap&quot;</span>, <span class="st">&quot;width&quot;</span>, <span class="st">&quot;frac_inf&quot;</span>, <span class="st">&quot;interval_score&quot;</span>, <span class="st">&quot;CRPS&quot;</span>, <span class="st">&quot;logscore&quot;</span>)</span>
+<span id="cb4-517"><a href="#cb4-517" aria-hidden="true" tabindex="-1"></a>  agg <span class="ot">&lt;-</span> agg[, .SD, .SDcols <span class="ot">=</span> <span class="fu">intersect</span>(col_order, <span class="fu">names</span>(agg))]</span>
+<span id="cb4-518"><a href="#cb4-518" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(scores_dt, <span class="st">&quot;results/ts_results_all.csv&quot;</span>)</span>
+<span id="cb4-519"><a href="#cb4-519" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fwrite</span>(agg, <span class="st">&quot;results/ts_results.csv&quot;</span>)</span>
+<span id="cb4-520"><a href="#cb4-520" aria-hidden="true" tabindex="-1"></a>  agg_p <span class="ot">&lt;-</span> <span class="fu">copy</span>(agg)</span>
+<span id="cb4-521"><a href="#cb4-521" aria-hidden="true" tabindex="-1"></a>  num_cols <span class="ot">&lt;-</span> <span class="fu">names</span>(agg_p)[<span class="fu">sapply</span>(agg_p, is.numeric)]</span>
+<span id="cb4-522"><a href="#cb4-522" aria-hidden="true" tabindex="-1"></a>  agg_p[, (num_cols) <span class="sc">:=</span> <span class="fu">lapply</span>(.SD, round, <span class="dv">3</span>), .SDcols <span class="ot">=</span> num_cols]</span>
+<span id="cb4-523"><a href="#cb4-523" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">=== TIME-SERIES BENCHMARK mean over &quot;</span>, N_SEEDS, <span class="st">&quot; seeds, alpha = &quot;</span>, ALPHA, <span class="st">&quot;, target coverage = &quot;</span>, TARGET_COV, <span class="st">&quot; ===</span><span class="sc">\n\n</span><span class="st">&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb4-524"><a href="#cb4-524" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(agg_p)</span>
+<span id="cb4-525"><a href="#cb4-525" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Wrote:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-526"><a href="#cb4-526" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  results/ts_results.csv</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-527"><a href="#cb4-527" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  results/ts_results_all.csv</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-528"><a href="#cb4-528" aria-hidden="true" tabindex="-1"></a>  <span class="fu">make_figures</span>(keep, agg)</span>
+<span id="cb4-529"><a href="#cb4-529" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  figures/ts_coverage.png</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-530"><a href="#cb4-530" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  figures/ts_plane.png</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-531"><a href="#cb4-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;  figures/ts_width.png</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-532"><a href="#cb4-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>(<span class="fu">list</span>(<span class="at">scores =</span> scores_dt, <span class="at">summary =</span> agg))</span>
+<span id="cb4-533"><a href="#cb4-533" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-534"><a href="#cb4-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-535"><a href="#cb4-535" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">run_all</span>()</span></code></pre></div>
+</body>
+</html>

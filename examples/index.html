@@ -1,23 +1,241 @@
-<!doctype html><html><head><meta charset="utf-8"><title>NNS Examples</title></head><body>
-<h1>NNS Examples</h1><ul>
-<li><a href="7_Econometric_Reasons.html">7_Econometric_Reasons</a></li>
-<li><a href="Bias_and_CI.html">Bias_and_CI</a></li>
-<li><a href="Boston_Housing.html">Boston_Housing</a></li>
-<li><a href="Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html">Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS</a></li>
-<li><a href="Curve_Fitting.html">Curve_Fitting</a></li>
-<li><a href="DatasaurusDozen.html">DatasaurusDozen</a></li>
-<li><a href="Logistic_Comparison.html">Logistic_Comparison</a></li>
-<li><a href="NNS_correlation_and_dependence.html">NNS_correlation_and_dependence</a></li>
-<li><a href="NNSvignette_Overview.html">NNSvignette_Overview</a></li>
-<li><a href="PWT.html">PWT</a></li>
-<li><a href="Regression_Residuals.html">Regression_Residuals</a></li>
-<li><a href="Sunspots_example.html">Sunspots_example</a></li>
-<li><a href="Time_Series_Classification.html">Time_Series_Classification</a></li>
-<li><a href="Time_Series_Classification_Expanded--Nasdaq-.html">Time_Series_Classification_Expanded--Nasdaq-</a></li>
-<li><a href="Time_Series_Classification_Expanded.html">Time_Series_Classification_Expanded</a></li>
-<li><a href="VAR_example.html">VAR_example</a></li>
-<li><a href="index.html">index</a></li>
-<li><a href="prophet_NNS_comparison.html">prophet_NNS_comparison</a></li>
-<li><a href="tides.html">tides</a></li>
-<li><a href="xgboost_example.html">xgboost_example</a></li>
-</ul></body></html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS Examples</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<img src="https://github.com/OVVO-Financial/NNS/raw/NNS-Beta-Version/vignettes/images/NNS_hex_sticker.png" width="150" style="border: none; outline: none; margin: 0; padding: 0; display: block;"/>
+
+<h1 id="nns-examples">NNS examples</h1>
+<p>The numbered package vignettes are the <strong>canonical NNS example
+curriculum</strong>. They define the statistical narrative, section
+order, datasets, and intended interpretation for companion
+implementations. The Python package follows this sequence and treats R
+as the source of truth.</p>
+<h2 id="canonical-package-vignettes">Canonical package vignettes</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Topic</th>
+<th>R vignette</th>
+<th>Python companion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>Overview</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_01_Overview.html">Overview</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/01_overview.py"><code>01_overview.py</code></a></td>
+</tr>
+<tr>
+<td>02</td>
+<td>Partial Moments</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_02_Partial_Moments.html">Partial
+Moments</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/02_partial_moments.py"><code>02_partial_moments.py</code></a></td>
+</tr>
+<tr>
+<td>03</td>
+<td>Correlation and Dependence</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_03_Correlation_and_Dependence.html">Correlation
+and Dependence</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/03_correlation_and_dependence.py"><code>03_correlation_and_dependence.py</code></a></td>
+</tr>
+<tr>
+<td>04</td>
+<td>Normalization and Rescaling</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_04_Normalization_and_Rescaling.html">Normalization
+and Rescaling</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/04_normalization_and_rescaling.py"><code>04_normalization_and_rescaling.py</code></a></td>
+</tr>
+<tr>
+<td>05</td>
+<td>Sampling and Simulation</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_05_Sampling.html">Sampling
+and Simulation</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/05_sampling_and_simulation.py"><code>05_sampling_and_simulation.py</code></a></td>
+</tr>
+<tr>
+<td>06</td>
+<td>Comparing Distributions</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_06_Comparing_Distributions.html">Comparing
+Distributions</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/06_comparing_distributions.py"><code>06_comparing_distributions.py</code></a></td>
+</tr>
+<tr>
+<td>07</td>
+<td>Clustering and Regression</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_07_Clustering_and_Regression.html">Clustering
+and Regression</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/07_clustering_and_regression.py"><code>07_clustering_and_regression.py</code></a></td>
+</tr>
+<tr>
+<td>08</td>
+<td>Classification</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_08_Classification.html">Classification</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/08_classification.py"><code>08_classification.py</code></a></td>
+</tr>
+<tr>
+<td>09</td>
+<td>Forecasting</td>
+<td><a
+href="https://ovvo-financial.github.io/NNS/articles/NNSvignette_09_Forecasting.html">Forecasting</a></td>
+<td><a
+href="https://github.com/OVVO-Financial/NNS-python/blob/main/examples/vignettes/09_forecasting.py"><code>09_forecasting.py</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>Canonical changes should be made in the R vignette first. A companion
+port may use language-appropriate syntax and containers, but should
+preserve the same statistical demonstration and interpretation.</p>
+<h2 id="applied-studies-and-extended-examples">Applied studies and
+extended examples</h2>
+<p>The following material applies NNS to specific problems, comparisons,
+and research questions. These examples are useful applications, but they
+do not replace the numbered package curriculum.</p>
+<h3 id="basic-statistics">Basic statistics</h3>
+<ol type="1">
+<li><a href="Partial%20Moments%20Equivalences.html">Partial Moment
+Equivalences</a></li>
+<li><a href="Bayes&#39;%20Theorem%20From%20Partial%20Moments.pdf">Bayes'
+Theorem</a></li>
+<li><a href="Continuous_CDFs_and_ANOVA_with_NNS.pdf">CDFs and
+ANOVA</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Bias_and_CI.html">Bias
+and Confidence Intervals</a></li>
+<li><a
+href="https://github.com/OVVO-Financial/Finance/blob/main/Data/Estimation_Error_Replication.md">Partial
+Moments Estimation Error</a></li>
+</ol>
+<h3 id="regression">Regression</h3>
+<ol type="1">
+<li><a href="https://ssrn.com/abstract=3389938">Overview</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Curve_Fitting.html">Curve
+Fitting</a></li>
+<li><a href="http://rdcu.be/tz0J">Nonparametric Regression Using
+Clusters</a></li>
+<li><a href="https://ssrn.com/abstract=2861339">Clustering and Curve
+Fitting By Line Segments</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Regression_Residuals.html">Regression
+Residuals</a></li>
+<li><a href="NNS_MI_vs_MICE.html">Multiple Imputation</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Logistic_Comparison.html">Logistic
+Regression Binary Classification</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Boston_Housing.html">Boston
+Housing</a></li>
+</ol>
+<h3 id="machine-learning">Machine learning</h3>
+<ol type="1">
+<li><a href="https://ssrn.com/abstract=3592491">Partitional Estimation
+Using Partial Moments</a></li>
+<li><a href="Machine_Learning.pdf">NNS Regression in Machine
+Learning</a></li>
+<li><a href="https://ssrn.com/abstract=2864711">Classification Using NNS
+Clustering Analysis</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/xgboost_example.html">NNS
+vs. xgboost</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Time_Series_Classification.html">Time-Series
+Classification</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Time_Series_Classification_Expanded.html">Time-Series
+Classification II</a></li>
+<li><a href="Spiral%20Matching%20Example.pdf">Spiral Matching
+Example</a></li>
+<li><a href="NNS%20vs%20KNN%20MNIST%20dataset.pdf">MNIST</a></li>
+</ol>
+<h3 id="time-series-forecasting">Time-series forecasting</h3>
+<ol type="1">
+<li><a href="https://ssrn.com/abstract=3382300">Overview</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Sunspots_example.html">NNS
+vs. KERAS</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/prophet_NNS_comparison.html">NNS
+vs. prophet</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/tides.html">Tides</a></li>
+<li><a href="NNS.ARMA%20vs%20N-Hits.html">NNS vs. N-HiTS</a></li>
+<li><a href="nns_arma_conformal_benchmark_report.html">NNS Time-Series
+Prediction Interval Benchmark</a></li>
+</ol>
+<h3 id="econometrics">Econometrics</h3>
+<ol type="1">
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/7_Econometric_Reasons.html">Econometrics
+Critiques and Solutions</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/VAR_example.html">VAR
+Alternative</a></li>
+<li><a href="https://ssrn.com/abstract=3589816">Nowcasting</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/PWT.html">Causal
+Analysis</a></li>
+<li><a
+href="https://ovvo-financial.github.io/NNS/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html">Federal
+Reserve Causal Analysis</a></li>
+<li><a href="Causal_Inference_with_NNS_stack.pdf">Causal
+Inference</a></li>
+</ol>
+<h2 id="references">References</h2>
+<p>The applied examples are demonstrations rather than exhaustive
+proofs. See the <a
+href="https://ovvo-financial.github.io/NNS/book/">book</a> and the <a
+href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1421356">research
+papers</a> for the underlying arguments.</p>
+</body>
+</html>
