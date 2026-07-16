@@ -153,7 +153,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
                           const std::vector<double>& inv_range,
                           std::vector<double>& d) {
   const int n = rpm_x.nrow(), p = rpm_x.ncol();
-  if (dist_code == 2) {
+  if (dist_code == 3) {
     for (int i = 0; i < n; ++i) {
       double mismatches = 0.0;
       for (int j = 0; j < p; ++j)
@@ -162,7 +162,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
     }
   } else if (active.empty()) {
     std::fill(d.begin(), d.end(), 0.0);
-  } else if (dist_code == 1) {
+  } else if (dist_code == 2) {
     for (int i = 0; i < n; ++i) {
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
@@ -171,7 +171,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       }
       d[i] = acc;
     }
-  } else if (dist_code == 3) {
+  } else if (dist_code == 0) {
     for (int i = 0; i < n; ++i) {
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
@@ -181,7 +181,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       }
       d[i] = acc;
     }
-  } else {
+  } else if (dist_code == 1) {
     for (int i = 0; i < n; ++i) {
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
@@ -191,6 +191,8 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       }
       d[i] = std::sqrt(acc);
     }
+  } else {
+    stop("Unknown NNS multivariate distance code");
   }
 }
 
@@ -221,6 +223,12 @@ inline void active_columns(const NumericVector& mins, const NumericVector& maxs,
       active.push_back(j);
       inv_range.push_back(1.0 / range);
     }
+  }
+}
+
+inline void validate_dist_code(int dist_code) {
+  if (dist_code < 0 || dist_code > 3) {
+    stop("Unknown NNS multivariate distance code");
   }
 }
 
@@ -370,7 +378,7 @@ struct PredictPathWorker : public Worker {
   }
 
   void distances_for_row(std::size_t r, std::vector<double>& d) const {
-    if (dist_code == 2) {
+    if (dist_code == 3) {
       for (int i = 0; i < n; ++i) {
         double mismatches = 0.0;
         for (int j = 0; j < p; ++j) if (rpm_x(i, j) != Xtest(r, j)) mismatches += 1.0;
@@ -378,7 +386,7 @@ struct PredictPathWorker : public Worker {
       }
     } else if (active.empty()) {
       std::fill(d.begin(), d.end(), 0.0);
-    } else if (dist_code == 1) {
+    } else if (dist_code == 2) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -386,7 +394,7 @@ struct PredictPathWorker : public Worker {
         }
         d[i] = acc;
       }
-    } else if (dist_code == 3) {
+    } else if (dist_code == 0) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -394,7 +402,7 @@ struct PredictPathWorker : public Worker {
         }
         d[i] = acc;
       }
-    } else {
+    } else if (dist_code == 1) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -402,6 +410,8 @@ struct PredictPathWorker : public Worker {
         }
         d[i] = std::sqrt(acc);
       }
+    } else {
+      stop("Unknown NNS multivariate distance code");
     }
   }
 
@@ -453,6 +463,7 @@ NumericMatrix NNS_mreg_predict_path_v2_cpp(const NumericMatrix& rpm_x,
   if (Xtest.ncol() != p) stop("Xtest and rpm_x must have the same columns");
   if (mins.size() != p || maxs.size() != p) stop("mins/maxs must have one value per column");
   if (kmax < 1) stop("kmax must be >= 1");
+  validate_dist_code(dist_code);
   if (kmax > n) kmax = n;
   RankComponents rank(kmax);
   NumericMatrix out(m, kmax);
@@ -489,7 +500,7 @@ NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x,
   return path(_, k - 1);
 }
 
-// dist_code: 0 = L2, 1 = L1, 2 = FACTOR (Hamming over encoded columns), 3 = native NNS.
+// dist_code: 0 = native NNS, 1 = L2, 2 = L1, 3 = FACTOR (Hamming over encoded columns).
 // [[Rcpp::export]]
 NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
                                    const NumericVector& yhat,
@@ -504,6 +515,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
   if (Xtest.ncol() != p) stop("Xtest and rpm_x must have the same columns");
   if (mins.size() != p || maxs.size() != p) stop("mins/maxs must have one value per column");
   if (k < 1) stop("k must be >= 1");
+  validate_dist_code(dist_code);
 
   // Active columns and reciprocal ranges for the normalized metrics.
   std::vector<int> active;
@@ -522,7 +534,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
 
   for (int r = 0; r < m; ++r) {
     // distances
-    if (dist_code == 2) {
+    if (dist_code == 3) {
       for (int i = 0; i < n; ++i) {
         double mismatches = 0.0;
         for (int j = 0; j < p; ++j)
@@ -531,7 +543,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       }
     } else if (active.empty()) {
       std::fill(d.begin(), d.end(), 0.0);
-    } else if (dist_code == 1) {
+    } else if (dist_code == 2) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -540,7 +552,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         }
         d[i] = acc;
       }
-    } else if (dist_code == 3) {
+    } else if (dist_code == 0) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -550,7 +562,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         }
         d[i] = acc;
       }
-    } else {
+    } else if (dist_code == 1) {
       for (int i = 0; i < n; ++i) {
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
@@ -560,6 +572,8 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         }
         d[i] = std::sqrt(acc);
       }
+    } else {
+      stop("Unknown NNS multivariate distance code");
     }
 
     const int kk = std::min(k, n);

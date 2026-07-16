@@ -13,7 +13,6 @@
 #' @param balance logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.
 #' @param ts.test integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.
 #' @param threshold numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.
-#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #' @param obj.fn expression;
 #' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
 #' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -23,6 +22,7 @@
 #' @param pred.int numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param seed Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.
+#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
 #'
@@ -60,7 +60,6 @@ NNS.boost <- function(IVs.train,
                       balance = FALSE,
                       ts.test = NULL,
                       threshold = NULL,
-                      dist = NULL,
                       obj.fn = expression(sum((predicted - actual)^2)),
                       objective = "min",
                       extreme = FALSE,
@@ -68,7 +67,8 @@ NNS.boost <- function(IVs.train,
                       feature.importance = TRUE,
                       pred.int = NULL,
                       status = TRUE,
-                      seed = 123L) {
+                      seed = 123L,
+                      dist = NULL) {
   dist <- .nns_reg_validate_dist(dist)
   # ---------------------------------------------------------------------------
   

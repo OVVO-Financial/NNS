@@ -955,7 +955,7 @@ NNS.stack <- function(IVs.train,
     storage.mode(test_matrix) <- "double"
     minimums <- vapply(train_design, min, numeric(1L))
     maximums <- vapply(train_design, max, numeric(1L))
-    dist_code <- match(dist, c("L2", "L1", "FACTOR")) - 1L
+    dist_code <- match(dist, c("NNS", "L2", "L1", "FACTOR")) - 1L
     
     path <- if (isTRUE(getOption("NNS.native.stack", TRUE))) {
       NNS_mreg_predict_path_v2_cpp(

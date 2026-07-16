@@ -72,3 +72,67 @@ test_that("NNS.boost NULL distance matches explicit NNS and propagates L2", {
   expect_equal(a$results, b$results, tolerance = 1e-12)
   expect_no_error(do.call(NNS.boost, c(args, list(dist = "L2"))))
 })
+
+test_that("native distance codes dispatch to their intended calculations", {
+  rpm_x <- matrix(c(0, 0,
+                    0.6, 0.6,
+                    1, 0,
+                    0.2, 1), ncol = 2, byrow = TRUE)
+  yhat <- c(1, 2, 3, 4)
+  xtest <- matrix(c(0.45, 0.15,
+                    0.2, 0.8), ncol = 2, byrow = TRUE)
+  mins <- c(0, 0)
+  maxs <- c(1, 1)
+  rpm <- data.frame(a = rpm_x[, 1], b = rpm_x[, 2], y.hat = yhat)
+  code_map <- c(NNS = 0L, L2 = 1L, L1 = 2L, FACTOR = 3L)
+
+  for (d in names(code_map)) {
+    ref <- .nns_mreg_predict_reference(xtest, rpm, 2L, d, mins, maxs, FALSE)
+    got <- NNS_mreg_predict_cpp(rpm_x, yhat, xtest, 2L, code_map[[d]], mins, maxs, FALSE)
+    expect_equal(got, ref, tolerance = 1e-12, info = d)
+  }
+
+  expect_error(
+    NNS_mreg_predict_cpp(rpm_x, yhat, xtest, 2L, 99L, mins, maxs, FALSE),
+    "distance code"
+  )
+})
+
+test_that("NNS.stack Method 1 OOF search uses NNS distance for NULL and NNS", {
+  x <- data.frame(a = c(0, 0.2, 0.9, 1, 0.15, 0.85, 0.35, 0.65, 0.45, 0.55),
+                  b = c(0, 1, 0.2, 1, 0.85, 0.15, 0.7, 0.3, 0.55, 0.45))
+  y <- c(0, 10, 20, 30, 11, 19, 12, 18, 14, 16)
+  args <- list(IVs.train = x, DV.train = y, IVs.test = x[1:3, ], method = 1,
+               folds = 2, ncores = 1, status = FALSE, stack = FALSE, seed = 7)
+
+  nns_null <- do.call(NNS.stack, c(args, list(dist = NULL)))
+  nns_alias <- do.call(NNS.stack, c(args, list(dist = "NNS")))
+  l2 <- do.call(NNS.stack, c(args, list(dist = "L2")))
+
+  expect_identical(nns_null$NNS.reg.n.best, nns_alias$NNS.reg.n.best)
+  expect_equal(nns_null$OBJfn.reg, nns_alias$OBJfn.reg, tolerance = 1e-12)
+  expect_equal(nns_null$reg, nns_alias$reg, tolerance = 1e-12)
+  expect_false(isTRUE(all.equal(nns_null$NNS.reg.n.best, l2$NNS.reg.n.best)) &&
+                 isTRUE(all.equal(nns_null$OBJfn.reg, l2$OBJfn.reg)) &&
+                 isTRUE(all.equal(nns_null$reg, l2$reg)))
+})
+
+test_that("NNS.boost preserves old positional objective argument order", {
+  x <- data.frame(a = c(0, 1, 0.2, 0.9, 0.4, 0.8, 0.3, 0.7),
+                  b = c(0, 0.2, 1, 0.9, 0.7, 0.1, 0.6, 0.4))
+  y <- c(0, 2, 4, 8, 5, 3, 6, 7)
+  test <- x[1:2, ]
+  obj <- expression(sum(abs(predicted - actual)))
+
+  positional <- NNS.boost(x, y, test, NULL, NULL, 2, 1, 0.25, FALSE,
+                          NULL, NULL, obj, "min", FALSE, FALSE, FALSE,
+                          NULL, FALSE, 42)
+  named <- NNS.boost(IVs.train = x, DV.train = y, IVs.test = test,
+                     learner.trials = 2, epochs = 1, CV.size = 0.25,
+                     balance = FALSE, ts.test = NULL, threshold = NULL,
+                     obj.fn = obj, objective = "min", extreme = FALSE,
+                     features.only = FALSE, feature.importance = FALSE,
+                     pred.int = NULL, status = FALSE, seed = 42)
+
+  expect_equal(positional$results, named$results, tolerance = 1e-12)
+})

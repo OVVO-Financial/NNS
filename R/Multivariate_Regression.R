@@ -105,7 +105,7 @@
   rpm.x <- as.matrix(rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE])
   storage.mode(rpm.x) <- "double"
   storage.mode(Xtest) <- "double"
-  dist.code <- match(dist, c("L2", "L1", "FACTOR", "NNS")) - 1L
+  dist.code <- match(dist, c("NNS", "L2", "L1", "FACTOR")) - 1L
 
   as.numeric(if (isTRUE(getOption("NNS.native.mreg", TRUE))) {
     NNS_mreg_predict_v2_cpp(
