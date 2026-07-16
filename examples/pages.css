@@ -1,0 +1,97 @@
+/* Styling for the rendered NNS examples pages on GitHub Pages. */
+:root {
+  --nns-text: #1f2430;
+  --nns-muted: #5a6472;
+  --nns-accent: #2780e3;
+  --nns-border: #e3e7ee;
+  --nns-code-bg: #f5f7fa;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  max-width: 52rem;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--nns-text);
+  background: #ffffff;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.25;
+  margin: 2rem 0 0.75rem;
+  font-weight: 650;
+}
+
+h1 { font-size: 2rem; margin-top: 0.5rem; }
+h2 { font-size: 1.5rem; border-bottom: 1px solid var(--nns-border); padding-bottom: 0.3rem; }
+h3 { font-size: 1.2rem; }
+
+a { color: var(--nns-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; height: auto; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  display: block;
+  overflow-x: auto;
+}
+
+th, td {
+  border: 1px solid var(--nns-border);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th { background: var(--nns-code-bg); }
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--nns-code-bg);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background: var(--nns-code-bg);
+  border: 1px solid var(--nns-border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+}
+
+pre code { background: none; padding: 0; }
+
+blockquote {
+  margin: 1rem 0;
+  padding: 0.25rem 1rem;
+  border-left: 4px solid var(--nns-border);
+  color: var(--nns-muted);
+}
+
+ol, ul { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+
+hr { border: none; border-top: 1px solid var(--nns-border); margin: 2rem 0; }
+
+.nns-site-nav {
+  font-size: 0.95rem;
+  color: var(--nns-muted);
+  border-bottom: 1px solid var(--nns-border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.nns-site-nav a { margin-right: 1.25rem; }
