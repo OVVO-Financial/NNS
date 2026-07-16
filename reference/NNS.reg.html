@@ -58,7 +58,7 @@
 <span>  n.best <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  smooth <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  noise.reduction <span class="op">=</span> <span class="st">"off"</span>,</span>
-<span>  dist <span class="op">=</span> <span class="st">"L2"</span>,</span>
+<span>  dist <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point.only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  multivariate.call <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -143,7 +143,7 @@
 
 
 <dt id="arg-dist">dist<a class="anchor" aria-label="anchor" href="#arg-dist"></a></dt>
-<dd><p>options:("L1", "L2", "FACTOR") the method of distance calculation; Selects the distance calculation used. <code>dist = "L2"</code> (default) selects the Euclidean distance and <code>(dist = "L1")</code> selects the Manhattan distance; <code>(dist = "FACTOR")</code> uses a frequency.</p></dd>
+<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. <code>dist = NULL</code> is the default and selects the native blended NNS distance over range-normalized coordinates. <code>dist = "NNS"</code> is an explicit alias for the default. <code>dist = "L2"</code> selects Euclidean distance; <code>dist = "L1"</code> selects Manhattan distance; <code>dist = "FACTOR"</code> uses a frequency.</p></dd>
 
 
 <dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>

@@ -269,7 +269,7 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
     ## [1] 1
     ## 
     ## $dist
-    ## [1] "L2"
+    ## [1] "NNS"
 
 ### Inter/Extrapolation
 

@@ -58,7 +58,8 @@
 <span>  feature.importance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  pred.int <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  status <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123L</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123L</span>,</span>
+<span>  dist <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -141,6 +142,10 @@
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.</p></dd>
+
+
+<dt id="arg-dist">dist<a class="anchor" aria-label="anchor" href="#arg-dist"></a></dt>
+<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated <a href="NNS.reg.html">NNS.reg</a> and <a href="NNS.stack.html">NNS.stack</a> calls. <code>dist = NULL</code> is the default and selects the native blended NNS distance. <code>dist = "NNS"</code> is an explicit alias for the default.</p></dd>
 
 </dl></div>
     <div class="section level2">

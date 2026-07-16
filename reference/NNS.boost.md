@@ -26,7 +26,8 @@ NNS.boost(
   feature.importance = TRUE,
   pred.int = NULL,
   status = TRUE,
-  seed = 123L
+  seed = 123L,
+  dist = NULL
 )
 ```
 
@@ -140,6 +141,16 @@ NNS.boost(
   Optional integer random seed used for reproducible resampling, fold
   construction, and stochastic fitting steps. If \`NULL\`, the current
   random-number-generator state is used.
+
+- dist:
+
+  options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance
+  calculation passed to delegated
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  and
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  calls. `dist = NULL` is the default and selects the native blended NNS
+  distance. `dist = "NNS"` is an explicit alias for the default.
 
 ## Value
 

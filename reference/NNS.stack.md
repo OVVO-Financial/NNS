@@ -15,7 +15,7 @@ NNS.stack(
   obj.fn = expression(sum((predicted - actual)^2)),
   objective = "min",
   optimize.threshold = TRUE,
-  dist = "L2",
+  dist = NULL,
   CV.size = NULL,
   balance = FALSE,
   ts.test = NULL,
@@ -77,11 +77,12 @@ NNS.stack(
 
 - dist:
 
-  options:("L1", "L2", "DTW", "FACTOR") the method of distance
-  calculation; Selects the distance calculation used. `dist = "L2"`
-  (default) selects the Euclidean distance and `(dist = "L1")` selects
-  the Manhattan distance; `(dist = "DTW")` selects the dynamic time
-  warping distance; `(dist = "FACTOR")` uses a frequency.
+  options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance
+  calculation. `dist = NULL` is the default and selects the native
+  blended NNS distance over range-normalized coordinates. `dist = "NNS"`
+  is an explicit alias for the default. `dist = "L2"` selects Euclidean
+  distance; `dist = "L1"` selects Manhattan distance; `dist = "FACTOR"`
+  uses a frequency.
 
 - CV.size:
 

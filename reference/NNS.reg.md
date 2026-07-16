@@ -24,7 +24,7 @@ NNS.reg(
   n.best = NULL,
   smooth = FALSE,
   noise.reduction = "off",
-  dist = "L2",
+  dist = NULL,
   ncores = NULL,
   point.only = FALSE,
   multivariate.call = FALSE
@@ -160,10 +160,12 @@ NNS.reg(
 
 - dist:
 
-  options:("L1", "L2", "FACTOR") the method of distance calculation;
-  Selects the distance calculation used. `dist = "L2"` (default) selects
-  the Euclidean distance and `(dist = "L1")` selects the Manhattan
-  distance; `(dist = "FACTOR")` uses a frequency.
+  options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance
+  calculation. `dist = NULL` is the default and selects the native
+  blended NNS distance over range-normalized coordinates. `dist = "NNS"`
+  is an explicit alias for the default. `dist = "L2"` selects Euclidean
+  distance; `dist = "L1"` selects Manhattan distance; `dist = "FACTOR"`
+  uses a frequency.
 
 - ncores:
 
