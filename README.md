@@ -3,12 +3,8 @@
 
 
 
-[![packageversion](https://img.shields.io/badge/NNS%20version-13.1-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-
-<h2 style="margin: 0; padding: 0; border: none; height: 40px;"></h2>
-
 # NNS
-NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental [elements of variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md) that [asymptotically approximate the area of f(x)](https://ovvo-financial.github.io/NNS/book/numerical-integration-via-partial-moments.html) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences.  Designed for real-world data that violates symmetry, linearity, or distributional assumptions.
+NNS (Nonlinear Nonparametric Statistics) leverages partial moments – the fundamental [elements of variance](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Partial%20Moments%20Equivalences.md) that [asymptotically approximate the area of f(x)](https://ovvo-financial.github.io/NNS/book/numerical-integration-via-partial-moments.html) – to provide a robust foundation for nonlinear analysis while maintaining linear equivalences. Designed for real-world data that violates symmetry, linearity, or distributional assumptions.
 
 NNS delivers a comprehensive suite of advanced statistical techniques, including:
   - Numerical Integration & Numerical Differentiation
@@ -18,12 +14,12 @@ NNS delivers a comprehensive suite of advanced statistical techniques, including
   - Nonlinear Regression & Classification
   - ANOVA
   - Seasonality & Autoregressive Modeling
-  - Normalization 
+  - Normalization
   - Stochastic Superiority / Dominance
   - Advanced Monte Carlo Sampling
 
 
-Companion R-package and datasets to: 
+Companion R-package and datasets to:
 #### Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" (ISBN: 1490523995)
 
 2nd edition available here: https://ovvo-financial.github.io/NNS/book/
@@ -33,22 +29,30 @@ Companion R-package and datasets to:
 
 
 ## Current Version
-Current [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) CRAN version is  [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/NNS)](https://www.r-pkg.org/badges/version/NNS)
+Current [![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) CRAN version is [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/NNS)](https://www.r-pkg.org/badges/version/NNS)
 
 ## Installation
-[![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) requires [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/).  See https://cran.r-project.org/ or [![installr](https://img.shields.io/badge/installr-0.18.0-blue.svg)](https://cran.r-project.org/package=installr) for upgrading to latest R release.
+[![NNS](https://img.shields.io/badge/NNS--blue.svg)](https://cran.r-project.org/package=NNS) requires [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/). See https://cran.r-project.org/ or [![installr](https://img.shields.io/badge/installr-0.18.0-blue.svg)](https://cran.r-project.org/package=installr) for upgrading to the latest R release.
 
 ```r
 library(remotes); remotes::install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
 ```
+
 or via CRAN
+
 ```r
 install.packages('NNS')
 ```
 
 ## Examples
-Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md for basic partial moments equivalences, hands-on statistics, machine learning and econometrics examples.
+The nine numbered files under [`vignettes/`](vignettes/) are the canonical NNS
+example curriculum and the source of truth for companion language ports.
+Python follows the same 01–09 sequence while using Python-native syntax and
+containers.
 
+See [`examples/index.md`](examples/index.md) for the canonical cross-language
+mapping plus applied studies in statistics, regression, machine learning,
+forecasting, and econometrics.
 
 ## Citation
 ```
