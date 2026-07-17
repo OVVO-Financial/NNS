@@ -38,7 +38,7 @@
 #' B <- cbind(x_1, x_2)
 #'
 #' ## To find derivatives of y wrt 1st regressor for specific points of both regressors
-#' dy.d_(B, y, wrt = 1, eval.points = t(c(.5, .5)))
+#' dy.d_(B, y, wrt = 1, eval.points = t(c(.5, 1)))
 #'
 #' ## To find average partial derivative of y wrt 1st regressor,
 #' only supply 1 value in [eval.points], or a vector of [eval.points]:
@@ -102,6 +102,27 @@ dy.d_ <- function(x, y, wrt,
   l <- ncol(x)
   n <- nrow(x)
   
+  xstar <- function(mat) as.numeric(rowMeans(as.matrix(mat)))
+  
+  xstar.train <- xstar(x)
+  xstar.train.design <- cbind(Xstar = xstar.train, Xstar2 = xstar.train)
+  
+  fd.estimates <- function(test_points) {
+    xs <- xstar(test_points)
+    as.numeric(
+      NNS.stack(
+        IVs.train = xstar.train.design,
+        DV.train = y,
+        IVs.test = cbind(Xstar = xs, Xstar2 = xs),
+        method = 1,
+        status = FALSE,
+        order = NULL,
+        folds = 1,
+        ncores = 1
+      )$stack
+    )
+  }
+  
   if (length(wrt) != 1L || !is.numeric(wrt) ||
       wrt < 1L || wrt > l || wrt != as.integer(wrt)) {
     stop("`wrt` must select exactly one column of the expanded predictor matrix.")
@@ -126,7 +147,7 @@ dy.d_ <- function(x, y, wrt,
     )
   }
   
-
+  
   base.eval.points <- eval.points
   
   norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
@@ -215,18 +236,7 @@ dy.d_ <- function(x, y, wrt,
         )
       }
       
-      estimates <- NNS.stack(
-        IVs.train = x,
-        DV.train = y,
-        IVs.test = deriv.points,
-        method = c(1, 2),
-        dim.red.method = "equal",
-        status = FALSE,
-        order = NULL,
-        folds = 1,
-        ncores = 1
-      )$stack
-      estimates <- as.numeric(estimates)
+      estimates <- fd.estimates(deriv.points)
       
       if (length(estimates) != nrow(deriv.points)) {
         stop("NNS.reg returned an unexpected number of point estimates.")
@@ -269,18 +279,7 @@ dy.d_ <- function(x, y, wrt,
         )
       }
       
-      estimates <- NNS.stack(
-        IVs.train = x,
-        DV.train = y,
-        IVs.test = deriv.points,
-        method = c(1, 2),
-        dim.red.method = "equal",
-        status = FALSE,
-        order = NULL,
-        folds = 1,
-        ncores = 1
-      )$stack
-      estimates <- as.numeric(estimates)
+      estimates <- fd.estimates(deriv.points)
       
       if (length(estimates) != 3L * n_eval) {
         stop("NNS.reg returned an unexpected number of point estimates.")
@@ -340,18 +339,7 @@ dy.d_ <- function(x, y, wrt,
       )
       colnames(mixed.deriv.points) <- colnames(x)
       
-      mixed.estimates <- NNS.stack(
-        IVs.train = x,
-        DV.train = y,
-        IVs.test = mixed.deriv.points,
-        method = c(1, 2),
-        dim.red.method = "equal",
-        status = FALSE,
-        order = NULL,
-        folds = 1,
-        ncores = 1
-      )$stack
-      mixed.estimates <- as.numeric(mixed.estimates)
+      mixed.estimates <- fd.estimates(mixed.deriv.points)
       
       if (length(mixed.estimates) != 4L * nrow(mixed_eval_points)) {
         stop("NNS.reg returned an unexpected number of mixed-derivative estimates.")
