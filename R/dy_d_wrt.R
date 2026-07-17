@@ -67,319 +67,208 @@ dy.d_ <- function(x, y, wrt,
                   eval.points = "obs",
                   mixed = FALSE,
                   messages = TRUE){
-  
+
   n <- nrow(x)
   l <- ncol(x)
-  
-  if (is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
-  if (l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
-  if (anyNA(cbind(x, y))) stop("You have some missing values, please address.")
-  
+
+  if(is.null(l)) stop("Please ensure (x) is a matrix or data.frame type object.")
+  if(l < 2) stop("Please use NNS::dy.dx(...) for univariate partial derivatives.")
+
+  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+
   dummies <- list()
-  for (i in seq_len(l)) {
-    dummies[[i]] <- factor_2_dummy_FR(x[, i])
-    if (!is.null(ncol(dummies[[i]]))) {
-      base_name <- if (is.null(colnames(x))) paste0("X", i) else colnames(x)[i]
-      colnames(dummies[[i]]) <- paste0(base_name, "_", colnames(dummies[[i]]))
-    }
+  for(i in 1:l){
+    dummies[[i]] <- factor_2_dummy_FR(x[,i])
+    if(!is.null(ncol(dummies[i][[1]]))) colnames(dummies[i][[1]]) <- paste0(colnames(x)[i], "_", colnames(dummies[i][[1]]))
   }
   x <- do.call(cbind, dummies)
-  
-  if (messages) {
-    message("Currently generating NNS.reg finite difference estimates...Regressor ",
-            wrt, "\r", appendLF = TRUE)
+
+  if(messages) message("Currently generating NNS.reg finite difference estimates...Regressor ", wrt,"\r", appendLF=TRUE)
+
+  if(is.null(colnames(x))){
+    colnames.list <- lapply(1 : l, function(i) paste0("X", i))
+    colnames(x) <- as.character(colnames.list)
   }
-  
-  if (is.null(colnames(x))) {
-    colnames(x) <- paste0("X", seq_len(ncol(x)))
-  }
-  
-  if (any(class(x) %in% c("tbl", "data.table"))) x <- as.data.frame(x)
-  if (!is.null(y) && any(class(y) %in% c("tbl", "data.table"))) {
-    y <- as.vector(unlist(y))
-  }
-  
-  l <- ncol(x)
-  n <- nrow(x)
-  
-  xstar <- function(mat) as.numeric(rowMeans(as.matrix(mat)))
-  
-  xstar.train <- xstar(x)
-  xstar.train.design <- cbind(Xstar = xstar.train, Xstar2 = xstar.train)
-  
-  fd.estimates <- function(test_points) {
-    xs <- xstar(test_points)
-    as.numeric(
-      NNS.stack(
-        IVs.train = xstar.train.design,
-        DV.train = y,
-        IVs.test = cbind(Xstar = xs, Xstar2 = xs),
-        method = 1,
-        status = FALSE,
-        order = NULL,
-        folds = 1,
-        ncores = 1
-      )$stack
-    )
-  }
-  
-  if (length(wrt) != 1L || !is.numeric(wrt) ||
-      wrt < 1L || wrt > l || wrt != as.integer(wrt)) {
-    stop("`wrt` must select exactly one column of the expanded predictor matrix.")
-  }
-  wrt <- as.integer(wrt)
-  
-  if (l != 2L) mixed <- FALSE
-  
-  if (is.character(eval.points)) {
-    if (length(eval.points) != 1L) {
-      stop("Character `eval.points` must contain exactly one option.")
-    }
-    
-    eval.points <- switch(
-      tolower(eval.points),
-      "median" = t(apply(x, 2, median)),
-      "last"   = tail(x, 1),
-      "mean"   = t(apply(x, 2, mean)),
-      "apd"    = as.vector(x[, wrt, drop = FALSE]),
-      "obs"    = x,
-      stop("Unknown `eval.points` option.")
-    )
-  }
-  
-  
-  base.eval.points <- eval.points
-  
-  norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
-  
-  zz <- max(
-    NNS.dep(x[, wrt], y, asym = TRUE)$Dependence,
-    NNS.copula(cbind(x[, wrt], x[, wrt], y)),
-    NNS.copula(cbind(norm.matrix[, wrt], norm.matrix[, wrt], y)),
-    na.rm = TRUE
-  )
-  
-  root_n <- floor(sqrt(n))
-  if (root_n < 2L) stop("Insufficient observations to construct finite-difference bandwidths.")
-  
-  # Keep the original five-bandwidth design, but prevent duplicate list indices.
-  h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
-  
-  results <- vector(mode = "list", length(h_s))
-  
-  base_h <- gravity(abs(diff(x[, wrt])))
-  if (!is.finite(base_h) || base_h == 0) {
-    rng <- abs(max(x[, wrt]) - min(x[, wrt]))
-    if (!is.finite(rng) || rng == 0) {
-      stop("Regressor `wrt` is constant; derivative is undefined.")
-    }
-    base_h <- rng / length(x[, wrt])
-  }
-  
-  is_vector_branch <- is.null(dim(base.eval.points)) ||
-    (!is.null(ncol(base.eval.points)) && ncol(base.eval.points) == 1L)
-  
-  if (is_vector_branch) {
-    ep <- as.numeric(base.eval.points)
-    
-    seq_by <- max(0.01, (1 - zz) / 2)
-    probs <- seq(0, 1, by = seq_by)
-    if (tail(probs, 1) < 1) probs <- c(probs, 1)
-    
-    deriv.grid <- apply(x, 2, function(z) LPM.VaR(probs, 1, z))
-    if (is.null(dim(deriv.grid)) || ncol(deriv.grid) != l) {
-      deriv.grid <- matrix(deriv.grid, ncol = l, byrow = FALSE)
-    }
-    sampsize <- nrow(deriv.grid)
-  } else {
-    ep_matrix <- as.matrix(base.eval.points)
-    if (ncol(ep_matrix) != l) {
-      stop("Matrix/data-frame `eval.points` must have one column per expanded predictor.")
-    }
-  }
-  
-  for (index in seq_along(h_s)) {
-    h_step <- base_h * h_s[index]
-    
-    if (!is.finite(h_step) || h_step <= 0) {
-      stop("A non-positive finite-difference step was generated.")
-    }
-    
-    if (is_vector_branch) {
-      # Build each id as lower block, midpoint block, upper block.
-      blocks <- lapply(seq_along(ep), function(g) {
-        lower_grid <- deriv.grid
-        middle_grid <- deriv.grid
-        upper_grid <- deriv.grid
-        
-        lower_grid[, wrt] <- ep[g] - h_step
-        middle_grid[, wrt] <- ep[g]
-        upper_grid[, wrt] <- ep[g] + h_step
-        
-        rbind(lower_grid, middle_grid, upper_grid)
-      })
-      
-      deriv.points <- do.call(rbind, blocks)
-      colnames(deriv.points) <- colnames(x)
-      
-      id <- rep(seq_along(ep), each = 3L * sampsize)
-      position <- rep(
-        rep(c("l", "m", "u"), each = sampsize),
-        times = length(ep)
-      )
-      
-      if (messages) {
-        message(
-          "Currently evaluating the ", nrow(deriv.points),
-          " required points ", index, " of ", length(h_s), "\r",
-          appendLF = FALSE
-        )
-      }
-      
-      estimates <- fd.estimates(deriv.points)
-      
-      if (length(estimates) != nrow(deriv.points)) {
-        stop("NNS.reg returned an unexpected number of point estimates.")
-      }
-      
-      ids <- seq_along(ep)
-      lower <- vapply(
-        ids,
-        function(g) gravity(estimates[position == "l" & id == g]),
-        numeric(1)
-      )
-      f.x <- vapply(
-        ids,
-        function(g) gravity(estimates[position == "m" & id == g]),
-        numeric(1)
-      )
-      upper <- vapply(
-        ids,
-        function(g) gravity(estimates[position == "u" & id == g]),
-        numeric(1)
-      )
-      
-      mixed_eval_points <- NULL
-      
+
+  if(any(class(x)%in%c("tbl","data.table")))  x <- as.data.frame(x)
+  if(!is.null(y) && any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+
+  if(l != 2) mixed <- FALSE
+
+  if(is.character(eval.points)){
+    eval.points <- tolower(eval.points)
+    if(eval.points == "median"){
+      eval.points <- t(apply(x, 2, median))
     } else {
-      # CRITICAL FIX: create fresh lower and upper points for every bandwidth.
-      current.min <- ep_matrix
-      current.max <- ep_matrix
-      current.min[, wrt] <- ep_matrix[, wrt] - h_step
-      current.max[, wrt] <- ep_matrix[, wrt] + h_step
-      
-      deriv.points <- rbind(current.min, ep_matrix, current.max)
-      n_eval <- nrow(ep_matrix)
-      
-      if (messages) {
-        message(
-          "Currently generating NNS.reg finite difference estimates...bandwidth ",
-          index, " of ", length(h_s), "\r",
-          appendLF = FALSE
-        )
-      }
-      
-      estimates <- fd.estimates(deriv.points)
-      
-      if (length(estimates) != 3L * n_eval) {
-        stop("NNS.reg returned an unexpected number of point estimates.")
-      }
-      
-      lower <- estimates[seq_len(n_eval)]
-      f.x <- estimates[n_eval + seq_len(n_eval)]
-      upper <- estimates[2L * n_eval + seq_len(n_eval)]
-      
-      mixed_eval_points <- ep_matrix
-    }
-    
-    first_deriv <- (upper - lower) / (2 * h_step)
-    second_deriv <- (upper - 2 * f.x + lower) / (h_step ^ 2)
-    
-    if (mixed) {
-      if (is_vector_branch) {
-        # Mixed derivatives require complete two-dimensional tuples.
-        if (length(ep) != 2L) {
-          stop("Mixed derivatives require a complete two-predictor evaluation tuple.")
+      if(eval.points == "last"){
+        eval.points <- tail(x, 1)
+      } else {
+        if(eval.points == "mean"){
+          eval.points <- t(apply(x, 2, mean))
+        } else {
+          if(eval.points == "apd"){
+            eval.points <- as.vector(x[ , wrt, drop = FALSE])
+          } else {
+            eval.points <- x
+          }
         }
-        mixed_eval_points <- matrix(ep, nrow = 1L)
-        colnames(mixed_eval_points) <- colnames(x)
       }
-      
-      if (ncol(mixed_eval_points) != 2L) {
-        stop("Mixed derivatives are only available for exactly two predictors.")
-      }
-      
-      h_step_1 <- gravity(abs(diff(x[, 1]))) * h_s[index]
-      h_step_2 <- gravity(abs(diff(x[, 2]))) * h_s[index]
-      
-      if (!is.finite(h_step_1) || h_step_1 == 0) {
-        rng_1 <- abs(max(x[, 1]) - min(x[, 1]))
-        h_step_1 <- (rng_1 / nrow(x)) * h_s[index]
-      }
-      if (!is.finite(h_step_2) || h_step_2 == 0) {
-        rng_2 <- abs(max(x[, 2]) - min(x[, 2]))
-        h_step_2 <- (rng_2 / nrow(x)) * h_s[index]
-      }
-      
-      if (h_step_1 <= 0 || h_step_2 <= 0) {
-        stop("Unable to construct valid mixed-derivative bandwidths.")
-      }
-      
-      mixed.deriv.points <- do.call(
-        rbind,
-        lapply(seq_len(nrow(mixed_eval_points)), function(i) {
-          p <- mixed_eval_points[i, ]
-          rbind(
-            c(p[1] + h_step_1, p[2] + h_step_2),
-            c(p[1] - h_step_1, p[2] + h_step_2),
-            c(p[1] + h_step_1, p[2] - h_step_2),
-            c(p[1] - h_step_1, p[2] - h_step_2)
-          )
-        })
-      )
-      colnames(mixed.deriv.points) <- colnames(x)
-      
-      mixed.estimates <- fd.estimates(mixed.deriv.points)
-      
-      if (length(mixed.estimates) != 4L * nrow(mixed_eval_points)) {
-        stop("NNS.reg returned an unexpected number of mixed-derivative estimates.")
-      }
-      
-      z <- matrix(mixed.estimates, ncol = 4L, byrow = TRUE)
-      mixed_deriv <- (z[, 1] - z[, 2] - z[, 3] + z[, 4]) /
-        (4 * h_step_1 * h_step_2)
-      
-      results[[index]] <- list(
-        First = first_deriv,
-        Second = second_deriv,
-        Mixed = mixed_deriv
-      )
-    } else {
-      results[[index]] <- list(
-        First = first_deriv,
-        Second = second_deriv
-      )
     }
   }
-  
-  weighted_mean <- function(values) {
-    m <- do.call(cbind, values)
-    if (is.null(dim(m))) m <- matrix(m, nrow = 1L)
-    weights <- rev(seq_len(ncol(m)))
-    as.numeric(m %*% (weights / sum(weights)))
+
+  original.eval.points.min <- eval.points
+  original.eval.points.max <- eval.points
+  original.eval.points <- eval.points
+
+  norm.matrix <- apply(x, 2, function(z) NNS.rescale(z, 0, 1))
+
+  zz <- max(NNS.dep(x[,wrt], y, asym = TRUE)$Dependence, NNS.copula(cbind(x[,wrt],x[,wrt],y)), NNS.copula(cbind(norm.matrix[,wrt], norm.matrix[,wrt], y)))
+
+  root_n <- floor(sqrt(n))
+  h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
+
+  results <- vector(mode = "list", length(h_s))
+
+  for(h in h_s){
+    index <- which(h == h_s)[1]
+    if(is.vector(eval.points) || ncol(eval.points) == 1){
+      eval.points <- unlist(eval.points)
+
+      h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
+
+      if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
+
+      original.eval.points.min <- original.eval.points.min - h_step
+      original.eval.points.max <- h_step + original.eval.points.max
+
+      seq_by <- max(.01, (1 - zz)/2)
+
+      deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0,1,seq_by), 1, z))
+
+      sampsize <- length(seq(0, 1, seq_by))
+
+      if(ncol(deriv.points)!=ncol(x)){
+        deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
+      }
+
+      # Base-R replacement for data.table::data.table(do.call(rbind, replicate(...)))
+      deriv.points <- do.call(rbind, replicate(3*length(eval.points), deriv.points, simplify = FALSE))
+
+      # Base-R replacement for data.table::set(deriv.points, i = NULL, j = wrt, value = ...)
+      deriv.points[ , as.integer(wrt)] <- rep(as.vector(rbind(original.eval.points.min,
+                                                              eval.points,
+                                                              original.eval.points.max)),
+                                              each = sampsize, length.out = nrow(deriv.points))
+
+      colnames(deriv.points) <- colnames(x)
+
+      distance_wrt <- h_step
+
+      position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = nrow(deriv.points))
+      id <- rep(1:length(eval.points), each = 3*sampsize, length.out = nrow(deriv.points))
+
+      if(messages) message(paste("Currently evaluating the ", nrow(deriv.points), " required points "  ), index, " of ", length(h_s),"\r", appendLF=FALSE)
+
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
+      estimates <- as.numeric(estimates)
+
+      # Base-R replacement for the data.table by = id gravity aggregation.
+      ids <- 1:length(eval.points)
+      lower <- vapply(ids, function(g) gravity(estimates[position == "l" & id == g]), numeric(1))
+      f.x   <- vapply(ids, function(g) gravity(estimates[position == "m" & id == g]), numeric(1))
+      upper <- vapply(ids, function(g) gravity(estimates[position == "u" & id == g]), numeric(1))
+
+      rise_1 <- upper - f.x
+      rise_2 <- f.x - lower
+
+    } else {
+
+      n <- nrow(eval.points)
+      original.eval.points <- eval.points
+
+      h_step <- gravity(abs(diff(x[,wrt]))) * h_s[index]
+
+      if(h_step==0) h_step <- ((abs((max(x[,wrt]) - min(x[,wrt])) ))/length(x[,wrt])) * h_s[index]
+
+      original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
+      original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
+
+      deriv.points <- rbind(original.eval.points.min,
+                            original.eval.points,
+                            original.eval.points.max)
+
+      if(messages) message("Currently generating NNS.reg finite difference estimates...bandwidth ", index, " of ", length(h_s),"\r" ,appendLF=FALSE)
+
+      estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
+      estimates <- as.numeric(estimates)
+
+      lower <- head(estimates,n)
+      f.x <- estimates[(n+1):(2*n)]
+      upper <- tail(estimates,n)
+
+      rise_1 <- upper - f.x
+      rise_2 <- f.x - lower
+
+      distance_wrt <- h_step
+    }
+
+    if(mixed){
+      if(is.null(dim(eval.points))){
+        if(length(eval.points)!=2) stop("Mixed Derivatives are only for 2 IV")
+      } else {
+        if(ncol(eval.points) != 2) stop("Mixed Derivatives are only for 2 IV")
+      }
+
+      if(!is.null(dim(eval.points))){
+        h_step_1 <- gravity(abs(diff(x[,1]))) * h_s[index]
+        if(h_step_1==0) h_step_1 <- ((abs((max(x[,1]) - min(x[,1])) ))/length(x[,1])) * h_s[index]
+
+        h_step_2 <- gravity(abs(diff(x[,2]))) * h_s[index]
+        if(h_step_2==0) h_step_2 <- ((abs((max(x[,2]) - min(x[,2])) ))/length(x[,2])) * h_s[index]
+
+        mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
+                                       eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
+                                       h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
+                                       eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
+
+        mixed.distances <- 4 * (h_step_1  * h_step_2)
+
+      } else {
+        mixed.deriv.points <- matrix(c(h_step + eval.points,
+                                       eval.points[1] - h_step, h_step + eval.points[2],
+                                       h_step + eval.points[1], eval.points[2] - h_step,
+                                       eval.points - h_step), ncol = 2, byrow = TRUE)
+
+        mixed.distances <- 4 * (h_step^2)
+      }
+
+      mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal", plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1, smooth = TRUE)$Point.est
+      mixed.estimates <- as.numeric(mixed.estimates)
+
+      z <- matrix(mixed.estimates, ncol=4, byrow=TRUE)
+      z <- z[,1] + z[,4] - z[,2] - z[,3]
+      mixed_deriv <- (z / mixed.distances)
+
+      results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
+                               "Second" = (upper - 2 * f.x + lower) / ((distance_wrt) ^ 2),
+                               "Mixed" = mixed_deriv)
+
+    } else {
+      results[[index]] <- list("First" = (rise_1 + rise_2)/(2 * distance_wrt),
+                               "Second" = (upper - 2 * f.x + lower) / ((distance_wrt) ^ 2) )
+    }
   }
-  
-  final_results <- list(
-    First = weighted_mean(lapply(results, `[[`, "First")),
-    Second = weighted_mean(lapply(results, `[[`, "Second"))
-  )
-  
-  if (mixed) {
-    final_results$Mixed <- weighted_mean(lapply(results, `[[`, "Mixed"))
+
+  if(mixed){
+    final_results <- list("First" = apply(do.call(cbind, (lapply(results, `[[`, 1))), 1, function(x) mean(rep(x, length(x):1))),
+                                          "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))),
+                                                           "Mixed" = apply((do.call(cbind, (lapply(results, `[[`, 3)))), 1, function(x) mean(rep(x, length(x):1))))
+  } else {
+    final_results <- list("First" = apply(do.call(cbind, (lapply(results, `[[`, 1))), 1, function(x) mean(rep(x, length(x):1))),
+                            "Second" = apply((do.call(cbind, (lapply(results, `[[`, 2)))), 1, function(x) mean(rep(x, length(x):1))))
   }
-  
-  if (messages) message("", "\r", appendLF = TRUE)
-  final_results
+  if(messages) message("","\r", appendLF=TRUE)
+  return(final_results)
 }
 
 dy.d_ <- Vectorize(dy.d_, vectorize.args = c("wrt"))
