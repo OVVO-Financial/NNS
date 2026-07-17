@@ -397,8 +397,8 @@ For continuity, the key idea is that `NNS.reg(..., confidence.interval = ...)` b
 
 ```r
 set.seed(12345)
-x <- runif(1000, -2, 2)
-y <- sin(pi * x_train) + rnorm(1000, sd = 0.2)
+x_train <- runif(1000, -2, 2)
+y_train <- sin(pi * x_train) + rnorm(1000, sd = 0.2)
 
 NNS.reg(x = x_train, y = y_train, order = NULL, confidence.interval = .95)
 ```
@@ -418,7 +418,7 @@ fit["pred.int"]   # local interval bounds from partition-specific distributions
 ```
 
 <center>
-![Figure 15.1. `NNS.reg(..., confidence.interval = 0.95)` visualization with nonlinear fit and interval bands estimated from local partitions.](images/ch15_reg_conf_int.png)
+![Figure 17.1. `NNS.reg(..., confidence.interval = 0.95)` visualization with nonlinear fit and interval bands estimated from local partitions.](images/ch17_reg_conf_int.png)
 </center>
 
 ## Advantages of the Directional Approach

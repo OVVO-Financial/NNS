@@ -446,7 +446,7 @@ nns_arma_optim(z, h=48, seasonal_factor=seasonal_period["periods"])
 
 
 <center>
-![Figure 24.1. `NNS.ARMA(..., h = 45, seasonal.factor = c(12,24,36))` forecast output with fitted trajectory and uncertainty structure.](images/ch24_uni_ts.png)
+![Figure 25.1. `NNS.ARMA(..., h = 45, seasonal.factor = c(12,24,36))` forecast output with fitted trajectory and uncertainty structure.](images/ch25_uni_ts.png)
 </center>
 
 

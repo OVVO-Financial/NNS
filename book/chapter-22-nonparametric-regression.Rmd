@@ -160,7 +160,7 @@ for i in range(1, 4):
 ```
 
 <center>
-![Figure 21.1. `NNS.reg` univariate fit on $y = x^3$ at orders 1–3, alongside the corresponding `NNS.part` X-only partitions. Each panel shows the piecewise-linear regression surface formed by connecting regression points, with progressively finer partition cells at higher order.](images/ch21_part_reg.png)
+![Figure 22.1. `NNS.reg` univariate fit on $y = x^3$ at orders 1–3, alongside the corresponding `NNS.part` X-only partitions. Each panel shows the piecewise-linear regression surface formed by connecting regression points, with progressively finer partition cells at higher order.](images/ch22_part_reg.png)
 </center>
 
 ---

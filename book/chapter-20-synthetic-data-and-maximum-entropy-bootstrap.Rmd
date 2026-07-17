@@ -255,7 +255,7 @@ boots["replicates"]   # (len(air) x 100) matrix of bootstrap paths
 ```
 
 <center>
-![Figure 17.1. `NNS.meboot` replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths.](images/ch17_meboot_orig.png)
+![Figure 20.1. `NNS.meboot` replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths.](images/ch20_meboot_orig.png)
 </center>
 
 
@@ -352,7 +352,7 @@ correlations = [np.corrcoef(X[:, i], xt)[0, 1] for i in range(X.shape[1])]
 ```
 
 <center>
-![Figure 17.2. Standard iid Monte Carlo correlation histogram (`cor(X, x_t)`), typically concentrated near zero.](images/ch17_iid_mc_sim.png)
+![Figure 20.2. Standard iid Monte Carlo correlation histogram (`cor(X, x_t)`), typically concentrated near zero.](images/ch20_iid_mc_sim.png)
 </center>
 
 
@@ -404,7 +404,7 @@ correlations = [np.corrcoef(sim[:, i], xt)[0, 1] for i in range(sim.shape[1])]
 ```
 
 <center>
-![Figure 17.3. `NNS.meboot` Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider \([-1,1]\) range.](images/ch17_meboot_mc_sim.png)
+![Figure 20.3. `NNS.meboot` Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider \([-1,1]\) range.](images/ch20_meboot_mc_sim.png)
 </center>
 
 
