@@ -63,19 +63,24 @@
 
 
 # -----------------------------------------------------------------------------
-# This restores the ORIGINAL NNS 0.5.7 finite-difference design used to produce
-# the results in Vinod & Viole (2020), "Comparing Old and New Partial Derivative
-# Estimates from Nonlinear Nonparametric Regressions" (SSRN 3681436).  It is a
-# straight base-R port of the original data.table implementation (which no longer
-# runs now that data.table has been dropped from Imports), and reproduces that
-# version bit-for-bit when run against the same NNS.reg engine.  Key design:
-#   * bandwidths h_s = 1/log(length(x), c(2, 10)); c(h_s, 10*h_s); doubled if
-#     NNS.dep(x[, wrt], y) < 0.5;
-#   * quantile-spacing step h_step = |mean(diff(LPM.VaR(seq(.01, 1, h), 0, x)))|;
-#   * a degree-0 quantile grid LPM.VaR(seq(0, 1, .05), 0, .);
-#   * NNS.reg(dim.red.method = "equal", point.only = TRUE) estimates (no smooth);
-#   * plain mean aggregation, distance_wrt = 2 * h_step, and a plain rowMeans
-#     (na.rm = TRUE) blend across bandwidths.
+# Reconciled dy.d_ : the original NNS 0.5.7 finite-difference design
+# (Vinod & Viole 2020, SSRN 3681436) reconciled with the current NNS.reg engine.
+# Two changes make the estimates uniform across identically-distributed
+# regressors and independent of the retired data.table machinery:
+#   * h_step shares the dy.dx() logic - a locally-adaptive step centred on the
+#     evaluation point's percentile:
+#         p      <- LPM.ratio(1, eval, x[, wrt])
+#         h_step <- LPM.VaR(p + H, 1, x[, wrt]) - LPM.VaR(p - H, 1, x[, wrt])
+#     (no cumulative window). This removes the cross-regressor scatter.
+#   * estimates come from NNS.stack on the equal-weight synthetic regressor X*
+#     via the increased-dimension trick cbind(X*, X*), with method = c(1, 2),
+#     dim.red.method = "equal", order = "max", folds = 5.  The cross-validated
+#     n.best regularises the (sharper) current engine back toward the paper's
+#     regime.
+# Bandwidths follow v0.5.7: h_s = 1/log(length(x), c(2, 10)); c(h_s, 10*h_s);
+# doubled when NNS.dep(x[, wrt], y) < 0.5.  First = (upper - lower)/(2*h_step);
+# Second = (upper - 2*f(x) + lower)/h_step^2 (matching dy.dx); rowMeans(na.rm)
+# blend across bandwidths.
 # -----------------------------------------------------------------------------
 
 dy.d_ <- function(x, y, wrt,
@@ -114,10 +119,9 @@ dy.d_ <- function(x, y, wrt,
     y <- as.vector(unlist(y))
   }
 
+  x <- as.matrix(x)
   l <- ncol(x)
   n <- nrow(x)
-
-  results <- list()
 
   if (l != 2) mixed <- FALSE
 
@@ -131,159 +135,148 @@ dy.d_ <- function(x, y, wrt,
                           x)
   }
 
-  original.eval.points.min <- eval.points
-  original.eval.points.max <- eval.points
-  original.eval.points     <- eval.points
+  # ---- Estimates: NNS.stack on the equal-weight synthetic regressor X* -------
+  stack.est <- function(train, resp, pts) {
+    xs <- as.numeric(rowMeans(as.matrix(train)))
+    ps <- as.numeric(rowMeans(as.matrix(pts)))
+    as.numeric(NNS.stack(
+      IVs.train = cbind(Xstar = xs, Xstar2 = xs),
+      DV.train = resp,
+      IVs.test = cbind(Xstar = ps, Xstar2 = ps),
+      method = c(1, 2),
+      dim.red.method = "equal",
+      order = "max",
+      folds = 5,
+      status = FALSE,
+      ncores = 1
+    )$stack)
+  }
+
+  # ---- dy.dx() locally-adaptive step -----------------------------------------
+  dydx.step <- function(col, ev, H) {
+    p <- LPM.ratio(1, ev, col)
+    LPM.VaR(min(1, p + H), 1, col) - LPM.VaR(max(0, p - H), 1, col)
+  }
 
   # v0.5.7 bandwidths.
   h_s <- 1/log(length(x), c(2, 10))
   h_s <- c(h_s, 10 * h_s)
   if (NNS.dep(x[, wrt], y)$Dependence < .5) h_s <- 2 * h_s
 
-  for (index in seq_along(h_s)) {
-    h <- h_s[index]
+  col <- x[, wrt]
 
-    if (is.vector(eval.points) || dim(eval.points)[2] == 1) {
-      eval.points <- unlist(eval.points)
+  band_first <- list()
+  band_second <- list()
+  band_mixed <- list()
 
-      h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[, wrt]))))
+  is_vector <- is.vector(eval.points) || (!is.null(ncol(eval.points)) && ncol(eval.points) == 1)
 
-      if (is.finite(h_step)) {
-        original.eval.points.min <- original.eval.points.min - h_step
-        original.eval.points.max <- h_step + original.eval.points.max
+  if (is_vector) {
+    eval_vec <- as.numeric(unlist(eval.points))
+    k <- length(eval_vec)
+    grid <- apply(x, 2, function(z) LPM.VaR(seq(0, 1, .05), 0, z))
+    if (is.null(dim(grid)) || ncol(grid) != l) grid <- matrix(grid, ncol = l, byrow = FALSE)
+    sampsize <- nrow(grid)
 
-        deriv.points <- apply(x, 2, function(z) LPM.VaR(seq(0, 1, .05), 0, z))
-        if (dim(deriv.points)[2] != dim(x)[2]) {
-          deriv.points <- matrix(deriv.points, ncol = l, byrow = FALSE)
-        }
-        sampsize <- length(seq(0, 1, .05))
+    for (bi in seq_along(h_s)) {
+      H <- h_s[bi]
+      steps <- vapply(eval_vec, function(ev) dydx.step(col, ev, H), numeric(1))
 
-        # base-R replacement for the data.table replicate + set().
-        deriv.points <- do.call(rbind, replicate(3 * length(eval.points), deriv.points, simplify = FALSE))
-        deriv.points[ , as.integer(wrt)] <- rep(as.vector(rbind(original.eval.points.min,
-                                                                eval.points,
-                                                                original.eval.points.max)),
-                                                 each = sampsize, length.out = nrow(deriv.points))
-        colnames(deriv.points) <- colnames(x)
-
-        distance_wrt <- 2 * h_step
-
-        position <- rep(rep(c("l", "m", "u"), each = sampsize), length.out = nrow(deriv.points))
-        id <- rep(1:length(eval.points), each = 3 * sampsize, length.out = nrow(deriv.points))
-
-        if (messages) {
-          message(paste("Currently evaluating the ", nrow(deriv.points), " required points"),
-                  "\r", appendLF = TRUE)
-        }
-
-        estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal",
-                             plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
-        estimates <- as.numeric(estimates)
-
-        # base-R replacement for the data.table by = id plain-mean aggregation.
-        ids <- 1:length(eval.points)
-        lower   <- vapply(ids, function(g) mean(estimates[position == "l" & id == g]), numeric(1))
-        two.f.x <- 2 * vapply(ids, function(g) mean(estimates[position == "m" & id == g]), numeric(1))
-        upper   <- vapply(ids, function(g) mean(estimates[position == "u" & id == g]), numeric(1))
-        rise <- upper - lower
-      } else {
-        kk <- length(unlist(eval.points))
-        lower <- rep(NA_real_, kk); two.f.x <- rep(NA_real_, kk)
-        upper <- rep(NA_real_, kk); rise <- rep(NA_real_, kk); distance_wrt <- NA_real_
+      blocks <- vector("list", 3L * k)
+      position <- character(0)
+      id <- integer(0)
+      for (g in seq_len(k)) {
+        lower_g <- grid; middle_g <- grid; upper_g <- grid
+        lower_g[, wrt]  <- eval_vec[g] - steps[g]
+        middle_g[, wrt] <- eval_vec[g]
+        upper_g[, wrt]  <- eval_vec[g] + steps[g]
+        blocks[[3L * g - 2L]] <- lower_g
+        blocks[[3L * g - 1L]] <- middle_g
+        blocks[[3L * g]]      <- upper_g
+        position <- c(position, rep(c("l", "m", "u"), each = sampsize))
+        id <- c(id, rep(g, 3L * sampsize))
       }
+      deriv.points <- do.call(rbind, blocks)
+      colnames(deriv.points) <- colnames(x)
+      estimates <- stack.est(x, y, deriv.points)
 
-    } else {
-
-      n <- dim(eval.points)[1]
-      original.eval.points <- eval.points
-
-      h_step <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[, wrt]))))
-
-      if (is.finite(h_step)) {
-        original.eval.points.min[ , wrt] <- original.eval.points.min[ , wrt] - h_step
-        original.eval.points.max[ , wrt] <- h_step + original.eval.points.max[ , wrt]
-
-        deriv.points <- rbind(original.eval.points.min,
-                              original.eval.points,
-                              original.eval.points.max)
-
-        if (messages) {
-          message("Currently generating NNS.reg finite difference estimates...bandwidth ",
-                  index, " of ", length(h_s), "\r", appendLF = FALSE)
+      f1 <- numeric(k); f2 <- numeric(k)
+      for (g in seq_len(k)) {
+        lo <- mean(estimates[position == "l" & id == g])
+        mm <- mean(estimates[position == "m" & id == g])
+        up <- mean(estimates[position == "u" & id == g])
+        h <- steps[g]
+        if (is.finite(h) && h != 0) {
+          f1[g] <- (up - lo) / (2 * h)
+          f2[g] <- (up - 2 * mm + lo) / (h ^ 2)
+        } else {
+          f1[g] <- NA_real_; f2[g] <- NA_real_
         }
-
-        estimates <- NNS.reg(x, y, point.est = deriv.points, dim.red.method = "equal",
-                             plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
-        estimates <- as.numeric(estimates)
-
-        lower   <- head(estimates, n)
-        two.f.x <- 2 * estimates[(n + 1):(2 * n)]
-        upper   <- tail(estimates, n)
-        rise <- upper - lower
-        distance_wrt <- 2 * h_step
-      } else {
-        lower <- rep(NA_real_, n); two.f.x <- rep(NA_real_, n)
-        upper <- rep(NA_real_, n); rise <- rep(NA_real_, n); distance_wrt <- NA_real_
       }
+      band_first[[bi]] <- f1
+      band_second[[bi]] <- f2
     }
+    mixed_eval <- if (k == 2L) matrix(eval_vec, nrow = 1L) else NULL
 
-    if (mixed) {
-      if (is.null(dim(eval.points))) {
-        if (length(eval.points) != 2) stop("Mixed Derivatives are only for 2 IV")
-      } else {
-        if (ncol(eval.points) != 2) stop("Mixed Derivatives are only for 2 IV")
-      }
+  } else {
+    eval_mat <- as.matrix(eval.points)
+    if (ncol(eval_mat) != l) stop("Matrix/data-frame `eval.points` must have one column per expanded predictor.")
+    n_eval <- nrow(eval_mat)
 
-      if (!is.null(dim(eval.points))) {
-        h_step_1 <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[ , 1]))))
-        h_step_2 <- abs(mean(diff(LPM.VaR(seq(.01, 1, h), 0, x[ , 2]))))
-        # Corner order per eval point: (+,+), (-,+), (+,-), (-,-); handles
-        # multiple evaluation rows without interleaving (matches the Python port).
-        ep <- as.matrix(eval.points)
-        n_eval <- nrow(ep)
-        mixed.deriv.points <- cbind(
-          rep(ep[,1], each = 4L) + rep(c(h_step_1, -h_step_1, h_step_1, -h_step_1), times = n_eval),
-          rep(ep[,2], each = 4L) + rep(c(h_step_2, h_step_2, -h_step_2, -h_step_2), times = n_eval)
-        )
-        colnames(mixed.deriv.points) <- colnames(ep)
-        mixed.distances <- 4 * h_step_1 * h_step_2
-      } else {
-        h_step_1 <- h_step; h_step_2 <- h_step
-        mixed.deriv.points <- matrix(c(h_step + eval.points,
-                                       eval.points[1] - h_step, h_step + eval.points[2],
-                                       h_step + eval.points[1], eval.points[2] - h_step,
-                                       eval.points - h_step), ncol = 2, byrow = TRUE)
-        mixed.distances <- (2 * h_step) * (2 * h_step)
-      }
+    for (bi in seq_along(h_s)) {
+      H <- h_s[bi]
+      steps <- vapply(seq_len(n_eval), function(i) dydx.step(col, eval_mat[i, wrt], H), numeric(1))
+      finite <- is.finite(steps) & steps != 0
 
-      if (is.finite(h_step_1) && is.finite(h_step_2)) {
-        mixed.estimates <- NNS.reg(x, y, point.est = mixed.deriv.points, dim.red.method = "equal",
-                                   plot = FALSE, threshold = 0, order = NULL, point.only = TRUE, ncores = 1)$Point.est
-        mixed.estimates <- as.numeric(mixed.estimates)
-        z <- matrix(mixed.estimates, ncol = 4, byrow = TRUE)
-        z <- z[,1] + z[,4] - z[,2] - z[,3]
-        mixed_band <- z / mixed.distances
-      } else {
-        mixed_band <- rep(NA_real_, if (is.null(dim(eval.points))) 1L else nrow(eval.points))
-      }
+      lower <- eval_mat; upper <- eval_mat
+      lower[, wrt] <- eval_mat[, wrt] - steps
+      upper[, wrt] <- eval_mat[, wrt] + steps
+      deriv.points <- rbind(lower, eval_mat, upper)
+      colnames(deriv.points) <- colnames(x)
+      estimates <- stack.est(x, y, deriv.points)
 
-      results[[index]] <- list("First"  = as.numeric(unlist(rise / distance_wrt)),
-                               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))),
-                               "Mixed"  = mixed_band)
-    } else {
-      results[[index]] <- list("First"  = as.numeric(unlist(rise / distance_wrt)),
-                               "Second" = as.numeric(unlist((upper - two.f.x + lower) / ((distance_wrt) ^ 2))))
+      lo <- estimates[seq_len(n_eval)]
+      mm <- estimates[n_eval + seq_len(n_eval)]
+      up <- estimates[2L * n_eval + seq_len(n_eval)]
+      f1 <- (up - lo) / (2 * steps)
+      f2 <- (up - 2 * mm + lo) / (steps ^ 2)
+      f1[!finite] <- NA_real_; f2[!finite] <- NA_real_
+      band_first[[bi]] <- f1
+      band_second[[bi]] <- f2
     }
+    mixed_eval <- eval_mat
+  }
+
+  row_nanmean <- function(bands) {
+    m <- do.call(cbind, bands)
+    if (is.null(dim(m))) m <- matrix(m, nrow = 1L)
+    rowMeans(m, na.rm = TRUE)
   }
 
   if (mixed) {
-    final_results <- list("First"  = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
-                          "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE),
-                          "Mixed"  = rowMeans(do.call(cbind, lapply(results, `[[`, 3)), na.rm = TRUE))
-  } else {
-    final_results <- list("First"  = rowMeans(do.call(cbind, lapply(results, `[[`, 1)), na.rm = TRUE),
-                          "Second" = rowMeans(do.call(cbind, lapply(results, `[[`, 2)), na.rm = TRUE))
+    if (is.null(mixed_eval) || ncol(mixed_eval) != 2) stop("Mixed Derivatives are only for 2 IV")
+    for (bi in seq_along(h_s)) {
+      H <- h_s[bi]
+      vals <- vapply(seq_len(nrow(mixed_eval)), function(i) {
+        p <- mixed_eval[i, ]
+        s1 <- dydx.step(x[, 1], p[1], H)
+        s2 <- dydx.step(x[, 2], p[2], H)
+        if (!is.finite(s1) || !is.finite(s2) || s1 == 0 || s2 == 0) return(NA_real_)
+        corners <- rbind(c(p[1] + s1, p[2] + s2),
+                         c(p[1] - s1, p[2] + s2),
+                         c(p[1] + s1, p[2] - s2),
+                         c(p[1] - s1, p[2] - s2))
+        colnames(corners) <- colnames(x)
+        z <- stack.est(x, y, corners)
+        (z[1] + z[4] - z[2] - z[3]) / (4 * s1 * s2)
+      }, numeric(1))
+      band_mixed[[bi]] <- vals
+    }
   }
+
+  final_results <- list("First"  = row_nanmean(band_first),
+                        "Second" = row_nanmean(band_second))
+  if (mixed) final_results$Mixed <- row_nanmean(band_mixed)
 
   if (messages) message("", "\r", appendLF = TRUE)
   return(final_results)
