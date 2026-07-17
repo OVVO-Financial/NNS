@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,9 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><p><img src="articles/images/NNS_hex_sticker.png" width="150" style="border: none; outline: none; margin: 0; padding: 0; display: block;"></p>
+<p><a href="https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version" class="external-link"><img src="https://img.shields.io/badge/NNS%20version-13.2-blue.svg?style=flat-square" alt="packageversion"></a> <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="external-link"><img src="https://img.shields.io/badge/licence-GPL--3-blue.svg" alt="Licence"></a></p>
+<h2 style="margin: 0; padding: 0; border: none; height: 40px;">
+</h2>
 <div class="section level1">
 <div class="page-header"><h1 id="nns">NNS<a class="anchor" aria-label="anchor" href="#nns"></a>
 </h1></div>
@@ -57,7 +60,7 @@
 <p>Companion R-package and datasets to: #### Viole, F. and Nawrocki, D. (2013) “<em>Nonlinear Nonparametric Statistics: Using Partial Moments</em>” (ISBN: 1490523995)</p>
 <p>2nd edition available here: <a href="https://ovvo-financial.github.io/NNS/book/" class="external-link uri">https://ovvo-financial.github.io/NNS/book/</a></p>
 <div class="section level4">
-<h4 id="for-a-direct-quantitative-finance-implementation-of-nns-see-ovvo-labs">For a direct quantitative finance implementation of NNS, see <a href="https://www.ovvolabs.com" class="external-link">OVVO Labs</a>
+<h4 id="for-a-direct-quantitative-finance-implementation-of-nns-see-ovvo-labs">For a direct quantitative finance implementation of NNS, see <a href="https://ovvolabs.com/" class="external-link">OVVO Labs</a>
 <a class="anchor" aria-label="anchor" href="#for-a-direct-quantitative-finance-implementation-of-nns-see-ovvo-labs"></a>
 </h4>
 </div>
@@ -69,7 +72,7 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p><a href="https://cran.r-project.org/package=NNS" class="external-link"><img src="https://img.shields.io/badge/NNS--blue.svg" alt="NNS"></a> requires <a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg" alt="minimal R version"></a>. See <a href="https://cran.r-project.org/" class="external-link uri">https://cran.r-project.org/</a> or <a href="https://cran.r-project.org/package=installr" class="external-link"><img src="https://img.shields.io/badge/installr-0.18.0-blue.svg" alt="installr"></a> for upgrading to the latest R release.</p>
+<p><a href="https://cran.r-project.org/package=NNS" class="external-link"><img src="https://img.shields.io/badge/NNS--blue.svg" alt="NNS"></a> requires <a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg" alt="minimal R version"></a>. See <a href="https://cran.r-project.org/" class="external-link uri">https://cran.r-project.org/</a> or <a href="https://cran.r-project.org/package=installr" class="external-link"><img src="https://img.shields.io/badge/installr-0.18.0-blue.svg" alt="installr"></a> for upgrading to latest R release.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span>; <span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'OVVO-Financial/NNS'</span>, ref <span class="op">=</span> <span class="st">"NNS-Beta-Version"</span><span class="op">)</span></span></code></pre></div>
 <p>or via CRAN</p>
@@ -79,8 +82,7 @@
 <div class="section level2">
 <h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
 </h2>
-<p>The nine numbered files under <a href="vignettes/"><code>vignettes/</code></a> are the canonical NNS example curriculum and the source of truth for companion language ports. Python follows the same 01–09 sequence while using Python-native syntax and containers.</p>
-<p>See <a href="examples/index.html"><code>examples/index.md</code></a> for the canonical cross-language mapping plus applied studies in statistics, regression, machine learning, forecasting, and econometrics.</p>
+<p>Please see <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md" class="external-link uri">https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md</a> for basic partial moments equivalences, hands-on statistics, machine learning and econometrics examples.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
@@ -89,7 +91,7 @@
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 13.1},
+    note = {R package version 13.2},
     url = {https://CRAN.R-project.org/package=NNS},
   }</code></pre>
 </div>
