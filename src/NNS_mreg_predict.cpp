@@ -358,7 +358,7 @@ struct PredictPathWorker : public Worker {
   RVector<double> mins;
   RVector<double> maxs;
   RMatrix<double> out;
-  const int kmax, dist_code, n, p;
+  const int kmax, dist_code, n, p, only_k;
   const bool is_class;
   const RankComponents& rank;
   std::vector<int> active;
@@ -367,10 +367,11 @@ struct PredictPathWorker : public Worker {
   PredictPathWorker(const NumericMatrix& rpm_x_, const NumericVector& yhat_,
                     const NumericMatrix& Xtest_, int kmax_, int dist_code_,
                     const NumericVector& mins_, const NumericVector& maxs_,
-                    bool is_class_, const RankComponents& rank_, NumericMatrix& out_)
+                    bool is_class_, const RankComponents& rank_, NumericMatrix& out_,
+                    int only_k_ = 0)
       : rpm_x(rpm_x_), yhat(yhat_), Xtest(Xtest_), mins(mins_), maxs(maxs_),
         out(out_), kmax(kmax_), dist_code(dist_code_), n(rpm_x_.nrow()),
-        p(rpm_x_.ncol()), is_class(is_class_), rank(rank_) {
+        p(rpm_x_.ncol()), only_k(only_k_), is_class(is_class_), rank(rank_) {
     for (int j = 0; j < p; ++j) {
       const double range = maxs[j] - mins[j];
       if (R_finite(range) && range > 0.0) { active.push_back(j); inv_range.push_back(1.0 / range); }
@@ -433,16 +434,35 @@ struct PredictPathWorker : public Worker {
     std::vector<int> idx(n);
     std::vector<double> student(kmax), inverse(kmax), normal(kmax), rbf(kmax), total(kmax);
     std::vector<double> cls(kmax), cls_totals(kmax);
+    // Total-order comparator (distance, then original index) so partial
+    // selection reproduces std::stable_sort with `d[a] < d[b]` byte-for-byte.
+    auto cmp = [&d](int a, int b) { return d[a] < d[b] || (d[a] == d[b] && a < b); };
     for (std::size_t r = begin; r < end; ++r) {
       distances_for_row(r, d);
       for (int i = 0; i < n; ++i) idx[i] = i;
-      std::stable_sort(idx.begin(), idx.end(), [&d](int a, int b) { return d[a] < d[b]; });
+      // Retain only the kmax nearest rows: O(n + kmax log kmax) instead of a
+      // full O(n log n) sort.
+      if (kmax < n) {
+        std::nth_element(idx.begin(), idx.begin() + kmax, idx.end(), cmp);
+        std::sort(idx.begin(), idx.begin() + kmax, cmp);
+      } else {
+        std::sort(idx.begin(), idx.end(), cmp);
+      }
       for (int i = 0; i < kmax; ++i) { dk[i] = d[idx[i]]; yk[i] = yhat[idx[i]]; }
-      out(r, 0) = min_ties(d, tied, one_weights);
-      for (int k = 2; k <= kmax; ++k) {
-        out(r, k - 1) = predict_sorted_k_noalloc(dk, yk, k, is_class, rank,
-                                                 student, inverse, normal, rbf,
-                                                 total, cls, cls_totals);
+      if (only_k > 0) {
+        // Single selected n.best: emit just the k-th prediction, no 1..k path.
+        out(r, 0) = (only_k == 1)
+            ? min_ties(d, tied, one_weights)
+            : predict_sorted_k_noalloc(dk, yk, only_k, is_class, rank,
+                                       student, inverse, normal, rbf,
+                                       total, cls, cls_totals);
+      } else {
+        out(r, 0) = min_ties(d, tied, one_weights);
+        for (int k = 2; k <= kmax; ++k) {
+          out(r, k - 1) = predict_sorted_k_noalloc(dk, yk, k, is_class, rank,
+                                                   student, inverse, normal, rbf,
+                                                   total, cls, cls_totals);
+        }
       }
     }
   }
@@ -496,8 +516,22 @@ NumericVector NNS_mreg_predict_v2_cpp(const NumericMatrix& rpm_x,
                                       const NumericVector& maxs,
                                       bool is_class,
                                       int nthreads) {
-  NumericMatrix path = NNS_mreg_predict_path_v2_cpp(rpm_x, yhat, Xtest, k, dist_code, mins, maxs, is_class, nthreads);
-  return path(_, k - 1);
+  const int n = rpm_x.nrow(), p = rpm_x.ncol(), m = Xtest.nrow();
+  if (yhat.size() != n) stop("yhat length must equal nrow(rpm_x)");
+  if (Xtest.ncol() != p) stop("Xtest and rpm_x must have the same columns");
+  if (mins.size() != p || maxs.size() != p) stop("mins/maxs must have one value per column");
+  if (k < 1) stop("k must be >= 1");
+  validate_dist_code(dist_code);
+  if (k > n) k = n;
+  // Genuine single-k kernel: select the k nearest rows and emit only the k-th
+  // prediction, instead of computing the whole 1..k path and discarding it.
+  RankComponents rank(k);
+  NumericMatrix out(m, 1);
+  PredictPathWorker worker(rpm_x, yhat, Xtest, k, dist_code, mins, maxs,
+                           is_class, rank, out, /*only_k=*/k);
+  const int threads = std::max(1, nthreads);
+  if (threads == 1 || m < 2) worker(0, m); else parallelFor(0, m, worker, 1, threads);
+  return out(_, 0);
 }
 
 // dist_code: 0 = native NNS, 1 = L2, 2 = L1, 3 = FACTOR (Hamming over encoded columns).
@@ -597,10 +631,16 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       continue;
     }
 
-    // stable ascending order: distance, then original index
+    // Retain only the kk nearest rows in stable (distance, then original
+    // index) order via partial selection - O(n + kk log kk) per query.
     for (int i = 0; i < n; ++i) idx[i] = i;
-    std::stable_sort(idx.begin(), idx.end(),
-                     [&d](int a, int b) { return d[a] < d[b]; });
+    auto cmp = [&d](int a, int b) { return d[a] < d[b] || (d[a] == d[b] && a < b); };
+    if (kk < n) {
+      std::nth_element(idx.begin(), idx.begin() + kk, idx.end(), cmp);
+      std::sort(idx.begin(), idx.begin() + kk, cmp);
+    } else {
+      std::sort(idx.begin(), idx.end(), cmp);
+    }
 
     std::vector<double> dk(kk), yk(kk);
     for (int i = 0; i < kk; ++i) {
