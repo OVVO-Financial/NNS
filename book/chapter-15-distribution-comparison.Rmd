@@ -318,7 +318,7 @@ legend("topright", legend = c("LPM degree 0 (discrete)",
 ```
 
 <center>
-![Figure 14.1. Degree-0 versus degree-1 LPM ratio convergence at the sample mean: degree-0 wanders while degree-1 remains pinned at 0.5.](images/ch14_lpm0_lpm1_diff.png)
+![Figure 15.1. Degree-0 versus degree-1 LPM ratio convergence at the sample mean: degree-0 wanders while degree-1 remains pinned at 0.5.](images/ch15_lpm0_lpm1_diff.png)
 </center>
 
 The red line wanders; the blue line is flat at 0.5 for every $n \ge 1$.

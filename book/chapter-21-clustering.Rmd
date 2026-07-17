@@ -319,7 +319,7 @@ plot_nns_part(part)   # Voronoi view of the directional partition
 ```
 
 <center>
-![Figure 20.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The directional partition discovers the natural group structure without a prespecified count; k-means forces all observations into exactly three spherical regions regardless of whether three is the right number.](images/ch20_kmeans_comp.png)
+![Figure 21.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The directional partition discovers the natural group structure without a prespecified count; k-means forces all observations into exactly three spherical regions regardless of whether three is the right number.](images/ch21_kmeans_comp.png)
 </center>
 
 ---
