@@ -1217,8 +1217,8 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 <span id="cb48-6"><a href="copula-interpretation.html#cb48-6" tabindex="-1"></a>)</span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch11_raw_copula.png" alt="Figure 11.1. Co-LPM surface in original (x,y) space (red), visualizing joint downside structure before copula transformation." />
-<div class="figcaption">Figure 11.1. Co-LPM surface in original <span class="math inline">\((x,y)\)</span> space (red), visualizing joint downside structure before copula transformation.</div>
+<img src="images/ch12_raw_copula.png" alt="Figure 12.1. Co-LPM surface in original (x,y) space (red), visualizing joint downside structure before copula transformation." />
+<div class="figcaption">Figure 12.1. Co-LPM surface in original <span class="math inline">\((x,y)\)</span> space (red), visualizing joint downside structure before copula transformation.</div>
 </div>
 </center>
 <p>In the call <code>Co.LPM(0, z[,1], z[,2], z[,1], z[,2])</code>, the argument order is <code>(degree, x, y, target.x, target.y)</code>. Setting <code>degree = 0</code> produces the probability-level co-lower partial moment, and reusing <code>z[,1]</code>/<code>z[,2]</code> as both variables and targets evaluates the surface over the full grid of benchmark pairs. The visualization uses <code>rgl::plot3d</code>, which produces an interactive three-dimensional plot.</p>
@@ -1237,8 +1237,8 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 <span id="cb50-6"><a href="copula-interpretation.html#cb50-6" tabindex="-1"></a>)</span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch11_transformed_copula.png" alt="Figure 11.2. Co-LPM surface in copula/probability space [0,1]^2 (blue), showing the same dependence geometry after marginal probability transformation." />
-<div class="figcaption">Figure 11.2. Co-LPM surface in copula/probability space <span class="math inline">\([0,1]^2\)</span> (blue), showing the same dependence geometry after marginal probability transformation.</div>
+<img src="images/ch12_transformed_copula.png" alt="Figure 12.2. Co-LPM surface in copula/probability space [0,1]^2 (blue), showing the same dependence geometry after marginal probability transformation." />
+<div class="figcaption">Figure 12.2. Co-LPM surface in copula/probability space <span class="math inline">\([0,1]^2\)</span> (blue), showing the same dependence geometry after marginal probability transformation.</div>
 </div>
 </center>
 <p>The resulting surface lies within the unit square <span class="math inline">\([0,1]^2\)</span>, which represents the <strong>copula domain</strong>.</p>

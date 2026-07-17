@@ -1258,8 +1258,8 @@ x_t^* = y_{(R_t)}
 <span id="cb77-14"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#cb77-14" tabindex="-1"></a>boots[<span class="st">&quot;replicates&quot;</span>]   <span class="co"># (len(air) x 100) matrix of bootstrap paths</span></span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch17_meboot_orig.png" alt="Figure 17.1. NNS.meboot replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths." />
-<div class="figcaption">Figure 17.1. <code>NNS.meboot</code> replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths.</div>
+<img src="images/ch20_meboot_orig.png" alt="Figure 20.1. NNS.meboot replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths." />
+<div class="figcaption">Figure 20.1. <code>NNS.meboot</code> replicates with ensemble mean (black) and original series (red), illustrating dependence-preserving bootstrap paths.</div>
 </div>
 </center>
 </div>
@@ -1384,8 +1384,8 @@ x_t^* = y_{(R_t)}
 <span id="cb83-9"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#cb83-9" tabindex="-1"></a>correlations <span class="op">=</span> [np.corrcoef(X[:, i], xt)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(X.shape[<span class="dv">1</span>])]</span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch17_iid_mc_sim.png" alt="Figure 17.2. Standard iid Monte Carlo correlation histogram (cor(X, x_t)), typically concentrated near zero." />
-<div class="figcaption">Figure 17.2. Standard iid Monte Carlo correlation histogram (<code>cor(X, x_t)</code>), typically concentrated near zero.</div>
+<img src="images/ch20_iid_mc_sim.png" alt="Figure 20.2. Standard iid Monte Carlo correlation histogram (cor(X, x_t)), typically concentrated near zero." />
+<div class="figcaption">Figure 20.2. Standard iid Monte Carlo correlation histogram (<code>cor(X, x_t)</code>), typically concentrated near zero.</div>
 </div>
 </center>
 <p>The resulting histogram is tightly centered on zero, confirming that standard MCS cannot generate strongly correlated or anti-correlated scenario paths.</p>
@@ -1431,8 +1431,8 @@ x_t^* = y_{(R_t)}
 <span id="cb85-15"><a href="synthetic-data-and-maximum-entropy-bootstrap.html#cb85-15" tabindex="-1"></a>correlations <span class="op">=</span> [np.corrcoef(sim[:, i], xt)[<span class="dv">0</span>, <span class="dv">1</span>] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(sim.shape[<span class="dv">1</span>])]</span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch17_meboot_mc_sim.png" alt="Figure 17.3. NNS.meboot Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider [-1,1] range." />
-<div class="figcaption">Figure 17.3. <code>NNS.meboot</code> Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider <span class="math inline">\([-1,1]\)</span> range.</div>
+<img src="images/ch20_meboot_mc_sim.png" alt="Figure 20.3. NNS.meboot Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider [-1,1] range." />
+<div class="figcaption">Figure 20.3. <code>NNS.meboot</code> Monte Carlo correlation histogram after vectorized dependence targeting, spanning a wider <span class="math inline">\([-1,1]\)</span> range.</div>
 </div>
 </center>
 <p>The resulting distribution of correlations is approximately uniform across <span class="math inline">\([-1, 1]\)</span>, confirming that the <code>rho</code>-vectorized approach provides a fundamentally richer simulation basis than standard iid MCS.</p>

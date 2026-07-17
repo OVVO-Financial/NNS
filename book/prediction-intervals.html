@@ -1327,8 +1327,8 @@ P\bigl(\text{LPM.VaR}(\alpha/2, d, X) \le X_{n+1} \le \text{UPM.VaR}(\alpha/2, d
 <p>Conditional intervals derived from <code>NNS.reg</code> are developed in detail in Chapter 21, where the regression estimator is introduced formally and interpreted geometrically.</p>
 <p>For continuity, the key idea is that <code>NNS.reg(..., confidence.interval = ...)</code> builds local intervals from partition-specific empirical distributions. In this chapter, we focus on the unconditional interval mechanics (<code>LPM.VaR</code> / <code>UPM.VaR</code>) that those later conditional constructions rely on.</p>
 <div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="prediction-intervals.html#cb70-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb70-2"><a href="prediction-intervals.html#cb70-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb70-3"><a href="prediction-intervals.html#cb70-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(pi <span class="sc">*</span> x_train) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)</span>
+<span id="cb70-2"><a href="prediction-intervals.html#cb70-2" tabindex="-1"></a>x_train <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb70-3"><a href="prediction-intervals.html#cb70-3" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">sin</span>(pi <span class="sc">*</span> x_train) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)</span>
 <span id="cb70-4"><a href="prediction-intervals.html#cb70-4" tabindex="-1"></a></span>
 <span id="cb70-5"><a href="prediction-intervals.html#cb70-5" tabindex="-1"></a><span class="fu">NNS.reg</span>(<span class="at">x =</span> x_train, <span class="at">y =</span> y_train, <span class="at">order =</span> <span class="cn">NULL</span>, <span class="at">confidence.interval =</span> .<span class="dv">95</span>)</span></code></pre></div>
 <p>In Python:</p>
@@ -1343,8 +1343,8 @@ P\bigl(\text{LPM.VaR}(\alpha/2, d, X) \le X_{n+1} \le \text{UPM.VaR}(\alpha/2, d
 <span id="cb71-9"><a href="prediction-intervals.html#cb71-9" tabindex="-1"></a>fit[<span class="st">&quot;pred.int&quot;</span>]   <span class="co"># local interval bounds from partition-specific distributions</span></span></code></pre></div>
 <center>
 <div class="float">
-<img src="images/ch15_reg_conf_int.png" alt="Figure 15.1. NNS.reg(..., confidence.interval = 0.95) visualization with nonlinear fit and interval bands estimated from local partitions." />
-<div class="figcaption">Figure 15.1. <code>NNS.reg(..., confidence.interval = 0.95)</code> visualization with nonlinear fit and interval bands estimated from local partitions.</div>
+<img src="images/ch17_reg_conf_int.png" alt="Figure 17.1. NNS.reg(..., confidence.interval = 0.95) visualization with nonlinear fit and interval bands estimated from local partitions." />
+<div class="figcaption">Figure 17.1. <code>NNS.reg(..., confidence.interval = 0.95)</code> visualization with nonlinear fit and interval bands estimated from local partitions.</div>
 </div>
 </center>
 </div>
