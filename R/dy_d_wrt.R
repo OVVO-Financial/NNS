@@ -129,8 +129,7 @@ dy.d_ <- function(x, y, wrt,
 
   results <- vector(mode = "list", length(h_s))
 
-  for(h in h_s){
-    index <- which(h == h_s)[1]
+  for(index in seq_along(h_s)){
     if(is.vector(eval.points) || ncol(eval.points) == 1){
       eval.points <- unlist(eval.points)
 
@@ -226,10 +225,15 @@ dy.d_ <- function(x, y, wrt,
         h_step_2 <- gravity(abs(diff(x[,2]))) * h_s[index]
         if(h_step_2==0) h_step_2 <- ((abs((max(x[,2]) - min(x[,2])) ))/length(x[,2])) * h_s[index]
 
-        mixed.deriv.points <- matrix(c(h_step_1 + eval.points[,1], h_step_2 + eval.points[,2],
-                                       eval.points[,1] - h_step_1, h_step_2 + eval.points[,2],
-                                       h_step_1 + eval.points[,1], eval.points[,2] - h_step_2,
-                                       eval.points[,1] - h_step_1, eval.points[,2] - h_step_2), ncol = 2, byrow = TRUE)
+        ep <- as.matrix(eval.points)
+        n_eval <- nrow(ep)
+        mixed.deriv.points <- cbind(
+          rep(ep[,1], each = 4L) +
+            rep(c(h_step_1, -h_step_1, h_step_1, -h_step_1), times = n_eval),
+          rep(ep[,2], each = 4L) +
+            rep(c(h_step_2, h_step_2, -h_step_2, -h_step_2), times = n_eval)
+        )
+        colnames(mixed.deriv.points) <- colnames(ep)
 
         mixed.distances <- 4 * (h_step_1  * h_step_2)
 
