@@ -367,8 +367,11 @@ struct PredictPathWorker : public Worker {
   // for the range-normalised metrics the distance is a strictly increasing
   // function of |coord - t|, so neighbours are found in O(log n + k) per query.
   bool is_1d = false;
-  int axis = -1, n_active = 0;
-  double inv_range0 = 0.0;
+  int axis = -1;
+  // Aggregated per-column range factors so the 1-D distance is mathematically
+  // identical to the generic path even when duplicated columns carry unequal
+  // supplied ranges: sum(inv_range) and sum(inv_range^2) over the active columns.
+  double sum_inv = 0.0, sum_inv2 = 0.0;
   std::vector<double> sc;   // RPM coordinate sorted ascending
   std::vector<int> so;      // original indices for the sorted order
 
@@ -397,8 +400,10 @@ struct PredictPathWorker : public Worker {
       }
       if (identical) {
         is_1d = true;
-        n_active = static_cast<int>(active.size());
-        inv_range0 = inv_range[0];
+        for (std::size_t a = 0; a < active.size(); ++a) {
+          sum_inv += inv_range[a];
+          sum_inv2 += inv_range[a] * inv_range[a];
+        }
         std::vector<double> coordv(n);
         for (int i = 0; i < n; ++i) coordv[i] = rpm_x(i, axis);
         so.resize(n);
@@ -413,10 +418,14 @@ struct PredictPathWorker : public Worker {
   }
 
   double distance_one_1d(int i, double t) const {
-    const double z = (rpm_x(i, axis) - t) * inv_range0;
-    if (dist_code == 0) return n_active * (std::fabs(z) + z * z);
-    if (dist_code == 1) return std::sqrt(static_cast<double>(n_active) * z * z);
-    return n_active * std::fabs(z);  // dist_code == 2
+    // Duplicated coordinate: z_j = delta * inv_range[j], so the generic
+    // per-column sums collapse to closed forms in delta and the aggregated
+    // range factors (matches NNS_mreg_predict_cpp / the R reference exactly).
+    const double delta = rpm_x(i, axis) - t;
+    const double ad = std::fabs(delta);
+    if (dist_code == 0) return ad * sum_inv + delta * delta * sum_inv2;  // NNS
+    if (dist_code == 1) return ad * std::sqrt(sum_inv2);                 // L2
+    return ad * sum_inv;                                                 // L1
   }
 
   void topk_1d(double t, int k, std::vector<int>& out_orig) const {
