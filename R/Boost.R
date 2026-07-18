@@ -1058,15 +1058,29 @@ NNS.boost <- function(IVs.train,
 #' @keywords internal
 #' @noRd
 .nns_boost_plot_feature_frequency <- function(feature.frequency) {
+  sorted <- sort(feature.frequency, decreasing = FALSE)
+
+  # Widen this panel's left margin so horizontal las = 1 labels are not
+  # clipped by the default margin. The change is scoped to this helper (and
+  # margins are per-panel, so the surrounding mfrow layout is untouched).
+  old_mai <- graphics::par("mai")
+  on.exit(graphics::par(mai = old_mai), add = TRUE)
+  label_margin <- max(graphics::strwidth(names(sorted), units = "inches") + 0.4,
+                      na.rm = TRUE)
+  graphics::par(mai = c(old_mai[1L],
+                        max(old_mai[2L], label_margin),
+                        old_mai[3L],
+                        old_mai[4L]))
+
   graphics::barplot(
-    sort(feature.frequency, decreasing = FALSE),
+    sorted,
     horiz = TRUE,
     col = "steelblue",
     main = "Feature Frequency in Final Estimate",
     xlab = "Frequency",
     las = 1
   )
-  
+
   invisible(NULL)
 }
 
