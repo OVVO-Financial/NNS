@@ -62,26 +62,6 @@
 #' @export
 
 
-# -----------------------------------------------------------------------------
-# Reconciled dy.d_ : the original NNS 0.5.7 finite-difference design
-# (Vinod & Viole 2020, SSRN 3681436) reconciled with the current NNS.reg engine.
-# Two changes make the estimates uniform across identically-distributed
-# regressors and independent of the retired data.table machinery:
-#   * h_step shares the dy.dx() logic - a locally-adaptive step centred on the
-#     evaluation point's percentile:
-#         p      <- LPM.ratio(1, eval, x[, wrt])
-#         h_step <- LPM.VaR(p + H, 1, x[, wrt]) - LPM.VaR(p - H, 1, x[, wrt])
-#     (no cumulative window). This removes the cross-regressor scatter.
-#   * estimates come from NNS.stack on the equal-weight synthetic regressor X*
-#     via the increased-dimension trick cbind(X*, X*), with method = c(1, 2),
-#     dim.red.method = "equal", order = "max", folds = 5.  The cross-validated
-#     n.best regularises the (sharper) current engine back toward the paper's
-#     regime.
-# Bandwidths follow v0.5.7: h_s = 1/log(length(x), c(2, 10)); c(h_s, 10*h_s);
-# doubled when NNS.dep(x[, wrt], y) < 0.5.  First = (upper - lower)/(2*h_step);
-# Second = (upper - 2*f(x) + lower)/h_step^2 (matching dy.dx); rowMeans(na.rm)
-# blend across bandwidths.
-# -----------------------------------------------------------------------------
 
 dy.d_ <- function(x, y, wrt,
                   eval.points = "obs",
@@ -167,10 +147,7 @@ dy.d_ <- function(x, y, wrt,
 
   is_vector <- is.vector(eval.points) || (!is.null(ncol(eval.points)) && ncol(eval.points) == 1)
 
-  # The NNS.stack fit (CV n.best, dimension-reduction coefficients, blend weight)
-  # depends only on (x, y), never on the evaluation points, so every bandwidth -
-  # and the mixed-derivative corners - are predicted from a single fit. Gather
-  # every test block, run ONE NNS.stack, then slice it back.
+
   chunks <- list(); csize <- integer(0)
   push <- function(block) {
     i <- length(chunks) + 1L
