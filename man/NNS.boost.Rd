@@ -73,7 +73,7 @@ NNS.boost(
 \item{folds}{integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class coding \code{$class.levels}.  Classification results are returned in the response's own coding: a factor or character \code{DV.train} yields the original class labels, and a numeric \code{DV.train} yields its original numeric class values.
+Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Classification results are numeric: a factor or character \code{DV.train} yields integer class codes with a base category of 1 (label recoverable as \code{class.levels[results]}), and a numeric \code{DV.train} yields its original numeric class values.
 }
 \description{
 Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.
@@ -93,8 +93,11 @@ Ensemble method for classification using the NNS multivariate regression \link{N
  epochs = 100, learner.trials = 100,
  type = "CLASS", depth = NULL, balance = TRUE)
 
- ## Test accuracy (results carry the original factor labels)
- mean(a$results == iris[141:150, 5])
+ ## Test accuracy
+ mean(a$results == as.numeric(iris[141:150, 5]))
+
+ ## Recover the labels
+ a$class.levels[a$results]
  }
 
 }

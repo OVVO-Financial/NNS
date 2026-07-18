@@ -62,14 +62,16 @@ test_that("NNS.boost iris run has probability threshold, epochs, and a replicate
   # epochs still ran.
   expect_true(any(grepl("% of epochs", msgs, fixed = TRUE)))
 
-  # 7-9: results and feature outputs. Classification results carry the
-  # response's original factor labels, never the internal 1..K codes.
+  # 7-9: results and feature outputs. Classification results keep the
+  # historical numeric coding (integer codes, base category 1) and
+  # $class.levels recovers the label for each code.
   expect_length(a$results, 10L)
-  expect_s3_class(a$results, "factor")
-  expect_identical(levels(a$results), levels(iris$Species))
-  expect_true(all(as.character(a$results) %in% levels(iris$Species)))
+  expect_true(is.numeric(a$results))
+  expect_true(all(a$results %in% seq_along(levels(iris$Species))))
   expect_identical(a$class.levels, levels(iris$Species))
-  expect_gte(mean(a$results == iris[141:150, 5]), 0.8)
+  expect_gte(mean(a$results == as.numeric(iris[141:150, 5])), 0.8)
+  expect_gte(mean(a$class.levels[a$results] ==
+                    as.character(iris[141:150, 5])), 0.8)
   expect_equal(sum(a$feature.weights), 1)
   expect_true(all(names(a$feature.frequency) %in% names(iris)[1:4]))
   expect_true(length(a$feature.frequency) >= 1L)
