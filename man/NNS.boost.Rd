@@ -24,7 +24,8 @@ NNS.boost(
   pred.int = NULL,
   status = TRUE,
   seed = 123L,
-  dist = NULL
+  dist = NULL,
+  folds = 5
 )
 }
 \arguments{
@@ -40,7 +41,7 @@ NNS.boost(
 
 \item{learner.trials}{integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.}
 
-\item{epochs}{integer; \code{2*length(DV.train)} (default) Total number of feature combinations to run.}
+\item{epochs}{integer; \code{2*length(DV.train)} (default) Number of repeated holdout re-evaluations of the learner-trial feature subsets that pass the accuracy threshold.}
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.}
 
@@ -48,18 +49,18 @@ NNS.boost(
 
 \item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
-\item{threshold}{numeric; \code{NULL} (default) Sets the \code{obj.fn} threshold to keep feature combinations.}
+\item{threshold}{numeric [0, 1]; \code{NULL} (default) Probability supplied to \link{LPM.VaR} over the learner-trial objective distribution to determine the objective cutoff for keeping feature combinations.  Defaults to 0.80 when \code{objective = "max"} and 0.20 when \code{objective = "min"}.  It is not a literal objective-score cutoff.}
 
 \item{obj.fn}{expression;
 \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.}
 
 \item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
-\item{extreme}{logical; \code{FALSE} (default) Uses the maximum (minimum) \code{threshold} obtained from the \code{learner.trials}, rather than the upper (lower) quintile level for maximization (minimization) \code{objective}.}
+\item{extreme}{logical; \code{FALSE} (default) Sets the \link{LPM.VaR} probability to 1 (0) for maximization (minimization) \code{objective}, i.e. the most extreme learner-trial objective value becomes the cutoff.  Overrides \code{threshold}.}
 
 \item{features.only}{logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.}
 
-\item{feature.importance}{logical; \code{TRUE} (default) Plots the frequency of features used in the final estimate.}
+\item{feature.importance}{logical; \code{TRUE} (default) Draws a two-panel diagnostic: the learner-trial objective distribution with its \link{LPM.VaR} cutoff, and the frequency of features used in the final estimate.}
 
 \item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.}
 
@@ -68,6 +69,8 @@ NNS.boost(
 \item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
 
 \item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.}
+
+\item{folds}{integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
