@@ -61,7 +61,8 @@
 <span>  pred.int <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  status <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123L</span>,</span>
-<span>  dist <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  dist <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  folds <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,7 +95,7 @@
 
 
 <dt id="arg-epochs">epochs<a class="anchor" aria-label="anchor" href="#arg-epochs"></a></dt>
-<dd><p>integer; <code>2*length(DV.train)</code> (default) Total number of feature combinations to run.</p></dd>
+<dd><p>integer; <code>2*length(DV.train)</code> (default) Number of repeated holdout re-evaluations of the learner-trial feature subsets that pass the accuracy threshold.</p></dd>
 
 
 <dt id="arg-cv-size">CV.size<a class="anchor" aria-label="anchor" href="#arg-cv-size"></a></dt>
@@ -110,7 +111,7 @@
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
-<dd><p>numeric; <code>NULL</code> (default) Sets the <code>obj.fn</code> threshold to keep feature combinations.</p></dd>
+<dd><p>numeric [0, 1]; <code>NULL</code> (default) Probability supplied to <a href="LPM.VaR.html">LPM.VaR</a> over the learner-trial objective distribution to determine the objective cutoff for keeping feature combinations.  Defaults to 0.80 when <code>objective = "max"</code> and 0.20 when <code>objective = "min"</code>.  It is not a literal objective-score cutoff.</p></dd>
 
 
 <dt id="arg-obj-fn">obj.fn<a class="anchor" aria-label="anchor" href="#arg-obj-fn"></a></dt>
@@ -123,7 +124,7 @@
 
 
 <dt id="arg-extreme">extreme<a class="anchor" aria-label="anchor" href="#arg-extreme"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Uses the maximum (minimum) <code>threshold</code> obtained from the <code>learner.trials</code>, rather than the upper (lower) quintile level for maximization (minimization) <code>objective</code>.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) Sets the <a href="LPM.VaR.html">LPM.VaR</a> probability to 1 (0) for maximization (minimization) <code>objective</code>, i.e. the most extreme learner-trial objective value becomes the cutoff.  Overrides <code>threshold</code>.</p></dd>
 
 
 <dt id="arg-features-only">features.only<a class="anchor" aria-label="anchor" href="#arg-features-only"></a></dt>
@@ -131,7 +132,7 @@
 
 
 <dt id="arg-feature-importance">feature.importance<a class="anchor" aria-label="anchor" href="#arg-feature-importance"></a></dt>
-<dd><p>logical; <code>TRUE</code> (default) Plots the frequency of features used in the final estimate.</p></dd>
+<dd><p>logical; <code>TRUE</code> (default) Draws a two-panel diagnostic: the learner-trial objective distribution with its <a href="LPM.VaR.html">LPM.VaR</a> cutoff, and the frequency of features used in the final estimate.</p></dd>
 
 
 <dt id="arg-pred-int">pred.int<a class="anchor" aria-label="anchor" href="#arg-pred-int"></a></dt>
@@ -149,10 +150,14 @@
 <dt id="arg-dist">dist<a class="anchor" aria-label="anchor" href="#arg-dist"></a></dt>
 <dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated <a href="NNS.reg.html">NNS.reg</a> and <a href="NNS.stack.html">NNS.stack</a> calls. <code>dist = NULL</code> is the default and selects the native blended NNS distance; <code>dist = "NNS"</code> is an explicit alias for the default.</p></dd>
 
+
+<dt id="arg-folds">folds<a class="anchor" aria-label="anchor" href="#arg-folds"></a></dt>
+<dd><p>integer; 5 (default) Number of cross-validation <code>folds</code> passed to the final <a href="NNS.stack.html">NNS.stack</a> call.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a vector of fitted values for the dependent variable test set <code>$results</code>, prediction intervals <code>$pred.int</code>, and the final feature loadings <code>$feature.weights</code>, along with final feature frequencies <code>$feature.frequency</code>.</p>
+    <p>Returns a vector of fitted values for the dependent variable test set <code>$results</code>, prediction intervals <code>$pred.int</code>, the final feature loadings <code>$feature.weights</code>, final feature frequencies <code>$feature.frequency</code>, and (for classification) the class labels <code>$class.levels</code>.  Classification results are numeric: a factor or character <code>DV.train</code> yields integer class codes with a base category of 1 (label recoverable as <code>class.levels[results]</code>), and a numeric <code>DV.train</code> yields its original numeric class values.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -180,6 +185,9 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co">## Test accuracy</span></span></span>
 <span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">a</span><span class="op">$</span><span class="va">results</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="fl">141</span><span class="op">:</span><span class="fl">150</span>, <span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span> <span class="co">## Recover the labels</span></span></span>
+<span class="r-in"><span> <span class="va">a</span><span class="op">$</span><span class="va">class.levels</span><span class="op">[</span><span class="va">a</span><span class="op">$</span><span class="va">results</span><span class="op">]</span></span></span>
 <span class="r-in"><span> <span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
