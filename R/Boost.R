@@ -25,7 +25,7 @@
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #' @param folds integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, and the final feature loadings \code{$feature.weights}, along with final feature frequencies \code{$feature.frequency}.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class coding \code{$class.levels}.  Classification results are returned in the response's own coding: a factor or character \code{DV.train} yields the original class labels, and a numeric \code{DV.train} yields its original numeric class values.
 #'
 #' @note
 #' \itemize{
@@ -43,8 +43,8 @@
 #'  epochs = 100, learner.trials = 100,
 #'  type = "CLASS", depth = NULL, balance = TRUE)
 #'
-#'  ## Test accuracy
-#'  mean(a$results == as.numeric(iris[141:150, 5]))
+#'  ## Test accuracy (results carry the original factor labels)
+#'  mean(a$results == iris[141:150, 5])
 #'  }
 #'
 #' @export
@@ -956,20 +956,19 @@ NNS.boost <- function(IVs.train,
     estimates_code <- pmin(pmax(estimates_code, 1L), length(class_values))
     estimates_code <- as.integer(round(estimates_code))
     
-    if (response_was_numeric) {
-      estimates <- class_values[estimates_code]
-    } else {
-      estimates <- estimates_code
-    }
+    # Classification results round-trip to the caller's own class coding:
+    # numeric responses recover their original numeric class values, factor
+    # and character responses recover their original labels (never the
+    # internal 1..K codes).
+    estimates <- .nns_boost_decode_class(estimates_code,
+                                         class_values,
+                                         original_response)
     
     if (!is.null(pred_int_out)) {
       pred_int_out <- as.data.frame(pred_int_out)
       pred_int_out[] <- lapply(pred_int_out, function(v) {
         code <- pmin(pmax(as.integer(round(v)), 1L), length(class_values))
-        if (response_was_numeric)
-          class_values[code]
-        else
-          code
+        .nns_boost_decode_class(code, class_values, original_response)
       })
     }
   } else {
@@ -981,7 +980,8 @@ NNS.boost <- function(IVs.train,
       results = estimates,
       pred.int = pred_int_out,
       feature.weights = plot.table / sum(plot.table),
-      feature.frequency = plot.table
+      feature.frequency = plot.table,
+      class.levels = if (is_class) class_values else NULL
     )
   )
 }
@@ -1112,4 +1112,31 @@ NNS.boost <- function(IVs.train,
   .nns_boost_plot_feature_frequency(feature.frequency = feature.frequency)
   
   invisible(NULL)
+}
+
+
+#' Decode internal 1..K class codes back to the caller's response coding
+#'
+#' Numeric class responses recover their original numeric values; factor,
+#' character, and logical responses recover their original labels (a factor
+#' response keeps its level order and orderedness).
+#'
+#' @keywords internal
+#' @noRd
+.nns_boost_decode_class <- function(code, class_values, original_response) {
+  if (is.numeric(original_response) || is.integer(original_response)) {
+    return(class_values[code])
+  }
+  
+  labels <- as.character(class_values)[code]
+  
+  if (is.factor(original_response)) {
+    return(factor(labels,
+                  levels = as.character(class_values),
+                  ordered = is.ordered(original_response)))
+  }
+  if (is.logical(original_response)) {
+    return(as.logical(labels))
+  }
+  labels
 }
