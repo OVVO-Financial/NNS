@@ -66,7 +66,7 @@ test_that("NNS.boost NULL distance matches explicit NNS and propagates L2", {
                   b = c(0, 0.2, 1, 0.9, 0.7, 0.1, 0.6, 0.4))
   y <- c(0, 2, 4, 8, 5, 3, 6, 7)
   args <- list(IVs.train = x, DV.train = y, IVs.test = x[1:2, ], learner.trials = 2,
-               epochs = 1, status = FALSE, seed = 42)
+               epochs = 0, status = FALSE, seed = 42)
   a <- do.call(NNS.boost, c(args, list(dist = NULL)))
   b <- do.call(NNS.boost, c(args, list(dist = "NNS")))
   expect_equal(a$results, b$results, tolerance = 1e-12)
@@ -128,11 +128,11 @@ test_that("NNS.boost preserves old positional objective argument order", {
   test <- x[1:2, ]
   obj <- expression(sum(abs(predicted - actual)))
   
-  positional <- NNS.boost(x, y, test, NULL, NULL, 2, 1, 0.25, FALSE,
+  positional <- NNS.boost(x, y, test, NULL, NULL, 2, 0, 0.25, FALSE,
                           NULL, NULL, obj, "min", FALSE, FALSE, FALSE,
                           NULL, FALSE, 42)
   named <- NNS.boost(IVs.train = x, DV.train = y, IVs.test = test,
-                     learner.trials = 2, epochs = 1, CV.size = 0.25,
+                     learner.trials = 2, epochs = 0, CV.size = 0.25,
                      balance = FALSE, ts.test = NULL, threshold = NULL,
                      obj.fn = obj, objective = "min", extreme = FALSE,
                      features.only = FALSE, feature.importance = FALSE,
