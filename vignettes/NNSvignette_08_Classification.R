@@ -31,12 +31,15 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 # NULL
 # 
 # $feature.weights
-#  Petal.Width Petal.Length Sepal.Length
-#    0.4444444    0.3333333    0.2222222
+# Petal.Length  Petal.Width Sepal.Length  Sepal.Width
+#    0.2777778    0.2777778    0.2222222    0.2222222
 # 
 # $feature.frequency
-#  Petal.Width Petal.Length Sepal.Length
-#            4            3            2
+# Petal.Length  Petal.Width Sepal.Length  Sepal.Width
+#            5            5            4            4
+# 
+# $class.levels
+# [1] "setosa"     "versicolor" "virginica"
 # 
 # mean( a$results == as.numeric(iris[test.set, 5]) )
 # [1] 1
@@ -52,16 +55,16 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----stackeval, eval = FALSE--------------------------------------------------
 # $OBJfn.reg
-# [1] 1
+# [1] 0.9714286
 # 
 # $NNS.reg.n.best
-# [1] 5
+# [1] 1
 # 
 # $probability.threshold
-# [1] 0.41
+# [1] 0.13
 # 
 # $OBJfn.dim.red
-# [1] 0.9714286
+# [1] 0.9642857
 # 
 # $NNS.dim.red.threshold
 # [1] 0.9335162
@@ -86,7 +89,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 # 
 # $weights
 #     reg dim.red
-#    0.66    0.34
+#    0.85    0.15
 # 
 # $class.levels
 # [1] "setosa"     "versicolor" "virginica"
