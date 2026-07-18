@@ -162,15 +162,18 @@ for classification problems when using
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="cn">NULL</span></span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">$</span>feature.weights</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.4444444</span>    <span class="fl">0.3333333</span>    <span class="fl">0.2222222</span> </span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length  Sepal.Width </span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.2777778</span>    <span class="fl">0.2777778</span>    <span class="fl">0.2222222</span>    <span class="fl">0.2222222</span> </span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
 <span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="sc">$</span>feature.frequency</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a> Petal.Width Petal.Length Sepal.Length </span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">4</span>            <span class="dv">3</span>            <span class="dv">2</span> </span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>   </span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length  Sepal.Width </span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">5</span>            <span class="dv">5</span>            <span class="dv">4</span>            <span class="dv">4</span> </span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>   </span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
 <p>A perfect classification, using the features weighted per the output
 above.</p>
 </div>
@@ -198,16 +201,16 @@ for classification problems when using
 <span></span>
 <span><span class="va">b</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span> </span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9714286</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">5</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.41</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.13</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9714286</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9642857</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9335162</span></span>
@@ -232,7 +235,7 @@ for classification problems when using
 <span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a></span>
 <span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="sc">$</span>weights</span>
 <span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>    reg dim.red </span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>   <span class="fl">0.66</span>    <span class="fl">0.34</span> </span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>   <span class="fl">0.85</span>    <span class="fl">0.15</span> </span>
 <span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a></span>
 <span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
 <span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span></code></pre></div>
