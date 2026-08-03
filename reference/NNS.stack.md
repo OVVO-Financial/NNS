@@ -47,7 +47,11 @@ NNS.stack(
 
   a vector, matrix or data frame of variables of numeric or factor data
   types with compatible dimensions to `(IVs.train)`. If NULL, will use
-  `(IVs.train)` as default.
+  `(IVs.train)` as default. Columns are matched to `(IVs.train)` by name
+  when the two share the same predictor names, and positionally when
+  they share no names at all (as in `cbind(test.x_1, test.x_2)` against
+  `cbind(x_1, x_2)`). Names that only partly overlap the training
+  predictors are ambiguous and return an error.
 
 - type:
 

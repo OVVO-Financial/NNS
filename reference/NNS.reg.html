@@ -100,7 +100,7 @@
 
 
 <dt id="arg-point-est">point.est<a class="anchor" aria-label="anchor" href="#arg-point-est"></a></dt>
-<dd><p>a numeric or factor vector with compatible dimensions to <code>x</code>.  Returns the fitted value <code>y.hat</code> for any value of <code>x</code>.</p></dd>
+<dd><p>a numeric or factor vector with compatible dimensions to <code>x</code>.  Returns the fitted value <code>y.hat</code> for any value of <code>x</code>.  Columns are matched to <code>x</code> by name when the two share the same predictor names, and positionally when they share no names at all (as in <code>cbind(test.x_1, test.x_2)</code> against <code>cbind(x_1, x_2)</code>).  Names that only partly overlap the training predictors are ambiguous and return an error.</p></dd>
 
 
 <dt id="arg-location">location<a class="anchor" aria-label="anchor" href="#arg-location"></a></dt>

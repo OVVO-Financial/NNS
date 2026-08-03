@@ -88,7 +88,12 @@ NNS.reg(
 - point.est:
 
   a numeric or factor vector with compatible dimensions to `x`. Returns
-  the fitted value `y.hat` for any value of `x`.
+  the fitted value `y.hat` for any value of `x`. Columns are matched to
+  `x` by name when the two share the same predictor names, and
+  positionally when they share no names at all (as in
+  `cbind(test.x_1, test.x_2)` against `cbind(x_1, x_2)`). Names that
+  only partly overlap the training predictors are ambiguous and return
+  an error.
 
 - location:
 
