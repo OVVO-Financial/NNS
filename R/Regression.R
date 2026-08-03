@@ -141,6 +141,37 @@
   out
 }
 
+# Reconcile supplied prediction / test column names with the training predictor
+# names.  Names only carry alignment information when both sides refer to the
+# same predictors, so three cases are distinguished:
+#
+#   * same set of names  -> reorder the supplied columns into the training
+#     order, which catches columns handed over in a different order;
+#   * no names in common -> the names cannot express an alignment at all, as in
+#     cbind(test.x_1, test.x_2) against cbind(x_1, x_2), so keep the supplied
+#     order and match positionally per the documented "compatible dimensions";
+#   * partial overlap    -> ambiguous, and in practice a wrong or misspelled
+#     column, so error.
+#
+# [supplied] and [train.names] must already be make.unique() normalized and of
+# equal length.  Returns the permutation to apply to the supplied columns, or
+# NULL when they are to be taken in the order supplied.
+.nns_match_predictor_names <- function(supplied, train.names, label) {
+  if (setequal(supplied, train.names)) return(match(train.names, supplied))
+  if (!any(supplied %in% train.names)) return(NULL)
+
+  missing.names <- setdiff(train.names, supplied)
+  extra.names <- setdiff(supplied, train.names)
+  stop(sprintf(
+    paste0("[%s] columns must exactly match the training predictors, or ",
+           "share no names with them to be matched positionally. ",
+           "Missing: %s; extra: %s."),
+    label,
+    if (length(missing.names)) paste(missing.names, collapse = ", ") else "none",
+    if (length(extra.names)) paste(extra.names, collapse = ", ") else "none"
+  ), call. = FALSE)
+}
+
 .nns_reg_prepare_points <- function(point.est, train.names) {
   if (is.null(point.est)) return(NULL)
   p <- length(train.names)
@@ -151,16 +182,13 @@
       names(out) <- train.names
       return(out)
     }
-    supplied.name <- colnames(point.est)
     out <- as.data.frame(point.est, check.names = FALSE, stringsAsFactors = FALSE)
     if (ncol(out) != 1L) {
       stop("[point.est] must contain exactly one predictor column.", call. = FALSE)
     }
-    if (!is.null(supplied.name) && nzchar(supplied.name[1L]) &&
-        !identical(supplied.name[1L], train.names[1L])) {
-      stop("Named [point.est] columns must exactly match the training predictors.",
-           call. = FALSE)
-    }
+    # A lone column can only align one way, so its name never selects between
+    # predictors: cbind(test.x) against a single training predictor is matched
+    # positionally.
     names(out) <- train.names
     return(out)
   }
@@ -174,12 +202,8 @@
       # Apply the same duplicate-name normalization used for the training frame.
       # Example: c(x = ..., x = ...) becomes c("x", "x.1") on both sides.
       supplied <- make.unique(supplied, sep = ".")
-      if (!setequal(supplied, train.names)) {
-        stop("Named [point.est] values must exactly match the training predictors.",
-             call. = FALSE)
-      }
-      names(point.est) <- supplied
-      point.est <- point.est[train.names]
+      ordering <- .nns_match_predictor_names(supplied, train.names, "point.est")
+      if (!is.null(ordering)) point.est <- point.est[ordering]
     }
     out <- as.data.frame(as.list(point.est), check.names = FALSE,
                          stringsAsFactors = FALSE)
@@ -199,15 +223,10 @@
     # Normalize prediction names identically before validating/reordering so
     # cbind(x, x) matches training columns c("x", "x.1") by position.
     supplied.names <- make.unique(supplied.names, sep = ".")
-    if (!setequal(supplied.names, train.names)) {
-      stop("Named [point.est] columns must exactly match the training predictors.",
-           call. = FALSE)
-    }
-    names(out) <- supplied.names
-    out <- out[, train.names, drop = FALSE]
-  } else {
-    names(out) <- train.names
+    ordering <- .nns_match_predictor_names(supplied.names, train.names, "point.est")
+    if (!is.null(ordering)) out <- out[, ordering, drop = FALSE]
   }
+  names(out) <- train.names
   out
 }
 
@@ -647,7 +666,7 @@
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
-#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.
+#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
 #' @param plot logical; \code{TRUE} (default) To plot regression.

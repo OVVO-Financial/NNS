@@ -4,7 +4,7 @@
 #'
 #' @param IVs.train a vector, matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
-#' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.
+#' @param IVs.test a vector, matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.  Columns are matched to \code{(IVs.train)} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.
 #' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.   Like a logistic regression, this setting is not necessary for target variable of two classes e.g. [0, 1].
 #' @param obj.fn expression; \code{expression(sum((predicted - actual)^2))} (default) Sum of squared errors is the default objective function.  Any \code{expression()} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -145,13 +145,13 @@ NNS.stack <- function(IVs.train,
         names(x) <- train_names
       } else if (length(x) == p) {
         supplied <- names(x)
-        if (!is.null(supplied) && all(nzchar(supplied)) &&
-            !identical(make.unique(supplied, sep = "."), train_names)) {
-          if (anyDuplicated(supplied) || !setequal(supplied, train_names)) {
-            stop("Named [IVs.test] values must exactly match the training predictors.",
-                 call. = FALSE)
-          }
-          x <- x[train_names]
+        if (!is.null(supplied) && all(nzchar(supplied))) {
+          # Normalize duplicate names exactly as the training frame does, then
+          # align by name only when the two name sets describe the same
+          # predictors.
+          supplied <- make.unique(supplied, sep = ".")
+          ordering <- .nns_match_predictor_names(supplied, train_names, "IVs.test")
+          if (!is.null(ordering)) x <- x[ordering]
         }
         x <- as.data.frame(as.list(x), check.names = FALSE,
                            stringsAsFactors = FALSE)
@@ -171,26 +171,16 @@ NNS.stack <- function(IVs.train,
            call. = FALSE)
     }
     
-    if (!had_names) {
-      names(x) <- train_names
-    } else {
+    if (had_names) {
       # Normalize duplicate names with make.unique() identically to the
       # training frame (and to NNS.reg), so cbind(x, x) test input aligns
       # with the c("x", "x.1") training columns rather than erroring.
-      names(x) <- make.unique(names(x), sep = ".")
-      missing_names <- setdiff(train_names, names(x))
-      extra_names <- setdiff(names(x), train_names)
-      if (length(missing_names) || length(extra_names)) {
-        stop(sprintf(
-          paste0("[IVs.test] columns must exactly match [IVs.train]. ",
-                 "Missing: %s; extra: %s."),
-          if (length(missing_names)) paste(missing_names, collapse = ", ") else "none",
-          if (length(extra_names)) paste(extra_names, collapse = ", ") else "none"
-        ), call. = FALSE)
-      }
-      x <- x[, train_names, drop = FALSE]
+      supplied <- make.unique(names(x), sep = ".")
+      ordering <- .nns_match_predictor_names(supplied, train_names, "IVs.test")
+      if (!is.null(ordering)) x <- x[, ordering, drop = FALSE]
     }
-    
+    names(x) <- train_names
+
     x
   }
   
