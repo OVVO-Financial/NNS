@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -154,6 +154,8 @@
     <p>Returns a vector of fitted values for the dependent variable test set for all models.</p><ul><li><p><code>"NNS.reg.n.best"</code> returns the optimum <code>"n.best"</code> parameter for the <a href="NNS.reg.html">NNS.reg</a> multivariate regression.  <code>"SSE.reg"</code> returns the SSE for the <a href="NNS.reg.html">NNS.reg</a> multivariate regression.</p></li>
 <li><p><code>"OBJfn.reg"</code> returns the <code>obj.fn</code> for the <a href="NNS.reg.html">NNS.reg</a> regression.</p></li>
 <li><p><code>"NNS.dim.red.threshold"</code> returns the optimum <code>"threshold"</code> from the <a href="NNS.reg.html">NNS.reg</a> dimension reduction regression.</p></li>
+<li><p><code>"NNS.dim.red.variables"</code> returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With <code>(stack = TRUE)</code> these are also the only predictors used by the <a href="NNS.reg.html">NNS.reg</a> multivariate regression, so they are exactly the variables behind <code>"stack"</code>.  <code>NULL</code> when <code>method</code> does not include 2.</p></li>
+<li><p><code>"NNS.dim.red.coefficients"</code> returns the named final dimension reduction coefficients for every encoded predictor column (zero for predictors not selected).  <code>NULL</code> when <code>method</code> does not include 2.</p></li>
 <li><p><code>"OBJfn.dim.red"</code> returns the <code>obj.fn</code> for the <a href="NNS.reg.html">NNS.reg</a> dimension reduction regression.</p></li>
 <li><p><code>"probability.threshold"</code> returns the optimum probability threshold for classification, else 0.5 when set to <code>FALSE</code>.</p></li>
 <li><p><code>"reg"</code> returns <a href="NNS.reg.html">NNS.reg</a> output.</p></li>

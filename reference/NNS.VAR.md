@@ -11,7 +11,7 @@ a multi-variate time-series forecast.
 ``` r
 NNS.VAR(
   variables,
-  h,
+  h = 1,
   tau = 1,
   dim.red.method = "cor",
   naive.weights = TRUE,
@@ -33,8 +33,8 @@ mean((predicted - actual)^2)/.denom
 
 - variables:
 
-  a numeric matrix or data.frame of contemporaneous time-series to
-  forecast.
+  a numeric matrix, data.frame, `ts`, `xts` or `zoo` object of
+  contemporaneous time-series to forecast.
 
 - h:
 
@@ -44,8 +44,14 @@ mean((predicted - actual)^2)/.denom
 - tau:
 
   positive integer \[ \> 0\]; 1 (default) Number of lagged observations
-  to consider for the time-series data. Vector for single lag for each
-  respective variable or list for multiple lags per each variable.
+  to consider for the time-series data. A single integer uses lags
+  `1:tau` for every variable. A vector with one entry per variable uses
+  that single lag for each respective variable, and a list with one lag
+  vector per variable (or one lag vector shared by every variable) uses
+  multiple lags per variable. The smallest lag of each variable is also
+  the `modulo` for its
+  [NNS.seas](https://OVVO-Financial.github.io/NNS/reference/NNS.seas.md)
+  seasonal-period search.
 
 - dim.red.method:
 
@@ -96,7 +102,10 @@ mean((predicted - actual)^2)/.denom
 - nowcast:
 
   logical; `FALSE` (default) internal call for frequency alignment in
-  downstream nowcasting applications.
+  downstream nowcasting applications. When `TRUE`, rows of a
+  time-indexed `variables` are labelled by month (`"Mon YYYY"`) whatever
+  the input frequency, with the forecast rows labelled by the following
+  `h` months.
 
 ## Value
 
@@ -110,8 +119,11 @@ Returns the following matrices of forecasted variables:
   different frequencies, e.g. where `NA` would be reported for
   intra-quarterly data when indexed with monthly periods.
 
-- `"relevant_variables"` Returns the relevant variables from the
-  dimension reduction step.
+- `"relevant_variables"` Returns, for each variable, the lagged
+  regressors selected by the
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  dimension reduction, ranked by absolute coefficient. These are exactly
+  the regressors the `"multivariate"` estimate is built from.
 
 - `"univariate"` Returns the univariate
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
@@ -124,6 +136,10 @@ Returns the following matrices of forecasted variables:
 - `"ensemble"` Returns the ensemble of both `"univariate"` and
   `"multivariate"` forecasts.
 
+When `variables` is a `ts`, `xts` or `zoo` object, rows are labelled
+with its time index and the forecast rows with the following `h`
+periods.
+
 ## Note
 
 - `"Error in { : task xx failed -}"` should be re-run with
@@ -133,6 +149,9 @@ Returns the following matrices of forecasted variables:
   numeric.
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   is better suited for factor or binary regressor extrapolation.
+
+- The lagged training sample, `nrow(variables) - max(tau)`, must contain
+  at least `2 * h + 3` observations.
 
 ## References
 

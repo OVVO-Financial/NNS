@@ -188,6 +188,18 @@ for all models.
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   dimension reduction regression.
 
+- `"NNS.dim.red.variables"` returns the names of the predictors carried
+  by the final dimension reduction regression, ranked by absolute
+  coefficient. With `(stack = TRUE)` these are also the only predictors
+  used by the
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  multivariate regression, so they are exactly the variables behind
+  `"stack"`. `NULL` when `method` does not include 2.
+
+- `"NNS.dim.red.coefficients"` returns the named final dimension
+  reduction coefficients for every encoded predictor column (zero for
+  predictors not selected). `NULL` when `method` does not include 2.
+
 - `"OBJfn.dim.red"` returns the `obj.fn` for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   dimension reduction regression.
