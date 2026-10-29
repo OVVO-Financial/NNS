@@ -28,6 +28,8 @@
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 #' \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
+#' \item{\code{"NNS.dim.red.coefficients"}} returns the named final dimension reduction coefficients for every encoded predictor column (zero for predictors not selected).  \code{NULL} when \code{method} does not include 2.
 #' \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
@@ -603,7 +605,10 @@ NNS.stack <- function(IVs.train,
   .numeric_design <- function(train, test) {
     train_blocks <- vector("list", ncol(train))
     test_blocks <- vector("list", ncol(train))
-    
+    # Original predictor behind each encoded column (factors expand to one
+    # column per level), so encoded selections map back to predictor names.
+    source_blocks <- vector("list", ncol(train))
+
     for (j in seq_along(train)) {
       nm <- names(train)[j]
       tr <- train[[j]]
@@ -633,6 +638,7 @@ NNS.stack <- function(IVs.train,
       
       train_blocks[[j]] <- tr_block
       test_blocks[[j]] <- te_block
+      source_blocks[[j]] <- rep(nm, ncol(tr_block))
     }
     
     train_matrix <- do.call(cbind, train_blocks)
@@ -656,7 +662,8 @@ NNS.stack <- function(IVs.train,
     test_scaled <- as.data.frame(test_scaled, check.names = FALSE)
     
     list(train = train_scaled, test = test_scaled,
-         minimum = train_min, range = train_range)
+         minimum = train_min, range = train_range,
+         source = unlist(source_blocks, use.names = FALSE))
   }
   
   .make_splits <- function() {
@@ -1017,6 +1024,8 @@ NNS.stack <- function(IVs.train,
   dim_component_threshold <- 0.5
   dim_oof_raw <- rep(NA_real_, n_obs)
   dim_threshold_report <- NA_real_
+  dim_active_variables <- NULL
+  dim_coefficients_report <- NULL
   dim_full_coef <- NULL
   dim_full_xstar_train <- NULL
   dim_full_xstar_test <- NULL
@@ -1121,6 +1130,17 @@ NNS.stack <- function(IVs.train,
       0
     }
     if (!is.finite(dim_threshold_report)) dim_threshold_report <- 0
+
+    # The exact predictors carried by the final X* projection (and therefore
+    # by Method 1 as well when stack = TRUE), ranked by |coefficient|. This is
+    # the authoritative selection: a threshold comparison cannot reproduce it
+    # because ties at the boundary are broken by column order.
+    dim_coefficients_report <- setNames(as.numeric(dim_full_coef),
+                                        names(full_design$train))
+    active_order <- order(abs(dim_full_coef), decreasing = TRUE,
+                          method = "radix")
+    active_order <- active_order[abs(dim_full_coef[active_order]) > 0]
+    dim_active_variables <- unique(full_design$source[active_order])
   }
   
   # -------------------------------------------------------------------------
@@ -1881,6 +1901,8 @@ NNS.stack <- function(IVs.train,
     probability.threshold = unname(as.numeric(probability.threshold)),
     OBJfn.dim.red = unname(as.numeric(dim_best_score)),
     NNS.dim.red.threshold = unname(as.numeric(dim_threshold_report)),
+    NNS.dim.red.variables = dim_active_variables,
+    NNS.dim.red.coefficients = dim_coefficients_report,
     reg = reg_output,
     reg.pred.int = .NNS.df(reg_pred_int),
     dim.red = dim_output,

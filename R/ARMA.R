@@ -258,7 +258,7 @@ NNS.ARMA <- function(variable,
         
         Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
         
-        if (method %in% c("means", "shrink")) {
+        if ((method == "means") || shrink) {
           Regression.Estimates_means <- sapply(Component.series, mean)
           if (shrink) Lin.Regression.Estimates <- (Lin.Regression.Estimates + Regression.Estimates_means) / 2 else Lin.Regression.Estimates <- Regression.Estimates_means
         }
