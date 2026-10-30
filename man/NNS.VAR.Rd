@@ -53,7 +53,7 @@ Returns the following matrices of forecasted variables:
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 
- \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts: \link{NNS.reg} on the relevant variables, each as its own dimension, stacked with the dimension reduction \link{NNS.reg} estimate.
+ \item{\code{"multivariate"}} Returns the multi-variate forecasts: a full \link{NNS.stack} \code{(method = c(1, 2), stack = FALSE)} on the relevant variables.
 
  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
  }

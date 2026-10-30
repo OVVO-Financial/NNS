@@ -55,53 +55,32 @@ test_that("NNS.stack reports exactly the regressors its estimate uses", {
 
 .var_default_obj <- eval(formals(NNS.VAR)$obj.fn)
 
-test_that("NNS.VAR stacks NNS.reg on exactly the relevant variables with the dimension reduction fit", {
+test_that("NNS.VAR relevant variables are the regressors the cross-validated threshold keeps", {
   train <- .var_lag1_train(.var_two_driver_data())
   IV <- train[, -2]; DV <- train[, 2]
-  test <- tail(IV, 3)
-  fit <- NNS:::.nns_var_stack(IV, DV, test, ts.test = 16, obj.fn = .var_default_obj,
-                              objective = "min", dim.red.method = "cor")
-
-  # The relevant variables are the regressors the cross-validated threshold keeps
-  dim.red <- NNS.reg(IV, DV, point.est = test, dim.red.method = "cor",
-                     threshold = fit$NNS.dim.red.threshold, order = NULL, ncores = 1,
-                     plot = FALSE, residual.plot = FALSE)
-  kept <- dim.red$equation$Variable[dim.red$equation$Coefficient != 0]
-  expect_setequal(fit$relevant_variables, setdiff(kept, "DENOMINATOR"))
-  expect_setequal(fit$relevant_variables, c("x_tau_1", "w_tau_1"))
-
-  # Method 1 is NNS.reg on those regressors, each as its own dimension
-  reg <- NNS.reg(IV[, fit$relevant_variables], DV, point.est = test[, fit$relevant_variables],
-                 n.best = fit$NNS.reg.n.best, order = NULL, ncores = 1,
-                 plot = FALSE, residual.plot = FALSE)
-  expect_equal(sum(fit$weights), 1)
-  expect_equal(fit$stack, fit$weights[1] * reg$Point.est + fit$weights[2] * dim.red$Point.est)
-
-  # Regressors outside the selection cannot move the estimate...
-  shifted <- test
-  unused <- setdiff(names(IV), fit$relevant_variables)
-  shifted[, unused] <- shifted[, unused] + 100
-  refit <- NNS:::.nns_var_stack(IV, DV, shifted, ts.test = 16, obj.fn = .var_default_obj,
-                                objective = "min", dim.red.method = "cor")
-  expect_equal(refit$stack, fit$stack)
-  # ...while a selected one does.
-  shifted[, "x_tau_1"] <- shifted[, "x_tau_1"] + 1
-  refit <- NNS:::.nns_var_stack(IV, DV, shifted, ts.test = 16, obj.fn = .var_default_obj,
-                                objective = "min", dim.red.method = "cor")
-  expect_false(isTRUE(all.equal(refit$stack, fit$stack)))
+  rel <- NNS:::.nns_var_relevant(IV, DV, ts.test = 16, obj.fn = .var_default_obj,
+                                 objective = "min", dim.red.method = "cor")
+  expect_setequal(rel, c("x_tau_1", "w_tau_1"))
+  expect_true(all(rel %in% names(IV)))
 })
 
-test_that("NNS.VAR multivariate is the stacked estimate at the last h training rows", {
+test_that("NNS.VAR multivariate is a full NNS.stack (stack = FALSE) on the relevant variables", {
   A <- .var_two_driver_data()
   out <- NNS.VAR(A, h = 3, tau = 1, status = FALSE, ncores = 1)
   train <- .var_lag1_train(A)
+  ts <- ceiling(0.2 * nrow(train))
   for (i in seq_len(ncol(A))) {
     IV <- train[, -i]
-    fit <- NNS:::.nns_var_stack(IV, train[, i], tail(IV, 3), ts.test = ceiling(0.2 * nrow(train)),
-                                obj.fn = .var_default_obj, objective = "min", dim.red.method = "cor")
-    expect_equal(out$multivariate[[i]], fit$stack)
-    expect_setequal(na.omit(out$relevant_variables[[i]]), fit$relevant_variables)
+    rel <- NNS:::.nns_var_relevant(IV, train[, i], ts.test = ts, obj.fn = .var_default_obj,
+                                   objective = "min", dim.red.method = "cor")
+    expect_setequal(na.omit(out$relevant_variables[[i]]), rel)
     expect_false(paste0(colnames(A)[i], "_tau_0") %in% out$relevant_variables[[i]])
+    fit <- suppressWarnings(NNS.stack(IV[, rel, drop = FALSE], train[, i],
+                                      IVs.test = tail(IV, 3)[, rel, drop = FALSE], ts.test = ts,
+                                      folds = 1, obj.fn = .var_default_obj, objective = "min",
+                                      method = c(1, 2), dim.red.method = "cor", order = NULL,
+                                      ncores = 1, stack = FALSE, status = FALSE))
+    expect_equal(out$multivariate[[i]], as.numeric(fit$stack))
   }
 })
 

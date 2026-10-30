@@ -21,7 +21,7 @@
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
-#'  \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts: \link{NNS.reg} on the relevant variables, each as its own dimension, stacked with the dimension reduction \link{NNS.reg} estimate.
+#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: a full \link{NNS.stack} \code{(method = c(1, 2), stack = FALSE)} on the relevant variables.
 #'
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
@@ -117,6 +117,11 @@ NNS.VAR <- function(variables,
                     ncores = NULL,
                     nowcast = FALSE){
   
+  # Capture whether the built-in ratio objective is in force before anything
+  # touches obj.fn. Only then may NNS.VAR fall back to plain MSE when the
+  # co-movement denominator is degenerate for every candidate.
+  use_default_objective <- missing(obj.fn) && identical(objective, "min")
+
   oldw <- getOption("warn")
   options(warn = -1)
   on.exit(options(warn = oldw), add = TRUE)
@@ -407,21 +412,52 @@ NNS.VAR <- function(variables,
     IV <- lagged_new_values_train[, -i, drop = FALSE]
     DV <- lagged_new_values_train[, i]
     
-    # ts.test must be a whole number, so round the 0.2 * length(DV) floor up.
+    # ts.test must be a whole number: NNS.stack now validates it as an integer
+    # >= 1, so round the 0.2 * length(DV) floor up rather than passing the raw
+    # fractional value through.
     ts <- max(2 * h, ceiling(.2 * length(DV)))
+
+    # Relevant variables (NNS 11.6): the regressors whose dimension reduction
+    # coefficient meets the cross-validated threshold
+    rel_vars <- .nns_var_relevant(IVs.train = IV,
+                                  DV.train = DV,
+                                  ts.test = ts,
+                                  obj.fn = obj.fn,
+                                  objective = objective,
+                                  dim.red.method = dim.red.method)
     
-    # Dimension reduction selects the relevant variables; the multivariate
-    # estimate is NNS.reg on exactly those regressors, stacked with the
-    # dimension reduction estimate (NNS.stack(..., stack = TRUE) of NNS 11.6).
-    multivariate <- .nns_var_stack(IVs.train = IV,
-                                   DV.train = DV,
-                                   IVs.test = tail(IV, h),
-                                   ts.test = ts,
-                                   obj.fn = obj.fn,
-                                   objective = objective,
-                                   dim.red.method = dim.red.method)
-    
-    rel_vars <- multivariate$relevant_variables
+    # Multivariate estimate: a full NNS.stack on exactly the relevant variables.
+    # stack = FALSE runs both methods on them independently; stack = TRUE uses
+    # the dimension reduction output in the n.best optimization.
+    .run_var_stack <- function(stack_obj_fn, stack_objective) {
+      NNS.stack(IVs.train = IV[, rel_vars, drop = FALSE],
+                DV.train = DV,
+                IVs.test = tail(IV, h)[, rel_vars, drop = FALSE],
+                ts.test = ts,
+                folds = 1,
+                obj.fn = stack_obj_fn,
+                objective = stack_objective,
+                method = c(1, 2),
+                dim.red.method = dim.red.method,
+                order = NULL, ncores = 1, stack = FALSE, status = FALSE)
+    }
+
+    multivariate <- tryCatch(
+      .run_var_stack(obj.fn, objective),
+      error = function(e) {
+        no_finite_method1 <- identical(
+          conditionMessage(e),
+          paste0("No Method 1 candidate produced a finite ",
+                 "complete-coverage OOF objective.")
+        )
+        if (!use_default_objective || !no_finite_method1) stop(e)
+        if (status) {
+          message(paste0("NNS.VAR: the co-movement objective was undefined for ",
+                         "every candidate; retrying this variable using MSE."))
+        }
+        .run_var_stack(expression(mean((predicted - actual)^2)), "min")
+      }
+    )
     
     nns_DVs <- multivariate$stack
     nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
@@ -433,7 +469,7 @@ NNS.VAR <- function(variables,
     parallel::clusterExport(
       cl,
       varlist = c("status", "variables", "lagged_new_values_train", "h",
-                  "obj.fn", "objective",
+                  "obj.fn", "objective", "use_default_objective",
                   "dim.red.method", "nns_IVs_results"),
       envir = environment()
     )
@@ -505,28 +541,19 @@ NNS.VAR <- function(variables,
 }
 
 
-# NNS.stack(..., method = c(1, 2), stack = TRUE) as NNS 11.6 ran it for NNS.VAR
-# (folds = 1, ts.test, order = NULL).  NNS.stack has since changed what
-# stack = TRUE means (Method 1 now regresses on the synthetic X* instead of the
-# selected regressors), so the 11.6 procedure is reproduced here:
-#   Method 2: cross-validate the dimension reduction threshold; the regressors
-#             whose coefficient survives it are the relevant variables.
-#   Method 1: cross-validate n.best for NNS.reg on the relevant variables, each
-#             kept as its own dimension, then fit it.
-#   stack:    blend both point estimates with weights 1 / objective^2 of each
-#             final fit.
-# The validation set is the last ts.test rows.  Returns the blended estimate and
-# the names of the regressors behind it.
-.nns_var_stack <- function(IVs.train, DV.train, IVs.test, ts.test, obj.fn,
-                           objective, dim.red.method) {
+# Relevant variables as NNS 11.6's NNS.VAR found them: cross-validate the
+# dimension reduction threshold over NNS 11.6's NNS.stack cutoff grid
+# (validated on the last ts.test rows) and keep every regressor whose
+# coefficient meets it.  Returns their names.
+.nns_var_relevant <- function(IVs.train, DV.train, ts.test, obj.fn, objective,
+                              dim.red.method) {
   IVs.train <- data.frame(IVs.train, check.names = FALSE)
-  IVs.test <- data.frame(IVs.test, check.names = FALSE)
   DV.train <- as.numeric(DV.train)
   n <- ncol(IVs.train)
+  if (n == 1) return(colnames(IVs.train))
   N <- nrow(IVs.train)
-  minimize <- objective == "min"
   best <- function(x) {
-    i <- if (minimize) which.min(x) else which.max(x)
+    i <- if (objective == "min") which.min(x) else which.max(x)
     if (length(i) == 0) 1L else i
   }
   score <- function(predicted, actual) eval(obj.fn)
@@ -537,96 +564,39 @@ NNS.VAR <- function(variables,
   CV.DV.train <- DV.train[-test.set]
   actual <- DV.train[test.set]
 
-  # Method 2: dimension reduction regression
-  if (n > 1) {
-    coefficients <- function(x, y) {
-      if (dim.red.method == "cor") {
-        suppressWarnings(cor(data.matrix(cbind(y, x)), method = "spearman"))[-1, 1]
-      } else {
-        suppressWarnings(NNS.reg(x, y, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE,
-                                 order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
-      }
+  coefficients <- function(x, y) {
+    if (dim.red.method == "cor") {
+      suppressWarnings(cor(data.matrix(cbind(y, x)), method = "spearman"))[-1, 1]
+    } else {
+      suppressWarnings(NNS.reg(x, y, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE,
+                               order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
     }
-    var.cutoffs_1 <- abs(round(coefficients(IVs.train, DV.train), digits = 2))
-    var.cutoffs_2 <- abs(round(coefficients(CV.IVs.train, CV.DV.train), digits = 2))
-
-    var.cutoffs <- pmin(var.cutoffs_1, (var.cutoffs_1 + var.cutoffs_2) / 2)
-    var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
-    var.cutoffs[is.na(var.cutoffs)] <- 0
-    var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
-    if (length(var.cutoffs) == 0) var.cutoffs <- 0
-    if (n == 2) var.cutoffs <- unique(c(var.cutoffs, 0))
-
-    nns.ord <- sapply(var.cutoffs, function(threshold) {
-      predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test,
-                                            dim.red.method = dim.red.method, threshold = threshold,
-                                            plot = FALSE, residual.plot = FALSE, order = NULL,
-                                            ncores = 1, point.only = TRUE)$Point.est)
-      predicted[is.na(predicted)] <- gravity(na.omit(predicted))
-      score(predicted, actual)
-    })
-    threshold <- var.cutoffs[best(nns.ord)]
-
-    nns.method.2 <- suppressWarnings(NNS.reg(IVs.train, DV.train, point.est = IVs.test,
-                                             dim.red.method = dim.red.method, threshold = threshold,
-                                             plot = FALSE, residual.plot = FALSE, order = NULL, ncores = 1))
-    best.nns.ord <- score(nns.method.2$Fitted.xy$y.hat, nns.method.2$Fitted.xy$y)
-
-    # Every regressor the threshold keeps (positive or negative coefficient)
-    relevant_vars <- which(nns.method.2$equation$Coefficient[1:n] != 0)
-    if (length(relevant_vars) == 0) relevant_vars <- 1:n
-    nns.method.2 <- nns.method.2$Point.est
-  } else {
-    relevant_vars <- 1
   }
+  var.cutoffs_1 <- abs(round(coefficients(IVs.train, DV.train), digits = 2))
+  var.cutoffs_2 <- abs(round(coefficients(CV.IVs.train, CV.DV.train), digits = 2))
 
-  # Method 1: NNS.reg on the relevant variables
-  best.k <- 1
-  if (length(relevant_vars) > 1) {
-    Kcand <- c(1:floor(sqrt(N)), N)
-    nns.cv.1 <- rep(NA_real_, length(Kcand))
-    for (index in seq_along(Kcand)) {
-      predicted <- suppressWarnings(NNS.reg(CV.IVs.train[, relevant_vars, drop = FALSE], CV.DV.train,
-                                            point.est = CV.IVs.test[, relevant_vars, drop = FALSE],
-                                            n.best = Kcand[index], plot = FALSE, residual.plot = FALSE,
-                                            order = NULL, ncores = 1, point.only = TRUE)$Point.est)
-      predicted[is.na(predicted)] <- mean(predicted, na.rm = TRUE)
-      nns.cv.1[index] <- score(predicted, actual)
+  var.cutoffs <- pmin(var.cutoffs_1, (var.cutoffs_1 + var.cutoffs_2) / 2)
+  var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
+  var.cutoffs[is.na(var.cutoffs)] <- 0
+  var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
+  if (length(var.cutoffs) == 0) var.cutoffs <- 0
+  if (n == 2) var.cutoffs <- unique(c(var.cutoffs, 0))
 
-      # Stop once the objective has failed to improve for two candidates
-      if (sum(!is.na(nns.cv.1)) > 3) {
-        nns.cv.1[is.na(nns.cv.1)] <- if (minimize) max(nns.cv.1, na.rm = TRUE) else min(nns.cv.1, na.rm = TRUE)
-        if (minimize && nns.cv.1[index] >= nns.cv.1[index - 1] && nns.cv.1[index] >= nns.cv.1[index - 2]) break
-        if (!minimize && nns.cv.1[index] <= nns.cv.1[index - 1] && nns.cv.1[index] <= nns.cv.1[index - 2]) break
-      }
-    }
-    best.k <- Kcand[best(nns.cv.1)]
-  }
+  nns.ord <- sapply(var.cutoffs, function(threshold) {
+    predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test,
+                                          dim.red.method = dim.red.method, threshold = threshold,
+                                          plot = FALSE, residual.plot = FALSE, order = NULL,
+                                          ncores = 1, point.only = TRUE)$Point.est)
+    predicted[is.na(predicted)] <- gravity(na.omit(predicted))
+    score(predicted, actual)
+  })
+  threshold <- var.cutoffs[best(nns.ord)]
 
-  nns.method.1 <- suppressWarnings(NNS.reg(IVs.train[, relevant_vars, drop = FALSE], DV.train,
-                                           point.est = IVs.test[, relevant_vars, drop = FALSE],
-                                           n.best = best.k, plot = FALSE, residual.plot = FALSE,
-                                           order = NULL, ncores = 1))
-  best.nns.cv <- score(nns.method.1$Fitted.xy$y.hat, nns.method.1$Fitted.xy$y)
-  nns.method.1 <- nns.method.1$Point.est
-
-  relevant_variables <- colnames(IVs.train)[relevant_vars]
-  if (n == 1) {
-    return(list(stack = nns.method.1, relevant_variables = relevant_variables, weights = c(1, 0)))
-  }
-
-  # Weights for combining NNS techniques
-  objectives <- c(best.nns.cv, best.nns.ord)
-  objectives[!is.na(objectives) & objectives == 0] <- 1e-10
-  weights <- if (minimize) 1 / objectives^2 else objectives^2
-  weights <- pmax(1e-10, weights)
-  weights[!is.finite(weights)] <- 0
-  if (sum(weights) > 0) weights <- weights / sum(weights) else weights <- c(.5, .5)
-
-  nns.method.1[is.na(nns.method.1)] <- nns.method.2[is.na(nns.method.1)]
-  nns.method.2[is.na(nns.method.2)] <- nns.method.1[is.na(nns.method.2)]
-
-  list(stack = weights[1] * nns.method.1 + weights[2] * nns.method.2,
-       relevant_variables = relevant_variables, weights = weights,
-       NNS.dim.red.threshold = threshold, NNS.reg.n.best = best.k)
+  # Every regressor the threshold keeps (positive or negative coefficient)
+  coef <- suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method,
+                                   threshold = threshold, plot = FALSE, residual.plot = FALSE,
+                                   order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
+  relevant_vars <- which(coef != 0)
+  if (length(relevant_vars) == 0) relevant_vars <- 1:n
+  colnames(IVs.train)[relevant_vars]
 }
