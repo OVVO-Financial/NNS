@@ -2,37 +2,34 @@
 #'
 #' Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 #'
-#' @param variables a numeric matrix, data.frame, \code{ts}, \code{xts} or \code{zoo} object of contemporaneous time-series to forecast.
+#' @param variables a numeric matrix or data.frame of contemporaneous time-series to forecast.
 #' @param h integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.
-#' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  A single integer uses lags \code{1:tau} for every variable.  A vector with one entry per variable uses that single lag for each respective variable, and a list with one lag vector per variable (or one lag vector shared by every variable) uses multiple lags per variable.  The smallest lag of each variable is also the \code{modulo} for its \link{NNS.seas} seasonal-period search.
-#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
-#' @param naive.weights logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.
+#' @param tau positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all") method for selecting the relevant regressors via \link{NNS.reg} dimension reduction.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
+#' @param naive.weights logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected. 
 #' @param obj.fn expression;
 #' \code{expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)} (default) MSE / co-movements is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
-#' @param nowcast logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.  When \code{TRUE}, rows of a time-indexed \code{variables} are labelled by month (\code{"Mon YYYY"}) whatever the input frequency, with the forecast rows labelled by the following \code{h} months.
+#' @param nowcast logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
 #'  \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
-#'  \item{\code{"relevant_variables"}} Returns, for each variable, the lagged regressors selected by the \link{NNS.stack} dimension reduction, ranked by absolute coefficient.  These are exactly the regressors the \code{"multivariate"} estimate is built from.
+#'  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step: the lagged regressors whose dimension reduction coefficient meets the cross-validated threshold.  These are the only regressors used in the \code{"multivariate"} estimate.
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
-#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: an \link{NNS.stack} \code{(stack = FALSE)} fit on the \code{"relevant_variables"}, so \link{NNS.reg} uses each of them as its own dimension.
+#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: a full \link{NNS.stack} \code{(method = c(1, 2), stack = FALSE)} on the relevant variables.
 #'
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
-#'
-#' When \code{variables} is a \code{ts}, \code{xts} or \code{zoo} object, rows are labelled with its time index and the forecast rows with the following \code{h} periods.
 #'
 #' @note
 #' \itemize{
 #' \item \code{"Error in { : task xx failed -}"} should be re-run with \code{NNS.VAR(..., ncores = 1)}.
 #' \item Not recommended for factor variables, even after transformed to numeric.  \link{NNS.reg} is better suited for factor or binary regressor extrapolation.
-#' \item The lagged training sample, \code{nrow(variables) - max(tau)}, must contain at least \code{2 * h + 3} observations.
 #' }
 #'
 #' @author Fred Viole, OVVO Financial Systems
@@ -106,80 +103,150 @@
 
 
 NNS.VAR <- function(variables,
-                    h = 1,
+                    h,
                     tau = 1,
                     dim.red.method = "cor",
                     naive.weights = TRUE,
                     obj.fn = expression( {
                       .denom <- NNS::Co.LPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual)) +
-                                NNS::Co.UPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual))
+                        NNS::Co.UPM(1, predicted, actual, target_x = mean(predicted), target_y = mean(actual))
                       if (.denom == 0) Inf else mean((predicted - actual)^2) / .denom
                     } ),
                     objective = "min",
                     status = TRUE,
                     ncores = NULL,
                     nowcast = FALSE){
-
+  
   # Capture whether the built-in ratio objective is in force before anything
   # touches obj.fn. Only then may NNS.VAR fall back to plain MSE when the
   # co-movement denominator is degenerate for every candidate.
-  default_obj_fn <- missing(obj.fn)
-
-  # ===================== Argument validation =====================
-  if (!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 0 || h != floor(h)) {
-    stop("[h] must be a single non-negative integer.", call. = FALSE)
+  use_default_objective <- missing(obj.fn) && identical(objective, "min")
+  
+  oldw <- getOption("warn")
+  options(warn = -1)
+  on.exit(options(warn = oldw), add = TRUE)
+  
+  dates <- NULL
+  
+  # ===================== Lag builder (robust names) =====================
+  lag.mtx <- function(x, tau) {
+    max_tau <- max(unlist(tau))
+    if (is.null(dim(x))) {
+      mc <- match.call(); base_name <- NULL
+      if (is.call(mc$x) && identical(mc$x[[1L]], as.name("["))) {
+        pf <- parent.frame()
+        base_obj <- try(eval(mc$x[[2L]], envir = pf), silent = TRUE)
+        col_idx  <- try(eval(mc$x[[3L]], envir = pf), silent = TRUE)
+        if (!inherits(base_obj, "try-error") && !is.null(colnames(base_obj))) {
+          col_idx <- try(as.integer(col_idx), silent = TRUE)
+          if (!inherits(col_idx, "try-error") && length(col_idx) == 1L &&
+              col_idx >= 1L && col_idx <= ncol(base_obj)) {
+            base_name <- colnames(base_obj)[col_idx]
+          }
+        }
+      }
+      x <- matrix(x, ncol = 1L); colnames(x) <- if (!is.null(base_name)) base_name else "V1"
+    } else {
+      x <- as.matrix(x); if (is.null(colnames(x))) colnames(x) <- paste0("V", seq_len(ncol(x)))
+    }
+    p <- ncol(x); j.vectors <- vector("list", p)
+    for (j in seq_len(p)) {
+      colhead <- colnames(x)[j]
+      heads <- gsub('"','', paste0(colhead, "_tau_"), fixed = TRUE)
+      x.vectors <- vector("list", max_tau + 1L); names(x.vectors) <- paste0(heads, 0:max_tau)
+      for (i in 0:max_tau) {
+        start <- max_tau - i + 1L; end <- nrow(x) - i
+        x.vectors[[i + 1L]] <- x[start:end, j]
+      }
+      j.vectors[[j]] <- do.call(cbind, x.vectors)
+    }
+    mtx <- as.data.frame(do.call(cbind, j.vectors), check.names = FALSE)
+    if (length(unlist(tau)) > 1L) {
+      block <- max_tau + 1L
+      relevant <- unlist(lapply(seq_along(tau), function(i) {
+        off <- (i - 1L) * block
+        c(off + 1L, off + unlist(tau[[i]]) + 1L)
+      }))
+      mtx <- mtx[, sort(unique(relevant)), drop = FALSE]
+    }
+    vars0 <- grep("tau_0$", colnames(mtx)); rest <- setdiff(seq_len(ncol(mtx)), vars0)
+    mtx[, c(vars0, rest), drop = FALSE]
   }
-  h <- as.integer(h)
-
-  if (!is.character(objective) || length(objective) != 1L || is.na(objective) ||
-      !(tolower(objective) %in% c("min", "max"))) {
-    stop("[objective] must be 'min' or 'max'.", call. = FALSE)
+  
+  # --------- Time-index dates (base R, no external date packages) ---------
+  # `dates` are used only as row labels on the returned matrices, so they are
+  # produced as "Mon YYYY" character labels.  Numerical forecasts never depend
+  # on them.  A yearmon-equivalent numeric (year + (month-1)/12) is used for the
+  # month arithmetic, then formatted -- matching zoo::as.yearmon's appearance.
+  .index_to_yearmon <- function(idx) {
+    if (inherits(idx, c("Date", "POSIXct", "POSIXt"))) {
+      lt <- as.POSIXlt(idx)
+      (lt$year + 1900) + lt$mon / 12
+    } else {
+      suppressWarnings(as.numeric(idx))
+    }
   }
-  objective <- tolower(objective)
-  use_default_objective <- default_obj_fn && objective == "min"
-
-  # dim.red.method is scalar: use "all" to combine methods.
-  if (!is.character(dim.red.method) || length(dim.red.method) != 1L || is.na(dim.red.method) ||
-      !(tolower(dim.red.method) %in% c("cor", "nns.dep", "nns.caus", "all"))) {
-    stop('Please ensure the dimension reduction method is set to a single value: one of "cor", "nns.dep", "nns.caus" or "all".', call. = FALSE)
+  .format_yearmon <- function(ym) {
+    yr <- floor(ym + 1e-8)
+    mo <- as.integer(round((ym - yr) * 12)) + 1L
+    roll <- !is.na(mo) & mo > 12L
+    yr[roll] <- yr[roll] + 1L; mo[roll] <- 1L
+    out <- rep(NA_character_, length(ym))
+    ok  <- !is.na(mo) & mo >= 1L & mo <= 12L
+    out[ok] <- paste(month.abb[mo[ok]], yr[ok])
+    out
   }
+  
+  # Extract a time index (best effort) without zoo/xts.
+  idx <- NULL
+  if (inherits(variables, "ts")) {
+    idx <- as.numeric(stats::time(variables))
+  } else if (inherits(variables, c("xts", "zoo"))) {
+    raw <- attr(variables, "index")
+    if (is.null(raw)) raw <- suppressWarnings(try(stats::time(variables), silent = TRUE))
+    if (!is.null(raw) && !inherits(raw, "try-error")) {
+      # xts/zoo store the index as numeric seconds since the epoch.
+      if (is.numeric(raw)) idx <- as.POSIXct(raw, origin = "1970-01-01", tz = "UTC") else idx <- raw
+    }
+  }
+  
+  if (nowcast && !is.null(idx)) {
+    ym <- .index_to_yearmon(idx)
+    if (!any(is.na(ym))) dates <- .format_yearmon(c(ym, tail(ym, h) + h/12))
+  }
+  
+  if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
+  if (inherits(variables, "xts")) {
+    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
+    variables <- data.frame(matrix(as.numeric(variables), nrow = NROW(variables),
+                                   dimnames = list(NULL, colnames(variables))),
+                            check.names = FALSE)
+  }
+  if (inherits(variables, "ts")) {
+    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
+    variables <- data.frame(as.matrix(variables), check.names = FALSE)
+  }
+  
   dim.red.method <- tolower(dim.red.method)
-
-  .check_flag <- function(value, name) {
-    if (!is.logical(value) || length(value) != 1L || is.na(value)) {
-      stop(sprintf("[%s] must be TRUE or FALSE.", name), call. = FALSE)
-    }
+  # dim.red.method is scalar: the downstream selectors use scalar if() (which
+  # errors on a length > 1 condition in R >= 4.2). Use "all" to combine methods.
+  if(length(dim.red.method) != 1L || !(dim.red.method %in% c("cor","nns.dep","nns.caus","all"))){ stop('Please ensure the dimension reduction method is set to a single value: one of "cor", "nns.dep", "nns.caus" or "all".')}
+  
+  if(is.null(colnames(variables))){
+    colnames.list <- lapply(1 : ncol(variables), function(i) paste0("x", i))
+    colnames(variables) <- as.character(colnames.list)
   }
-  .check_flag(naive.weights, "naive.weights")
-  .check_flag(status, "status")
-  .check_flag(nowcast, "nowcast")
-
-  # ===================== Inputs, names and time index =====================
-  time_index <- .nns_var_time_index(variables)
-  variables <- .nns_var_as_frame(variables)
-  p <- ncol(variables)
-  n <- nrow(variables)
-
-  lag_spec <- .nns_var_lags(tau, p)
-
-  if (h > 0L) {
-    # NNS.stack holds out max(2h, 20%) of the lagged training rows and needs
-    # at least three fitting rows ahead of that window.
-    n_lagged <- n - lag_spec$max
-    n_needed <- max(2L * h + 3L, 4L)
-    if (n_lagged < n_needed) {
-      stop(sprintf(paste0("Not enough observations: with h = %d and max(tau) = %d the lagged ",
-                          "training sample has %d rows but needs at least %d."),
-                   h, lag_spec$max, max(n_lagged, 0L), n_needed),
-           call. = FALSE)
+  
+  if(any(colnames(variables)=="")){
+    var_names <- character()
+    for(i in 1:length(which(colnames(variables)==""))){
+      var_names[i] <- paste0("x",i)
     }
+    colnames(variables)[which(colnames(variables)=="")] <- var_names
   }
-
-  labels <- .nns_var_row_labels(time_index, n, h, nowcast)
-
-  # Variables never observed below zero keep every output non-negative.
-  nonneg <- vapply(variables, function(v) min(v, na.rm = TRUE) >= 0, logical(1L))
-
+  
+  colnames(variables) <- gsub(" - ", "...", colnames(variables))
+  
   # Parallel process...
   auto_cores <- is.null(ncores)
   if (auto_cores) {
@@ -187,7 +254,7 @@ NNS.VAR <- function(variables,
   } else {
     num_cores <- max(1L, as.integer(ncores), na.rm = TRUE)
   }
-
+  
   # Workload gate: standing up a process cluster costs ~1s (spawn + exporting
   # data to workers). NNS.VAR parallelizes across VARIABLES -- one heavy task per
   # column (NNS.stack + dimension reduction over the ~ncol*tau lagged regressors)
@@ -200,11 +267,11 @@ NNS.VAR <- function(variables,
   # tune ncol_parallel_min / the nrow cutoff against representative workloads.)
   ncol_parallel_min <- 6L
   use_parallel <- num_cores > 1 &&
-    p >= 2L &&
+    ncol(variables) >= 2L &&
     (!auto_cores ||
-       p >= ncol_parallel_min ||
-       n >= 500L)
-
+       ncol(variables) >= ncol_parallel_min ||
+       nrow(variables) >= 500L)
+  
   # Create a single cluster shared by both parallel sections (fork-first, with a
   # PSOCK fallback). Stopped at the end of the multi-variate estimate section.
   cl <- NULL
@@ -219,511 +286,317 @@ NNS.VAR <- function(variables,
     if (!forked) parallel::clusterEvalQ(cl, library(NNS))
     on.exit(if (!is.null(cl)) try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
   }
-
+  
   if(status) message("Currently interpolating/extrapolating variables...","\r", appendLF=TRUE)
-
+  
   # ===================== Interpolation / Extrapolation  =====================
   .interp_worker <- function(i) {
-    x <- variables[[i]]
-    len <- length(x)
-    observed <- which(!is.na(x))
-    last_observed <- max(observed)
-    filled <- x
-
-    # Leading and interior NA(s): fit on the index and fill ONLY the missing
-    # indices; observed values are never smoothed.
-    inner_missing <- which(is.na(x) & seq_len(len) < last_observed)
-    if (length(inner_missing)) {
-      filled[inner_missing] <- .nns_var_index_fit(observed, x[observed], inner_missing)
+    n <- nrow(variables)
+    index <- seq_len(n)
+    a <- cbind.data.frame("index" = index, variables)
+    
+    # For Interpolation / Extrapolation of all missing values
+    selected_variable <- a[, c(1,(i+1))]
+    
+    interpolation_point <- tail(which(!is.na(selected_variable[,2])), 1)
+    
+    missing_index <- which(is.na(selected_variable[,2]))
+    selected_variable <- selected_variable[complete.cases(selected_variable), , drop = FALSE]
+    
+    h_int <- tail(index, 1) - interpolation_point
+    # ensure plain numeric to avoid classed assignment issues
+    variable_interpolation <- as.numeric(variables[,i])
+    
+    if (length(missing_index) == 0L) {
+      # ---- FIX: dataset is complete -> DO NOT SMOOTH ----
+      # keep the original series exactly
+      variable_interpolation <- as.numeric(variables[, i])
+      
+    } else if (h_int > 0) {
+      # trailing NA(s): estimate them using NNS.stack on the index (as in original).
+      # The index is duplicated into two identical predictors so the multivariate
+      # machinery has >1 column; strip cbind's auto-generated column names so the
+      # duplicate labels do not trip NNS.stack's unique-predictor-name guard.
+      multi <- NNS.stack(unname(cbind(selected_variable[,1], selected_variable[,1])), selected_variable[,2],
+                         order = NULL, ncores = 1, status = FALSE, folds = 5,
+                         IVs.test = unname(cbind(missing_index, missing_index)), method = 1)$stack
+      variable_interpolation[missing_index] <- as.numeric(multi)
+      
+    } else {
+      # interior NA(s) only: fit on index, but fill ONLY the missing indices (no global smoothing)
+      fitted_missing <- NNS.reg(selected_variable[,1], selected_variable[,2],
+                                order = "max", ncores = 1,
+                                point.est = missing_index, plot = FALSE, point.only = TRUE)$Point.est
+      if (length(missing_index)) variable_interpolation[missing_index] <- as.numeric(fitted_missing)
     }
-
-    # Trailing NA(s): NNS.ARMA extrapolation of the gap-filled history.
-    if (last_observed < len) {
-      trailing <- (last_observed + 1L):len
-      filled[trailing] <- .nns_var_extrapolate(filled[seq_len(last_observed)], length(trailing),
-                                               lag_spec$modulo[i], nonneg[i], obj.fn, objective)
-    }
-
-    if (nonneg[i]) filled <- pmax(0, filled)
-
-    forecast <- if (h > 0L) {
-      .nns_var_arma(filled, h, lag_spec$modulo[i], nonneg[i], obj.fn, objective)
-    } else NULL
-
-    list(filled, forecast)
+    
+    if(h > 0){
+      # robust tau selection without changing flow
+      tau_i <- if (is.list(tau)) tau[[min(i, length(tau))]] else tau
+      periods <- tryCatch(NNS.seas(variable_interpolation, modulo = min(tau_i),
+                                   mod.only = FALSE, plot = FALSE)$periods,
+                          error = function(e) NULL)
+      if (!is.numeric(periods) || length(periods) == 0L) periods <- NULL
+      
+      b <- NNS.ARMA.optim(variable_interpolation, seasonal.factor = periods,
+                          obj.fn = obj.fn,
+                          objective = objective,
+                          print.trace = FALSE,
+                          ncores = 1,
+                          negative.values = min(variable_interpolation, na.rm = TRUE) < 0, h = h)
+      
+      variable_extrapolation <- b$results
+      
+    } else variable_extrapolation <- NULL
+    
+    list(variable_interpolation, variable_extrapolation)
   }
-
+  
   nns_IVs <- if (use_parallel) {
     parallel::clusterExport(
       cl,
-      varlist = c("variables", "h", "lag_spec", "nonneg", "obj.fn", "objective"),
+      varlist = c("variables", "h", "tau", "obj.fn", "objective"),
       envir = environment()
     )
-    parallel::parLapply(cl, seq_len(p), .interp_worker)
+    parallel::parLapply(cl, 1:ncol(variables), .interp_worker)
   } else {
-    lapply(seq_len(p), .interp_worker)
+    lapply(1:ncol(variables), .interp_worker)
   }
-
-  .as_columns <- function(columns) {
-    out <- as.data.frame(setNames(columns, colnames(variables)), check.names = FALSE)
-    rownames(out) <- NULL
-    out
+  
+  interpolation_results <- lapply(nns_IVs, `[[`, 1)
+  
+  nns_IVs_interpolated_extrapolated <- data.frame(do.call(cbind, interpolation_results))
+  colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
+  
+  positive_values <- apply(variables, 2, function(x) min(x, na.rm = TRUE)>0)
+  for(i in 1:length(positive_values)){
+    if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
   }
-
-  interpolation_results <- lapply(nns_IVs, `[[`, 1L)
-  nns_IVs_interpolated_extrapolated <- .as_columns(interpolation_results)
-  rownames(nns_IVs_interpolated_extrapolated) <- labels$observed
-
-  if(h == 0L) return(.NNS.df(nns_IVs_interpolated_extrapolated))
-
-  extrapolation_results <- lapply(nns_IVs, `[[`, 2L)
-  nns_IVs_results <- .as_columns(extrapolation_results)
-
+  
+  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
+  colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
+  
+  if(h == 0) return(.NNS.df(nns_IVs_interpolated_extrapolated))
+  
+  extrapolation_results <- lapply(nns_IVs, `[[`, 2)
+  nns_IVs_results <- data.frame(do.call(cbind, extrapolation_results))
+  colnames(nns_IVs_results) <- colnames(variables)
+  
   # Combine interpolated / extrapolated / forecasted IVs onto training data.frame
-  new_values <- .as_columns(Map(c, interpolation_results, extrapolation_results))
-
-  # Now lag new forecasted data.frame. The first nrow - h lagged rows are the
-  # observed training sample; the last h rows are the forecast horizon, whose
-  # regressors carry the univariate forecasts of every variable.
-  lagged <- .nns_var_lag_matrix(new_values, lag_spec$lags)
-  lagged_new_values <- lagged$values
+  new_values <- lapply(1:ncol(variables), function(i) c(nns_IVs_interpolated_extrapolated[,i], nns_IVs_results[,i]))
+  
+  new_values <- data.frame(do.call(cbind, new_values))
+  colnames(new_values) <- as.character(colnames(variables))
+  
+  nns_IVs_interpolated_extrapolated <- head(new_values, nrow(variables))
+  
+  # Now lag new forecasted data.frame
+  lagged_new_values <- lag.mtx(new_values, tau = tau)
+  
+  # Keep original variables as training set
   lagged_new_values_train <- head(lagged_new_values, nrow(lagged_new_values) - h)
-  lagged_new_values_test <- tail(lagged_new_values, h)
-  lag_source <- lagged$source
-
-
+  
+  
   if(status) message("Currently generating multi-variate estimates...", "\r", appendLF = TRUE)
-
-
+  
+  
   if(use_parallel){
     if(status) message("Parallel process running, status unavailable... \n","\r",appendLF=FALSE)
     status <- FALSE
   }
-
-
+  
+  
   .model_worker <- function(i) {
-    if(status) message("Variable ", i, " of ", p, appendLF = TRUE)
-
-    # Column i is variable i's contemporaneous (tau_0) column.
+    if(status) message("Variable ", i, " of ", ncol(variables), appendLF = TRUE)
+    
     IV <- lagged_new_values_train[, -i, drop = FALSE]
-    DV <- lagged_new_values_train[[i]]
-    IV.test <- lagged_new_values_test[, -i, drop = FALSE]
-
-    # ts.test must be a whole number: NNS.stack validates it as an integer >= 1.
-    ts <- max(2L * h, as.integer(ceiling(.2 * length(DV))))
-
-    .run_var_stack <- function(stack_obj_fn, stack_objective, columns, method, stack) {
-      suppressWarnings(
-        NNS.stack(IVs.train = IV[, columns, drop = FALSE],
-                  DV.train = DV,
-                  IVs.test = IV.test[, columns, drop = FALSE],
-                  ts.test = ts,
-                  folds = 1,
-                  obj.fn = stack_obj_fn,
-                  objective = stack_objective,
-                  method = method,
-                  dim.red.method = dim.red.method,
-                  order = NULL, ncores = 1, stack = stack, status = FALSE)
-      )
+    DV <- lagged_new_values_train[, i]
+    
+    # ts.test must be a whole number: NNS.stack now validates it as an integer
+    # >= 1, so round the 0.2 * length(DV) floor up rather than passing the raw
+    # fractional value through.
+    ts <- max(2 * h, ceiling(.2 * length(DV)))
+    
+    # Relevant variables: the regressors whose dimension reduction
+    # coefficient meets the cross-validated threshold
+    rel_vars <- .nns_var_relevant(IVs.train = IV,
+                                  DV.train = DV,
+                                  ts.test = ts,
+                                  obj.fn = obj.fn,
+                                  objective = objective,
+                                  dim.red.method = dim.red.method)
+    
+    # Multivariate estimate: a full NNS.stack on exactly the relevant variables.
+    # stack = FALSE runs both methods on them independently; stack = TRUE uses
+    # the dimension reduction output in the n.best optimization.
+    .run_var_stack <- function(stack_obj_fn, stack_objective) {
+      NNS.stack(IVs.train = IV[, rel_vars, drop = FALSE],
+                DV.train = DV,
+                IVs.test = tail(IV, h)[, rel_vars, drop = FALSE],
+                ts.test = ts,
+                folds = 1,
+                obj.fn = stack_obj_fn,
+                objective = stack_objective,
+                method = 1,
+                dim.red.method = dim.red.method,
+                order = NULL, ncores = 1, stack = FALSE, status = FALSE)
     }
-
-    # The built-in co-movement ratio objective falls back to plain MSE when it
-    # is undefined for every candidate; a user objective is never overridden.
-    .fit_var_stack <- function(columns, method, stack) {
-      tryCatch(
-        .run_var_stack(obj.fn, objective, columns, method, stack),
-        error = function(e) {
-          degenerate <- conditionMessage(e) %in% c(
-            paste0("No Method 1 candidate produced a finite ",
-                   "complete-coverage OOF objective."),
-            "No candidate produced a finite out-of-fold objective."
-          )
-          if (!use_default_objective || !degenerate) stop(e)
-          if (status) {
-            message(paste0("NNS.VAR: the co-movement objective was undefined for ",
-                           "every candidate; retrying this variable using MSE."))
-          }
-          .run_var_stack(expression(mean((predicted - actual)^2)), "min",
-                         columns, method, stack)
+    
+    multivariate <- tryCatch(
+      .run_var_stack(obj.fn, objective),
+      error = function(e) {
+        no_finite_method1 <- identical(
+          conditionMessage(e),
+          paste0("No Method 1 candidate produced a finite ",
+                 "complete-coverage OOF objective.")
+        )
+        if (!use_default_objective || !no_finite_method1) stop(e)
+        if (status) {
+          message(paste0("NNS.VAR: the co-movement objective was undefined for ",
+                         "every candidate; retrying this variable using MSE."))
         }
-      )
-    }
-
-    # Step 1: the NNS.stack dimension reduction selects the relevant regressors
-    # (Method 2 alone makes exactly the selection it makes inside a full stack).
-    # Without a dimension reduction step (a single regressor) it is kept.
-    selection <- .fit_var_stack(names(IV), 2, TRUE)
-    rel_vars <- selection$NNS.dim.red.variables
-    if (is.null(rel_vars) || !length(rel_vars)) rel_vars <- names(IV)
-
-    # Step 2: a true multivariate NNS.stack fit (stack = FALSE) on exactly the
-    # relevant regressors: NNS.reg uses every one of them, so they are not
-    # collapsed into a single synthetic X* regressor.
-    fit <- .fit_var_stack(rel_vars, c(1, 2), FALSE)
-
-    # When the blend gives NNS.reg no weight, only the dimension reduction
-    # component remains; report the regressors that component carries.
-    if (isTRUE(fit$weights[["reg"]] == 0) && length(fit$NNS.dim.red.variables)) {
-      rel_vars <- fit$NNS.dim.red.variables
-    }
-
-    nns_DVs <- as.numeric(fit$stack)
-    missing_estimate <- !is.finite(nns_DVs)
-    nns_DVs[missing_estimate] <- nns_IVs_results[missing_estimate, i]
-    if (nonneg[i]) nns_DVs <- pmax(0, nns_DVs)
-
+        .run_var_stack(expression(mean((predicted - actual)^2)), "min")
+      }
+    )
+    
+    nns_DVs <- multivariate$stack
+    nns_DVs[is.na(nns_DVs)] <- nns_IVs_results[is.na(nns_DVs),i]
+    
     list(nns_DVs, rel_vars)
   }
-
+  
   lists <- if (use_parallel) {
     parallel::clusterExport(
       cl,
-      varlist = c("status", "p", "lagged_new_values_train", "lagged_new_values_test",
-                  "h", "obj.fn", "objective", "use_default_objective",
-                  "dim.red.method", "nns_IVs_results", "nonneg"),
+      varlist = c("status", "variables", "lagged_new_values_train", "h",
+                  "obj.fn", "objective", "use_default_objective",
+                  "dim.red.method", "nns_IVs_results"),
       envir = environment()
     )
-    parallel::parLapply(cl, seq_len(p), .model_worker)
+    parallel::parLapply(cl, 1:ncol(variables), .model_worker)
   } else {
-    lapply(seq_len(p), .model_worker)
+    lapply(1:ncol(variables), .model_worker)
   }
-
+  
   if(use_parallel) {
     parallel::stopCluster(cl)
     cl <- NULL
     invisible(gc(verbose = FALSE))
   }
-
-  nns_DVs <- .as_columns(lapply(lists, `[[`, 1L))
-  relevant_vars <- lapply(lists, `[[`, 2L)
-
-  RV <- do.call(cbind, lapply(relevant_vars, `length<-`, max(lengths(relevant_vars))))
-  colnames(RV) <- colnames(variables)
-
-  # Ensemble weights: the univariate share is the fraction of the relevant
-  # regressors that are the variable's own lags. lag_source maps every lagged
-  # column to its variable exactly, so variable names are never parsed.
-  uni <- rep(0.5, p)
-  if (!naive.weights) {
-    for (i in seq_len(p)) {
-      observed_var <- lag_source[match(relevant_vars[[i]], names(lagged_new_values))]
-      observed_var <- observed_var[!is.na(observed_var)]
-      if (length(observed_var)) uni[i] <- mean(observed_var == colnames(variables)[i])
+  
+  nns_DVs <- lapply(lists, `[[`, 1)
+  relevant_vars <- lapply(lists, `[[`, 2)
+  
+  
+  nns_DVs <- data.frame(do.call(cbind, nns_DVs))
+  nns_DVs <- head(nns_DVs, h)
+  
+  RV <- lapply(relevant_vars, function(x) if(length(x)==0){NA} else {x})
+  
+  colnames(nns_DVs) <- colnames(variables)
+  
+  RV <- do.call(cbind, lapply(RV, `length<-`, max(lengths(RV))))
+  colnames(RV) <- as.character(colnames(variables))
+  
+  multi <- uni <- numeric(length(colnames(RV)))
+  
+  for(i in 1:length(colnames(RV))){
+    if(length(na.omit(RV[,i])) > 0){
+      given_var <- unlist(strsplit(colnames(RV)[i], split = "_tau"))[1]
+      observed_var <- do.call(rbind,(strsplit(na.omit(RV[,i]), split = "_tau")))[,1]
+      
+      equal_tau <- sum(given_var==observed_var)
+      unequal_tau <- sum(given_var!=observed_var)
+      
+      if(naive.weights) uni[i] <- 0.5 else uni[i] <- equal_tau/(equal_tau + unequal_tau)
+      multi[i] <- 1 - uni[i]
+    } else {
+      uni[i] <- 0.5
+      multi[i] <- 0.5
     }
   }
-  multi <- 1 - uni
-
-  forecasts <- .as_columns(Map(function(u, m, a, b) u * a + m * b,
-                               uni, multi, nns_IVs_results, nns_DVs))
-
-  rownames(nns_IVs_results) <- labels$forecast
-  rownames(nns_DVs) <- labels$forecast
-  rownames(forecasts) <- labels$forecast
-
+  
+  
+  forecasts <- data.frame(Reduce(`+`,list(t(t(nns_IVs_results)*uni) , t(t(nns_DVs)*multi))))
+  colnames(forecasts) <- colnames(variables)
+  
+  
+  colnames(nns_IVs_results) <- colnames(variables)
+  rownames(nns_IVs_results) <- tail(dates, h)
+  colnames(nns_DVs) <- colnames(variables)
+  rownames(nns_DVs) <- tail(dates, h)
+  colnames(forecasts) <- colnames(variables)
+  rownames(forecasts) <- tail(dates, h)
+  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(nns_IVs_interpolated_extrapolated))
+  
+  options(warn = oldw)
+  
+  
   return( list("interpolated_and_extrapolated" = .NNS.df(nns_IVs_interpolated_extrapolated),
-               "relevant_variables" = .NNS.df(data.frame(RV, check.names = FALSE)),
+               "relevant_variables" = .NNS.df(data.frame(RV)),
                univariate = .NNS.df(nns_IVs_results),
                multivariate = .NNS.df(nns_DVs),
                ensemble = .NNS.df(forecasts)) )
-
+  
 }
 
 
-# ===================== NNS.VAR internals =====================
-
-# Coerce the supported inputs to a numeric data.frame with unique, non-empty
-# column names.
-.nns_var_as_frame <- function(variables) {
-  if (any(class(variables) %in% c("tbl", "data.table"))) variables <- as.data.frame(variables)
-  if (inherits(variables, c("xts", "zoo", "ts"))) {
-    variables <- matrix(as.numeric(variables), nrow = NROW(variables),
-                        dimnames = list(NULL, colnames(variables)))
+# Relevant variables: cross-validate the
+# dimension reduction threshold overNNS.stack cutoff grid
+# (validated on the last ts.test rows) and keep every regressor whose
+# coefficient meets it.  Returns their names.
+.nns_var_relevant <- function(IVs.train, DV.train, ts.test, obj.fn, objective,
+                              dim.red.method) {
+  IVs.train <- data.frame(IVs.train, check.names = FALSE)
+  DV.train <- as.numeric(DV.train)
+  n <- ncol(IVs.train)
+  if (n == 1) return(colnames(IVs.train))
+  N <- nrow(IVs.train)
+  best <- function(x) {
+    i <- if (objective == "min") which.min(x) else which.max(x)
+    if (length(i) == 0) 1L else i
   }
-  if (is.null(dim(variables))) {
-    if (!is.numeric(variables) && !is.logical(variables)) {
-      stop("[variables] must be a numeric matrix or data.frame of time-series.", call. = FALSE)
-    }
-    variables <- matrix(as.numeric(variables), ncol = 1L)
-  }
-
-  var_names <- colnames(variables)
-  variables <- as.data.frame(variables, check.names = FALSE, stringsAsFactors = FALSE)
-
-  if (ncol(variables) < 1L || nrow(variables) < 1L) {
-    stop("[variables] must contain at least one variable and one observation.", call. = FALSE)
-  }
-
-  numeric_cols <- vapply(variables, function(v) is.numeric(v) || is.logical(v), logical(1L))
-  if (!all(numeric_cols)) {
-    stop(sprintf("All [variables] must be numeric; non-numeric column(s): %s.",
-                 paste(which(!numeric_cols), collapse = ", ")), call. = FALSE)
-  }
-  variables[] <- lapply(variables, as.numeric)
-  if (any(vapply(variables, function(v) any(is.infinite(v)), logical(1L)))) {
-    stop("[variables] contains infinite values.", call. = FALSE)
-  }
-  empty <- vapply(variables, function(v) all(is.na(v)), logical(1L))
-  if (any(empty)) {
-    stop(sprintf("Variable(s) %s contain only missing values.",
-                 paste(which(empty), collapse = ", ")), call. = FALSE)
-  }
-
-  if (is.null(var_names)) var_names <- rep("", ncol(variables))
-  blank <- is.na(var_names) | var_names == ""
-  var_names[blank] <- paste0("x", which(blank))
-  var_names <- gsub(" - ", "...", var_names)
-  colnames(variables) <- make.unique(var_names)
-  rownames(variables) <- NULL
-  variables
-}
-
-# Validate tau and expand it to one lag vector per variable. `modulo` is the
-# NNS.seas modulo for each variable: its smallest lag (a scalar tau keeps tau).
-.nns_var_lags <- function(tau, p) {
-  invalid <- function() {
-    stop(paste0("[tau] must be a positive integer, a vector of positive integers with one lag ",
-                "per variable, or a list of positive-integer lag vectors (one per variable, or ",
-                "one shared by every variable)."), call. = FALSE)
-  }
-  as_lags <- function(v) {
-    v <- unlist(v, use.names = FALSE)
-    if (!is.numeric(v) || !length(v) || any(!is.finite(v)) || any(v < 1) || any(v != floor(v))) {
-      invalid()
-    }
-    sort(unique(as.integer(v)))
-  }
-
-  if (is.list(tau)) {
-    if (length(tau) == 1L) tau <- rep(tau, p)
-    if (length(tau) != p) invalid()
-    lags <- lapply(tau, as_lags)
-    modulo <- vapply(lags, min, integer(1L))
-  } else {
-    v <- as_lags(tau)
-    if (length(tau) == 1L) {
-      lags <- rep(list(seq_len(v)), p)
-      modulo <- rep(v, p)
-    } else if (length(tau) == p) {
-      lags <- as.list(as.integer(tau))
-      modulo <- as.integer(tau)
+  score <- function(predicted, actual) eval(obj.fn)
+  
+  test.set <- (N - ts.test + 1):N
+  CV.IVs.train <- IVs.train[-test.set, , drop = FALSE]
+  CV.IVs.test <- IVs.train[test.set, , drop = FALSE]
+  CV.DV.train <- DV.train[-test.set]
+  actual <- DV.train[test.set]
+  
+  coefficients <- function(x, y) {
+    if (dim.red.method == "cor") {
+      suppressWarnings(cor(data.matrix(cbind(y, x)), method = "spearman"))[-1, 1]
     } else {
-      invalid()
+      suppressWarnings(NNS.reg(x, y, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE,
+                               order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
     }
   }
-
-  list(lags = lags, modulo = as.integer(modulo), max = max(unlist(lags)))
-}
-
-# Lag matrix: every variable's contemporaneous (tau_0) column first, in
-# variable order, then each variable's requested lags. `source` names the
-# variable behind every column.
-.nns_var_lag_matrix <- function(x, lags) {
-  x <- as.matrix(x)
-  var_names <- gsub('"', '', colnames(x), fixed = TRUE)
-  max_tau <- max(unlist(lags))
-  rows <- (max_tau + 1L):nrow(x)
-
-  columns <- list(); col_names <- character(); col_source <- character()
-  for (j in seq_len(ncol(x))) {
-    columns[[length(columns) + 1L]] <- x[rows, j]
-    col_names <- c(col_names, paste0(var_names[j], "_tau_0"))
-    col_source <- c(col_source, colnames(x)[j])
-  }
-  for (j in seq_len(ncol(x))) {
-    for (l in lags[[j]]) {
-      columns[[length(columns) + 1L]] <- x[rows - l, j]
-      col_names <- c(col_names, paste0(var_names[j], "_tau_", l))
-      col_source <- c(col_source, colnames(x)[j])
-    }
-  }
-
-  values <- as.data.frame(do.call(cbind, columns), check.names = FALSE)
-  names(values) <- make.unique(col_names)
-  list(values = values, source = col_source)
-}
-
-# Fit a series on its index and evaluate it at `at` (interpolation inside the
-# observed range, linear extrapolation outside it).
-.nns_var_index_fit <- function(index, values, at) {
-  if (length(index) < 2L) return(rep(values[1L], length(at)))
-  as.numeric(suppressWarnings(
-    NNS.reg(index, values, order = "max", ncores = 1, point.est = at,
-            plot = FALSE, point.only = TRUE)$Point.est
-  ))
-}
-
-# NNS.ARMA.optim forecast with a seasonal-period fallback chain: the modulo
-# periods from NNS.seas, then the unrestricted NNS.seas periods, then a plain
-# lag-1 model. NNS.ARMA.optim rejects periods too long for its training set,
-# so one unusable candidate set no longer aborts the whole call.
-.nns_var_arma <- function(series, horizon, modulo, nonneg, obj.fn, objective) {
-  seas_periods <- function(...) {
-    periods <- tryCatch(suppressWarnings(NNS.seas(series, mod.only = FALSE, plot = FALSE, ...)$periods),
-                        error = function(e) NULL)
-    periods <- suppressWarnings(as.integer(periods))
-    periods[!is.na(periods) & periods >= 1L]
-  }
-  candidates <- list(function() seas_periods(modulo = modulo),
-                     function() seas_periods(),
-                     function() 1L)
-
-  failure <- NULL
-  for (candidate in candidates) {
-    periods <- candidate()
-    if (!length(periods)) next
-    fit <- tryCatch(
-      suppressWarnings(NNS.ARMA.optim(series, h = horizon, seasonal.factor = periods,
-                                      obj.fn = obj.fn, objective = objective,
-                                      print.trace = FALSE, ncores = 1,
-                                      negative.values = !nonneg)),
-      error = function(e) {
-        failure <<- e
-        NULL
-      }
-    )
-    if (!is.null(fit)) {
-      forecast <- as.numeric(fit$results)
-      if (nonneg) forecast <- pmax(0, forecast)
-      return(forecast)
-    }
-  }
-  stop(paste0("NNS.ARMA.optim failed for every seasonal-period candidate: ",
-              if (is.null(failure)) "no candidate periods" else conditionMessage(failure)),
-       call. = FALSE)
-}
-
-# Trailing NA(s): NNS.ARMA extrapolation, falling back to a linear index fit
-# when the observed history is too short for NNS.ARMA.optim.
-.nns_var_extrapolate <- function(history, horizon, modulo, nonneg, obj.fn, objective) {
-  tryCatch(
-    .nns_var_arma(history, horizon, modulo, nonneg, obj.fn, objective),
-    error = function(e) {
-      out <- .nns_var_index_fit(seq_along(history), history, length(history) + seq_len(horizon))
-      if (nonneg) pmax(0, out) else out
-    }
-  )
-}
-
-# Best-effort time index of a ts / xts / zoo input, without zoo or xts.
-.nns_var_time_index <- function(variables) {
-  if (inherits(variables, "ts")) {
-    return(list(type = "time", time = as.numeric(stats::time(variables)),
-                frequency = stats::frequency(variables)))
-  }
-  if (!inherits(variables, c("xts", "zoo"))) return(NULL)
-
-  raw <- attr(variables, "index")
-  if (is.null(raw)) return(NULL)
-
-  if (inherits(variables, "xts")) {
-    # xts stores its index as numeric seconds since the epoch.
-    tz <- attr(raw, "tzone")
-    if (is.null(tz) || !nzchar(tz[1L])) tz <- "UTC"
-    raw <- as.POSIXct(as.numeric(raw), origin = "1970-01-01", tz = tz[1L])
-  }
-
-  if (inherits(raw, "yearmon")) {
-    return(list(type = "time", time = as.numeric(raw), frequency = 12))
-  }
-  if (inherits(raw, "yearqtr")) {
-    return(list(type = "time", time = as.numeric(raw), frequency = 4))
-  }
-  if (inherits(raw, "POSIXt")) {
-    lt <- as.POSIXlt(raw)
-    if (all(lt$hour == 0 & lt$min == 0 & lt$sec == 0)) {
-      return(list(type = "date", date = as.Date(format(raw, "%Y-%m-%d"))))
-    }
-    return(list(type = "datetime", datetime = as.POSIXct(raw)))
-  }
-  if (inherits(raw, "Date")) return(list(type = "date", date = raw))
-  if (is.numeric(raw) && length(raw) >= 2L) {
-    spacing <- unique(round(diff(as.numeric(raw)), 8))
-    if (length(spacing) == 1L && spacing > 0) {
-      return(list(type = "time", time = as.numeric(raw), frequency = 1 / spacing))
-    }
-  }
-  NULL
-}
-
-# "Mon YYYY" for monthly, "YYYY Qn" for quarterly, "YYYY" for annual and
-# "YYYY(cycle)" for any other frequency.
-.nns_var_cycle_labels <- function(time, frequency) {
-  year <- floor(time + 1e-8)
-  cycle <- as.integer(round((time - year) * frequency)) + 1L
-  roll <- !is.na(cycle) & cycle > round(frequency)
-  year[roll] <- year[roll] + 1; cycle[roll] <- 1L
-  if (isTRUE(all.equal(frequency, 12))) return(paste(month.abb[cycle], year))
-  if (isTRUE(all.equal(frequency, 4))) return(paste0(year, " Q", cycle))
-  if (isTRUE(all.equal(frequency, 1))) return(as.character(year))
-  paste0(year, "(", cycle, ")")
-}
-
-# Row labels for the observed rows and the h forecast rows. Labels that are not
-# unique are dropped (with a warning) rather than failing the call.
-.nns_var_row_labels <- function(time_index, n, h, nowcast) {
-  none <- list(observed = NULL, forecast = NULL)
-  if (is.null(time_index)) return(none)
-  step <- seq_len(h)
-
-  as_months <- function(date) {
-    lt <- as.POSIXlt(date)
-    (lt$year + 1900) + lt$mon / 12
-  }
-  monthly_labels <- function(months) {
-    .nns_var_cycle_labels(c(months, tail(months, 1L) + step / 12), 12)
-  }
-
-  labels <- switch(
-    time_index$type,
-    time = {
-      tt <- time_index$time
-      f <- if (nowcast) 12 else time_index$frequency
-      .nns_var_cycle_labels(c(tt, tail(tt, 1L) + step / f), f)
-    },
-    date = {
-      d <- time_index$date
-      spacing <- as.numeric(diff(d))
-      months <- as_months(d)
-      if (nowcast || (length(d) >= 2L && all(spacing >= 28 & spacing <= 31))) {
-        monthly_labels(months)
-      } else if (length(d) >= 2L && all(spacing >= 89 & spacing <= 92)) {
-        quarters <- floor(months + 1e-8) + floor(round((months %% 1) * 12) / 3) / 4
-        .nns_var_cycle_labels(c(quarters, tail(quarters, 1L) + step / 4), 4)
-      } else if (length(d) >= 2L && all(spacing >= 365 & spacing <= 366)) {
-        years <- floor(months + 1e-8)
-        as.character(c(years, tail(years, 1L) + step))
-      } else {
-        last <- tail(d, 1L)
-        weekdays_only <- length(d) >= 2L && !any(as.POSIXlt(d)$wday %in% c(0L, 6L))
-        future <- if (length(d) < 2L) {
-          last + step
-        } else if (weekdays_only && stats::median(spacing) <= 1) {
-          days <- last + seq_len(2L * h + 7L)
-          head(days[!(as.POSIXlt(days)$wday %in% c(0L, 6L))], h)
-        } else {
-          last + stats::median(spacing) * step
-        }
-        format(c(d, future), "%Y-%m-%d")
-      }
-    },
-    datetime = {
-      dt <- time_index$datetime
-      if (nowcast) {
-        monthly_labels(as_months(dt))
-      } else {
-        spacing <- if (length(dt) >= 2L) stats::median(as.numeric(diff(dt), units = "secs")) else 1
-        format(c(dt, tail(dt, 1L) + spacing * step), "%Y-%m-%d %H:%M:%S")
-      }
-    },
-    NULL
-  )
-
-  if (is.null(labels) || length(labels) != n + h || anyNA(labels) || anyDuplicated(labels)) {
-    if (!is.null(labels)) {
-      warning("NNS.VAR: the time index does not give unique row labels; rows are left unlabelled.",
-              call. = FALSE)
-    }
-    return(none)
-  }
-  list(observed = labels[seq_len(n)], forecast = labels[n + step])
+  var.cutoffs_1 <- abs(round(coefficients(IVs.train, DV.train), digits = 2))
+  var.cutoffs_2 <- abs(round(coefficients(CV.IVs.train, CV.DV.train), digits = 2))
+  
+  var.cutoffs <- pmin(var.cutoffs_1, (var.cutoffs_1 + var.cutoffs_2) / 2)
+  var.cutoffs <- var.cutoffs[var.cutoffs < 1 & var.cutoffs >= 0]
+  var.cutoffs[is.na(var.cutoffs)] <- 0
+  var.cutoffs <- rev(sort(unique(var.cutoffs)))[-1]
+  if (length(var.cutoffs) == 0) var.cutoffs <- 0
+  if (n == 2) var.cutoffs <- unique(c(var.cutoffs, 0))
+  
+  nns.ord <- sapply(var.cutoffs, function(threshold) {
+    predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test,
+                                          dim.red.method = dim.red.method, threshold = threshold,
+                                          plot = FALSE, residual.plot = FALSE, order = NULL,
+                                          ncores = 1, point.only = TRUE)$Point.est)
+    predicted[is.na(predicted)] <- gravity(na.omit(predicted))
+    score(predicted, actual)
+  })
+  threshold <- var.cutoffs[best(nns.ord)]
+  
+  # Every regressor the threshold keeps (positive or negative coefficient)
+  coef <- suppressWarnings(NNS.reg(IVs.train, DV.train, dim.red.method = dim.red.method,
+                                   threshold = threshold, plot = FALSE, residual.plot = FALSE,
+                                   order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
+  relevant_vars <- which(coef != 0)
+  if (length(relevant_vars) == 0) relevant_vars <- 1:n
+  colnames(IVs.train)[relevant_vars]
 }
