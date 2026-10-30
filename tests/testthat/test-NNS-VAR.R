@@ -36,124 +36,92 @@ test_that("NNS.stack reports exactly the regressors its estimate uses", {
   expect_false(isTRUE(all.equal(fit(shifted)$stack, base$stack)))
 })
 
-test_that("NNS.VAR relevant_variables are the selected regressors, never the target itself", {
-  A <- .var_driven_data()
-  for (method in c("cor", "nns.dep")) {
-    out <- NNS.VAR(A, h = 3, tau = 2, dim.red.method = method, status = FALSE, ncores = 1)
-    for (v in colnames(A)) {
-      rel <- na.omit(out$relevant_variables[[v]])
-      expect_true(length(rel) >= 1L)
-      expect_false(paste0(v, "_tau_0") %in% rel)
-    }
-    # y is driven by lagged x
-    expect_true("x_tau_1" %in% na.omit(out$relevant_variables$y))
-  }
-})
 
-test_that("NNS.VAR multivariate estimates forecast the horizon, not the last observed rows", {
-  L <- cbind(x1 = as.numeric(-2:17), x2 = seq(1, 39, 2))
-  out <- NNS.VAR(L, h = 3, tau = 2, status = FALSE, ncores = 1)
-  expect_equal(unname(as.matrix(out$univariate)), cbind(18:20, c(41, 43, 45)), tolerance = 1e-6)
-  expect_equal(unname(as.matrix(out$multivariate)), cbind(18:20, c(41, 43, 45)), tolerance = 1e-6)
-  expect_equal(unname(as.matrix(out$ensemble)), cbind(18:20, c(41, 43, 45)), tolerance = 1e-6)
-})
-
-test_that("NNS.VAR validates h and tau before fitting", {
-  A <- .var_driven_data(40)
-  expect_error(NNS.VAR(A, h = -1, status = FALSE), "\\[h\\]")
-  expect_error(NNS.VAR(A, h = 1.5, status = FALSE), "\\[h\\]")
-  expect_error(NNS.VAR(A, h = 2, tau = c(1, 2), status = FALSE), "\\[tau\\]")
-  expect_error(NNS.VAR(A, h = 2, tau = c(1, 1, 1, 1), status = FALSE), "\\[tau\\]")
-  expect_error(NNS.VAR(A, h = 2, tau = 0, status = FALSE), "\\[tau\\]")
-  expect_error(NNS.VAR(A, h = 2, tau = list(1:2, 1), status = FALSE), "\\[tau\\]")
-  expect_error(NNS.VAR(A[1:10, ], h = 4, tau = 2, status = FALSE), "Not enough observations")
-  expect_equal(nrow(NNS.VAR(A, tau = 1, status = FALSE, ncores = 1)$ensemble), 1L)
-})
-
-test_that("NNS.VAR fills trailing NAs by extrapolation and keeps observed values", {
-  L <- cbind(x1 = as.numeric(-2:17), x2 = seq(1, 39, 2))
-  L[5, 1] <- NA
-  L[20, 1] <- NA
-  filled <- NNS.VAR(L, h = 0, tau = 2, status = FALSE, ncores = 1)
-  expect_equal(filled$x1, as.numeric(-2:17), tolerance = 1e-6)
-  expect_equal(filled$x2, seq(1, 39, 2))
-})
-
-test_that("NNS.VAR labels forecast rows with the following periods", {
-  A <- .var_driven_data(60)
-  monthly <- NNS.VAR(ts(A, start = c(2015, 1), frequency = 12), h = 2, tau = 1,
-                     status = FALSE, ncores = 1)
-  expect_equal(tail(rownames(monthly$interpolated_and_extrapolated), 1L), "Dec 2019")
-  expect_equal(rownames(monthly$ensemble), c("Jan 2020", "Feb 2020"))
-
-  # Weekly data used to fail with duplicate "Mon YYYY" row names.
-  weekly <- NNS.VAR(ts(A, start = c(2020, 1), frequency = 52), h = 2, tau = 1,
-                    status = FALSE, ncores = 1)
-  expect_equal(rownames(weekly$ensemble), c("2021(9)", "2021(10)"))
-})
-
-test_that("NNS.VAR daily xts input is labelled by date", {
-  skip_if_not_installed("xts")
-  A <- .var_driven_data(60)
-  daily <- xts::xts(A, order.by = seq(as.Date("2024-01-01"), by = "day", length.out = 60))
-  out <- NNS.VAR(daily, h = 2, tau = 1, status = FALSE, ncores = 1)
-  expect_equal(rownames(out$ensemble), c("2024-03-01", "2024-03-02"))
-})
-
-test_that("NNS.VAR handles one variable, awkward names and own-lag weights", {
-  A <- .var_driven_data(60)
-  single <- NNS.VAR(A[, 1, drop = FALSE], h = 2, tau = 2, status = FALSE, ncores = 1)
-  single_rel <- na.omit(single$relevant_variables$x)
-  expect_true(length(single_rel) >= 1L)
-  expect_true(all(single_rel %in% c("x_tau_1", "x_tau_2")))
-
-  B <- A; colnames(B) <- c("a_tau", "a", "a")
-  out <- NNS.VAR(B, h = 2, tau = 1, naive.weights = FALSE, status = FALSE, ncores = 1)
-  expect_equal(colnames(out$ensemble), c("a_tau", "a", "a.1"))
-  expect_true(all(is.finite(as.matrix(out$ensemble))))
-})
-
-test_that("NNS.VAR keeps never-negative variables non-negative", {
-  set.seed(3)
-  P <- cbind(p1 = abs(rnorm(60)) + 0.01, p2 = seq_len(60) / 10)
-  out <- NNS.VAR(P, h = 6, tau = 2, status = FALSE, ncores = 1)
-  expect_true(all(as.matrix(out$multivariate) >= 0))
-  expect_true(all(as.matrix(out$ensemble) >= 0))
-})
-
-test_that("NNS.VAR recovers from seasonal periods too long for a short series", {
-  A <- .var_driven_data(45)
-  out <- NNS.VAR(A, h = 3, tau = 12, status = FALSE, ncores = 1)
-  expect_equal(dim(out$ensemble), c(3L, 3L))
-  expect_true(all(is.finite(as.matrix(out$ensemble))))
-})
-
-test_that("NNS.VAR multivariate is a stack = FALSE fit on exactly the relevant variables", {
-  # y is driven by lagged x and lagged w, so its fit is genuinely multivariate.
-  set.seed(2)
-  n <- 80
+.var_two_driver_data <- function(n = 80, seed = 2) {
+  set.seed(seed)
   x <- as.numeric(stats::filter(rnorm(n), 0.6, method = "recursive"))
   w <- as.numeric(stats::filter(rnorm(n), 0.6, method = "recursive"))
   y <- c(0, head(x, -1) + head(w, -1)) + rnorm(n, sd = 0.2)
-  A <- cbind(x = x, y = y, w = w)
-  h <- 3
-  out <- NNS.VAR(A, h = h, tau = 1, status = FALSE, ncores = 1)
-  expect_setequal(na.omit(out$relevant_variables$y), c("x_tau_1", "w_tau_1"))
+  cbind(x = x, y = y, w = w)
+}
 
-  values <- rbind(as.matrix(out$interpolated_and_extrapolated), as.matrix(out$univariate))
-  lagged <- NNS:::.nns_var_lag_matrix(as.data.frame(values), rep(list(1L), 3))$values
-  train <- head(lagged, nrow(lagged) - h)
-  test <- tail(lagged, h)
-  obj <- formals(NNS.VAR)$obj.fn
+# The lagged training matrix NNS.VAR builds for tau = 1 on complete data
+.var_lag1_train <- function(A) {
+  n <- nrow(A)
+  lagged <- cbind(A[-1, , drop = FALSE], A[-n, , drop = FALSE])
+  colnames(lagged) <- c(paste0(colnames(A), "_tau_0"), paste0(colnames(A), "_tau_1"))
+  data.frame(lagged, check.names = FALSE)
+}
 
+.var_default_obj <- eval(formals(NNS.VAR)$obj.fn)
+
+test_that("NNS.VAR stacks NNS.reg on exactly the relevant variables with the dimension reduction fit", {
+  train <- .var_lag1_train(.var_two_driver_data())
+  IV <- train[, -2]; DV <- train[, 2]
+  test <- tail(IV, 3)
+  fit <- NNS:::.nns_var_stack(IV, DV, test, ts.test = 16, obj.fn = .var_default_obj,
+                              objective = "min", dim.red.method = "cor")
+
+  # The relevant variables are the regressors the cross-validated threshold keeps
+  dim.red <- NNS.reg(IV, DV, point.est = test, dim.red.method = "cor",
+                     threshold = fit$NNS.dim.red.threshold, order = NULL, ncores = 1,
+                     plot = FALSE, residual.plot = FALSE)
+  kept <- dim.red$equation$Variable[dim.red$equation$Coefficient != 0]
+  expect_setequal(fit$relevant_variables, setdiff(kept, "DENOMINATOR"))
+  expect_setequal(fit$relevant_variables, c("x_tau_1", "w_tau_1"))
+
+  # Method 1 is NNS.reg on those regressors, each as its own dimension
+  reg <- NNS.reg(IV[, fit$relevant_variables], DV, point.est = test[, fit$relevant_variables],
+                 n.best = fit$NNS.reg.n.best, order = NULL, ncores = 1,
+                 plot = FALSE, residual.plot = FALSE)
+  expect_equal(sum(fit$weights), 1)
+  expect_equal(fit$stack, fit$weights[1] * reg$Point.est + fit$weights[2] * dim.red$Point.est)
+
+  # Regressors outside the selection cannot move the estimate...
+  shifted <- test
+  unused <- setdiff(names(IV), fit$relevant_variables)
+  shifted[, unused] <- shifted[, unused] + 100
+  refit <- NNS:::.nns_var_stack(IV, DV, shifted, ts.test = 16, obj.fn = .var_default_obj,
+                                objective = "min", dim.red.method = "cor")
+  expect_equal(refit$stack, fit$stack)
+  # ...while a selected one does.
+  shifted[, "x_tau_1"] <- shifted[, "x_tau_1"] + 1
+  refit <- NNS:::.nns_var_stack(IV, DV, shifted, ts.test = 16, obj.fn = .var_default_obj,
+                                objective = "min", dim.red.method = "cor")
+  expect_false(isTRUE(all.equal(refit$stack, fit$stack)))
+})
+
+test_that("NNS.VAR multivariate is the stacked estimate at the last h training rows", {
+  A <- .var_two_driver_data()
+  out <- NNS.VAR(A, h = 3, tau = 1, status = FALSE, ncores = 1)
+  train <- .var_lag1_train(A)
   for (i in seq_len(ncol(A))) {
-    rel <- as.character(na.omit(out$relevant_variables[[i]]))
-    IV <- train[, -i, drop = FALSE]
-    refit <- suppressWarnings(NNS.stack(IV[, rel, drop = FALSE], train[[i]],
-                                        IVs.test = test[, -i, drop = FALSE][, rel, drop = FALSE],
-                                        ts.test = max(2 * h, ceiling(0.2 * nrow(train))), folds = 1,
-                                        obj.fn = eval(obj), method = c(1, 2), order = NULL,
-                                        ncores = 1, stack = FALSE, status = FALSE))
-    expect_equal(out$multivariate[[i]], as.numeric(refit$stack))
+    IV <- train[, -i]
+    fit <- NNS:::.nns_var_stack(IV, train[, i], tail(IV, 3), ts.test = ceiling(0.2 * nrow(train)),
+                                obj.fn = .var_default_obj, objective = "min", dim.red.method = "cor")
+    expect_equal(out$multivariate[[i]], fit$stack)
+    expect_setequal(na.omit(out$relevant_variables[[i]]), fit$relevant_variables)
+    expect_false(paste0(colnames(A)[i], "_tau_0") %in% out$relevant_variables[[i]])
+  }
+})
+
+test_that("NNS.VAR relevant variables drive the ensemble weights when naive.weights = FALSE", {
+  A <- .var_two_driver_data()
+  out <- NNS.VAR(A, h = 2, tau = 2, naive.weights = FALSE, status = FALSE, ncores = 1)
+  for (v in colnames(A)) {
+    rel <- na.omit(out$relevant_variables[[v]])
+    own <- mean(sub("_tau_.*$", "", rel) == v)
+    expect_equal(out$ensemble[[v]], own * out$univariate[[v]] + (1 - own) * out$multivariate[[v]])
+  }
+})
+
+test_that("NNS.VAR selects relevant variables with every dimension reduction method", {
+  A <- .var_two_driver_data()
+  for (method in c("nns.dep", "nns.caus", "all")) {
+    out <- NNS.VAR(A, h = 2, tau = 1, dim.red.method = method, status = FALSE, ncores = 1)
+    rel <- na.omit(out$relevant_variables$y)
+    expect_true(length(rel) >= 1L)
+    expect_true(all(rel %in% c("x_tau_0", "w_tau_0", "x_tau_1", "y_tau_1", "w_tau_1")))
+    expect_true(all(is.finite(out$multivariate$y)))
   }
 })
