@@ -127,3 +127,33 @@ test_that("NNS.VAR recovers from seasonal periods too long for a short series", 
   expect_equal(dim(out$ensemble), c(3L, 3L))
   expect_true(all(is.finite(as.matrix(out$ensemble))))
 })
+
+test_that("NNS.VAR multivariate is a stack = FALSE fit on exactly the relevant variables", {
+  # y is driven by lagged x and lagged w, so its fit is genuinely multivariate.
+  set.seed(2)
+  n <- 80
+  x <- as.numeric(stats::filter(rnorm(n), 0.6, method = "recursive"))
+  w <- as.numeric(stats::filter(rnorm(n), 0.6, method = "recursive"))
+  y <- c(0, head(x, -1) + head(w, -1)) + rnorm(n, sd = 0.2)
+  A <- cbind(x = x, y = y, w = w)
+  h <- 3
+  out <- NNS.VAR(A, h = h, tau = 1, status = FALSE, ncores = 1)
+  expect_setequal(na.omit(out$relevant_variables$y), c("x_tau_1", "w_tau_1"))
+
+  values <- rbind(as.matrix(out$interpolated_and_extrapolated), as.matrix(out$univariate))
+  lagged <- NNS:::.nns_var_lag_matrix(as.data.frame(values), rep(list(1L), 3))$values
+  train <- head(lagged, nrow(lagged) - h)
+  test <- tail(lagged, h)
+  obj <- formals(NNS.VAR)$obj.fn
+
+  for (i in seq_len(ncol(A))) {
+    rel <- as.character(na.omit(out$relevant_variables[[i]]))
+    IV <- train[, -i, drop = FALSE]
+    refit <- suppressWarnings(NNS.stack(IV[, rel, drop = FALSE], train[[i]],
+                                        IVs.test = test[, -i, drop = FALSE][, rel, drop = FALSE],
+                                        ts.test = max(2 * h, ceiling(0.2 * nrow(train))), folds = 1,
+                                        obj.fn = eval(obj), method = c(1, 2), order = NULL,
+                                        ncores = 1, stack = FALSE, status = FALSE))
+    expect_equal(out$multivariate[[i]], as.numeric(refit$stack))
+  }
+})
