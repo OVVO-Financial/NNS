@@ -21,7 +21,7 @@
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
-#'  \item{\code{"multivariate"}} Returns the multi-variate \link{NNS.reg} forecasts.
+#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: an \link{NNS.stack} \code{(stack = FALSE)} fit on the \code{"relevant_variables"}, so \link{NNS.reg} uses each of them as its own dimension.
 #'
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
@@ -312,44 +312,60 @@ NNS.VAR <- function(variables,
     # ts.test must be a whole number: NNS.stack validates it as an integer >= 1.
     ts <- max(2L * h, as.integer(ceiling(.2 * length(DV))))
 
-    # The dimension reduction inside NNS.stack selects the regressors; with
-    # stack = TRUE both of its methods are fitted on exactly that selection.
-    .run_var_stack <- function(stack_obj_fn, stack_objective) {
+    .run_var_stack <- function(stack_obj_fn, stack_objective, columns, method, stack) {
       suppressWarnings(
-        NNS.stack(IVs.train = IV,
+        NNS.stack(IVs.train = IV[, columns, drop = FALSE],
                   DV.train = DV,
-                  IVs.test = IV.test,
+                  IVs.test = IV.test[, columns, drop = FALSE],
                   ts.test = ts,
                   folds = 1,
                   obj.fn = stack_obj_fn,
                   objective = stack_objective,
-                  method = c(1, 2),
+                  method = method,
                   dim.red.method = dim.red.method,
-                  order = NULL, ncores = 1, stack = TRUE, status = FALSE)
+                  order = NULL, ncores = 1, stack = stack, status = FALSE)
       )
     }
 
-    fit <- tryCatch(
-      .run_var_stack(obj.fn, objective),
-      error = function(e) {
-        no_finite_method1 <- identical(
-          conditionMessage(e),
-          paste0("No Method 1 candidate produced a finite ",
-                 "complete-coverage OOF objective.")
-        )
-        if (!use_default_objective || !no_finite_method1) stop(e)
-        if (status) {
-          message(paste0("NNS.VAR: the co-movement objective was undefined for ",
-                         "every candidate; retrying this variable using MSE."))
+    # The built-in co-movement ratio objective falls back to plain MSE when it
+    # is undefined for every candidate; a user objective is never overridden.
+    .fit_var_stack <- function(columns, method, stack) {
+      tryCatch(
+        .run_var_stack(obj.fn, objective, columns, method, stack),
+        error = function(e) {
+          degenerate <- conditionMessage(e) %in% c(
+            paste0("No Method 1 candidate produced a finite ",
+                   "complete-coverage OOF objective."),
+            "No candidate produced a finite out-of-fold objective."
+          )
+          if (!use_default_objective || !degenerate) stop(e)
+          if (status) {
+            message(paste0("NNS.VAR: the co-movement objective was undefined for ",
+                           "every candidate; retrying this variable using MSE."))
+          }
+          .run_var_stack(expression(mean((predicted - actual)^2)), "min",
+                         columns, method, stack)
         }
-        .run_var_stack(expression(mean((predicted - actual)^2)), "min")
-      }
-    )
+      )
+    }
 
-    # Report exactly the regressors the estimate was built from. Without a
-    # dimension reduction step (a single regressor) every regressor is used.
-    rel_vars <- fit$NNS.dim.red.variables
+    # Step 1: the NNS.stack dimension reduction selects the relevant regressors
+    # (Method 2 alone makes exactly the selection it makes inside a full stack).
+    # Without a dimension reduction step (a single regressor) it is kept.
+    selection <- .fit_var_stack(names(IV), 2, TRUE)
+    rel_vars <- selection$NNS.dim.red.variables
     if (is.null(rel_vars) || !length(rel_vars)) rel_vars <- names(IV)
+
+    # Step 2: a true multivariate NNS.stack fit (stack = FALSE) on exactly the
+    # relevant regressors: NNS.reg uses every one of them, so they are not
+    # collapsed into a single synthetic X* regressor.
+    fit <- .fit_var_stack(rel_vars, c(1, 2), FALSE)
+
+    # When the blend gives NNS.reg no weight, only the dimension reduction
+    # component remains; report the regressors that component carries.
+    if (isTRUE(fit$weights[["reg"]] == 0) && length(fit$NNS.dim.red.variables)) {
+      rel_vars <- fit$NNS.dim.red.variables
+    }
 
     nns_DVs <- as.numeric(fit$stack)
     missing_estimate <- !is.finite(nns_DVs)
