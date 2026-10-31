@@ -283,24 +283,25 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       return Rf_ScalarReal(nearest_int_half_up(med));
     }
     
-    // Integerize and count exact frequencies
-    std::unordered_map<int,int> freq; freq.reserve(l * 2u);
-    for (double v : xnum) ++freq[ nearest_int_half_up(v) ];
+    // Integerize and count exact frequencies. The key is a double so values
+    // beyond the int range stay exact; "+ 0.0" folds -0.0 into the 0 key.
+    std::unordered_map<double,int> freq; freq.reserve(l * 2u);
+    for (double v : xnum) ++freq[ nearest_int_half_up(v) + 0.0 ];
     
     int maxf = 0; for (auto &kv : freq) if (kv.second > maxf) maxf = kv.second;
     
-    std::vector<int> modes_int;
+    std::vector<double> modes_int;
     for (auto &kv : freq) if (kv.second == maxf) modes_int.push_back(kv.first);
     std::sort(modes_int.begin(), modes_int.end());
     
     if (multi) {
       NumericVector out((int)modes_int.size());
-      for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = (double)modes_int[i];
+      for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = modes_int[i];
       return out;            // e.g., 2 3 4 for c(1,2,2,3,3,4,4,5)
     } else {
       // Return the arithmetic mean of all tied modes
       long double sum = 0.0L;
-      for (int m : modes_int) sum += (long double)m;
+      for (double m : modes_int) sum += (long double)m;
       double mean_modes = (modes_int.empty() ? NA_REAL
                              : (double)(sum / (long double)modes_int.size()));
       return Rf_ScalarReal(mean_modes);
