@@ -595,11 +595,12 @@ NNS.stack <- function(IVs.train,
     }
     smallest <- min(lengths(groups))
     largest <- max(lengths(groups))
+    # sample(g, k) on a length-one group samples from 1:g, so index into g.
     down_idx <- unlist(lapply(groups, function(g) {
-      sample(g, smallest, replace = FALSE)
+      g[sample.int(length(g), smallest, replace = FALSE)]
     }), use.names = FALSE)
     up_idx <- unlist(lapply(groups, function(g) {
-      sample(g, largest, replace = TRUE)
+      g[sample.int(length(g), largest, replace = TRUE)]
     }), use.names = FALSE)
     sample(c(down_idx, up_idx), replace = FALSE)
   }
