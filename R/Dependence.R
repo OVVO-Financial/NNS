@@ -82,9 +82,6 @@ NNS.dep <- function(x,
   # ---- matrix / p.value path ------------------------------------------------
   if (is.null(y)) {
     if (p.value) {
-      original.par <- par(no.readonly = TRUE)
-      on.exit(par(original.par), add = TRUE)
-      
       nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g))
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
@@ -95,6 +92,9 @@ NNS.dep <- function(x,
       dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1L, 2L)])
       
       if (print.map) {
+        # par(no.readonly = TRUE) opens a device even when nothing is drawn.
+        original.par <- par(no.readonly = TRUE)
+        on.exit(par(original.par), add = TRUE)
         par(mfrow = c(1L, 2L))
         hist(cors[-c(1L, 2L)], main = "NNS Correlation", xlab = NULL,
              xlim = c(min(cors), max(cors[-1L])))
