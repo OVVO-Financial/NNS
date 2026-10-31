@@ -411,6 +411,9 @@ NNS.VAR <- function(variables,
     
     IV <- lagged_new_values_train[, -i, drop = FALSE]
     DV <- lagged_new_values_train[, i]
+    # Forecast-period regressors (rows n+1, ..., n+h of the extended lag matrix);
+    # tail(IV, h) would be the last h observed rows.
+    IV.test <- tail(lagged_new_values[, -i, drop = FALSE], h)
     
     # ts.test must be a whole number: NNS.stack now validates it as an integer
     # >= 1, so round the 0.2 * length(DV) floor up rather than passing the raw
@@ -432,7 +435,7 @@ NNS.VAR <- function(variables,
     .run_var_stack <- function(stack_obj_fn, stack_objective) {
       NNS.stack(IVs.train = IV[, rel_vars, drop = FALSE],
                 DV.train = DV,
-                IVs.test = tail(IV, h)[, rel_vars, drop = FALSE],
+                IVs.test = IV.test[, rel_vars, drop = FALSE],
                 ts.test = ts,
                 folds = 1,
                 obj.fn = stack_obj_fn,
@@ -468,7 +471,7 @@ NNS.VAR <- function(variables,
   lists <- if (use_parallel) {
     parallel::clusterExport(
       cl,
-      varlist = c("status", "variables", "lagged_new_values_train", "h",
+      varlist = c("status", "variables", "lagged_new_values", "lagged_new_values_train", "h",
                   "obj.fn", "objective", "use_default_objective",
                   "dim.red.method", "nns_IVs_results"),
       envir = environment()
