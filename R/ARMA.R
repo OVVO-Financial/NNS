@@ -203,22 +203,18 @@ NNS.ARMA <- function(variable,
     for (j in 1:h) {
       # Regenerate seasonal.factor if dynamic
       if (dynamic) {
-        seas.matrix <- NNS.seas(variable, plot = FALSE)
+        # Same period selection as the static path, on the extended series.
+        seas.matrix <- NNS.seas(variable, plot = FALSE, modulo = modulo, mod.only = mod.only)
         if (!is.list(seas.matrix)) {
           M <- t(1)
         } else {
-          if (is.null(best.periods)) {
-            M <- seas.matrix$all.periods
-            best.periods <- length(M$all.periods$Period)
-          } else {
-            if (length(M$all.periods$Period) < best.periods) {
-              best.periods <- length(M$all.periods$Period)
-            }
-            M <- seas.matrix$all.periods[1:best.periods, ]
+          M <- seas.matrix$all.periods
+          if (!is.null(best.periods)) {
+            M <- M[1:min(best.periods, length(M$Period)), ]
           }
         }
         
-        ASW <- ARMA.seas.weighting(seasonal.factor, M)
+        ASW <- .arma_lag_weights(seasonal.factor, M)
         lag <- ASW$lag
         Weights <- ASW$Weights
       }
