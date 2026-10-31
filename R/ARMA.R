@@ -386,5 +386,12 @@ NNS.ARMA <- function(variable,
   if (isTRUE(sf) && is.data.frame(M) && "Period" %in% names(M)) {
     return(list(lag = M$Period[1], Weights = 1))
   }
-  ARMA.seas.weighting(sf, M)
+  ASW <- ARMA.seas.weighting(sf, M)
+  # The weights are (VarCV - CV) / sqrt(lag), normalised: all 0 when every
+  # CV == VarCV, which forced a forecast of 0.
+  w <- ASW$Weights
+  if (length(ASW$lag) > 0 && (length(w) == 0 || all(w == 0) || any(!is.finite(w)))) {
+    ASW$Weights <- rep(1 / length(ASW$lag), length(ASW$lag))
+  }
+  ASW
 }
