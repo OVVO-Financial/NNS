@@ -95,10 +95,12 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
 
 
-# Internal helper: extract canonical signed causation from the third element of cp.
+# Internal helper: extract canonical signed causation x -> y from cp.
 signed_from_cp <- function(cp){
-  # Extract the third element (log-ratio in direction of stronger causation) and cap infinities
+  # The third element is the log-ratio toward the stronger causation; orient it
+  # as x -> y, as NNS.caus.matrix does, and cap infinities.
   raw_val <- as.numeric(cp[3])
+  if(identical(names(cp)[3], "C(y--->x)")) raw_val <- -raw_val
   if(is.infinite(raw_val)) raw_val <- sign(raw_val) * 100
   return(raw_val)
 }
