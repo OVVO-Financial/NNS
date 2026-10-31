@@ -189,8 +189,8 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #'
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
 #' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
-#' @param target numeric; \code{NULL} (default) Must lie within support of each variable.
-#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return for bi-variate analysis.  Multivariate analysis is restricted to \code{"CDF"}.
+#' @param target numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} is computed by inclusion-exclusion over all subsets of the columns (\eqn{2^d} joint CDF evaluations), and the hazard and cumulative hazard are built from it.
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
@@ -252,8 +252,9 @@ NNS.CDF <- function(variable,
     if (is.null(dim(variable))||ncol(variable)==1) {
       if (target<min(variable)||target>max(variable)) stop("target out of bounds")
     } else {
-      if (target[1]<min(variable[,1])||target[1]>max(variable[,1])||
-          target[2]<min(variable[,2])||target[2]>max(variable[,2])) stop("target out of bounds")
+      if (length(target) != ncol(variable)) stop("target must have one value per column of variable")
+      lo <- apply(variable, 2, min); hi <- apply(variable, 2, max)
+      if (any(target < lo | target > hi)) stop("target out of bounds")
     }
   }
   
@@ -326,39 +327,58 @@ NNS.CDF <- function(variable,
     # Compute joint conditional CDF using one batched C++ call.
     # This replaces n R-level Co.LPM_nD dispatches and n parallel launches.
     variable <- as.matrix(variable)
+    d <- ncol(variable)
     CDF <- Co.LPM_nD.batch(variable, variable, degree = degree, norm = TRUE)
+    
+    # Joint survival S(t) = P(X_1 > t_1, ..., X_d > t_d) by inclusion-exclusion
+    # over all subsets A of the coordinates: S = sum_A (-1)^|A| F_A(t_A), with
+    # F_A the joint CDF of the coordinates in A (F_{} = 1, F_{1..d} = joint CDF).
+    # For d = 2 this is 1 - F_1 - F_2 + F_12.
+    joint.survival <- function(points, joint_cdf) {
+      points <- matrix(points, ncol = d)
+      marginals <- vapply(seq_len(d), function(j) LPM.ratio(degree, points[, j], variable[, j]),
+                          numeric(nrow(points)))
+      S <- 1 - rowSums(matrix(marginals, ncol = d))
+      if (d > 2) {
+        for (k in 2:(d - 1)) {
+          for (A in utils::combn(d, k, simplify = FALSE)) {
+            S <- S + (-1)^k * Co.LPM_nD.batch(variable[, A, drop = FALSE], points[, A, drop = FALSE],
+                                              degree = degree, norm = TRUE)
+          }
+        }
+      }
+      S + (-1)^d * joint_cdf
+    }
+    
+    if (type != "cdf") S <- joint.survival(variable, CDF)
     
     # Apply transformation based on type
     if (type == "survival") {
-      marginal_probs <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
-      CDF <- pmax(0, pmin(1, 1 - rowSums(marginal_probs) + CDF))
+      CDF <- pmax(0, pmin(1, S))
     }
     
     if (type == "hazard") {
-      f <- NNS.reg(variable, pmax(CDF, 1e-10), order = "max", plot = FALSE)$Fitted$y.hat
-      marginals <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
-      CDF <- pmax(f / pmax(1 - rowSums(marginals) + CDF, 1e-10), 0)
+      f <- NNS.reg(variable, pmax(CDF, 1e-10), order = "max", plot = FALSE, point.est = target)
+      CDF <- pmax(f$Fitted$y.hat / pmax(S, 1e-10), 0)
     }
     
     if (type == "cumulative hazard") {
-      marginals <- apply(variable, 2, function(col) LPM.ratio(degree, col, col))
-      CDF <- pmax(-log(pmax(1 - rowSums(marginals) + CDF, 1e-10)), 0)
+      CDF <- pmax(-log(pmax(S, 1e-10)), 0)
     }
     
-    # Target evaluation
+    # Target evaluation (the same function as the rows, evaluated at target)
     Pv <- numeric(0)
     if (!is.null(target)) {
       Pv <- Co.LPM_nD(variable, target, degree = degree)
+      if (type != "cdf") S_t <- joint.survival(target, Pv)
       if (type == "survival") {
-        marg_target <- mapply(LPM.ratio, degree, target, as.data.frame(variable))
-        Pv <- max(0, min(1, 1 - sum(marg_target) + Pv))
+        Pv <- max(0, min(1, S_t))
       }
       if (type == "hazard") {
-        Pv <- NNS.reg(variable, CDF, order = "max", plot = FALSE, point.est = target)$Point.est /
-          pmax(1 - Pv, 1e-10)
+        Pv <- max(f$Point.est / pmax(S_t, 1e-10), 0)
       }
       if (type == "cumulative hazard") {
-        Pv <- pmax(-log(pmax(1 - Pv, 1e-10)), 0)
+        Pv <- pmax(-log(pmax(S_t, 1e-10)), 0)
       }
     }
     
