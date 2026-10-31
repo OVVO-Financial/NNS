@@ -491,12 +491,16 @@ NNS.ARMA.optim <- function(variable,
   options(warn = oldw)
   
   
+  # nns.regress was tested on the smoothed series with shrink = TRUE.
+  final.variable <- if(nns.regress) regressed_variable else OV
+  if(nns.regress) nns.shrink <- TRUE
+  
   if(is.null(h_oos)){
     if(is.null(h)) h <- h_eval
-    model.results <- NNS.ARMA(OV, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- NNS.ARMA(final.variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   } else {
     if(is.null(h)) h <- h_oos
-    model.results <- NNS.ARMA(OV, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
   
