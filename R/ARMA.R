@@ -268,6 +268,7 @@ NNS.ARMA <- function(variable,
       }
       
       if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
+      if (method == "means") Estimates[j] <- Lin.estimates
       if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
       if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
       
