@@ -27,6 +27,12 @@ static inline bool isInteger(double value) {
   return value == static_cast<int>(value);
 }
 
+// Integer targets (2L, 1:3) are used as given, not replaced by mean(variable).
+static inline bool is_supplied_target(const RObject &target) {
+  return !target.isNULL() &&
+    (is<NumericVector>(target) || is<IntegerVector>(target));
+}
+
 
 // [[Rcpp::export(rng = false)]]
 double CoLPM_nD_RCPP(const NumericMatrix &data,
@@ -61,7 +67,7 @@ NumericVector LPM_RCPP(const double &degree,
                        const bool &excess_ret) {
   NumericVector variable_vec = as<NumericVector>(clone(variable));
   NumericVector target_vec;
-  if (is<NumericVector>(target) && !target.isNULL()) {
+  if (is_supplied_target(target)) {
     target_vec = as<NumericVector>(target);
   } else {
     target_vec = NumericVector::create(mean(variable_vec));
@@ -96,7 +102,7 @@ NumericVector UPM_RCPP(const double &degree,
                        const bool &excess_ret) {
   NumericVector variable_vec = as<NumericVector>(clone(variable));
   NumericVector target_vec;
-  if (is<NumericVector>(target) && !target.isNULL()) {
+  if (is_supplied_target(target)) {
     target_vec = as<NumericVector>(target);
   } else {
     target_vec = NumericVector::create(mean(variable_vec));
@@ -158,7 +164,7 @@ NumericVector UPM_RCPP(const double &degree,
      variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
    else
      Rcpp::stop("variable should be numeric vector, or data table");
-   if (is<NumericVector>(target) && !target.isNULL()){
+   if (is_supplied_target(target)){
      target_vec = as<NumericVector>(target);
    }else{
      target_vec = NumericVector(1);
@@ -199,7 +205,7 @@ NumericVector UPM_RCPP(const double &degree,
      variable_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(variable, "unlist"), "as.vector");
    else
      Rcpp::stop("variable should be numeric vector, or data table");
-   if (is<NumericVector>(target) && !target.isNULL()){
+   if (is_supplied_target(target)){
      target_vec = as<NumericVector>(target);
    }else{
      target_vec = NumericVector(1);
@@ -228,13 +234,13 @@ NumericVector CoLPM_RCPP(
    else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
    else                         Rcpp::stop("y should be numeric vector, or data table");
    
-   if (is<NumericVector>(target_x) && !target_x.isNULL()){
+   if (is_supplied_target(target_x)){
      target_x_vec = as<NumericVector>(target_x);
    }else{
      target_x_vec = NumericVector(1);
      target_x_vec[0] = mean(x_vec);
    }
-   if (is<NumericVector>(target_y) && !target_y.isNULL()){
+   if (is_supplied_target(target_y)){
      target_y_vec = as<NumericVector>(target_y);
    }else{
      target_y_vec = NumericVector(1);
@@ -263,13 +269,13 @@ NumericVector CoUPM_RCPP(
    else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
    else                         Rcpp::stop("y should be numeric vector, or data table");
    
-   if (is<NumericVector>(target_x) && !target_x.isNULL()){
+   if (is_supplied_target(target_x)){
      target_x_vec = as<NumericVector>(target_x);
    }else{
      target_x_vec = NumericVector(1);
      target_x_vec[0] = mean(x_vec);
    }
-   if (is<NumericVector>(target_y) && !target_y.isNULL()){
+   if (is_supplied_target(target_y)){
      target_y_vec = as<NumericVector>(target_y);
    }else{
      target_y_vec = NumericVector(1);
@@ -316,13 +322,13 @@ NumericVector CoUPM_RCPP(
    else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
    else                         Rcpp::stop("y should be numeric vector, or data table");
    
-   if (is<NumericVector>(target_x) && !target_x.isNULL()){
+   if (is_supplied_target(target_x)){
      target_x_vec = as<NumericVector>(target_x);
    }else{
      target_x_vec = NumericVector(1);
      target_x_vec[0] = mean(x_vec);
    }
-   if (is<NumericVector>(target_y) && !target_y.isNULL()){
+   if (is_supplied_target(target_y)){
      target_y_vec = as<NumericVector>(target_y);
    }else{
      target_y_vec = NumericVector(1);
@@ -369,13 +375,13 @@ NumericVector CoUPM_RCPP(
    else if (is<DataFrame>(y))   y_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(y, "unlist"), "as.vector");
    else                         Rcpp::stop("y should be numeric vector, or data table");
    
-   if (is<NumericVector>(target_x) && !target_x.isNULL()){
+   if (is_supplied_target(target_x)){
      target_x_vec = as<NumericVector>(target_x);
    }else{
      target_x_vec = NumericVector(1);
      target_x_vec[0] = mean(x_vec);
    }
-   if (is<NumericVector>(target_y) && !target_y.isNULL()){
+   if (is_supplied_target(target_y)){
      target_y_vec = as<NumericVector>(target_y);
    }else{
      target_y_vec = NumericVector(1);
@@ -410,7 +416,7 @@ NumericVector CoUPM_RCPP(
    
    size_t variable_cols=variable_matrix.cols();
    NumericVector tgt;
-   if((is<NumericVector>(target) || is<DataFrame>(target)) && !target.isNULL()){
+   if((is_supplied_target(target) || (is<DataFrame>(target) && !target.isNULL()))){
      tgt=as<NumericVector>(target);
    }else{
      tgt=colMeans(variable_matrix);
