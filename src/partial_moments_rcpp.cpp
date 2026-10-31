@@ -89,7 +89,8 @@ NumericVector LPM_RCPP(const double &degree,
     for (int i = 0; i < n; ++i) {
       double t    = (tlen == 1 ? target_vec[0] : target_vec[i]);
       double diff = t - variable_vec[i];
-      if (diff > 0) {
+      // Degree 0 counts ties (x <= target), as the non-excess path does.
+      if (diff > 0 || (degree == 0 && diff == 0)) {
         if      (degree == 0)       out[i] = 1;
         else if (degree == 1)       out[i] = diff;
         else if (isInteger(degree)) out[i] = repeatMultiplication(diff, (int)degree);
