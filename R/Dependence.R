@@ -117,8 +117,9 @@ NNS.dep <- function(x,
                                     UPM(0, cors[2L], cors[-c(1L, 2L)])),
         "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
         "Dependence"          = as.numeric(deps[2L]),
-        "Dependence p.value"  = min(LPM(0, deps[2L], deps[-c(1L, 2L)]),
-                                    UPM(0, deps[2L], deps[-c(1L, 2L)])),
+        # Dependence is a magnitude: only the upper tail is evidence against independence.
+        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L])) /
+                                (1 + length(deps[-c(1L, 2L)])),
         "Dependence 95% CIs"  = c(dep_lower_CI, dep_upper_CI)
       ))
     }
