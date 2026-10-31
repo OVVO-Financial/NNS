@@ -83,15 +83,16 @@ inline double lpm_deg2(const ColPre& c, int k, double t){
 }
 
 // Walk merged grid and apply a functor at each threshold t
+// Each sample is walked with its own length (the samples may differ in size).
 template <class F>
 inline void for_each_threshold(const ColPre& a, const ColPre& b, F f){
-  int ia=0, ib=0, m=a.m; // assume same m
-  while(ia<m || ib<m){
-    double next_a = (ia<m ? a.vals[ia] : R_PosInf);
-    double next_b = (ib<m ? b.vals[ib] : R_PosInf);
+  int ia=0, ib=0, ma=a.m, mb=b.m;
+  while(ia<ma || ib<mb){
+    double next_a = (ia<ma ? a.vals[ia] : R_PosInf);
+    double next_b = (ib<mb ? b.vals[ib] : R_PosInf);
     double t = (next_a < next_b ? next_a : next_b);
-    while(ia<m && a.vals[ia] <= t) ++ia; // k_a = ia
-    while(ib<m && b.vals[ib] <= t) ++ib; // k_b = ib
+    while(ia<ma && a.vals[ia] <= t) ++ia; // k_a = ia
+    while(ib<mb && b.vals[ib] <= t) ++ib; // k_b = ib
     f(t, ia, ib);
   }
 }
