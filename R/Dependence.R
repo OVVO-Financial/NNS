@@ -82,7 +82,7 @@ NNS.dep <- function(x,
   # ---- matrix / p.value path ------------------------------------------------
   if (is.null(y)) {
     if (p.value) {
-      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g))
+      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g, asym = asym))
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
