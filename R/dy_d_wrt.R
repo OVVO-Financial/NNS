@@ -115,21 +115,17 @@ dy.d_ <- function(x, y, wrt,
                           x)
   }
 
-  # ---- Estimates: NNS.stack on the equal-weight synthetic regressor X* -------
+  # ---- Estimates: multivariate NNS.reg on the actual regressors -------------
+  # f(x +/- h e_wrt) needs a model that tells the regressors apart; the
+  # equal-weight index rowMeans(x) gave every regressor the index slope.
   stack.est <- function(train, resp, pts) {
-    xs <- as.numeric(rowMeans(as.matrix(train)))
-    ps <- as.numeric(rowMeans(as.matrix(pts)))
-    as.numeric(NNS.stack(
-      IVs.train = cbind(Xstar = xs, Xstar2 = xs),
-      DV.train = resp,
-      IVs.test = cbind(Xstar = ps, Xstar2 = ps),
-      method = c(1, 2),
-      dim.red.method = "equal",
-      order = "max",
-      folds = 5,
-      status = FALSE,
+    as.numeric(NNS.reg(
+      as.matrix(train), resp,
+      point.est = as.matrix(pts),
+      order = NULL,
+      plot = FALSE,
       ncores = 1
-    )$stack)
+    )$Point.est)
   }
 
   # ---- dy.dx() locally-adaptive step -----------------------------------------
