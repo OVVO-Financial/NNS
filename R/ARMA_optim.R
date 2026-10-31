@@ -354,8 +354,13 @@ NNS.ARMA.optim <- function(variable,
     nns.SSE <- min(unlist(overall.estimates))
     predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
     
-    if(length(nns.periods)>1){
-       weight.SSE <- eval(obj.fn)
+    if(length(nns.periods) > 1){
+      # Candidate: equal weights across the selected periods.
+      predicted.null <- predicted
+      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
+      weight.SSE <- eval(obj.fn)
+      if(is.na(weight.SSE)) weight.SSE <- Inf
+      predicted <- predicted.null
       
       if(weight.SSE < nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
@@ -395,7 +400,12 @@ NNS.ARMA.optim <- function(variable,
     predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
     
     if(length(nns.periods) > 1){
+      # Candidate: equal weights across the selected periods.
+      predicted.null <- predicted
+      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
       weight.SSE <- eval(obj.fn)
+      if(is.na(weight.SSE)) weight.SSE <- -Inf
+      predicted <- predicted.null
       
       if(weight.SSE > nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
