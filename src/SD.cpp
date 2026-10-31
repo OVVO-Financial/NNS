@@ -107,7 +107,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
     if (!(X.mn >= Y.mn)) return 0;                 // FSD gate
     if (identical_samples(X, Y)) return 0;         // identical series -> 0 (matches R's identical(LPM_x, LPM_y))
     
-    bool x_gt_y = false;
+    bool x_gt_y = false, curves_differ = false;
     int deg = (discrete ? 0 : 1); // discrete->0, continuous->1
     for_each_threshold(X, Y, [&](double t, int kx, int ky){
       double Rx, Ry;
@@ -124,7 +124,10 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
         Ry = (Ay>0.0 ? Ly/Ay : 0.0);
       }
       if (Rx > Ry) x_gt_y = true;
+      if (Rx != Ry) curves_differ = true;
     });
+    // Equal curves: no dominance, as R's !identical(LPM_x_sort, LPM_y_sort).
+    if (!curves_differ) return 0;
     return x_gt_y ? 0 : 1;                         // 1 iff "X FSD Y"
   }
   
@@ -133,23 +136,27 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
   if (identical_samples(X, Y)) return 0;           // identical series -> 0
   
   if (degree==2){ // SSD: compare LPM degree 1
-    bool x_gt_y = false;
+    bool x_gt_y = false, curves_differ = false;
     for_each_threshold(X, Y, [&](double t, int kx, int ky){
       double Lx, Ux, Ly, Uy; (void)Ux; (void)Uy;   // not used beyond calc
       lpm_upm_deg1(X, kx, t, Lx, Ux);
       lpm_upm_deg1(Y, ky, t, Ly, Uy);
       if (Lx > Ly) x_gt_y = true;
+      if (Lx != Ly) curves_differ = true;
     });
+    if (!curves_differ) return 0;                  // equal curves -> no SSD
     return x_gt_y ? 0 : 1;                         // 1 iff "X SSD Y"
   }
   
   // TSD: compare LPM degree 2
-  bool x_gt_y = false;
+  bool x_gt_y = false, curves_differ = false;
   for_each_threshold(X, Y, [&](double t, int kx, int ky){
     double Lx2 = lpm_deg2(X, kx, t);
     double Ly2 = lpm_deg2(Y, ky, t);
     if (Lx2 > Ly2) x_gt_y = true;
+    if (Lx2 != Ly2) curves_differ = true;
   });
+  if (!curves_differ) return 0;                    // equal curves -> no TSD
   return x_gt_y ? 0 : 1;                           // 1 iff "X TSD Y"
 }
 
