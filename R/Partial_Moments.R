@@ -239,7 +239,14 @@ NNS.CDF <- function(variable,
   if (any(class(variable) %in% c("tbl","data.table"))) {
     variable <- as.data.frame(variable)
   }
-  
+
+  # — Drop missing observations (counted in n, they capped the CDF below 1)
+  if (is.null(dim(variable))) {
+    variable <- variable[!is.na(variable)]
+  } else {
+    variable <- variable[stats::complete.cases(variable), , drop = FALSE]
+  }
+
   # — Bounds check
   if (!is.null(target)) {
     if (is.null(dim(variable))||ncol(variable)==1) {
