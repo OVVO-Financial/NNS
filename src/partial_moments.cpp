@@ -442,6 +442,7 @@ NumericVector CoLPM_nD_batch_RCPP(const NumericMatrix& data,
                                   const NumericMatrix& targets,
                                   double degree = 0.0,
                                   bool norm = true) {
+  nns_check_degree(degree, "degree");
   if (data.ncol() != targets.ncol()) {
     stop("`targets` must have the same number of columns as `data`");
   }
@@ -921,6 +922,8 @@ List PMMatrix_CPv(
     const bool &pop_adj,
     const bool &norm
 ) {
+  nns_check_degree(LPM_degree, "LPM_degree");
+  nns_check_degree(UPM_degree, "UPM_degree");
   size_t variable_cols = variable.cols();
   size_t target_length = target.size();
   if(variable_cols != target_length){

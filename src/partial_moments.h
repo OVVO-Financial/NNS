@@ -28,6 +28,14 @@ double UPM_C(const double &degree,
              const double &target,
              const RcppParallel::RVector<double> &variable);
 
+// Rejects negative and NaN degrees. Called from the R-facing wrappers before
+// any parallel work starts.
+inline void nns_check_degree(const double degree, const char *name) {
+  if (!(degree >= 0.0)) {
+    Rcpp::stop("'%s' must be a non-negative number", name);
+  }
+}
+
 namespace nns_pm_detail {
 
 // Keep very large integer degrees on the legacy full-scan path. This prevents
