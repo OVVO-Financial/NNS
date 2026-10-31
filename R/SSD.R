@@ -33,7 +33,7 @@ NNS.SSD <- function(x, y, plot = TRUE){
   x <- to_numeric_vector(x, "x")
   y <- to_numeric_vector(y, "y")
 
-  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
 
   Combined_sort <- sort(c(x, y), decreasing = FALSE)
 

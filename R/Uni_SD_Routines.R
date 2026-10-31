@@ -33,7 +33,7 @@ NNS.FSD.uni <- function(x, y, type = "discrete"){
   x <- to_numeric_vector(x, "x")
   y <- to_numeric_vector(y, "y")
   
-  if(anyNA(cbind(x,y))) {
+  if(anyNA(x) || anyNA(y)) {
     stop("You have some missing values, please address.")
   }
   
@@ -76,7 +76,7 @@ NNS.SSD.uni <- function(x, y){
   x <- to_numeric_vector(x, "x")
   y <- to_numeric_vector(y, "y")
   
-  if(anyNA(cbind(x,y))) {
+  if(anyNA(x) || anyNA(y)) {
     stop("You have some missing values, please address.")
   }
   
@@ -115,7 +115,7 @@ NNS.TSD.uni <- function(x, y){
   x <- to_numeric_vector(x, "x")
   y <- to_numeric_vector(y, "y")
   
-  if(anyNA(cbind(x,y))) {
+  if(anyNA(x) || anyNA(y)) {
     stop("You have some missing values, please address.")
   }
   
