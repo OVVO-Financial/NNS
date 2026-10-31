@@ -10,7 +10,7 @@
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
 #' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
-#' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.
+#' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.  Numeric weights must have one value per seasonal lag and are treated as relative weights (rescaled to sum to 1).
 #' @param best.periods integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #' \code{(seasonal.factor = FALSE, best.periods = NULL)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
@@ -153,6 +153,17 @@ NNS.ARMA <- function(variable,
     
   }
   
+  # User-supplied weights: "equal", or one relative weight per lag.
+  if(!is.null(weights)){
+    if(is.character(weights)){
+      Weights <- rep(1/length(lag), length(lag))
+    } else {
+      if(length(weights) != length(lag)) stop("weights must have one value per seasonal lag (length(weights) == length(seasonal.factor)).")
+      if(!all(is.finite(weights)) || sum(weights) == 0) stop("weights must be finite and must not sum to 0.")
+      Weights <- weights / sum(weights)
+    }
+  }
+  
   # Vectorized linear
   Lin.Reg.Estimates <- list()
   Regression.Estimates_means <- list()
@@ -267,10 +278,11 @@ NNS.ARMA <- function(variable,
         if(!negative.values)  Lin.estimates <- pmax(0, Lin.estimates)
       }
       
-      if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
+      # Lin.estimates / Nonlin.estimates are already weighted sums over lags.
+      if (method == "lin") Estimates[j] <- Lin.estimates
       if (method == "means") Estimates[j] <- Lin.estimates
       if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
-      if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
+      if (method == "nonlin")  Estimates[j] <- Nonlin.estimates
       
       variable <- c(variable, Estimates[j])
       FV <- variable
