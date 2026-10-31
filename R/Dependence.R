@@ -68,6 +68,8 @@ NNS.dep <- function(x,
   # ---- missing values -------------------------------------------------------
   if (anyNA(x)) stop("x has missing values, please address.")
   if (!is.null(y) && anyNA(y)) stop("y has missing values, please address.")
+  if (any(is.infinite(x))) stop("x must be finite.")
+  if (!is.null(y) && any(is.infinite(y))) stop("y must be finite.")
   
   # ---- p.value permutation setup --------------------------------------------
   if (p.value) {
