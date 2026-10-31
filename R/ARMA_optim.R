@@ -210,7 +210,8 @@ NNS.ARMA.optim <- function(variable,
               h = h_eval,
               seasonal.factor = seasonal.combs[[i]][, k],
               method = "lin",
-              plot = FALSE
+              plot = FALSE,
+              negative.values = negative.values
             )
             eval(obj.fn)
           })
@@ -223,7 +224,8 @@ NNS.ARMA.optim <- function(variable,
               h = h_eval,
               seasonal.factor = seasonal.combs[[i]][, k],
               method = "lin",
-              plot = FALSE
+              plot = FALSE,
+              negative.values = negative.values
             )
             eval(obj.fn)
           })
