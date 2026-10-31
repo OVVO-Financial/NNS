@@ -129,15 +129,11 @@ NNS.ANOVA.bin <- function(control, treatment,
     # Calculate confidence bounds
     alpha <- if(tails == "both") (1 - confidence.interval)/2 else 1 - confidence.interval
     
-    if(tails %in% c("both", "right")) {
-      control_upper <- UPM.VaR(alpha, 0, control_stats)
-      treatment_upper <- UPM.VaR(alpha, 0, treatment_stats)
-    }
-    
-    if(tails %in% c("both", "left")) {
-      control_lower <- LPM.VaR(alpha, 0, control_stats)
-      treatment_lower <- LPM.VaR(alpha, 0, treatment_stats)
-    }
+    # One-sided bounds also need both quantiles (lower = treatment_lower - control_upper).
+    control_upper <- UPM.VaR(alpha, 0, control_stats)
+    treatment_upper <- UPM.VaR(alpha, 0, treatment_stats)
+    control_lower <- LPM.VaR(alpha, 0, control_stats)
+    treatment_lower <- LPM.VaR(alpha, 0, treatment_stats)
     
     # Calculate conservative effect size bounds
     if(tails == "both") {
