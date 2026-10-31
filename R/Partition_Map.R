@@ -217,15 +217,6 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   RP <- RP[order(RP$quadrant, method = "radix"), , drop = FALSE]
   rownames(RP) <- NULL
   
-  if (is.discrete(x)) {
-    finite <- is.finite(RP$x)
-    RP$x[finite] <- ifelse(
-      RP$x[finite] %% 1 < 0.5,
-      floor(RP$x[finite]),
-      ceiling(RP$x[finite])
-    )
-  }
-  
   if (Voronoi) {
     graphics::plot(
       x, y,
