@@ -144,7 +144,7 @@ NNS.ARMA <- function(variable,
       }
     }
     
-    ASW <- ARMA.seas.weighting(seasonal.factor, M)
+    ASW <- .arma_lag_weights(seasonal.factor, M)
     lag <- ASW$lag
     
     if(is.null(weights)) Weights <- ASW$Weights else Weights <- weights
@@ -377,4 +377,14 @@ NNS.ARMA <- function(variable,
   } else {
     return(Estimates)
   }
+}
+
+
+# Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
+# the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
+.arma_lag_weights <- function(sf, M){
+  if (isTRUE(sf) && is.data.frame(M) && "Period" %in% names(M)) {
+    return(list(lag = M$Period[1], Weights = 1))
+  }
+  ARMA.seas.weighting(sf, M)
 }
