@@ -121,6 +121,8 @@ NNS.ARMA <- function(variable,
       Seasonal.weighting <- 1 / pmax(Relative.seasonal, .Machine$double.eps)
       Observation.weighting <- 1 / sqrt(seasonal.factor)
       Weights <- (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
+      # A constant series has CV 0/0 = NaN for every lag: weight the lags equally.
+      if(any(!is.finite(Weights))) Weights <- rep(1/length(lag), length(lag))
       seasonal.plot <- FALSE
     } else {
       Weights <- weights
