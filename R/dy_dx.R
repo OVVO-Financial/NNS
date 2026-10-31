@@ -57,6 +57,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     n <- length(x)
     root_n <- floor(sqrt(n))
     h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
+    # Typical spacing between neighbouring x values, independent of row order.
+    x.spacing <- gravity(diff(sort(unique(x))))
 
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
@@ -67,7 +69,7 @@ dy.dx <- function(x, y, eval.point = NULL){
     for(h in h_s){
       index <- which(h == h_s)
 
-      h_step <- gravity(abs(diff(x))) * h_s[index]
+      h_step <- x.spacing * h_s[index]
 
       eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
       eval.point.max <- pmin(max(x), h_step + original.eval.point.max)
