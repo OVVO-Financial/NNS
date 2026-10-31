@@ -243,7 +243,7 @@ NNS.ARMA <- function(variable,
           last.y + (rise / run)
         })
         
-        Regression.Estimates <- pmax(0, Regression.Estimates)
+        if(!negative.values) Regression.Estimates <- pmax(0, Regression.Estimates)
         Nonlin.estimates <- sum(Regression.Estimates * Weights)
       }
       
