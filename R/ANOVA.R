@@ -101,7 +101,11 @@ NNS.ANOVA <- function(
     # with treatment
     if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
     if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
-    
+
+    # Missing values are omitted, as in the multi-group path (na.omit per column).
+    control   <- control[!is.na(control)]
+    treatment <- treatment[!is.na(treatment)]
+
     if (robust) {
       # ---------------------------
       # Robust path: resample pairs
