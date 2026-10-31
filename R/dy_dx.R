@@ -29,6 +29,9 @@
 #' @export
 
 dy.dx <- function(x, y, eval.point = NULL){
+  
+  if(is.null(eval.point) || length(eval.point) == 0)
+    stop("eval.point must be provided: numeric point(s) or 'overall'")
 
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
