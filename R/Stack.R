@@ -1273,11 +1273,9 @@ NNS.stack <- function(IVs.train,
         }
         
         # ALL is the separate full-support limit condition and is always
-        # evaluated, irrespective of the later local stopping point.
-        all_raw <- rep(
-          mean(train_y_fit) - response_offset,
-          length(test_x)
-        )
+        # evaluated, irrespective of the later local stopping point. Score the
+        # estimator deployed when ALL wins (the univariate NNS.reg fit).
+        all_raw <- .fit_univariate_raw(train_x, train_y_fit, test_x)$raw
         good <- is.finite(all_raw)
         if (any(good)) {
           rows <- valid_idx[good]
@@ -1352,12 +1350,28 @@ NNS.stack <- function(IVs.train,
           }
         }
         
-        # Preserve the current full-support limit behavior from this version:
-        # all RPM points reduce to the balanced fitting-response mean. The ALL
-        # candidate is always populated for every fold.
-        all_raw <- rep(
-          mean(train_y_fit) - response_offset,
-          length(valid_idx)
+        # The ALL candidate is always populated for every fold. Score the
+        # estimator that is deployed when ALL wins, NNS.reg(n.best = "all"),
+        # rather than a constant training mean.
+        all_fit <- suppressWarnings(
+          NNS.reg(
+            train_design,
+            train_y_fit,
+            point.est = valid_design,
+            plot = FALSE,
+            residual.plot = FALSE,
+            n.best = "all",
+            order = order,
+            type = NULL,
+            factor.2.dummy = FALSE,
+            dist = dist,
+            ncores = ncores,
+            point.only = TRUE
+          )
+        )
+        all_raw <- .sanitize_raw(
+          as.numeric(all_fit$Point.est) - response_offset,
+          y[train_idx]
         )
         good <- is.finite(all_raw)
         if (any(good)) {
