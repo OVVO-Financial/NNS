@@ -201,7 +201,9 @@ UPM_RCPP <- function(degree, target, variable, excess_ret) {
 #' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.
 #' @param target numeric vector; threshold(s). Defaults to mean(variable).
 #' @param variable numeric vector or data‑frame column to evaluate.
-#' @return Numeric vector of standardized lower partial moments.
+#' @return Numeric vector of standardized lower partial moments. For
+#'   \code{degree > 0}, a target at which every observation equals the target
+#'   (0/0) returns the \code{degree = 0} ratio.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
 #'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
@@ -228,7 +230,9 @@ LPM.ratio <- function(degree, target, variable) {
 #' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area.
 #' @param target numeric vector; threshold(s). Defaults to mean(variable).
 #' @param variable numeric vector or data‑frame column to evaluate.
-#' @return Numeric vector of standardized upper partial moments.
+#' @return Numeric vector of standardized upper partial moments. For
+#'   \code{degree > 0}, a target at which every observation equals the target
+#'   (0/0) returns the \code{degree = 0} ratio.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
 #'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)

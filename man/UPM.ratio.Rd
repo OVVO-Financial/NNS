@@ -14,7 +14,9 @@ UPM.ratio(degree, target, variable)
 \item{variable}{numeric vector or data‑frame column to evaluate.}
 }
 \value{
-Numeric vector of standardized upper partial moments.
+Numeric vector of standardized upper partial moments. For
+  \code{degree > 0}, a target at which every observation equals the target
+  (0/0) returns the \code{degree = 0} ratio.
 }
 \description{
 This function generates a standardized univariate upper partial moment

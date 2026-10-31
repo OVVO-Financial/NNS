@@ -40,6 +40,23 @@ static inline void stop_if_not_finite(const NumericVector &v, const char *what) 
   }
 }
 
+// For degree > 0 the ratio is 0/0 when every observation equals the target;
+// use the degree -> 0 limit (LPM 1, UPM 0, the ECDF convention x <= target).
+static inline NumericVector fill_degenerate_ratio(NumericVector out,
+                                                  const double &degree,
+                                                  const NumericVector &target,
+                                                  const NumericVector &variable,
+                                                  const bool lower) {
+  if (degree <= 0) return out;
+  for (R_xlen_t i = 0; i < out.size(); ++i) {
+    if (ISNAN(out[i])) {
+      NumericVector t = NumericVector::create(target[i]);
+      out[i] = lower ? LPM_CPv(0.0, t, variable)[0] : UPM_CPv(0.0, t, variable)[0];
+    }
+  }
+  return out;
+}
+
 
 // [[Rcpp::export(rng = false)]]
 double CoLPM_nD_RCPP(const NumericMatrix &data,
@@ -146,7 +163,9 @@ NumericVector UPM_RCPP(const double &degree,
 //' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.
 //' @param target numeric vector; threshold(s). Defaults to mean(variable).
 //' @param variable numeric vector or data‑frame column to evaluate.
-//' @return Numeric vector of standardized lower partial moments.
+//' @return Numeric vector of standardized lower partial moments. For
+//'   \code{degree > 0}, a target at which every observation equals the target
+//'   (0/0) returns the \code{degree = 0} ratio.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
 //'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
@@ -180,7 +199,8 @@ NumericVector UPM_RCPP(const double &degree,
    }
    stop_if_not_finite(variable_vec, "variable");
    stop_if_not_finite(target_vec, "target");
-   return LPM_ratio_CPv(degree, target_vec, variable_vec);
+   return fill_degenerate_ratio(LPM_ratio_CPv(degree, target_vec, variable_vec),
+                                degree, target_vec, variable_vec, true);
  }
 
 
@@ -192,7 +212,9 @@ NumericVector UPM_RCPP(const double &degree,
 //' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area.
 //' @param target numeric vector; threshold(s). Defaults to mean(variable).
 //' @param variable numeric vector or data‑frame column to evaluate.
-//' @return Numeric vector of standardized upper partial moments.
+//' @return Numeric vector of standardized upper partial moments. For
+//'   \code{degree > 0}, a target at which every observation equals the target
+//'   (0/0) returns the \code{degree = 0} ratio.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
 //'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
@@ -223,7 +245,8 @@ NumericVector UPM_RCPP(const double &degree,
    }
    stop_if_not_finite(variable_vec, "variable");
    stop_if_not_finite(target_vec, "target");
-   return UPM_ratio_CPv(degree, target_vec, variable_vec);
+   return fill_degenerate_ratio(UPM_ratio_CPv(degree, target_vec, variable_vec),
+                                degree, target_vec, variable_vec, false);
  }
 
 
