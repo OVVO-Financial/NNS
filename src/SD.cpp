@@ -170,6 +170,18 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
           }
         }
       }
+      // Ratios equal at both knots can still differ inside; equal at the
+      // midpoint too means equal on the whole interval.
+      if (deg==1 && R_FINITE(t_next) && !curves_differ){
+        double s = 0.5*(t + t_next), Lx, Ux, Ly, Uy;
+        lpm_upm_deg1(X, kx, s, Lx, Ux);
+        lpm_upm_deg1(Y, ky, s, Ly, Uy);
+        double Dx = Lx+Ux, Dy = Ly+Uy;
+        double d = Lx/Dx - Ly/Dy;
+        double tol_m = eps64 * std::max(1.0, S / std::min(Dx, Dy));
+        if (std::fabs(d) > tol_m) curves_differ = true;
+        if (d > tol_m) x_gt_y = true;
+      }
     });
     // Equal curves: no dominance, as R's !identical(LPM_x_sort, LPM_y_sort).
     if (!curves_differ) return 0;
