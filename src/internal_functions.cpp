@@ -320,7 +320,8 @@ List ARMA_seas_weighting(bool sf, SEXP mat) {
     wprod[i] = lag_weighting[i] * observation_weighting[i];
     denom += wprod[i];
   }
-  return List::create(_["lag"] = lag, _["Weights"] = (denom == 0.0) ? NumericVector(wprod.size(), 0.0) : wprod / denom);
+  // No lag beats the series (e.g. the no-seasonality row): weight them equally, not all 0
+  return List::create(_["lag"] = lag, _["Weights"] = (denom == 0.0) ? NumericVector(wprod.size(), 1.0 / wprod.size()) : wprod / denom);
 }
 
 // ---------- 8) NNS.meboot.part ----------

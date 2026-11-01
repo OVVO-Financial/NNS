@@ -39,3 +39,14 @@ test_that("a series with mean zero up to rounding compares standard deviations",
 test_that("no lag is reported unless its CV is strictly below CV(X)", {
   expect_equal(NNS.seas(rep(5, 20), plot = FALSE)$periods, 1L)
 })
+
+test_that("the no-seasonality row gets weight 1, not 0", {
+  M <- data.frame(Period = 1L, Coefficient.of.Variation = 0.5, Variable.Coefficient.of.Variation = 0.5)
+  expect_equal(NNS:::ARMA.seas.weighting(FALSE, M)$Weights, 1)
+})
+
+test_that("NNS.ARMA forecasts a nonseasonal trend from lag 1", {
+  f <- NNS.ARMA(1:100, h = 2, plot = FALSE, seasonal.plot = FALSE)
+  expect_equal(f, NNS.ARMA(1:100, h = 2, seasonal.factor = 1, plot = FALSE))
+  expect_equal(f, c(101, 102), tolerance = 1e-3)
+})
