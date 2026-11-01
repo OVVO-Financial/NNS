@@ -289,7 +289,16 @@ NNS.CDF <- function(variable,
     if (type=="hazard") {
       n <- length(x); w <- min(10,n-1)
       F <- pval
-      proxy <- vapply(seq_along(x),function(i){lo<-max(1,i-w%/%2);hi<-min(n,i+w%/%2);(F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
+      if (x[1] == x[n]) stop("type = 'hazard' requires at least two distinct values of variable")
+      proxy <- vapply(seq_along(x),function(i){
+        lo<-max(1,i-w%/%2);hi<-min(n,i+w%/%2)
+        # A window lying inside a run of tied values has zero width (0/0):
+        # widen it to the neighbouring distinct values (x is sorted).
+        if (x[hi] == x[lo]) {
+          lo <- max(1L, findInterval(x[i], x, left.open = TRUE))
+          hi <- min(n, findInterval(x[i], x) + 1L)
+        }
+        (F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
       fit <- NNS.reg(x, pmax(proxy,1e-10), order=NULL, n.best=1, point.est=target, plot=FALSE)
       DT[[2]] <- pmin(pmax(fit$Fitted$y.hat / pmax(1-F,1e-10),0),1e6)
     }
