@@ -9,12 +9,12 @@ NNS.mode(x, discrete = FALSE, multi = TRUE)
 \arguments{
 \item{x}{vector of data.}
 
-\item{discrete}{logical; \code{FALSE} (default) for discrete distributions.}
+\item{discrete}{logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.}
 
 \item{multi}{logical; \code{TRUE} (default) returns multiple mode values.}
 }
 \value{
-Returns a numeric value representing the mode of the distribution.
+Returns the mode of the distribution: a numeric vector of all modes when \code{multi = TRUE} (default), otherwise a single numeric value.
 }
 \description{
 Mode of a distribution, either continuous or discrete.

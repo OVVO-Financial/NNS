@@ -9,12 +9,14 @@ LPM.ratio(degree, target, variable)
 \arguments{
 \item{degree}{numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.}
 
-\item{target}{numeric vector; threshold(s). Defaults to mean(variable).}
+\item{target}{numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.}
 
 \item{variable}{numeric vector or data‑frame column to evaluate.}
 }
 \value{
-Numeric vector of standardized lower partial moments.
+Numeric vector of standardized lower partial moments. For
+  \code{degree > 0}, a target at which every observation equals the target
+  (0/0) returns the \code{degree = 0} ratio.
 }
 \description{
 This function generates a standardized univariate lower partial moment

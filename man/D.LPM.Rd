@@ -15,9 +15,9 @@ D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 
 \item{y}{numeric vector of the same length as x.}
 
-\item{target_x}{numeric vector; thresholds for x (defaults to mean(x)).}
+\item{target_x}{numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.}
 
-\item{target_y}{numeric vector; thresholds for y (defaults to mean(y)).}
+\item{target_y}{numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.}
 }
 \value{
 Numeric vector of divergent LPM values.
