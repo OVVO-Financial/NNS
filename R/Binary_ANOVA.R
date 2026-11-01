@@ -15,8 +15,7 @@ NNS.ANOVA.bin <- function(control, treatment,
   # Calculate grand statistic if not provided
   if(is.null(mean.of.means)) {
     if(medians) {
-      mean.of.means <- (length(control) * median(control) + length(treatment) * median(treatment)) /
-        (length(control) + length(treatment))
+      mean.of.means <- median(c(control, treatment))
     } else {
       mean.of.means <- (length(control) * mean(control) + length(treatment) * mean(treatment)) /
         (length(control) + length(treatment))
