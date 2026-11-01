@@ -297,7 +297,7 @@ NNS.ARMA <- function(variable,
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
     
-    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), abs(LPM.VaR((1-pred.int)/2, 0, z)))) 
+    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), LPM.VaR((1-pred.int)/2, 0, z))) 
     upper_PIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
     lower_PIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
   } else lin.resid <- 0
