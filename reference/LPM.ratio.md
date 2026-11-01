@@ -17,7 +17,8 @@ LPM.ratio(degree, target, variable)
 
 - target:
 
-  numeric vector; threshold(s). Defaults to mean(variable).
+  numeric vector; threshold(s). There is no default: pass `NULL` to use
+  `mean(variable)`.
 
 - variable:
 
@@ -25,7 +26,9 @@ LPM.ratio(degree, target, variable)
 
 ## Value
 
-Numeric vector of standardized lower partial moments.
+Numeric vector of standardized lower partial moments. For `degree > 0`,
+a target at which every observation equals the target (0/0) returns the
+`degree = 0` ratio.
 
 ## References
 

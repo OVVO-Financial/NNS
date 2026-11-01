@@ -16,8 +16,9 @@ NNS.moments(x, population = TRUE)
 
 - population:
 
-  logical; `TRUE` (default) Performs the population adjustment.
-  Otherwise returns the sample statistic.
+  logical; `TRUE` (default) returns the population (unadjusted)
+  statistics. `FALSE` returns the sample-adjusted statistics (variance
+  with `n - 1`, sample skewness and sample excess kurtosis).
 
 ## Value
 

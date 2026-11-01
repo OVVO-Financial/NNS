@@ -25,8 +25,10 @@ Co.LPM_nD(data, target, degree = 0, norm = TRUE)
 
 - norm:
 
-  logical; if `TRUE` (default) normalize to the maximum observed value
-  (→ \[0,1\]), otherwise return the raw moment.
+  logical; if `TRUE` (default) divide by the sum of the co-lower,
+  co-upper and divergent nD partial moments at the same degree and
+  target (→ \[0,1\]), otherwise return the raw moment. `norm` is ignored
+  at `degree = 0`.
 
 ## Value
 

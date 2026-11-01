@@ -16,7 +16,8 @@ NNS.mode(x, discrete = FALSE, multi = TRUE)
 
 - discrete:
 
-  logical; `FALSE` (default) for discrete distributions.
+  logical; `FALSE` (default) for continuous distributions, `TRUE` for
+  discrete distributions.
 
 - multi:
 
@@ -24,7 +25,8 @@ NNS.mode(x, discrete = FALSE, multi = TRUE)
 
 ## Value
 
-Returns a numeric value representing the mode of the distribution.
+Returns the mode of the distribution: a numeric vector of all modes when
+`multi = TRUE` (default), otherwise a single numeric value.
 
 ## Author
 

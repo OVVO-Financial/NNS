@@ -53,7 +53,7 @@
 
 
 <dt id="arg-discrete">discrete<a class="anchor" aria-label="anchor" href="#arg-discrete"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) for discrete distributions.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) for continuous distributions, <code>TRUE</code> for discrete distributions.</p></dd>
 
 
 <dt id="arg-multi">multi<a class="anchor" aria-label="anchor" href="#arg-multi"></a></dt>
@@ -62,7 +62,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a numeric value representing the mode of the distribution.</p>
+    <p>Returns the mode of the distribution: a numeric vector of all modes when <code>multi = TRUE</code> (default), otherwise a single numeric value.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

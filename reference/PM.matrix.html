@@ -57,7 +57,7 @@
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
-<dd><p>numeric vector; thresholds for each column (defaults to colMeans).</p></dd>
+<dd><p>numeric vector; thresholds for each column. There is no default: pass <code>NULL</code> to use <code>colMeans(variable)</code>.</p></dd>
 
 
 <dt id="arg-variable">variable<a class="anchor" aria-label="anchor" href="#arg-variable"></a></dt>
@@ -65,7 +65,7 @@
 
 
 <dt id="arg-pop-adj">pop_adj<a class="anchor" aria-label="anchor" href="#arg-pop-adj"></a></dt>
-<dd><p>logical; TRUE adjusts population vs. sample moments.</p></dd>
+<dd><p>logical; <code>TRUE</code> applies the sample adjustment <code>n / (n - 1)</code> to the co-/divergent moments (with both degrees 1, <code>target = NULL</code> and <code>norm = FALSE</code>, the covariance matrix then equals <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov()</a></code>). It is ignored when either degree is 0.</p></dd>
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>

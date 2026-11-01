@@ -56,7 +56,7 @@
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
-<dd><p>numeric vector; threshold(s). Defaults to mean(variable).</p></dd>
+<dd><p>numeric vector; threshold(s). There is no default: pass <code>NULL</code> to use <code>mean(variable)</code>.</p></dd>
 
 
 <dt id="arg-variable">variable<a class="anchor" aria-label="anchor" href="#arg-variable"></a></dt>
@@ -65,7 +65,9 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Numeric vector of standardized lower partial moments.</p>
+    <p>Numeric vector of standardized lower partial moments. For
+  <code>degree &gt; 0</code>, a target at which every observation equals the target
+  (0/0) returns the <code>degree = 0</code> ratio.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

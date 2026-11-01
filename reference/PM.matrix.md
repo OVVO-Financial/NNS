@@ -21,7 +21,8 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 
 - target:
 
-  numeric vector; thresholds for each column (defaults to colMeans).
+  numeric vector; thresholds for each column. There is no default: pass
+  `NULL` to use `colMeans(variable)`.
 
 - variable:
 
@@ -29,7 +30,11 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 
 - pop_adj:
 
-  logical; TRUE adjusts population vs. sample moments.
+  logical; `TRUE` applies the sample adjustment `n / (n - 1)` to the
+  co-/divergent moments (with both degrees 1, `target = NULL` and
+  `norm = FALSE`, the covariance matrix then equals
+  [`cov()`](https://rdrr.io/r/stats/cor.html)). It is ignored when
+  either degree is 0.
 
 - norm:
 

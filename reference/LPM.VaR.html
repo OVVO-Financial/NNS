@@ -53,7 +53,7 @@
 
 
 <dt id="arg-degree">degree<a class="anchor" aria-label="anchor" href="#arg-degree"></a></dt>
-<dd><p>integer; <code>(degree = 0)</code> for discrete distributions, <code>(degree = 1)</code> for continuous distributions.</p></dd>
+<dd><p>integer; <code>(degree = 0)</code> for discrete distributions, <code>(degree = 1)</code> for continuous distributions. With <code>degree = 0</code> the result is the interpolated empirical quantile (<code>quantile(x, percentile, type = 7)</code>), which on tied data need not be an exact inverse of <code>LPM.ratio(0, ., x)</code>.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>

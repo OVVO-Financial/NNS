@@ -39,8 +39,8 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 
 Returns:
 
-- `"Function"` a data.table containing the observations and resulting
-  CDF of the variable.
+- `"Function"` a data.frame (class `NNS.data.frame`) containing the
+  observations and the resulting function of the variable.
 
 - `"target.value"` value from the `target` argument.
 

@@ -16,7 +16,8 @@ NNS.gravity(x, discrete = FALSE)
 
 - discrete:
 
-  logical; `FALSE` (default) for discrete distributions.
+  logical; `FALSE` (default) for continuous distributions, `TRUE` for
+  discrete distributions.
 
 ## Value
 

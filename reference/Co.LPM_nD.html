@@ -61,7 +61,7 @@
 
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
-<dd><p>logical; if <code>TRUE</code> (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.</p></dd>
+<dd><p>logical; if <code>TRUE</code> (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. <code>norm</code> is ignored at <code>degree = 0</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

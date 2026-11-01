@@ -18,7 +18,10 @@ LPM.VaR(percentile, degree, x)
 - degree:
 
   integer; `(degree = 0)` for discrete distributions, `(degree = 1)` for
-  continuous distributions.
+  continuous distributions. With `degree = 0` the result is the
+  interpolated empirical quantile (`quantile(x, percentile, type = 7)`),
+  which on tied data need not be an exact inverse of
+  `LPM.ratio(0, ., x)`.
 
 - x:
 

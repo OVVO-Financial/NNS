@@ -17,7 +17,8 @@ UPM.ratio(degree, target, variable)
 
 - target:
 
-  numeric vector; threshold(s). Defaults to mean(variable).
+  numeric vector; threshold(s). There is no default: pass `NULL` to use
+  `mean(variable)`.
 
 - variable:
 
@@ -25,7 +26,9 @@ UPM.ratio(degree, target, variable)
 
 ## Value
 
-Numeric vector of standardized upper partial moments.
+Numeric vector of standardized upper partial moments. For `degree > 0`,
+a target at which every observation equals the target (0/0) returns the
+`degree = 0` ratio.
 
 ## References
 
@@ -37,3 +40,13 @@ Using Partial Moments\* (ISBN:1490523995)
 Fred Viole, OVVO Financial Systems
 
 ## Examples
+
+``` r
+  set.seed(123)
+  x <- rnorm(100)
+  UPM.ratio(0, mean(x), x)
+#> [1] 0.49
+if (FALSE) { # \dontrun{
+  plot(sort(x), UPM.ratio(0, sort(x), x))
+} # }
+```
