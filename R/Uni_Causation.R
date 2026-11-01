@@ -124,7 +124,7 @@ NNS.caus_core <- function(x, y = NULL,
                           permute = c("y","x","both"),
                           seed = NULL,
                           conf.int = 0.95){
-  if(!is.null(y))  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+  if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
   if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
   
   orig.tau <- tau
