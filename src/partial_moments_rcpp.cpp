@@ -47,12 +47,13 @@ static inline NumericVector fill_degenerate_ratio(NumericVector out,
                                                   const NumericVector &target,
                                                   const NumericVector &variable,
                                                   const bool lower) {
-  if (!(degree > 0)) return out;
+  if (!(degree > 0) || variable.size() == 0) return out;
+  const double c = variable[0];
+  for (R_xlen_t j = 1; j < variable.size(); ++j) {
+    if (variable[j] != c) return out;
+  }
   for (R_xlen_t i = 0; i < out.size(); ++i) {
-    if (ISNAN(out[i])) {
-      NumericVector t = NumericVector::create(target[i]);
-      out[i] = lower ? LPM_CPv(0.0, t, variable)[0] : UPM_CPv(0.0, t, variable)[0];
-    }
+    if (ISNAN(out[i]) && target[i] == c) out[i] = lower ? 1.0 : 0.0;
   }
   return out;
 }
