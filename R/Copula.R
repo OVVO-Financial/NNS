@@ -108,9 +108,11 @@ NNS.copula <- function (
   indep_anchors <- function(p) list(Co = sum((outer(p, p) + outer(1 - p, 1 - p))[utr]), D = 1 - prod(p) - prod(1 - p))
   discrete_indep <- indep_anchors(vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1)))
   continuous_indep <- if(continuous) indep_anchors(vapply(seq_len(n), function(j) LPM.ratio(1, target[j], X[ , j]), numeric(1))) else discrete_indep
+  # A boundary target can zero an anchor; an observed 0 then matches it exactly
+  rel_dev <- function(obs, indep) if(obs == indep) 0 else abs(obs - indep)/indep
   
-  discrete_dep <- abs(discrete_Co_pm-discrete_indep$Co)/discrete_indep$Co
-  continuous_dep <- abs(continuous_Co_pm-continuous_indep$Co)/continuous_indep$Co 
+  discrete_dep <- rel_dev(discrete_Co_pm, discrete_indep$Co)
+  continuous_dep <- rel_dev(continuous_Co_pm, continuous_indep$Co)
   
    
   discrete_dep <- min(max(discrete_dep, 0), 1)
@@ -120,8 +122,8 @@ NNS.copula <- function (
   discrete_D_pm <- DPM_nD(data = X, target = target, degree = 0, norm = TRUE)
   if(continuous) continuous_D_pm <- DPM_nD(data = X, target = target, degree = 1, norm = TRUE) else continuous_D_pm <- discrete_D_pm
   
-  n_dim_discrete_dep <- abs(discrete_D_pm - discrete_indep$D)/discrete_indep$D 
-  n_dim_continuous_dep <- abs(continuous_D_pm - continuous_indep$D)/continuous_indep$D
+  n_dim_discrete_dep <- rel_dev(discrete_D_pm, discrete_indep$D)
+  n_dim_continuous_dep <- rel_dev(continuous_D_pm, continuous_indep$D)
   n_dim_discrete_dep <- min(n_dim_discrete_dep, 1)
   n_dim_continuous_dep <- min(n_dim_continuous_dep, 1)
 

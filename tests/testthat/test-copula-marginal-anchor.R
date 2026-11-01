@@ -40,3 +40,9 @@ test_that("A constant margin leaves the copula of the varying margins unchanged"
   expect_equal(NNS.copula(cbind(Z, k = 1)), NNS.copula(Z))
   expect_equal(NNS.copula(cbind(Z, k = 1), target = c(5, 3, 4, 0)), NNS.copula(Z, target = c(5, 3, 4)))
 })
+
+test_that("NNS.copula is 0 on an independent grid at a boundary target", {
+  expect_equal(NNS.copula(expand.grid(0:1, 0:1), target = c(0, 0)), 0)
+  expect_equal(NNS.copula(expand.grid(0:1, 0:1), target = c(0, 1)), 0)
+  expect_equal(NNS.copula(expand.grid(0:1, 0:1, 0:2), target = c(0, 0, 0)), 0)
+})
