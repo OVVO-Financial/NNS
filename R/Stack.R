@@ -1586,7 +1586,7 @@ NNS.stack <- function(IVs.train,
   # -------------------------------------------------------------------------
   
   component_weights <- c(reg = 0, dim.red = 0)
-  probability.threshold <- if (is_class) 0.5 else 0.5
+  probability.threshold <- 0.5
   
   if (identical(method, 1L)) {
     component_weights["reg"] <- 1
@@ -1691,18 +1691,6 @@ NNS.stack <- function(IVs.train,
       # Univariate final fit
       # Use NNS.reg with n.best = n.best
       if (is.character(n.best) && n.best == "all") {
-        # For univariate, "all" means use all training points; we can pass n.best = "all"
-        # but NNS.reg univariate might not accept "all"? We'll use NNS.reg with n.best = "all"
-        reg_final_fit <- .fit_univariate_raw(
-          train_design[[1L]],
-          train_y_fit,
-          test_design[[1L]],
-          confidence.interval = pred.int,
-          point.only = FALSE
-        )
-        # But that uses default n.best? Actually .fit_univariate_raw does not pass n.best.
-        # We need to handle separately.
-        # For univariate, we can just use NNS.reg with n.best = "all" explicitly.
         reg_final_fit <- suppressWarnings(
           NNS.reg(
             as.numeric(train_design[[1L]]),
@@ -1776,22 +1764,8 @@ NNS.stack <- function(IVs.train,
           y
         )
         reg_pred_int_raw <- .translate_interval(reg_final_fit$pred.int)
-        # Also set reg_best_k to the full RPM row count for return field
-        # We need to get the RPM row count from the final fit? We can compute from the fit object.
-        # But we can also compute by calling .nns_mreg_prepare_model on full data.
-        # We'll compute later if needed.
-        # For now, we'll set a placeholder.
-        # Actually we'll compute after the fit.
-        # We'll store the nRPM in a variable.
-        # Let's compute RPM row count for full data:
-        setup_full <- .nns_mreg_prepare_model(train_design, train_y_fit, order = order,
-                                              noise.reduction = "off", is.class = FALSE,
-                                              use.native = isTRUE(getOption("NNS.native.mreg", TRUE)))
-        if (!is.null(setup_full$RPM)) {
-          reg_best_k <- nrow(setup_full$RPM)
-        } else {
-          reg_best_k <- nrow(train_design)  # fallback
-        }
+        # Report the full RPM row count; the final fit already holds the RPM.
+        reg_best_k <- if (!is.null(reg_final_fit$RPM)) nrow(reg_final_fit$RPM) else nrow(train_design)
       } else {
         # numeric n.best
         reg_final_fit <- suppressWarnings(
