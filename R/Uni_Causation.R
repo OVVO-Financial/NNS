@@ -159,6 +159,8 @@ NNS.caus_core <- function(x, y = NULL,
     if(is.factor(y)) y <- as.numeric(y)
     
     # ---- input validation ---------------------------------------------------
+    if(NCOL(x) > 1 || NCOL(y) > 1)
+      stop("x and y must each be a single variable (factor.2.dummy = TRUE turns a factor with k levels into k - 1 columns).")
     if(length(x) != length(y)) stop("x and y must have the same length.")
     if(any(is.infinite(x)) || any(is.infinite(y))) stop("x and y must be finite.")
     if(length(unique(x)) < 2 || length(unique(y)) < 2)
