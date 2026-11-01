@@ -445,6 +445,7 @@ NumericVector CoLPM_nD_batch_RCPP(const NumericMatrix& data,
                                   const NumericMatrix& targets,
                                   double degree = 0.0,
                                   bool norm = true) {
+  nns_check_degree(degree, "degree");
   if (data.ncol() != targets.ncol()) {
     stop("`targets` must have the same number of columns as `data`");
   }
@@ -479,6 +480,7 @@ static const R_xlen_t NNS_DIRECT_PATH_MAX_TARGETS = 32;
 NumericVector LPM_CPv(const double &degree,
                       const NumericVector &target,
                       const NumericVector &variable) {
+  nns_check_degree(degree, "degree");
   if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
     NumericVector output(target.size());
     RcppParallel::RVector<double> v(variable);
@@ -497,6 +499,7 @@ NumericVector LPM_CPv(const double &degree,
 NumericVector UPM_CPv(const double &degree,
                       const NumericVector &target,
                       const NumericVector &variable) {
+  nns_check_degree(degree, "degree");
   if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
     NumericVector output(target.size());
     RcppParallel::RVector<double> v(variable);
@@ -924,6 +927,8 @@ List PMMatrix_CPv(
     const bool &pop_adj,
     const bool &norm
 ) {
+  nns_check_degree(LPM_degree, "LPM_degree");
+  nns_check_degree(UPM_degree, "UPM_degree");
   size_t variable_cols = variable.cols();
   size_t target_length = target.size();
   if(variable_cols != target_length){

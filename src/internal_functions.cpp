@@ -182,6 +182,7 @@ List generate_vectors(NumericVector x, IntegerVector l, int len = -1) {
   // recursive forecast steps without re-allocating or copying a growing
   // vector each step.  len < 0 (default) preserves the original behaviour of
   // using the full length of 'x'.
+  if (len > x.size()) stop("'len' must not exceed length(x)");
   int n = (len < 0) ? x.size() : len;
   List comp_series(l.size()), comp_index(l.size());
   for (int t = 0; t < l.size(); ++t) {
@@ -191,8 +192,9 @@ List generate_vectors(NumericVector x, IntegerVector l, int len = -1) {
       comp_index[t] = IntegerVector(0);
       continue;
     }
+    // For lag > n, start = n + 1 and the component is empty.
     int start = (n % lag) + 1;
-    int m = ((n - start) / lag) + 1;
+    int m = (start > n) ? 0 : ((n - start) / lag) + 1;
     
     NumericVector s(no_init(m));
     IntegerVector idx(no_init(m));
@@ -227,13 +229,17 @@ static List create_recycled_list_num(const NumericVector& values, int list_lengt
 
 // [[Rcpp::export(name = "generate.lin.vectors")]]
 List generate_lin_vectors(NumericVector x, int l, int h = 1) {
+  // l is a modulus below, so l = 0 would raise SIGFPE.
+  if (l < 1) stop("'l' must be a positive integer");
+  if (h < 0) stop("'h' must be a non-negative integer");
   int n = x.size();
   int max_fcast = std::min(h, l);
   
   List comp_series(max_fcast), comp_index(max_fcast);
   for (int i = 1; i <= max_fcast; ++i) {
     int start = ((n + i - 1) % l) + 1;
-    int m = ((n - start) / l) + 1;
+    // start > n (l > n) means an empty component; see generate_vectors.
+    int m = (start > n) ? 0 : ((n - start) / l) + 1;
     NumericVector s(no_init(m));
     IntegerVector idx(no_init(m));
     int pos = start;

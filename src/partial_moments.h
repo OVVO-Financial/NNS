@@ -28,6 +28,14 @@ double UPM_C(const double &degree,
              const double &target,
              const RcppParallel::RVector<double> &variable);
 
+// Rejects negative and NaN degrees. Called from the R-facing wrappers before
+// any parallel work starts.
+inline void nns_check_degree(const double degree, const char *name) {
+  if (!(degree >= 0.0)) {
+    Rcpp::stop("'%s' must be a non-negative number", name);
+  }
+}
+
 namespace nns_pm_detail {
 
 // Keep very large integer degrees on the legacy full-scan path. This prevents
@@ -46,35 +54,29 @@ inline bool prefix_supported_degree(const double degree, int &degree_int) {
   return true;
 }
 
-inline std::vector<double> binomial_coefficients(const int degree) {
-  std::vector<double> choose(static_cast<std::size_t>(degree) + 1U, 1.0);
-  for (int j = 1; j < degree; ++j) {
-    choose[static_cast<std::size_t>(j)] =
-      choose[static_cast<std::size_t>(j - 1)] *
-      static_cast<double>(degree - j + 1) /
-        static_cast<double>(j);
-  }
-  return choose;
-}
-
+// Sorted-anchor prefix backend. Every expansion is anchored at the adjacent
+// order statistic, so all terms are non-negative and cannot cancel (anchoring
+// at the median instead lets terms cancel from degree 3 up):
+//   lower_j(k) = sum_{i < k}  (x_(k-1) - x_(i))^j  (anchor: largest point <= t)
+//   upper_j(k) = sum_{i >= k} (x_(i) - x_(k))^j    (anchor: smallest point > t)
+// built with the exact recurrence
+//   lower_j(k+1) = sum_{l <= j} C(j,l) delta^(j-l) lower_l(k) + [j == 0],
+// and a target with k = #{x_i <= t} is evaluated as
+//   LPM = sum_j C(d,j) (t - x_(k-1))^(d-j) lower_j(k) / n
+//   UPM = sum_j C(d,j) (x_(k) - t)^(d-j)   upper_j(k) / n.
 struct PrefixPartialMomentBackend {
   std::vector<double> sorted;
-  std::vector<std::vector<double> > prefix_power;
-  std::vector<double> total_power;
-  std::vector<double> choose;
+  std::vector<double> lower;   // (n + 1) x (degree + 1), row k = lower_j(k)
+  std::vector<double> upper;   // (n + 1) x (degree + 1), row k = upper_j(k)
+  std::vector<double> binom;  // (degree + 1) x (degree + 1), C(j, l)
   std::size_t n;
   int degree;
-  double shift;
   
   PrefixPartialMomentBackend(const Rcpp::NumericVector &variable,
                              const int degree_)
     : sorted(variable.begin(), variable.end()),
-      prefix_power(static_cast<std::size_t>(degree_) + 1U),
-      total_power(static_cast<std::size_t>(degree_) + 1U, 0.0),
-      choose(binomial_coefficients(degree_)),
       n(sorted.size()),
-      degree(degree_),
-      shift(0.0) {
+      degree(degree_) {
     
     // Match the legacy path for missing/non-finite data by declining the prefix
     // backend. The constructor is only called after this same condition is
@@ -88,27 +90,62 @@ struct PrefixPartialMomentBackend {
     }
     
     std::sort(sorted.begin(), sorted.end());
-    shift = sorted[n / 2U];
+    const std::size_t w = static_cast<std::size_t>(degree) + 1U;
     
-    for (int p = 0; p <= degree; ++p) {
-      prefix_power[static_cast<std::size_t>(p)].assign(n + 1U, 0.0);
-    }
-    
-    for (std::size_t i = 0; i < n; ++i) {
-      const double x = sorted[i] - shift;
-      double x_power = 1.0;
-      
-      for (int p = 0; p <= degree; ++p) {
-        const std::size_t ps = static_cast<std::size_t>(p);
-        prefix_power[ps][i + 1U] = prefix_power[ps][i] + x_power;
-        x_power *= x;
+    binom.assign(w * w, 0.0);
+    for (std::size_t j = 0; j < w; ++j) {
+      binom[j * w] = 1.0;
+      for (std::size_t l = 1; l <= j; ++l) {
+        binom[j * w + l] = binom[(j - 1U) * w + l - 1U] +
+          (l < j ? binom[(j - 1U) * w + l] : 0.0);
       }
     }
     
-    for (int p = 0; p <= degree; ++p) {
-      const std::size_t ps = static_cast<std::size_t>(p);
-      total_power[ps] = prefix_power[ps][n];
+    lower.assign((n + 1U) * w, 0.0);
+    upper.assign((n + 1U) * w, 0.0);
+    if (n == 0U) return;
+    std::vector<double> dpow(w);
+    
+    lower[1U * w] = 1.0;  // k = 1: the single point equals its anchor
+    for (std::size_t k = 1; k < n; ++k) {
+      fill_powers(sorted[k] - sorted[k - 1U], dpow);
+      step(&lower[k * w], &lower[(k + 1U) * w], dpow);
     }
+    upper[(n - 1U) * w] = 1.0;  // k = n - 1: the single point equals its anchor
+    for (std::size_t k = n - 1U; k > 0; --k) {
+      fill_powers(sorted[k] - sorted[k - 1U], dpow);
+      step(&upper[k * w], &upper[(k - 1U) * w], dpow);
+    }
+  }
+  
+  void fill_powers(const double base, std::vector<double> &pw) const {
+    pw[0] = 1.0;
+    for (std::size_t p = 1; p < pw.size(); ++p) pw[p] = pw[p - 1U] * base;
+  }
+  
+  // next_j = sum_{l <= j} C(j,l) delta^(j-l) prev_l + [j == 0]
+  void step(const double *prev, double *next, const std::vector<double> &dpow) const {
+    const std::size_t w = static_cast<std::size_t>(degree) + 1U;
+    for (std::size_t j = 0; j < w; ++j) {
+      double acc = (j == 0U) ? 1.0 : 0.0;
+      for (std::size_t l = 0; l <= j; ++l) {
+        if (prev[l] != 0.0) acc += binom[j * w + l] * dpow[j - l] * prev[l];
+      }
+      next[j] = acc;
+    }
+  }
+  
+  // sum_j C(d,j) gap^(d-j) sums_j, all terms >= 0.
+  double combine(const double *sums, const double gap) const {
+    const std::size_t d = static_cast<std::size_t>(degree);
+    const std::size_t w = d + 1U;
+    double out = 0.0;
+    double gpow = 1.0;  // gap^(d-j), built from j = d downwards
+    for (std::size_t jj = w; jj-- > 0U;) {
+      if (sums[jj] != 0.0) out += binom[d * w + jj] * gpow * sums[jj];
+      gpow *= gap;
+    }
+    return out;
   }
   
   bool ok() const {
@@ -125,69 +162,26 @@ struct PrefixPartialMomentBackend {
     if (!std::isfinite(target)) return R_NaN;
     
     const std::size_t k = count_leq(target);
-    const double tc = target - shift;
     const double nd = static_cast<double>(n);
     
     if (degree == 0) return static_cast<double>(k) / nd;
+    if (k == 0U) return 0.0;
     
-    if (degree == 1) {
-      return (static_cast<double>(k) * tc - prefix_power[1][k]) / nd;
-    }
-    
-    if (degree == 2) {
-      const double t2 = tc * tc;
-      return (static_cast<double>(k) * t2 -
-              2.0 * tc * prefix_power[1][k] +
-              prefix_power[2][k]) / nd;
-    }
-    
-    double out = 0.0;
-    for (int j = 0; j <= degree; ++j) {
-      const std::size_t js = static_cast<std::size_t>(j);
-      const double sign = (j % 2 == 0) ? 1.0 : -1.0;
-      out += choose[js] * sign *
-        std::pow(tc, static_cast<double>(degree - j)) *
-        prefix_power[js][k];
-    }
-    
-    return out / nd;
+    const std::size_t w = static_cast<std::size_t>(degree) + 1U;
+    return combine(&lower[k * w], target - sorted[k - 1U]) / nd;
   }
   
   double upm(const double target) const {
     if (!std::isfinite(target)) return R_NaN;
     
     const std::size_t k = count_leq(target);
-    const double tc = target - shift;
-    const std::size_t above = n - k;
     const double nd = static_cast<double>(n);
     
-    if (degree == 0) return static_cast<double>(above) / nd;
+    if (degree == 0) return static_cast<double>(n - k) / nd;
+    if (k == n) return 0.0;
     
-    const double suffix1 = total_power[1] - prefix_power[1][k];
-    
-    if (degree == 1) {
-      return (suffix1 - static_cast<double>(above) * tc) / nd;
-    }
-    
-    if (degree == 2) {
-      const double suffix2 = total_power[2] - prefix_power[2][k];
-      const double t2 = tc * tc;
-      return (suffix2 -
-              2.0 * tc * suffix1 +
-              static_cast<double>(above) * t2) / nd;
-    }
-    
-    double out = 0.0;
-    for (int j = 0; j <= degree; ++j) {
-      const std::size_t js = static_cast<std::size_t>(j);
-      const double suffix_j = total_power[js] - prefix_power[js][k];
-      const double sign = ((degree - j) % 2 == 0) ? 1.0 : -1.0;
-      out += choose[js] * sign *
-        std::pow(tc, static_cast<double>(degree - j)) *
-        suffix_j;
-    }
-    
-    return out / nd;
+    const std::size_t w = static_cast<std::size_t>(degree) + 1U;
+    return combine(&upper[k * w], sorted[k] - target) / nd;
   }
   
   std::pair<double, double> both(const double target) const {

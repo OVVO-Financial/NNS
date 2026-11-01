@@ -2,6 +2,8 @@
 #include <Rcpp.h>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <unordered_map>
 #include "central_tendencies.h"
 
 using namespace Rcpp;
@@ -73,35 +75,66 @@ static void quartiles_like_R_code(const std::vector<double>& xs, double& q1, dou
   }
 }
 
-// Minimal replacement for NNS_bin used by mode/gravity:
-// Given sorted x, fixed bin width, origin, return counts and the width.
-// We align with the R usage where z_names <- seq(x1, xl, width) and length(counts) matches z_names length.
+// Minimal replacement for NNS_bin used by mode/gravity. Bins are
+// [origin + k*width, origin + (k+1)*width), k = 0 .. nbins-1, with
+// nbins = floor((max - origin) / width + 1e-12) + 1.
 //
-// We assign each x to idx = floor((x - origin) / width), clipped to [0, nbins-1].
-//
-static void simple_bin_counts(const std::vector<double>& xs,
-                              double width, double origin,
-                              std::vector<double>& bin_names,
-                              std::vector<int>& counts) {
-  const int l = (int)xs.size();
-  if (l == 0) { bin_names.clear(); counts.clear(); return; }
-  
+// Gravity and mode only read counts within 6 bins of a non-empty bin, so runs
+// of more than kMaxEmptyRun empty bins keep only their first and last
+// kMaxEmptyRun / 2 bins: results are bit-identical and memory is O(n). A width
+// so small that the bin count exceeds 2^52 is widened to (max - origin) / 2^52.
+static constexpr std::int64_t kMaxEmptyRun = 16;
+static constexpr double kMaxBinIndex = 4503599627370496.0;  // 2^52
+
+static void simple_bin_counts(const std::vector<double>& xs, double width, double origin,
+                              std::vector<double>& bin_names, std::vector<int>& counts) {
+  bin_names.clear();
+  counts.clear();
+  if (xs.empty()) return;
 
   const double xmax = xs.back();
-  // Number of bins so that last bin_name <= xmax and bin_names[k] = origin + k*width
-  int nbins = (int)std::floor( (xmax - origin) / width + 1e-12 ) + 1;
-  if (nbins < 1) nbins = 1;
-  
-  bin_names.resize(nbins);
-  for (int k = 0; k < nbins; ++k) bin_names[k] = origin + k * width;
-  
-  counts.assign(nbins, 0);
-  for (double v : xs) {
-    int idx = (int)std::floor((v - origin) / width);
-    if (idx < 0) idx = 0;
-    if (idx >= nbins) idx = nbins - 1;
-    counts[idx] += 1;
+  double last = std::floor((xmax - origin) / width + 1e-12);
+  if (!(last < kMaxBinIndex)) {
+    width = (xmax - origin) / kMaxBinIndex;
+    last = std::floor((xmax - origin) / width + 1e-12);
+    if (!(last < kMaxBinIndex)) last = kMaxBinIndex;
   }
+  const std::int64_t nbins = (last >= 0.0) ? static_cast<std::int64_t>(last) + 1 : 1;
+  const std::int64_t cap = static_cast<std::int64_t>(xs.size()) * (kMaxEmptyRun + 1) + kMaxEmptyRun;
+  bin_names.reserve(static_cast<std::size_t>(std::min(nbins, cap)));
+  counts.reserve(static_cast<std::size_t>(std::min(nbins, cap)));
+
+  auto push_bin = [&](std::int64_t k, int c) {
+    bin_names.push_back(origin + static_cast<double>(k) * width);
+    counts.push_back(c);
+  };
+  auto push_empty_run = [&](std::int64_t first, std::int64_t last_bin) {
+    const std::int64_t len = last_bin - first + 1;
+    if (len <= 0) return;
+    if (len <= kMaxEmptyRun) {
+      for (std::int64_t k = first; k <= last_bin; ++k) push_bin(k, 0);
+      return;
+    }
+    const std::int64_t half = kMaxEmptyRun / 2;
+    for (std::int64_t k = first; k < first + half; ++k) push_bin(k, 0);
+    for (std::int64_t k = last_bin - half + 1; k <= last_bin; ++k) push_bin(k, 0);
+  };
+
+  // xs is sorted, so bin indices are non-decreasing.
+  const double top = static_cast<double>(nbins - 1);
+  std::int64_t prev = -1;
+  for (double v : xs) {
+    const double q = std::floor((v - origin) / width);
+    const std::int64_t k = (q < 0.0) ? 0 : (q >= top ? nbins - 1 : static_cast<std::int64_t>(q));
+    if (k == prev) {
+      ++counts.back();
+      continue;
+    }
+    push_empty_run(prev + 1, k - 1);
+    push_bin(k, 1);
+    prev = k;
+  }
+  push_empty_run(prev + 1, nbins - 1);
 }
 
 // ---------- NNS.gravity ----------
@@ -246,10 +279,12 @@ static void smooth_counts_tri7(const std::vector<int>& counts, std::vector<doubl
   smooth.assign(n, 0.0);
   if (n == 0) return;
   
-  // Mirror at edges (symmetric extension)
+  // Mirror at edges (symmetric extension). The clamp only binds for n <= 3
+  // bins, whose smoothed values are unused (the peak scan needs n >= 7).
   auto at = [&](int idx)->int{
-    if (idx < 0)   return counts[-idx];            // reflect: -1 -> 1, -2 -> 2, ...
-    if (idx >= n)  return counts[2*n - 2 - idx];   // reflect: n -> n-2, n+1 -> n-3, ...
+    if (idx < 0)   idx = -idx;                     // reflect: -1 -> 1, -2 -> 2, ...
+    if (idx >= n)  idx = 2*n - 2 - idx;            // reflect: n -> n-2, n+1 -> n-3, ...
+    idx = std::min(std::max(idx, 0), n - 1);
     return counts[idx];
   };
   
@@ -283,24 +318,25 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       return Rf_ScalarReal(nearest_int_half_up(med));
     }
     
-    // Integerize and count exact frequencies
-    std::unordered_map<int,int> freq; freq.reserve(l * 2u);
-    for (double v : xnum) ++freq[ nearest_int_half_up(v) ];
+    // Integerize and count exact frequencies. The key is a double so values
+    // beyond the int range stay exact; "+ 0.0" folds -0.0 into the 0 key.
+    std::unordered_map<double,int> freq; freq.reserve(l * 2u);
+    for (double v : xnum) ++freq[ nearest_int_half_up(v) + 0.0 ];
     
     int maxf = 0; for (auto &kv : freq) if (kv.second > maxf) maxf = kv.second;
     
-    std::vector<int> modes_int;
+    std::vector<double> modes_int;
     for (auto &kv : freq) if (kv.second == maxf) modes_int.push_back(kv.first);
     std::sort(modes_int.begin(), modes_int.end());
     
     if (multi) {
       NumericVector out((int)modes_int.size());
-      for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = (double)modes_int[i];
+      for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = modes_int[i];
       return out;            // e.g., 2 3 4 for c(1,2,2,3,3,4,4,5)
     } else {
       // Return the arithmetic mean of all tied modes
       long double sum = 0.0L;
-      for (int m : modes_int) sum += (long double)m;
+      for (double m : modes_int) sum += (long double)m;
       double mean_modes = (modes_int.empty() ? NA_REAL
                              : (double)(sum / (long double)modes_int.size()));
       return Rf_ScalarReal(mean_modes);
