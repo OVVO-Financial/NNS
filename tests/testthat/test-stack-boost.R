@@ -99,3 +99,23 @@ test_that("NNS.stack scores the multivariate ALL candidate with NNS.reg(n.best =
   expect_equal(frame$candidate_raws$all, oof, tolerance = 1e-12)
   expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)
 })
+
+test_that("NNS.stack scores the univariate ALL candidate with the deployed NNS.reg fit", {
+  set.seed(5)
+  x <- data.frame(a = rnorm(160))
+  y <- rnorm(160)
+  frame <- capture_frame("NNS.stack", NNS::NNS.stack(
+    x, y, IVs.test = x[1:3, , drop = FALSE], method = 1, seed = 1, ncores = 1, status = FALSE
+  ))
+  oof <- rep(NA_real_, length(y))
+  for (s in frame$splits) {
+    design <- frame$.method1_design_for_split(s$train, s$validation)
+    fit <- NNS.reg(design$train[[1L]], frame$y_fit_all[s$train], point.est = design$test[[1L]],
+                   n.best = "all", order = frame$order, dist = frame$dist, type = NULL,
+                   factor.2.dummy = FALSE, plot = FALSE, residual.plot = FALSE,
+                   ncores = 1, point.only = TRUE)
+    oof[s$validation] <- fit$Point.est - frame$response_offset
+  }
+  expect_equal(frame$candidate_raws$all, oof, tolerance = 1e-12)
+  expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)
+})
