@@ -75,3 +75,19 @@ test_that("obj.fn is the equal-weights score when equal weights win (max)", {
                 weights = c(0.5, 0.5), plot = FALSE)
   expect_equal(o$obj.fn, -mean((p - tail(x, 32))^2))
 })
+
+test_that("nns.regress is not selected by a smooth that saw the validation window", {
+  # Smoothing all 100 points scores 19.4 against 29.8 raw; smoothing the 80 training points scores 56.8.
+  o <- run_optim(random_walk(4), training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
+  expect_false(o$nns.regress)
+})
+
+test_that("validation results with nns.regress use a smooth of the training window", {
+  x <- random_walk(8)
+  o <- run_optim(x, training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
+  smoothed <- NNS.reg(1:80, x[1:80], plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
+  p <- NNS.ARMA(smoothed, training.set = 80, h = 20, seasonal.factor = o$periods,
+                method = o$method, weights = o$weights, shrink = TRUE, plot = FALSE)
+  expect_true(o$nns.regress)
+  expect_equal(o$results, p + o$bias.shift)
+})

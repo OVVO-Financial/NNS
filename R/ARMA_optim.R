@@ -465,15 +465,15 @@ NNS.ARMA.optim <- function(variable,
   }
   
   
-  regressed_variable <- NNS.reg(1:length(variable), variable, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
+  # Smooth the training window only, so the validation score never sees the validation data.
+  regressed_training <- NNS.reg(1:training.set, variable[1:training.set], plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   
-  predicted <- NNS.ARMA(regressed_variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
+  predicted <- NNS.ARMA(regressed_training, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   
   nns.regress <- FALSE
   
   if(objective == "min"){
     if(eval(obj.fn) < nns.SSE){
-      variable <- regressed_variable
       nns.regress <- TRUE
       final.predicted <- predicted
     }
@@ -481,7 +481,6 @@ NNS.ARMA.optim <- function(variable,
   
   if(objective == "max"){
     if(eval(obj.fn) > nns.SSE){
-      variable <- regressed_variable
       nns.regress <- TRUE
       final.predicted <- predicted
     }
@@ -494,14 +493,15 @@ NNS.ARMA.optim <- function(variable,
   
   
   # nns.regress was tested on the smoothed series with shrink = TRUE.
-  final.variable <- if(nns.regress) regressed_variable else OV
   if(nns.regress) nns.shrink <- TRUE
   
   if(is.null(h_oos)){
     if(is.null(h)) h <- h_eval
+    final.variable <- if(nns.regress) regressed_training else OV
     model.results <- NNS.ARMA(final.variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   } else {
     if(is.null(h)) h <- h_oos
+    final.variable <- if(nns.regress) NNS.reg(1:n, OV, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
     model.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
