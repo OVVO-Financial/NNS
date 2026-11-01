@@ -66,7 +66,9 @@ static double copula_signed(const std::vector<double>& xv,
     
     if (dx > 0.0 && dy > 0.0) d0_cupm += 1.0;
     if (dx <= 0.0 && dy <= 0.0) d0_clpm += 1.0;
-    if (!((dx < 0.0 && dy < 0.0) || (dx > 0.0 && dy > 0.0)))
+    // Discordant = neither co-lower (<= target) nor co-upper (> target), so
+    // the degree-0 counts partition the cell.
+    if (!((dx <= 0.0 && dy <= 0.0) || (dx > 0.0 && dy > 0.0)))
       dpm_d0_count += 1.0;
     
     if (dx >= 0.0 && dy >= 0.0) {
@@ -82,8 +84,12 @@ static double copula_signed(const std::vector<double>& xv,
   }
   
   double inv_n = 1.0 / static_cast<double>(n);
-  double d0_Co = (d0_cupm + d0_clpm) * inv_n;
-  if (d0_Co == 1.0 || d0_Co == 0.0) return 1.0;
+  // Compare counts, not count * (1/n): 49 * (1/49) != 1.
+  double d0_concordant = d0_cupm + d0_clpm;
+  double d0_Co = d0_concordant * inv_n;
+  // All concordant: perfect positive dependence; all discordant: negative.
+  if (d0_concordant == static_cast<double>(n)) return 1.0;
+  if (d0_concordant == 0.0) return -1.0;
   
   double c1_total = c1_cupm + c1_clpm + c1_dpm;
   double co_d1 = c1_total > 0.0 ? (c1_cupm + c1_clpm) / c1_total : 0.0;
@@ -127,7 +133,9 @@ static double copula_degree0_unsigned(const std::vector<double>& xv,
     double dy = yv[i] - ty;
     if (dx > 0.0 && dy > 0.0) d0_cupm += 1.0;
     if (dx <= 0.0 && dy <= 0.0) d0_clpm += 1.0;
-    if (!((dx < 0.0 && dy < 0.0) || (dx > 0.0 && dy > 0.0)))
+    // Discordant = neither co-lower (<= target) nor co-upper (> target), so
+    // the degree-0 counts partition the cell.
+    if (!((dx <= 0.0 && dy <= 0.0) || (dx > 0.0 && dy > 0.0)))
       dpm_d0_count += 1.0;
   }
   

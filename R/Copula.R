@@ -77,7 +77,9 @@ NNS.copula <- function (
   discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
   utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
   discrete_Co_pm <- sum(discrete_pm_cov$cupm[utr]) + sum(discrete_pm_cov$clpm[utr]) 
-  if(discrete_Co_pm==1 || discrete_Co_pm==0) return(1)
+  # Perfect dependence: every pair fully concordant (1) or fully discordant (0).
+  pair_Co_pm <- discrete_pm_cov$cupm[utr] + discrete_pm_cov$clpm[utr]
+  if(all(abs(pair_Co_pm - 1) < 1e-9 | abs(pair_Co_pm) < 1e-9)) return(1)
   
   
   if(continuous){
