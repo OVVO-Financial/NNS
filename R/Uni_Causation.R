@@ -1,120 +1,134 @@
-Uni.caus <- function(x, y, tau, plot = TRUE){
+# Directional causation (book ch14), redesigned for #68.
+#
+# For a lag tau >= 0 the two directions are evaluated on explicitly lagged
+# pairs:
+#   x -> y on (X_{t-tau}, Y_t),   y -> x on (Y_{t-tau}, X_t).
+# Each pair is mapped to the copula scale with per-column ranks (the degree-0
+# lower partial moment, the empirical CDF), so the statistic is invariant to
+# shifts, rescaling and any monotone transform of either variable. The lag
+# supplies the temporal asymmetry; at tau = 0 the asymmetry comes from the
+# directional measures themselves.
+#
+# Each direction gets a raw score in [0, 1],
+#   C~_{x -> y} = (P_{x -> y} + max(rho_{x -> y} - rho_{y -> x}, 0)) / 2,
+# where
+#   P_{x -> y}   share of Y_t's degree-1 deviation (L1 + U1 about its mean)
+#                resolved by conditioning on the position of X_{t-tau}
+#                (equal-frequency cells of the copula-scale cause), and
+#   rho_{x -> y} NNS.dep(X_{t-tau}, Y_t, asym = TRUE)$Dependence, the
+#                directional dependence of Y_t on X_{t-tau}, built from the
+#                lagged co-partial moments of the pair.
+# The index is
+#   C_{x -> y} = (C~_{x -> y} + k) / (C~_{x -> y} + C~_{y -> x} + 2k),
+#   C_{y -> x} = 1 - C_{x -> y},
+# with a neutral pseudo-count k = 1 / sqrt(n - tau), the order of the raw
+# scores' sampling variation, so weak or absent evidence stays near 0.5.
 
-  if(tau=="cs") tau <- 0
-  if(tau=="ts") tau <- 3
 
-  min.length <- min(length(x), length(y))
+# Copula scale: the degree-0 LPM of each observation against its own column.
+.nns_caus_u <- function(v) LPM.ratio(0, v, v)
 
-  x.vectors <- vector("list", tau + 1)
-  y.vectors <- vector("list", tau + 1)
 
-  ## Create tau vectors
-  if(tau > 0){
-    for (i in 0:tau){
-        start <- tau - i + 1
-        end <- min.length - i
-        x.vectors[[i + 1]] <- x[start : end]
-        y.vectors[[i + 1]] <- y[start : end]
-    }
-
-      x.vectors.tau <- do.call(cbind, x.vectors)
-      y.vectors.tau <- do.call(cbind, y.vectors)
-
-      ## Normalize x to x.tau
-      x.norm.tau <- unlist(NNS.norm(x.vectors.tau)[ , 1])
-
-      ## Normalize y to y.tau
-      y.norm.tau <- unlist(NNS.norm(y.vectors.tau)[ , 1])
-
-  } else {
-      x.norm.tau <- x
-      y.norm.tau <- y
+# Share of the effect's degree-1 deviation resolved by the cause's position.
+# Both inputs are on the copula scale and have the same length.
+.nns_caus_P <- function(cause_u, effect_u) {
+  n <- length(cause_u)
+  if (n < 3L) return(0)
+  k <- max(2L, as.integer(floor(sqrt(n))))
+  cell <- pmax(1L, as.integer(ceiling(cause_u * k)))
+  # Degree-1 deviation about the mean, L1 + U1, with a small-sample factor so
+  # independence scores near 0 instead of a positive bias of order 1 / m.
+  dev <- function(v) {
+    m <- length(v)
+    if (m < 2L) return(NA_real_)
+    mu <- mean(v)
+    (LPM(1, mu, v) + UPM(1, mu, v)) * sqrt(m / (m - 1))
   }
-
-
-
-  ## Normalize x.norm.tau to y.norm.tau
-  x.tau.y.tau <- NNS.norm(cbind(x.norm.tau, y.norm.tau))
-  x.norm.to.y <- as.vector(unlist(x.tau.y.tau[ , 1]))
-  y.norm.to.x <- as.vector(unlist(x.tau.y.tau[ , 2]))
-
-
-  ## Conditional Probability from Normalized Variables P(x.norm.to.y | y.norm.to.x)
-  P.x.given.y <- 1 - (LPM.ratio(1, min(y.norm.to.x), x.norm.to.y) + UPM.ratio(1, max(y.norm.to.x), x.norm.to.y))
-
-
-  ## Correlation of Normalized Variables
-  dep.mtx <- NNS.dep(cbind(y.norm.to.x, x.norm.to.y), asym = TRUE)$Dependence
-  rho.x.y <- dep.mtx[1, 2]
-  rho.y.x <- dep.mtx[2, 1]
-
-  Causation.x.given.y <- mean(c(P.x.given.y * rho.x.y, max(0, (rho.x.y - rho.y.x))))
-
-
-  if(plot){
-      original.par <- par(no.readonly = TRUE)
-      par(mfrow = c(3, 1))
-
-      ## Raw Variable Plot
-      ymin <- min(c(min(x), min(y)))
-      ymax <- max(c(max(x), max(y)))
-      par(mar = c(2, 4, 0, 1))
-      plot(y,type = 'l', ylim = c(ymin, ymax), ylab = 'STANDARDIZED', col = 'red', lwd = 3)
-      lines(x, col = 'steelblue',lwd = 3)
-      legend('top', c("X", "Y"), lty = 1,lwd = c(3, 3),
-           col = c('steelblue', 'red'), ncol = 2)
-
-      ## Time Normalized Variables Plot
-      ymin <- min(c(min(x.norm.tau), min(y.norm.tau)))
-      ymax <- max(c(max(x.norm.tau), max(y.norm.tau)))
-      par(mar = c(2, 4, 0, 1))
-      plot(y.norm.tau, type = 'l', ylim = c(ymin, ymax), ylab = 'TIME NORMALIZED', col = 'red', lwd = 3)
-      lines(x.norm.tau, col = 'steelblue', lwd = 3)
-      legend('top', c("X", "Y"), lty = 1, lwd = c(3, 3),
-           col = c('steelblue', 'red'), ncol = 2)
-
-      ## Time Normalized Variables Normalized to each other Plot
-      ymin <- min(c(min(x.norm.to.y), min(y.norm.to.x)))
-      ymax <- max(c(max(x.norm.to.y), max(y.norm.to.x)))
-      par(mar = c(2, 4, 0, 1))
-      plot(y.norm.to.x, type = 'l', ylim = c(ymin, ymax), ylab = 'X & Y NORMALIZED', col='red', lwd = 3)
-      lines(x.norm.to.y, col = 'steelblue', lwd = 3)
-      legend('top',c("X","Y"), lty = 1,lwd=c(3,3),
-           col = c('steelblue', 'red'), ncol = 2)
-
-      par(original.par)
-  }
-
-  return(Causation.x.given.y)
-
+  total <- dev(effect_u)
+  if (!is.finite(total) || total <= 0) return(0)
+  parts <- split(effect_u, cell)
+  w <- vapply(parts, length, integer(1L))
+  d <- vapply(parts, dev, numeric(1L))
+  ok <- is.finite(d)
+  if (!any(ok)) return(0)
+  within <- sum(w[ok] * d[ok]) / sum(w[ok])
+  min(1, max(0, 1 - within / total))
 }
 
 
+# Raw scores for both directions at lag tau.
+.nns_caus_raw <- function(x, y, tau) {
+  n <- length(x)
+  lead <- (tau + 1L):n
+  lag <- 1L:(n - tau)
+  x_lag <- .nns_caus_u(x[lag]);  y_lead <- .nns_caus_u(y[lead])   # (X_{t-tau}, Y_t)
+  y_lag <- .nns_caus_u(y[lag]);  x_lead <- .nns_caus_u(x[lead])   # (Y_{t-tau}, X_t)
 
-# Internal helper: extract canonical signed causation x -> y from cp.
+  P_xy <- .nns_caus_P(x_lag, y_lead)
+  P_yx <- .nns_caus_P(y_lag, x_lead)
+  dep <- function(a, b) {
+    z <- tryCatch(NNS.dep(a, b, asym = TRUE)$Dependence, error = function(e) 0)
+    if (is.finite(z)) z else 0
+  }
+  rho_xy <- dep(x_lag, y_lead)
+  rho_yx <- dep(y_lag, x_lead)
+
+  list(raw_xy = (P_xy + max(rho_xy - rho_yx, 0)) / 2,
+       raw_yx = (P_yx + max(rho_yx - rho_xy, 0)) / 2,
+       P = c(P_xy, P_yx), rho = c(rho_xy, rho_yx),
+       n_pairs = n - tau,
+       pairs = list(xy = cbind(x_lag, y_lead), yx = cbind(y_lag, x_lead)))
+}
+
+
+.nns_caus_index <- function(raw_xy, raw_yx, n_pairs) {
+  k <- 1 / sqrt(n_pairs)
+  c_xy <- (raw_xy + k) / (raw_xy + raw_yx + 2 * k)
+  c("C(x--->y)" = c_xy, "C(y--->x)" = 1 - c_xy)
+}
+
+
+.nns_caus_tau <- function(tau) {
+  if (identical(tau, "cs")) return(0L)
+  if (identical(tau, "ts")) return(3L)
+  as.integer(tau)
+}
+
+
+# Raw directional causation of y on x: C~_{y -> x}. Uni.caus(response, X_j)
+# is the causal weight of X_j on the response in NNS.reg and NNS.stack
+# dimension reduction. tau = "ts" uses a lag of 3 there.
+Uni.caus <- function(x, y, tau, plot = FALSE){
+  tau <- .nns_caus_tau(tau)
+  n <- min(length(x), length(y))
+  if (tau >= n - 2L) tau <- max(0L, n - 3L)
+  r <- .nns_caus_raw(as.numeric(y[seq_len(n)]), as.numeric(x[seq_len(n)]), tau)
+  if (plot) .nns_caus_plot(r, tau, .nns_caus_index(r$raw_xy, r$raw_yx, r$n_pairs))
+  r$raw_xy
+}
+
+
+.nns_caus_plot <- function(r, tau, idx) {
+  original.par <- par(no.readonly = TRUE)
+  on.exit(par(original.par), add = TRUE)
+  par(mfrow = c(1, 2))
+  lab <- if (tau > 0) paste0("t-", tau) else "t"
+  plot(r$pairs$xy, pch = 16, cex = .5, col = "steelblue",
+       xlab = paste0("X(", lab, ") copula scale"), ylab = "Y(t) copula scale",
+       main = sprintf("x ---> y: C = %.3f", idx[[1]]))
+  plot(r$pairs$yx, pch = 16, cex = .5, col = "red",
+       xlab = paste0("Y(", lab, ") copula scale"), ylab = "X(t) copula scale",
+       main = sprintf("y ---> x: C = %.3f", idx[[2]]))
+}
+
+
+# Internal helper: signed causation x -> y from cp, in [-1, 1].
 signed_from_cp <- function(cp){
-  # The third element is the log-ratio toward the stronger causation; orient it
-  # as x -> y, as NNS.caus.matrix does, and cap infinities.
-  raw_val <- as.numeric(cp[3])
-  if(identical(names(cp)[3], "C(y--->x)")) raw_val <- -raw_val
-  if(is.infinite(raw_val)) raw_val <- sign(raw_val) * 100
-  return(raw_val)
-}
-
-# helper: cap infinite values at 100 (preserves sign) 
-cap_inf100_scalar <- function(v, cap = 100){  
-  v2 <- v
-  v2[is.infinite(v2)] <- sign(v2[is.infinite(v2)]) * cap
-  v2 <- ifelse(abs(v2) > cap, sign(v2) * cap, v2)
-  return(v2)
-
+  as.numeric(cp[["C(x--->y)"]] - cp[["C(y--->x)"]])
 }
 
 
-
-
-# log-ratio logic now consolidated in core; helper removed.
-# Core causation computation (no permutation logic) extracted from original implementation.
+# Core causation computation (no permutation logic).
 NNS.caus_core <- function(x, y = NULL,
                           factor.2.dummy = FALSE,
                           tau = 0,
@@ -126,14 +140,14 @@ NNS.caus_core <- function(x, y = NULL,
                           conf.int = 0.95){
   if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
   if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
-  
+
   orig.tau <- tau
   orig.plot <- plot
-  
+
   if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
   if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
-  
+
   if(factor.2.dummy){
     if(!is.null(dim(x))){
       if(!is.numeric(x)){
@@ -154,80 +168,49 @@ NNS.caus_core <- function(x, y = NULL,
       }
     }
   }
-  
-  if(!is.null(y)){
-    if(is.factor(y)) y <- as.numeric(y)
-    
-    # ---- input validation ---------------------------------------------------
-    if(NCOL(x) > 1 || NCOL(y) > 1)
-      stop("x and y must each be a single variable (factor.2.dummy = TRUE turns a factor with k levels into k - 1 columns).")
-    if(length(x) != length(y)) stop("x and y must have the same length.")
-    if(any(is.infinite(x)) || any(is.infinite(y))) stop("x and y must be finite.")
-    if(length(unique(x)) < 2 || length(unique(y)) < 2)
-      stop("x and y must not be constant: causation is undefined for a variable with no variation.")
-    if(!(identical(tau, "cs") || identical(tau, "ts"))){
-      if(!is.numeric(tau) || length(tau) != 1 || !is.finite(tau) || tau < 0 ||
-         tau != round(tau) || tau >= length(x) - 2)
-        stop("tau must be \"cs\", \"ts\" or a single non-negative integer smaller than length(x) - 2.")
-    }
-    
-    if(is.numeric(tau)){
-      Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
-      Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
-      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-    }
-    
-    if(identical(tau, "cs")){
-      Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
-      Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
-      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-    }
-    
-    if(identical(tau, "ts")){
-      l <- length(x)
-      x_tau <- NNS.seas(x, plot = FALSE)$periods
-      y_tau <- NNS.seas(y, plot = FALSE)$periods
-      
-      x_tau <- x_tau[x_tau <= (l)^(1/2)][1]
-      y_tau <- y_tau[y_tau <= (l)^(1/2)][1]
-      if(is.na(x_tau) || is.na(y_tau))
-        stop(paste0("tau = \"ts\": NNS.seas found no seasonal period <= sqrt(length(x)) for ",
-                    if(is.na(x_tau)) "x" else "y", "; supply a numeric tau instead."))
-      
-      Causation.y.given.x <- Uni.caus(y, x, tau = x_tau, plot = FALSE)
-      Causation.x.given.y <- Uni.caus(x, y, tau = y_tau, plot = FALSE)
-      Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-      Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-    }
-    
-    # Choose plotting direction for diagnostics (basing on which direction is stronger) and correct direction naming according to updated semantics:
-    # If Causation.y.given.x >= Causation.x.given.y then x causes y is stronger (so label C(x--->y)).
-    if(abs(Causation.y.given.x) >= abs(Causation.x.given.y)){
-      if(plot){
-        if(identical(tau, "cs")) tau_plot <- 0 else if(identical(tau, "ts")) tau_plot <- mean(c(x_tau, y_tau)) else tau_plot <- tau
-        Uni.caus(y, x, tau = tau_plot, plot = plot)
-      }
-      eps <- .Machine$double.eps
-      net_log_ratio <- sign(Causation.y.given.x) * log((abs(Causation.y.given.x) + eps)/(abs(Causation.x.given.y) + eps))
-      cp <- c(Causation.x.given.y = Causation.x.given.y,
-              Causation.y.given.x = Causation.y.given.x,
-              "C(x--->y)" = net_log_ratio)
-    } else {
-      if(plot){
-        if(identical(tau, "cs")) tau_plot <- 0 else if(identical(tau, "ts")) tau_plot <- mean(c(x_tau, y_tau)) else tau_plot <- tau
-        Uni.caus(x, y, tau = tau_plot, plot = plot)
-      }
-      eps <- .Machine$double.eps
-      net_log_ratio <- sign(Causation.x.given.y) * log((abs(Causation.x.given.y) + eps)/(abs(Causation.y.given.x) + eps))
-      cp <- c(Causation.x.given.y = Causation.x.given.y,
-              Causation.y.given.x = Causation.y.given.x,
-              "C(y--->x)" = net_log_ratio)
-    }
-    cp[3] <- cap_inf100_scalar(cp[3])
-    return(cp)
-  } else {
-    return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot, p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed))  
+
+  if(is.null(y)) {
+    return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot,
+                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed))
   }
+
+  if(is.factor(y)) y <- as.numeric(y)
+
+  # ---- input validation ---------------------------------------------------
+  if(NCOL(x) > 1 || NCOL(y) > 1)
+    stop("x and y must each be a single variable (factor.2.dummy = TRUE turns a factor with k levels into k - 1 columns).")
+  if(length(x) != length(y)) stop("x and y must have the same length.")
+  if(any(is.infinite(x)) || any(is.infinite(y))) stop("x and y must be finite.")
+  if(length(unique(x)) < 2 || length(unique(y)) < 2)
+    stop("x and y must not be constant: causation is undefined for a variable with no variation.")
+  if(!(identical(tau, "cs") || identical(tau, "ts"))){
+    if(!is.numeric(tau) || length(tau) != 1 || !is.finite(tau) || tau < 0 ||
+       tau != round(tau) || tau >= length(x) - 2)
+      stop("tau must be \"cs\", \"ts\" or a single non-negative integer smaller than length(x) - 2.")
+  }
+
+  x <- as.numeric(x); y <- as.numeric(y)
+
+  if(identical(tau, "cs")) {
+    tau_use <- 0L
+  } else if(identical(tau, "ts")) {
+    # One lag for both directions, so the two raw scores are comparable: the
+    # mean of the first NNS.seas period <= sqrt(n) of each series.
+    l <- length(x)
+    x_tau <- NNS.seas(x, plot = FALSE)$periods
+    y_tau <- NNS.seas(y, plot = FALSE)$periods
+    x_tau <- x_tau[x_tau <= (l)^(1/2)][1]
+    y_tau <- y_tau[y_tau <= (l)^(1/2)][1]
+    if(is.na(x_tau) || is.na(y_tau))
+      stop(paste0("tau = \"ts\": NNS.seas found no seasonal period <= sqrt(length(x)) for ",
+                  if(is.na(x_tau)) "x" else "y", "; supply a numeric tau instead."))
+    tau_use <- min(as.integer(round(mean(c(x_tau, y_tau)))), l - 3L)
+  } else {
+    tau_use <- as.integer(tau)
+  }
+
+  r <- .nns_caus_raw(x, y, tau_use)
+  cp <- .nns_caus_index(r$raw_xy, r$raw_yx, r$n_pairs)
+  if(plot) .nns_caus_plot(r, tau_use, cp)
+  cp
 }

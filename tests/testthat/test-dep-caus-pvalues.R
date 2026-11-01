@@ -2,9 +2,10 @@ test_that("NNS.caus p.value statistic is oriented x -> y", {
   set.seed(1); x <- rnorm(100); y <- x^2 + rnorm(100, sd = 0.1)
   xy <- NNS.caus(x, y, p.value = TRUE, nperm = 10, seed = 2)
   yx <- NNS.caus(y, x, p.value = TRUE, nperm = 10, seed = 2)
-  expect_identical(names(yx$causation)[3], "C(y--->x)")
-  expect_equal(xy$p.value$observed_signed, 1.0631958, tolerance = 1e-6)
-  expect_equal(yx$p.value$observed_signed, -1.0631958, tolerance = 1e-6)
+  expect_identical(names(yx$causation), c("C(x--->y)", "C(y--->x)"))
+  # The statistic is C(x--->y) - C(y--->x): y = x^2 is driven by x.
+  expect_gt(xy$p.value$observed_signed, 0.5)
+  expect_equal(yx$p.value$observed_signed, -xy$p.value$observed_signed)
 })
 
 test_that("NNS.dep p.value without print.map opens no graphics device", {
@@ -62,7 +63,7 @@ test_that("NNS.caus keeps a factor in a single-column data frame", {
   f <- factor(rep(c("a", "b"), 30))
   y <- as.double(1:60)^2
   v <- NNS.caus(f, y, factor.2.dummy = TRUE)
-  expect_equal(v[["C(y--->x)"]], 6.9250219, tolerance = 1e-6)
+  expect_equal(unname(v[["C(x--->y)"]] + v[["C(y--->x)"]]), 1)
   expect_equal(NNS.caus(data.frame(f), y, factor.2.dummy = TRUE), v)
 })
 
@@ -71,7 +72,7 @@ test_that("NNS.caus rejects multi-column x or y when y is supplied", {
   expect_error(NNS.caus(data.frame(x, x), y), "single variable")
   expect_error(NNS.caus(x, cbind(y, y)), "single variable")
   expect_error(NNS.caus(factor(rep(1:3, 20)), y, factor.2.dummy = TRUE), "single variable")
-  expect_length(NNS.caus(factor(rep(1:2, 30)), y, factor.2.dummy = TRUE), 3)
+  expect_length(NNS.caus(factor(rep(1:2, 30)), y, factor.2.dummy = TRUE), 2)
 })
 
 test_that("NNS.caus rejects unequal lengths", {
@@ -101,7 +102,7 @@ test_that("NNS.caus rejects tau that is not \"cs\", \"ts\" or a non-negative int
 
 test_that("NNS.caus rejects tau that leaves fewer than three lagged rows", {
   set.seed(1); x <- rnorm(20); y <- rnorm(20)
-  expect_length(NNS.caus(x, y, tau = 17), 3)
+  expect_length(NNS.caus(x, y, tau = 17), 2)
   expect_error(NNS.caus(x, y, tau = 18), "tau must be")
   expect_error(NNS.caus(c(1, 3), c(2, 1)), "tau must be")
 })
@@ -115,5 +116,5 @@ test_that("NNS.caus tau = \"ts\" stops when no seasonal period qualifies", {
   s <- ar1(21)
   expect_error(NNS.caus(s$a, s$b, tau = "ts"), "no seasonal period")
   s <- ar1(6)
-  expect_length(NNS.caus(s$a, s$b, tau = "ts"), 3)
+  expect_length(NNS.caus(s$a, s$b, tau = "ts"), 2)
 })

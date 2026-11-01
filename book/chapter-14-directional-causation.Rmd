@@ -16,9 +16,9 @@ Two variables may move together because
 
 Identifying the direction and strength of causal influence requires more than a symmetric dependence measure. It requires a framework that can detect **which variable is doing the driving**.
 
-Classical approaches to this problem rely on **Granger causality**, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: causal structure is inferred from **nonlinear probability relationships between variables after removing each variable's internal dynamics**, without imposing a parametric model.
+Classical approaches to this problem rely on **Granger causality**, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: causal structure is inferred from **nonlinear probability relationships between a lagged cause and its effect, compared in both directions**, without imposing a parametric model.
 
-This chapter develops the **directional causation framework** in three stages: removing internal dynamics through nonlinear lag normalization, placing residual signals on a shared scale through joint rangespace normalization, and measuring causal influence through partial-moment-based conditional probability and asymmetric directional dependence.
+This chapter develops the **directional causation framework** in three stages: forming explicitly lagged pairs and placing them on the copula scale, measuring how strongly the lagged cause constrains the effect through partial-moment conditional probability and asymmetric directional dependence, and comparing the two directions in a single normalized index.
 
 ---
 
@@ -39,7 +39,7 @@ Y_t =
 
 If the coefficients \(b_i\) are jointly significant, \(X\) is said to Granger-cause \(Y\).
 
-Granger causality captures a genuine and important insight: the causal role of \(X\) in \(Y\) should only be assessed after conditioning on \(Y\)'s own past. The directional framework retains this principle. What changes is how that conditioning is implemented — through nonlinear normalization rather than linear regression — and what the causal evidence consists of — conditional probability and asymmetric dependence rather than regression coefficients.
+Granger causality captures a genuine and important insight: the causal role of \(X\) in \(Y\) should only be assessed after conditioning on \(Y\)'s own past. The directional framework retains this principle. What changes is how the comparison is implemented — through lagged pairs evaluated in both directions on the copula scale rather than a linear regression on own lags — and what the causal evidence consists of — conditional probability and asymmetric dependence rather than regression coefficients.
 
 The parametric Granger approach carries four limitations that are familiar from earlier chapters.
 
@@ -65,7 +65,9 @@ Before developing the method, it is useful to state what a causation measure sho
 
 **Axiom 3 — Directionality proportionality.** Causal strength should scale with the degree of functional asymmetry between the two variables. When \(X\) strongly determines \(Y\) but \(Y\) only weakly constrains \(X\), the statistic should reflect this imbalance clearly and in a stable, interpretable way.
 
-These axioms motivate a measure built from two components: a **conditional probability** that captures whether movements in one variable constrain the range of the other, and an **asymmetric dependence** measure that captures whether those movements are directionally aligned. Neither component alone satisfies all three axioms; together they do.
+These axioms motivate a measure built from two components: a **conditional probability** that captures how strongly the position of one variable constrains the distribution of the other, and an **asymmetric dependence** measure that captures whether that constraint is stronger in one direction than the other. Neither component alone satisfies all three axioms; together they do.
+
+One qualification applies to Axiom 2. When \(f\) is invertible, \(X = f^{-1}(Y)\) is just as much a function of \(Y\), so contemporaneous data register influence equally in both directions and the net index is neutral. Time order, through a lag \(\tau > 0\), is what identifies the direction in that case. A non-invertible \(f\), such as \(Y = X^2\), is directional even without a lag.
 
 ---
 
@@ -107,125 +109,93 @@ Like their contemporaneous counterparts from Chapter 10, lagged co-partial momen
 
 These estimators converge to their population values by the law of large numbers.
 
-The causation statistic developed below operationalizes this lagged structure: first removing the self-driven component of each variable, then measuring the residual cross-variable co-movement through conditional probability and asymmetric dependence.
+The causation statistic developed below operationalizes this lagged structure directly: it evaluates each direction on its own lagged pairs, places them on the copula scale, and compares the two directions.
 
 ---
 
-## Removing Internal Dynamics
+## Lagged Pairs on the Copula Scale
 
-The first computational step separates each variable's **internal temporal dynamics** from its interaction with the other variable.
-
-This is the nonparametric analogue of pre-whitening in classical time-series analysis. In the Granger framework, pre-whitening is accomplished by including the variable's own lags in the regression. In the directional framework, it is accomplished through **nonlinear lag normalization**.
-
-Let \(\tau\) denote the lag order. Form the lag matrix for \(X\):
+Let \(\tau \ge 0\) denote the lag. The two candidate directions are evaluated on two different sets of pairs:
 
 \[
-\mathbf{X}_\tau = \bigl[X_t,\; X_{t-1},\; \dots,\; X_{t-\tau}\bigr]
+X \to Y:\quad \bigl(X_{t-\tau},\; Y_t\bigr), \qquad
+Y \to X:\quad \bigl(Y_{t-\tau},\; X_t\bigr), \qquad t = \tau+1, \dots, n .
 \]
 
-and analogously \(\mathbf{Y}_\tau\) for \(Y\). Apply joint normalization within each lag matrix:
+Each direction pairs the earlier value of the candidate cause with the later value of the candidate effect, exactly as in the lagged co-partial moments above. When \(\tau = 0\) both sets are the contemporaneous pairs, which corresponds to the cross-sectional case where temporal ordering carries no information. The lag may be specified directly, or set to \(\tau = \texttt{"ts"}\), which uses one lag for both directions: the mean of the first seasonal period of each series detected by \(\texttt{NNS.seas}\), restricted to at most \(\sqrt{n}\).
+
+Within each set of pairs, both variables are mapped to the copula scale through their own empirical CDFs, the degree-zero lower partial moment from Chapter 3:
 
 \[
-X_t^{*} = \texttt{NNS.norm}(\mathbf{X}_\tau)[\,\cdot\,,1]
-\qquad
-Y_t^{*} = \texttt{NNS.norm}(\mathbf{Y}_\tau)[\,\cdot\,,1]
+U = L_0(X; X) = P(X' \le X) \in (0, 1].
 \]
 
-where \(\texttt{NNS.norm}(\cdot)\) implements the empirical CDF transformation — mapping each observation to its relative rank position within the column — a direct application of the degree-zero partial moment \(L_0(t;X) = P(X \le t)\) from Chapter 3. The first column of each normalized matrix gives the representation of the current observation relative to its own lag structure.
+Chapter 10 showed that this probability integral transform defines copula space. Working on ranks makes the statistic invariant to shifts, rescaling and any monotone transformation of either variable: adding a constant to \(Y\), changing its units, or replacing it by \(\log Y\) leaves every quantity below unchanged.
 
-This normalization step has a direct partial-moment interpretation. Mapping each observation through the empirical CDF of its lagged neighborhood positions it on the uniform \([0,1]\) scale relative to its own history. The resulting \(X_t^{*}\) represents the **relative standing of the current observation within its own temporal context** — precisely the information that a Granger regression extracts through linear projection, but without imposing a linear model.
-
-Any remaining association between \(X_t^{*}\) and \(Y_t^{*}\) therefore reflects cross-variable interaction rather than self-dependence.
-
-When \(\tau = 0\), the lag-normalization step is skipped and the raw variables are passed directly to the joint normalization step. This corresponds to the cross-sectional case where temporal ordering carries no information. The lag order \(\tau\) may be specified directly, or set to \(\tau = \texttt{"ts"}\) for automatic selection via the detected seasonality of each series using \(\texttt{NNS.seas}\).
-
----
-
-## Joint Rangespace Normalization
-
-Once internal dynamics have been removed, the lag-adjusted variables \(X_t^{*}\) and \(Y_t^{*}\) must be placed on a **common scale** before their interaction can be meaningfully measured.
-
-Because the two series may differ in scale, units, and distributional shape, direct comparison of the lag-normalized values can be misleading. The solution draws on the same degree-zero partial moment used in the previous step. From Chapter 3, the degree-zero lower partial moment equals the empirical CDF:
-
-\[
-L_0(t; X) = P(X \le t).
-\]
-
-Mapping both variables jointly through their empirical CDFs places them on a shared \([0,1]\) scale while preserving their relative positions within the joint distribution. Chapter 10 showed that this is precisely the probability integral transform that defines copula space.
-
-The directional framework applies this idea jointly to the lag-adjusted variables:
-
-\[
-\bigl[X_t^{**},\; Y_t^{**}\bigr]
-=
-\texttt{NNS.norm}\!\bigl(\bigl[X_t^{*},\; Y_t^{*}\bigr]\bigr).
-\]
-
-The resulting \(X_t^{**}\) and \(Y_t^{**}\) are copula-like transforms of the lag-adjusted series. Their degree-zero partial moments are approximately uniformly distributed on \([0,1]\), connecting to the copula interpretation of Chapter 10. All subsequent probability and dependence calculations are therefore performed on variables that are simultaneously free of internal dynamics and free of scale differences.
+Two features of the construction do the work that internal-dynamics removal was meant to do. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: \((X_{t-\tau}, Y_t)\) and \((Y_{t-\tau}, X_t)\) are different pairs. Second, the comparison is always bidirectional. A shared driver or common persistence that links the two series symmetrically raises the evidence for both directions equally and cancels in the normalized index developed below.
 
 ---
 
 ## Conditional Probability via Partial Moments
 
-With both variables on a shared rangespace, the conditional probability that movements in \(X\) constrain the distribution of \(Y\) can now be measured directly using partial moments.
+With each direction's pairs on the copula scale, the conditional probability that the position of the cause constrains the distribution of the effect can be measured directly with partial moments.
 
-The **partial-moment conditional probability** is defined as the fraction of \(X^{**}\)'s mass that falls within the observed support of \(Y^{**}\):
+For the \(X \to Y\) pairs, write \(U_X\) for the copula-scale values of \(X_{t-\tau}\) and \(U_Y\) for those of \(Y_t\). The unconditional degree-one deviation of the effect about its mean \(\mu_Y\) is
 
 \[
-P(X^{**} \mid Y^{**})
+D(U_Y) = L_1(\mu_Y; U_Y) + U_1(\mu_Y; U_Y),
+\]
+
+the lower plus upper partial moment of degree one. Partition the cause into \(k = \lfloor\sqrt{n-\tau}\rfloor\) equal-frequency cells \(c\) on its copula scale, and measure the same deviation of the effect within each cell, about the cell's own mean \(\mu_{Y \mid c}\):
+
+\[
+D_c(U_Y) = L_1(\mu_{Y \mid c}; U_Y \mid c) + U_1(\mu_{Y \mid c}; U_Y \mid c).
+\]
+
+The **partial-moment conditional probability** is the share of the effect's deviation that knowing the cause's cell resolves:
+
+\[
+P(X \to Y)
 =
 1
 -
-\Bigl[
-L_1\!\bigl(\min(Y^{**});\; X^{**}\bigr)_{\text{ratio}}
-+
-U_1\!\bigl(\max(Y^{**});\; X^{**}\bigr)_{\text{ratio}}
-\Bigr]
+\frac{\sum_c w_c\, D_c(U_Y)}{D(U_Y)},
+\qquad w_c = \frac{n_c}{n-\tau},
 \]
 
-where the degree-one ratio forms are
+bounded to \([0, 1]\). Each deviation carries the small-sample factor \(\sqrt{m/(m-1)}\) for its \(m\) points, so that independent variables score near zero rather than at a positive bias of order \(1/m\).
 
-\[
-L_r(t; X)_{\text{ratio}}
-=
-\frac{L_r(t; X)}{L_r(t; X) + U_r(t; X)},
-\qquad
-U_r(t; X)_{\text{ratio}}
-=
-\frac{U_r(t; X)}{L_r(t; X) + U_r(t; X)}.
-\]
+The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause's position pins the effect down. It is not symmetric: \(P(X \to Y) \ne P(Y \to X)\) in general. For \(Y = X^2\), knowing \(X\) fixes \(Y\), while knowing \(Y\) leaves \(X\) split between \(\pm\sqrt{Y}\), so \(P(X \to Y)\) is close to one and \(P(Y \to X)\) close to zero. It requires no kernel bandwidth, no distributional assumption, and no parametric model.
 
-When \(L_r(t;X) + U_r(t;X) = 0\), indicating no mass on either side of \(t\), both ratios are defined as zero.
-
-The first subtracted term, \(L_1(\min(Y^{**}); X^{**})_{\text{ratio}}\), measures the proportion of \(X^{**}\) mass lying **below the lower bound** of \(Y^{**}\)'s support. The second, \(U_1(\max(Y^{**}); X^{**})_{\text{ratio}}\), measures the proportion lying **above the upper bound**. Subtracting both tails from one yields the probability that a randomly drawn value of \(X^{**}\) falls within the range occupied by \(Y^{**}\) — a measure of **distributional co-occupancy** grounded entirely in the partial-moment calculus developed in Chapters 2–4.
-
-This measure is not symmetric: \(P(X^{**} \mid Y^{**}) \neq P(Y^{**} \mid X^{**})\) in general, because the support ranges of \(X^{**}\) and \(Y^{**}\) after joint normalization need not be identical. It requires no kernel bandwidth, no distributional assumption, and no parametric model.
+Because both variables are on the copula scale, this conditional probability is informative where a comparison of supports would not be: after rank normalization both supports are the same interval, so the share of one variable's mass inside the other's range would be one in both directions.
 
 ---
 
 ## Asymmetric Directional Dependence
 
-Conditional probability alone does not establish the **direction** of co-movement. Two variables may overlap substantially in range while moving in opposite directions, or one may respond to the other only in extreme regions.
+Conditional probability measures how strongly the cause constrains the effect, but not whether that constraint is stronger in one direction than the other once the dependence structure is taken into account. Two variables may each constrain the other, or one may respond to the other only in extreme regions.
 
-To capture directional alignment, the framework uses the asymmetric dependence measures from Chapter 10. From the directional co-partial moment structure, the dependence of \(Y\) on \(X\) and the dependence of \(X\) on \(Y\) need not be equal after joint normalization:
+To capture directional alignment, the framework uses the asymmetric dependence measures from Chapter 10 on each direction's lagged copula pairs:
 
 \[
-\rho_{X^{**} \to Y^{**}} \neq \rho_{Y^{**} \to X^{**}}.
+\rho_{X \to Y} = \texttt{NNS.dep}\bigl(U_{X_{t-\tau}},\, U_{Y_t},\, \texttt{asym} = \texttt{TRUE}\bigr),
+\qquad
+\rho_{Y \to X} = \texttt{NNS.dep}\bigl(U_{Y_{t-\tau}},\, U_{X_t},\, \texttt{asym} = \texttt{TRUE}\bigr).
 \]
 
-These are computed from the asymmetric directional dependence matrix of the jointly normalized variables — exactly the structure developed in Chapter 10 — using \(\texttt{NNS.dep}(\cdot, \texttt{asym} = \texttt{TRUE})\).
+Each is built from the degree-zero and degree-one co-partial moments of its pair within the partition of the candidate cause, so it is the lagged co-partial moment structure of this chapter measured as a dependence.
 
-Implementation detail: `asym = TRUE` turns on asymmetric dependence, but **direction is determined by argument order**. In practice, `NNS.dep(x, y, asym = TRUE)` and `NNS.dep(y, x, asym = TRUE)` generally differ; the first quantifies directional dependence of `y` on `x`, while the second quantifies the reverse direction.
+Implementation detail: `asym = TRUE` turns on asymmetric dependence, but **direction is determined by argument order**. `NNS.dep(x, y, asym = TRUE)` partitions on `x` and measures the dependence of `y` on `x`; `NNS.dep(y, x, asym = TRUE)` measures the reverse.
 
 Define the **excess directional dependence** of \(Y\) on \(X\) as
 
 \[
-\Delta\rho = \rho_{X^{**} \to Y^{**}} - \rho_{Y^{**} \to X^{**}}.
+\Delta\rho = \rho_{X \to Y} - \rho_{Y \to X}.
 \]
 
-When \(\Delta\rho > 0\), movements in \(X\) are more closely tracked by \(Y\) than the reverse — a second and independent signature of causal flow from \(X\) to \(Y\) beyond what conditional overlap alone captures. When \(\Delta\rho \le 0\), this component contributes nothing to the \(X \to Y\) direction.
+When \(\Delta\rho > 0\), the lagged movements of \(X\) are more closely tracked by \(Y\) than the reverse — a second and independent signature of causal flow from \(X\) to \(Y\) beyond what the conditional probability alone captures. When \(\Delta\rho \le 0\), this component contributes nothing to the \(X \to Y\) direction.
 
-The use of asymmetric directional dependence here — rather than Pearson correlation — is a direct consequence of Chapter 10. Joint normalization places the variables in copula space, but copula-space variables still exhibit asymmetric tail co-movements that the Chapter 10 framework is designed to detect. Classical symmetric correlation would average away exactly the directional asymmetry that makes the causation statistic informative.
+The use of asymmetric directional dependence here — rather than Pearson correlation — is a direct consequence of Chapter 10. Copula-space variables still exhibit asymmetric tail co-movements that the Chapter 10 framework is designed to detect. Classical symmetric correlation would average away exactly the directional asymmetry that makes the causation statistic informative.
 
 ---
 
@@ -240,33 +210,35 @@ The **raw directional causation value** from \(X\) to \(Y\) is
 =
 \frac{1}{2}
 \Bigl[
-P(X^{**} \mid Y^{**})
+P(X \to Y)
 +
 \max\!\bigl(\Delta\rho, 0\bigr)
 \Bigr].
 \]
 
-The first term rewards directional overlap in support after lag and copula-style normalization. The second term adds only the positive directional asymmetry in dependence, so reverse-direction dominance is not allowed to inflate the \(X \to Y\) score.
+The first term rewards how strongly the lagged cause constrains the effect. The second term adds only the positive directional asymmetry in dependence, so reverse-direction dominance is not allowed to inflate the \(X \to Y\) score.
 
-By construction, \(\tilde{C}_{X \to Y}\in[0,1]\) in standard empirical settings: both components are bounded in \([0,1]\), and the outer factor \(1/2\) averages them.
+By construction, \(\tilde{C}_{X \to Y}\in[0,1]\): both components are bounded in \([0,1]\), and the outer factor \(1/2\) averages them.
 
 ---
 
 ## Bidirectional Normalization
 
-Directional causation should be interpreted comparatively, not in isolation. Define the reverse-direction raw score \(\tilde{C}_{Y \to X}\) by swapping \(X\) and \(Y\) in the same construction.
+Directional causation should be interpreted comparatively, not in isolation. Define the reverse-direction raw score \(\tilde{C}_{Y \to X}\) by swapping \(X\) and \(Y\) in the same construction, on the pairs \((Y_{t-\tau}, X_t)\).
 
 The final **directional causation index** from \(X\) to \(Y\) is then normalized as
 
 \[
 C_{X \to Y}
 =
-\frac{\tilde{C}_{X \to Y}}{\tilde{C}_{X \to Y}+\tilde{C}_{Y \to X}},
+\frac{\tilde{C}_{X \to Y} + \kappa}{\tilde{C}_{X \to Y}+\tilde{C}_{Y \to X} + 2\kappa},
 \qquad
-C_{Y \to X}=1-C_{X \to Y}.
+C_{Y \to X}=1-C_{X \to Y},
+\qquad
+\kappa = \frac{1}{\sqrt{n-\tau}}.
 \]
 
-When both raw scores are zero, neither direction shows measurable directional-causation signal and both normalized values are defined as zero.
+The neutral pseudo-count \(\kappa\) is of the order of the raw scores' sampling variation. Without it, two raw scores that are both close to zero — as they are for unrelated variables — would form a ratio dominated by noise and could land anywhere in \([0, 1]\). With it, weak or absent directional evidence stays near \(0.5\), while strong evidence is barely affected. It never changes which side of \(0.5\) the index falls on.
 
 Interpretation:
 
@@ -274,13 +246,15 @@ Interpretation:
 - \(C_{X \to Y} < 0.5\): stronger evidence for \(Y\) leading \(X\),
 - \(C_{X \to Y} \approx 0.5\): weak directional asymmetry.
 
+For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row \(i\) and column \(j\), so that \(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\) off the diagonal, and its diagonal is zero by Axiom 1. A permutation test of the signed statistic \(C_{X \to Y} - C_{Y \to X}\) provides p-values for either direction.
+
 ---
 
 ## Summary
 
-This chapter formalized directional causation as a three-stage construction: lag normalization to remove self-dynamics, joint rangespace normalization to align scales, and asymmetric directional scoring to detect net directional flow.
+This chapter formalized directional causation as a three-stage construction: explicitly lagged pairs on the copula scale, partial-moment conditional probability and asymmetric directional dependence for each direction, and a bidirectional index that detects net directional flow.
 
-The resulting statistic remains nonparametric, benchmark-relative, and distribution-aware, while avoiding linear-model restrictions of classical Granger-style tests.
+The resulting statistic is nonparametric and invariant to monotone transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests.
 
 For an applied macroeconomic example using `NNS.nowcast`, `NNS.caus`, noise benchmarks, and strength-of-inference summaries, see [Causal Inference Amongst Macroeconomic Variables Using NNS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html).
 
