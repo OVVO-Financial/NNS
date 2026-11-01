@@ -39,8 +39,6 @@ NNS.TSD <- function(x, y, plot = TRUE){
   LPM_x_sort <- LPM(2, Combined_sort, x)
   LPM_y_sort <- LPM(2, Combined_sort, y)
     
-  x.tsd.y <- any(LPM_x_sort > LPM_y_sort)
-  y.tsd.x <- any(LPM_y_sort > LPM_x_sort)
 
 
   if(plot){
@@ -51,9 +49,13 @@ NNS.TSD <- function(x, y, plot = TRUE){
     legend("topleft", c("X","Y"), lwd = 10, col=c("red","steelblue"))
   }
     
-  ifelse (!x.tsd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
+  # Verdict from the exact pairwise test (NNS.TSD.uni both ways), which also checks
+  # the interior maxima of the piecewise-quadratic LPM2; the grid curves are for the plot.
+  x.dom <- .Call(`_NNS_NNS_TSD_uni_cpp`, x, y) == 1L
+  y.dom <- .Call(`_NNS_NNS_TSD_uni_cpp`, y, x) == 1L
+  ifelse (x.dom,
           "X TSD Y",
-          ifelse (!y.tsd.x && min(y) >= min(x) && mean(y) >= mean(x) && !identical(LPM_x_sort, LPM_y_sort),
+          ifelse (y.dom,
                   "Y TSD X",
                   "NO TSD EXISTS"))
 

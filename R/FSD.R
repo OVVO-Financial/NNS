@@ -68,6 +68,16 @@ NNS.FSD <- function(x, y, type = "discrete", plot = TRUE){
   }
   
   ## Verification of ***0 instances*** of CDFx > CDFy, and conversely of CDFy > CDFx
+  if (type == "continuous") {
+    # The continuous ratio curves are linear-fractional between sample
+    # points, so their difference can peak between them: use the exact
+    # pairwise test (NNS.FSD.uni in both directions), which also checks the
+    # interior extrema.
+    x.dom <- .Call(`_NNS_NNS_FSD_uni_cpp`, x, y, "continuous") == 1L
+    y.dom <- .Call(`_NNS_NNS_FSD_uni_cpp`, y, x, "continuous") == 1L
+    return(ifelse(x.dom, "X FSD Y", ifelse(y.dom, "Y FSD X", "NO FSD EXISTS")))
+  }
+  
   ifelse (!x.fsd.y && min(x) >= min(y) && !identical(LPM_x_sort, LPM_y_sort),
           "X FSD Y",
           ifelse (!y.fsd.x && min(y) >= min(x) && !identical(LPM_x_sort, LPM_y_sort),
