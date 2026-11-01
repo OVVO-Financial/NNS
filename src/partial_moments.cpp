@@ -477,6 +477,7 @@ static const R_xlen_t NNS_DIRECT_PATH_MAX_TARGETS = 32;
 NumericVector LPM_CPv(const double &degree,
                       const NumericVector &target,
                       const NumericVector &variable) {
+  nns_check_degree(degree, "degree");
   if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
     NumericVector output(target.size());
     RcppParallel::RVector<double> v(variable);
@@ -495,6 +496,7 @@ NumericVector LPM_CPv(const double &degree,
 NumericVector UPM_CPv(const double &degree,
                       const NumericVector &target,
                       const NumericVector &variable) {
+  nns_check_degree(degree, "degree");
   if (target.size() <= NNS_DIRECT_PATH_MAX_TARGETS) {
     NumericVector output(target.size());
     RcppParallel::RVector<double> v(variable);
