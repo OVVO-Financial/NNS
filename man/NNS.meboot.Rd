@@ -56,7 +56,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 \item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.}
 
-\item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.}
+\item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.}
 
 \item{sym}{logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.}
 

@@ -16,7 +16,7 @@
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
 #' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.
 #' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.
-#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
+#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
 #' @param digits integer; 6 (default) number of digits to round output to.
@@ -246,6 +246,20 @@ NNS.meboot <- function(x,
   # ===== Variance expansion ON RESIDUALS (match sd to original residuals) =====
   res_mat <- NNS.meboot.expand.sd(x = orig_res, ensemble = res_mat, ...) 
   
+  # Optional ME-density scale adjustment on residuals, where the ME density lives
+  if (scl.adjustment){
+    zz <- c(xmin, z, xmax)
+    v  <- diff(zz^2) / 12
+    xb <- mean(orig_res)
+    s1 <- sum((desintxb - xb)^2)
+    uv <- (s1 + sum(v)) / n
+    desired.sd  <- sd(orig_res)
+    actualME.sd <- sqrt(uv)
+    if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
+    kappa <- (desired.sd / actualME.sd) - 1
+    res_mat <- res_mat + kappa * (res_mat - xb)
+  } else kappa <- NULL
+  
   # ===== Reconstruct levels: baseline + residuals =====
   # baseline has length n (= nrow); column-major recycling adds it down each
   # column, identical to sweep(MARGIN = 1) but without aperm/array copies.
@@ -263,20 +277,6 @@ NNS.meboot <- function(x,
   
   # Optional CLT enforcement
   if (force.clt && reps > 1) ensemble <- force.clt(x = x, ensemble = ensemble)
-  
-  # Optional ME-density scale adjustment (same as before)
-  if (scl.adjustment){
-    zz <- c(xmin, z, xmax)
-    v  <- diff(zz^2) / 12
-    xb <- mean(x)
-    s1 <- sum((desintxb - xb)^2)
-    uv <- (s1 + sum(v)) / n
-    desired.sd  <- sd(x)
-    actualME.sd <- sqrt(uv)
-    if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
-    kappa <- (desired.sd / actualME.sd) - 1
-    ensemble <- ensemble + kappa * (ensemble - xb)
-  } else kappa <- NULL
   
   # Enforce min / max if provided. pmax/pmin recycle the scalar bound across the
   # whole matrix elementwise, replacing the previous per-column apply(). Assign
