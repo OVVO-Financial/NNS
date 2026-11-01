@@ -25,10 +25,8 @@ struct ColPre {
   int m{0};
 };
 
-static ColPre precompute_col(const NumericMatrix& X, int j){
-  ColPre c; c.m = X.nrow();
-  c.vals.resize(c.m);
-  for(int i=0;i<c.m;++i) c.vals[i] = X(i,j);
+static void finish_col(ColPre& c){
+  if (c.m == 0) stop("Each sample needs at least one observation.");
   std::sort(c.vals.begin(), c.vals.end());
   c.P1.assign(c.m+1, 0.0);
   c.P2.assign(c.m+1, 0.0);
@@ -41,24 +39,20 @@ static ColPre precompute_col(const NumericMatrix& X, int j){
   c.S2   = c.P2[c.m];
   c.mn   = c.vals.front();
   c.mean = c.S1 / double(c.m);
+}
+
+static ColPre precompute_col(const NumericMatrix& X, int j){
+  ColPre c; c.m = X.nrow();
+  c.vals.resize(c.m);
+  for(int i=0;i<c.m;++i) c.vals[i] = X(i,j);
+  finish_col(c);
   return c;
 }
 
 static ColPre precompute_vec(const NumericVector& x){
   ColPre c; c.m = x.size();
   c.vals.assign(x.begin(), x.end());
-  std::sort(c.vals.begin(), c.vals.end());
-  c.P1.assign(c.m+1, 0.0);
-  c.P2.assign(c.m+1, 0.0);
-  for(int k=1;k<=c.m;++k){
-    double v = c.vals[k-1];
-    c.P1[k] = c.P1[k-1] + v;
-    c.P2[k] = c.P2[k-1] + v*v;
-  }
-  c.S1   = c.P1[c.m];
-  c.S2   = c.P2[c.m];
-  c.mn   = c.vals.front();
-  c.mean = c.S1 / double(c.m);
+  finish_col(c);
   return c;
 }
 
