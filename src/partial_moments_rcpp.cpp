@@ -47,7 +47,7 @@ static inline NumericVector fill_degenerate_ratio(NumericVector out,
                                                   const NumericVector &target,
                                                   const NumericVector &variable,
                                                   const bool lower) {
-  if (degree <= 0) return out;
+  if (!(degree > 0)) return out;
   for (R_xlen_t i = 0; i < out.size(); ++i) {
     if (ISNAN(out[i])) {
       NumericVector t = NumericVector::create(target[i]);
