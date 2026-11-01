@@ -25,7 +25,7 @@
 #'
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
-#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+#' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression; \code{NA} for a single predictor, whose univariate \link{NNS.reg} fit has no \code{n.best} to tune (use \code{cbind(x, x)} to search one).  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 #' \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
@@ -1189,7 +1189,10 @@ NNS.stack <- function(IVs.train,
     # diminishing-returns stop is then applied to the complete pooled OOF
     # objectives. This prevents fold-specific early stopping from giving larger
     # candidates partial or zero OOF coverage.
-    l <- max(1L, floor(sqrt(n_obs)))
+    # A single predictor's NNS.reg fit has no neighbour count to tune (it
+    # ignores n.best), so ALL, the deployed fit, is its only candidate.
+    univariate <- encoded_p == 1L
+    l <- if (univariate) 0L else max(1L, floor(sqrt(n_obs)))
     candidate_ids <- c(as.character(seq_len(l)), "all")
     
     sum_list <- setNames(vector("list", length(candidate_ids)), candidate_ids)
@@ -1222,52 +1225,14 @@ NNS.stack <- function(IVs.train,
       if (ncol(train_design) == 1L) {
         train_x <- as.numeric(train_design[[1L]])
         test_x <- as.numeric(valid_design[[1L]])
-        small_kmax <- min(l, length(train_x))
-        fold_small_kmax[b] <- small_kmax
         
         if (status) {
           message(sprintf(
-            paste0(
-              "Method 1 fold %d/%d: local candidates = 1...%d; ",
-              "limit candidate = ALL (%d observations)"
-            ),
-            b, length(splits), small_kmax, length(train_x)
+            "Method 1 fold %d/%d: univariate NNS.reg (%d observations)",
+            b, length(splits), length(train_x)
           ))
         }
         
-        pred_mat <- matrix(
-          NA_real_,
-          nrow = length(test_x),
-          ncol = small_kmax
-        )
-        
-        for (i in seq_along(test_x)) {
-          dists <- abs(train_x - test_x[i])
-          ord <- order(dists, method = "radix")
-          cumsum_y <- cumsum(train_y_fit[ord])
-          pred_mat[i, ] <-
-            cumsum_y[seq_len(small_kmax)] / seq_len(small_kmax)
-        }
-        
-        # Aggregate every available local candidate for this fold. No
-        # fold-specific early stopping is allowed because it creates
-        # incomparable OOF coverage across candidates.
-        for (k in seq_len(small_kmax)) {
-          id <- as.character(k)
-          raw <- pred_mat[, k] - response_offset
-          good <- is.finite(raw)
-          if (any(good)) {
-            rows <- valid_idx[good]
-            sum_list[[id]][rows] <-
-              sum_list[[id]][rows] + raw[good]
-            count_list[[id]][rows] <-
-              count_list[[id]][rows] + 1L
-          }
-        }
-        
-        # ALL is the separate full-support limit condition and is always
-        # evaluated, irrespective of the later local stopping point. Score the
-        # estimator deployed when ALL wins (the univariate NNS.reg fit).
         all_raw <- .fit_univariate_raw(train_x, train_y_fit, test_x)$raw
         good <- is.finite(all_raw)
         if (any(good)) {
@@ -1371,7 +1336,7 @@ NNS.stack <- function(IVs.train,
     }
     
     common_small_kmax <- min(fold_small_kmax)
-    if (!is.finite(common_small_kmax) || common_small_kmax < 1L) {
+    if (!univariate && (!is.finite(common_small_kmax) || common_small_kmax < 1L)) {
       stop(
         "No Method 1 local candidate was available in every fold.",
         call. = FALSE
@@ -1391,10 +1356,10 @@ NNS.stack <- function(IVs.train,
       candidate_ids
     )
     
-    # Candidate 1 is evaluated in every valid Method 1 fold. Its count vector
-    # defines the required complete OOF coverage pattern. A candidate may
-    # compete only when it has exactly the same coverage.
-    reference_count <- count_list[["1"]]
+    # The first candidate is evaluated in every valid Method 1 fold. Its count
+    # vector defines the required complete OOF coverage pattern. A candidate
+    # may compete only when it has exactly the same coverage.
+    reference_count <- count_list[[candidate_ids[1L]]]
     
     .score_method1_candidate <- function(id) {
       sum_vec <- sum_list[[id]]
@@ -1674,56 +1639,27 @@ NNS.stack <- function(IVs.train,
     }
     
     if (ncol(train_design) == 1L) {
-      # Univariate final fit
-      # Use NNS.reg with n.best = n.best
-      if (is.character(n.best) && n.best == "all") {
-        reg_final_fit <- suppressWarnings(
-          NNS.reg(
-            as.numeric(train_design[[1L]]),
-            as.numeric(train_y_fit),
-            point.est = as.numeric(test_design[[1L]]),
-            plot = FALSE,
-            residual.plot = FALSE,
-            order = order,
-            n.best = "all",
-            type = NULL,
-            factor.2.dummy = FALSE,
-            dist = dist,
-            ncores = ncores,
-            point.only = FALSE,
-            confidence.interval = pred.int
-          )
+      reg_final_fit <- suppressWarnings(
+        NNS.reg(
+          as.numeric(train_design[[1L]]),
+          as.numeric(train_y_fit),
+          point.est = as.numeric(test_design[[1L]]),
+          plot = FALSE,
+          residual.plot = FALSE,
+          order = order,
+          type = NULL,
+          factor.2.dummy = FALSE,
+          dist = dist,
+          ncores = ncores,
+          point.only = FALSE,
+          confidence.interval = pred.int
         )
-        reg_raw_final <- .sanitize_raw(
-          as.numeric(reg_final_fit$Point.est) - response_offset,
-          y
-        )
-        reg_pred_int_raw <- .translate_interval(reg_final_fit$pred.int)
-      } else {
-        # numeric n.best
-        reg_final_fit <- suppressWarnings(
-          NNS.reg(
-            as.numeric(train_design[[1L]]),
-            as.numeric(train_y_fit),
-            point.est = as.numeric(test_design[[1L]]),
-            plot = FALSE,
-            residual.plot = FALSE,
-            order = order,
-            n.best = n.best,
-            type = NULL,
-            factor.2.dummy = FALSE,
-            dist = dist,
-            ncores = ncores,
-            point.only = FALSE,
-            confidence.interval = pred.int
-          )
-        )
-        reg_raw_final <- .sanitize_raw(
-          as.numeric(reg_final_fit$Point.est) - response_offset,
-          y
-        )
-        reg_pred_int_raw <- .translate_interval(reg_final_fit$pred.int)
-      }
+      )
+      reg_raw_final <- .sanitize_raw(
+        as.numeric(reg_final_fit$Point.est) - response_offset,
+        y
+      )
+      reg_pred_int_raw <- .translate_interval(reg_final_fit$pred.int)
     } else {
       # Multivariate final fit
       if (is.character(n.best) && n.best == "all") {

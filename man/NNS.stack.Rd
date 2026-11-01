@@ -71,7 +71,7 @@ NNS.stack(
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
-\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
+\item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression; \code{NA} for a single predictor, whose univariate \link{NNS.reg} fit has no \code{n.best} to tune (use \code{cbind(x, x)} to search one).  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
