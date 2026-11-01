@@ -130,9 +130,9 @@ NNS.caus_core <- function(x, y = NULL,
   orig.tau <- tau
   orig.plot <- plot
   
-  if(is.data.frame(x) && ncol(x) == 1) x <- as.vector(unlist(x))
+  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
-  if(is.data.frame(y) && ncol(y) == 1) y <- as.vector(unlist(y))
+  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
   
   if(factor.2.dummy){
     if(!is.null(dim(x))){

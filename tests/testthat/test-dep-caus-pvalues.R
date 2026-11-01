@@ -56,6 +56,14 @@ test_that("NNS.caus treats single-column data frames like vectors", {
   expect_error(NNS.caus(data.frame(x = replace(x, 2, Inf)), y), "must be finite")
 })
 
+test_that("NNS.caus keeps a factor in a single-column data frame", {
+  f <- factor(rep(c("a", "b"), 30))
+  y <- as.double(1:60)^2
+  v <- NNS.caus(f, y, factor.2.dummy = TRUE)
+  expect_equal(v[["C(y--->x)"]], 6.9250219, tolerance = 1e-6)
+  expect_equal(NNS.caus(data.frame(f), y, factor.2.dummy = TRUE), v)
+})
+
 test_that("NNS.caus rejects multi-column x or y when y is supplied", {
   set.seed(1); x <- rnorm(60); y <- x^2 + rnorm(60, sd = 0.1)
   expect_error(NNS.caus(data.frame(x, x), y), "single variable")
