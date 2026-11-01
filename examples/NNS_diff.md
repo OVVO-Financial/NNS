@@ -10,7 +10,7 @@ The method works as follows:
 2. Compute the y-intercepts (`B₁` and `B₂`) of the two secant lines connecting those points.
 3. Treat the interval between the two intercepts as a bracket and iteratively bisect it.
 4. At each candidate midpoint `B`, solve via `uniroot` for the step size `h*` that would make the left-hand secant project exactly to that `B`.
-5. The sign of `h*` tells the algorithm which side of the bracket to shrink. The process repeats until either `|h*| < tol` or `max.iter` is reached.
+5. The sign of `h*` tells the algorithm which side of the bracket to shrink. The process repeats until `|h*| < tol`, the bracket on `B` has narrowed to within `tol * max(|point|, |f(point) - B|)`, or `max.iter` is reached.
 
 The final inferred `h*`, whether fully converged or stall-limited by noise, is then supplied to multiple downstream estimators. For **analytic, complex-compatible functions**, the strongest downstream output is the **Complex Step Derivative (Inferred h)**. For **non-analytic, piecewise, thresholded, saturated, quantized, or real-only black-box functions**, the core projected derivative itself, `DERIVATIVE`, becomes the most important output.
 
@@ -109,7 +109,7 @@ It treats the choice of `h` as the primary unknown and solves for it **geometric
 3. Bracket the interval `[min(B_1, B_2), max(B_1, B_2)]`.
 4. For a candidate midpoint `B`, solve $B = f(x) - \frac{f(x) - f(x-h^*)}{h^*} \cdot x$ for `h*` via `uniroot`.
 5. Use the sign of `h*` to decide which half of the bracket to discard.
-6. Repeat until either `|h*| < tol` or `max.iter` is reached.
+6. Repeat until `|h*| < tol`, the bracket on `B` has narrowed to within `tol * max(|point|, |f(point) - B|)`, or `max.iter` is reached.
 
 In clean analytic functions the search converges quickly to a tiny `h*`, often around $10^{-11}$. In noisy functions it naturally stalls at a **larger** `h*`, automatically moving away from the tiny steps that would amplify noise.
 

@@ -29,6 +29,9 @@
 #' @export
 
 dy.dx <- function(x, y, eval.point = NULL){
+  
+  if(is.null(eval.point) || length(eval.point) == 0)
+    stop("eval.point must be provided: numeric point(s) or 'overall'")
 
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
   if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
@@ -54,6 +57,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     n <- length(x)
     root_n <- floor(sqrt(n))
     h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
+    # Typical spacing between neighbouring x values, independent of row order.
+    x.spacing <- gravity(diff(sort(unique(x))))
 
     results <- vector(mode = "list", length(h_s))
     first.deriv <- vector(mode = "list", length(h_s))
@@ -64,7 +69,7 @@ dy.dx <- function(x, y, eval.point = NULL){
     for(h in h_s){
       index <- which(h == h_s)
 
-      h_step <- gravity(abs(diff(x))) * h_s[index]
+      h_step <- x.spacing * h_s[index]
 
       eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
       eval.point.max <- pmin(max(x), h_step + original.eval.point.max)
@@ -77,17 +82,8 @@ dy.dx <- function(x, y, eval.point = NULL){
     deriv.points <- deriv.points[order(deriv.points[, "eval.point"], method = "radix"), , drop = FALSE]
     rownames(deriv.points) <- NULL
 
-      n <- nrow(deriv.points)
-
-      run_1 <- deriv.points[,3] - deriv.points[,2]
-      run_2 <- deriv.points[,2] - deriv.points[,1]
-
-      if(any(run_1 == 0)||any(run_2 == 0)) {
-        z_1 <- which(run_1 == 0); z_2 <- which(run_2 == 0)
-        eval.point.max[z_1] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_1]; eval.point.max[z_2] <- ((abs((max(x) - min(x)) ))/length(x)) * index + eval.point[z_2]
-        eval.point.max[z_1] <- eval.point[z_1] - ((abs((max(x) - min(x)) ))/length(x)) * index; eval.point.max[z_2] <- eval.point[z_2] - ((abs((max(x) - min(x)) ))/length(x)) * index
-        run_1[z_1] <- eval.point.max[z_1] - eval.point[z_1]; run_2[z_2] <- eval.point[z_2] - eval.point.min[z_2]
-      }
+      # At the boundary one run is 0 (the window is clipped to [min(x), max(x)]);
+      # the first derivative then uses the one-sided slope below.
 
       reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1, smooth = TRUE)
 
