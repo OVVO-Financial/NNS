@@ -19,11 +19,12 @@
 #'
 #' \code{Certainty} is \emph{not} a calibrated probability and not the inverse of
 #' a p-value: for two samples from the same distribution it is not uniform on
-#' \eqn{[0, 1]} (its median is about 0.7-0.96 depending on \code{n}), it is shrunk by
+#' \eqn{[0, 1]} and rises toward 1 with sample size, it is shrunk by
 #' the population adjustment \eqn{((n_1 + n_2 - 2) / (n_1 + n_2))^2} for small
 #' samples, and it should not be compared with p-value thresholds such as 0.05.
-#' Use a permutation or bootstrap reference (e.g. \code{robust = TRUE}) to judge
-#' how unusual a value is.
+#' \code{robust = TRUE} bounds the sampling variability of \code{Certainty}
+#' itself; it is not a reference distribution under no difference. For that,
+#' recompute \code{Certainty} on random relabelings of the pooled observations.
 #'  
 #' @param control Numeric vector of control group observations
 #' @param treatment Numeric vector of treatment group observations
@@ -32,7 +33,7 @@
 #' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
 #' @param tails Character; specifies CI tail(s): "both", "left", or "right"
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
-#' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (\link{NNS.gravity}) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored for the multi-group and \code{pairwise = TRUE} paths.
+#' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (\link{NNS.gravity}) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored when \code{control} is a matrix or list (multi-group, including \code{pairwise = TRUE}).
 #' @param plot Logical; \code{TRUE} (default) generates distribution plot
 #' 
 #' @return Returns a list containing:
