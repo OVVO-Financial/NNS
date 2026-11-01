@@ -68,7 +68,7 @@ struct PrefixPartialMomentBackend {
   std::vector<double> sorted;
   std::vector<double> lower;   // (n + 1) x (degree + 1), row k = lower_j(k)
   std::vector<double> upper;   // (n + 1) x (degree + 1), row k = upper_j(k)
-  std::vector<double> pascal;  // (degree + 1) x (degree + 1), C(j, l)
+  std::vector<double> binom;  // (degree + 1) x (degree + 1), C(j, l)
   std::size_t n;
   int degree;
   
@@ -92,12 +92,12 @@ struct PrefixPartialMomentBackend {
     std::sort(sorted.begin(), sorted.end());
     const std::size_t w = static_cast<std::size_t>(degree) + 1U;
     
-    pascal.assign(w * w, 0.0);
+    binom.assign(w * w, 0.0);
     for (std::size_t j = 0; j < w; ++j) {
-      pascal[j * w] = 1.0;
+      binom[j * w] = 1.0;
       for (std::size_t l = 1; l <= j; ++l) {
-        pascal[j * w + l] = pascal[(j - 1U) * w + l - 1U] +
-          (l < j ? pascal[(j - 1U) * w + l] : 0.0);
+        binom[j * w + l] = binom[(j - 1U) * w + l - 1U] +
+          (l < j ? binom[(j - 1U) * w + l] : 0.0);
       }
     }
     
@@ -129,7 +129,7 @@ struct PrefixPartialMomentBackend {
     for (std::size_t j = 0; j < w; ++j) {
       double acc = (j == 0U) ? 1.0 : 0.0;
       for (std::size_t l = 0; l <= j; ++l) {
-        if (prev[l] != 0.0) acc += pascal[j * w + l] * dpow[j - l] * prev[l];
+        if (prev[l] != 0.0) acc += binom[j * w + l] * dpow[j - l] * prev[l];
       }
       next[j] = acc;
     }
@@ -142,7 +142,7 @@ struct PrefixPartialMomentBackend {
     double out = 0.0;
     double gpow = 1.0;  // gap^(d-j), built from j = d downwards
     for (std::size_t jj = w; jj-- > 0U;) {
-      if (sums[jj] != 0.0) out += pascal[d * w + jj] * gpow * sums[jj];
+      if (sums[jj] != 0.0) out += binom[d * w + jj] * gpow * sums[jj];
       gpow *= gap;
     }
     return out;
