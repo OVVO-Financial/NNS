@@ -49,7 +49,7 @@ The default is the mean squared error divided by the degree-1 co-movement of \co
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the validation errors: the estimate plus / minus \code{abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)} (deterministic, symmetric).}
+\item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the returned model's internal validation residuals (actual - forecast), adding their \link{LPM.VaR} and \link{UPM.VaR} at \code{(1 - pred.int)/2} to the final estimates.}
 
 \item{print.trace}{logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
@@ -64,8 +64,8 @@ Returns a list containing:
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.
-\item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
-\item{\code{$errors}} a vector of model errors from internal calibration.
+\item{\code{$bias.shift}} a numerical result of the overall bias of the returned model on the internal validation window, 0 when correcting it does not improve the objective function.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
+\item{\code{$errors}} a vector of the returned model's internal validation errors (forecast - actual), before \code{$bias.shift}.
 \item{\code{$results}} a vector of length \code{h}.
 \item{\code{$lower.pred.int}} a vector of lower prediction intervals per forecast point.
 \item{\code{$upper.pred.int}} a vector of upper prediction intervals per forecast point.
