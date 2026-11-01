@@ -36,8 +36,10 @@ NNS.diff(
 
 - tol:
 
-  numeric; Sets the tolerance for the stopping condition of the inferred
-  `h`. Defaults to `(tol = 1e-10)`.
+  numeric; Stopping tolerance. The search stops when the inferred `h` is
+  below `tol` or when the bracket on the y-intercept fixes the
+  derivative to within about `tol * max(1, abs(derivative))`. Defaults
+  to `(tol = 1e-10)`.
 
 - max.iter:
 

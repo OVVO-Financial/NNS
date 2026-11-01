@@ -70,7 +70,7 @@
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
-<dd><p>numeric; Sets the tolerance for the stopping condition of the inferred <code>h</code>. Defaults to <code>(tol = 1e-10)</code>.</p></dd>
+<dd><p>numeric; Stopping tolerance. The search stops when the inferred <code>h</code> is below <code>tol</code> or when the bracket on the y-intercept fixes the derivative to within about <code>tol * max(1, abs(derivative))</code>. Defaults to <code>(tol = 1e-10)</code>.</p></dd>
 
 
 <dt id="arg-max-iter">max.iter<a class="anchor" aria-label="anchor" href="#arg-max-iter"></a></dt>

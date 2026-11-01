@@ -120,8 +120,10 @@ iteratively bisect it.</li>
 <code>uniroot</code> for the step size <code>h*</code> that would make
 the left-hand secant project exactly to that <code>B</code>.</li>
 <li>The sign of <code>h*</code> tells the algorithm which side of the
-bracket to shrink. The process repeats until either
-<code>|h*| &lt; tol</code> or <code>max.iter</code> is reached.</li>
+bracket to shrink. The process repeats until <code>|h*| &lt; tol</code>,
+the bracket on <code>B</code> has narrowed to within
+<code>tol * max(|point|, |f(point) - B|)</code>, or
+<code>max.iter</code> is reached.</li>
 </ol>
 <p>The final inferred <code>h*</code>, whether fully converged or
 stall-limited by noise, is then supplied to multiple downstream
@@ -239,7 +241,9 @@ class="math inline">$B = f(x) - \frac{f(x) - f(x-h^*)}{h^*} \cdot
 x$</span> for <code>h*</code> via <code>uniroot</code>.</li>
 <li>Use the sign of <code>h*</code> to decide which half of the bracket
 to discard.</li>
-<li>Repeat until either <code>|h*| &lt; tol</code> or
+<li>Repeat until <code>|h*| &lt; tol</code>, the bracket on
+<code>B</code> has narrowed to within
+<code>tol * max(|point|, |f(point) - B|)</code>, or
 <code>max.iter</code> is reached.</li>
 </ol>
 <p>In clean analytic functions the search converges quickly to a tiny
