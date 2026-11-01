@@ -663,18 +663,18 @@
 #' @param y a numeric or factor vector with compatible dimensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} will force a limit condition perfect fit.
-#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "cor")} uses Spearman rank correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.
-#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1].
+#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  \code{(type = "XONLY")} is accepted for univariate regression but has no effect, since the univariate fit always uses an x-only partition.
 #' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
 #' @param plot logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
-#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and reports the standard error for each individual segment.  Also applies the same level for the prediction intervals.
+#' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and adds \code{conf.int.pos} / \code{conf.int.neg} to \code{Fitted.xy}.  The intervals are global: they are built from the type-8 quantiles of the in-sample residuals (no per-segment standard errors are returned).  Also applies the same level for the prediction intervals.
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
-#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{sqrt(# of regressors)}.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
+#' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - NNS.copula(cbind(x, y))) * sqrt(nrow(x)))} (at least 1, at most the number of regression points).  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 #' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
@@ -706,7 +706,7 @@
 #' \itemize{
 #'  \item{\code{"R2"}} provides the goodness of fit;
 #'
-#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.frame} consisting of regressor and its coefficient.  Denominator is simply the length of all coefficients > 0, returned in last row of \code{equation} \code{data.frame}.
+#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.frame} consisting of regressor and its coefficient.  Denominator is the number of non-zero coefficients (\code{abs(coefficient) > 0}), returned in last row of \code{equation} \code{data.frame}.
 #'
 #'  \item{\code{"x.star"}} returns the synthetic X* as a vector;
 #'
@@ -718,14 +718,14 @@
 #'  
 #'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x},\code{y}, \code{y.hat}, \code{gradient}, and \code{NNS.ID}.
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of the regressors, \code{y}, \code{y.hat}, \code{NNS.ID} and \code{residuals} (no \code{gradient}).
 #' }
 #'
 #' @note
 #' \itemize{
 #'  \item Please ensure \code{point.est} is of compatible dimensions to \code{x}, error message will ensue if not compatible.
 #'
-#'  \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for classification problems.
+#'  \item Like a logistic regression, the \code{(type = "CLASS")} setting is not necessary for target variable of two classes e.g. [0, 1].  For other numeric responses set \code{type = "CLASS"}; the response variable base category should be 1 for multi-class problems.
 #'
 #'  \item For low signal:noise instances, increasing the dimension may yield better results using \code{NNS.stack(cbind(x,x), y, method = 1, ...)}.
 #' }
@@ -753,8 +753,6 @@
 #' ## Maximum {order} selection
 #' NNS.reg(x, y, order = "max")
 #'
-#' ## x-only paritioning (Univariate only)
-#' NNS.reg(x, y, type = "XONLY")
 #'
 #' ## For Multiple Regression:
 #' x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)
