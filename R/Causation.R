@@ -66,6 +66,13 @@ NNS.caus <- function(x, y = NULL,
                      conf.int = 0.95){
   permute <- match.arg(permute)
   if(!is.null(seed)) set.seed(seed)
+
+  # Unwrap single-column data frames here as well as in the core: the
+  # permutation loop below calls sample() on x and y, which on a data frame
+  # would shuffle its one column as a single element and leave the rows in
+  # place, so every null value would equal the observed statistic.
+  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
+  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
   
   # Base causation (delegates to core)
   cp <- NNS.caus_core(x = x, y = y,

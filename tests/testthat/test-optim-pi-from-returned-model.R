@@ -48,3 +48,16 @@ test_that("the out-of-sample interval uses the validation residuals", {
   expect_equal(o$lower.pred.int, o$results + LPM.VaR(0.025, 0, r))
   expect_equal(o$upper.pred.int, o$results + UPM.VaR(0.025, 0, r))
 })
+
+test_that("a nonnegative series takes residuals from the clamped forecasts it returns", {
+  # An objective that rewards lower forecasts always accepts a positive bias,
+  # which pushes some validation forecasts below 0 before clamping.
+  set.seed(5); v <- pmax(0, rep(c(0, 0, 3, 1), length.out = 80) + rnorm(80, 0, 0.8))
+  o <- NNS.ARMA.optim(v, seasonal.factor = c(2, 4), training.set = 64, negative.values = FALSE,
+                      obj.fn = expression(mean(predicted)), objective = "min",
+                      print.trace = FALSE, ncores = 1, plot = FALSE)
+  expect_true(any(o$results == 0))
+  res <- tail(v, 16) - o$results
+  expect_equal(o$upper.pred.int, pmax(0, o$results + UPM.VaR(.025, 0, res)))
+  expect_equal(o$lower.pred.int, pmax(0, o$results + LPM.VaR(.025, 0, res)))
+})

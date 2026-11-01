@@ -72,3 +72,13 @@ test_that("NNS.caus weights still drive dimension reduction", {
   w <- fit$equation$Coefficient
   expect_gt(abs(w[1]), abs(w[2]))
 })
+
+test_that("p.value permutes the rows of a single-column data frame", {
+  set.seed(1); x <- rnorm(80); y <- x^2 + rnorm(80, sd = 0.2)
+  v <- NNS.caus(x, y, p.value = TRUE, nperm = 20, seed = 3)
+  d <- NNS.caus(x, data.frame(y = y), p.value = TRUE, nperm = 20, seed = 3)
+  expect_equal(d$p.value$null_distribution, v$p.value$null_distribution)
+  expect_gt(length(unique(d$p.value$null_distribution)), 1)
+  expect_equal(NNS.caus(data.frame(x = x), y, p.value = TRUE, nperm = 20, seed = 3, permute = "x")$p.value$two.sided,
+               NNS.caus(x, y, p.value = TRUE, nperm = 20, seed = 3, permute = "x")$p.value$two.sided)
+})

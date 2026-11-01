@@ -439,10 +439,14 @@ NNS.ARMA.optim <- function(variable,
   if(is.na(bias)) bias <- 0
   predicted <- final.predicted
   model.SSE <- eval(obj.fn)
+  # A nonnegative series returns forecasts clamped at 0, so the bias test and
+  # the residuals below use the clamped forecasts the returned model reports.
   predicted <- final.predicted - bias
+  if(!negative.values) predicted <- pmax(0, predicted)
   bias.SSE <- eval(obj.fn)
   if(!isTRUE(if(objective == "min") bias.SSE < model.SSE else bias.SSE > model.SSE)) bias <- 0
   final.predicted <- final.predicted - bias
+  if(!negative.values) final.predicted <- pmax(0, final.predicted)
   
   residuals <- actual - final.predicted
   lower_PIs_is <- final.predicted + LPM.VaR((1-pred.int)/2, 0, residuals)
