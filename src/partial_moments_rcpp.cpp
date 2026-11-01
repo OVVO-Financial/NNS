@@ -200,6 +200,7 @@ NumericVector UPM_RCPP(const double &degree,
    }
    stop_if_not_finite(variable_vec, "variable");
    stop_if_not_finite(target_vec, "target");
+   if (!(degree >= 0)) Rcpp::stop("'degree' must be a non-negative number");
    return fill_degenerate_ratio(LPM_ratio_CPv(degree, target_vec, variable_vec),
                                 degree, target_vec, variable_vec, true);
  }
@@ -246,6 +247,7 @@ NumericVector UPM_RCPP(const double &degree,
    }
    stop_if_not_finite(variable_vec, "variable");
    stop_if_not_finite(target_vec, "target");
+   if (!(degree >= 0)) Rcpp::stop("'degree' must be a non-negative number");
    return fill_degenerate_ratio(UPM_ratio_CPv(degree, target_vec, variable_vec),
                                 degree, target_vec, variable_vec, false);
  }
