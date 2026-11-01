@@ -59,7 +59,8 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   const double mean_var = vec_mean(variable);
   const double sd_var = vec_sd(variable);
   // CV is meaningless for a mean that is zero up to rounding; compare sds instead
-  const bool use_cv = std::fabs(mean_var) > std::sqrt(DBL_EPSILON) * sd_var;
+  const double tol = std::sqrt(DBL_EPSILON);
+  const bool use_cv = std::fabs(mean_var) > tol * sd_var;
   const double var_cov = use_cv ? std::fabs(sd_var / mean_var) : sd_var;
   
   std::vector<int> periods_vec;
@@ -75,7 +76,8 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     for(int j=0;j<m;++j){
       int len = (n-1-j)/m + 1;
       double sd = std::sqrt(ss[j] / (double)(len-1));
-      wsum += len * (use_cv ? std::fabs(sd / mu[j]) : sd);
+      // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
+      wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu[j]), tol * sd)) : sd);
     }
     double cv_m = wsum / (double)n;
     if (cv_m < var_cov){

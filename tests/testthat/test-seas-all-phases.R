@@ -50,3 +50,11 @@ test_that("NNS.ARMA forecasts a nonseasonal trend from lag 1", {
   expect_equal(f, NNS.ARMA(1:100, h = 2, seasonal.factor = 1, plot = FALSE))
   expect_equal(f, c(101, 102), tolerance = 1e-3)
 })
+
+test_that("a constant zero phase scores 0 and keeps its lag", {
+  x <- rep(c(0, 10), 10)
+  r <- NNS.seas(x, plot = FALSE)$all.periods
+  expect_equal(sort(r$Period), c(2L, 4L, 6L, 8L))
+  expect_equal(r$Coefficient.of.Variation, rep(0, 4))
+  expect_equal(NNS.ARMA(x, h = 2, plot = FALSE, seasonal.plot = FALSE), c(0, 10))
+})
