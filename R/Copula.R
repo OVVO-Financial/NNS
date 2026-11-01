@@ -73,6 +73,15 @@ NNS.copula <- function (
   
   if(is.null(target)) target <- colMeans(X)
   
+  # A constant margin is independent of the rest and has no degree-1 lower share
+  vary <- vapply(seq_len(n), function(j) length(unique(X[ , j])) > 1L, logical(1))
+  if(!all(vary)){
+    if(sum(vary) < 2) return(0)
+    X <- X[ , vary, drop = FALSE]
+    target <- target[vary]
+    n <- ncol(X)
+  }
+  
   # Pairwise  
   discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
   utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)

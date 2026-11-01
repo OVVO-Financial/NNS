@@ -22,3 +22,21 @@ test_that("NNS.copula is 0 on independent margins at a non-mean target", {
   Y <- rbind(c(-10, 0.1, 0.1), c(0.1, -10, 0.1), c(0.1, 0.1, -10))
   expect_lte(NNS.copula(Y, target = rep(0, 3)), 1)
 })
+
+test_that("NNS.copula drops constant margins", {
+  expect_equal(NNS.copula(cbind(-2:2, 1)), 0)
+  expect_equal(NNS.copula(cbind(-2:2, 1), continuous = FALSE), 0)
+  x <- 1:5
+  expect_equal(NNS.copula(cbind(x, x, 3)), 1)
+})
+
+test_that("A constant margin leaves the copula of the varying margins unchanged", {
+  # p = 0.5 in both margins, where the old fixed anchors were exact; values match the old cbind(x, y)
+  x <- c(1, 2, 3, 4, 5, 6)
+  y <- c(3, 1, 6, 2, 5, 4)
+  expect_equal(NNS.copula(cbind(x, y, 5)), 0.690065559342, tolerance = 1e-10)
+  expect_equal(NNS.copula(cbind(x, y, 5), continuous = FALSE), sqrt(1/3), tolerance = 1e-10)
+  Z <- iris[, 1:3]
+  expect_equal(NNS.copula(cbind(Z, k = 1)), NNS.copula(Z))
+  expect_equal(NNS.copula(cbind(Z, k = 1), target = c(5, 3, 4, 0)), NNS.copula(Z, target = c(5, 3, 4)))
+})
