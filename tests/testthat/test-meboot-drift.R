@@ -31,3 +31,31 @@ test_that("scl.adjustment kappa uses the residual mean and sd", {
   expect_equal(mean(apply(b["replicates", ]$replicates, 2, sd)),
                mean(apply(meboot_reps(), 2, sd)), tolerance = 0.01)
 })
+
+test_that("force.clt spreads changed-drift replicate means on the residual scale", {
+  set.seed(7)
+  tt <- 1:100
+  y <- 1000 + 10 * tt + rnorm(100)
+  fit <- lm(y ~ tt)
+  clt_reps <- function(...) {
+    set.seed(1)
+    NNS.meboot(y, reps = 10, rho = 1, ...)["replicates", ]$replicates
+  }
+
+  flat <- colMeans(clt_reps(drift = FALSE))
+  expect_equal(mean(flat), mean(y), tolerance = 1e-6)
+  expect_equal(sd(flat), sd(resid(fit)) / sqrt(10), tolerance = 1e-5)
+
+  sloped <- colMeans(clt_reps(target_drift = 5))
+  ref <- 5 * tt + resid(fit)
+  expect_equal(mean(sloped), mean(y), tolerance = 1e-6)
+  expect_equal(sd(sloped), sd(ref) / sqrt(10), tolerance = 1e-5)
+})
+
+test_that("drift = FALSE keeps mean(x) as the replicate level", {
+  for (clt in c(TRUE, FALSE)) {
+    R <- meboot_reps(drift = FALSE, force.clt = clt)
+    expect_equal(mean(R), mean(x), tolerance = 1e-3)
+    expect_gt(min(R), 0)
+  }
+})
