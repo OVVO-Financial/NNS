@@ -40,7 +40,7 @@ LPM.VaR <- function(percentile, degree, x) {
 #' Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio.
 #'
 #' @param percentile numeric [0, 1]; The percentile for right-tail VaR.
-#' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions. With \code{degree = 0} the result is the interpolated empirical quantile (\code{quantile(x, percentile, type = 7)}), which on tied data need not be an exact inverse of \code{LPM.ratio(0, ., x)}.
+#' @param degree integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions. With \code{degree = 0} the result is the interpolated empirical quantile (\code{quantile(x, 1 - percentile, type = 7)}), which on tied data need not be an exact inverse of \code{UPM.ratio(0, ., x)}.
 #' @param x a numeric vector.
 #' @return Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
 #' @author Fred Viole, OVVO Financial Systems

@@ -81,7 +81,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for lower deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. \code{norm} is ignored at \code{degree = 0}.
 #' @return Numeric; the n‑dimensional co‑lower partial moment.
 #' @examples
 #' \dontrun{
@@ -133,7 +133,7 @@ Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. \code{norm} is ignored at \code{degree = 0}.
 #' @return Numeric; the n‑dimensional co‑upper partial moment.
 #' @examples
 #' \dontrun{
@@ -161,7 +161,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. \code{norm} is ignored at \code{degree = 0}.
 #' @return Numeric; the n-dimensional divergent partial moment.
 #' @examples
 #' \dontrun{
@@ -427,7 +427,7 @@ NNS.CDF <- function(variable,
 #' This function returns the first 4 moments of the distribution.
 #'
 #' @param x a numeric vector.
-#' @param population logical; \code{TRUE} (default) returns the population (unadjusted) statistics. \code{FALSE} returns the sample-adjusted statistics (variance with \code{n - 1}, adjusted Fisher-Pearson skewness and sample excess kurtosis).
+#' @param population logical; \code{TRUE} (default) returns the population (unadjusted) statistics. \code{FALSE} returns the sample-adjusted statistics (variance with \code{n - 1}, sample skewness and sample excess kurtosis).
 #' @return Returns:
 #' \itemize{
 #'  \item{\code{"$mean"}} mean of the distribution.
@@ -492,7 +492,7 @@ NNS.moments <- function(x, population = TRUE) {
 #' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
 #' @param target numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use \code{colMeans(variable)}.
 #' @param variable numeric matrix or data.frame.
-#' @param pop_adj logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.
+#' @param pop_adj logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (with both degrees 1, \code{target = NULL} and \code{norm = FALSE}, the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.
 #' @param norm logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j).  
 #' @return A list: $cupm, $dupm, $dlpm, $clpm, $cov.matrix.
 #' @note When \code{norm = TRUE}, each cell (i,j) of the four quadrant matrices
