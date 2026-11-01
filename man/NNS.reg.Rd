@@ -42,7 +42,7 @@ NNS.reg(
 
 \item{tau}{options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} for more accurate causal analysis.}
 
-\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  \code{(type = "XONLY")} is accepted for univariate regression but has no effect, since the univariate fit always uses an x-only partition.}
+\item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  \code{(type = "XONLY")} is valid only for a single predictor: it keeps the default x-only partition but turns off the automatic classification.}
 
 \item{point.est}{a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.}
 
@@ -112,7 +112,7 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
  
  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 
- \item{\code{"Fitted.xy"}} returns a \code{data.frame} of the regressors, \code{y}, \code{y.hat}, \code{NNS.ID} and \code{residuals} (no \code{gradient}).
+ \item{\code{"Fitted.xy"}} returns a \code{data.frame} of the regressors, \code{y}, \code{y.hat}, \code{NNS.ID} and \code{residuals} for full multivariate regression, or of the synthetic \code{x}, \code{y}, \code{y.hat}, \code{NNS.ID}, \code{gradient} and \code{residuals} for dimension reduction regression.  \code{confidence.interval} adds \code{conf.int.neg} and \code{conf.int.pos}.
 }
 }
 \description{
