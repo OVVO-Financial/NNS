@@ -233,7 +233,7 @@ Equal weighting would be `weights = "equal"`.
 
 -   `pred.int`
 
-Provides the values for the specified prediction intervals within [0,1] for each forecasted point and plots the bootstrapped replicates for the forecasted points.
+Returns lower and upper bands for each forecasted point from a maximum entropy bootstrap of the forecast path, and plots the bootstrapped replicates. The band describes how dispersed the forecast path is, not the probability that future values fall inside it: it does not widen with the horizon and is not calibrated to the nominal level. `NNS.ARMA.optim` builds its interval from validation errors instead.
 
 -   `seasonal.factor = FALSE`
 
