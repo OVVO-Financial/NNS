@@ -44,7 +44,7 @@ NNS.stack(
 
 \item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.}
 
-\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size if \code{(IVs.test = NULL)}.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.}
+\item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the holdout size for repeated holdout cross-validation (one random holdout per fold).  With \code{CV.size = NULL} and \code{folds > 1}, (stratified, for classification) k-fold cross-validation is used; with \code{CV.size = NULL} and \code{folds = 1}, a single holdout of random size between 0.2 and 0.33 is used.}
 
 \item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.}
 
@@ -58,7 +58,7 @@ NNS.stack(
 
 \item{stack}{logical; \code{TRUE} (default) Uses dimension reduction output in \code{n.best} optimization, otherwise performs both analyses independently.}
 
-\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} uses standard linear correlation for weights.  \code{(dim.red.method = "NNS.dep")} (default) uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
+\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses Spearman rank correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
 
 \item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals with each \code{method}.}
 
@@ -97,12 +97,6 @@ Prediction model using the predictions of the NNS base models \link{NNS.reg} as 
 
 \item Missing data should be handled prior as well using \link{na.omit} or \link{complete.cases} on the full dataset.
 }
-
-If error received:
-
-\code{"Error in is.data.frame(x) : object 'RP' not found"}
-
-reduce the \code{CV.size}.
 }
 \examples{
  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
