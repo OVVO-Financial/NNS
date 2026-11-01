@@ -91,3 +91,10 @@ test_that("validation results with nns.regress use a smooth of the training wind
   expect_true(o$nns.regress)
   expect_equal(o$results, p + o$bias.shift)
 })
+
+test_that("nns.regress must beat the accepted shrink score", {
+  # Smoothed 1.670 beats raw 3.809 but loses to raw with shrink, 1.447.
+  o <- run_optim(random_walk(5), training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
+  expect_true(o$shrink)
+  expect_false(o$nns.regress)
+})

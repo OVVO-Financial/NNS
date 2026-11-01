@@ -447,6 +447,7 @@ NNS.ARMA.optim <- function(variable,
   }
 
   final.predicted <- predicted
+  best.SSE <- nns.SSE
  
   predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   
@@ -454,6 +455,7 @@ NNS.ARMA.optim <- function(variable,
     if(eval(obj.fn) < nns.SSE){
       nns.shrink = TRUE
       final.predicted <- predicted
+      best.SSE <- eval(obj.fn)
     }  else nns.shrink = FALSE
   }
   
@@ -461,6 +463,7 @@ NNS.ARMA.optim <- function(variable,
     if(eval(obj.fn) > nns.SSE){
       nns.shrink = TRUE
       final.predicted <- predicted
+      best.SSE <- eval(obj.fn)
     }  else nns.shrink = FALSE
   }
   
@@ -473,14 +476,14 @@ NNS.ARMA.optim <- function(variable,
   nns.regress <- FALSE
   
   if(objective == "min"){
-    if(eval(obj.fn) < nns.SSE){
+    if(eval(obj.fn) < best.SSE){
       nns.regress <- TRUE
       final.predicted <- predicted
     }
   }
   
   if(objective == "max"){
-    if(eval(obj.fn) > nns.SSE){
+    if(eval(obj.fn) > best.SSE){
       nns.regress <- TRUE
       final.predicted <- predicted
     }
