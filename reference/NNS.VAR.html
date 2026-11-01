@@ -111,7 +111,7 @@
     <p>Returns the following matrices of forecasted variables:</p><ul><li><p><code>"interpolated_and_extrapolated"</code> Returns a <code>data.frame</code> of the linear interpolated and <a href="NNS.ARMA.html">NNS.ARMA</a> extrapolated values to replace <code>NA</code> values in the original <code>variables</code> argument.  This is required for working with variables containing different frequencies, e.g. where <code>NA</code> would be reported for intra-quarterly data when indexed with monthly periods.</p></li>
 <li><p><code>"relevant_variables"</code> Returns, for each variable, the lagged regressors selected by the <a href="NNS.stack.html">NNS.stack</a> dimension reduction, ranked by absolute coefficient.  These are exactly the regressors the <code>"multivariate"</code> estimate is built from.</p></li>
 <li><p><code>"univariate"</code> Returns the univariate <a href="NNS.ARMA.html">NNS.ARMA</a> forecasts.</p></li>
-<li><p><code>"multivariate"</code> Returns the multi-variate <a href="NNS.reg.html">NNS.reg</a> forecasts.</p></li>
+<li><p><code>"multivariate"</code> Returns the multi-variate forecasts: <a href="NNS.stack.html">NNS.stack</a> <code>(method = 1, stack = FALSE)</code> on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).</p></li>
 <li><p><code>"ensemble"</code> Returns the ensemble of both <code>"univariate"</code> and <code>"multivariate"</code> forecasts.</p></li>
 </ul><p>When <code>variables</code> is a <code>ts</code>, <code>xts</code> or <code>zoo</code> object, rows are labelled with its time index and the forecast rows with the following <code>h</code> periods.</p>
     </div>

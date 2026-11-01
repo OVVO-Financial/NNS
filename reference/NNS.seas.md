@@ -38,8 +38,9 @@ than the variable with `"all.periods"`; and the single period exhibiting
 the least coefficient of variation versus the variable with
 `"best.period"`; as well as a vector of `"periods"` for easy call into
 [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md).
-If no seasonality is detected, `NNS.seas` will return ("No Seasonality
-Detected").
+If no seasonality is detected, `all.periods` holds a single row with
+`Period = 1` and a coefficient of variation equal to the variable's
+(`Period = 0` for fewer than 5 observations).
 
 ## References
 

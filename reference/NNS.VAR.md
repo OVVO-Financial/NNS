@@ -129,9 +129,11 @@ Returns the following matrices of forecasted variables:
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
   forecasts.
 
-- `"multivariate"` Returns the multi-variate
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  forecasts.
+- `"multivariate"` Returns the multi-variate forecasts:
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  `(method = 1, stack = FALSE)` on the relevant variables, evaluated on
+  the lag-matrix rows of the forecast period (built from the univariate
+  forecasts).
 
 - `"ensemble"` Returns the ensemble of both `"univariate"` and
   `"multivariate"` forecasts.

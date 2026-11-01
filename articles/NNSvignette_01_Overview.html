@@ -734,11 +734,11 @@ conditional dependence)</li>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span>,  <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span>  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(x---&gt;y) </span></span>
-<span><span class="co">##           0.2993174           0.3896713           0.2637990</span></span></code></pre>
+<span><span class="co">##           0.2800864           0.4117684           0.3853630</span></span></code></pre>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span><span class="op">)</span>   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## Causation.x.given.y Causation.y.given.x           C(y---&gt;x) </span></span>
-<span><span class="co">##           0.3896713           0.2993174           0.2637990</span></span></code></pre>
+<span><span class="co">##           0.4117684           0.2800864           0.3853630</span></span></code></pre>
 <p><strong>Interpretation.</strong> Examine asymmetry in scores to infer
 direction. The method conditions partial‑moment dependence on candidate
 drivers.</p>
@@ -788,7 +788,7 @@ drivers.</p>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61 ) ...)"</span></span>
 <span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.261855687810987"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259567580022873"</span></span>
+<span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259567580022872"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52 ) ...)"</span></span>
 <span><span class="co">## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259036260976855"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
@@ -798,15 +798,15 @@ drivers.</p>
 <span><span class="co">## [1] "CURRNET METHOD: nonlin"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.7937143939678"</span></span>
+<span><span class="co">## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 0.368721358748004"</span></span>
 <span><span class="co">## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.7937143939678"</span></span>
+<span><span class="co">## [1] "BEST nonlin OBJECTIVE FUNCTION = 0.368721358748004"</span></span>
 <span><span class="co">## [1] "CURRNET METHOD: both"</span></span>
 <span><span class="co">## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
 <span><span class="co">## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"</span></span>
-<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.607121592790574"</span></span>
+<span><span class="co">## [1] "CURRENT both OBJECTIVE FUNCTION = 0.284406480403171"</span></span>
 <span><span class="co">## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"</span></span>
-<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.607121592790574"</span></span></code></pre>
+<span><span class="co">## [1] "BEST both OBJECTIVE FUNCTION = 0.284406480403171"</span></span></code></pre>
 <p><img src="NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $periods</span></span>
 <span><span class="co">## [1] 49 51 48 77 53 61 47 52 39</span></span>

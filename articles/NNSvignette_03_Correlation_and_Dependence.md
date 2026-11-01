@@ -72,10 +72,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] 0.950153
+    ## [1] 0.9537657
     ## 
     ## $Dependence
-    ## [1] 0.950153
+    ## [1] 0.9537657
 
 ### Cyclic Relationship
 
@@ -206,14 +206,14 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 ![](NNSvignette_03_Correlation_and_Dependence_files/figure-html/permutattions_res-1.png)
 
     ## $Correlation
-    ## [1] 0.2350543
+    ## [1] 0.1162424
     ## 
     ## $`Correlation p.value`
-    ## [1] 0.17
+    ## [1] 0.41
     ## 
     ## $`Correlation 95% CIs`
     ##       2.5%      97.5% 
-    ## -0.1899710  0.3465982 
+    ## -0.2103680  0.3484086 
     ## 
     ## $Dependence
     ## [1] 0.8197227
@@ -223,7 +223,7 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
     ## 
     ## $`Dependence 95% CIs`
     ##      2.5%     97.5% 
-    ## 0.4920102 0.6685294
+    ## 0.4920102 0.6699670
 
 ## Multivariate Dependence `NNS.copula()`
 

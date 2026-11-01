@@ -66,7 +66,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a matrix of all periods exhibiting less coefficient of variation than the variable with <code>"all.periods"</code>; and the single period exhibiting the least coefficient of variation versus the variable with <code>"best.period"</code>; as well as a vector of <code>"periods"</code> for easy call into <a href="NNS.ARMA.optim.html">NNS.ARMA.optim</a>.  If no seasonality is detected, <code>NNS.seas</code> will return ("No Seasonality Detected").</p>
+    <p>Returns a matrix of all periods exhibiting less coefficient of variation than the variable with <code>"all.periods"</code>; and the single period exhibiting the least coefficient of variation versus the variable with <code>"best.period"</code>; as well as a vector of <code>"periods"</code> for easy call into <a href="NNS.ARMA.optim.html">NNS.ARMA.optim</a>.  If no seasonality is detected, <code>all.periods</code> holds a single row with <code>Period = 1</code> and a coefficient of variation equal to the variable's (<code>Period = 0</code> for fewer than 5 observations).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -686,7 +686,7 @@ NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg
 ```
 
     ## Causation.x.given.y Causation.y.given.x           C(x--->y) 
-    ##           0.2993174           0.3896713           0.2637990
+    ##           0.2800864           0.4117684           0.3853630
 
 ``` r
 
@@ -694,7 +694,7 @@ NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 ```
 
     ## Causation.x.given.y Causation.y.given.x           C(y--->x) 
-    ##           0.3896713           0.2993174           0.2637990
+    ##           0.4117684           0.2800864           0.3853630
 
 **Interpretation.** Examine asymmetry in scores to infer direction. The
 method conditions partial‑moment dependence on candidate drivers.
@@ -750,7 +750,7 @@ NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE
     ## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61 ) ...)"
     ## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.261855687810987"
     ## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47 ) ...)"
-    ## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259567580022873"
+    ## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259567580022872"
     ## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52 ) ...)"
     ## [1] "CURRENT lin OBJECTIVE FUNCTION = 0.259036260976855"
     ## [1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"
@@ -760,15 +760,15 @@ NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE
     ## [1] "CURRNET METHOD: nonlin"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"
-    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 2.7937143939678"
+    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 0.368721358748004"
     ## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"
-    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 2.7937143939678"
+    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 0.368721358748004"
     ## [1] "CURRNET METHOD: both"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 77, 53, 61, 47, 52, 39 ) ...)"
-    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.607121592790574"
+    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.284406480403171"
     ## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 77, 53, 61, 47, 52, 39 )"
-    ## [1] "BEST both OBJECTIVE FUNCTION = 0.607121592790574"
+    ## [1] "BEST both OBJECTIVE FUNCTION = 0.284406480403171"
 
 ![](NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png)
 

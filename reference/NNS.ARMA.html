@@ -82,11 +82,11 @@
 
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>numeric or <code>"equal"</code>; <code>NULL</code> (default) sets the weights of the <code>seasonal.factor</code> vector when specified as integers.  If <code>(weights = NULL)</code> each <code>seasonal.factor</code> is weighted on its <a href="NNS.seas.html">NNS.seas</a> result and number of observations it contains, else an <code>"equal"</code> weight is used.</p></dd>
+<dd><p>numeric or <code>"equal"</code>; <code>NULL</code> (default) sets the weights of the <code>seasonal.factor</code> vector when specified as integers.  If <code>(weights = NULL)</code> each <code>seasonal.factor</code> is weighted on its <a href="NNS.seas.html">NNS.seas</a> result and number of observations it contains, else an <code>"equal"</code> weight is used.  Numeric weights must have one value per seasonal lag and are treated as relative weights (rescaled to sum to 1).  With <code>(dynamic = TRUE)</code> the lags are re-selected at every step, so only <code>NULL</code> or <code>"equal"</code> weights are accepted.</p></dd>
 
 
 <dt id="arg-best-periods">best.periods<a class="anchor" aria-label="anchor" href="#arg-best-periods"></a></dt>
-<dd><p>integer; [2] (default) used in conjunction with <code>(seasonal.factor = FALSE)</code>, uses the <code>best.periods</code> number of detected seasonal lags instead of <code>ALL</code> lags when
+<dd><p>integer; 1 (default) used in conjunction with <code>(seasonal.factor = FALSE)</code>, uses the <code>best.periods</code> number of detected seasonal lags instead of <code>ALL</code> lags when
 <code>(seasonal.factor = FALSE, best.periods = NULL)</code>.</p></dd>
 
 

@@ -3,7 +3,8 @@
 Wrapper function for optimizing any combination of a given
 `seasonal.factor` vector in
 [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md).
-Minimum sum of squared errors (forecast-actual) is used to determine
+The objective function `obj.fn` on a validation window (the last
+`length(variable) - training.set` observations) is used to determine the
 optimum across all
 [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
 methods.
@@ -70,15 +71,16 @@ mean((predicted - actual)^2)/.denom
 
 - obj.fn:
 
-  expression;
-  `expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))`
-  (default) Rank correlation / sum of squared errors is the default
-  objective function. Any `expression(...)` using the specific terms
-  `predicted` and `actual` can be used.
+  expression; The default is the mean squared error divided by the
+  degree-1 co-movement of `predicted` and `actual`,
+  `mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))`
+  (`Inf` when the co-movement is 0), to be minimized. Any
+  `expression(...)` using the specific terms `predicted` and `actual`
+  can be used.
 
 - objective:
 
-  options: ("min", "max") `"max"` (default) Select whether to minimize
+  options: ("min", "max") `"min"` (default) Select whether to minimize
   or maximize the objective function `obj.fn`.
 
 - linear.approximation:
@@ -96,10 +98,10 @@ mean((predicted - actual)^2)/.denom
 - pred.int:
 
   numeric \[0, 1\]; 0.95 (default) Returns the associated prediction
-  intervals for the final estimate. Constructed using the maximum
-  entropy bootstrap
-  [NNS.meboot](https://OVVO-Financial.github.io/NNS/reference/NNS.meboot.md)
-  on the final estimates.
+  intervals for the final estimate. Constructed from the validation
+  errors: the estimate plus / minus
+  `abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)`
+  (deterministic, symmetric).
 
 - print.trace:
 

@@ -58,11 +58,14 @@ NNS.ARMA(
   `(weights = NULL)` each `seasonal.factor` is weighted on its
   [NNS.seas](https://OVVO-Financial.github.io/NNS/reference/NNS.seas.md)
   result and number of observations it contains, else an `"equal"`
-  weight is used.
+  weight is used. Numeric weights must have one value per seasonal lag
+  and are treated as relative weights (rescaled to sum to 1). With
+  `(dynamic = TRUE)` the lags are re-selected at every step, so only
+  `NULL` or `"equal"` weights are accepted.
 
 - best.periods:
 
-  integer; \[2\] (default) used in conjunction with
+  integer; 1 (default) used in conjunction with
   `(seasonal.factor = FALSE)`, uses the `best.periods` number of
   detected seasonal lags instead of `ALL` lags when
   `(seasonal.factor = FALSE, best.periods = NULL)`.
