@@ -175,7 +175,7 @@ NNS.dep <- function(x,
 }
 
 
-NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
+NNS.dep.matrix <- function(x, asym = FALSE){
   
   n <- ncol(x)
   if(is.null(n)){
@@ -185,8 +185,6 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
   
   x <- data.matrix(x)
-  
-  if(nrow(x) < 20 ) order <- 2
   
   upper_lower <- function(x, y, asym){
     basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)

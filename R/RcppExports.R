@@ -5,10 +5,6 @@ NNS_dep_pair_cpp <- function(x, y, quad_xy, quad_yx, asym = FALSE) {
     .Call(`_NNS_NNS_dep_pair_cpp`, x, y, quad_xy, quad_yx, asym)
 }
 
-NNS_dep_matrix_cpp <- function(X, asym = FALSE) {
-    .Call(`_NNS_NNS_dep_matrix_cpp`, X, asym)
-}
-
 NNS_distance_cpp <- function(X, yhat, dest, k, use_class) {
     .Call(`_NNS_NNS_distance_cpp`, X, yhat, dest, k, use_class)
 }

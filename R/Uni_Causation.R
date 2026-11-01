@@ -3,18 +3,14 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
   if(tau=="cs") tau <- 0
   if(tau=="ts") tau <- 3
 
-  xy <- NNS.norm(cbind(x, y), linear = FALSE, chart.type = NULL)
-
   min.length <- min(length(x), length(y))
 
-  x.vectors <- list(tau+1)
-  y.vectors <- list(tau+1)
+  x.vectors <- vector("list", tau + 1)
+  y.vectors <- vector("list", tau + 1)
 
   ## Create tau vectors
   if(tau > 0){
     for (i in 0:tau){
-        x.vectors[[paste('x.tau.', i, sep = "")]] <- numeric(0L)
-        y.vectors[[paste('y.tau.', i, sep = "")]] <- numeric(0L)
         start <- tau - i + 1
         end <- min.length - i
         x.vectors[[i + 1]] <- x[start : end]
@@ -178,13 +174,6 @@ NNS.caus_core <- function(x, y = NULL,
       Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
       Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
       Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      if(Causation.x.given.y == Causation.y.given.x ||
-         Causation.x.given.y == 0 || Causation.y.given.x == 0){
-        Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
-        Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
-        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      }
     }
     
     if(identical(tau, "cs")){
@@ -192,13 +181,6 @@ NNS.caus_core <- function(x, y = NULL,
       Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
       Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
       Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      if(Causation.x.given.y == Causation.y.given.x ||
-         Causation.x.given.y == 0 || Causation.y.given.x == 0){
-        Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
-        Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
-        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      }
     }
     
     if(identical(tau, "ts")){
