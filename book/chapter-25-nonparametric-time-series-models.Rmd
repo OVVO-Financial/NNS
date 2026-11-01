@@ -283,6 +283,8 @@ where \(w_j\) may be proportional to component length or to some predictive-stre
 
 An even stricter rule requires most, or all, component CVs to lie below the full-series CV. The exact rule is a modeling choice, but the guiding principle is unchanged: a good seasonal lag is one that produces tighter conditional distributions than the unpartitioned series.
 
+Component length also matters. The sample standard deviation of \(k\) observations is biased low, \(E[s] = c_4(k)\,\sigma\) with \(c_4(2) \approx 0.80\), \(c_4(3) \approx 0.89\) and \(c_4(5) \approx 0.94\), so at very long lags, where each component has only two or three points, every component looks tight even when the series is pure noise. `NNS.seas` therefore scans only lags with at least five observations in every component (\(m \le n/5\)) and divides each component standard deviation by \(c_4(k)\). The eight-point series above is a worked illustration below that size; `NNS.seas` needs at least ten observations to test lag 2. Even with these corrections a series without seasonality passes some lags by chance, so the detected periods are best treated as candidates and validated, as `NNS.ARMA.optim` does.
+
 A technical caveat is also important. If \(\mu_X \approx 0\), then \(CV(X)\) can become unstable because the denominator is near zero. In such cases the analyst may instead compare component standard deviations directly, center the series at a more stable scale, or regularize the denominator by adding a small constant. The predictive logic remains the same even if the raw coefficient of variation is numerically unreliable.
 
 ---
@@ -670,7 +672,7 @@ The methods developed here focus on a single series. Cross-series interactions a
 
 ### Data requirements
 
-Because prediction is learned from historical structure, sparse component series may limit reliability for very large lag lengths.
+Because prediction is learned from historical structure, sparse component series limit reliability for very large lag lengths. `NNS.seas` does not test lags whose components would have fewer than five observations.
 
 ### Computational cost
 

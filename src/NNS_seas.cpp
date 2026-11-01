@@ -23,6 +23,15 @@ inline double vec_mean(const NumericVector& x){
   return s / (double)n;
 }
 
+// c4(k): E[s] = c4(k) * sigma for k normal observations. Dividing by it removes
+// the small-sample downward bias of the sd, which otherwise favours the lags
+// with the shortest components (#69).
+inline double c4(int k){
+  if (k < 2) return 1.0;
+  const double kd = static_cast<double>(k);
+  return std::sqrt(2.0 / (kd - 1.0)) * std::exp(std::lgamma(kd / 2.0) - std::lgamma((kd - 1.0) / 2.0));
+}
+
 inline double vec_sd(const NumericVector& x){
   int n = x.size();
   if(n < 2) return NA_REAL;
@@ -57,16 +66,24 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   
   const int half_n = n/2;
   const double mean_var = vec_mean(variable);
-  const double sd_var = vec_sd(variable);
+  const double sd_var = vec_sd(variable) / c4(n);
   // CV is meaningless for a mean that is zero up to rounding; compare sds instead
   const double tol = std::sqrt(DBL_EPSILON);
   const bool use_cv = std::fabs(mean_var) > tol * sd_var;
   const double var_cov = use_cv ? std::fabs(sd_var / mean_var) : sd_var;
   
+  // Minimum component length (#69): every component series of lag m must have
+  // at least MIN_COMPONENT_LENGTH points, i.e. m <= n / MIN_COMPONENT_LENGTH.
+  // With 2-3 points per component the sample sd is biased low (E[s] = c4(k) sigma,
+  // c4(2) = 0.80, c4(3) = 0.89), so the longest lags looked tightest even in
+  // pure noise and were picked as the best period.
+  const int MIN_COMPONENT_LENGTH = 5;
+  const int max_m = std::min(half_n, n / MIN_COMPONENT_LENGTH);
+
   std::vector<int> periods_vec;
   std::vector<double> cvmean_vec;
   const double* x = variable.begin();
-  for(int m=1;m<=half_n;++m){
+  for(int m=1;m<=max_m;++m){
     double wsum = 0.0;
     for(int j=0;j<m;++j){
       int len = (n-1-j)/m + 1;
@@ -74,7 +91,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
       for(int i=j;i<n;i+=m) mu += x[i];
       mu /= (double)len;
       for(int i=j;i<n;i+=m){ double d = x[i]-mu; ss += d*d; }
-      double sd = std::sqrt(ss / (double)(len-1));
+      double sd = std::sqrt(ss / (double)(len-1)) / c4(len);
       // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
       wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
     }
