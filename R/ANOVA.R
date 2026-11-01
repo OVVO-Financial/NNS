@@ -33,7 +33,7 @@
 #' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
 #' @param tails Character; specifies CI tail(s): "both", "left", or "right"
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
-#' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (\link{NNS.gravity}) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored when \code{control} is a matrix or list (multi-group, including \code{pairwise = TRUE}).
+#' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the median (robust point estimate) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored when \code{control} is a matrix or list (multi-group, including \code{pairwise = TRUE}).
 #' @param plot Logical; \code{TRUE} (default) generates distribution plot
 #' 
 #' @return Returns a list containing:
@@ -135,7 +135,7 @@ NNS.ANOVA <- function(
       )
       
       # Robust point estimate of certainty
-      robust_estimate <- gravity(nns.certainties)
+      robust_estimate <- median(nns.certainties)
       
       # --- CI for robust certainty, honoring confidence.interval and tails
       alpha <- if (tails == "both") (1 - confidence.interval) / 2 else 1 - confidence.interval

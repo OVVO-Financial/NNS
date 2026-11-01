@@ -30,7 +30,7 @@ test_that("robust mode bootstraps each group independently from its full sample"
   cs <- vapply(seq_len(100), function(i) {
     NNS:::NNS.ANOVA.bin(cx[, i], ty[, i], plot = FALSE)$Certainty
   }, numeric(1))
-  expected <- c(NNS.gravity(cs), unname(quantile(cs, c(0.025, 0.975))))
+  expected <- c(median(cs), unname(quantile(cs, c(0.025, 0.975))))
 
   r <- anova(x, y, robust = TRUE, seed = 314)
   expect_type(r, "list")
