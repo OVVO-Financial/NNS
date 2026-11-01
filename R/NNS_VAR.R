@@ -21,7 +21,7 @@
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 #'
-#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: a full \link{NNS.stack} \code{(method = c(1, 2), stack = FALSE)} on the relevant variables.
+#'  \item{\code{"multivariate"}} Returns the multi-variate forecasts: \link{NNS.stack} \code{(method = 1, stack = FALSE)} on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).
 #'
 #'  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
 #'  }
