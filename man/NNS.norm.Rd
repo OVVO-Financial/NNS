@@ -9,7 +9,7 @@ NNS.norm(X, linear = FALSE, chart.type = NULL, location = "topleft")
 \arguments{
 \item{X}{a numeric matrix or data frame, or a list.}
 
-\item{linear}{logical; \code{FALSE} (default) Performs a linear scaling normalization, resulting in equal means for all variables.}
+\item{linear}{logical; \code{FALSE} (default) performs the nonlinear scaling normalization (each variable's mean-ratio scale is weighted by its correlation / \link{NNS.dep} dependence with the other variables).  \code{TRUE} performs a linear scaling normalization, resulting in equal means for all variables.  Both scale by ratios of means, so they assume variables with positive means; a zero mean is replaced by 1e-10 (giving extreme scale factors).}
 
 \item{chart.type}{options: ("l", "b"); \code{NULL} (default).  Set \code{(chart.type = "l")} for line,
 \code{(chart.type = "b")} for boxplot.}
