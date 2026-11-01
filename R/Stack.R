@@ -1344,26 +1344,12 @@ NNS.stack <- function(IVs.train,
         }
         
         # The ALL candidate is always populated for every fold. Score the
-        # estimator that is deployed when ALL wins, NNS.reg(n.best = "all"),
-        # rather than a constant training mean.
-        all_fit <- suppressWarnings(
-          NNS.reg(
-            train_design,
-            train_y_fit,
-            point.est = valid_design,
-            plot = FALSE,
-            residual.plot = FALSE,
-            n.best = "all",
-            order = order,
-            type = NULL,
-            factor.2.dummy = FALSE,
-            dist = dist,
-            ncores = ncores,
-            point.only = TRUE
-          )
-        )
+        # estimator deployed when ALL wins, NNS.reg(n.best = "all"), from the fold RPM.
         all_raw <- .sanitize_raw(
-          as.numeric(all_fit$Point.est) - response_offset,
+          .nns_mreg_predict(
+            valid_design, rpm, nRPM, dist,
+            setup$minimums, setup$maximums, FALSE, ncores
+          ) - response_offset,
           y[train_idx]
         )
         good <- is.finite(all_raw)
