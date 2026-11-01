@@ -3,9 +3,9 @@
 #' Mode of a distribution, either continuous or discrete.
 #'
 #' @param x vector of data.
-#' @param discrete logical; \code{FALSE} (default) for discrete distributions.
+#' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
 #' @param multi logical; \code{TRUE} (default) returns multiple mode values.
-#' @return Returns a numeric value representing the mode of the distribution.
+#' @return Returns the mode of the distribution: a numeric vector of all modes when \code{multi = TRUE} (default), otherwise a single numeric value.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
 #' \dontrun{
@@ -31,7 +31,7 @@ mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
 #' Alternative central tendency measure more robust to outliers.
 #'
 #' @param x vector of data.
-#' @param discrete logical; \code{FALSE} (default) for discrete distributions.
+#' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
 #' @return Returns a numeric value representing the central tendency of the distribution.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples

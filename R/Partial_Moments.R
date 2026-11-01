@@ -81,7 +81,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for lower deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
 #' @return Numeric; the n‑dimensional co‑lower partial moment.
 #' @examples
 #' \dontrun{
@@ -133,7 +133,7 @@ Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
 #' @return Numeric; the n‑dimensional co‑upper partial moment.
 #' @examples
 #' \dontrun{
@@ -161,7 +161,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
 #' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
-#' @param norm   logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.
+#' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.
 #' @return Numeric; the n-dimensional divergent partial moment.
 #' @examples
 #' \dontrun{
@@ -194,7 +194,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
-#'  \item{\code{"Function"}} a data.table containing the observations and resulting CDF of the variable.
+#'  \item{\code{"Function"}} a data.frame (class \code{NNS.data.frame}) containing the observations and the resulting function of the variable.
 #'  \item{\code{"target.value"}} value from the \code{target} argument.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
@@ -427,7 +427,7 @@ NNS.CDF <- function(variable,
 #' This function returns the first 4 moments of the distribution.
 #'
 #' @param x a numeric vector.
-#' @param population logical; \code{TRUE} (default) Performs the population adjustment. Otherwise returns the sample statistic.
+#' @param population logical; \code{TRUE} (default) returns the population (unadjusted) statistics. \code{FALSE} returns the sample-adjusted statistics (variance with \code{n - 1}, adjusted Fisher-Pearson skewness and sample excess kurtosis).
 #' @return Returns:
 #' \itemize{
 #'  \item{\code{"$mean"}} mean of the distribution.
@@ -490,9 +490,9 @@ NNS.moments <- function(x, population = TRUE) {
 #' @description Builds a list containing CUPM, DUPM, DLPM, CLPM and the overall covariance matrix.
 #' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
 #' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
-#' @param target numeric vector; thresholds for each column (defaults to colMeans).
+#' @param target numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use \code{colMeans(variable)}.
 #' @param variable numeric matrix or data.frame.
-#' @param pop_adj logical; TRUE adjusts population vs. sample moments.
+#' @param pop_adj logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.
 #' @param norm logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j).  
 #' @return A list: $cupm, $dupm, $dlpm, $clpm, $cov.matrix.
 #' @note When \code{norm = TRUE}, each cell (i,j) of the four quadrant matrices
@@ -531,8 +531,8 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = 
 #' @param degree_lpm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
-#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
 #' @param degree_y numeric; optional degree for y. If omitted, `degree_lpm` is
 #'   used for both x and y.
 #' @return Numeric vector of co‑LPM values.
@@ -560,8 +560,8 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y, degree_y = NULL) {
 #' @param degree_upm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
-#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
 #' @param degree_y numeric; optional degree for y. If omitted, `degree_upm` is
 #'   used for both x and y.
 #' @return Numeric vector of co‑UPM values.

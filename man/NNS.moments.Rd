@@ -9,7 +9,7 @@ NNS.moments(x, population = TRUE)
 \arguments{
 \item{x}{a numeric vector.}
 
-\item{population}{logical; \code{TRUE} (default) Performs the population adjustment. Otherwise returns the sample statistic.}
+\item{population}{logical; \code{TRUE} (default) returns the population (unadjusted) statistics. \code{FALSE} returns the sample-adjusted statistics (variance with \code{n - 1}, adjusted Fisher-Pearson skewness and sample excess kurtosis).}
 }
 \value{
 Returns:

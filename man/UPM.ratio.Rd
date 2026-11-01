@@ -9,7 +9,7 @@ UPM.ratio(degree, target, variable)
 \arguments{
 \item{degree}{numeric; degree = 0 gives frequency, degree = 1 gives area.}
 
-\item{target}{numeric vector; threshold(s). Defaults to mean(variable).}
+\item{target}{numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.}
 
 \item{variable}{numeric vector or data‑frame column to evaluate.}
 }
@@ -27,7 +27,7 @@ This function generates a standardized univariate upper partial moment
   x <- rnorm(100)
   UPM.ratio(0, mean(x), x)
 \dontrun{
-  plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), …)
+  plot(sort(x), UPM.ratio(0, sort(x), x))
 }
 }
 \references{

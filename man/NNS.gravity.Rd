@@ -9,7 +9,7 @@ NNS.gravity(x, discrete = FALSE)
 \arguments{
 \item{x}{vector of data.}
 
-\item{discrete}{logical; \code{FALSE} (default) for discrete distributions.}
+\item{discrete}{logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.}
 }
 \value{
 Returns a numeric value representing the central tendency of the distribution.

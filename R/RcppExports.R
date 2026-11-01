@@ -199,7 +199,7 @@ UPM_RCPP <- function(degree, target, variable, excess_ret) {
 #'   This function generates a standardized univariate lower partial moment
 #'   of any non‑negative degree for a given target.
 #' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.
-#' @param target numeric vector; threshold(s). Defaults to mean(variable).
+#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
 #' @param variable numeric vector or data‑frame column to evaluate.
 #' @return Numeric vector of standardized lower partial moments. For
 #'   \code{degree > 0}, a target at which every observation equals the target
@@ -228,7 +228,7 @@ LPM.ratio <- function(degree, target, variable) {
 #'   This function generates a standardized univariate upper partial moment
 #'   of any non‑negative degree for a given target.
 #' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area.
-#' @param target numeric vector; threshold(s). Defaults to mean(variable).
+#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
 #' @param variable numeric vector or data‑frame column to evaluate.
 #' @return Numeric vector of standardized upper partial moments. For
 #'   \code{degree > 0}, a target at which every observation equals the target
@@ -241,7 +241,7 @@ LPM.ratio <- function(degree, target, variable) {
 #'   x <- rnorm(100)
 #'   UPM.ratio(0, mean(x), x)
 #' \dontrun{
-#'   plot3d(x, y, Co.UPM(0, sort(x), sort(y), x, y), …)
+#'   plot(sort(x), UPM.ratio(0, sort(x), x))
 #' }
 #' @export
 UPM.ratio <- function(degree, target, variable) {
@@ -265,8 +265,8 @@ CoUPM_RCPP <- function(degree_upm, x, y, target_x, target_y, degree_y) {
 #' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
-#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
 #' @return Numeric vector of divergent LPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
@@ -289,8 +289,8 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x (defaults to mean(x)).
-#' @param target_y numeric vector; thresholds for y (defaults to mean(y)).
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
 #' @return Numeric vector of divergent UPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references

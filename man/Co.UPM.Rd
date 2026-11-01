@@ -13,9 +13,9 @@ Co.UPM(degree_upm, x, y, target_x, target_y, degree_y = NULL)
 
 \item{y}{numeric vector of the same length as x.}
 
-\item{target_x}{numeric vector; thresholds for x (defaults to mean(x)).}
+\item{target_x}{numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.}
 
-\item{target_y}{numeric vector; thresholds for y (defaults to mean(y)).}
+\item{target_y}{numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.}
 
 \item{degree_y}{numeric; optional degree for y. If omitted, `degree_upm` is
 used for both x and y.}

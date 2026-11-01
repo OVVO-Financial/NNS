@@ -9,7 +9,7 @@ LPM.ratio(degree, target, variable)
 \arguments{
 \item{degree}{numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.}
 
-\item{target}{numeric vector; threshold(s). Defaults to mean(variable).}
+\item{target}{numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.}
 
 \item{variable}{numeric vector or data‑frame column to evaluate.}
 }

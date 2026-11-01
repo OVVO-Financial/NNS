@@ -11,11 +11,11 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 
 \item{UPM_degree}{numeric; upper partial moment degree (0 = freq, 1 = area).}
 
-\item{target}{numeric vector; thresholds for each column (defaults to colMeans).}
+\item{target}{numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use \code{colMeans(variable)}.}
 
 \item{variable}{numeric matrix or data.frame.}
 
-\item{pop_adj}{logical; TRUE adjusts population vs. sample moments.}
+\item{pop_adj}{logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.}
 
 \item{norm}{logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j).}
 }

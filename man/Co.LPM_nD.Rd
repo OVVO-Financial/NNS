@@ -13,7 +13,7 @@ Co.LPM_nD(data, target, degree = 0, norm = TRUE)
 
 \item{degree}{numeric; degree for lower deviations (0 = frequency, 1 = area).}
 
-\item{norm}{logical; if \code{TRUE} (default) normalize to the maximum observed value (→ [0,1]), otherwise return the raw moment.}
+\item{norm}{logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. At \code{degree = 0} the three already sum to 1, so \code{norm} has no effect.}
 }
 \value{
 Numeric; the n‑dimensional co‑lower partial moment.
