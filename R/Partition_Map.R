@@ -14,6 +14,18 @@
 #' @param noise.reduction One of "mean", "median", "mode", "mode_class", or "off".
 #'
 #' @return A list containing `order`, `dt`, and `regression.points`.
+#' \itemize{
+#'   \item \code{order}: the order actually completed. It can be smaller than
+#'   the requested \code{order} when \code{obs.req} / \code{min.obs.stop}
+#'   stop the recursion (e.g. \code{order = 3} returns 2 for \code{n = 200}
+#'   with the default \code{obs.req = 8}).
+#'   \item \code{dt}: the observations with their final \code{quadrant} and
+#'   \code{prior.quadrant} labels.
+#'   \item \code{regression.points}: for a numeric \code{order}, one (x, y)
+#'   centroid per \code{prior.quadrant}, i.e. per cell of the previous order:
+#'   \code{order = 1} gives 4 final quadrants but a single regression point
+#'   (\code{"q"}), \code{order = 2} gives up to 16 quadrants and 4 points.
+#' }
 #' @details
 #' For a numeric \code{order}, each cell is split at a centre per coordinate, set
 #' by \code{noise.reduction}:
@@ -25,6 +37,11 @@
 #' \code{order = "max"} makes no splits: every observation is its own regression
 #' point, or with \code{type = "XONLY"} each distinct x gets the y centre of its
 #' observations.
+#' Quadrant labels append one digit per order. With split centres \code{cx}
+#' and \code{cy}, the digit for the default joint partition
+#' (\code{type = NULL}) is \code{1 + (x <= cx) + 2 * (y <= cy)}: 1 = upper-right,
+#' 2 = upper-left, 3 = lower-right, 4 = lower-left. For \code{type = "XONLY"}
+#' the digit is 1 for \code{x <= cx} and 2 for \code{x > cx}.
 #' @export
 #' 
 #' 
