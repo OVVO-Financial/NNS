@@ -163,8 +163,9 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
     
     new.f <- function(x) -f.x + ((f.x - f(point - x)) / x) * point + new.B
     
+    # Solve for h to the convergence tolerance; uniroot's default (~1.2e-4) is far coarser.
     inferred.h <- tryCatch(
-      uniroot(new.f, c(-2 * h, 2 * h), extendInt = "yes")$root,
+      uniroot(new.f, c(-2 * h, 2 * h), extendInt = "yes", tol = tol / 10)$root,
       error = function(e) NA_real_
     )
     
@@ -206,6 +207,14 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
     }
     
     new.B <- mean(c(lower.B, upper.B))
+    
+    # Converged once the bracket on B is tight: inferred.h cannot reach
+    # |h| < tol in double precision.
+    if(abs(upper.B - lower.B) <= tol * max(1, abs(new.B))) {
+      converged <- TRUE
+      termination.code <- 0L
+      break
+    }
     i <- i + 1L
   }
   
