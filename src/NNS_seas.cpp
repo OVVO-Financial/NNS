@@ -65,19 +65,18 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   
   std::vector<int> periods_vec;
   std::vector<double> cvmean_vec;
-  std::vector<double> mu(half_n), ss(half_n);
+  const double* x = variable.begin();
   for(int m=1;m<=half_n;++m){
-    std::fill(mu.begin(), mu.begin()+m, 0.0);
-    std::fill(ss.begin(), ss.begin()+m, 0.0);
-    for(int i=0, j=0;i<n;++i){ mu[j] += variable[i]; if(++j == m) j = 0; }
-    for(int j=0;j<m;++j) mu[j] /= (double)((n-1-j)/m + 1);
-    for(int i=0, j=0;i<n;++i){ double d = variable[i]-mu[j]; ss[j] += d*d; if(++j == m) j = 0; }
     double wsum = 0.0;
     for(int j=0;j<m;++j){
       int len = (n-1-j)/m + 1;
-      double sd = std::sqrt(ss[j] / (double)(len-1));
+      double mu = 0.0, ss = 0.0;
+      for(int i=j;i<n;i+=m) mu += x[i];
+      mu /= (double)len;
+      for(int i=j;i<n;i+=m){ double d = x[i]-mu; ss += d*d; }
+      double sd = std::sqrt(ss / (double)(len-1));
       // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
-      wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu[j]), tol * sd)) : sd);
+      wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
     }
     double cv_m = wsum / (double)n;
     if (cv_m < var_cov){
