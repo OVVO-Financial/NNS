@@ -41,15 +41,15 @@ NNS.ARMA.optim(
 \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.}
 
 \item{obj.fn}{expression;
-\code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}
+The default is the mean squared error divided by the degree-1 co-movement of \code{predicted} and \code{actual}, \code{mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))} (\code{Inf} when the co-movement is 0), to be minimized.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}
 
-\item{objective}{options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
+\item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 
 \item{linear.approximation}{logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.}
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{NNS.meboot} on the final estimates.}
+\item{pred.int}{numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the validation errors: the estimate plus / minus \code{abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)} (deterministic, symmetric).}
 
 \item{print.trace}{logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
@@ -72,7 +72,7 @@ Returns a list containing:
 }
 }
 \description{
-Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
+Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  The objective function \code{obj.fn} on a validation window (the last \code{length(variable) - training.set} observations) is used to determine the optimum across all \link{NNS.ARMA} methods.
 }
 \note{
 \itemize{

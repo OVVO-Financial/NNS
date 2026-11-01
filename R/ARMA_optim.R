@@ -1,6 +1,6 @@
 #' NNS ARMA Optimizer
 #'
-#' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  Minimum sum of squared errors (forecast-actual) is used to determine optimum across all \link{NNS.ARMA} methods.
+#' Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  The objective function \code{obj.fn} on a validation window (the last \code{length(variable) - training.set} observations) is used to determine the optimum across all \link{NNS.ARMA} methods.
 #'
 #' @param variable a numeric vector.
 #' @param h integer; \code{NULL} (default) Number of periods to forecast out of sample.  If \code{NULL}, \code{h = length(variable) - training.set}.
@@ -10,10 +10,10 @@
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.
 #' @param obj.fn expression;
-#' \code{expression(cor(predicted, actual, method = "spearman") / sum((predicted - actual)^2))} (default) Rank correlation / sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.
-#' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' The default is the mean squared error divided by the degree-1 co-movement of \code{predicted} and \code{actual}, \code{mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))} (\code{Inf} when the co-movement is 0), to be minimized.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.
+#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
-#' @param pred.int numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{NNS.meboot} on the final estimates.
+#' @param pred.int numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the validation errors: the estimate plus / minus \code{abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)} (deterministic, symmetric).
 #' @param print.trace logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param plot logical; \code{FALSE} (default)
@@ -210,7 +210,8 @@ NNS.ARMA.optim <- function(variable,
               h = h_eval,
               seasonal.factor = seasonal.combs[[i]][, k],
               method = "lin",
-              plot = FALSE
+              plot = FALSE,
+              negative.values = negative.values
             )
             eval(obj.fn)
           })
@@ -223,7 +224,8 @@ NNS.ARMA.optim <- function(variable,
               h = h_eval,
               seasonal.factor = seasonal.combs[[i]][, k],
               method = "lin",
-              plot = FALSE
+              plot = FALSE,
+              negative.values = negative.values
             )
             eval(obj.fn)
           })
@@ -231,6 +233,17 @@ NNS.ARMA.optim <- function(variable,
         
         # Ensure output is unlisted
         nns.estimates.indiv <- unlist(nns.estimates.indiv)
+      }
+      
+      if(j != "lin" && !linear.approximation){
+        # Exhaustive search: score every candidate seasonal set with the method itself.
+        nns.estimates.indiv <- unlist(lapply(1:ncol(seasonal.combs[[i]]), function(k) {
+          actual <- tail(variable, h_eval)
+          predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval,
+                                seasonal.factor = seasonal.combs[[i]][, k], method = j,
+                                plot = FALSE, negative.values = negative.values)
+          eval(obj.fn)
+        }))
       }
       
       if(j=="nonlin" && linear.approximation){
@@ -247,8 +260,9 @@ NNS.ARMA.optim <- function(variable,
         # Find the min (obj.fn) for a given seasonals sequence
         actual <- tail(variable, h_eval)
         
-        lin.predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = "lin", plot = FALSE, negative.values = negative.values)
-        predicted <- both.predicted <- (lin.predicted + nonlin.predicted) / 2
+        # Score the returned model: method = "both" averages lin and nonlin inside
+        # the recursion, unlike the mean of two separate forecasts.
+        predicted <- both.predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = "both", plot = FALSE, negative.values = negative.values)
         
         nns.estimates.indiv <- eval(obj.fn)
       }
@@ -340,11 +354,17 @@ NNS.ARMA.optim <- function(variable,
     nns.SSE <- min(unlist(overall.estimates))
     predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
     
-    if(length(nns.periods)>1){
-       weight.SSE <- eval(obj.fn)
+    if(length(nns.periods) > 1){
+      # Candidate: equal weights across the selected periods.
+      predicted.null <- predicted
+      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
+      weight.SSE <- eval(obj.fn)
+      if(is.na(weight.SSE)) weight.SSE <- Inf
+      predicted <- predicted.null
       
       if(weight.SSE < nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
+        nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
         
         errors <- predicted - actual
@@ -381,10 +401,16 @@ NNS.ARMA.optim <- function(variable,
     predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
     
     if(length(nns.periods) > 1){
+      # Candidate: equal weights across the selected periods.
+      predicted.null <- predicted
+      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
       weight.SSE <- eval(obj.fn)
+      if(is.na(weight.SSE)) weight.SSE <- -Inf
+      predicted <- predicted.null
       
       if(weight.SSE > nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
+        nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
         
         errors <- predicted - actual
@@ -421,6 +447,7 @@ NNS.ARMA.optim <- function(variable,
   }
 
   final.predicted <- predicted
+  best.SSE <- nns.SSE
  
   predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   
@@ -428,6 +455,7 @@ NNS.ARMA.optim <- function(variable,
     if(eval(obj.fn) < nns.SSE){
       nns.shrink = TRUE
       final.predicted <- predicted
+      best.SSE <- eval(obj.fn)
     }  else nns.shrink = FALSE
   }
   
@@ -435,27 +463,27 @@ NNS.ARMA.optim <- function(variable,
     if(eval(obj.fn) > nns.SSE){
       nns.shrink = TRUE
       final.predicted <- predicted
+      best.SSE <- eval(obj.fn)
     }  else nns.shrink = FALSE
   }
   
   
-  regressed_variable <- NNS.reg(1:length(variable), variable, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
+  # Smooth the training window only, so the validation score never sees the validation data.
+  regressed_training <- NNS.reg(1:training.set, variable[1:training.set], plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   
-  predicted <- NNS.ARMA(regressed_variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
+  predicted <- NNS.ARMA(regressed_training, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   
   nns.regress <- FALSE
   
   if(objective == "min"){
-    if(eval(obj.fn) < nns.SSE){
-      variable <- regressed_variable
+    if(eval(obj.fn) < best.SSE){
       nns.regress <- TRUE
       final.predicted <- predicted
     }
   }
   
   if(objective == "max"){
-    if(eval(obj.fn) > nns.SSE){
-      variable <- regressed_variable
+    if(eval(obj.fn) > best.SSE){
       nns.regress <- TRUE
       final.predicted <- predicted
     }
@@ -467,12 +495,17 @@ NNS.ARMA.optim <- function(variable,
   options(warn = oldw)
   
   
+  # nns.regress was tested on the smoothed series with shrink = TRUE.
+  if(nns.regress) nns.shrink <- TRUE
+  
   if(is.null(h_oos)){
     if(is.null(h)) h <- h_eval
-    model.results <- NNS.ARMA(OV, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    final.variable <- if(nns.regress) regressed_training else OV
+    model.results <- NNS.ARMA(final.variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   } else {
     if(is.null(h)) h <- h_oos
-    model.results <- NNS.ARMA(OV, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    final.variable <- if(nns.regress) NNS.reg(1:n, OV, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
+    model.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
   
