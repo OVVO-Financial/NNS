@@ -37,7 +37,7 @@ NNS.meboot(
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
-\item{drift}{logical; \code{drift = TRUE} (default) preserves the drift of the original series.}
+\item{drift}{logical; \code{drift = TRUE} (default) preserves the drift of the original series.  \code{drift = FALSE} removes it: replicates are a flat baseline plus the resampled residuals.}
 
 \item{target_drift}{numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.}
 
@@ -52,7 +52,7 @@ NNS.meboot(
 \item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
 
-\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.}
+\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.}
 
 \item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.}
 

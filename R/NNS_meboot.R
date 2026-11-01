@@ -6,7 +6,7 @@
 #' @param reps numeric; number of replicates to generate.
 #' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
-#' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
+#' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.  \code{drift = FALSE} removes it: replicates are a flat baseline plus the resampled residuals.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.
@@ -14,7 +14,7 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.
 #' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
@@ -256,8 +256,8 @@ NNS.meboot <- function(x,
     if (reps > 1) ensemble <- t(apply(ensemble, 1, function(z) sample(z, size = reps, replace = TRUE)))
   }
   
-  # Optional level scaling toward sd(x) 
-  if (isTRUE(expand.sd)) {
+  # Optional level scaling toward sd(x), which includes the original drift
+  if (isTRUE(expand.sd) && recon_slope == orig_drift) {
     ensemble <- NNS.meboot.expand.sd(x = x, ensemble = ensemble, ...)   
   }
   
