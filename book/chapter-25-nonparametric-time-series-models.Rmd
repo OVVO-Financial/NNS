@@ -213,13 +213,13 @@ The overall mean is
 and the sample standard deviation is approximately
 
 \[
-s_X \approx 5.345.
+s_X \approx 5.071.
 \]
 
 Hence the overall coefficient of variation is
 
 \[
-CV(X) \approx \frac{5.345}{16} = 0.334.
+CV(X) \approx \frac{5.071}{16} = 0.317.
 \]
 
 Now test lag \(m=2\). The component series are
@@ -242,7 +242,7 @@ For the second,
 \bar X_2 = 20.5,\qquad s_2 \approx 2.082,\qquad CV_2 \approx \frac{2.082}{20.5}=0.102.
 \]
 
-Both component coefficients of variation are far below the overall value \(0.334\). That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag \(2\) reveals meaningful recurring structure.
+Both component coefficients of variation are far below the overall value \(0.317\). That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag \(2\) reveals meaningful recurring structure.
 
 By contrast, consider lag \(m=3\). The three component series are
 

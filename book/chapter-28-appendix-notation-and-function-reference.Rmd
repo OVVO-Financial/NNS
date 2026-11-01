@@ -67,7 +67,7 @@ The R name is the canonical reference used throughout the book; the Python name 
 | $CoLPM, CoUPM$ | Concordant lower/upper co-partial moments | `Co.LPM(...)`, `Co.UPM(...)` |
 | $DLPM, DUPM$ | Divergent lower/upper co-partial moments | `D.LPM(...)`, `D.UPM(...)` |
 | $NNS.dep(X,Y)$ | Global nonlinear dependence measure | `NNS.dep(x, y)` |
-| $NNS.copula(X,Y)$ | Nonparametric dependence geometry / copula view | `NNS.copula(x, y)` |
+| $NNS.copula(X)$ | Nonparametric dependence geometry / copula view | `NNS.copula(cbind(x, y))` |
 | $NNS.caus(X,Y)$ | Directional causation diagnostic | `NNS.caus(x, y)` |
 
 ## Distribution comparison, dominance, and interval objects
@@ -110,7 +110,7 @@ To maintain continuity with Chapter 22's directional decision-region framing, th
 | Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
 | Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
 | Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Directionality can be nonlinear and state dependent. |
-| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree, target.x, target.y, x, y)` / `Co.UPM(degree, target.x, target.y, x, y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
+| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree_lpm, x, y, target_x, target_y)` / `Co.UPM(degree_upm, x, y, target_x, target_y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
 | Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapter 17 | Produces directional prediction intervals without normality assumptions. |
 
 

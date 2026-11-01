@@ -249,7 +249,7 @@ To be used in conjunction with `seasonal.factor = FALSE`. This parameter will en
 
 -   `mod.only`
 
-To be used in conjunction with `seasonal.factor = FALSE & modulo != NULL`. This parameter will ensure empirical patterns are kept along with the logical seasonal patterns.
+To be used in conjunction with `seasonal.factor = FALSE & modulo != NULL`. With `mod.only = TRUE` (default), only periods at multiples of `modulo` are kept: the detected periods are replaced by their nearest multiples. Set `mod.only = FALSE` to keep the empirically detected periods along with the logical seasonal patterns.
 
 -   `dynamic = TRUE`
 
