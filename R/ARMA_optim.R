@@ -13,7 +13,7 @@
 #' The default is the mean squared error divided by the degree-1 co-movement of \code{predicted} and \code{actual}, \code{mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))} (\code{Inf} when the co-movement is 0), to be minimized.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param linear.approximation logical; \code{TRUE} (default) Uses the best linear output from \code{NNS.reg} to generate a nonlinear and mixture regression for comparison.  \code{FALSE} is a more exhaustive search over the objective space.
-#' @param pred.int numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the validation errors: the estimate plus / minus \code{abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)} (deterministic, symmetric).
+#' @param pred.int numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the returned model's internal validation residuals (actual - forecast), adding their \link{LPM.VaR} and \link{UPM.VaR} at \code{(1 - pred.int)/2} to the final estimates.
 #' @param print.trace logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param plot logical; \code{FALSE} (default)
@@ -26,8 +26,8 @@
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 #' \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.
-#' \item{\code{$bias.shift}} a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
-#' \item{\code{$errors}} a vector of model errors from internal calibration.
+#' \item{\code{$bias.shift}} a numerical result of the overall bias of the returned model on the internal validation window, 0 when correcting it does not improve the objective function.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
+#' \item{\code{$errors}} a vector of the returned model's internal validation errors (forecast - actual), before \code{$bias.shift}.
 #' \item{\code{$results}} a vector of length \code{h}.
 #' \item{\code{$lower.pred.int}} a vector of lower prediction intervals per forecast point.
 #' \item{\code{$upper.pred.int}} a vector of upper prediction intervals per forecast point.
@@ -366,34 +366,8 @@ NNS.ARMA.optim <- function(variable,
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
         nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
-        
-        errors <- predicted - actual
-        bias <- gravity(na.omit(errors))
-        if(is.na(bias)) bias <- 0
-        predicted <- predicted - bias
-        bias.SSE <- eval(obj.fn)
-        
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE > weight.SSE) bias <- 0
-      } else {
-        nns.weights <- NULL
-        errors <- predicted - actual
-        bias <- gravity(na.omit(errors))
-        if(is.na(bias)) bias <- 0
-        predicted <- predicted - bias
-        bias.SSE <- eval(obj.fn)
-        
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
-      }
-    } else {
-      nns.weights <- NULL
-      errors <- predicted - actual
-      bias <- gravity(na.omit(errors))
-      if(is.na(bias)) bias <- 0
-      predicted <- predicted - bias
-      bias.SSE <- eval(obj.fn)
-      
-      if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
-    }
+      } else nns.weights <- NULL
+    } else nns.weights <- NULL
   } else {
     nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
     if(lin.only) nns.method <- "lin" else nns.method <- c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
@@ -412,38 +386,8 @@ NNS.ARMA.optim <- function(variable,
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
         nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
-        
-        errors <- predicted - actual
-        bias <- gravity(na.omit(errors))
-        if(is.na(bias)) bias <- 0
-        predicted <- predicted - bias
-        bias.SSE <- eval(obj.fn)
-        
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= weight.SSE) bias <- 0
-        
-      } else {
-        nns.weights <- NULL
-        errors <- predicted - actual
-        bias <- gravity(na.omit(errors))
-        if(is.na(bias)) bias <- 0
-        predicted <- predicted - bias
-        bias.SSE <- eval(obj.fn)
-        
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= nns.SSE) bias <- 0
-      }
-    } else {
-      nns.weights <- NULL
-      errors <- predicted - actual
-      bias <- gravity(na.omit(errors))
-      if(is.na(bias)) bias <- 0
-      predicted <- predicted - bias
-      bias.SSE <- eval(obj.fn)
-      if(objective=="min"){
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE >= nns.SSE) bias <- 0
-      } else {
-        if(is.na(bias.SSE)) bias <- 0 else if(bias.SSE <= nns.SSE) bias <- 0
-      }
-    }
+      } else nns.weights <- NULL
+    } else nns.weights <- NULL
   }
 
   final.predicted <- predicted
@@ -489,8 +433,20 @@ NNS.ARMA.optim <- function(variable,
     }
   }
 
-  lower_PIs_is <- final.predicted - abs(UPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
-  upper_PIs_is <- final.predicted + abs(UPM.VaR((1-pred.int)/2, 0, errors)) + abs(bias)
+  # Decided after shrink and nns.regress so errors, bias and intervals describe the returned model.
+  errors <- final.predicted - actual
+  bias <- gravity(na.omit(errors))
+  if(is.na(bias)) bias <- 0
+  predicted <- final.predicted
+  model.SSE <- eval(obj.fn)
+  predicted <- final.predicted - bias
+  bias.SSE <- eval(obj.fn)
+  if(!isTRUE(if(objective == "min") bias.SSE < model.SSE else bias.SSE > model.SSE)) bias <- 0
+  final.predicted <- final.predicted - bias
+  
+  residuals <- actual - final.predicted
+  lower_PIs_is <- final.predicted + LPM.VaR((1-pred.int)/2, 0, residuals)
+  upper_PIs_is <- final.predicted + UPM.VaR((1-pred.int)/2, 0, residuals)
   
   options(warn = oldw)
   
@@ -500,8 +456,7 @@ NNS.ARMA.optim <- function(variable,
   
   if(is.null(h_oos)){
     if(is.null(h)) h <- h_eval
-    final.variable <- if(nns.regress) regressed_training else OV
-    model.results <- NNS.ARMA(final.variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- final.predicted
   } else {
     if(is.null(h)) h <- h_oos
     final.variable <- if(nns.regress) NNS.reg(1:n, OV, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
@@ -509,8 +464,8 @@ NNS.ARMA.optim <- function(variable,
   }
   
   
-  lower_PIs <- model.results - abs(UPM.VaR((1-pred.int)/2, 0, errors)) - abs(bias)
-  upper_PIs <- model.results + abs(UPM.VaR((1-pred.int)/2, 0, errors)) + abs(bias)
+  lower_PIs <- model.results + LPM.VaR((1-pred.int)/2, 0, residuals)
+  upper_PIs <- model.results + UPM.VaR((1-pred.int)/2, 0, residuals)
 
   if(!negative.values){
     model.results <- pmax(0, model.results)
