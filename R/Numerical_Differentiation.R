@@ -5,7 +5,7 @@
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
 #' @param h numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.1 + 0.01)}.
-#' @param tol numeric; Sets the tolerance for the stopping condition of the inferred \code{h}. Defaults to \code{(tol = 1e-10)}.
+#' @param tol numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. Defaults to \code{(tol = 1e-10)}.
 #' @param max.iter integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.
 #' @param digits numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.
 #' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.
@@ -210,7 +210,7 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
     
     # Converged once the bracket on B is tight: inferred.h cannot reach
     # |h| < tol in double precision.
-    if(abs(upper.B - lower.B) <= tol * max(1, abs(new.B))) {
+    if(abs(upper.B - lower.B) <= tol * max(abs(point), abs(f.x - new.B))) {
       converged <- TRUE
       termination.code <- 0L
       break
