@@ -74,6 +74,9 @@ NNS.ARMA <- function(variable,
   
   if(anyNA(variable)) stop("You have some missing values, please address.")
   
+  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
+    stop("[h] must be a positive integer.")
+  
   method <- tolower(method)
   if(method == "means") shrink <- FALSE
   
