@@ -14,7 +14,7 @@ test_that("NNS.copula does not return 1 for an interior pair sum of 1", {
   X <- cbind(c(5, 3, 4, 5, 3, 3, 2, 5, 2, 2),
              c(2, 5, 1, 1, 5, 5, 5, 2, 2, 1),
              c(1, 1, 4, 2, 4, 5, 2, 4, 4, 5))
-  expect_equal(NNS.copula(X), 0.583687101729, tolerance = 1e-10)
+  expect_equal(NNS.copula(X), 0.577972677175, tolerance = 1e-10)
 })
 
 test_that("NNS.copula is 1 for perfect dependence with mixed signs", {

@@ -8,7 +8,7 @@
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
 #'
-#' @return Returns a multivariate dependence value [0,1].
+#' @return Returns a multivariate dependence value [0,1]. Each co-partial moment is compared with its value under independence, the product of the marginal partial moments at \code{target}, so independent variables give a value near 0 for any target and marginal distributions.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \doi{10.2139/ssrn.2745308}.
@@ -73,6 +73,15 @@ NNS.copula <- function (
   
   if(is.null(target)) target <- colMeans(X)
   
+  # A constant margin is independent of the rest and has no degree-1 lower share
+  vary <- vapply(seq_len(n), function(j) length(unique(X[ , j])) > 1L, logical(1))
+  if(!all(vary)){
+    if(sum(vary) < 2) return(0)
+    X <- X[ , vary, drop = FALSE]
+    target <- target[vary]
+    n <- ncol(X)
+  }
+  
   # Pairwise  
   discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
   utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
@@ -95,10 +104,15 @@ NNS.copula <- function (
   continuous_Co_pm <- sum(continuous_pm_cov$cupm[utr]) + sum(continuous_pm_cov$clpm[utr]) 
   continuous_D_pm <- sum(continuous_pm_cov$dupm[utr]) + sum(continuous_pm_cov$dlpm[utr]) 
   
-  indep_Co_pm <- .25 * (n^2 - n)
+  # Independence anchors from each margin's own lower-tail share, so they hold at any target
+  indep_anchors <- function(p) list(Co = sum((outer(p, p) + outer(1 - p, 1 - p))[utr]), D = 1 - prod(p) - prod(1 - p))
+  discrete_indep <- indep_anchors(vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1)))
+  continuous_indep <- if(continuous) indep_anchors(vapply(seq_len(n), function(j) LPM.ratio(1, target[j], X[ , j]), numeric(1))) else discrete_indep
+  # A boundary target can zero an anchor; an observed 0 then matches it exactly
+  rel_dev <- function(obs, indep) if(obs == indep) 0 else abs(obs - indep)/indep
   
-  discrete_dep <- abs(discrete_Co_pm-indep_Co_pm)/indep_Co_pm
-  continuous_dep <- abs(continuous_Co_pm-indep_Co_pm)/indep_Co_pm 
+  discrete_dep <- rel_dev(discrete_Co_pm, discrete_indep$Co)
+  continuous_dep <- rel_dev(continuous_Co_pm, continuous_indep$Co)
   
    
   discrete_dep <- min(max(discrete_dep, 0), 1)
@@ -108,15 +122,10 @@ NNS.copula <- function (
   discrete_D_pm <- DPM_nD(data = X, target = target, degree = 0, norm = TRUE)
   if(continuous) continuous_D_pm <- DPM_nD(data = X, target = target, degree = 1, norm = TRUE) else continuous_D_pm <- discrete_D_pm
   
-  # DPM_nD counts a point as concordant when it is all-below OR all-above the
-  # target (both fully-aligned orthants), so under independence
-  # P(discordant) = 1 - 2*0.5^n (0.5 when n = 2), not 1 - 0.5^n. The old
-  # 1 - 0.5^n anchor left a fixed residual in the discordant terms and a
-  # non-vanishing dependence floor for independent data.
-  indep_D_pm <- 1 - 2*(0.5^n)
-  
-  n_dim_discrete_dep <- abs(discrete_D_pm - indep_D_pm)/indep_D_pm 
-  n_dim_continuous_dep <- abs(continuous_D_pm - indep_D_pm)/indep_D_pm
+  n_dim_discrete_dep <- rel_dev(discrete_D_pm, discrete_indep$D)
+  n_dim_continuous_dep <- rel_dev(continuous_D_pm, continuous_indep$D)
+  n_dim_discrete_dep <- min(n_dim_discrete_dep, 1)
+  n_dim_continuous_dep <- min(n_dim_continuous_dep, 1)
 
 
   return(mean(c(discrete_dep, continuous_dep, n_dim_discrete_dep, n_dim_continuous_dep))^(1/2))

@@ -13,9 +13,9 @@ E <- NNS.copula(Z, continuous=F, plot=F)
 
 test_that(
 	"Copula", {
-	  expect_equal(B, 0.2554476, tolerance=1e-5)
-	  expect_equal(C, 0.2, tolerance=1e-5)
-	  expect_equal(D, 0.2470094, tolerance=1e-5)
-	  expect_equal(E, 0.2, tolerance=1e-5)
+	  expect_equal(B, 0.2542705, tolerance=1e-5)
+	  expect_equal(C, 0.1969773, tolerance=1e-5)
+	  expect_equal(D, 0.2506271, tolerance=1e-5)
+	  expect_equal(E, 0.2088075, tolerance=1e-5)
 	}
 )
