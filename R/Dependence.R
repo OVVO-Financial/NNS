@@ -9,6 +9,9 @@
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
+#' @details
+#' Each partition cell's concordance (degree 0 and degree 1) is measured against its expectation under the within-cell permutation null and rescaled so that perfect dependence stays at 1.  Independent variables therefore score near 0 at any sample size, instead of a floor that shrank only like \code{n^(-1/4)} (about 0.32 at n = 1000).  Cells below chance can pull the average down; Dependence is floored at 0 after averaging, and \code{|Correlation|} never exceeds the Dependence of the same direction.
+#'
 #' @note
 #' For asymmetrical \code{(asym = TRUE)} matrices, entry \code{[i, j]} is the directional dependence ([row variable i] ---> [column variable j]), i.e. \code{NNS.dep(x[, i], x[, j], asym = TRUE)}, the dependence of column \code{j} on row variable \code{i}.
 #'

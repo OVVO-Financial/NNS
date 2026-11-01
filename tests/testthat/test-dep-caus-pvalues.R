@@ -21,7 +21,8 @@ test_that("NNS.dep Dependence p.value is the upper-tail permutation p-value", {
   null <- apply(perms, 2, function(i) NNS.dep(x, y[i])$Dependence)
   set.seed(6); p <- NNS.dep(x, y, p.value = TRUE)
   expect_equal(p$`Dependence p.value`, (1 + sum(null >= obs)) / 101)
-  expect_equal(p$`Dependence p.value`, 7 / 101)
+  # 7 / 101 before the per-cell debiasing (#70) removed the independence floor.
+  expect_equal(p$`Dependence p.value`, 1 / 101)
 })
 
 test_that("NNS.dep Dependence p.value is at least 1 / 101", {
@@ -35,7 +36,8 @@ test_that("NNS.dep p.value = TRUE honours asym", {
   set.seed(4); p <- NNS.dep(y, x, p.value = TRUE, asym = TRUE)
   expect_equal(p$Correlation, direct$Correlation)
   expect_equal(p$Dependence, direct$Dependence)
-  expect_equal(p$Dependence, 0.6005389, tolerance = 1e-6)
+  # x is not a function of y = x^2: 0.6005389 before the per-cell debiasing (#70).
+  expect_equal(p$Dependence, 0.1027830, tolerance = 1e-6)
 })
 
 test_that("NNS.dep rejects infinite values", {

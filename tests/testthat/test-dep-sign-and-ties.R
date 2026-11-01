@@ -34,7 +34,13 @@ test_that("degree-0 nD co-moments partition the sample when points tie the targe
 })
 
 test_that("NNS.dep degree-0 discordant count excludes ties with the cell mean", {
+  # The middle point ties both cell means, so it counts as co-lower and the
+  # cell is not all-discordant. Three points then carry no evidence beyond
+  # the within-cell permutation null (#70), so the result is 0, not -1.
   x <- -1:1
+  expect_equal(unname(unlist(NNS.dep(x, -x))), c(0, 0))
+  # With five points the countermonotone signal clears the null.
+  x <- -2:2
   expect_equal(unname(unlist(NNS.dep(x, -x))), c(-1, 1) * sqrt(2 / 3))
 })
 
