@@ -25,15 +25,26 @@ struct ColPre {
   int m{0};
 };
 
+inline void neumaier_add(double& sum, double& err, double v){
+  double t = sum + v;
+  err += (std::fabs(sum) >= std::fabs(v)) ? (sum - t) + v : (v - t) + sum;
+  sum = t;
+}
+
 static void finish_col(ColPre& c){
   if (c.m == 0) stop("Each sample needs at least one observation.");
   std::sort(c.vals.begin(), c.vals.end());
   c.P1.assign(c.m+1, 0.0);
   c.P2.assign(c.m+1, 0.0);
+  // Compensated sums: a plain running sum drifts by up to ~m*eps*|x|,
+  // which for large samples exceeds the tie tolerance in sd_dom_pair.
+  double s1 = 0.0, e1 = 0.0, s2 = 0.0, e2 = 0.0;
   for(int k=1;k<=c.m;++k){
     double v = c.vals[k-1];
-    c.P1[k] = c.P1[k-1] + v;
-    c.P2[k] = c.P2[k-1] + v*v;
+    neumaier_add(s1, e1, v);
+    neumaier_add(s2, e2, v*v);
+    c.P1[k] = s1 + e1;
+    c.P2[k] = s2 + e2;
   }
   c.S1   = c.P1[c.m];
   c.S2   = c.P2[c.m];
