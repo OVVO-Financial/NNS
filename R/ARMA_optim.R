@@ -364,6 +364,7 @@ NNS.ARMA.optim <- function(variable,
       
       if(weight.SSE < nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
+        nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
         
         errors <- predicted - actual
@@ -409,6 +410,7 @@ NNS.ARMA.optim <- function(variable,
       
       if(weight.SSE > nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
+        nns.SSE <- weight.SSE
         predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
         
         errors <- predicted - actual

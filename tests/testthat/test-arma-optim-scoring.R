@@ -58,3 +58,20 @@ test_that("the out-of-sample forecast applies nns.regress to the full series", {
   expect_true(o$shrink)
   expect_equal(o$results, p + o$bias.shift)
 })
+
+test_that("obj.fn is the equal-weights score when equal weights win (min)", {
+  x <- two_cycles()
+  o <- run_optim(x, h = 10, seasonal.factor = c(7, 12), obj.fn = mse)
+  p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = o$method,
+                weights = c(0.5, 0.5), plot = FALSE)
+  expect_equal(o$obj.fn, mean((p - tail(x, 32))^2))
+})
+
+test_that("obj.fn is the equal-weights score when equal weights win (max)", {
+  x <- two_cycles()
+  o <- run_optim(x, h = 10, seasonal.factor = c(7, 12), objective = "max",
+             obj.fn = expression(-mean((predicted - actual)^2)))
+  p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = o$method,
+                weights = c(0.5, 0.5), plot = FALSE)
+  expect_equal(o$obj.fn, -mean((p - tail(x, 32))^2))
+})
