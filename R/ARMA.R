@@ -81,6 +81,7 @@ NNS.ARMA <- function(variable,
   if(method == "means") shrink <- FALSE
   
   oldw <- getOption("warn")
+  on.exit(options(warn = oldw), add = TRUE)
   options(warn = -1)
   
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
@@ -359,9 +360,6 @@ NNS.ARMA <- function(variable,
     
     par(original.par)
   }
-  
-  
-  options(warn = oldw)
   
   if(!is.null(pred.int)){
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_PIs),  pmax(Estimates, upper_PIs))
