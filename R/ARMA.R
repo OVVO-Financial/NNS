@@ -10,8 +10,8 @@
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param modulo integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.
 #' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
-#' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.
-#' @param best.periods integer; [2] (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
+#' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.  Numeric weights must have one value per seasonal lag and are treated as relative weights (rescaled to sum to 1).  With \code{(dynamic = TRUE)} the lags are re-selected at every step, so only \code{NULL} or \code{"equal"} weights are accepted.
+#' @param best.periods integer; 1 (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #' \code{(seasonal.factor = FALSE, best.periods = NULL)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.
@@ -70,14 +70,20 @@ NNS.ARMA <- function(variable,
   
   if(is.numeric(seasonal.factor) && dynamic) stop('Hmmm...Seems you have "seasonal.factor" specified and "dynamic = TRUE".  Nothing dynamic about static seasonal factors!  Please set "dynamic = FALSE" or "seasonal.factor = FALSE"')
   
+  if(is.numeric(weights) && dynamic) stop('Numeric "weights" cannot be used with "dynamic = TRUE", which re-selects the seasonal lags at every step.  Please set "weights" to NULL or "equal", or "dynamic = FALSE"')
+  
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
   
   if(anyNA(variable)) stop("You have some missing values, please address.")
+  
+  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
+    stop("[h] must be a positive integer.")
   
   method <- tolower(method)
   if(method == "means") shrink <- FALSE
   
   oldw <- getOption("warn")
+  on.exit(options(warn = oldw), add = TRUE)
   options(warn = -1)
   
   if(!is.null(best.periods) && !is.numeric(seasonal.factor)) seasonal.factor <- FALSE
@@ -121,6 +127,8 @@ NNS.ARMA <- function(variable,
       Seasonal.weighting <- 1 / pmax(Relative.seasonal, .Machine$double.eps)
       Observation.weighting <- 1 / sqrt(seasonal.factor)
       Weights <- (Seasonal.weighting * Observation.weighting) / sum(Observation.weighting * Seasonal.weighting)
+      # A constant series has CV 0/0 = NaN for every lag: weight the lags equally.
+      if(any(!is.finite(Weights))) Weights <- rep(1/length(lag), length(lag))
       seasonal.plot <- FALSE
     } else {
       Weights <- weights
@@ -134,23 +142,28 @@ NNS.ARMA <- function(variable,
       if(is.null(best.periods)){
         M <- M$all.periods
       } else {
-        if(!seasonal.factor && is.numeric(best.periods) && (length(M$all.periods$Period) < best.periods)){
-          best.periods <- length(M$all.periods$Period)
-        }
-        if(!seasonal.factor && is.null(best.periods)){
-          best.periods <- length(M$all.periods$Period)
-        }
-        M <- M$all.periods[1 : best.periods, ]
+        M <- M$all.periods[1 : min(best.periods, length(M$all.periods$Period)), ]
       }
     }
     
-    ASW <- ARMA.seas.weighting(seasonal.factor, M)
+    ASW <- .arma_lag_weights(seasonal.factor, M)
     lag <- ASW$lag
     
     if(is.null(weights)) Weights <- ASW$Weights else Weights <- weights
     
     if(is.character(weights)) Weights <- rep(1/length(lag), length(lag))
     
+  }
+  
+  # User-supplied weights: "equal", or one relative weight per lag.
+  if(!is.null(weights)){
+    if(is.character(weights)){
+      Weights <- rep(1/length(lag), length(lag))
+    } else {
+      if(length(weights) != length(lag)) stop("weights must have one value per seasonal lag (length(weights) == length(seasonal.factor)).")
+      if(!all(is.finite(weights)) || sum(weights) == 0) stop("weights must be finite and must not sum to 0.")
+      Weights <- weights / sum(weights)
+    }
   }
   
   # Vectorized linear
@@ -192,24 +205,21 @@ NNS.ARMA <- function(variable,
     for (j in 1:h) {
       # Regenerate seasonal.factor if dynamic
       if (dynamic) {
-        seas.matrix <- NNS.seas(variable, plot = FALSE)
+        # Same period selection as the static path, on the extended series.
+        seas.matrix <- NNS.seas(variable, plot = FALSE, modulo = modulo, mod.only = mod.only)
         if (!is.list(seas.matrix)) {
           M <- t(1)
         } else {
-          if (is.null(best.periods)) {
-            M <- seas.matrix$all.periods
-            best.periods <- length(M$all.periods$Period)
-          } else {
-            if (length(M$all.periods$Period) < best.periods) {
-              best.periods <- length(M$all.periods$Period)
-            }
-            M <- seas.matrix$all.periods[1:best.periods, ]
+          M <- seas.matrix$all.periods
+          if (!is.null(best.periods)) {
+            M <- M[1:min(best.periods, length(M$Period)), ]
           }
         }
         
-        ASW <- ARMA.seas.weighting(seasonal.factor, M)
+        ASW <- .arma_lag_weights(seasonal.factor, M)
         lag <- ASW$lag
         Weights <- ASW$Weights
+        if(is.character(weights)) Weights <- rep(1/length(lag), length(lag))
       }
       
       # Re-Generate vectors for 1:lag if dynamic
@@ -243,7 +253,7 @@ NNS.ARMA <- function(variable,
           last.y + (rise / run)
         })
         
-        Regression.Estimates <- pmax(0, Regression.Estimates)
+        if(!negative.values) Regression.Estimates <- pmax(0, Regression.Estimates)
         Nonlin.estimates <- sum(Regression.Estimates * Weights)
       }
       
@@ -267,9 +277,11 @@ NNS.ARMA <- function(variable,
         if(!negative.values)  Lin.estimates <- pmax(0, Lin.estimates)
       }
       
-      if (method == "lin") Estimates[j] <- sum(Lin.estimates * Weights)
+      # Lin.estimates / Nonlin.estimates are already weighted sums over lags.
+      if (method == "lin") Estimates[j] <- Lin.estimates
+      if (method == "means") Estimates[j] <- Lin.estimates
       if (method == 'both') Estimates[j] <- mean(c(Lin.estimates, Nonlin.estimates))
-      if (method == "nonlin")  Estimates[j] <- sum(Nonlin.estimates * Weights)
+      if (method == "nonlin")  Estimates[j] <- Nonlin.estimates
       
       variable <- c(variable, Estimates[j])
       FV <- variable
@@ -280,7 +292,7 @@ NNS.ARMA <- function(variable,
     if (method != "means"){
       Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
       lin.resid <- mean(abs(Lin.Regression.Estimates - mean(Lin.Regression.Estimates)))
-    }
+    } else lin.resid <- 0
     PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = -1, upper_rho = 1, by = .2)$replicates)
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
@@ -352,9 +364,6 @@ NNS.ARMA <- function(variable,
     par(original.par)
   }
   
-  
-  options(warn = oldw)
-  
   if(!is.null(pred.int)){
     results <- cbind.data.frame(Estimates,  pmin(Estimates, lower_PIs),  pmax(Estimates, upper_PIs))
     colnames(results) = c("Estimates",
@@ -364,4 +373,21 @@ NNS.ARMA <- function(variable,
   } else {
     return(Estimates)
   }
+}
+
+
+# Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
+# the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
+.arma_lag_weights <- function(sf, M){
+  if (isTRUE(sf) && is.data.frame(M) && "Period" %in% names(M)) {
+    return(list(lag = M$Period[1], Weights = 1))
+  }
+  ASW <- ARMA.seas.weighting(sf, M)
+  # The weights are (VarCV - CV) / sqrt(lag), normalised: all 0 when every
+  # CV == VarCV, which forced a forecast of 0.
+  w <- ASW$Weights
+  if (length(ASW$lag) > 0 && (length(w) == 0 || all(w == 0) || any(!is.finite(w)))) {
+    ASW$Weights <- rep(1 / length(ASW$lag), length(ASW$lag))
+  }
+  ASW
 }
