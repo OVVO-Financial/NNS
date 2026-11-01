@@ -19,7 +19,7 @@ NNS.seas(variable, modulo = NULL, mod.only = TRUE, plot = TRUE)
 Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{NNS.seas} will return ("No Seasonality Detected").
 }
 \description{
-Seasonality test based on the coefficient of variation for the variable and lagged component series.  A result of 1 signifies no seasonality present.
+Seasonality test based on the coefficient of variation for the variable and lagged component series.  For each lag \code{m}, the variable is split into its \code{m} component series \code{variable[seq(j, n, m)]}, \code{j = 1, ..., m}, and lag \code{m} is reported when the length-weighted mean of the component coefficients of variation is below the coefficient of variation of the variable.  When the mean of the variable is zero up to rounding, standard deviations are compared instead.  A result of 1 signifies no seasonality present.
 }
 \examples{
 \dontrun{
