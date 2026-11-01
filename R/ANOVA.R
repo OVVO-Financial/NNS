@@ -135,7 +135,7 @@ NNS.ANOVA <- function(
       )
       
       # Robust point estimate of certainty
-      robust_estimate <- median(nns.certainties)
+      robust_estimate <- median(nns.certainties, na.rm = TRUE)
       
       # --- CI for robust certainty, honoring confidence.interval and tails
       alpha <- if (tails == "both") (1 - confidence.interval) / 2 else 1 - confidence.interval

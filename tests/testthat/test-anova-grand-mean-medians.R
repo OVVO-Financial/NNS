@@ -39,3 +39,19 @@ test_that("robust point estimate is the median of the resampled certainties", {
   r <- NNS.ANOVA(cx, ty, robust = TRUE, plot = FALSE)
   expect_equal(r[["Robust Certainty Estimate"]], median(cs))
 })
+
+test_that("robust point estimate skips NaN resampled certainties", {
+  tx <- c(rep(0, 9), 1)
+  ty <- c(rep(0, 9), 2)
+  set.seed(171)
+  ci <- replicate(100, sample.int(length(tx), replace = TRUE))
+  ti <- replicate(100, sample.int(length(ty), replace = TRUE))
+  cs <- vapply(seq_len(100), function(i) {
+    NNS:::NNS.ANOVA.bin(tx[ci[, i]], ty[ti[, i]], plot = FALSE)$Certainty
+  }, numeric(1))
+
+  set.seed(171)
+  r <- NNS.ANOVA(tx, ty, robust = TRUE, plot = FALSE)
+  expect_equal(r[["Robust Certainty Estimate"]], median(cs, na.rm = TRUE))
+  expect_true(is.finite(r[["Robust Certainty Estimate"]]))
+})
