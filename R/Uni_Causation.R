@@ -3,18 +3,14 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
   if(tau=="cs") tau <- 0
   if(tau=="ts") tau <- 3
 
-  xy <- NNS.norm(cbind(x, y), linear = FALSE, chart.type = NULL)
-
   min.length <- min(length(x), length(y))
 
-  x.vectors <- list(tau+1)
-  y.vectors <- list(tau+1)
+  x.vectors <- vector("list", tau + 1)
+  y.vectors <- vector("list", tau + 1)
 
   ## Create tau vectors
   if(tau > 0){
     for (i in 0:tau){
-        x.vectors[[paste('x.tau.', i, sep = "")]] <- numeric(0L)
-        y.vectors[[paste('y.tau.', i, sep = "")]] <- numeric(0L)
         start <- tau - i + 1
         end <- min.length - i
         x.vectors[[i + 1]] <- x[start : end]
@@ -95,10 +91,12 @@ Uni.caus <- function(x, y, tau, plot = TRUE){
 
 
 
-# Internal helper: extract canonical signed causation from the third element of cp.
+# Internal helper: extract canonical signed causation x -> y from cp.
 signed_from_cp <- function(cp){
-  # Extract the third element (log-ratio in direction of stronger causation) and cap infinities
+  # The third element is the log-ratio toward the stronger causation; orient it
+  # as x -> y, as NNS.caus.matrix does, and cap infinities.
   raw_val <- as.numeric(cp[3])
+  if(identical(names(cp)[3], "C(y--->x)")) raw_val <- -raw_val
   if(is.infinite(raw_val)) raw_val <- sign(raw_val) * 100
   return(raw_val)
 }
@@ -126,15 +124,15 @@ NNS.caus_core <- function(x, y = NULL,
                           permute = c("y","x","both"),
                           seed = NULL,
                           conf.int = 0.95){
-  if(!is.null(y))  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+  if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
   if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
   
   orig.tau <- tau
   orig.plot <- plot
   
-  if(any(class(x)%in%c("tbl","data.table")) && dim(x)[2]==1) x <- as.vector(unlist(x))
+  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
-  if(!is.null(y) && any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
+  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
   
   if(factor.2.dummy){
     if(!is.null(dim(x))){
@@ -160,18 +158,24 @@ NNS.caus_core <- function(x, y = NULL,
   if(!is.null(y)){
     if(is.factor(y)) y <- as.numeric(y)
     
+    # ---- input validation ---------------------------------------------------
+    if(NCOL(x) > 1 || NCOL(y) > 1)
+      stop("x and y must each be a single variable (factor.2.dummy = TRUE turns a factor with k levels into k - 1 columns).")
+    if(length(x) != length(y)) stop("x and y must have the same length.")
+    if(any(is.infinite(x)) || any(is.infinite(y))) stop("x and y must be finite.")
+    if(length(unique(x)) < 2 || length(unique(y)) < 2)
+      stop("x and y must not be constant: causation is undefined for a variable with no variation.")
+    if(!(identical(tau, "cs") || identical(tau, "ts"))){
+      if(!is.numeric(tau) || length(tau) != 1 || !is.finite(tau) || tau < 0 ||
+         tau != round(tau) || tau >= length(x) - 2)
+        stop("tau must be \"cs\", \"ts\" or a single non-negative integer smaller than length(x) - 2.")
+    }
+    
     if(is.numeric(tau)){
       Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
       Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
       Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
       Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      if(Causation.x.given.y == Causation.y.given.x ||
-         Causation.x.given.y == 0 || Causation.y.given.x == 0){
-        Causation.x.given.y <- Uni.caus(x, y, tau = tau, plot = FALSE)
-        Causation.y.given.x <- Uni.caus(y, x, tau = tau, plot = FALSE)
-        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      }
     }
     
     if(identical(tau, "cs")){
@@ -179,13 +183,6 @@ NNS.caus_core <- function(x, y = NULL,
       Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
       Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
       Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      if(Causation.x.given.y == Causation.y.given.x ||
-         Causation.x.given.y == 0 || Causation.y.given.x == 0){
-        Causation.x.given.y <- Uni.caus(x, y, tau = 0, plot = FALSE)
-        Causation.y.given.x <- Uni.caus(y, x, tau = 0, plot = FALSE)
-        Causation.x.given.y[is.na(Causation.x.given.y)] <- 0
-        Causation.y.given.x[is.na(Causation.y.given.x)] <- 0
-      }
     }
     
     if(identical(tau, "ts")){
@@ -195,6 +192,9 @@ NNS.caus_core <- function(x, y = NULL,
       
       x_tau <- x_tau[x_tau <= (l)^(1/2)][1]
       y_tau <- y_tau[y_tau <= (l)^(1/2)][1]
+      if(is.na(x_tau) || is.na(y_tau))
+        stop(paste0("tau = \"ts\": NNS.seas found no seasonal period <= sqrt(length(x)) for ",
+                    if(is.na(x_tau)) "x" else "y", "; supply a numeric tau instead."))
       
       Causation.y.given.x <- Uni.caus(y, x, tau = x_tau, plot = FALSE)
       Causation.x.given.y <- Uni.caus(x, y, tau = y_tau, plot = FALSE)

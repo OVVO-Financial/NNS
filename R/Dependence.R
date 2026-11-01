@@ -4,13 +4,13 @@
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
-#' @param asym logical; \code{FALSE} (default) Allows for asymmetrical dependencies.
-#' @param p.value logical; \code{FALSE} (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.
+#' @param asym logical; \code{FALSE} (default) returns the symmetric measures. If \code{TRUE}, returns the asymmetric (directional) measures: the partition is built on \code{x} only and the result measures the dependence of \code{y} on \code{x} (\code{y} as a function of \code{x}); swap the arguments for the other direction.
+#' @param p.value logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
 #' @note
-#' For asymmetrical \code{(asym = TRUE)} matrices, directional dependence is returned as ([column variable] ---> [row variable]).
+#' For asymmetrical \code{(asym = TRUE)} matrices, entry \code{[i, j]} is the directional dependence ([row variable i] ---> [column variable j]), i.e. \code{NNS.dep(x[, i], x[, j], asym = TRUE)}, the dependence of column \code{j} on row variable \code{i}.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -68,6 +68,8 @@ NNS.dep <- function(x,
   # ---- missing values -------------------------------------------------------
   if (anyNA(x)) stop("x has missing values, please address.")
   if (!is.null(y) && anyNA(y)) stop("y has missing values, please address.")
+  if (any(is.infinite(x))) stop("x must be finite.")
+  if (!is.null(y) && any(is.infinite(y))) stop("y must be finite.")
   
   # ---- p.value permutation setup --------------------------------------------
   if (p.value) {
@@ -82,10 +84,7 @@ NNS.dep <- function(x,
   # ---- matrix / p.value path ------------------------------------------------
   if (is.null(y)) {
     if (p.value) {
-      original.par <- par(no.readonly = TRUE)
-      on.exit(par(original.par), add = TRUE)
-      
-      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g))
+      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g, asym = asym))
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
@@ -95,6 +94,9 @@ NNS.dep <- function(x,
       dep_upper_CI <- UPM.VaR(.025, 0, deps[-c(1L, 2L)])
       
       if (print.map) {
+        # par(no.readonly = TRUE) opens a device even when nothing is drawn.
+        original.par <- par(no.readonly = TRUE)
+        on.exit(par(original.par), add = TRUE)
         par(mfrow = c(1L, 2L))
         hist(cors[-c(1L, 2L)], main = "NNS Correlation", xlab = NULL,
              xlim = c(min(cors), max(cors[-1L])))
@@ -117,8 +119,9 @@ NNS.dep <- function(x,
                                     UPM(0, cors[2L], cors[-c(1L, 2L)])),
         "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
         "Dependence"          = as.numeric(deps[2L]),
-        "Dependence p.value"  = min(LPM(0, deps[2L], deps[-c(1L, 2L)]),
-                                    UPM(0, deps[2L], deps[-c(1L, 2L)])),
+        # Dependence is a magnitude: only the upper tail is evidence against independence.
+        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L])) /
+                                (1 + length(deps[-c(1L, 2L)])),
         "Dependence 95% CIs"  = c(dep_lower_CI, dep_upper_CI)
       ))
     }
@@ -172,7 +175,7 @@ NNS.dep <- function(x,
 }
 
 
-NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
+NNS.dep.matrix <- function(x, asym = FALSE){
   
   n <- ncol(x)
   if(is.null(n)){
@@ -182,8 +185,6 @@ NNS.dep.matrix <- function(x, order = NULL, degree = NULL, asym = FALSE){
   if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
   
   x <- data.matrix(x)
-  
-  if(nrow(x) < 20 ) order <- 2
   
   upper_lower <- function(x, y, asym){
     basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
