@@ -13,7 +13,7 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 
 \item{target}{numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).}
 
-\item{type}{options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} is computed by inclusion-exclusion over all subsets of the columns (\eqn{2^d} joint CDF evaluations), and the hazard and cumulative hazard are built from it.}
+\item{type}{options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, computed by inclusion-exclusion over all subsets of the columns (\eqn{2^d} joint CDF evaluations), and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it.}
 
 \item{plot}{logical; plots CDF.}
 }
