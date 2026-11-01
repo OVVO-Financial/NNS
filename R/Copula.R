@@ -77,7 +77,13 @@ NNS.copula <- function (
   discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
   utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
   discrete_Co_pm <- sum(discrete_pm_cov$cupm[utr]) + sum(discrete_pm_cov$clpm[utr]) 
-  if(discrete_Co_pm==1 || discrete_Co_pm==0) return(1)
+  # Perfect dependence: every pair fully concordant (the sum over the
+  # choose(n, 2) pairs equals choose(n, 2)) or, for two variables, fully
+  # discordant (sum 0). Comparing the sum with 1 was the bivariate rule and
+  # fired for interior values when n >= 3. The sum of count fractions is
+  # compared with a tolerance far below one observation (1 / nrow).
+  n_pairs <- n * (n - 1) / 2
+  if(abs(discrete_Co_pm - n_pairs) < 1e-9 || (n == 2 && abs(discrete_Co_pm) < 1e-9)) return(1)
   
   
   if(continuous){
