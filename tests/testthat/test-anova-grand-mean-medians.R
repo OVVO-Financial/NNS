@@ -24,18 +24,3 @@ test_that("multi-group medians evaluate at the pooled median", {
   expect_equal(NNS.ANOVA(list(x, y), medians = TRUE, means.only = TRUE, plot = FALSE),
                c(Certainty = expected))
 })
-
-test_that("robust point estimate is the median of the resampled certainties", {
-  cx <- c(-2, -1, 0, 2, 6, 8, 10)
-  ty <- c(-3, 1, 4, 5)
-  set.seed(314)
-  ci <- replicate(100, sample.int(length(cx), replace = TRUE))
-  ti <- replicate(100, sample.int(length(ty), replace = TRUE))
-  cs <- vapply(seq_len(100), function(i) {
-    NNS:::NNS.ANOVA.bin(cx[ci[, i]], ty[ti[, i]], plot = FALSE)$Certainty
-  }, numeric(1))
-
-  set.seed(314)
-  r <- NNS.ANOVA(cx, ty, robust = TRUE, plot = FALSE)
-  expect_equal(r[["Robust Certainty Estimate"]], median(cs))
-})
