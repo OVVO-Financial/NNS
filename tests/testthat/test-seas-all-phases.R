@@ -86,3 +86,8 @@ test_that("a constant zero phase scores 0 and keeps its lag", {
   expect_equal(r$Coefficient.of.Variation, rep(0, 2))
   expect_equal(NNS.ARMA(x, h = 2, plot = FALSE, seasonal.plot = FALSE), c(0, 10))
 })
+
+test_that("a constant decimal series has no seasonal period", {
+  expect_equal(NNS.seas(rep(.1, 20), plot = FALSE)$best.period, 1)
+  expect_equal(NNS.seas(rep(c(.1, 1), 10), plot = FALSE)$best.period, 2)
+})
