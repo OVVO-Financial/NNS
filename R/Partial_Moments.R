@@ -190,7 +190,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
 #' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).
-#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it.
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it, and need \code{degree = 0} for multivariate \code{variable}.  At \code{degree > 0} with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At \code{degree = 0}, and in one dimension at any degree, they are proper distribution functions.
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
@@ -330,6 +330,11 @@ NNS.CDF <- function(variable,
   
   # — Multivariate case (d >= 2)
   if (!is.null(dim(variable)) && ncol(variable) >= 2) {
+    # At degree > 0 each target's co-partial moment is normalised by its own
+    # total, which is not a joint distribution function (#100): the hazard
+    # types divide by it as if it were one, so they need degree 0.
+    if (degree > 0 && type %in% c("hazard", "cumulative hazard"))
+      stop("type = '", type, "' needs degree = 0 for multivariate variable: at degree > 0 the joint ratio is not a distribution function.")
     xlab <- colnames(variable)[1]
     ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
     
