@@ -14,7 +14,7 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}) keeps the original reconstruction.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.
 #' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
@@ -139,9 +139,13 @@ NNS.meboot <- function(x,
   # slope by about 1e-15, and an exact comparison sent it down the
   # changed-drift path (AirPassengers replicates moved by up to 75). The
   # tolerance is relative to the slope's own scale: sd(x) / n is the slope of a
-  # trend that spans one standard deviation over the sample.
+  # trend that spans one standard deviation over the sample. The second term
+  # covers rounding in the slope fit itself, which grows with the level of x:
+  # each centred value carries about eps * max|x| of rounding, which moves an
+  # OLS slope on t = 1:n by up to about eps * max|x| / sd(t).
+  slope_rounding <- if (n > 1) 8 * .Machine$double.eps * max(abs(x)) / stats::sd(seq_len(n)) else 0
   same_slope <- isTRUE(abs(recon_slope - orig_drift) <=
-                         sqrt(.Machine$double.eps) * max(abs(orig_drift), stats::sd(x) / n))
+                         sqrt(.Machine$double.eps) * max(abs(orig_drift), stats::sd(x) / n) + slope_rounding)
   if (same_slope) recon_slope <- orig_drift
   baseline <- if (same_slope) orig_intercept + recon_slope * (1:n)
               else mean(x) + recon_slope * ((1:n) - (n + 1) / 2)

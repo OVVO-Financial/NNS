@@ -69,4 +69,18 @@ test_that("a target_drift equal to the original slope up to rounding keeps the d
   expect_equal(reps(target_drift_scale = 1), base)
   # A real change of drift still takes the changed-drift path.
   expect_false(isTRUE(all.equal(reps(target_drift = 1.01 * d_lm), base)))
+  # A target strictly inside the tolerance reproduces the default exactly,
+  # which pins the snap to the original slope.
+  d <- NNS:::fast_lm(tt, ap)$coef[2]
+  tol <- sqrt(.Machine$double.eps) * max(abs(d), sd(ap) / length(ap))
+  expect_identical(reps(target_drift = d + tol / 2), base)
+})
+
+test_that("the slope tolerance allows for rounding at a large series level", {
+  t <- 1:20; set.seed(7); x <- 1e6 + .0001 * t + .01 * rnorm(20)
+  d_lm <- unname(coef(lm(x ~ t))[2])   # same OLS fit, ~1e-11 from fast_lm's slope
+  reps <- function(...) { set.seed(1); NNS.meboot(x, reps = 5, rho = .5, ...)["replicates", ][[1]] }
+  expect_identical(reps(target_drift = d_lm), reps())
+  # A real change of drift still takes the changed-drift path.
+  expect_false(isTRUE(all.equal(reps(target_drift = .1), reps())))
 })
