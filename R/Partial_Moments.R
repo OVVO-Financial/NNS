@@ -310,8 +310,9 @@ NNS.CDF <- function(variable,
     } else {
       Pv <- LPM.ratio(degree,target,variable)
       if (type=="survival") Pv <- 1-Pv
-      if (type=="hazard") Pv <- fit$Point.est / pmax(1-pval[which.min(abs(x-target))],1e-10)
-      if (type=="cumulative hazard") Pv <- NNS.reg(x,DT[[2]],order=NULL,n.best=1,point.est=target,plot=FALSE)$Point.est
+      # The same transformation of the survival at target as the curve uses at each x.
+      if (type=="hazard") Pv <- pmin(pmax(fit$Point.est / pmax(1-Pv,1e-10),0),1e6)
+      if (type=="cumulative hazard") Pv <- pmax(-log(pmax(1-Pv,1e-10)),0)
     }
     
     # plotting
