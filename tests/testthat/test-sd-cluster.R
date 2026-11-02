@@ -18,3 +18,19 @@ test_that("the returned dendrogram keeps hclust's leaf order", {
   expect_identical(order.dendrogram(as.dendrogram(res$Dendrogram)), res$Dendrogram$order)
   expect_identical(unname(labels(as.dendrogram(res$Dendrogram))), v[hc$order])
 })
+
+test_that("variables left when peeling stops at once form the final cluster", {
+  A <- cbind(A = 1:5, B = 2:6)
+  expect_identical(NNS.SD.cluster(A, min_cluster = 2)$Clusters, list(Cluster_1 = c("A", "B")))
+  expect_identical(NNS.SD.cluster(A, min_cluster = 3)$Clusters, list(Cluster_1 = c("A", "B")))
+  expect_identical(NNS.SD.cluster(A[, "A", drop = FALSE])$Clusters, list(Cluster_1 = "A"))
+
+  pdf(NULL); on.exit(dev.off())
+  res <- NNS.SD.cluster(A, min_cluster = 2, dendrogram = TRUE)
+  expect_identical(res$Clusters, list(Cluster_1 = c("A", "B")))
+  expect_identical(unname(res$Dendrogram$labels), c("A", "B"))
+  res <- NNS.SD.cluster(cbind(A = 1:5, B = 11:15), dendrogram = TRUE)
+  expect_identical(res$Clusters, list(Cluster_1 = "B", Cluster_2 = "A"))
+  expect_warning(res <- NNS.SD.cluster(A[, "A", drop = FALSE], dendrogram = TRUE), "Not enough variables")
+  expect_identical(res$Clusters, list(Cluster_1 = "A"))
+})
