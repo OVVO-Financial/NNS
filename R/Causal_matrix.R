@@ -2,8 +2,11 @@
 # C(column i ---> column j) in [0, 1], so [i, j] + [j, i] = 1 off the diagonal
 # and 0.5 is neutral. The diagonal is 0 (no self-causation).
 # With p.value = TRUE, the columns are permuted independently to build the
-# null of each index; lower_CI / upper_CI hold its partial-moment interval and
-# p.value_matrix the two-sided permutation p-value of C(i ---> j) - C(j ---> i).
+# null of each index -- shuffled for cross-sections, circularly shifted for
+# time series (tau = "ts" or a positive lag) so each series keeps its own
+# dynamics -- with each pair's lag fixed at its observed value. lower_CI /
+# upper_CI hold the null's partial-moment interval and p.value_matrix the
+# two-sided permutation p-value of C(i ---> j) - C(j ---> i).
 NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, seed = NULL){
   if(is.null(ncol(x))){
     stop("supply both 'x' and 'y' or a matrix-like 'x'")
@@ -13,8 +16,8 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
   causes <- matrix(0, n, n, dimnames = list(nm, nm))
   pairs <- utils::combn(n, 2)
 
-  pair_index <- function(xm, i, j, plot = FALSE) {
-    NNS.caus(xm[, i], xm[, j], plot = plot, tau = tau, factor.2.dummy = factor.2.dummy)
+  pair_index <- function(xm, i, j, plot = FALSE, tau_ij = tau) {
+    NNS.caus(xm[, i], xm[, j], plot = plot, tau = tau_ij, factor.2.dummy = factor.2.dummy)
   }
 
   for(k in seq_len(ncol(pairs))){
@@ -33,11 +36,25 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
   upper_CI <- matrix(0, n, n, dimnames = list(nm, nm))
   p.value_matrix <- matrix(0, n, n, dimnames = list(nm, nm))
 
+  # Each pair's lag is resolved once on the observed columns (#96), so the
+  # permuted columns are compared at the same lag.
+  pair_tau <- vapply(seq_len(ncol(pairs)), function(k) {
+    if (identical(tau, "ts"))
+      .nns_caus_ts_lag(as.numeric(x[, pairs[1, k]]), as.numeric(x[, pairs[2, k]]))
+    else if (identical(tau, "cs")) 0L else as.integer(tau)
+  }, integer(1L))
+  time_series <- any(pair_tau > 0L)
+  # Permute column by column so a data frame keeps its column types: apply()
+  # would turn a factor column into character (#96).
+  x_cols <- if (is.data.frame(x)) x else as.data.frame(x)
   null_mat <- array(NA_real_, dim = c(nperm, ncol(pairs)))
   for(b in seq_len(nperm)){
-    x_perm <- apply(x, 2, sample)
+    x_perm <- x_cols
+    for(j in seq_len(n)){
+      x_perm[[j]] <- if (time_series) .nns_caus_shift(x_cols[[j]], max(pair_tau)) else sample(x_cols[[j]])
+    }
     for(k in seq_len(ncol(pairs))){
-      null_mat[b, k] <- pair_index(x_perm, pairs[1, k], pairs[2, k])[["C(x--->y)"]]
+      null_mat[b, k] <- pair_index(x_perm, pairs[1, k], pairs[2, k], tau_ij = pair_tau[k])[["C(x--->y)"]]
     }
   }
 

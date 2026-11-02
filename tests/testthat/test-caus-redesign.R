@@ -28,7 +28,7 @@ test_that("an invertible relationship has no cross-sectional direction", {
   expect_equal(unname(NNS.caus(x, 2 * x + 1)), c(0.5, 0.5))
 })
 
-test_that("the result is invariant to shifts, rescaling and monotone transforms", {
+test_that("the result is invariant to shifts, rescaling and increasing transforms", {
   set.seed(5); x <- rnorm(500, 1); y <- x - 1.5 + rnorm(500, sd = 0.3)
   v <- NNS.caus(x, y)
   expect_equal(NNS.caus(x, y + 10), v)

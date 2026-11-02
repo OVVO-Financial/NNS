@@ -39,7 +39,7 @@ Y_t =
 
 If the coefficients \(b_i\) are jointly significant, \(X\) is said to Granger-cause \(Y\).
 
-Granger causality captures a genuine and important insight: the causal role of \(X\) in \(Y\) should only be assessed after conditioning on \(Y\)'s own past. The directional framework retains this principle. What changes is how the comparison is implemented — through lagged pairs evaluated in both directions on the copula scale rather than a linear regression on own lags — and what the causal evidence consists of — conditional probability and asymmetric dependence rather than regression coefficients.
+Granger causality captures a genuine and important insight: the causal role of \(X\) in \(Y\) should only be assessed after accounting for \(Y\)'s own past. The directional framework does not condition on own lags in the regression sense. It measures directional lagged association — lagged pairs evaluated in both directions on the copula scale, with conditional probability and asymmetric dependence rather than regression coefficients as the evidence — and accounts for each series' own dynamics at the inference step: the permutation test for time series circularly shifts one series against the other, which keeps every autocorrelation of each series and breaks only their alignment. Neither step conditions on third variables, so a common driver that reaches \(Y\) later than \(X\) makes \(X \to Y\) look causal. Partitioning on that variable — conditional co-partial moments — is the natural extension, and is not part of the index below.
 
 The parametric Granger approach carries four limitations that are familiar from earlier chapters.
 
@@ -130,9 +130,9 @@ Within each set of pairs, both variables are mapped to the copula scale through 
 U = L_0(X; X) = P(X' \le X) \in (0, 1].
 \]
 
-Chapter 10 showed that this probability integral transform defines copula space. Working on ranks makes the statistic invariant to shifts, rescaling and any monotone transformation of either variable: adding a constant to \(Y\), changing its units, or replacing it by \(\log Y\) leaves every quantity below unchanged.
+Chapter 10 showed that this probability integral transform defines copula space. Working on ranks makes the statistic invariant to shifts, rescaling and any increasing transformation of either variable: adding a constant to \(Y\), changing its units, or replacing it by \(\log Y\) leaves every quantity below unchanged. A decreasing transformation reverses the ranks, which changes the copula and therefore the index.
 
-Two features of the construction do the work that internal-dynamics removal was meant to do. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: \((X_{t-\tau}, Y_t)\) and \((Y_{t-\tau}, X_t)\) are different pairs. Second, the comparison is always bidirectional. A shared driver or common persistence that links the two series symmetrically raises the evidence for both directions equally and cancels in the normalized index developed below.
+Two features of the construction do the work that internal-dynamics removal was meant to do. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: \((X_{t-\tau}, Y_t)\) and \((Y_{t-\tau}, X_t)\) are different pairs. Second, the comparison is always bidirectional. A shared driver or common persistence that links the two series symmetrically raises the evidence for both directions equally and cancels in the normalized index developed below. A driver that reaches the two series at different times does not cancel: it reads as direction from the series it reaches first.
 
 ---
 
@@ -140,17 +140,19 @@ Two features of the construction do the work that internal-dynamics removal was 
 
 With each direction's pairs on the copula scale, the conditional probability that the position of the cause constrains the distribution of the effect can be measured directly with partial moments.
 
-For the \(X \to Y\) pairs, write \(U_X\) for the copula-scale values of \(X_{t-\tau}\) and \(U_Y\) for those of \(Y_t\). The unconditional degree-one deviation of the effect about its mean \(\mu_Y\) is
+For the \(X \to Y\) pairs, write \(U_X\) for the copula-scale values of \(X_{t-\tau}\) and \(U_Y\) for those of \(Y_t\). The unconditional deviation of the effect about its mean \(\mu_Y\), over its \(m = n - \tau\) values, is
 
 \[
-D(U_Y) = L_1(\mu_Y; U_Y) + U_1(\mu_Y; U_Y),
+D(U_Y) = \frac{m}{m-1}\Bigl[L_2(\mu_Y; U_Y) + U_2(\mu_Y; U_Y)\Bigr],
 \]
 
-the lower plus upper partial moment of degree one. Partition the cause into \(k = \lfloor\sqrt{n-\tau}\rfloor\) equal-frequency cells \(c\) on its copula scale, and measure the same deviation of the effect within each cell, about the cell's own mean \(\mu_{Y \mid c}\):
+the lower plus upper partial moment of degree two — the variance, by Chapter 5. With the factor \(m/(m-1)\) it is a U-statistic, \(\frac{1}{2m(m-1)}\sum_{i \ne j}(U_{Y,i} - U_{Y,j})^2\), and so has the same expectation in any random subset of the sample as in the whole, for any distribution, ties included. Partition the cause into \(k = \lfloor\sqrt{n-\tau}\rfloor\) equal-frequency cells \(c\) on its copula scale, and measure the same deviation of the effect within each cell, about the cell's own mean:
 
 \[
-D_c(U_Y) = L_1(\mu_{Y \mid c}; U_Y \mid c) + U_1(\mu_{Y \mid c}; U_Y \mid c).
+D_c(U_Y) = D(U_Y \mid c).
 \]
+
+The deviation is taken about a centre on purpose. A pairwise measure such as the mean absolute difference would treat \(Y\) split between two values as concentrated; about its centre, a two-valued split is as spread out as the values are far apart, which is what an unresolved sign looks like.
 
 The **partial-moment conditional probability** is the share of the effect's deviation that knowing the cause's cell resolves:
 
@@ -163,7 +165,7 @@ P(X \to Y)
 \qquad w_c = \frac{n_c}{n-\tau},
 \]
 
-bounded to \([0, 1]\). Each deviation carries the small-sample factor \(\sqrt{m/(m-1)}\) for its \(m\) points, so that independent variables score near zero rather than at a positive bias of order \(1/m\).
+bounded to \([0, 1]\). Because each \(D_c\) is unbiased for \(D\) when the cause carries no information about the effect, independent variables score near zero whatever the effect's distribution: no normal-theory correction is needed.
 
 The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause's position pins the effect down. It is not symmetric: \(P(X \to Y) \ne P(Y \to X)\) in general. For \(Y = X^2\), knowing \(X\) fixes \(Y\), while knowing \(Y\) leaves \(X\) split between \(\pm\sqrt{Y}\), so \(P(X \to Y)\) is close to one and \(P(Y \to X)\) close to zero. It requires no kernel bandwidth, no distributional assumption, and no parametric model.
 
@@ -175,15 +177,9 @@ Because both variables are on the copula scale, this conditional probability is 
 
 Conditional probability measures how strongly the cause constrains the effect, but not whether that constraint is stronger in one direction than the other once the dependence structure is taken into account. Two variables may each constrain the other, or one may respond to the other only in extreme regions.
 
-To capture directional alignment, the framework uses the asymmetric dependence measures from Chapter 10 on each direction's lagged copula pairs:
+To capture directional alignment, the framework uses the asymmetric dependence measure from Chapter 10 on each direction's lagged copula pairs: \(\rho_{X \to Y}\) is the dependence of \(U_{Y_t}\) on \(U_{X_{t-\tau}}\) and \(\rho_{Y \to X}\) the dependence of \(U_{X_t}\) on \(U_{Y_{t-\tau}}\). Each is built from the degree-zero and degree-one co-partial moments of its pair within the recursive mean-split partition of the candidate cause, each cell measured against its own permutation null, so it is the lagged co-partial moment structure of this chapter measured as a dependence.
 
-\[
-\rho_{X \to Y} = \texttt{NNS.dep}\bigl(U_{X_{t-\tau}},\, U_{Y_t},\, \texttt{asym} = \texttt{TRUE}\bigr),
-\qquad
-\rho_{Y \to X} = \texttt{NNS.dep}\bigl(U_{Y_{t-\tau}},\, U_{X_t},\, \texttt{asym} = \texttt{TRUE}\bigr).
-\]
-
-Each is built from the degree-zero and degree-one co-partial moments of its pair within the partition of the candidate cause, so it is the lagged co-partial moment structure of this chapter measured as a dependence.
+`NNS.dep(..., asym = TRUE)` reports the strongest level of that partition. For the causal comparison the dependence is averaged over the levels instead: the average has no selection step, so two independent series are centred at the same value whatever their margins. Taking the strongest level would favour the variable with more levels to search, so that a continuous series would appear to lead a binary one.
 
 Implementation detail: `asym = TRUE` turns on asymmetric dependence, but **direction is determined by argument order**. `NNS.dep(x, y, asym = TRUE)` partitions on `x` and measures the dependence of `y` on `x`; `NNS.dep(y, x, asym = TRUE)` measures the reverse.
 
@@ -246,7 +242,7 @@ Interpretation:
 - \(C_{X \to Y} < 0.5\): stronger evidence for \(Y\) leading \(X\),
 - \(C_{X \to Y} \approx 0.5\): weak directional asymmetry.
 
-For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row \(i\) and column \(j\), so that \(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\) off the diagonal, and its diagonal is zero by Axiom 1. A permutation test of the signed statistic \(C_{X \to Y} - C_{Y \to X}\) provides p-values for either direction.
+For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row \(i\) and column \(j\), so that \(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\) off the diagonal, and its diagonal is zero by Axiom 1. A permutation test of the signed statistic \(C_{X \to Y} - C_{Y \to X}\) provides p-values for either direction. For time series the null circularly shifts one series against the other, keeping each series' own dynamics, at the lag used for the observed statistic; for cross-sections it shuffles the values.
 
 ---
 
@@ -254,7 +250,7 @@ For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row
 
 This chapter formalized directional causation as a three-stage construction: explicitly lagged pairs on the copula scale, partial-moment conditional probability and asymmetric directional dependence for each direction, and a bidirectional index that detects net directional flow.
 
-The resulting statistic is nonparametric and invariant to monotone transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests.
+The resulting statistic is nonparametric and invariant to increasing transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests. It measures directional lagged association: it does not condition on third variables.
 
 For an applied macroeconomic example using `NNS.nowcast`, `NNS.caus`, noise benchmarks, and strength-of-inference summaries, see [Causal Inference Amongst Macroeconomic Variables Using NNS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html).
 
