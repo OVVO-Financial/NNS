@@ -80,3 +80,20 @@ test_that("the native and partition-map paths agree", {
   old <- options(NNS.native = FALSE); on.exit(options(old))
   expect_identical(c(unlist(NNS.dep(x, y)), unlist(NNS.dep(x, y, asym = TRUE))), native)
 })
+
+test_that("NNS.reg's order heuristic keeps the local (finest-cell) dependence", {
+  # The default order reads dependence as a fine-scale signal-to-noise
+  # measure. The multi-level NNS.dep also counts dependence between coarse
+  # cells (0.64 for y = x + e below) and would over-partition noisy data, so
+  # the heuristic keeps the finest-cell measure, with the values it had
+  # before #95.
+  set.seed(1); x <- rnorm(500); y <- x + rnorm(500)
+  expect_equal(NNS:::.nns_dep_local(x, y), 0)
+  expect_gt(NNS.dep(x, y, asym = TRUE)$Dependence, 0.55)
+  expect_equal(NNS:::.nns_reg_default_order(x, y), 4L)
+  set.seed(2); x <- runif(400); y <- sin(6 * x) + rnorm(400, sd = .2)
+  expect_equal(NNS:::.nns_dep_local(x, y), 0.350735025118, tolerance = 1e-10)
+  expect_equal(NNS:::.nns_reg_default_order(x, y), 5L)
+  set.seed(3); u <- sample(1:4, 200, TRUE); v <- u^2 + rnorm(200, sd = .5)
+  expect_equal(NNS:::.nns_dep_local(u, v, asym = FALSE), 0.109921576501, tolerance = 1e-10)
+})

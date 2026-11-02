@@ -199,6 +199,26 @@ NNS.dep <- function(x,
 }
 
 
+# Local (finest-cell) dependence, NNS.dep's measure before the multi-level
+# redesign (#95). NNS.reg's default order and dy.d_'s step rule read it as a
+# fine-scale signal-to-noise measure (see NNS_dep_local_cpp); NNS.dep itself
+# reports the multi-level measure.
+.nns_dep_local <- function(x, y, asym = TRUE) {
+  x <- as.numeric(x); y <- as.numeric(y)
+  l <- length(x)
+  obs <- max(8L, as.integer(l / 8L))
+  ord <- max(ceiling(log(l, 2)), 1L)
+  part <- function(a, b) {
+    as.character(NNS_part_cpp(a, b, type = "XONLY", order_in = as.integer(ord),
+                              obs_req = as.integer(obs), min_obs_stop = FALSE,
+                              noise_reduction = "off", quadrants_only = TRUE)$quadrant)
+  }
+  qxy <- part(x, y)
+  qyx <- if (isTRUE(asym)) character(0) else part(y, x)
+  NNS_dep_local_cpp(x, y, qxy, qyx, isTRUE(asym))
+}
+
+
 NNS.dep.matrix <- function(x, asym = FALSE){
   
   n <- ncol(x)

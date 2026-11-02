@@ -139,7 +139,8 @@ dy.d_ <- function(x, y, wrt,
   # v0.5.7 bandwidths.
   h_s <- 1/log(length(x), c(2, 10))
   h_s <- c(h_s, 10 * h_s)
-  if (NNS.dep(col, y)$Dependence < .5) h_s <- 2 * h_s
+  # The settled step rule reads the local (fine-scale) dependence (#95).
+  if (.nns_dep_local(col, y, asym = FALSE) < .5) h_s <- 2 * h_s
 
   is_vector <- is.vector(eval.points) || (!is.null(ncol(eval.points)) && ncol(eval.points) == 1)
 

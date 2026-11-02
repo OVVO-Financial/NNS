@@ -439,3 +439,95 @@ NumericVector NNS_dep_levels_cpp(NumericVector x, NumericVector y, CharacterVect
   best_level(xv, yv, as_labels(quad_xy), 0.0, CONDITIONAL, has_ties(xv), has_ties(yv), &levels);
   return wrap(levels);
 }
+
+// ------------------------------------------------------------
+// Local (finest-cell) dependence: NNS.dep's measure before the multi-level
+// redesign (#95). Each finest cell's debiased concordance enters as a signed
+// square root, the cells are averaged and floored at 0, and discrete pairs
+// are blended with the degree-0 copula. It is high only when structure
+// survives inside the finest cells, which is how NNS.reg's default order
+// (order ~ 10 x dependence) and dy.d_'s step rule read it: as a fine-scale
+// signal-to-noise measure. NNS.dep reports the multi-level measure instead,
+// which also counts dependence between cells (a noisy linear relationship)
+// and would push those heuristics to over-deep partitions.
+// ------------------------------------------------------------
+
+static double copula_degree0_unsigned(const std::vector<double>& xv,
+                                      const std::vector<double>& yv) {
+  const int n = static_cast<int>(xv.size());
+  if (n < 2) return 0.0;
+  double tx = 0.0, ty = 0.0;
+  for (int i = 0; i < n; ++i) { tx += xv[i]; ty += yv[i]; }
+  tx /= n; ty /= n;
+  double conc = 0.0, disc = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const bool lo_x = (xv[i] - tx) <= 0.0, lo_y = (yv[i] - ty) <= 0.0;
+    if (lo_x == lo_y) conc += 1.0; else disc += 1.0;
+  }
+  const double d0_Co = conc / n, dpm_d0 = disc / n;
+  const double disc_dep = std::min(1.0, std::max(0.0, std::abs(d0_Co - 0.5) / 0.5));
+  const double nd_disc = std::abs(dpm_d0 - 0.5) / 0.5;
+  return std::sqrt((disc_dep + nd_disc) / 2.0);
+}
+
+static int count_unique(std::vector<double> v) {
+  std::sort(v.begin(), v.end());
+  return static_cast<int>(std::unique(v.begin(), v.end()) - v.begin());
+}
+
+static double local_dep_dir(const std::vector<double>& u, const std::vector<double>& v,
+                            const std::vector<std::string_view>& lab,
+                            bool u_ties, bool v_ties) {
+  const int n = static_cast<int>(u.size());
+  auto root = [](double inner) { return (inner >= 0.0 ? 1.0 : -1.0) * std::sqrt(std::abs(inner)); };
+  auto cell_value = [&](const std::vector<double>& uq, const std::vector<double>& vq) {
+    CellKind ck;
+    CellCopula c = cell_dependence(uq, vq, u_ties, v_ties, ck);
+    if (ck == CELL_BOTH_CONST) return 1.0;
+    if (ck == CELL_X_CONST) return 0.0;
+    return root(c.magnitude);
+  };
+  double global = cell_value(u, v);
+  if (!std::isfinite(global)) global = 0.0;
+
+  std::vector<int> ord(n);
+  std::iota(ord.begin(), ord.end(), 0);
+  std::stable_sort(ord.begin(), ord.end(), [&](int i, int j) { return lab[i] < lab[j]; });
+  double dep = 0.0;
+  std::vector<double> uq, vq;
+  for (int lo = 0; lo < n;) {
+    int hi = lo + 1;
+    while (hi < n && lab[ord[hi]] == lab[ord[lo]]) ++hi;
+    const int m = hi - lo;
+    uq.resize(m); vq.resize(m);
+    for (int k = 0; k < m; ++k) { uq[k] = u[ord[lo + k]]; vq[k] = v[ord[lo + k]]; }
+    double val = cell_value(uq, vq);
+    if (!std::isfinite(val)) val = global;
+    dep += val * static_cast<double>(m) / static_cast<double>(n);
+    lo = hi;
+  }
+  return std::max(0.0, dep);
+}
+
+// [[Rcpp::export]]
+double NNS_dep_local_cpp(NumericVector x, NumericVector y,
+                         CharacterVector quad_xy, CharacterVector quad_yx,
+                         bool asym = true) {
+  const int n = x.size();
+  if (y.size() != n || quad_xy.size() != n) stop("x, y and quad_xy must all have the same length");
+  if (!asym && quad_yx.size() != n) stop("quad_yx must have the length of x when asym = FALSE");
+  std::vector<double> xv(x.begin(), x.end()), yv(y.begin(), y.end());
+  bool cx = true, cy = true;
+  for (int i = 1; i < n; ++i) { if (xv[i] != xv[0]) cx = false; if (yv[i] != yv[0]) cy = false; }
+  if (n < 2 || cx || cy) return 0.0;
+  const bool x_ties = has_ties(xv), y_ties = has_ties(yv);
+  double dep = local_dep_dir(xv, yv, as_labels(quad_xy), x_ties, y_ties);
+  if (!asym) dep = std::max(dep, local_dep_dir(yv, xv, as_labels(quad_yx), y_ties, x_ties));
+  const double rn = std::sqrt(static_cast<double>(n));
+  if (count_unique(xv) < rn && count_unique(yv) < rn) {
+    double disc = copula_degree0_unsigned(xv, yv);
+    if (!std::isfinite(disc)) disc = dep;
+    dep = 0.5 * (dep + disc);
+  }
+  return dep;
+}

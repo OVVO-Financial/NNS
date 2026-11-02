@@ -9,6 +9,10 @@ NNS_dep_levels_cpp <- function(x, y, quad_xy) {
     .Call(`_NNS_NNS_dep_levels_cpp`, x, y, quad_xy)
 }
 
+NNS_dep_local_cpp <- function(x, y, quad_xy, quad_yx, asym = TRUE) {
+    .Call(`_NNS_NNS_dep_local_cpp`, x, y, quad_xy, quad_yx, asym)
+}
+
 NNS_distance_cpp <- function(X, yhat, dest, k, use_class) {
     .Call(`_NNS_NNS_distance_cpp`, X, yhat, dest, k, use_class)
 }
