@@ -47,8 +47,9 @@ test_that("NNS.gravity / NNS.mode stay fast with a tight IQR and an outlier", {
   expect_lt(elapsed, 2)
   expect_equal(g, 5, tolerance = 1e-3)
   expect_equal(m, 5, tolerance = 1e-5)
-  # Tiny histograms (<= 3 bins) are well defined.
-  expect_equal(NNS.mode(c(0, 0, 1, 1), multi = FALSE), 0.5)
+  # Tiny histograms (<= 3 bins) are well defined; tied modes resolve to the
+  # one nearest the gravity (0.375), not their average.
+  expect_equal(NNS.mode(c(0, 0, 1, 1), multi = FALSE), 0)
   expect_equal(NNS.gravity(c(0, 0, 1, 1)), 0.375)
 })
 
@@ -109,7 +110,14 @@ test_that("generate.lin.vectors(x, 0) errors instead of killing the R session", 
   expect_match(paste(out, collapse = "\n"), "'l' must be a positive integer")
 })
 
-test_that("equally high mode peaks are averaged", {
+test_that("equally high mode peaks resolve to the one nearest the gravity", {
   x <- rep(0:19, each = 400)
-  expect_equal(NNS.mode(x, multi = FALSE), mean(NNS.mode(x)))
+  m <- NNS.mode(x)
+  r <- NNS.mode(x, multi = FALSE)
+  expect_true(r %in% m)
+  expect_equal(r, m[which.min(abs(m - NNS.gravity(x)))])
+  # Tied clusters: always a real peak, never a value in the gap between them
+  # (averaging them gave 8.91 for this sample).
+  y <- c(rep(1:3, each = 300), rep(10:12, each = 300), rep(20:22, each = 150))
+  expect_true(NNS.mode(y, multi = FALSE) %in% NNS.mode(y))
 })

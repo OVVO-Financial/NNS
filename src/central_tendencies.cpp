@@ -436,15 +436,20 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
         std::sort(out.begin(), out.end());
         return out;
       } else {
-        // GLOBAL-HEIGHT RULE: the kept peak with the largest smoothed height;
-        // equally high peaks are averaged, as the tied-bin fallback below does.
+        // GLOBAL-HEIGHT RULE: the kept peak with the largest smoothed height.
+        // Equally high peaks are broken by distance to the gravity of the
+        // data (then the lower value), so the result is always a real peak:
+        // an average of tied peaks can land in a gap with no data.
         double best_h = cs[kept[0]];
         for (int t = 1; t < (int)kept.size(); ++t) best_h = std::max(best_h, cs[kept[t]]);
-        long double sum = 0.0L;
-        int nt = 0;
-        for (int t = 0; t < (int)kept.size(); ++t)
-          if (cs[kept[t]] == best_h) { sum += (long double)centers[t]; ++nt; }
-        return Rf_ScalarReal((double)(sum / nt));
+        const double g = gravity_value(xnum, false);
+        double best_c = NA_REAL, best_d = R_PosInf;
+        for (int t = 0; t < (int)kept.size(); ++t) {
+          if (cs[kept[t]] != best_h) continue;
+          const double dist = std::fabs(centers[t] - g);
+          if (dist < best_d || (dist == best_d && centers[t] < best_c)) { best_d = dist; best_c = centers[t]; }
+        }
+        return Rf_ScalarReal(best_c);
       }
     }
   }
@@ -459,12 +464,16 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       std::sort(out.begin(), out.end());
       return out;
     } else {
-      // Mean of those bin centers when multi==false
-      long double sum = 0.0L;
-      int pos = 0;
-      for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { sum += (long double)z_names[i]; ++pos; }
-      double mean_modes = (pos > 0 ? (double)(sum / (long double)pos) : NA_REAL);
-      return Rf_ScalarReal(mean_modes);
+      // Tied highest bins: the one nearest the gravity of the data (then the
+      // lower value), as for tied peaks above.
+      const double g = gravity_value(xnum, false);
+      double best_c = NA_REAL, best_d = R_PosInf;
+      for (int i = 0; i < lz; ++i) {
+        if (counts[i] != maxc) continue;
+        const double dist = std::fabs(z_names[i] - g);
+        if (dist < best_d || (dist == best_d && z_names[i] < best_c)) { best_d = dist; best_c = z_names[i]; }
+      }
+      return Rf_ScalarReal(best_c);
     }
   }
   
