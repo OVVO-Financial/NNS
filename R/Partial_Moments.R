@@ -190,7 +190,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
 #' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).
-#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, computed by inclusion-exclusion over all subsets of the columns (\eqn{2^d} joint CDF evaluations), and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it.
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it.
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
@@ -339,22 +339,33 @@ NNS.CDF <- function(variable,
     d <- ncol(variable)
     CDF <- Co.LPM_nD.batch(variable, variable, degree = degree, norm = TRUE)
     
-    # Joint survival S(t) = P(X_1 > t_1, ..., X_d > t_d) by inclusion-exclusion:
-    # S = sum_A (-1)^|A| F_A(t_A) over subsets A of the coordinates (F_{} = 1).
-    # For degree > 0 the F_A have different normalisers, so use
-    # Co.UPM_nD(X, t) = Co.LPM_nD(-X, -t) instead.
+    # Joint survival S(t) = P(X_1 > t_1, ..., X_d > t_d). At degree 0 use
+    # inclusion-exclusion, S = sum_A (-1)^|A| F_A(t_A) over subsets A of the
+    # coordinates, up to d = 3; beyond that its 2^d terms are slow and cancel,
+    # so count the rows above t directly.
+    # For degree > 0 use Co.UPM_nD(X, t) = Co.LPM_nD(-X, -t).
     joint.survival <- function(points, joint_cdf) {
       points <- matrix(points, ncol = d)
       if (degree > 0) return(Co.LPM_nD.batch(-variable, -points, degree = degree, norm = TRUE))
+      if (d > 3) {
+        cols <- lapply(seq_len(d), function(j) variable[, j])
+        o1 <- order(cols[[1]]); v1 <- cols[[1]][o1]; nv <- length(v1)
+        above <- function(p) {
+          k <- findInterval(p[1], v1)
+          if (k >= nv) return(0L)
+          rows <- o1[(k + 1L):nv]
+          for (j in 2:d) if (length(rows)) rows <- rows[cols[[j]][rows] > p[j]]
+          length(rows)
+        }
+        return(apply(points, 1, above) / nrow(variable))
+      }
       marginals <- vapply(seq_len(d), function(j) LPM.ratio(degree, points[, j], variable[, j]),
                           numeric(nrow(points)))
       S <- 1 - rowSums(matrix(marginals, ncol = d))
-      if (d > 2) {
-        for (k in 2:(d - 1)) {
-          for (A in utils::combn(d, k, simplify = FALSE)) {
-            S <- S + (-1)^k * Co.LPM_nD.batch(variable[, A, drop = FALSE], points[, A, drop = FALSE],
-                                              degree = degree, norm = TRUE)
-          }
+      if (d == 3) {
+        for (A in utils::combn(d, 2, simplify = FALSE)) {
+          S <- S + Co.LPM_nD.batch(variable[, A, drop = FALSE], points[, A, drop = FALSE],
+                                   degree = degree, norm = TRUE)
         }
       }
       S + (-1)^d * joint_cdf

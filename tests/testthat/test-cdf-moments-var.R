@@ -99,3 +99,11 @@ test_that("fractional-degree VaR returns the sample range at p = 0 and 1", {
     expect_identical(UPM.VaR(c(1, 0), degree, x), range(x))
   }
 })
+
+test_that("degree-0 joint survival with many columns is the joint upper share", {
+  set.seed(9)
+  x <- matrix(sample(0:4, 400, TRUE), 20, 20)
+  s <- sapply(1:20, function(i) mean(colSums(t(x) > x[i, ]) == 20))
+  h <- NNS.CDF(x, degree = 0, type = "cumulative hazard", plot = FALSE)$Function$CDF
+  expect_equal(h, pmax(-log(pmax(s, 1e-10)), 0))
+})
