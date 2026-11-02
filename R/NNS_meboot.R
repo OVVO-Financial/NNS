@@ -14,7 +14,7 @@
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}) keeps the original reconstruction.
 #' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
@@ -134,7 +134,16 @@ NNS.meboot <- function(x,
   } else {
     recon_slope <- 0
   }
-  baseline <- if (recon_slope == orig_drift) orig_intercept + recon_slope * (1:n)
+  # The original reconstruction applies whenever the slope is unchanged up to
+  # rounding. A target_drift copied from coef(lm(x ~ t)) differs from fast_lm's
+  # slope by about 1e-15, and an exact comparison sent it down the
+  # changed-drift path (AirPassengers replicates moved by up to 75). The
+  # tolerance is relative to the slope's own scale: sd(x) / n is the slope of a
+  # trend that spans one standard deviation over the sample.
+  same_slope <- isTRUE(abs(recon_slope - orig_drift) <=
+                         sqrt(.Machine$double.eps) * max(abs(orig_drift), stats::sd(x) / n))
+  if (same_slope) recon_slope <- orig_drift
+  baseline <- if (same_slope) orig_intercept + recon_slope * (1:n)
               else mean(x) + recon_slope * ((1:n) - (n + 1) / 2)
   
   # ===== MEBOOT CORE ON RESIDUALS ONLY =====
@@ -272,13 +281,13 @@ NNS.meboot <- function(x,
   }
   
   # Optional level scaling toward sd(x), which includes the original drift
-  if (isTRUE(expand.sd) && recon_slope == orig_drift) {
+  if (isTRUE(expand.sd) && same_slope) {
     ensemble <- NNS.meboot.expand.sd(x = x, ensemble = ensemble, ...)   
   }
   
   # Optional CLT enforcement
   if (force.clt && reps > 1) {
-    clt_ref <- if (recon_slope == orig_drift) x else baseline + orig_res
+    clt_ref <- if (same_slope) x else baseline + orig_res
     ensemble <- force.clt(x = clt_ref, ensemble = ensemble)
   }
   

@@ -52,7 +52,7 @@ NNS.meboot(
 \item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
 
-\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.}
+\item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}) keeps the original reconstruction.}
 
 \item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.}
 

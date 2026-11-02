@@ -59,3 +59,14 @@ test_that("drift = FALSE keeps mean(x) as the replicate level", {
     expect_gt(min(R), 0)
   }
 })
+
+test_that("a target_drift equal to the original slope up to rounding keeps the default output", {
+  ap <- as.numeric(AirPassengers); tt <- seq_along(ap)
+  d_lm <- unname(coef(lm(ap ~ tt))[2])   # differs from fast_lm's slope by ~1e-15
+  reps <- function(...) { set.seed(1); NNS.meboot(ap, reps = 20, rho = 1, ...)["replicates", ][[1]] }
+  base <- reps()
+  expect_equal(reps(target_drift = d_lm), base)
+  expect_equal(reps(target_drift_scale = 1), base)
+  # A real change of drift still takes the changed-drift path.
+  expect_false(isTRUE(all.equal(reps(target_drift = 1.01 * d_lm), base)))
+})
