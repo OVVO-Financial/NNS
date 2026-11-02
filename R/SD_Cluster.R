@@ -53,7 +53,6 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
   n <- ncol(data)
   
   if(is.null(colnames(data))) colnames(data) <- paste0("X_",1:ncol(data))
-  original_names <- colnames(data)
   
   # Ensure the input data is a matrix
   remaining_data <- as.matrix(data)
@@ -133,8 +132,6 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
          ylab = "SD Distance",
          sub = ""
     )
-
-    hc$order <- match(hc$labels, original_names)
     
     return(.NNS.out(list("Clusters" = clusters, "Dendrogram" = hc)))
   } else return(.NNS.out(list("Clusters" = clusters)))
