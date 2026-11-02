@@ -85,7 +85,22 @@ test_that("vectorised UPM / UPM.ratio keep relative accuracy just below the maxi
 test_that("discrete NNS.mode keeps tied modes beyond the int range apart", {
   x <- c(3e9, 3e9, -5e9, -5e9, 1)
   expect_identical(NNS.mode(x, discrete = TRUE, multi = TRUE), c(-5e9, 3e9))
-  expect_identical(NNS.mode(x, discrete = TRUE, multi = FALSE), -1e9)
+  expect_identical(NNS.mode(x, discrete = TRUE, multi = FALSE), -5e9)
+})
+
+test_that("discrete NNS.mode returns the tied mode nearest the gravity, not their mean", {
+  nearest <- function(x) {
+    m <- NNS.mode(x, discrete = TRUE, multi = TRUE)
+    m[which.min(abs(m - NNS.gravity(x)))]                  # ties: the lower
+  }
+  for (x in list(c(1, 1, 3, 3), c(1, 1, 2, 2), rep(0:19, each = 400), c(1, 3), c(1, 2))) {
+    r <- NNS:::mode_class(x)
+    expect_true(r %in% x)
+    expect_identical(r, nearest(x))
+  }
+  expect_identical(NNS:::mode_class(c(1, 1, 3, 3)), 1)     # 2 before
+  expect_identical(NNS.mode(rep(0:19, each = 400), discrete = TRUE, multi = FALSE), 9)
+  expect_identical(NNS.mode(c(1, 3), discrete = TRUE, multi = TRUE), c(1, 3))
 })
 
 test_that("generate.vectors gives empty components for empty input, len = 0 and lag > n", {
@@ -140,4 +155,11 @@ test_that("dy.d_ thins rows without a fixed stride", {
   for (q in 2:5) expect_lt(max(abs(tabulate(r %% q + 1, q) - 10000 / q)), 0.01 * 10000 / q)
   expect_lt(abs(mean(r[r <= 10000] %% 2) - 0.5), 0.01)
   expect_identical(NNS:::.nns_spread_rows(50, 80), 1:50)
+})
+
+test_that("NNS.reg CLASS predicts one of a cell's tied classes", {
+  # The cell x = 1:4 holds classes 1, 1, 3, 3; the mean of the tied modes made it class 2.
+  x <- 1:8; y <- c(1, 1, 3, 3, 2, 2, 2, 2)
+  f <- NNS.reg(x, y, type = "CLASS", order = 2, plot = FALSE)
+  expect_true(all(f$Fitted.xy$y.hat[1:4] %in% c(1, 3)))
 })
