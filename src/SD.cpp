@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <cfloat>
+#include <cmath>
 using namespace Rcpp;
 using namespace RcppParallel;
 
@@ -23,40 +25,45 @@ struct ColPre {
   int m{0};
 };
 
-static ColPre precompute_col(const NumericMatrix& X, int j){
-  ColPre c; c.m = X.nrow();
-  c.vals.resize(c.m);
-  for(int i=0;i<c.m;++i) c.vals[i] = X(i,j);
+inline void neumaier_add(double& sum, double& err, double v){
+  double t = sum + v;
+  err += (std::fabs(sum) >= std::fabs(v)) ? (sum - t) + v : (v - t) + sum;
+  sum = t;
+}
+
+static void finish_col(ColPre& c){
+  if (c.m == 0) stop("Each sample needs at least one observation.");
   std::sort(c.vals.begin(), c.vals.end());
   c.P1.assign(c.m+1, 0.0);
   c.P2.assign(c.m+1, 0.0);
+  // Compensated sums: a plain running sum drifts by up to ~m*eps*|x|,
+  // which for large samples exceeds the tie tolerance in sd_dom_pair.
+  double s1 = 0.0, e1 = 0.0, s2 = 0.0, e2 = 0.0;
   for(int k=1;k<=c.m;++k){
     double v = c.vals[k-1];
-    c.P1[k] = c.P1[k-1] + v;
-    c.P2[k] = c.P2[k-1] + v*v;
+    neumaier_add(s1, e1, v);
+    neumaier_add(s2, e2, v*v);
+    c.P1[k] = s1 + e1;
+    c.P2[k] = s2 + e2;
   }
   c.S1   = c.P1[c.m];
   c.S2   = c.P2[c.m];
   c.mn   = c.vals.front();
   c.mean = c.S1 / double(c.m);
+}
+
+static ColPre precompute_col(const NumericMatrix& X, int j){
+  ColPre c; c.m = X.nrow();
+  c.vals.resize(c.m);
+  for(int i=0;i<c.m;++i) c.vals[i] = X(i,j);
+  finish_col(c);
   return c;
 }
 
 static ColPre precompute_vec(const NumericVector& x){
   ColPre c; c.m = x.size();
   c.vals.assign(x.begin(), x.end());
-  std::sort(c.vals.begin(), c.vals.end());
-  c.P1.assign(c.m+1, 0.0);
-  c.P2.assign(c.m+1, 0.0);
-  for(int k=1;k<=c.m;++k){
-    double v = c.vals[k-1];
-    c.P1[k] = c.P1[k-1] + v;
-    c.P2[k] = c.P2[k-1] + v*v;
-  }
-  c.S1   = c.P1[c.m];
-  c.S2   = c.P2[c.m];
-  c.mn   = c.vals.front();
-  c.mean = c.S1 / double(c.m);
+  finish_col(c);
   return c;
 }
 
@@ -83,17 +90,32 @@ inline double lpm_deg2(const ColPre& c, int k, double t){
 }
 
 // Walk merged grid and apply a functor at each threshold t
+// Each sample is walked with its own length (the samples may differ in size).
 template <class F>
 inline void for_each_threshold(const ColPre& a, const ColPre& b, F f){
-  int ia=0, ib=0, m=a.m; // assume same m
-  while(ia<m || ib<m){
-    double next_a = (ia<m ? a.vals[ia] : R_PosInf);
-    double next_b = (ib<m ? b.vals[ib] : R_PosInf);
+  int ia=0, ib=0, ma=a.m, mb=b.m;
+  while(ia<ma || ib<mb){
+    double next_a = (ia<ma ? a.vals[ia] : R_PosInf);
+    double next_b = (ib<mb ? b.vals[ib] : R_PosInf);
     double t = (next_a < next_b ? next_a : next_b);
-    while(ia<m && a.vals[ia] <= t) ++ia; // k_a = ia
-    while(ib<m && b.vals[ib] <= t) ++ib; // k_b = ib
-    f(t, ia, ib);
+    while(ia<ma && a.vals[ia] <= t) ++ia; // k_a = ia
+    while(ib<mb && b.vals[ib] <= t) ++ib; // k_b = ib
+    // Next knot: the counts (ia, ib) are constant on (t, t_next).
+    double t_next = std::min(ia<ma ? a.vals[ia] : R_PosInf,
+                             ib<mb ? b.vals[ib] : R_PosInf);
+    f(t, ia, ib, t_next);
   }
+}
+
+// Continuous FSD ratio L1/(L1+U1) on an interval with fixed count k:
+// L1 = alpha*t + beta, L1+U1 = gamma*t + delta (both linear in t).
+inline void ratio_deg1_coefs(const ColPre& c, int k, double& alpha, double& beta,
+                             double& gamma, double& delta){
+  double m = double(c.m);
+  alpha = k / m;
+  beta  = -c.P1[k] / m;
+  gamma = (2.0*k - c.m) / m;
+  delta = (c.S1 - 2.0*c.P1[k]) / m;
 }
 
 // =====================================================================
@@ -102,14 +124,20 @@ inline void for_each_threshold(const ColPre& a, const ColPre& b, F f){
 // Returns 1 iff X dominates Y, else 0.
 // =====================================================================
 inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discrete){
+  // Prefix-sum rounding makes curves that are equal in exact arithmetic differ
+  // by about eps * S^degree (S = largest |value|), so differences up to
+  // 64 * DBL_EPSILON * S^degree count as ties. Discrete FSD uses no tolerance.
+  const double S = std::max(std::max(std::fabs(X.vals.front()), std::fabs(X.vals.back())),
+                            std::max(std::fabs(Y.vals.front()), std::fabs(Y.vals.back())));
+  const double eps64 = 64.0 * DBL_EPSILON;
   if (degree==1){ // FSD
     if (!(X.mn >= Y.mn)) return 0;                 // FSD gate
     if (identical_samples(X, Y)) return 0;         // identical series -> 0 (matches R's identical(LPM_x, LPM_y))
     
-    bool x_gt_y = false;
+    bool x_gt_y = false, curves_differ = false;
     int deg = (discrete ? 0 : 1); // discrete->0, continuous->1
-    for_each_threshold(X, Y, [&](double t, int kx, int ky){
-      double Rx, Ry;
+    for_each_threshold(X, Y, [&](double t, int kx, int ky, double t_next){
+      double Rx, Ry, tol = 0.0;
       if (deg==0){
         // L0/(L0+U0) == ECDF
         Rx = double(kx)/double(X.m);
@@ -119,36 +147,99 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
         lpm_upm_deg1(X, kx, t, Lx, Ux);
         lpm_upm_deg1(Y, ky, t, Ly, Uy);
         double Ax = Lx+Ux, Ay = Ly+Uy;
-        Rx = (Ax>0.0 ? Lx/Ax : 0.0);
-        Ry = (Ay>0.0 ? Ly/Ay : 0.0);
+        // 0/0 (every observation equals t): the degree-0 ratio k/m, as in LPM.ratio.
+        Rx = (Ax>0.0 ? Lx/Ax : double(kx)/double(X.m));
+        Ry = (Ay>0.0 ? Ly/Ay : double(ky)/double(Y.m));
+        double Amin = std::min(Ax, Ay);
+        tol = eps64 * ((Amin > 0.0) ? std::max(1.0, S / Amin) : 1.0);
       }
-      if (Rx > Ry) x_gt_y = true;
+      if (Rx - Ry > tol) x_gt_y = true;
+      if (std::fabs(Rx - Ry) > tol) curves_differ = true;
+      
+      // Continuous ratios are linear-fractional between knots, so their
+      // difference can peak strictly inside (t, t_next). Its stationary
+      // points solve Ax / Dx(t)^2 = Ay / Dy(t)^2 with Dx, Dy > 0, i.e.
+      // Dy(t) = sqrt(Ay / Ax) * Dx(t) (only when Ax, Ay have the same sign).
+      if (deg==1 && R_FINITE(t_next) && !x_gt_y){
+        double ax, bx, gx, dx, ay, by, gy, dy;
+        ratio_deg1_coefs(X, kx, ax, bx, gx, dx);
+        ratio_deg1_coefs(Y, ky, ay, by, gy, dy);
+        double Ax = ax*dx - bx*gx, Ay = ay*dy - by*gy;
+        if (Ax != 0.0 && Ay != 0.0 && ((Ax > 0.0) == (Ay > 0.0))){
+          double r = std::sqrt(Ay / Ax);
+          double den = gy - r*gx;
+          if (den != 0.0){
+            double ts = (r*dx - dy) / den;
+            if (ts > t && ts < t_next){
+              double Dx = gx*ts + dx, Dy = gy*ts + dy;
+              if (Dx > 0.0 && Dy > 0.0){
+                double Rxs = (ax*ts + bx) / Dx, Rys = (ay*ts + by) / Dy;
+                double tol_r = eps64 * std::max(1.0, S / std::min(Dx, Dy));
+                if (Rxs - Rys > tol_r) { x_gt_y = true; curves_differ = true; }
+              }
+            }
+          }
+        }
+      }
+      // Ratios equal at both knots can still differ inside; equal at the
+      // midpoint too means equal on the whole interval.
+      if (deg==1 && R_FINITE(t_next) && !curves_differ){
+        double s = 0.5*(t + t_next), Lx, Ux, Ly, Uy;
+        lpm_upm_deg1(X, kx, s, Lx, Ux);
+        lpm_upm_deg1(Y, ky, s, Ly, Uy);
+        double Dx = Lx+Ux, Dy = Ly+Uy;
+        double d = Lx/Dx - Ly/Dy;
+        double tol_m = eps64 * std::max(1.0, S / std::min(Dx, Dy));
+        if (std::fabs(d) > tol_m) curves_differ = true;
+        if (d > tol_m) x_gt_y = true;
+      }
     });
+    // Equal curves: no dominance, as R's !identical(LPM_x_sort, LPM_y_sort).
+    if (!curves_differ) return 0;
     return x_gt_y ? 0 : 1;                         // 1 iff "X FSD Y"
   }
   
   // SSD/TSD gates
-  if (!(X.mn >= Y.mn) || (Y.mean > X.mean)) return 0;
+  if (!(X.mn >= Y.mn) || (Y.mean - X.mean > eps64 * S)) return 0;
   if (identical_samples(X, Y)) return 0;           // identical series -> 0
   
   if (degree==2){ // SSD: compare LPM degree 1
-    bool x_gt_y = false;
-    for_each_threshold(X, Y, [&](double t, int kx, int ky){
+    bool x_gt_y = false, curves_differ = false;
+    // LPM1 is piecewise linear with knots at the data: checking the knots is exact.
+    for_each_threshold(X, Y, [&](double t, int kx, int ky, double){
       double Lx, Ux, Ly, Uy; (void)Ux; (void)Uy;   // not used beyond calc
       lpm_upm_deg1(X, kx, t, Lx, Ux);
       lpm_upm_deg1(Y, ky, t, Ly, Uy);
-      if (Lx > Ly) x_gt_y = true;
+      if (Lx - Ly > eps64 * S) x_gt_y = true;
+      if (std::fabs(Lx - Ly) > eps64 * S) curves_differ = true;
     });
+    if (!curves_differ) return 0;                  // equal curves -> no SSD
     return x_gt_y ? 0 : 1;                         // 1 iff "X SSD Y"
   }
   
   // TSD: compare LPM degree 2
-  bool x_gt_y = false;
-  for_each_threshold(X, Y, [&](double t, int kx, int ky){
+  bool x_gt_y = false, curves_differ = false;
+  for_each_threshold(X, Y, [&](double t, int kx, int ky, double t_next){
     double Lx2 = lpm_deg2(X, kx, t);
     double Ly2 = lpm_deg2(Y, ky, t);
-    if (Lx2 > Ly2) x_gt_y = true;
+    if (Lx2 - Ly2 > eps64 * S * S) x_gt_y = true;
+    if (std::fabs(Lx2 - Ly2) > eps64 * S * S) curves_differ = true;
+    // LPM2 is piecewise quadratic: on (t, t_next) the difference is
+    // a*s^2 - 2*b*s + c with a = kx/mx - ky/my, b = P1x/mx - P1y/my. When
+    // a < 0 it has an interior maximum at s* = b / a, which the knots miss.
+    if (R_FINITE(t_next) && !x_gt_y){
+      double a = double(kx)/double(X.m) - double(ky)/double(Y.m);
+      if (a < 0.0){
+        double b = X.P1[kx]/double(X.m) - Y.P1[ky]/double(Y.m);
+        double ts = b / a;
+        if (ts > t && ts < t_next){
+          double Dts = lpm_deg2(X, kx, ts) - lpm_deg2(Y, ky, ts);
+          if (Dts > eps64 * S * S) { x_gt_y = true; curves_differ = true; }
+        }
+      }
+    }
   });
+  if (!curves_differ) return 0;                    // equal curves -> no TSD
   return x_gt_y ? 0 : 1;                           // 1 iff "X TSD Y"
 }
 

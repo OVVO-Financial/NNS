@@ -6,6 +6,7 @@
 #' @param y a numeric vector.
 #' @param plot logical; \code{TRUE} (default) plots the TSD test.
 #' @return Returns one of the following TSD results: \code{"X TSD Y"}, \code{"Y TSD X"}, or \code{"NO TSD EXISTS"}.
+#' @note The curves are compared on the merged sample points and, for TSD and continuous FSD, also at their closed-form extrema between those points. Differences smaller than \code{64 * .Machine$double.eps * S^d} (\code{S} = largest absolute value in \code{x} and \code{y}, \code{d} = 1 for SSD and the mean condition, 2 for TSD; a ratio analogue for continuous FSD) are treated as ties, so that rounding noise does not decide dominance. Discrete FSD compares exact empirical CDF values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  \doi{10.4236/jmf.2016.61012}.
 #' @examples
@@ -32,15 +33,13 @@ NNS.TSD <- function(x, y, plot = TRUE){
   x <- to_numeric_vector(x, "x")
   y <- to_numeric_vector(y, "y")
     
-  if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
+  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
 
   Combined_sort <- sort(c(x, y), decreasing = FALSE)
 
   LPM_x_sort <- LPM(2, Combined_sort, x)
   LPM_y_sort <- LPM(2, Combined_sort, y)
     
-  x.tsd.y <- any(LPM_x_sort > LPM_y_sort)
-  y.tsd.x <- any(LPM_y_sort > LPM_x_sort)
 
 
   if(plot){
@@ -51,9 +50,13 @@ NNS.TSD <- function(x, y, plot = TRUE){
     legend("topleft", c("X","Y"), lwd = 10, col=c("red","steelblue"))
   }
     
-  ifelse (!x.tsd.y && min(x) >= min(y) && mean(x) >= mean(y) && !identical(LPM_x_sort, LPM_y_sort),
+  # Verdict from the exact pairwise test (NNS.TSD.uni both ways), which also checks
+  # the interior maxima of the piecewise-quadratic LPM2; the grid curves are for the plot.
+  x.dom <- .Call(`_NNS_NNS_TSD_uni_cpp`, x, y) == 1L
+  y.dom <- .Call(`_NNS_NNS_TSD_uni_cpp`, y, x) == 1L
+  ifelse (x.dom,
           "X TSD Y",
-          ifelse (!y.tsd.x && min(y) >= min(x) && mean(y) >= mean(x) && !identical(LPM_x_sort, LPM_y_sort),
+          ifelse (y.dom,
                   "Y TSD X",
                   "NO TSD EXISTS"))
 
