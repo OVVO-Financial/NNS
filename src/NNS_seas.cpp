@@ -83,7 +83,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   std::vector<int> periods_vec;
   std::vector<double> cvmean_vec;
   const double* x = variable.begin();
-  for(int m=1;m<=max_m;++m){
+  auto score = [&](int m){
     double wsum = 0.0;
     for(int j=0;j<m;++j){
       int len = (n-1-j)/m + 1;
@@ -95,7 +95,16 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
       // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
       wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
     }
-    double cv_m = wsum / (double)n;
+    return wsum / (double)n;
+  };
+  // A period the user adds through modulo is scored even beyond the scan limit,
+  // so ARMA.seas.weighting doesn't give it zero weight.
+  auto added_cv = [&](int m){
+    if (m > max_m && m <= half_n){ double c = score(m); if (c < var_cov) return c; }
+    return var_cov;
+  };
+  for(int m=1;m<=max_m;++m){
+    double cv_m = score(m);
     if (cv_m < var_cov){
       periods_vec.push_back(m);
       cvmean_vec.push_back(cv_m);
@@ -141,7 +150,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
       for(int i=0;i<Period.size();++i){
         if (per_set.count(Period[i])){ keptP.push_back(Period[i]); keptCV.push_back(CoefVar[i]); }
       }
-      for(int s: per_set) if(!curr.count(s)){ keptP.push_back(s); keptCV.push_back(var_cov); }
+      for(int s: per_set) if(!curr.count(s)){ keptP.push_back(s); keptCV.push_back(added_cv(s)); }
       if(keptP.empty()){
         Period   = IntegerVector::create(1);
         CoefVar  = NumericVector::create(var_cov);
@@ -164,7 +173,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
         int oldm = Period.size(), addm = (int)add.size();
         IntegerVector P2(oldm+addm); NumericVector CV2(oldm+addm); NumericVector VCV2(oldm+addm);
         for(int i=0;i<oldm;++i){ P2[i]=Period[i]; CV2[i]=CoefVar[i]; VCV2[i]=VarCoefVar[i]; }
-        for(int i=0;i<addm;++i){ P2[oldm+i]=add[i]; CV2[oldm+i]=var_cov; VCV2[oldm+i]=var_cov; }
+        for(int i=0;i<addm;++i){ P2[oldm+i]=add[i]; CV2[oldm+i]=added_cv(add[i]); VCV2[oldm+i]=var_cov; }
         Period=P2; CoefVar=CV2; VarCoefVar=VCV2;
         IntegerVector ord = seq(0, Period.size()-1);
         std::sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
