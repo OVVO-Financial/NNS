@@ -131,3 +131,13 @@ test_that("dy.d_ averages a scalar eval point over the observed rows (#65)", {
   r <- dy.d_(x, y, wrt = 1, eval.points = 0, messages = FALSE)
   expect_lt(abs(unlist(r["First", ])[1] - ame), 0.05)
 })
+
+test_that("dy.d_ thins rows without a fixed stride", {
+  r <- NNS:::.nns_spread_rows(20000, 10000)
+  expect_length(r, 10000)
+  expect_false(is.unsorted(r)); expect_false(anyDuplicated(r) > 0)
+  # Every residue class is visited evenly, throughout the data.
+  for (q in 2:5) expect_lt(max(abs(tabulate(r %% q + 1, q) - 10000 / q)), 0.01 * 10000 / q)
+  expect_lt(abs(mean(r[r <= 10000] %% 2) - 0.5), 0.01)
+  expect_identical(NNS:::.nns_spread_rows(50, 80), 1:50)
+})

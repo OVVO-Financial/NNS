@@ -164,10 +164,10 @@ dy.d_ <- function(x, y, wrt,
     # distribution of the other regressors, as an average marginal effect
     # uses -- not over a grid of matched quantiles, whose rows move together
     # and are tuples the data may never contain (#65). Large samples are
-    # thinned systematically to at most max(21, 10000 / k) rows per point.
+    # thinned to at most max(21, 10000 / k) rows per point, spread through the
+    # data without a fixed stride (.nns_spread_rows).
     n_rows <- min(nrow(x), max(21L, floor(10000 / k)))
-    rows <- if (n_rows < nrow(x)) unique(round(seq(1, nrow(x), length.out = n_rows))) else seq_len(nrow(x))
-    grid <- as.matrix(x[rows, , drop = FALSE])
+    grid <- as.matrix(x[.nns_spread_rows(nrow(x), n_rows), , drop = FALSE])
     if (is.null(dim(grid)) || ncol(grid) != l) grid <- matrix(grid, ncol = l, byrow = FALSE)
     sampsize <- nrow(grid)
     position <- rep(rep(c("l", "m", "u"), each = sampsize), times = k)
@@ -306,3 +306,13 @@ dy.d_ <- function(x, y, wrt,
 }
 
 dy.d_ <- Vectorize(dy.d_, vectorize.args = c("wrt"))
+
+
+# k of n row indices spread through the data without a fixed stride: the rows
+# whose golden-ratio (Weyl) sequence values are smallest. A fixed stride can
+# line up with periodic or sorted row order and keep only some phases; an
+# irrational rotation visits every residue class evenly.
+.nns_spread_rows <- function(n, k) {
+  if (k >= n) return(seq_len(n))
+  sort(order((seq_len(n) * 0.6180339887498949) %% 1)[seq_len(k)])
+}
