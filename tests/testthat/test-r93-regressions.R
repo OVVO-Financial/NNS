@@ -27,3 +27,18 @@ test_that("ARMA.optim out-of-sample bands sit on the clamped forecasts", {
   expect_true(all(o$upper.pred.int >= o$results))
   expect_true(all(o$upper.pred.int[o$results == 0] > 0))
 })
+
+test_that("constant cells keep the direction of a discrete relationship", {
+  b <- rep(0:1, each = 50)
+  expect_equal(unlist(NNS.dep(b, -b)), c(Correlation = -1, Dependence = 1))
+  expect_equal(NNS.dep(b + .1, -(b + .1))$Correlation, -1)
+  u <- rep(1:3, 30)
+  expect_equal(NNS.dep(u, (u - 2)^2)$Correlation, 0)
+  g <- rep(1:3, each = 30)
+  expect_equal(NNS.dep(g, (g - 2)^2)$Correlation, 0)
+  expect_equal(NNS.dep(rev(g), rev((g - 2)^2))$Correlation, 0)
+  x <- 1e6 + rep(c(-.01, 0, .01), each = 1000); y <- 1e6 + rep(c(.01, 0, .01), each = 1000)
+  expect_equal(c(NNS.dep(x, y)$Correlation, NNS.dep(rev(x), rev(y))$Correlation), c(0, 0))
+  expect_equal(NNS.dep(u, u)$Correlation, 1)
+  expect_equal(NNS.dep(rep(c(0, 1, 2, 10), 30), rep(0:3, 30))$Correlation, 1)
+})

@@ -69,6 +69,7 @@ static inline int n_unique(const std::vector<double>& v) {
 struct CellCopula {
   double signed_value;  // debiased magnitude times the sign of the cell covariance
   double magnitude;     // debiased magnitude; may be negative below chance
+  bool constant = false;  // x and y both constant: no within-cell sign
 };
 
 // E0|2 p0 - 1| for a cell of m points with a points at or below the x mean and
@@ -178,7 +179,7 @@ static CellCopula copula_signed(const std::vector<double>& xv,
     if (xv[i] != xv[0]) x_const = false;
     if (yv[i] != yv[0]) y_const = false;
   }
-  if (x_const) return y_const ? CellCopula{1.0, 1.0} : CellCopula{0.0, 0.0};
+  if (x_const) return y_const ? CellCopula{1.0, 1.0, true} : CellCopula{0.0, 0.0};
 
   const double slope_sign = (s > 0.0) ? 1.0 : (s < 0.0) ? -1.0 : 0.0;
   const double e0 = null_T0(n, a, b);
@@ -267,6 +268,21 @@ static DepResult NNS_dep_pair_core(const std::vector<double>& xv,
   for (int i = 0; i < n; ++i)
     grp_yx[quad_yx[i]].push_back(i);
   
+  // A constant cell has no within-cell sign; it takes the sign of the overall
+  // covariance, read as 0 when it is within rounding of 0.
+  // Accumulate from the first observation so a large common level doesn't round away.
+  const double x0 = xv[0], y0 = yv[0];
+  double mx = 0.0, my = 0.0, cov = 0.0, cov_abs = 0.0;
+  for (int i = 0; i < n; ++i) { mx += xv[i] - x0; my += yv[i] - y0; }
+  mx /= n; my /= n;
+  for (int i = 0; i < n; ++i) {
+    const double p = ((xv[i] - x0) - mx) * ((yv[i] - y0) - my);
+    cov += p;
+    cov_abs += std::abs(p);
+  }
+  const double cov_tol = 1e-12 * cov_abs;
+  const double between_sign = (cov > cov_tol) ? 1.0 : (cov < -cov_tol) ? -1.0 : 0.0;
+
   CellCopula global_cop = copula_signed(xv, yv);
   if (!std::isfinite(global_cop.signed_value) || !std::isfinite(global_cop.magnitude))
     global_cop = {0.0, 0.0};
@@ -282,6 +298,7 @@ static DepResult NNS_dep_pair_core(const std::vector<double>& xv,
     
     CellCopula cop = copula_signed(xq, yq);
     if (!std::isfinite(cop.signed_value) || !std::isfinite(cop.magnitude)) cop = global_cop;
+    if (cop.constant) cop.signed_value = between_sign * cop.magnitude;
     
     double w = static_cast<double>(nq) / static_cast<double>(n);
     corr_xy += cop.signed_value * w;
@@ -299,6 +316,7 @@ static DepResult NNS_dep_pair_core(const std::vector<double>& xv,
     
     CellCopula cop = copula_signed(yq, xq);
     if (!std::isfinite(cop.signed_value) || !std::isfinite(cop.magnitude)) cop = global_cop;
+    if (cop.constant) cop.signed_value = between_sign * cop.magnitude;
     
     double w = static_cast<double>(nq) / static_cast<double>(n);
     corr_yx += cop.signed_value * w;
