@@ -120,7 +120,7 @@ NNS.moments(x, population = FALSE)
     ## [1] 0.8332328
     ## 
     ## $skewness
-    ## [1] 0.06235774
+    ## [1] 0.06142471
     ## 
     ## $kurtosis
     ## [1] -0.1069186

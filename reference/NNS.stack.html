@@ -102,7 +102,7 @@
 
 
 <dt id="arg-cv-size">CV.size<a class="anchor" aria-label="anchor" href="#arg-cv-size"></a></dt>
-<dd><p>numeric [0, 1]; <code>NULL</code> (default) Sets the cross-validation size if <code>(IVs.test = NULL)</code>.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.</p></dd>
+<dd><p>numeric [0, 1]; <code>NULL</code> (default) Sets the holdout size for repeated holdout cross-validation (one random holdout per fold).  With <code>CV.size = NULL</code> and <code>folds &gt; 1</code>, (stratified, for classification) k-fold cross-validation is used; with <code>CV.size = NULL</code> and <code>folds = 1</code>, a single holdout of random size between 0.2 and 0.33 is used.</p></dd>
 
 
 <dt id="arg-balance">balance<a class="anchor" aria-label="anchor" href="#arg-balance"></a></dt>
@@ -130,7 +130,7 @@
 
 
 <dt id="arg-dim-red-method">dim.red.method<a class="anchor" aria-label="anchor" href="#arg-dim-red-method"></a></dt>
-<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  <code>(dim.red.method = "cor")</code> uses standard linear correlation for weights.  <code>(dim.red.method = "NNS.dep")</code> (default) uses <a href="NNS.dep.html">NNS.dep</a> for nonlinear dependence weights, while <code>(dim.red.method = "NNS.caus")</code> uses <a href="NNS.caus.html">NNS.caus</a> for causal weights.  <code>(dim.red.method = "all")</code> averages all methods for further feature engineering.</p></dd>
+<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  <code>(dim.red.method = "cor")</code> (default) uses Spearman rank correlation for weights.  <code>(dim.red.method = "NNS.dep")</code> uses <a href="NNS.dep.html">NNS.dep</a> for nonlinear dependence weights, while <code>(dim.red.method = "NNS.caus")</code> uses <a href="NNS.caus.html">NNS.caus</a> for causal weights.  <code>(dim.red.method = "all")</code> averages all methods for further feature engineering.</p></dd>
 
 
 <dt id="arg-pred-int">pred.int<a class="anchor" aria-label="anchor" href="#arg-pred-int"></a></dt>
@@ -171,10 +171,7 @@
 <ul><li><p>Incorporate any objective function from external packages (such as <code>Metrics::mape</code>) via <code>NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")</code></p></li>
 <li><p>Like a logistic regression, the <code>(type = "CLASS")</code> setting is not necessary for target variable of two classes e.g. [0, 1].  The response variable base category should be 1 for multiple class problems.</p></li>
 <li><p>Missing data should be handled prior as well using <a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a> or <a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a> on the full dataset.</p></li>
-</ul><p>If error received:</p>
-<p><code>"Error in is.data.frame(x) : object 'RP' not found"</code></p>
-<p>reduce the <code>CV.size</code>.</p>
-    </div>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Viole, F. (2016) "Classification Using NNS Clustering Analysis"  <a href="https://doi.org/10.2139/ssrn.2864711" class="external-link">doi:10.2139/ssrn.2864711</a></p>

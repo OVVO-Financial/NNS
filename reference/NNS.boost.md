@@ -118,7 +118,7 @@ NNS.boost(
 
 - objective:
 
-  options: ("min", "max") `"max"` (default) Select whether to minimize
+  options: ("min", "max") `"min"` (default) Select whether to minimize
   or maximize the objective function `obj.fn`.
 
 - extreme:

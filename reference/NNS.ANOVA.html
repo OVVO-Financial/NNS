@@ -100,7 +100,7 @@ differences between control and treatment groups. Depending on the setting of
 
 
 <dt id="arg-robust">robust<a class="anchor" aria-label="anchor" href="#arg-robust"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) Two-sample (<code>control</code>, <code>treatment</code>) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (<a href="NNS.gravity.html">NNS.gravity</a>) and the <code>confidence.interval</code> bounds of the resampled <code>Certainty</code> values.  It is ignored when <code>control</code> is a matrix or list (multi-group, including <code>pairwise = TRUE</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -110,23 +110,31 @@ differences between control and treatment groups. Depending on the setting of
 <li><p><code>Grand_Statistic</code>: Grand mean/median</p></li>
 <li><p><code>Control_CDF</code>: CDF value at grand statistic (control)</p></li>
 <li><p><code>Treatment_CDF</code>: CDF value at grand statistic (treatment)</p></li>
-<li><p><code>Certainty</code>: Probability that the groups are the <em>same</em>
-        (means-only or full distribution depending on <code>means.only</code>).</p></li>
+<li><p><code>Certainty</code>: Similarity index in [0, 1] (1 = the groups are the
+        <em>same</em>; means-only or full distribution depending on
+        <code>means.only</code>); not a calibrated probability.</p></li>
 <li><p><code>Effect_Size_LB</code>: Lower bound of treatment effect (if confidence.interval requested)</p></li>
 <li><p><code>Effect_Size_UB</code>: Upper bound of treatment effect (if confidence.interval requested)</p></li>
 <li><p><code>Confidence_Level</code>: Confidence level used (if confidence.interval requested)</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The key output is the <code>Certainty</code> metric, a calibrated probability in
-\([0, 1]\) representing the likelihood that the groups being compared are
-the *same* with respect to the chosen comparison mode:</p><ul><li><p>If <code>means.only = TRUE</code>: <code>Certainty</code> is the probability that
-        the group <em>means</em> (or medians, if <code>medians = TRUE</code>) are the same.</p></li>
-<li><p>If <code>means.only = FALSE</code>: <code>Certainty</code> is the probability that
-        the two <em>entire distributions</em> are the same.</p></li>
-</ul><p>This makes <code>Certainty</code> the conceptual inverse of a classical p-value.
-A *low* Certainty (e.g., &lt; 0.10) indicates strong evidence of difference,
-while a *high* Certainty (e.g., &gt; 0.90) indicates strong evidence of similarity.</p>
+    <p>The key output is the <code>Certainty</code> metric, a descriptive similarity index
+in \([0, 1]\) (1 = the groups are the same) with respect to the chosen
+comparison mode:</p><ul><li><p>If <code>means.only = TRUE</code>: similarity of the group <em>means</em>
+        (or medians, if <code>medians = TRUE</code>), measured by how far each
+        group's partial-moment CDF at the grand statistic is from 0.5.</p></li>
+<li><p>If <code>means.only = FALSE</code>: similarity of the two <em>entire
+        distributions</em>, adding the same comparison at the 12.5% and 25% tail
+        quantiles.</p></li>
+</ul><p><code>Certainty</code> is <em>not</em> a calibrated probability and not the inverse of
+a p-value: for two samples from the same distribution it is not uniform on
+\([0, 1]\) and rises toward 1 with sample size, it is shrunk by
+the population adjustment \(((n_1 + n_2 - 2) / (n_1 + n_2))^2\) for small
+samples, and it should not be compared with p-value thresholds such as 0.05.
+<code>robust = TRUE</code> bounds the sampling variability of <code>Certainty</code>
+itself; it is not a reference distribution under no difference. For that,
+recompute <code>Certainty</code> on random relabelings of the pooled observations.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

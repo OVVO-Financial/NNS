@@ -762,15 +762,15 @@ NNS.ARMA.optim(z, h = 48, seasonal.factor = seasonal_period$periods, plot = TRUE
     ## [1] "CURRNET METHOD: nonlin"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 49, 51, 48, 50, 47, 53, 25 ) ...)"
-    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 0.314439010716385"
+    ## [1] "CURRENT nonlin OBJECTIVE FUNCTION = 0.321471277769471"
     ## [1] "BEST method = 'nonlin' PATH MEMBER = c( 49, 51, 48, 50, 47, 53, 25 )"
-    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 0.314439010716385"
+    ## [1] "BEST nonlin OBJECTIVE FUNCTION = 0.321471277769471"
     ## [1] "CURRNET METHOD: both"
     ## [1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
     ## [1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 49, 51, 48, 50, 47, 53, 25 ) ...)"
-    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.27236009764649"
+    ## [1] "CURRENT both OBJECTIVE FUNCTION = 0.274232391659256"
     ## [1] "BEST method = 'both' PATH MEMBER = c( 49, 51, 48, 50, 47, 53, 25 )"
-    ## [1] "BEST both OBJECTIVE FUNCTION = 0.27236009764649"
+    ## [1] "BEST both OBJECTIVE FUNCTION = 0.274232391659256"
 
 ![](NNSvignette_01_Overview_files/figure-html/unnamed-chunk-14-1.png)
 

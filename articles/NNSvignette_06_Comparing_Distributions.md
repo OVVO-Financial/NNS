@@ -63,22 +63,22 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
     ## [1] 0.02345583
     ## 
     ## $`Effect_Size_LB.2.5%`
-    ## [1] 2.651417
+    ## [1] 2.44919
     ## 
     ## $`Effect_Size_UB.97.5%`
-    ## [1] 12.29762
+    ## [1] 12.20105
     ## 
     ## $Confidence_Level
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.01293583
+    ## [1] 0.01447008
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0
+    ## [1] 0.000272993
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.08849699
+    ## [1] 0.06890714
 
 The `Certainty` shows that these two distributions clearly do not come
 from the same population. This is verified with the
@@ -136,22 +136,22 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.912545
     ## 
     ## $`Effect_Size_LB.2.5%`
-    ## [1] -0.1215839
+    ## [1] -0.1226692
     ## 
     ## $`Effect_Size_UB.97.5%`
-    ## [1] 0.2556542
+    ## [1] 0.2558928
     ## 
     ## $Confidence_Level
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.9183685
+    ## [1] 0.9046778
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0.7311398
+    ## [1] 0.7729845
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.9928339
+    ## [1] 0.9929432
 
 ``` r
 
@@ -207,22 +207,22 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.1824463
     ## 
     ## $`Effect_Size_LB.2.5%`
-    ## [1] 0.900412
+    ## [1] 0.8993267
     ## 
     ## $`Effect_Size_UB.97.5%`
-    ## [1] 1.148409
+    ## [1] 1.14823
     ## 
     ## $Confidence_Level
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.1788691
+    ## [1] 0.1811777
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0.1484567
+    ## [1] 0.1463972
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.2114944
+    ## [1] 0.2166297
 
 ``` r
 
@@ -280,22 +280,22 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.3497634
     ## 
     ## $`Effect_Size_LB.2.5%`
-    ## [1] 0.8659585
+    ## [1] 0.8684753
     ## 
     ## $`Effect_Size_UB.97.5%`
-    ## [1] 1.222394
+    ## [1] 1.222264
     ## 
     ## $Confidence_Level
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.3448958
+    ## [1] 0.3379858
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0.2856004
+    ## [1] 0.28774
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.4308527
+    ## [1] 0.3899075
 
 ## Stochastic Superiority
 

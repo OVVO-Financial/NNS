@@ -178,9 +178,13 @@ Vectorized `rho` and `drift` parameters will not vectorize both
 simultaneously. Also, do not specify `target_drift = NULL`.
 
 The `rho` dependence alignment is calibrated on each individual
-`replicate`: every replicate is mixed so that its dependence on the
-original series matches `rho`, in the metric implied by `type`. Assess a
-result in that **same** metric – a `"NNSdep"` target with
+`replicate`: every replicate's *detrended residuals* are mixed so that
+their dependence on the original series' detrended residuals matches
+`rho`, in the metric implied by `type`; the trend is added back
+afterwards. For a trending series the replicate levels therefore stay
+strongly correlated with the original even at `rho = -1` (e.g.
+AirPassengers: mean Spearman 0.81 at `rho = -1`). Assess a result in
+that **same** metric – a `"NNSdep"` target with
 [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)`$Dependence`
 (unsigned) and a `"spearman"`/`"pearson"` target with rank/linear
 correlation – because a signed correlation taken on an unsigned

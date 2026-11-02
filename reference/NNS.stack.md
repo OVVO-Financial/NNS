@@ -89,9 +89,12 @@ NNS.stack(
 
 - CV.size:
 
-  numeric \[0, 1\]; `NULL` (default) Sets the cross-validation size if
-  `(IVs.test = NULL)`. Defaults to a random value between 0.2 and 0.33
-  for a random sampling of the training set.
+  numeric \[0, 1\]; `NULL` (default) Sets the holdout size for repeated
+  holdout cross-validation (one random holdout per fold). With
+  `CV.size = NULL` and `folds > 1`, (stratified, for classification)
+  k-fold cross-validation is used; with `CV.size = NULL` and
+  `folds = 1`, a single holdout of random size between 0.2 and 0.33 is
+  used.
 
 - balance:
 
@@ -137,8 +140,8 @@ NNS.stack(
 
   options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for
   determining synthetic X\* coefficients. `(dim.red.method = "cor")`
-  uses standard linear correlation for weights.
-  `(dim.red.method = "NNS.dep")` (default) uses
+  (default) uses Spearman rank correlation for weights.
+  `(dim.red.method = "NNS.dep")` uses
   [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
   for nonlinear dependence weights, while
   `(dim.red.method = "NNS.caus")` uses
@@ -240,12 +243,6 @@ for all models.
   [na.omit](https://rdrr.io/r/stats/na.fail.html) or
   [complete.cases](https://rdrr.io/r/stats/complete.cases.html) on the
   full dataset.
-
-If error received:
-
-`"Error in is.data.frame(x) : object 'RP' not found"`
-
-reduce the `CV.size`.
 
 ## References
 

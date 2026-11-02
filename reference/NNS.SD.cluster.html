@@ -70,7 +70,7 @@ subject to a minimum cluster size.</p>
 
 
 <dt id="arg-min-cluster">min_cluster<a class="anchor" aria-label="anchor" href="#arg-min-cluster"></a></dt>
-<dd><p>Integer. The minimum number of elements required for a valid cluster.</p></dd>
+<dd><p>Integer. Peeling stops once at most <code>min_cluster</code> variables remain; those form the final cluster, and a final cluster smaller than <code>min_cluster</code> is merged into the previous one.  SD-efficient sets peeled before that are kept whatever their size.</p></dd>
 
 
 <dt id="arg-dendrogram">dendrogram<a class="anchor" aria-label="anchor" href="#arg-dendrogram"></a></dt>
@@ -85,9 +85,9 @@ subject to a minimum cluster size.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function applies <code><a href="NNS.SD.efficient.set.html">NNS.SD.efficient.set</a></code> iteratively, peeling off the SD-efficient set at each step
-if it meets or exceeds <code>min_cluster</code> in size, until no more subsets can be extracted or all variables are exhausted.
-Variables in each SD-efficient set form a cluster, with any remaining variables aggregated into the final cluster if it meets
-the <code>min_cluster</code> threshold.</p>
+(whatever its size) while more than <code>min_cluster</code> variables remain, or until no more subsets can be extracted.
+Variables in each SD-efficient set form a cluster. The remaining variables form the final cluster, which is merged
+into the previous cluster if it has fewer than <code>min_cluster</code> members.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

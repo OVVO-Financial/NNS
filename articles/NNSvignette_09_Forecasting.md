@@ -153,7 +153,7 @@ nns = NNS.ARMA(AirPassengers,
 sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
 ```
 
-    ## [1] 18.07676
+    ## [1] 17.32624
 
 **Note:** You may experience instances with monthly data that report
 `seasonal.factor` close to multiples of 3, 4, 6 or 12. For instance, if

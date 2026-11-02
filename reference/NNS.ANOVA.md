@@ -61,10 +61,14 @@ NNS.ANOVA(
 
 - robust:
 
-  logical; `FALSE` (default) Generates 100 independent random
-  permutations to test results, and returns / plots 95 percent
-  confidence intervals along with robust central tendency of all results
-  for pairwise analysis only.
+  logical; `FALSE` (default) Two-sample (`control`, `treatment`) path
+  only: draws 100 independent bootstrap resamples of each group (with
+  replacement, from its own full sample), and returns / plots the robust
+  central tendency
+  ([NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md))
+  and the `confidence.interval` bounds of the resampled `Certainty`
+  values. It is ignored when `control` is a matrix or list (multi-group,
+  including `pairwise = TRUE`).
 
 ## Value
 
@@ -80,8 +84,9 @@ Returns a list containing:
 
 - `Treatment_CDF`: CDF value at grand statistic (treatment)
 
-- `Certainty`: Probability that the groups are the *same* (means-only or
-  full distribution depending on `means.only`).
+- `Certainty`: Similarity index in \[0, 1\] (1 = the groups are the
+  *same*; means-only or full distribution depending on `means.only`);
+  not a calibrated probability.
 
 - `Effect_Size_LB`: Lower bound of treatment effect (if
   confidence.interval requested)
@@ -94,20 +99,26 @@ Returns a list containing:
 
 ## Details
 
-The key output is the `Certainty` metric, a calibrated probability in
-\\\[0, 1\]\\ representing the likelihood that the groups being compared
-are the \*same\* with respect to the chosen comparison mode:
+The key output is the `Certainty` metric, a descriptive similarity index
+in \\\[0, 1\]\\ (1 = the groups are the same) with respect to the chosen
+comparison mode:
 
-- If `means.only = TRUE`: `Certainty` is the probability that the group
-  *means* (or medians, if `medians = TRUE`) are the same.
+- If `means.only = TRUE`: similarity of the group *means* (or medians,
+  if `medians = TRUE`), measured by how far each group's partial-moment
+  CDF at the grand statistic is from 0.5.
 
-- If `means.only = FALSE`: `Certainty` is the probability that the two
-  *entire distributions* are the same.
+- If `means.only = FALSE`: similarity of the two *entire distributions*,
+  adding the same comparison at the 12.5% and 25% tail quantiles.
 
-This makes `Certainty` the conceptual inverse of a classical p-value. A
-\*low\* Certainty (e.g., \< 0.10) indicates strong evidence of
-difference, while a \*high\* Certainty (e.g., \> 0.90) indicates strong
-evidence of similarity.
+`Certainty` is *not* a calibrated probability and not the inverse of a
+p-value: for two samples from the same distribution it is not uniform on
+\\\[0, 1\]\\ and rises toward 1 with sample size, it is shrunk by the
+population adjustment \\((n_1 + n_2 - 2) / (n_1 + n_2))^2\\ for small
+samples, and it should not be compared with p-value thresholds such as
+0.05. `robust = TRUE` bounds the sampling variability of `Certainty`
+itself; it is not a reference distribution under no difference. For
+that, recompute `Certainty` on random relabelings of the pooled
+observations.
 
 ## References
 

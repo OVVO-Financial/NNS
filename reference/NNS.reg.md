@@ -66,7 +66,7 @@ NNS.reg(
   for nonlinear dependence weights, while
   `(dim.red.method = "NNS.caus")` uses
   [NNS.caus](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-  for causal weights. `(dim.red.method = "cor")` uses standard linear
+  for causal weights. `(dim.red.method = "cor")` uses Spearman rank
   correlation for weights. `(dim.red.method = "all")` averages all
   methods for further feature engineering. `(dim.red.method = "equal")`
   uses unit weights. Alternatively, user can specify a numeric vector of
@@ -83,7 +83,11 @@ NNS.reg(
 
   `NULL` (default). To perform a classification, set to
   `(type = "CLASS")`. Like a logistic regression, it is not necessary
-  for target variable of two classes e.g. \[0, 1\].
+  for target variable of two classes e.g. \[0, 1\]: a numeric response
+  with exactly the values 0 and 1, or a factor, character or logical
+  response, is classified automatically. `(type = "XONLY")` is valid
+  only for a single predictor: it keeps the default x-only partition but
+  turns off the automatic classification.
 
 - point.est:
 
@@ -123,8 +127,10 @@ NNS.reg(
 - confidence.interval:
 
   numeric \[0, 1\]; `NULL` (default) Plots the associated confidence
-  interval with the estimate and reports the standard error for each
-  individual segment. Also applies the same level for the prediction
+  interval with the estimate and adds `conf.int.pos` / `conf.int.neg` to
+  `Fitted.xy`. The intervals are global: they are built from the type-8
+  quantiles of the in-sample residuals (no per-segment standard errors
+  are returned). Also applies the same level for the prediction
   intervals.
 
 - threshold:
@@ -137,8 +143,9 @@ NNS.reg(
 
   integer; `NULL` (default) Sets the number of nearest regression points
   to use in weighting for multivariate regression at
-  `sqrt(# of regressors)`. `(n.best = "all")` will select and weight all
-  generated regression points. Analogous to `k` in a
+  `floor((1 - NNS.copula(cbind(x, y))) * sqrt(nrow(x)))` (at least 1, at
+  most the number of regression points). `(n.best = "all")` will select
+  and weight all generated regression points. Analogous to `k` in a
   `k Nearest Neighbors` algorithm. Different values of `n.best` are
   tested using cross-validation in
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md).
@@ -218,8 +225,9 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
 - `"equation"` returns the numerator of the synthetic X\* dimension
   reduction equation as a `data.frame` consisting of regressor and its
-  coefficient. Denominator is simply the length of all coefficients \>
-  0, returned in last row of `equation` `data.frame`.
+  coefficient. Denominator is the number of non-zero coefficients
+  (`abs(coefficient) > 0`), returned in last row of `equation`
+  `data.frame`.
 
 - `"x.star"` returns the synthetic X\* as a vector;
 
@@ -234,8 +242,11 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"pred.int"` lower and upper prediction intervals for the
   `"Point.est"` returned using the `"confidence.interval"` provided;
 
-- `"Fitted.xy"` returns a `data.frame` of `x`,`y`, `y.hat`, `gradient`,
-  and `NNS.ID`.
+- `"Fitted.xy"` returns a `data.frame` of the regressors, `y`, `y.hat`,
+  `NNS.ID` and `residuals` for full multivariate regression, or of the
+  synthetic `x`, `y`, `y.hat`, `NNS.ID`, `gradient` and `residuals` for
+  dimension reduction regression. `confidence.interval` adds
+  `conf.int.neg` and `conf.int.pos`.
 
 ## Note
 
@@ -243,9 +254,9 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
   message will ensue if not compatible.
 
 - Like a logistic regression, the `(type = "CLASS")` setting is not
-  necessary for target variable of two classes e.g. \[0, 1\]. The
-  response variable base category should be 1 for classification
-  problems.
+  necessary for target variable of two classes e.g. \[0, 1\]. For other
+  numeric responses set `type = "CLASS"`; the response variable base
+  category should be 1 for multi-class problems.
 
 - For low signal:noise instances, increasing the dimension may yield
   better results using `NNS.stack(cbind(x,x), y, method = 1, ...)`.
@@ -288,8 +299,6 @@ NNS.reg(x, y, order = 2)
 ## Maximum {order} selection
 NNS.reg(x, y, order = "max")
 
-## x-only paritioning (Univariate only)
-NNS.reg(x, y, type = "XONLY")
 
 ## For Multiple Regression:
 x <- cbind(rnorm(100), rnorm(100), rnorm(100)) ; y <- rnorm(100)

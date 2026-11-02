@@ -53,7 +53,7 @@
 
 
 <dt id="arg-linear">linear<a class="anchor" aria-label="anchor" href="#arg-linear"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Performs a linear scaling normalization, resulting in equal means for all variables.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) performs the nonlinear scaling normalization (each variable's mean-ratio scale is weighted by its correlation / <a href="NNS.dep.html">NNS.dep</a> dependence with the other variables).  <code>TRUE</code> performs a linear scaling normalization, resulting in equal means for all variables.  Both scale by ratios of means, so they assume variables with positive means; a zero mean is replaced by 1e-10 (giving extreme scale factors).</p></dd>
 
 
 <dt id="arg-chart-type">chart.type<a class="anchor" aria-label="anchor" href="#arg-chart-type"></a></dt>

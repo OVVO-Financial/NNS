@@ -97,7 +97,34 @@ observable partition representation without passing an invalid integer to C++.</
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing `order`, `dt`, and `regression.points`.</p>
+    <p>A list containing `order`, `dt`, and `regression.points`.</p><ul><li><p><code>order</code>: the order actually completed. It can be smaller than
+  the requested <code>order</code> when <code>obs.req</code> / <code>min.obs.stop</code>
+  stop the recursion (e.g. <code>order = 3</code> returns 2 for <code>n = 200</code>
+  with the default <code>obs.req = 8</code>).</p></li>
+<li><p><code>dt</code>: the observations with their final <code>quadrant</code> and
+  <code>prior.quadrant</code> labels.</p></li>
+<li><p><code>regression.points</code>: for a numeric <code>order</code>, one (x, y)
+  centroid per <code>prior.quadrant</code>, i.e. per cell of the previous order:
+  <code>order = 1</code> gives 4 final quadrants but a single regression point
+  (<code>"q"</code>), <code>order = 2</code> gives up to 16 quadrants and 4 points.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For a numeric <code>order</code>, each cell is split at a centre per coordinate, set
+by <code>noise.reduction</code>:
+<code>"mean"</code> and <code>"median"</code> use the mean and median, <code>"mode"</code>
+uses <code>NNS.mode(discrete = TRUE)</code>, <code>"mode_class"</code> uses
+<a href="NNS.gravity.html">NNS.gravity</a> for x and <code>NNS.mode(discrete = TRUE)</code> for y, and
+<code>"off"</code> uses <a href="NNS.gravity.html">NNS.gravity</a>. Regression points are the same centres
+of each <code>prior.quadrant</code>.
+<code>order = "max"</code> makes no splits: every observation is its own regression
+point, or with <code>type = "XONLY"</code> each distinct x gets the y centre of its
+observations.
+Quadrant labels append one digit per order. With split centres <code>cx</code>
+and <code>cy</code>, the digit for the default joint partition
+(<code>type = NULL</code>) is <code>1 + (x &lt;= cx) + 2 * (y &lt;= cy)</code>: 1 = upper-right,
+2 = upper-left, 3 = lower-right, 4 = lower-left. For <code>type = "XONLY"</code>
+the digit is 1 for <code>x &lt;= cx</code> and 2 for <code>x &gt; cx</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

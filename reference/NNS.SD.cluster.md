@@ -32,7 +32,10 @@ NNS.SD.cluster(
 
 - min_cluster:
 
-  Integer. The minimum number of elements required for a valid cluster.
+  Integer. Peeling stops once at most `min_cluster` variables remain;
+  those form the final cluster, and a final cluster smaller than
+  `min_cluster` is merged into the previous one. SD-efficient sets
+  peeled before that are kept whatever their size.
 
 - dendrogram:
 
@@ -53,11 +56,11 @@ A list with the following components:
 
 The function applies
 [`NNS.SD.efficient.set`](https://OVVO-Financial.github.io/NNS/reference/NNS.SD.efficient.set.md)
-iteratively, peeling off the SD-efficient set at each step if it meets
-or exceeds `min_cluster` in size, until no more subsets can be extracted
-or all variables are exhausted. Variables in each SD-efficient set form
-a cluster, with any remaining variables aggregated into the final
-cluster if it meets the `min_cluster` threshold.
+iteratively, peeling off the SD-efficient set at each step (whatever its
+size) while more than `min_cluster` variables remain, or until no more
+subsets can be extracted. Variables in each SD-efficient set form a
+cluster. The remaining variables form the final cluster, which is merged
+into the previous cluster if it has fewer than `min_cluster` members.
 
 ## References
 
