@@ -87,11 +87,11 @@
 
 
 <dt id="arg-drift">drift<a class="anchor" aria-label="anchor" href="#arg-drift"></a></dt>
-<dd><p>logical; <code>drift = TRUE</code> (default) preserves the drift of the original series.</p></dd>
+<dd><p>logical; <code>drift = TRUE</code> (default) preserves the drift of the original series.  <code>drift = FALSE</code> removes it: replicates are a flat baseline at <code>mean(x)</code> plus the resampled residuals.</p></dd>
 
 
 <dt id="arg-target-drift">target_drift<a class="anchor" aria-label="anchor" href="#arg-target-drift"></a></dt>
-<dd><p>numerical; <code>target_drift = NULL</code> (default) Specifies the desired drift when <code>drift = TRUE</code>, i.e. a risk-free rate of return.</p></dd>
+<dd><p>numerical; <code>target_drift = NULL</code> (default) Specifies the desired drift when <code>drift = TRUE</code>, i.e. a risk-free rate of return.  A drift other than the original is centred so the replicates keep <code>mean(x)</code>.</p></dd>
 
 
 <dt id="arg-target-drift-scale">target_drift_scale<a class="anchor" aria-label="anchor" href="#arg-target-drift-scale"></a></dt>
@@ -116,15 +116,15 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 
 <dt id="arg-expand-sd">expand.sd<a class="anchor" aria-label="anchor" href="#arg-expand-sd"></a></dt>
-<dd><p>logical; If <code>TRUE</code> the standard deviation in the ensemble is expanded. See <code>expand.sd</code> in <code>meboot::meboot</code>.</p></dd>
+<dd><p>logical; If <code>TRUE</code> the standard deviation in the ensemble is expanded. See <code>expand.sd</code> in <code>meboot::meboot</code>.  The expansion toward <code>sd(x)</code> is skipped when <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, since <code>sd(x)</code> includes that drift.  A target equal to the original drift up to rounding (relative tolerance <code>sqrt(.Machine$double.eps)</code>, plus an allowance for rounding in the slope fit that grows with <code>max(abs(x))</code>) keeps the original reconstruction.</p></dd>
 
 
 <dt id="arg-force-clt">force.clt<a class="anchor" aria-label="anchor" href="#arg-force-clt"></a></dt>
-<dd><p>logical; If <code>TRUE</code> the ensemble is forced to satisfy the central limit theorem. See <code>force.clt</code> in <code>meboot::meboot</code>.</p></dd>
+<dd><p>logical; If <code>TRUE</code> the ensemble is forced to satisfy the central limit theorem. See <code>force.clt</code> in <code>meboot::meboot</code>.  When <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of <code>x</code>.</p></dd>
 
 
 <dt id="arg-scl-adjustment">scl.adjustment<a class="anchor" aria-label="anchor" href="#arg-scl-adjustment"></a></dt>
-<dd><p>logical; If <code>TRUE</code> scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.</p></dd>
+<dd><p>logical; If <code>TRUE</code> scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.</p></dd>
 
 
 <dt id="arg-sym">sym<a class="anchor" aria-label="anchor" href="#arg-sym"></a></dt>

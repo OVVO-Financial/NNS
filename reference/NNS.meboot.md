@@ -57,12 +57,14 @@ NNS.meboot(
 - drift:
 
   logical; `drift = TRUE` (default) preserves the drift of the original
-  series.
+  series. `drift = FALSE` removes it: replicates are a flat baseline at
+  `mean(x)` plus the resampled residuals.
 
 - target_drift:
 
   numerical; `target_drift = NULL` (default) Specifies the desired drift
-  when `drift = TRUE`, i.e. a risk-free rate of return.
+  when `drift = TRUE`, i.e. a risk-free rate of return. A drift other
+  than the original is centred so the replicates keep `mean(x)`.
 
 - target_drift_scale:
 
@@ -91,18 +93,27 @@ NNS.meboot(
 - expand.sd:
 
   logical; If `TRUE` the standard deviation in the ensemble is expanded.
-  See `expand.sd` in `meboot::meboot`.
+  See `expand.sd` in `meboot::meboot`. The expansion toward `sd(x)` is
+  skipped when `drift = FALSE`, `target_drift` or `target_drift_scale`
+  replaces the original drift, since `sd(x)` includes that drift. A
+  target equal to the original drift up to rounding (relative tolerance
+  `sqrt(.Machine$double.eps)`, plus an allowance for rounding in the
+  slope fit that grows with `max(abs(x))`) keeps the original
+  reconstruction.
 
 - force.clt:
 
   logical; If `TRUE` the ensemble is forced to satisfy the central limit
-  theorem. See `force.clt` in `meboot::meboot`.
+  theorem. See `force.clt` in `meboot::meboot`. When `drift = FALSE`,
+  `target_drift` or `target_drift_scale` replaces the original drift,
+  the replicate means are centred and spread using the new baseline plus
+  the original residuals instead of `x`.
 
 - scl.adjustment:
 
   logical; If `TRUE` scale adjustment is performed to ensure that the
-  population variance of the transformed series equals the variance of
-  the data.
+  population variance of the resampled residuals equals the variance of
+  the detrended data.
 
 - sym:
 
