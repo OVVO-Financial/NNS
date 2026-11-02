@@ -287,7 +287,7 @@ such structure.</p>
 <pre><code><span><span class="co">## Pearson r = 0.0006</span></span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"NNS.dep  = %.4f\n"</span>, <span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">Dependence</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## NNS.dep  = 0.6751</span></span></code></pre>
+<pre><code><span><span class="co">## NNS.dep  = 0.9186</span></span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>a<span class="op">=</span><span class="va">x</span>, b<span class="op">=</span><span class="va">y</span>, c<span class="op">=</span><span class="va">x</span><span class="op">*</span><span class="va">y</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span>, sd<span class="op">=</span><span class="fl">.05</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/PM.matrix.html">PM.matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, target <span class="op">=</span> <span class="st">"means"</span>, variable<span class="op">=</span><span class="va">X</span>, pop_adj<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
@@ -735,11 +735,11 @@ direction, in
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span>,  <span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span><span class="op">)</span>  <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## C(x---&gt;y) C(y---&gt;x) </span></span>
-<span><span class="co">##  0.550117  0.449883</span></span></code></pre>
+<span><span class="co">## 0.4867329 0.5132671</span></span></code></pre>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.caus.html">NNS.caus</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">hp</span><span class="op">)</span>   <span class="co"># hp -&gt; mpg</span></span></code></pre></div>
 <pre><code><span><span class="co">## C(x---&gt;y) C(y---&gt;x) </span></span>
-<span><span class="co">##  0.449883  0.550117</span></span></code></pre>
+<span><span class="co">## 0.5132671 0.4867329</span></span></code></pre>
 <p><strong>Interpretation.</strong> Each call returns
 <code>C(x---&gt;y)</code> and <code>C(y---&gt;x)</code>, which sum to 1;
 a value above 0.5 favours that direction, and swapping the arguments
@@ -768,12 +768,12 @@ units or scale of either variable.</p>
 <span><span class="va">seasonal_period</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.seas.html">NNS.seas</a></span><span class="op">(</span><span class="va">z</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">seasonal_period</span><span class="op">$</span><span class="va">all.periods</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
-<span><span class="co">## 1     50                0.4451812                          1.000522</span></span>
-<span><span class="co">## 2     51                0.4967253                          1.000522</span></span>
-<span><span class="co">## 3     49                0.6105774                          1.000522</span></span>
-<span><span class="co">## 4     52                0.6610179                          1.000522</span></span>
-<span><span class="co">## 5     48                0.8205053                          1.000522</span></span>
-<span><span class="co">## 6     53                0.8250963                          1.000522</span></span></code></pre>
+<span><span class="co">## 1     50                0.5090898                          1.150504</span></span>
+<span><span class="co">## 2     51                0.5532376                          1.150504</span></span>
+<span><span class="co">## 3     49                0.6885932                          1.150504</span></span>
+<span><span class="co">## 4     52                0.7495139                          1.150504</span></span>
+<span><span class="co">## 5     48                0.9370540                          1.150504</span></span>
+<span><span class="co">## 6     53                0.9374740                          1.150504</span></span></code></pre>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate seasonal periods</span></span>
 <span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">z</span>, h <span class="op">=</span> <span class="fl">48</span>, seasonal.factor <span class="op">=</span> <span class="va">seasonal_period</span><span class="op">$</span><span class="va">periods</span>, plot <span class="op">=</span> <span class="cn">TRUE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
@@ -916,12 +916,12 @@ the linear or nonlinear regression forecasts.</p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mc</span><span class="op">$</span><span class="va">replicates</span><span class="op">$</span><span class="va">`rho = 0`</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Replicate 1 Replicate 2 Replicate 3 Replicate 4 Replicate 5</span></span>
-<span><span class="co">## [1,]   12.080732    6.022924    6.587004    1.808137    8.560541</span></span>
-<span><span class="co">## [2,]    8.511841   12.091955    7.943611    0.870806    6.199911</span></span>
-<span><span class="co">## [3,]    0.123113    6.613393    9.529598    3.201866    5.173936</span></span>
-<span><span class="co">## [4,]    1.768517    4.635251    4.217551    5.348460   14.314581</span></span>
-<span><span class="co">## [5,]   -4.102181    7.055852    7.414148    5.697692   15.412686</span></span>
-<span><span class="co">## [6,]   -0.176066    5.813247    8.752096    5.639663   15.273176</span></span></code></pre>
+<span><span class="co">## [1,]    8.294844    6.022924    8.272604    5.594026    6.874941</span></span>
+<span><span class="co">## [2,]    4.725953   12.091955    9.629211    4.656695    4.514312</span></span>
+<span><span class="co">## [3,]   -3.662776    6.613393   11.215198    6.987755    3.488336</span></span>
+<span><span class="co">## [4,]   -2.017371    4.635251    5.903151    9.134349   12.628982</span></span>
+<span><span class="co">## [5,]   -7.888070    7.055852    9.099748    9.483581   13.727086</span></span>
+<span><span class="co">## [6,]   -3.961955    5.813247   10.437696    9.425552   13.587576</span></span></code></pre>
 <hr>
 </div>
 </div>

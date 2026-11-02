@@ -78,7 +78,7 @@ Returns a list containing:
 
 - `Treatment_Statistic`: Mean/median of treatment group
 
-- `Grand_Statistic`: Grand mean/median
+- `Grand_Statistic`: Mean/median of all observations pooled
 
 - `Control_CDF`: CDF value at grand statistic (control)
 

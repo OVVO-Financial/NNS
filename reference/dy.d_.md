@@ -34,7 +34,9 @@ dy.d_(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE)
 
   - Numeric values must be in matrix or data.frame form to be evaluated
     for each regressor, otherwise, a vector of points will evaluate only
-    at the `wrt` regressor. See examples for use cases.
+    at the `wrt` regressor, averaging over the observed rows of the
+    other regressors (at most `max(21, 10000 / k)` of them for `k`
+    points, taken evenly through the data). See examples for use cases.
 
   - Set to `(eval.points = "obs")` (default) to find the average partial
     derivative at every observation of the variable with respect to *for
@@ -42,7 +44,8 @@ dy.d_(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE)
 
   - Set to `(eval.points = "apd")` to find the average partial
     derivative at every observation of the variable with respect to
-    *over the entire distribution of other regressors.*
+    *over the entire distribution of other regressors*, represented by
+    their observed rows.
 
   - Set to `(eval.points = "mean")` to find the partial derivative at
     the mean of value of every variable.

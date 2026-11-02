@@ -104,10 +104,14 @@ NNS.meboot(
 - force.clt:
 
   logical; If `TRUE` the ensemble is forced to satisfy the central limit
-  theorem. See `force.clt` in `meboot::meboot`. When `drift = FALSE`,
-  `target_drift` or `target_drift_scale` replaces the original drift,
-  the replicate means are centred and spread using the new baseline plus
-  the original residuals instead of `x`.
+  theorem: the replicate means are spread as a normal sample centred on
+  `mean(x)` with standard deviation `sd(x) / sqrt(n)`, the standard
+  error of the mean of the `n` observations, whatever the number of
+  `reps`. See `force.clt` in `meboot::meboot`, whose code divides by the
+  number of replicates instead (its comment says `n`). When
+  `drift = FALSE`, `target_drift` or `target_drift_scale` replaces the
+  original drift, the replicate means are centred and spread using the
+  new baseline plus the original residuals instead of `x`.
 
 - scl.adjustment:
 

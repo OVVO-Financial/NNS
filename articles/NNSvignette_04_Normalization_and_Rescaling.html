@@ -483,13 +483,14 @@ factor is negative</li>
 </ul>
 <p><code><a href="../reference/NNS.rescale.html">NNS.rescale()</a></code> is monotone increasing, so ranks, copulas
 and NNS dependence measures are unchanged by it. <code><a href="../reference/NNS.norm.html">NNS.norm()</a></code>
-is too when every factor is positive; in nonlinear mode a column whose
+is too when every factor is positive, but in either mode a column whose
 mean has the opposite sign from the others gets a negative factor. For
 example, with <code>x ~ N(1, 1)</code> and
 <code>y = x - 1.5 + noise</code>, <code>cor(x, y)</code> is 0.957 before
-<code><a href="../reference/NNS.norm.html">NNS.norm()</a></code> and -0.957 after. Check the signs, or use
-<code>linear = TRUE</code>, before using normalized columns for
-dependence or causation.</p>
+<code><a href="../reference/NNS.norm.html">NNS.norm()</a></code> and -0.957 after; with <code>x &lt;- 1:4</code>
+and <code>y &lt;- x - 4</code>, <code>linear = TRUE</code> turns a
+correlation of 1 into -1 as well. Check the signs of the factors before
+using normalized columns for dependence or causation.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>

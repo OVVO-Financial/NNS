@@ -120,7 +120,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 
 <dt id="arg-force-clt">force.clt<a class="anchor" aria-label="anchor" href="#arg-force-clt"></a></dt>
-<dd><p>logical; If <code>TRUE</code> the ensemble is forced to satisfy the central limit theorem. See <code>force.clt</code> in <code>meboot::meboot</code>.  When <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of <code>x</code>.</p></dd>
+<dd><p>logical; If <code>TRUE</code> the ensemble is forced to satisfy the central limit theorem: the replicate means are spread as a normal sample centred on <code>mean(x)</code> with standard deviation <code>sd(x) / sqrt(n)</code>, the standard error of the mean of the <code>n</code> observations, whatever the number of <code>reps</code>.  See <code>force.clt</code> in <code>meboot::meboot</code>, whose code divides by the number of replicates instead (its comment says <code>n</code>).  When <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of <code>x</code>.</p></dd>
 
 
 <dt id="arg-scl-adjustment">scl.adjustment<a class="anchor" aria-label="anchor" href="#arg-scl-adjustment"></a></dt>

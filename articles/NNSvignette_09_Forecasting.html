@@ -199,14 +199,15 @@ that <code>modulo</code> will be in the expanded output.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.seas.html">NNS.seas</a></span><span class="op">(</span><span class="va">AirPassengers</span>, modulo <span class="op">=</span> <span class="fl">12</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $all.periods</span></span>
 <span><span class="co">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
-<span><span class="co">## 1     12                0.4214769                         0.4287436</span></span>
-<span><span class="co">## 2     24                0.4287436                         0.4287436</span></span>
+<span><span class="co">## 1     12               0.09860445                         0.1776757</span></span>
+<span><span class="co">## 2     24               0.10336370                         0.1776757</span></span>
+<span><span class="co">## 3     36               0.10754609                         0.1776757</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $best.period</span></span>
 <span><span class="co">## [1] 12</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $periods</span></span>
-<span><span class="co">## [1] 12 24</span></span></code></pre>
+<span><span class="co">## [1] 12 24 36</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="cross-validating-all-combinations-of-seasonal-factor">Cross-Validating All Combinations of
@@ -373,10 +374,11 @@ results.</p>
 <p>To be used in conjunction with
 <code>seasonal.factor = FALSE &amp; modulo != NULL</code>. With
 <code>mod.only = TRUE</code> (default), only periods at multiples of
-<code>modulo</code> are kept: the detected periods are replaced by their
-nearest multiples. Set <code>mod.only = FALSE</code> to keep the
-empirically detected periods along with the logical seasonal
-patterns.</p>
+<code>modulo</code> are kept: each detected period is replaced by the
+multiples of <code>modulo</code> on either side of it (period 7 with
+<code>modulo = 5</code> gives 5 and 10). Set
+<code>mod.only = FALSE</code> to keep the empirically detected periods
+along with the logical seasonal patterns.</p>
 <ul>
 <li><code>dynamic = TRUE</code></li>
 </ul>

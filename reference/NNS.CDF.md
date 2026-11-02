@@ -36,7 +36,13 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
   column for larger \\d\\, and the joint upper partial moment
   [Co.UPM_nD](https://OVVO-Financial.github.io/NNS/reference/Co.UPM_nD.md)
   at `degree > 0`, normalised like the CDF. The hazard and cumulative
-  hazard are built from it.
+  hazard are built from it, and need `degree = 0` for multivariate
+  `variable`. At `degree > 0` with two or more columns, each target's
+  co-partial moment is normalised by its own total, so the "CDF" and
+  "survival" values are generalised co-partial-moment ratios, not a
+  joint distribution function: they can assign a negative probability to
+  a rectangle. At `degree = 0`, and in one dimension at any degree, they
+  are proper distribution functions.
 
 - plot:
 

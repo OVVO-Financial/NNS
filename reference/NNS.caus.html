@@ -49,7 +49,7 @@
 <span>  plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  p.value <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="fl">100L</span>,</span>
-<span>  permute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x"</span>, <span class="st">"both"</span><span class="op">)</span>,</span>
+<span>  permute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"y"</span>, <span class="st">"x"</span>, <span class="st">"both"</span>, <span class="st">"shift"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf.int <span class="op">=</span> <span class="fl">0.95</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -88,7 +88,7 @@
 
 
 <dt id="arg-permute">permute<a class="anchor" aria-label="anchor" href="#arg-permute"></a></dt>
-<dd><p>one of "both", "y", or "x"; which variable(s) to shuffle when constructing the null distribution.</p></dd>
+<dd><p>one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  <code>"shift"</code> circularly shifts <code>y</code> by a random offset at least <code>max(tau + 1, n / 10)</code> steps from alignment, so each series keeps its own dynamics and only their alignment is broken: a nonparametric counterpart to conditioning on the effect's own past.  <code>"y"</code>, <code>"x"</code> and <code>"both"</code> shuffle the values, an independence null for cross-sections.  <code>"auto"</code> uses <code>"shift"</code> when the lag is positive (including <code>tau = "ts"</code>) and <code>"y"</code> otherwise.  The lag of <code>tau = "ts"</code> is resolved once on the observed series and kept for every permutation.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -111,11 +111,11 @@ For a matrix <code>x</code>, entry <code>[i, j]</code> is <code>C(column i ---&g
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Following book chapter 14, each direction is evaluated on explicitly lagged pairs mapped to the copula scale with per-column ranks (the degree-0 lower partial moment), so the result is invariant to shifts, rescaling and any monotone transform of either variable.  For x —&gt; y the raw score is</p>
+    <p>Following book chapter 14, each direction is evaluated on explicitly lagged pairs mapped to the copula scale with per-column ranks (the degree-0 lower partial moment), so the result is invariant to shifts, rescaling and any increasing transform of either variable (reversing a variable's order changes the copula, and so the index).  For x —&gt; y the raw score is</p>
 <p>$$\tilde{C}_{x \to y} = \frac{1}{2}\left[P_{x \to y} + \max(\rho_{x \to y} - \rho_{y \to x}, 0)\right],$$</p>
-<p>where \(P_{x \to y}\) is the share of the degree-1 deviation (lower plus upper partial moment about the mean) of <code>y[t]</code> resolved by conditioning on the position of <code>x[t - tau]</code>, and \(\rho_{x \to y}\) is <code>NNS.dep(x[t - tau], y[t], asym = TRUE)$Dependence</code>, the directional dependence built from the lagged co-partial moments of the pair.  The index is</p>
+<p>where \(P_{x \to y}\) is the share of the deviation of <code>y[t]</code> resolved by conditioning on the position of <code>x[t - tau]</code>, the deviation being the degree-2 lower plus upper partial moment about the mean with the \(m/(m-1)\) factor, which is exactly unbiased under permutation for any distribution, and \(\rho_{x \to y}\) is the debiased directional dependence of <code>y[t]</code> on <code>x[t - tau]</code> from <a href="NNS.dep.html">NNS.dep</a>'s cells (the lagged co-partial moments of the pair), averaged over the levels of the partition on <code>x[t - tau]</code>.  <a href="NNS.dep.html">NNS.dep</a> reports the strongest level; the average has no selection step, so independent series are centred at 0.5 whatever their margins.  The index is</p>
 <p>$$C_{x \to y} = \frac{\tilde{C}_{x \to y} + \kappa}{\tilde{C}_{x \to y} + \tilde{C}_{y \to x} + 2\kappa}, \quad C_{y \to x} = 1 - C_{x \to y},$$</p>
-<p>with a neutral pseudo-count \(\kappa = 1/\sqrt{n - \tau}\), the order of the raw scores' sampling variation, so that weak or absent directional evidence stays near 0.5.  An invertible relationship (e.g. <code>y = 2 * x + 1</code>) has no cross-sectional direction and returns 0.5; the lag is what identifies direction in that case.</p>
+<p>with a neutral pseudo-count \(\kappa = 1/\sqrt{n - \tau}\), the order of the raw scores' sampling variation, so that weak or absent directional evidence stays near 0.5.  An invertible relationship (e.g. <code>y = 2 * x + 1</code>) has no cross-sectional direction and returns 0.5; the lag is what identifies direction in that case.  The index measures directional lagged association: it does not condition on other variables, so a common driver that reaches <code>y</code> later than <code>x</code> makes x —&gt; y look causal.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

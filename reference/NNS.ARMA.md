@@ -72,8 +72,9 @@ NNS.ARMA(
 
 - modulo:
 
-  integer(s); NULL (default) Used to find the nearest multiple(s) in the
-  reported seasonal period.
+  integer(s); NULL (default) Adds the multiples of `modulo` on either
+  side of each detected period (period 7 with `modulo = 5` gives 5 and
+  10).
 
 - mod.only:
 
@@ -131,7 +132,11 @@ NNS.ARMA(
   and
   [UPM.VaR](https://OVVO-Financial.github.io/NNS/reference/UPM.VaR.md)
   of the replicates at probability `(1 - pred.int) / 2`, widened by the
-  spread of the per-lag linear estimates. The band therefore describes
+  spread of the per-lag linear estimates; a one-point (`h = 1`) or
+  constant path has no dispersion to resample, so its band is the path
+  widened by that spread alone (zero width with a single seasonal lag);
+  [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md)
+  gives intervals from validation errors. The band therefore describes
   the dispersion of the forecast path, not the uncertainty of the
   outcome at each horizon: it does not widen with the horizon, and it is
   not calibrated to contain future values with probability `pred.int`

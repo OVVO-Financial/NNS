@@ -15,7 +15,7 @@ NNS.caus(
   plot = FALSE,
   p.value = FALSE,
   nperm = 100L,
-  permute = c("y", "x", "both"),
+  permute = c("auto", "y", "x", "both", "shift"),
   seed = NULL,
   conf.int = 0.95
 )
@@ -66,8 +66,16 @@ NNS.caus(
 
 - permute:
 
-  one of "both", "y", or "x"; which variable(s) to shuffle when
-  constructing the null distribution.
+  one of "auto" (default), "y", "x", "both" or "shift"; how the null
+  distribution is built. `"shift"` circularly shifts `y` by a random
+  offset at least `max(tau + 1, n / 10)` steps from alignment, so each
+  series keeps its own dynamics and only their alignment is broken: a
+  nonparametric counterpart to conditioning on the effect's own past.
+  `"y"`, `"x"` and `"both"` shuffle the values, an independence null for
+  cross-sections. `"auto"` uses `"shift"` when the lag is positive
+  (including `tau = "ts"`) and `"y"` otherwise. The lag of `tau = "ts"`
+  is resolved once on the observed series and kept for every
+  permutation.
 
 - seed:
 
@@ -101,18 +109,26 @@ partial-moment interval of each index under the permutation null. \*
 Following book chapter 14, each direction is evaluated on explicitly
 lagged pairs mapped to the copula scale with per-column ranks (the
 degree-0 lower partial moment), so the result is invariant to shifts,
-rescaling and any monotone transform of either variable. For x —\> y the
+rescaling and any increasing transform of either variable (reversing a
+variable's order changes the copula, and so the index). For x —\> y the
 raw score is
 
 \$\$\tilde{C}\_{x \to y} = \frac{1}{2}\left\[P\_{x \to y} +
 \max(\rho\_{x \to y} - \rho\_{y \to x}, 0)\right\],\$\$
 
-where \\P\_{x \to y}\\ is the share of the degree-1 deviation (lower
-plus upper partial moment about the mean) of `y[t]` resolved by
-conditioning on the position of `x[t - tau]`, and \\\rho\_{x \to y}\\ is
-`NNS.dep(x[t - tau], y[t], asym = TRUE)$Dependence`, the directional
-dependence built from the lagged co-partial moments of the pair. The
-index is
+where \\P\_{x \to y}\\ is the share of the deviation of `y[t]` resolved
+by conditioning on the position of `x[t - tau]`, the deviation being the
+degree-2 lower plus upper partial moment about the mean with the
+\\m/(m-1)\\ factor, which is exactly unbiased under permutation for any
+distribution, and \\\rho\_{x \to y}\\ is the debiased directional
+dependence of `y[t]` on `x[t - tau]` from
+[NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)'s
+cells (the lagged co-partial moments of the pair), averaged over the
+levels of the partition on `x[t - tau]`.
+[NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
+reports the strongest level; the average has no selection step, so
+independent series are centred at 0.5 whatever their margins. The index
+is
 
 \$\$C\_{x \to y} = \frac{\tilde{C}\_{x \to y} + \kappa}{\tilde{C}\_{x
 \to y} + \tilde{C}\_{y \to x} + 2\kappa}, \quad C\_{y \to x} = 1 - C\_{x
@@ -122,7 +138,10 @@ with a neutral pseudo-count \\\kappa = 1/\sqrt{n - \tau}\\, the order of
 the raw scores' sampling variation, so that weak or absent directional
 evidence stays near 0.5. An invertible relationship (e.g.
 `y = 2 * x + 1`) has no cross-sectional direction and returns 0.5; the
-lag is what identifies direction in that case.
+lag is what identifies direction in that case. The index measures
+directional lagged association: it does not condition on other
+variables, so a common driver that reaches `y` later than `x` makes x
+—\> y look causal.
 
 ## References
 

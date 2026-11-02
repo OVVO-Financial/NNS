@@ -61,9 +61,9 @@
 
 
 <dt id="arg-eval-points">eval.points<a class="anchor" aria-label="anchor" href="#arg-eval-points"></a></dt>
-<dd><p>numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.</p><ul><li><p>Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the <code>wrt</code> regressor.  See examples for use cases.</p></li>
+<dd><p>numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.</p><ul><li><p>Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the <code>wrt</code> regressor, averaging over the observed rows of the other regressors (at most <code>max(21, 10000 / k)</code> of them for <code>k</code> points, taken evenly through the data).  See examples for use cases.</p></li>
 <li><p>Set to <code>(eval.points = "obs")</code> (default) to find the average partial derivative at every observation of the variable with respect to <em>for specific tuples of given observations.</em></p></li>
-<li><p>Set to <code>(eval.points = "apd")</code> to find the average partial derivative at every observation of the variable with respect to <em>over the entire distribution of other regressors.</em></p></li>
+<li><p>Set to <code>(eval.points = "apd")</code> to find the average partial derivative at every observation of the variable with respect to <em>over the entire distribution of other regressors</em>, represented by their observed rows.</p></li>
 <li><p>Set to <code>(eval.points = "mean")</code> to find the partial derivative at the mean of value of every variable.</p></li>
 <li><p>Set to <code>(eval.points = "median")</code> to find the partial derivative at the median value of every variable.</p></li>
 <li><p>Set to <code>(eval.points = "last")</code> to find the partial derivative at the last observation of every value (relevant for time-series data).</p></li>

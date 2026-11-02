@@ -268,16 +268,16 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 1.054852
     ## 
     ## $Grand_Statistic
-    ## [1] 0.532031
+    ## [1] 0.5162715
     ## 
     ## $Control_CDF
-    ## [1] 0.704
+    ## [1] 0.7
     ## 
     ## $Treatment_CDF
-    ## [1] 0.305
+    ## [1] 0.3
     ## 
     ## $Certainty
-    ## [1] 0.3497634
+    ## [1] 0.3592804
     ## 
     ## $`Effect_Size_LB.2.5%`
     ## [1] 0.8684753
@@ -289,13 +289,13 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.3379858
+    ## [1] 0.3595841
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0.28774
+    ## [1] 0.3151044
     ## 
     ## $`Upper 95% CI`
-    ## [1] 0.3899075
+    ## [1] 0.4024833
 
 ## Stochastic Superiority
 

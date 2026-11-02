@@ -171,14 +171,15 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 
     ## $all.periods
     ##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-    ## 1     12                0.4214769                         0.4287436
-    ## 2     24                0.4287436                         0.4287436
+    ## 1     12               0.09860445                         0.1776757
+    ## 2     24               0.10336370                         0.1776757
+    ## 3     36               0.10754609                         0.1776757
     ## 
     ## $best.period
     ## [1] 12
     ## 
     ## $periods
-    ## [1] 12 24
+    ## [1] 12 24 36
 
 ### Cross-Validating All Combinations of `seasonal.factor`
 
@@ -344,9 +345,10 @@ data) are included along with the results.
 
 To be used in conjunction with
 `seasonal.factor = FALSE & modulo != NULL`. With `mod.only = TRUE`
-(default), only periods at multiples of `modulo` are kept: the detected
-periods are replaced by their nearest multiples. Set `mod.only = FALSE`
-to keep the empirically detected periods along with the logical seasonal
+(default), only periods at multiples of `modulo` are kept: each detected
+period is replaced by the multiples of `modulo` on either side of it
+(period 7 with `modulo = 5` gives 5 and 10). Set `mod.only = FALSE` to
+keep the empirically detected periods along with the logical seasonal
 patterns.
 
 - `dynamic = TRUE`

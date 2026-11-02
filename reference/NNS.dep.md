@@ -50,13 +50,35 @@ Returns the bi-variate `"Correlation"` and `"Dependence"` or correlation
 
 ## Details
 
-Each partition cell's concordance (degree 0 and degree 1) is measured
-against its expectation under the within-cell permutation null and
-rescaled so that perfect dependence stays at 1. Independent variables
-therefore score near 0 at any sample size, instead of a floor that
-shrank only like `n^(-1/4)` (about 0.32 at n = 1000). Cells below chance
-can pull the average down; Dependence is floored at 0 after averaging,
-and `|Correlation|` never exceeds the Dependence of the same direction.
+Dependence is read from the recursive mean-split partitions of the data
+([NNS.part](https://OVVO-Financial.github.io/NNS/reference/NNS.part.md)):
+on `x` (`y` as a function of `x`), on `y`, and on the joint quadrants of
+`(x, y)`, where the co-lower, co-upper and divergent partial moments
+live. In every cell the degree-0 (frequency) and degree-1 (area)
+concordance about the cell means is measured against its expectation
+under the within-cell permutation null and rescaled so that perfect
+dependence stays at 1, and the two are averaged. The cell-size weighted
+average is taken at every level of each partition, from the whole sample
+down to the finest cells, and Dependence is the strongest level, so
+dependence carried between coarse cells (a noisy linear relationship),
+within fine cells (a nonlinear function) or by the joint quadrants (a
+circle, or `y = x * noise`) is detected alike. With `asym = TRUE` only
+the partition on `x` is used. A cell in which `x` is constant scores
+whether `y` is determined there (1 if `y` is constant, 0 otherwise),
+against the chance of that under the permutation null; in the joint
+quadrants such a cell is constant by construction and scores 0.
+Independent variables score near 0. Taking the strongest level adds a
+small selection effect, about 0.14 at n = 100 and 0.04 at n = 1000 for
+independent continuous data. It is larger for a rare discrete `y`,
+because each cell constant in `x` then contributes a single, weakly
+informative observation of whether `y` is determined there (about 0.12
+at n = 300 and 0.05 at n = 1000 for a 3 percent binary `y` against a
+20-level `x`). That score, like every cell term, is measured against its
+exact null and stays unbiased, so perfect dependence still reads 1; the
+`p.value` permutation null includes the selection effect. Levels below
+chance can make every average negative; Dependence is floored at 0, and
+Correlation, the signed average at the same level, never exceeds it in
+absolute value.
 
 ## Note
 

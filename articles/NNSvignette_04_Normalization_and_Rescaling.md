@@ -437,13 +437,14 @@ c(
 is monotone increasing, so ranks, copulas and NNS dependence measures
 are unchanged by it.
 [`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
-is too when every factor is positive; in nonlinear mode a column whose
+is too when every factor is positive, but in either mode a column whose
 mean has the opposite sign from the others gets a negative factor. For
 example, with `x ~ N(1, 1)` and `y = x - 1.5 + noise`, `cor(x, y)` is
 0.957 before
 [`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
-and -0.957 after. Check the signs, or use `linear = TRUE`, before using
-normalized columns for dependence or causation.
+and -0.957 after; with `x <- 1:4` and `y <- x - 4`, `linear = TRUE`
+turns a correlation of 1 into -1 as well. Check the signs of the factors
+before using normalized columns for dependence or causation.
 
 ``` r
 

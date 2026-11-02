@@ -21,7 +21,11 @@ NNS.mode(x, discrete = FALSE, multi = TRUE)
 
 - multi:
 
-  logical; `TRUE` (default) returns multiple mode values.
+  logical; `TRUE` (default) returns multiple mode values. `FALSE`
+  returns the highest peak; among equally high peaks, the one nearest
+  [NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md)
+  of the data (then the lower value), so the result is always one of the
+  modes.
 
 ## Value
 
