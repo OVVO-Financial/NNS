@@ -463,8 +463,12 @@ SEXP force_clt(SEXP x, NumericMatrix ensemble) {
   NumericVector sortxbar = clone(xbar);
   std::sort(sortxbar.begin(), sortxbar.end());
   
+  // The replicate means are spread like means of n observations, s / sqrt(n),
+  // with n the series length. meboot::meboot's code divides by the number of
+  // replicates (its comment says n), which made the spread shrink as reps grew
+  // (#101): a computational setting must not change the stated uncertainty.
   NumericVector smean = clone(s);
-  for (int i = 0; i < smean.size(); ++i) smean[i] = s[i] / std::sqrt((double)bigj);
+  for (int i = 0; i < smean.size(); ++i) smean[i] = s[i] / std::sqrt((double)n);
   double smean_scalar = smean.size() ? smean[0] : 0.0;
   
   NumericVector newbar(no_init(bigj));
