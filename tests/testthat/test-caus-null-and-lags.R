@@ -98,3 +98,20 @@ test_that("the matrix time-series null shifts one series per pair", {
   expect_identical(calls, 2L * ncol(utils::combn(4, 2)))   # 12; 8 with column shifts
   expect_true(all(is.finite(r$p.value_matrix)))
 })
+
+test_that("the matrix p-value honours permute like the vector path", {
+  set.seed(107); M <- matrix(rnorm(120), 60, 2)
+  for (tau in c(0, 1)) for (m in c("x", "y", "both", "shift")) {
+    mat <- NNS.caus(M, tau = tau, p.value = TRUE, nperm = 19, permute = m, seed = 7)$p.value_matrix[1, 2]
+    vec <- NNS.caus(M[, 1], M[, 2], tau = tau, p.value = TRUE, nperm = 19, permute = m, seed = 7)$p.value$two.sided
+    expect_equal(mat, vec, info = paste(tau, m))
+  }
+})
+
+test_that("the matrix p-value uses the same signed statistic as the vector path on tied data", {
+  set.seed(17); invisible(rnorm(120))
+  M <- cbind(sample(0:1, 60, TRUE), sample(0:1, 60, TRUE))
+  mat <- NNS.caus(M, p.value = TRUE, nperm = 19, permute = "both", seed = 7)$p.value_matrix[1, 2]
+  vec <- NNS.caus(M[, 1], M[, 2], p.value = TRUE, nperm = 19, permute = "both", seed = 7)$p.value$two.sided
+  expect_equal(mat, vec)
+})

@@ -6,10 +6,12 @@
 # are shuffled independently; for time series (tau = "ts" or a positive lag)
 # each pair keeps its first column and circularly shifts the second, so both
 # series keep their own dynamics and the pair is always at least
-# max(tau + 1, n / 10) steps from alignment. lower_CI /
+# max(tau + 1, n / 10) steps from alignment. An explicit permute ("x", "y",
+# "both", "shift") is applied to every pair as in the vector path, with
+# column i as x and column j as y. lower_CI /
 # upper_CI hold the null's partial-moment interval and p.value_matrix the
 # two-sided permutation p-value of C(i ---> j) - C(j ---> i).
-NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, seed = NULL){
+NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, seed = NULL, permute = "auto"){
   if(is.null(ncol(x))){
     stop("supply both 'x' and 'y' or a matrix-like 'x'")
   }
@@ -46,43 +48,49 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
     else if (identical(tau, "cs")) 0L else as.integer(tau)
   }, integer(1L))
   time_series <- any(pair_tau > 0L)
+  # "both" shuffles every column at once, which for one pair is the vector path's "both".
+  if (permute == "auto") permute <- if (time_series) "shift" else "both"
   # Permute column by column so a data frame keeps its column types: apply()
   # would turn a factor column into character (#96).
   x_cols <- if (is.data.frame(x)) x else as.data.frame(x)
-  if (time_series) {
-    # Shift one series per pair: shifting every column independently would
+  # One row per draw: C(x--->y) for the interval, C(x--->y) - C(y--->x) for the p-value.
+  null_row <- function(cp) c(cp[["C(x--->y)"]], cp[["C(x--->y)"]] - cp[["C(y--->x)"]])
+  if (permute != "both") {
+    # Permute within each pair: shifting every column independently would
     # leave pairs whose two shifts nearly coincide still aligned.
     null_list <- lapply(seq_len(ncol(pairs)), function(k) {
       i <- pairs[1, k]; j <- pairs[2, k]
       x_pair <- x_cols[, c(i, j)]
-      vapply(.nns_caus_shift_draw(nrow(x_cols), pair_tau[k], nperm), function(s) {
-        x_pair[[2]] <- .nns_caus_shift(x_cols[[j]], s)
-        pair_index(x_pair, 1L, 2L, tau_ij = pair_tau[k])[["C(x--->y)"]]
-      }, numeric(1L))
+      draws <- if (permute == "shift") .nns_caus_shift_draw(nrow(x_cols), pair_tau[k], nperm) else seq_len(nperm)
+      t(vapply(draws, function(s) {
+        if (permute == "shift") x_pair[[2]] <- .nns_caus_shift(x_cols[[j]], s)
+        if (permute == "x") x_pair[[1]] <- sample(x_cols[[i]])
+        if (permute == "y") x_pair[[2]] <- sample(x_cols[[j]])
+        null_row(pair_index(x_pair, 1L, 2L, tau_ij = pair_tau[k]))
+      }, numeric(2L)))
     })
   } else {
-    null_mat <- array(NA_real_, dim = c(nperm, ncol(pairs)))
+    null_list <- lapply(seq_len(ncol(pairs)), function(k) matrix(NA_real_, nperm, 2L))
     for(b in seq_len(nperm)){
       x_perm <- x_cols
       for(j in seq_len(n)) x_perm[[j]] <- sample(x_cols[[j]])
       for(k in seq_len(ncol(pairs))){
-        null_mat[b, k] <- pair_index(x_perm, pairs[1, k], pairs[2, k], tau_ij = pair_tau[k])[["C(x--->y)"]]
+        null_list[[k]][b, ] <- null_row(pair_index(x_perm, pairs[1, k], pairs[2, k], tau_ij = pair_tau[k]))
       }
     }
-    null_list <- lapply(seq_len(ncol(pairs)), function(k) null_mat[, k])
   }
 
   p <- (1 - conf.int)/2
   for(k in seq_len(ncol(pairs))){
     i <- pairs[1, k]; j <- pairs[2, k]
-    null_ij <- null_list[[k]]
+    null_ij <- null_list[[k]][, 1L]
     lower_CI[i, j] <- LPM.VaR(p, 0, null_ij)
     upper_CI[i, j] <- UPM.VaR(p, 0, null_ij)
     lower_CI[j, i] <- LPM.VaR(p, 0, 1 - null_ij)
     upper_CI[j, i] <- UPM.VaR(p, 0, 1 - null_ij)
     obs_signed <- causes[i, j] - causes[j, i]
-    null_signed <- 2 * null_ij - 1
-    pval <- (1 + sum(abs(null_signed) >= abs(obs_signed))) / (1 + length(null_ij))
+    null_signed <- null_list[[k]][, 2L]
+    pval <- (1 + sum(abs(null_signed) >= abs(obs_signed))) / (1 + length(null_signed))
     p.value_matrix[i, j] <- pval
     p.value_matrix[j, i] <- pval
   }
