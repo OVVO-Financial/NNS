@@ -5,19 +5,26 @@
 #' \code{means.only}, the procedure tests either differences in central tendency
 #' (means or medians) or differences across the full empirical distributions.
 #'
-#' The key output is the \code{Certainty} metric, a calibrated probability in
-#' \eqn{[0, 1]} representing the likelihood that the groups being compared are
-#' the *same* with respect to the chosen comparison mode:
+#' The key output is the \code{Certainty} metric, a descriptive similarity index
+#' in \eqn{[0, 1]} (1 = the groups are the same) with respect to the chosen
+#' comparison mode:
 #' \itemize{
-#'   \item If \code{means.only = TRUE}: \code{Certainty} is the probability that
-#'         the group \emph{means} (or medians, if \code{medians = TRUE}) are the same.
-#'   \item If \code{means.only = FALSE}: \code{Certainty} is the probability that
-#'         the two \emph{entire distributions} are the same.
+#'   \item If \code{means.only = TRUE}: similarity of the group \emph{means}
+#'         (or medians, if \code{medians = TRUE}), measured by how far each
+#'         group's partial-moment CDF at the grand statistic is from 0.5.
+#'   \item If \code{means.only = FALSE}: similarity of the two \emph{entire
+#'         distributions}, adding the same comparison at the 12.5\% and 25\% tail
+#'         quantiles.
 #' }
 #'
-#' This makes \code{Certainty} the conceptual inverse of a classical p-value.
-#' A *low* Certainty (e.g., < 0.10) indicates strong evidence of difference,
-#' while a *high* Certainty (e.g., > 0.90) indicates strong evidence of similarity.
+#' \code{Certainty} is \emph{not} a calibrated probability and not the inverse of
+#' a p-value: for two samples from the same distribution it is not uniform on
+#' \eqn{[0, 1]} and rises toward 1 with sample size, it is shrunk by
+#' the population adjustment \eqn{((n_1 + n_2 - 2) / (n_1 + n_2))^2} for small
+#' samples, and it should not be compared with p-value thresholds such as 0.05.
+#' \code{robust = TRUE} bounds the sampling variability of \code{Certainty}
+#' itself; it is not a reference distribution under no difference. For that,
+#' recompute \code{Certainty} on random relabelings of the pooled observations.
 #'  
 #' @param control Numeric vector of control group observations
 #' @param treatment Numeric vector of treatment group observations
@@ -26,7 +33,7 @@
 #' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
 #' @param tails Character; specifies CI tail(s): "both", "left", or "right"
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
-#' @param robust logical; \code{FALSE} (default) Generates 100 independent random permutations to test results, and returns / plots 95 percent confidence intervals along with robust central tendency of all results for pairwise analysis only.
+#' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (\link{NNS.gravity}) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored when \code{control} is a matrix or list (multi-group, including \code{pairwise = TRUE}).
 #' @param plot Logical; \code{TRUE} (default) generates distribution plot
 #' 
 #' @return Returns a list containing:
@@ -36,8 +43,9 @@
 #'   \item \code{Grand_Statistic}: Grand mean/median
 #'   \item \code{Control_CDF}: CDF value at grand statistic (control)
 #'   \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
-#'   \item \code{Certainty}: Probability that the groups are the \emph{same}
-#'         (means-only or full distribution depending on \code{means.only}).
+#'   \item \code{Certainty}: Similarity index in [0, 1] (1 = the groups are the
+#'         \emph{same}; means-only or full distribution depending on
+#'         \code{means.only}); not a calibrated probability.
 #'   \item \code{Effect_Size_LB}: Lower bound of treatment effect (if confidence.interval requested)
 #'   \item \code{Effect_Size_UB}: Upper bound of treatment effect (if confidence.interval requested)
 #'   \item \code{Confidence_Level}: Confidence level used (if confidence.interval requested)
@@ -101,19 +109,19 @@ NNS.ANOVA <- function(
     # with treatment
     if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
     if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
-    
+
+    # Missing values are omitted, as in the multi-group path (na.omit per column).
+    control   <- control[!is.na(control)]
+    treatment <- treatment[!is.na(treatment)]
+
     if (robust) {
       # ---------------------------
-      # Robust path: resample pairs
+      # Robust path: bootstrap each group
       # ---------------------------
-      # Draw bootstrap-style index matrices with a common length so both groups
-      # are resampled on aligned indices for repeated certainty estimation.
-      l <- min(length(treatment), length(control))
-      treatment_p      <- replicate(100, sample.int(l, replace = TRUE))
-      treatment_matrix <- matrix(treatment[treatment_p], ncol = dim(treatment_p)[2], byrow = FALSE)
-      treatment_matrix <- cbind(treatment[treatment_p[,1]], treatment_matrix[, rev(seq_len(ncol(treatment_matrix)))])
-      control_matrix   <- matrix(control[treatment_p],   ncol = dim(treatment_p)[2], byrow = FALSE)
-      full_matrix      <- cbind(control[treatment_p[,1]], control_matrix, treatment[treatment_p[,1]], treatment_matrix)
+      control_p        <- replicate(100, sample.int(length(control),   replace = TRUE))
+      treatment_p      <- replicate(100, sample.int(length(treatment), replace = TRUE))
+      control_matrix   <- matrix(control[control_p],     ncol = 100L, byrow = FALSE)
+      treatment_matrix <- matrix(treatment[treatment_p], ncol = 100L, byrow = FALSE)
       
       nns.certainties <- sapply(
         1:ncol(control_matrix),

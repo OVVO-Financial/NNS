@@ -19,7 +19,7 @@ NNS.SD.cluster(
 
 \item{type}{Character, either  \code{"discrete"} (default) or \code{"continuous"}; specifies the type of CDF.}
 
-\item{min_cluster}{Integer. The minimum number of elements required for a valid cluster.}
+\item{min_cluster}{Integer. Peeling stops once at most \code{min_cluster} variables remain; those form the final cluster, and a final cluster smaller than \code{min_cluster} is merged into the previous one.  SD-efficient sets peeled before that are kept whatever their size.}
 
 \item{dendrogram}{Logical; \code{FALSE} (default). If \code{TRUE}, a dendrogram is produced based on a simple "distance" measure between clusters.}
 }
@@ -36,9 +36,9 @@ subject to a minimum cluster size.
 }
 \details{
 The function applies \code{\link{NNS.SD.efficient.set}} iteratively, peeling off the SD-efficient set at each step
-if it meets or exceeds \code{min_cluster} in size, until no more subsets can be extracted or all variables are exhausted.
-Variables in each SD-efficient set form a cluster, with any remaining variables aggregated into the final cluster if it meets
-the \code{min_cluster} threshold.
+(whatever its size) while more than \code{min_cluster} variables remain, or until no more subsets can be extracted.
+Variables in each SD-efficient set form a cluster. The remaining variables form the final cluster, which is merged
+into the previous cluster if it has fewer than \code{min_cluster} members.
 }
 \examples{
 \dontrun{

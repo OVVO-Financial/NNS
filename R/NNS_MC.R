@@ -1,11 +1,11 @@
 #' NNS Monte Carlo Sampling
 #'
-#' Monte Carlo sampling from the maximum entropy bootstrap routine \link{NNS.meboot}, ensuring the replicates are sampled from the full [-1,1] correlation space.
+#' Monte Carlo sampling from the maximum entropy bootstrap routine \link{NNS.meboot}, ensuring the replicates are sampled across the full [-1,1] range of \code{rho} (the target dependence of the detrended residuals, see \link{NNS.meboot}).
 #'
 #' @param x vector of data.
 #' @param reps numeric; number of replicates to generate, \code{30} default.
-#' @param lower_rho numeric \code{[-1,1]}; \code{.01} default will set the \code{from} argument in \code{seq(from, to, by)}.
-#' @param upper_rho numeric \code{[-1,1]}; \code{.01} default will set the \code{to} argument in \code{seq(from, to, by)}.
+#' @param lower_rho numeric \code{[-1,1]}; \code{-1} default will set the \code{from} argument in \code{seq(from, to, by)}.
+#' @param upper_rho numeric \code{[-1,1]}; \code{1} default will set the \code{to} argument in \code{seq(from, to, by)}.
 #' @param by numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.
 #' @param exp numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
