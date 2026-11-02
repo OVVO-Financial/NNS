@@ -11,9 +11,9 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 
 \item{y}{\code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.}
 
-\item{asym}{logical; \code{FALSE} (default) Allows for asymmetrical dependencies.}
+\item{asym}{logical; \code{FALSE} (default) returns the symmetric measures. If \code{TRUE}, returns the asymmetric (directional) measures: the partition is built on \code{x} only and the result measures the dependence of \code{y} on \code{x} (\code{y} as a function of \code{x}); swap the arguments for the other direction.}
 
-\item{p.value}{logical; \code{FALSE} (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.}
+\item{p.value}{logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.}
 }
@@ -23,8 +23,11 @@ Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlati
 \description{
 Returns the dependence and nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.
 }
+\details{
+Each partition cell's concordance (degree 0 and degree 1) is measured against its expectation under the within-cell permutation null and rescaled so that perfect dependence stays at 1.  Independent variables therefore score near 0 at any sample size, instead of a floor that shrank only like \code{n^(-1/4)} (about 0.32 at n = 1000).  Cells below chance can pull the average down; Dependence is floored at 0 after averaging, and \code{|Correlation|} never exceeds the Dependence of the same direction.
+}
 \note{
-For asymmetrical \code{(asym = TRUE)} matrices, directional dependence is returned as ([column variable] ---> [row variable]).
+For asymmetrical \code{(asym = TRUE)} matrices, entry \code{[i, j]} is the directional dependence ([row variable i] ---> [column variable j]), i.e. \code{NNS.dep(x[, i], x[, j], asym = TRUE)}, the dependence of column \code{j} on row variable \code{i}.
 }
 \examples{
 \dontrun{

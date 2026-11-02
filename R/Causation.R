@@ -1,38 +1,52 @@
 #' NNS Causation
 #'
-#' Returns the causality from observational data between two variables.
+#' Returns the directional causation between two variables from observational data, as an index in [0, 1] for each direction (0.5 = no net direction).
 #'
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
 #' @param factor.2.dummy logical; \code{FALSE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.  Includes dependent variable \code{y}.
-#' @param tau options: ("cs", "ts", integer); 0 (default) Number of lagged observations to consider (for time series data).  Otherwise, set \code{(tau = "cs")} for cross-sectional data.  \code{(tau = "ts")} automatically selects the lag of the time series data, while \code{(tau = [integer])} specifies a time series lag.
-#' @param plot logical; \code{FALSE} (default) Plots the raw variables, tau normalized, and cross-normalized variables.
-#' @param p.value logical; \code{FALSE} (default) If \code{TRUE}, runs a permutation test to compute empirical p-values for the signed causation from x -> y.
+#' @param tau options: ("cs", "ts", integer); 0 (default) Lag between cause and effect.  \code{(tau = [integer])} compares the lagged pairs \code{(x[t - tau], y[t])} for x ---> y and \code{(y[t - tau], x[t])} for y ---> x.  \code{(tau = 0)} or \code{(tau = "cs")} compares the contemporaneous pairs (cross-sectional data).  \code{(tau = "ts")} uses one lag for both directions, the mean of the first \link{NNS.seas} period at most \code{sqrt(length(x))} of each series.
+#' @param plot logical; \code{FALSE} (default) Plots both lagged pairs on the copula scale with their indices.
+#' @param p.value logical; \code{FALSE} (default) If \code{TRUE}, runs a permutation test of the signed statistic \code{C(x--->y) - C(y--->x)}.
 #' @param nperm integer; number of permutations to use when \code{p.value = TRUE}. Default 100.
 #' @param permute one of "both", "y", or "x"; which variable(s) to shuffle when constructing the null distribution.
 #' @param seed optional integer seed for reproducibility of the permutation test.
 #' @param conf.int numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.
 #'
-#' @return If \code{p.value=FALSE} returns the original causation vector of length 3 (directional given/received and net), named either "C(x--->y)" or "C(y--->x)" in the third slot.  If \code{p.value=TRUE} returns a list with components:
-#'  * \code{causation}: the original causation vector as above.
-#'  * \code{p.value}: a list with empirical two-sided and one-sided p-values (x_causes_y, y_causes_x), the null distribution, the observed signed statistic, and metadata (permute, nperm).
-#' If \code{p.value=TRUE} for a matrix, the function returns a list with components:
-#'   * \code{causality}: the causality matrix.
-#'   * \code{lower_CI}: matrix of lower confidence bounds (partial-moment based).
-#'   * \code{upper_CI}: matrix of upper confidence bounds (partial-moment based).
-#'   * \code{p.value}: matrix of empirical two-sided p-values.
-
+#' @return If \code{p.value = FALSE} returns a named vector \code{c("C(x--->y)", "C(y--->x)")} of directional causation indices in [0, 1] that sum to 1: above 0.5 is evidence that the first direction leads, 0.5 is no net direction.  If \code{p.value = TRUE} returns a list with components:
+#'  * \code{causation}: the vector above.
+#'  * \code{p.value}: a list with empirical two-sided and one-sided p-values (x_causes_y, y_causes_x) of the signed statistic \code{C(x--->y) - C(y--->x)}, its null distribution and observed value, the partial-moment interval of the null, and metadata (permute, nperm).
+#' For a matrix \code{x}, entry \code{[i, j]} is \code{C(column i ---> column j)}, with a 0 diagonal.  If \code{p.value = TRUE} for a matrix, the function returns a list with components:
+#'   * \code{causality}: the causation matrix.
+#'   * \code{lower_CI}, \code{upper_CI}: matrices with the partial-moment interval of each index under the permutation null.
+#'   * \code{p.value_matrix}: matrix of empirical two-sided p-values of \code{C(i ---> j) - C(j ---> i)}.
+#'
+#' @details
+#' Following book chapter 14, each direction is evaluated on explicitly lagged pairs mapped to the copula scale with per-column ranks (the degree-0 lower partial moment), so the result is invariant to shifts, rescaling and any monotone transform of either variable.  For x ---> y the raw score is
+#' 
+#' \deqn{\tilde{C}_{x \to y} = \frac{1}{2}\left[P_{x \to y} + \max(\rho_{x \to y} - \rho_{y \to x}, 0)\right],}
+#' 
+#' where \eqn{P_{x \to y}} is the share of the degree-1 deviation (lower plus upper partial moment about the mean) of \code{y[t]} resolved by conditioning on the position of \code{x[t - tau]}, and \eqn{\rho_{x \to y}} is \code{NNS.dep(x[t - tau], y[t], asym = TRUE)$Dependence}, the directional dependence built from the lagged co-partial moments of the pair.  The index is
+#' 
+#' \deqn{C_{x \to y} = \frac{\tilde{C}_{x \to y} + \kappa}{\tilde{C}_{x \to y} + \tilde{C}_{y \to x} + 2\kappa}, \quad C_{y \to x} = 1 - C_{x \to y},}
+#' 
+#' with a neutral pseudo-count \eqn{\kappa = 1/\sqrt{n - \tau}}, the order of the raw scores' sampling variation, so that weak or absent directional evidence stays near 0.5.  An invertible relationship (e.g. \code{y = 2 * x + 1}) has no cross-sectional direction and returns 0.5; the lag is what identifies direction in that case.
+#'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
 #'
 #' \dontrun{
-#' ## x causes y...
+#' ## x causes y (y is a function of x, x is not a function of y)
 #' set.seed(123)
 #' x <- rnorm(1000) ; y <- x ^ 2
 #' NNS.caus(x, y, tau = "cs")
 #'
-#' ## Causal matrix without per factor causation
+#' ## Lagged causation: y follows x by one period
+#' x <- rnorm(500) ; y <- c(0, 0.8 * x[-500]) + 0.3 * rnorm(500)
+#' NNS.caus(x, y, tau = 1)
+#'
+#' ## Causal matrix: entry [i, j] is C(column i ---> column j)
 #' NNS.caus(iris, tau = 0)
 #'
 #' ## Causal matrix with per factor causation
@@ -52,6 +66,13 @@ NNS.caus <- function(x, y = NULL,
                      conf.int = 0.95){
   permute <- match.arg(permute)
   if(!is.null(seed)) set.seed(seed)
+
+  # Unwrap single-column data frames here as well as in the core: the
+  # permutation loop below calls sample() on x and y, which on a data frame
+  # would shuffle its one column as a single element and leave the rows in
+  # place, so every null value would equal the observed statistic.
+  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
+  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
   
   # Base causation (delegates to core)
   cp <- NNS.caus_core(x = x, y = y,

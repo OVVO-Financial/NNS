@@ -213,13 +213,13 @@ The overall mean is
 and the sample standard deviation is approximately
 
 \[
-s_X \approx 5.345.
+s_X \approx 5.071.
 \]
 
 Hence the overall coefficient of variation is
 
 \[
-CV(X) \approx \frac{5.345}{16} = 0.334.
+CV(X) \approx \frac{5.071}{16} = 0.317.
 \]
 
 Now test lag \(m=2\). The component series are
@@ -242,7 +242,7 @@ For the second,
 \bar X_2 = 20.5,\qquad s_2 \approx 2.082,\qquad CV_2 \approx \frac{2.082}{20.5}=0.102.
 \]
 
-Both component coefficients of variation are far below the overall value \(0.334\). That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag \(2\) reveals meaningful recurring structure.
+Both component coefficients of variation are far below the overall value \(0.317\). That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag \(2\) reveals meaningful recurring structure.
 
 By contrast, consider lag \(m=3\). The three component series are
 
@@ -282,6 +282,8 @@ where \(w_j\) may be proportional to component length or to some predictive-stre
 \]
 
 An even stricter rule requires most, or all, component CVs to lie below the full-series CV. The exact rule is a modeling choice, but the guiding principle is unchanged: a good seasonal lag is one that produces tighter conditional distributions than the unpartitioned series.
+
+Component length also matters. The sample standard deviation of \(k\) observations is biased low, \(E[s] = c_4(k)\,\sigma\) with \(c_4(2) \approx 0.80\), \(c_4(3) \approx 0.89\) and \(c_4(5) \approx 0.94\), so at very long lags, where each component has only two or three points, every component looks tight even when the series is pure noise. `NNS.seas` therefore scans only lags with at least five observations in every component (\(m \le n/5\)) and divides each component standard deviation by \(c_4(k)\). The eight-point series above is a worked illustration below that size; `NNS.seas` needs at least ten observations to test lag 2. Even with these corrections a series without seasonality passes some lags by chance, so the detected periods are best treated as candidates and validated, as `NNS.ARMA.optim` does.
 
 A technical caveat is also important. If \(\mu_X \approx 0\), then \(CV(X)\) can become unstable because the denominator is near zero. In such cases the analyst may instead compare component standard deviations directly, center the series at a more stable scale, or regularize the denominator by adding a small constant. The predictive logic remains the same even if the raw coefficient of variation is numerically unreliable.
 
@@ -510,29 +512,23 @@ A useful empirical guide is out-of-sample validation. One may reserve a holdout 
 
 Point forecasts are only one part of the forecasting problem. Analysts also need measures of uncertainty.
 
-Because the NNS framework is nonparametric, forecast intervals are constructed without Gaussian error assumptions. Instead, uncertainty can be propagated using the maximum entropy bootstrap machinery developed in Chapter 17.
+Because the NNS framework is nonparametric, forecast bands are constructed without Gaussian error assumptions, using the maximum entropy bootstrap machinery developed in Chapter 20.
 
-The logic is straightforward:
-
-1. generate replicates consistent with the forecast path and dependence structure,
-2. compute the implied distribution of future outcomes,
-3. extract lower and upper predictive bounds from directional quantiles.
-
-This produces prediction intervals that are aligned with the empirical distributional shape of the series rather than with a parametric error law.
-
-Thus the directional framework provides not only nonlinear point forecasts, but also **distribution-free forecast uncertainty quantification**.
-
-A bit more concretely, suppose the fitted model yields a forecast path
+`NNS.ARMA(..., pred.int = )` applies it to the forecast path itself. Suppose the fitted model yields
 
 \[
 \hat X_{T+1}, \dots, \hat X_{T+H}.
 \]
 
-The bootstrap procedure does not assume i.i.d. Gaussian residuals around that path. Instead, it constructs synthetic continuations that preserve the rank structure and dependence features of the observed series as closely as possible. Each bootstrap replicate yields an alternative future trajectory, and the collection of such trajectories forms an empirical predictive distribution at each horizon.
+The procedure is:
 
-If the series is asymmetric, heavy-tailed, or exhibits occasional bursts, those features can appear in the predictive distribution instead of being averaged away by a normal approximation. Directional lower and upper tail functionals can then be used to extract forecast bands. In this sense, the interval forecast is not an accessory to the point forecast. It is the distributional analogue of the same nonparametric logic: preserve the observed structure first, summarize uncertainty second.
+1. resample this path with the maximum entropy bootstrap, across a range of dependence targets \(\rho \in [-1, 1]\), giving replicate paths that preserve its rank structure;
+2. at each step, take the directional quantiles \(\text{LPM.VaR}(\alpha/2)\) and \(\text{UPM.VaR}(\alpha/2)\) of the replicates;
+3. widen them by the spread of the per-lag linear estimates.
 
-In practice, one might generate a large number of bootstrap replicates, often on the order of hundreds or thousands, then evaluate the empirical future distribution at each horizon. If a central \(100(1-\alpha)\%\) interval is desired, the lower and upper bounds can be extracted from directional quantiles corresponding to \(\alpha/2\) and \(1-\alpha/2\). The exact number of replicates is an accuracy-versus-computation choice, but the principle is always the same: empirical resampled paths replace parametric error formulas.
+Because the replicates rearrange the \(H\) forecast values, the resulting band describes the **dispersion of the forecast path** — how much the forecasts themselves vary across the horizon — rather than the uncertainty of the outcome at each step. It does not widen with the horizon, it is wide for a strongly seasonal path and narrow for a flat one, and it is not calibrated to contain future values with probability \(1-\alpha\): rolling-origin coverage at a nominal 95% has ranged from about 35% on white noise to 97% on `AirPassengers`. Asymmetry and heavy tails in the path still carry into the band, since no normal approximation is used.
+
+A predictive interval in the sense of Chapter 17, \(P(\text{LPM.VaR}(\alpha/2) \le X_{T+h} \le \text{UPM.VaR}(\alpha/2)) \approx 1 - \alpha\), needs the distribution of future outcomes at each horizon instead. Two routes stay within the framework: directional quantiles of validation errors collected separately for each horizon, which `NNS.ARMA.optim` approximates with its validation-window errors, or synthetic continuations of the observed series, rerunning the recursion on each bootstrap replicate and taking directional quantiles of the simulated outcomes at each horizon. Whichever is used, the interval calibration check in the validation protocol below applies.
 
 ---
 
@@ -670,7 +666,7 @@ The methods developed here focus on a single series. Cross-series interactions a
 
 ### Data requirements
 
-Because prediction is learned from historical structure, sparse component series may limit reliability for very large lag lengths.
+Because prediction is learned from historical structure, sparse component series limit reliability for very large lag lengths. `NNS.seas` does not test lags whose components would have fewer than five observations.
 
 ### Computational cost
 

@@ -21,8 +21,8 @@
 #' @param shrink logical; \code{FALSE} (default) Ensembles forecasts with \code{method = "means"}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
-#' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns the associated prediction intervals for the final estimate.  Constructed using the maximum entropy bootstrap \link{NNS.meboot} on the final estimates.
-#' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as lower and upper prediction intervals per forecast point.
+#' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int} (rolling-origin coverage at \code{pred.int = 0.95} has ranged from about 0.35 on white noise to 0.97 on \code{AirPassengers}).  \link{NNS.ARMA.optim} derives its interval from validation errors instead.
+#' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as the lower and upper forecast-path bands per forecast point (see \code{pred.int}).
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
 #' \code{(seasonal.factor = c(36, 48, 72))}.
@@ -297,7 +297,7 @@ NNS.ARMA <- function(variable,
     lin.resid <- mean(unlist(lin.resid))
     lin.resid[is.na(lin.resid)] <- 0
     
-    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), abs(LPM.VaR((1-pred.int)/2, 0, z)))) 
+    upper_lower <- apply(PIs, 1, function(z) list(UPM.VaR((1-pred.int)/2, 0, z), LPM.VaR((1-pred.int)/2, 0, z))) 
     upper_PIs <- as.numeric(lapply(upper_lower, `[[`, 1)) + lin.resid
     lower_PIs <- as.numeric(lapply(upper_lower, `[[`, 2)) - lin.resid
   } else lin.resid <- 0

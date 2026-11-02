@@ -2,6 +2,7 @@
 #include <Rcpp.h>
 #include <set>
 #include <algorithm>
+#include <cfloat>
 
 using namespace Rcpp;
 
@@ -22,6 +23,15 @@ inline double vec_mean(const NumericVector& x){
   return s / (double)n;
 }
 
+// c4(k): E[s] = c4(k) * sigma for k normal observations. Dividing by it removes
+// the small-sample downward bias of the sd, which otherwise favours the lags
+// with the shortest components (#69).
+inline double c4(int k){
+  if (k < 2) return 1.0;
+  const double kd = static_cast<double>(k);
+  return std::sqrt(2.0 / (kd - 1.0)) * std::exp(std::lgamma(kd / 2.0) - std::lgamma((kd - 1.0) / 2.0));
+}
+
 inline double vec_sd(const NumericVector& x){
   int n = x.size();
   if(n < 2) return NA_REAL;
@@ -31,54 +41,6 @@ inline double vec_sd(const NumericVector& x){
     double d = x[i]-m; ss += d*d;
   }
   return std::sqrt(ss / (double)(n-1));
-}
-
-// lag-1 Pearson autocorrelation
-inline double acf1(const NumericVector& x){
-  int n = x.size();
-  if(n < 2) return NA_REAL;
-  double m = vec_mean(x);
-  double num = 0.0;
-  double den = 0.0;
-  for(int t=1;t<n;++t) num += (x[t]-m)*(x[t-1]-m);
-  for(int t=0;t<n;++t){ double d=x[t]-m; den += d*d; }
-  if(den == 0.0) return NA_REAL;
-  return num / den;
-}
-
-inline double cv_or_fallback(const NumericVector& x, bool use_cv, double var_cov){
-  int n = x.size();
-  if(n < 2) return var_cov;
-  double z;
-  if(use_cv){
-    double m = vec_mean(x);
-    double s = vec_sd(x);
-    z = std::fabs(s / m);
-  } else {
-    double a1 = acf1(x);
-    if (NumericVector::is_na(a1)) return var_cov;
-    z = std::pow(std::fabs(a1), -1.0);
-  }
-  if(!R_finite(z)) return var_cov;
-  return z;
-}
-
-inline IntegerVector rev_step_indices(int n, int step){
-  int len = (n-1) / step + 1;
-  IntegerVector out(len);
-  int v = n;
-  for(int k=0;k<len;++k, v -= step) out[k] = v; // 1-based
-  return out;
-}
-
-inline NumericVector take_by_index(const NumericVector& x, const IntegerVector& idx){
-  int m = idx.size();
-  NumericVector out(m);
-  for(int i=0;i<m;++i){
-    int j = idx[i]-1;
-    out[i] = (j>=0 && j<x.size()) ? x[j] : NA_REAL;
-  }
-  return out;
 }
 
 // [[Rcpp::export]]
@@ -102,44 +64,41 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     );
   }
   
-  NumericVector variable_1(n-1);
-  for(int i=0;i<n-1;++i) variable_1[i] = variable[i];
-  NumericVector variable_2 = (n-1>=2) ? NumericVector(n-2) : NumericVector(0);
-  for(int i=0;i<variable_2.size();++i) variable_2[i] = variable_1[i];
-  
   const int half_n = n/2;
   const double mean_var = vec_mean(variable);
-  const bool use_cv = (mean_var != 0.0);
-  double var_cov = use_cv ? std::fabs(vec_sd(variable)/mean_var) : std::pow(std::fabs(acf1(variable)), -1.0);
-  if(!R_finite(var_cov)) var_cov = R_PosInf;
+  const double sd_var = vec_sd(variable) / c4(n);
+  // CV is meaningless for a mean that is zero up to rounding; compare sds instead
+  const double tol = std::sqrt(DBL_EPSILON);
+  const bool use_cv = std::fabs(mean_var) > tol * sd_var;
+  const double var_cov = use_cv ? std::fabs(sd_var / mean_var) : sd_var;
   
-  NumericVector out(half_n), out1(half_n), out2(half_n);
-  IntegerVector inst(half_n), inst1(half_n), inst2(half_n);
-  
-  const int n1 = n-1;
-  const int n2 = variable_2.size();
-  
-  for(int i=1;i<=half_n;++i){
-    IntegerVector idx  = rev_step_indices(n , i);
-    IntegerVector idx1 = rev_step_indices(n1, i);
-    IntegerVector idx2 = (n2>0) ? rev_step_indices(n2, i) : IntegerVector(0);
-    
-    double t  = cv_or_fallback(take_by_index(variable  , idx ), use_cv, var_cov);
-    double t1 = cv_or_fallback(take_by_index(variable_1, idx1), use_cv, var_cov);
-    double t2 = cv_or_fallback(take_by_index(variable_2, idx2), use_cv, var_cov);
-    
-    if (t  <= var_cov){ inst[i-1]  = i; out[i-1]  = t;  }
-    if (t1 <= var_cov){ inst1[i-1] = i; out1[i-1] = t1; }
-    if (t2 <= var_cov){ inst2[i-1] = i; out2[i-1] = t2; }
-  }
-  
-  // build passing set and average CV across the three staggered series
+  // Minimum component length (#69): every component series of lag m must have
+  // at least MIN_COMPONENT_LENGTH points, i.e. m <= n / MIN_COMPONENT_LENGTH.
+  // With 2-3 points per component the sample sd is biased low (E[s] = c4(k) sigma,
+  // c4(2) = 0.80, c4(3) = 0.89), so the longest lags looked tightest even in
+  // pure noise and were picked as the best period.
+  const int MIN_COMPONENT_LENGTH = 5;
+  const int max_m = std::min(half_n, n / MIN_COMPONENT_LENGTH);
+
   std::vector<int> periods_vec;
   std::vector<double> cvmean_vec;
-  for(int i=0;i<half_n;++i){
-    if (inst[i] > 0 && inst1[i] > 0 && inst2[i] > 0){
-      periods_vec.push_back(inst[i]);
-      cvmean_vec.push_back( (out[i] + out1[i] + out2[i]) / 3.0 );
+  const double* x = variable.begin();
+  for(int m=1;m<=max_m;++m){
+    double wsum = 0.0;
+    for(int j=0;j<m;++j){
+      int len = (n-1-j)/m + 1;
+      double mu = 0.0, ss = 0.0;
+      for(int i=j;i<n;i+=m) mu += x[i];
+      mu /= (double)len;
+      for(int i=j;i<n;i+=m){ double d = x[i]-mu; ss += d*d; }
+      double sd = std::sqrt(ss / (double)(len-1)) / c4(len);
+      // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
+      wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
+    }
+    double cv_m = wsum / (double)n;
+    if (cv_m < var_cov){
+      periods_vec.push_back(m);
+      cvmean_vec.push_back(cv_m);
     }
   }
   

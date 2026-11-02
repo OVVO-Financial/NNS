@@ -561,6 +561,8 @@ Lower and upper forecast bounds are then obtained using partial-moment quantile 
 
 In the nowcasting examples, this is illustrated directly for GDP. The GDP ensemble path is bootstrapped with `NNS.meboot`, and lower and upper confidence bounds are then computed from `LPM.VaR` and `UPM.VaR`.
 
+Because the replicates are generated from the forecast path, these bounds describe the dispersion of the path rather than the uncertainty of each future outcome: they do not widen with the horizon and are not calibrated to a coverage probability (see Chapter 25).
+
 The conceptual advantage is consistent with the rest of NNS:
 
 - no Gaussian residual assumption is required,

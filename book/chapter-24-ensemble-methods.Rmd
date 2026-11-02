@@ -201,7 +201,7 @@ In the NNS setting, the base learners come from two main sources documented in t
 
 The `method` argument controls whether method 1, method 2, or both are used. The default `method = c(1, 2)` includes both, which means that the stacked system can combine the geometry-preserving regression-point prediction of method 1 with the parsimonious synthetic-index regression of method 2.
 
-This is important because the two sources of prediction reflect structurally different views of the same problem. Method 1 operates in the full predictor space through a compressed nearest-neighbor geometry; method 2 compresses the predictor space itself before any regression is performed. Stacking across both allows the meta-learner to weight whichever structural representation generalizes better on the held-out validation data.
+This is important because the two sources of prediction reflect structurally different views of the same problem. Method 1 operates through a compressed nearest-neighbor geometry in predictor space — the full predictor space when `stack = FALSE`, and with the default `stack = TRUE` the predictors retained by the dimension reduction — while method 2 compresses the predictor space itself into a synthetic index before any regression is performed. Stacking across both allows the meta-learner to weight whichever structural representation generalizes better on the held-out validation data.
 
 The `dim.red.method` argument controls how synthetic predictor weights are determined for method 2:
 
