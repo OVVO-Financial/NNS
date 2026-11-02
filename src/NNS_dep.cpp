@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cstdint>
+#include <cfloat>
 
 using namespace Rcpp;
 using namespace RcppParallel;
@@ -178,17 +179,29 @@ static CellCopula cell_dependence(const std::vector<double>& xv,
   kind = CELL_VARYING;
   if (n < 2) return {0.0, 0.0};
 
-  double tx = 0.0, ty = 0.0;
-  for (int i = 0; i < n; ++i) { tx += xv[i]; ty += yv[i]; }
+  // Measure from the cell minimum, so deviations round at the cell's spread rather than its level.
+  double rx = 0.0, ry = 0.0;
+  if (!legacy_null) {
+    rx = *std::min_element(xv.begin(), xv.end());
+    ry = *std::min_element(yv.begin(), yv.end());
+  }
+  double tx = 0.0, ty = 0.0, ax = 0.0, ay = 0.0;
+  for (int i = 0; i < n; ++i) {
+    tx += xv[i] - rx; ty += yv[i] - ry;
+    ax = std::max(ax, xv[i] - rx); ay = std::max(ay, yv[i] - ry);
+  }
   tx /= n; ty /= n;
+  // Bound on the mean's rounding, which depends on row order: a value equal to the mean can't fall either side.
+  const double tie_x = legacy_null ? 0.0 : (n + 1) * DBL_EPSILON * ax;
+  const double tie_y = legacy_null ? 0.0 : (n + 1) * DBL_EPSILON * ay;
 
   std::vector<double> dx(n), dy(n);
   int a = 0, b = 0;
   double conc = 0.0, s = 0.0, d = 0.0;
   for (int i = 0; i < n; ++i) {
-    dx[i] = xv[i] - tx;
-    dy[i] = yv[i] - ty;
-    const bool lo_x = dx[i] <= 0.0, lo_y = dy[i] <= 0.0;
+    dx[i] = (xv[i] - rx) - tx;
+    dy[i] = (yv[i] - ry) - ty;
+    const bool lo_x = dx[i] <= tie_x, lo_y = dy[i] <= tie_y;
     a += lo_x;
     b += lo_y;
     // Concordant = co-lower (<= target) or co-upper (> target); the degree-0
@@ -213,7 +226,9 @@ static CellCopula cell_dependence(const std::vector<double>& xv,
     return {0.0, 0.0};
   }
 
-  const double slope_sign = (s > 0.0) ? 1.0 : (s < 0.0) ? -1.0 : 0.0;
+  // s is summed in partition order, so a zero covariance can round either way.
+  const double s_tol = legacy_null ? 0.0 : 1e-12 * d;
+  const double slope_sign = (s > s_tol) ? 1.0 : (s < -s_tol) ? -1.0 : 0.0;
   const double e0 = null_T0(n, a, b);
 
   // All concordant or all discordant is perfect dependence, unless the cell is
