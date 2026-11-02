@@ -468,11 +468,12 @@ NNS.ARMA.optim <- function(variable,
   }
   
   
+  # The bands sit on the forecasts the function returns, so clamp those first.
+  if(!negative.values) model.results <- pmax(0, model.results)
   lower_PIs <- model.results + LPM.VaR((1-pred.int)/2, 0, residuals)
   upper_PIs <- model.results + UPM.VaR((1-pred.int)/2, 0, residuals)
 
   if(!negative.values){
-    model.results <- pmax(0, model.results)
     lower_PIs <- pmax(0, lower_PIs)
     upper_PIs <- pmax(0, upper_PIs)
     lower_PIs_is <- pmax(0, lower_PIs_is)
