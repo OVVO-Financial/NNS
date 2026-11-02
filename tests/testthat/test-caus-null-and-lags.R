@@ -72,3 +72,17 @@ test_that("the matrix p-value path keeps factor columns numeric", {
   expect_equal(dim(r$causality), c(5, 5))
   expect_true(all(is.finite(r$p.value_matrix)))
 })
+
+test_that("the matrix time-series null shifts one series per pair", {
+  # Shifting every column independently can leave a pair aligned when the two
+  # shifts nearly coincide; each pair now keeps its first column and shifts
+  # the second, so the shift helper runs once per pair and permutation.
+  calls <- 0L
+  testthat::local_mocked_bindings(
+    .nns_caus_shift = function(v, tau = 0L) { calls <<- calls + 1L; n <- length(v); c(v[31:n], v[1:30]) },
+    .package = "NNS")
+  set.seed(5); M <- matrix(rnorm(240), 60, 4)
+  r <- NNS.caus(M, tau = 1, p.value = TRUE, nperm = 2, seed = 1)
+  expect_identical(calls, 2L * ncol(utils::combn(4, 2)))   # 12; 8 with column shifts
+  expect_true(all(is.finite(r$p.value_matrix)))
+})

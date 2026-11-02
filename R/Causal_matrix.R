@@ -1,10 +1,12 @@
 # Pairwise causation matrix: entry [i, j] is the directional causation index
 # C(column i ---> column j) in [0, 1], so [i, j] + [j, i] = 1 off the diagonal
 # and 0.5 is neutral. The diagonal is 0 (no self-causation).
-# With p.value = TRUE, the columns are permuted independently to build the
-# null of each index -- shuffled for cross-sections, circularly shifted for
-# time series (tau = "ts" or a positive lag) so each series keeps its own
-# dynamics -- with each pair's lag fixed at its observed value. lower_CI /
+# With p.value = TRUE, the null of each index is built by permutation with
+# each pair's lag fixed at its observed value: for cross-sections the columns
+# are shuffled independently; for time series (tau = "ts" or a positive lag)
+# each pair keeps its first column and circularly shifts the second, so both
+# series keep their own dynamics and the pair is always at least
+# max(tau + 1, n / 10) steps from alignment. lower_CI /
 # upper_CI hold the null's partial-moment interval and p.value_matrix the
 # two-sided permutation p-value of C(i ---> j) - C(j ---> i).
 NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, seed = NULL){
@@ -49,12 +51,21 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
   x_cols <- if (is.data.frame(x)) x else as.data.frame(x)
   null_mat <- array(NA_real_, dim = c(nperm, ncol(pairs)))
   for(b in seq_len(nperm)){
-    x_perm <- x_cols
-    for(j in seq_len(n)){
-      x_perm[[j]] <- if (time_series) .nns_caus_shift(x_cols[[j]], max(pair_tau)) else sample(x_cols[[j]])
-    }
-    for(k in seq_len(ncol(pairs))){
-      null_mat[b, k] <- pair_index(x_perm, pairs[1, k], pairs[2, k], tau_ij = pair_tau[k])[["C(x--->y)"]]
+    if (time_series) {
+      # Shift one series per pair: shifting every column independently would
+      # leave pairs whose two shifts nearly coincide still aligned.
+      for(k in seq_len(ncol(pairs))){
+        i <- pairs[1, k]; j <- pairs[2, k]
+        x_pair <- x_cols[, c(i, j)]
+        x_pair[[2]] <- .nns_caus_shift(x_cols[[j]], pair_tau[k])
+        null_mat[b, k] <- pair_index(x_pair, 1L, 2L, tau_ij = pair_tau[k])[["C(x--->y)"]]
+      }
+    } else {
+      x_perm <- x_cols
+      for(j in seq_len(n)) x_perm[[j]] <- sample(x_cols[[j]])
+      for(k in seq_len(ncol(pairs))){
+        null_mat[b, k] <- pair_index(x_perm, pairs[1, k], pairs[2, k], tau_ij = pair_tau[k])[["C(x--->y)"]]
+      }
     }
   }
 
