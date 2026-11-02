@@ -6,17 +6,17 @@
 #' @param reps numeric; number of replicates to generate.
 #' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
-#' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
-#' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
+#' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.  \code{drift = FALSE} removes it: replicates are a flat baseline at \code{mean(x)} plus the resampled residuals.
+#' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.  A drift other than the original is centred so the replicates keep \code{mean(x)}.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.
 #' @param xmin numeric; the lower limit for the left tail.
 #' @param xmax numeric; the upper limit for the right tail.
 #' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
-#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.
-#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.
-#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the transformed series equals the variance of the data.
+#' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.
+#' @param force.clt logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem. See \code{force.clt} in \code{meboot::meboot}.  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
+#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
 #' @param digits integer; 6 (default) number of digits to round output to.
@@ -125,7 +125,7 @@ NNS.meboot <- function(x,
   orig_drift     <- orig_lm$coef[2]
   orig_res       <- orig_lm$residuals
   
-  # Choose reconstruction slope (t = 1:n); for drift=FALSE baseline is flat at intercept (t = 0 fitted value)
+  # Choose reconstruction slope (t = 1:n); a changed slope pivots about mean(x) so the level is kept
   if (!is.null(target_drift) || !is.null(target_drift_scale)) drift <- TRUE
   if (drift) {
     if (!is.null(target_drift_scale))      target_drift <- orig_drift * target_drift_scale
@@ -134,7 +134,8 @@ NNS.meboot <- function(x,
   } else {
     recon_slope <- 0
   }
-  baseline <- orig_intercept + recon_slope * (1:n)
+  baseline <- if (recon_slope == orig_drift) orig_intercept + recon_slope * (1:n)
+              else mean(x) + recon_slope * ((1:n) - (n + 1) / 2)
   
   # ===== MEBOOT CORE ON RESIDUALS ONLY =====
   # Order stats, indices, symmetry, midpoints, tails computed from residuals
@@ -246,6 +247,20 @@ NNS.meboot <- function(x,
   # ===== Variance expansion ON RESIDUALS (match sd to original residuals) =====
   res_mat <- NNS.meboot.expand.sd(x = orig_res, ensemble = res_mat, ...) 
   
+  # Optional ME-density scale adjustment on residuals, where the ME density lives
+  if (scl.adjustment){
+    zz <- c(xmin, z, xmax)
+    v  <- diff(zz^2) / 12
+    xb <- mean(orig_res)
+    s1 <- sum((desintxb - xb)^2)
+    uv <- (s1 + sum(v)) / n
+    desired.sd  <- sd(orig_res)
+    actualME.sd <- sqrt(uv)
+    if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
+    kappa <- (desired.sd / actualME.sd) - 1
+    res_mat <- res_mat + kappa * (res_mat - xb)
+  } else kappa <- NULL
+  
   # ===== Reconstruct levels: baseline + residuals =====
   # baseline has length n (= nrow); column-major recycling adds it down each
   # column, identical to sweep(MARGIN = 1) but without aperm/array copies.
@@ -256,27 +271,16 @@ NNS.meboot <- function(x,
     if (reps > 1) ensemble <- t(apply(ensemble, 1, function(z) sample(z, size = reps, replace = TRUE)))
   }
   
-  # Optional level scaling toward sd(x) 
-  if (isTRUE(expand.sd)) {
+  # Optional level scaling toward sd(x), which includes the original drift
+  if (isTRUE(expand.sd) && recon_slope == orig_drift) {
     ensemble <- NNS.meboot.expand.sd(x = x, ensemble = ensemble, ...)   
   }
   
   # Optional CLT enforcement
-  if (force.clt && reps > 1) ensemble <- force.clt(x = x, ensemble = ensemble)
-  
-  # Optional ME-density scale adjustment (same as before)
-  if (scl.adjustment){
-    zz <- c(xmin, z, xmax)
-    v  <- diff(zz^2) / 12
-    xb <- mean(x)
-    s1 <- sum((desintxb - xb)^2)
-    uv <- (s1 + sum(v)) / n
-    desired.sd  <- sd(x)
-    actualME.sd <- sqrt(uv)
-    if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
-    kappa <- (desired.sd / actualME.sd) - 1
-    ensemble <- ensemble + kappa * (ensemble - xb)
-  } else kappa <- NULL
+  if (force.clt && reps > 1) {
+    clt_ref <- if (recon_slope == orig_drift) x else baseline + orig_res
+    ensemble <- force.clt(x = clt_ref, ensemble = ensemble)
+  }
   
   # Enforce min / max if provided. pmax/pmin recycle the scalar bound across the
   # whole matrix elementwise, replacing the previous per-column apply(). Assign
