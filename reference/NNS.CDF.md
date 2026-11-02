@@ -31,9 +31,9 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
   options("CDF", "survival", "hazard", "cumulative hazard"); `"CDF"`
   (default) Selects type of function to return. For multivariate
   `variable` the joint survival is \\P(X_1 \> t_1, \ldots, X_d \> t_d)\\
-  at `degree = 0`, computed by inclusion-exclusion over all subsets of
-  the columns (\\2^d\\ joint CDF evaluations), and the joint upper
-  partial moment
+  at `degree = 0`, by inclusion-exclusion over the column subsets for
+  \\d \le 3\\ and as the share of observations above \\t\\ in every
+  column for larger \\d\\, and the joint upper partial moment
   [Co.UPM_nD](https://OVVO-Financial.github.io/NNS/reference/Co.UPM_nD.md)
   at `degree > 0`, normalised like the CDF. The hazard and cumulative
   hazard are built from it.

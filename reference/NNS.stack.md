@@ -179,7 +179,10 @@ for all models.
 
 - `"NNS.reg.n.best"` returns the optimum `"n.best"` parameter for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression. `"SSE.reg"` returns the SSE for the
+  multivariate regression; `NA` for a single predictor, whose univariate
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  fit has no `n.best` to tune (use `cbind(x, x)` to search one).
+  `"SSE.reg"` returns the SSE for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   multivariate regression.
 
