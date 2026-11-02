@@ -172,10 +172,11 @@ static CellCopula copula_signed(const std::vector<double>& xv,
   // x constant in the cell (discrete x): the cell has no within-cell
   // variation to test, only whether y is determined there. A constant y is
   // perfect dependence, as before; otherwise the cell is uninformative.
+  // Compare the raw values: a repeated 0.1 need not centre to exactly 0.
   bool x_const = true, y_const = true;
-  for (int i = 0; i < n; ++i) {
-    if (dx[i] != 0.0) x_const = false;
-    if (dy[i] != 0.0) y_const = false;
+  for (int i = 1; i < n; ++i) {
+    if (xv[i] != xv[0]) x_const = false;
+    if (yv[i] != yv[0]) y_const = false;
   }
   if (x_const) return y_const ? CellCopula{1.0, 1.0} : CellCopula{0.0, 0.0};
 
