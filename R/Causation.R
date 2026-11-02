@@ -9,7 +9,7 @@
 #' @param plot logical; \code{FALSE} (default) Plots both lagged pairs on the copula scale with their indices.
 #' @param p.value logical; \code{FALSE} (default) If \code{TRUE}, runs a permutation test of the signed statistic \code{C(x--->y) - C(y--->x)}.
 #' @param nperm integer; number of permutations to use when \code{p.value = TRUE}. Default 100.
-#' @param permute one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  \code{"shift"} circularly shifts \code{y} by a random offset at least \code{max(tau + 1, n / 10)} steps from alignment, so each series keeps its own dynamics and only their alignment is broken: a nonparametric counterpart to conditioning on the effect's own past.  \code{"y"}, \code{"x"} and \code{"both"} shuffle the values, an independence null for cross-sections.  \code{"auto"} uses \code{"shift"} when the lag is positive (including \code{tau = "ts"}) and \code{"y"} otherwise.  The lag of \code{tau = "ts"} is resolved once on the observed series and kept for every permutation.
+#' @param permute one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  \code{"shift"} circularly shifts \code{y} by random distinct offsets at least \code{max(tau + 1, n / 10)} steps from alignment, so each series keeps its own dynamics and only their alignment is broken: a nonparametric counterpart to conditioning on the effect's own past.  When at most \code{nperm} offsets are admissible, each is used once and the reported \code{nperm} is their number.  \code{"y"}, \code{"x"} and \code{"both"} shuffle the values, an independence null for cross-sections.  \code{"auto"} uses \code{"shift"} when the lag is positive (including \code{tau = "ts"}) and \code{"y"} otherwise.  The lag of \code{tau = "ts"} is resolved once on the observed series and kept for every permutation.
 #' @param seed optional integer seed for reproducibility of the permutation test.
 #' @param conf.int numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.
 #'
@@ -99,6 +99,10 @@ NNS.caus <- function(x, y = NULL,
   # Time series keep their own dynamics under a circular shift; cross-sections
   # are shuffled.
   if (permute == "auto") permute <- if (tau_num > 0L) "shift" else "y"
+  if (permute == "shift") {
+    offsets <- .nns_caus_shift_draw(length(yv), tau_num, nperm)
+    nperm <- length(offsets)
+  }
   
   # Build null distribution via permutations
   null_vals <- numeric(nperm)
@@ -110,7 +114,7 @@ NNS.caus <- function(x, y = NULL,
       x_perm <- sample(xv, length(xv), replace = FALSE)
       y_perm <- sample(yv, length(yv), replace = FALSE)
     }
-    if(permute == "shift") y_perm <- .nns_caus_shift(yv, tau_num)
+    if(permute == "shift") y_perm <- .nns_caus_shift(yv, offsets[b])
     cp_perm <- NNS.caus_core(x = x_perm, y = y_perm,
                              factor.2.dummy = FALSE,
                              tau = tau_num,
