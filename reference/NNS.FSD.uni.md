@@ -28,6 +28,16 @@ NNS.FSD.uni(x, y, type = "discrete")
 
 Returns (1) if `"X FSD Y"`, else (0).
 
+## Note
+
+The curves are compared on the merged sample points and, for TSD and
+continuous FSD, also at their closed-form extrema between those points.
+Differences smaller than `64 * .Machine$double.eps * S^d` (`S` = largest
+absolute value in `x` and `y`, `d` = 1 for SSD and the mean condition, 2
+for TSD; a ratio analogue for continuous FSD) are treated as ties, so
+that rounding noise does not decide dominance. Discrete FSD compares
+exact empirical CDF values.
+
 ## References
 
 Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the

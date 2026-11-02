@@ -65,6 +65,10 @@
     <p>Returns one of the following SSD results: <code>"X SSD Y"</code>, <code>"Y SSD X"</code>, or <code>"NO SSD EXISTS"</code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>The curves are compared on the merged sample points and, for TSD and continuous FSD, also at their closed-form extrema between those points. Differences smaller than <code>64 * .Machine$double.eps * S^d</code> (<code>S</code> = largest absolute value in <code>x</code> and <code>y</code>, <code>d</code> = 1 for SSD and the mean condition, 2 for TSD; a ratio analogue for continuous FSD) are treated as ties, so that rounding noise does not decide dominance. Discrete FSD compares exact empirical CDF values.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Viole, F. and Nawrocki, D. (2016) "LPM Density Functions for the Computation of the SD Efficient Set." Journal of Mathematical Finance, 6, 105-126.  <a href="https://doi.org/10.4236/jmf.2016.61012" class="external-link">doi:10.4236/jmf.2016.61012</a>
 .</p>
