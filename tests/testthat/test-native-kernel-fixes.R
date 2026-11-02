@@ -108,3 +108,8 @@ test_that("generate.lin.vectors(x, 0) errors instead of killing the R session", 
   expect_null(attr(out, "status"))
   expect_match(paste(out, collapse = "\n"), "'l' must be a positive integer")
 })
+
+test_that("equally high mode peaks are averaged", {
+  x <- rep(0:19, each = 400)
+  expect_equal(NNS.mode(x, multi = FALSE), mean(NNS.mode(x)))
+})

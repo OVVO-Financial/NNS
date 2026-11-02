@@ -403,8 +403,9 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   
   // Non-maximum suppression on smoothed heights: keep peaks >= 4 bins apart
   if (!peak_idx.empty()) {
-    std::sort(peak_idx.begin(), peak_idx.end(),
-              [&](int a, int b){ return cs[a] > cs[b]; });
+    // Equal heights keep bin order, so the kept peaks don't depend on the sort implementation.
+    std::stable_sort(peak_idx.begin(), peak_idx.end(),
+                     [&](int a, int b){ return cs[a] > cs[b]; });
     std::vector<int> kept;
     for (int idx : peak_idx) {
       bool too_close = false;
@@ -435,12 +436,15 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
         std::sort(out.begin(), out.end());
         return out;
       } else {
-        // GLOBAL-HEIGHT RULE: choose the kept peak with largest smoothed height cs[i]
-        int best_t = 0;
-        for (int t = 1; t < (int)kept.size(); ++t) {
-          if (cs[kept[t]] > cs[kept[best_t]]) best_t = t;
-        }
-        return Rf_ScalarReal(centers[best_t]);
+        // GLOBAL-HEIGHT RULE: the kept peak with the largest smoothed height;
+        // equally high peaks are averaged, as the tied-bin fallback below does.
+        double best_h = cs[kept[0]];
+        for (int t = 1; t < (int)kept.size(); ++t) best_h = std::max(best_h, cs[kept[t]]);
+        long double sum = 0.0L;
+        int nt = 0;
+        for (int t = 0; t < (int)kept.size(); ++t)
+          if (cs[kept[t]] == best_h) { sum += (long double)centers[t]; ++nt; }
+        return Rf_ScalarReal((double)(sum / nt));
       }
     }
   }
