@@ -117,15 +117,17 @@ static const int kExactCellSize = 6;
 
 // E0[ |sum dx dy| / sum |dx dy| ] under random pairing of dx and dy. The
 // arrangement counts are only worth computing when a variable has ties.
+// legacy = true keeps the rule NNS.dep used before #95 (exact only for cells of
+// at most 6 points), for the local measure behind NNS.reg's default order.
 static double null_T1(const std::vector<double>& dx, const std::vector<double>& dy,
-                      bool x_ties, bool y_ties) {
+                      bool x_ties, bool y_ties, bool legacy = false) {
   const int m = static_cast<int>(dx.size());
   // Pairing dy with a random permutation of dx is the same null as the reverse,
   // so permute whichever has fewer distinct arrangements. Every distinct
   // arrangement of a multiset is equally likely under a uniform permutation.
   double lx = 1e300, ly = 1e300;
-  if (m <= kExactCellSize || x_ties) lx = log_arrangements(dx);
-  if (m <= kExactCellSize || y_ties) ly = log_arrangements(dy);
+  if (m <= kExactCellSize || (x_ties && !legacy)) lx = log_arrangements(dx);
+  if (m <= kExactCellSize || (y_ties && !legacy)) ly = log_arrangements(dy);
   if (std::min(lx, ly) <= kLogExactArrangements) {
     std::vector<double> v = (lx <= ly) ? dx : dy;
     const std::vector<double>& w = (lx <= ly) ? dy : dx;
@@ -169,7 +171,8 @@ enum CellKind { CELL_VARYING = 0, CELL_X_CONST = 1, CELL_BOTH_CONST = 2 };
 
 static CellCopula cell_dependence(const std::vector<double>& xv,
                                   const std::vector<double>& yv,
-                                  bool x_ties, bool y_ties, CellKind& kind) {
+                                  bool x_ties, bool y_ties, CellKind& kind,
+                                  bool legacy_null = false) {
   const int n = static_cast<int>(xv.size());
   kind = CELL_VARYING;
   if (n < 2) return {0.0, 0.0};
@@ -223,7 +226,7 @@ static CellCopula cell_dependence(const std::vector<double>& xv,
   const double md = static_cast<double>(n);
   const double t0 = std::abs(2.0 * conc / md - 1.0);
   const double t1 = d > 0.0 ? std::abs(s) / d : 0.0;
-  const double e1 = null_T1(dx, dy, x_ties, y_ties);
+  const double e1 = null_T1(dx, dy, x_ties, y_ties, legacy_null);
 
   const double dep = 0.5 * (debias_term(t0, e0) + debias_term(t1, e1));
   if (slope_sign == 0.0) return {0.0, 0.0};
@@ -482,7 +485,7 @@ static double local_dep_dir(const std::vector<double>& u, const std::vector<doub
   auto root = [](double inner) { return (inner >= 0.0 ? 1.0 : -1.0) * std::sqrt(std::abs(inner)); };
   auto cell_value = [&](const std::vector<double>& uq, const std::vector<double>& vq) {
     CellKind ck;
-    CellCopula c = cell_dependence(uq, vq, u_ties, v_ties, ck);
+    CellCopula c = cell_dependence(uq, vq, u_ties, v_ties, ck, true);
     if (ck == CELL_BOTH_CONST) return 1.0;
     if (ck == CELL_X_CONST) return 0.0;
     return root(c.magnitude);
