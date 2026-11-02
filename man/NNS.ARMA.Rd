@@ -38,7 +38,7 @@ NNS.ARMA(
 \item{best.periods}{integer; 1 (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 \code{(seasonal.factor = FALSE, best.periods = NULL)}.}
 
-\item{modulo}{integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.}
+\item{modulo}{integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).}
 
 \item{mod.only}{logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.}
 
@@ -56,7 +56,7 @@ NNS.ARMA(
 
 \item{seasonal.plot}{logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.}
 
-\item{pred.int}{numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int} (rolling-origin coverage at \code{pred.int = 0.95} has ranged from about 0.35 on white noise to 0.97 on \code{AirPassengers}).  \link{NNS.ARMA.optim} derives its interval from validation errors instead.}
+\item{pred.int}{numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates; a one-point (\code{h = 1}) or constant path has no dispersion to resample, so its band is the path widened by that spread alone (zero width with a single seasonal lag); \link{NNS.ARMA.optim} gives intervals from validation errors.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int} (rolling-origin coverage at \code{pred.int = 0.95} has ranged from about 0.35 on white noise to 0.97 on \code{AirPassengers}).  \link{NNS.ARMA.optim} derives its interval from validation errors instead.}
 }
 \value{
 Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as the lower and upper forecast-path bands per forecast point (see \code{pred.int}).

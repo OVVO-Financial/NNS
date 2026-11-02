@@ -98,7 +98,9 @@ Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimate
  replicates <- NNS.meboot(nns_estimate$ensemble[,1], rho = seq(-1,1,.25))["replicates",]
  replicates <- do.call(cbind, replicates)
 
- # Apply UPM.VaR and LPM.VaR for desired prediction interval...95 percent illustrated
+ # Apply UPM.VaR and LPM.VaR for a band around the forecast path (2.5 percent per tail).
+ # The replicates resample the forecast path itself, so the band shows the path's
+ # dispersion, not a calibrated 95 percent prediction interval (see NNS.ARMA's pred.int).
  # Tail percentage used in first argument per {LPM.VaR} and {UPM.VaR} functions
  lower_CIs <- apply(replicates, 1, function(z) LPM.VaR(0.025, 0, z))
  upper_CIs <- apply(replicates, 1, function(z) UPM.VaR(0.025, 0, z))
