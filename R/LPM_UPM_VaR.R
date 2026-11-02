@@ -392,16 +392,20 @@ UPM.VaR <- function(percentile, degree, x) {
     return(rep(x_min, length(p)))
   }
   
+  # The ratio is monotone in the target: solve ratio(b) = p by bracketing, to a
+  # tolerance relative to the range of x.
+  tol <- .Machine$double.eps^0.5 * (x_max - x_min)
   vapply(
     p,
     function(pp) {
-      func <- function(b) {
-        abs(
-          as.numeric(.Call("_NNS_LPM_ratio_RCPP", degree, b, x)) - pp
-        )
+      g <- function(b) as.numeric(.Call("_NNS_LPM_ratio_RCPP", degree, b, x)) - pp
+      g_lo <- g(x_min); g_hi <- g(x_max)
+      if (g_lo == 0) return(x_min)
+      if (g_hi == 0) return(x_max)
+      if (sign(g_lo) == sign(g_hi)) {
+        return(if (abs(g_lo) <= abs(g_hi)) x_min else x_max)
       }
-      
-      stats::optimize(func, c(x_min, x_max))$minimum
+      stats::uniroot(g, c(x_min, x_max), f.lower = g_lo, f.upper = g_hi, tol = tol)$root
     },
     numeric(1)
   )
@@ -419,16 +423,20 @@ UPM.VaR <- function(percentile, degree, x) {
     return(rep(x_min, length(p)))
   }
   
+  # The ratio is monotone in the target: solve ratio(b) = p by bracketing, to a
+  # tolerance relative to the range of x.
+  tol <- .Machine$double.eps^0.5 * (x_max - x_min)
   vapply(
     p,
     function(pp) {
-      func <- function(b) {
-        abs(
-          as.numeric(.Call("_NNS_UPM_ratio_RCPP", degree, b, x)) - pp
-        )
+      g <- function(b) as.numeric(.Call("_NNS_UPM_ratio_RCPP", degree, b, x)) - pp
+      g_lo <- g(x_min); g_hi <- g(x_max)
+      if (g_lo == 0) return(x_min)
+      if (g_hi == 0) return(x_max)
+      if (sign(g_lo) == sign(g_hi)) {
+        return(if (abs(g_lo) <= abs(g_hi)) x_min else x_max)
       }
-      
-      stats::optimize(func, c(x_min, x_max))$minimum
+      stats::uniroot(g, c(x_min, x_max), f.lower = g_lo, f.upper = g_hi, tol = tol)$root
     },
     numeric(1)
   )
