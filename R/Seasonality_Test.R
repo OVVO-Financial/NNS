@@ -6,7 +6,7 @@
 #' @param modulo integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).
 #' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
-#' @param detrend logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored.
+#' @param detrend logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored; an exactly linear variable is then constant and has no seasonal period.
 #' @param max.period integer; \code{NULL} (default) scans lags up to \code{n / 5}.  A smaller value caps the scan, whose cost grows with \code{n} times the number of lags.
 #' @param p.value logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which have no seasonality by construction.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); since each copy contributes its best lag, the 5 percent level holds for the whole scan.  Uses the random number generator.
 #' @param nperm integer; 100 (default) number of shuffled copies when \code{p.value = TRUE}.
@@ -60,7 +60,13 @@ NNS.seas <- function(variable,
   if (isTRUE(detrend) && n >= 5L) {
     t <- seq_len(n)
     b <- fast_lm(t, x)$coef[2]
-    if (is.finite(b) && b != 0) x <- x - b * (t - mean(t))
+    if (is.finite(b) && b != 0) {
+      x <- x - b * (t - mean(t))
+      # A second fit removes the slope's rounding, which grows with n, leaving the data's own.
+      r <- x - fast_lm(t, x)$coef[2] * (t - mean(t))
+      # An exactly linear series leaves only that rounding, which must not read as a period.
+      if (max(abs(r - mean(r))) <= 8 * .Machine$double.eps * max(abs(variable))) x <- rep(mean(x), n)
+    }
   }
   mp <- if (is.null(max.period)) NULL else as.integer(max.period)
 

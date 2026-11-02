@@ -117,6 +117,24 @@ test_that("a linear trend does not hide the seasonal period (#97)", {
   expect_equal(NNS.seas(1:50 + 0.5, plot = FALSE)$best.period, 1)
 })
 
+test_that("an exactly linear series detrends to a constant, not a period", {
+  for (a in c(0, 10, -50, 1e6, 1e9)) for (b in c(.3, -2, 1e-3)) for (n in c(12L, 50L, 144L)) {
+    r <- NNS.seas(a + b * seq_len(n), plot = FALSE)
+    expect_equal(r$best.period, 1, info = paste(a, b, n))
+    expect_true(all(r$all.periods$Coefficient.of.Variation >= 0), info = paste(a, b, n))
+  }
+  r <- NNS.seas(10 + .3 * (1:50), plot = FALSE)$all.periods
+  expect_equal(c(r$Coefficient.of.Variation, r$Variable.Coefficient.of.Variation), c(0, 0))
+  t <- 1:120
+  expect_equal(NNS.seas(1e6 + .3 * t + sin(2 * pi * t / 12), plot = FALSE)$best.period, 12)
+  # Small or slow periods on a high, long series are not rounding noise.
+  t <- seq_len(12000)
+  expect_equal(NNS.seas(1e9 + .3 * t + .01 * sin(2 * pi * t / 12), plot = FALSE, max.period = 12)$best.period, 12)
+  x <- 1e9 + .3 * t + .1 * cos(2 * pi * (t - .5) / 1200)
+  expect_equal(NNS.seas(x, plot = FALSE, max.period = 1200)$best.period, 1200)
+  expect_equal(NNS.seas(1e9 + cumsum(rep(.3, 1e5)), plot = FALSE, max.period = 24)$best.period, 1)
+})
+
 test_that("noise flags do not depend on the level or the tail shape (#97)", {
   flagged <- function(gen) mean(sapply(1:5, function(s) {
     set.seed(s); sum(NNS.seas(gen(), plot = FALSE)$periods > 1)
