@@ -7,9 +7,9 @@
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
 #' @param eval.points numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
 #' \itemize{
-#' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
+#' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor, averaging over the observed rows of the other regressors (at most \code{max(21, 10000 / k)} of them for \code{k} points, taken evenly through the data).  See examples for use cases.
 #' \item Set to \code{(eval.points = "obs")} (default) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
-#' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
+#' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors}, represented by their observed rows.
 #' \item Set to \code{(eval.points = "mean")} to find the partial derivative at the mean of value of every variable.
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
@@ -159,7 +159,14 @@ dy.d_ <- function(x, y, wrt,
   if (is_vector) {
     eval_vec <- as.numeric(unlist(eval.points))
     k <- length(eval_vec)
-    grid <- apply(x, 2, function(z) LPM.VaR(seq(0, 1, .05), 0, z))
+    # Average over observed rows of the regressors -- the empirical joint
+    # distribution of the other regressors, as an average marginal effect
+    # uses -- not over a grid of matched quantiles, whose rows move together
+    # and are tuples the data may never contain (#65). Large samples are
+    # thinned systematically to at most max(21, 10000 / k) rows per point.
+    n_rows <- min(nrow(x), max(21L, floor(10000 / k)))
+    rows <- if (n_rows < nrow(x)) unique(round(seq(1, nrow(x), length.out = n_rows))) else seq_len(nrow(x))
+    grid <- as.matrix(x[rows, , drop = FALSE])
     if (is.null(dim(grid)) || ncol(grid) != l) grid <- matrix(grid, ncol = l, byrow = FALSE)
     sampsize <- nrow(grid)
     position <- rep(rep(c("l", "m", "u"), each = sampsize), times = k)

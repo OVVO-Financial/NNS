@@ -121,3 +121,13 @@ test_that("equally high mode peaks resolve to the one nearest the gravity", {
   y <- c(rep(1:3, each = 300), rep(10:12, each = 300), rep(20:22, each = 150))
   expect_true(NNS.mode(y, multi = FALSE) %in% NNS.mode(y))
 })
+
+test_that("dy.d_ averages a scalar eval point over the observed rows (#65)", {
+  # With three regressors the old grid set the other two to the same
+  # quantile, so the average of d(x1 x2 x3)/dx1 = x2 x3 came out positive.
+  set.seed(611); n <- 600
+  x <- cbind(runif(n, -1, 1), runif(n, -1, 1), runif(n, -1, 1)); y <- x[, 1] * x[, 2] * x[, 3]
+  ame <- mean(x[, 2] * x[, 3])
+  r <- dy.d_(x, y, wrt = 1, eval.points = 0, messages = FALSE)
+  expect_lt(abs(unlist(r["First", ])[1] - ame), 0.05)
+})

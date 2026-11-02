@@ -15,9 +15,9 @@ dy.d_(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE)
 
 \item{eval.points}{numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
 \itemize{
-\item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
+\item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor, averaging over the observed rows of the other regressors (at most \code{max(21, 10000 / k)} of them for \code{k} points, taken evenly through the data).  See examples for use cases.
 \item Set to \code{(eval.points = "obs")} (default) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
-\item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
+\item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors}, represented by their observed rows.
 \item Set to \code{(eval.points = "mean")} to find the partial derivative at the mean of value of every variable.
 \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
