@@ -51,3 +51,37 @@ test_that("NNS.dep reads an exactly independent tied grid as 0", {
   expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2]))), c(0, 0))
   expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2], asym = TRUE))), c(0, 0))
 })
+
+test_that("symmetric NNS.dep on tied data ignores argument and row order", {
+  # Zero covariances and values equal to a cell mean rounded either way
+  # depending on the order the cell was summed in, more so at a high level.
+  set.seed(487); n <- sample(10:80, 1); x <- sample(0:5, n, TRUE); y <- sample(0:5, n, TRUE)
+  expect_equal(unlist(NNS.dep(y, x)), unlist(NNS.dep(x, y)), tolerance = 1e-12)
+  for (lev in c(0, 1e9)) for (div in c(1, 10)) {
+    d <- vapply(1:300, function(s) {
+      set.seed(s); n <- sample(10:80, 1); x <- lev + sample(0:5, n, TRUE) / div; y <- lev + sample(0:5, n, TRUE) / div
+      o <- sample(n)
+      a <- unlist(NNS.dep(x, y))
+      max(abs(a - unlist(NNS.dep(y, x))), abs(a - unlist(NNS.dep(x[o], y[o]))))
+    }, numeric(1))
+    expect_lt(max(d), 1e-12)
+  }
+  # Decimal ties give the result of their exact integer image.
+  set.seed(208); n <- sample(10:80, 1); x <- sample(0:5, n, TRUE); y <- sample(0:5, n, TRUE)
+  expect_equal(NNS.dep(x / 10, y / 10), NNS.dep(x, y), tolerance = 1e-12)   # 0.167 vs -0.189 before
+  set.seed(78); n <- sample(10:80, 1); x <- sample(0:5, n, TRUE); y <- sample(0:5, n, TRUE)
+  # 1e9 + 0.1 is stored to 1.2e-7, so the shifted data matches its image to about 1e-6.
+  expect_equal(NNS.dep(1e9 + x / 10, 1e9 + y / 10), NNS.dep(x, y), tolerance = 1e-6)   # 0.110 vs 0.191
+  # Distinct values at a high level are not ties.
+  ts <- 1.7e9 + seq_len(100) / 1e6
+  expect_equal(unname(unlist(NNS.dep(ts, -ts))), c(-1, 1))
+  expect_equal(NNS.dep(iris[, 1], iris[, 2]), NNS.dep(iris[, 2], iris[, 1]), tolerance = 1e-12)
+})
+
+test_that("the local dependence NNS.reg's default order reads is unchanged on tied data", {
+  set.seed(388); n <- sample(10:80, 1); x <- sample(0:5, n, TRUE); y <- sample(0:5, n, TRUE)
+  expect_equal(NNS:::.nns_dep_local(x, y), 0.0541613480206442, tolerance = 1e-12)
+  expect_identical(NNS:::.nns_reg_default_order(x, y), 1L)
+  expect_equal(NNS.reg(x, y, point.est = 4, plot = FALSE, residual.plot = FALSE)$Point.est,
+               1.2920454396936896, tolerance = 1e-12)
+})
