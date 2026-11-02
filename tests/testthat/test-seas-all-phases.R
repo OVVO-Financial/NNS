@@ -1,22 +1,40 @@
-# Each component sd is divided by c4(k), and lags are scanned only up to n / 5
-# so every component has at least 5 points (#69).
-c4 <- function(k) sqrt(2 / (k - 1)) * exp(lgamma(k / 2) - lgamma((k - 1) / 2))
-cv <- function(v) sd(v) / c4(length(v)) / mean(v)
+# Reference for the scan (#97): the linear trend is removed (keeping the mean),
+# each component's dispersion is the Gini mean difference, the coefficient of
+# variation is used when the series stays on one side of zero, and lags are
+# scanned only up to n / 5 so every component has at least 5 points (#69).
+gmd <- function(v) {
+  k <- length(v)
+  if (k < 2 || min(v) == max(v)) return(0)
+  s <- sort(v)
+  2 * sum((2 * seq_len(k) - k - 1) * s) / (k * (k - 1))
+}
+detrend <- function(x) { t <- seq_along(x); x - unname(coef(lm(x ~ t))[2]) * (t - mean(t)) }
+score <- function(x, m) {
+  n <- length(x); use_cv <- all(x > 0) || all(x < 0)
+  sum(sapply(1:m, function(j) {
+    v <- x[seq(j, n, m)]
+    length(v) * (if (use_cv) gmd(v) / abs(mean(v)) else gmd(v))
+  })) / n
+}
 
 test_that("NNS.seas ranks period 12 first on AirPassengers", {
   r <- NNS.seas(as.numeric(AirPassengers), plot = FALSE)
   expect_equal(r$best.period, 12L)
-  expect_equal(r$periods, 12L)
-  expect_equal(r$all.periods$Coefficient.of.Variation, 0.421476943243904, tolerance = 1e-12)
+  x <- detrend(as.numeric(AirPassengers))
+  expect_equal(r$all.periods$Coefficient.of.Variation[1], score(x, 12), tolerance = 1e-10)
+  expect_equal(r$all.periods$Variable.Coefficient.of.Variation[1], score(x, 1), tolerance = 1e-10)
 })
 
 test_that("NNS.seas reproduces the ch25 lag-2 toy example once components have 5 points", {
   # The 8-point book series has 4 points per lag-2 component: below the minimum.
   expect_equal(NNS.seas(c(10, 18, 11, 21, 12, 20, 13, 23), plot = FALSE)$periods, 1L)
-  r <- NNS.seas(c(10, 18, 11, 21, 12, 20, 13, 23, 14, 22), plot = FALSE)
+  x <- c(10, 18, 11, 21, 12, 20, 13, 23, 14, 22)
+  r <- NNS.seas(x, plot = FALSE)
   expect_equal(r$periods, 2L)
-  expect_equal(r$all.periods$Coefficient.of.Variation,
-               (5 * cv(c(10, 11, 12, 13, 14)) + 5 * cv(c(18, 21, 20, 23, 22))) / 10)
+  expect_equal(r$all.periods$Coefficient.of.Variation, score(detrend(x), 2), tolerance = 1e-10)
+  # Without detrending the components are the book's (10, ..., 14) and (18, ..., 22).
+  r0 <- NNS.seas(x, plot = FALSE, detrend = FALSE)
+  expect_equal(r0$all.periods$Coefficient.of.Variation, score(x, 2), tolerance = 1e-12)
 })
 
 test_that("NNS.seas scans only lags with at least 5 points per component", {
@@ -43,22 +61,20 @@ test_that("NNS.seas finds the true period of a noisy seasonal series", {
 })
 
 test_that("each lag m scores all m component series, weighted by length", {
-  x <- as.numeric(lynx)
+  x <- detrend(as.numeric(lynx))
   n <- length(x)
-  ref <- sapply(1:(n %/% 5), function(m) {
-    sum(sapply(1:m, function(j) { v <- x[seq(j, n, m)]; length(v) * cv(v) })) / n
-  })
-  pass <- which(ref < sd(x) / c4(n) / mean(x))
-  r <- NNS.seas(x, plot = FALSE)$all.periods
+  ref <- sapply(1:(n %/% 5), function(m) score(x, m))
+  pass <- which(ref < ref[1])
+  r <- NNS.seas(as.numeric(lynx), plot = FALSE)$all.periods
   expect_equal(sort(r$Period), pass)
-  expect_equal(r$Coefficient.of.Variation[order(r$Period)], ref[pass])
+  expect_equal(r$Coefficient.of.Variation[order(r$Period)], ref[pass], tolerance = 1e-10)
 })
 
-test_that("a series with mean zero up to rounding compares standard deviations", {
+test_that("a series that crosses zero compares dispersions, not CVs", {
   x <- sin(2 * pi * (1:96) / 12)
   x <- x - mean(x)
-  r <- NNS.seas(x, plot = FALSE)$all.periods
-  expect_equal(r$Variable.Coefficient.of.Variation[1], sd(x) / c4(96))
+  r <- NNS.seas(x, plot = FALSE, detrend = FALSE)$all.periods
+  expect_equal(r$Variable.Coefficient.of.Variation[1], gmd(x))
   # 24 and 36 have fewer than 5 points per component at n = 96.
   expect_equal(r$Period[1], 12L)
   expect_lt(r$Coefficient.of.Variation[1], 1e-12)
@@ -81,7 +97,7 @@ test_that("NNS.ARMA forecasts a nonseasonal trend from lag 1", {
 
 test_that("a constant zero phase scores 0 and keeps its lag", {
   x <- rep(c(0, 10), 10)
-  r <- NNS.seas(x, plot = FALSE)$all.periods
+  r <- NNS.seas(x, plot = FALSE, detrend = FALSE)$all.periods
   expect_equal(sort(r$Period), c(2L, 4L))
   expect_equal(r$Coefficient.of.Variation, rep(0, 2))
   expect_equal(NNS.ARMA(x, h = 2, plot = FALSE, seasonal.plot = FALSE), c(0, 10))
@@ -90,4 +106,40 @@ test_that("a constant zero phase scores 0 and keeps its lag", {
 test_that("a constant decimal series has no seasonal period", {
   expect_equal(NNS.seas(rep(.1, 20), plot = FALSE)$best.period, 1)
   expect_equal(NNS.seas(rep(c(.1, 1), 10), plot = FALSE)$best.period, 2)
+})
+
+test_that("a linear trend does not hide the seasonal period (#97)", {
+  bp <- sapply(1201:1210, function(s) {
+    set.seed(s); t <- 1:240
+    NNS.seas(10 + .07 * t + 2 * sin(2 * pi * t / 12) + rnorm(240), plot = FALSE)$best.period
+  })
+  expect_true(all(bp %% 12 == 0))                 # 0 of 10 before
+  expect_equal(NNS.seas(1:50 + 0.5, plot = FALSE)$best.period, 1)
+})
+
+test_that("noise flags do not depend on the level or the tail shape (#97)", {
+  flagged <- function(gen) mean(sapply(1:5, function(s) {
+    set.seed(s); sum(NNS.seas(gen(), plot = FALSE)$periods > 1)
+  }))
+  # Before: 170 of 200 at mean 0, 0 at mean 1, 198 for t3 noise at mean 10.
+  for (v in c(flagged(function() rnorm(1000)), flagged(function() 1 + rnorm(1000)),
+              flagged(function() 10 + rt(1000, 3))))
+    expect_true(v > 60 && v < 140)
+})
+
+test_that("p.value keeps periods that beat the best lag of shuffled copies (#97)", {
+  fp <- sapply(1:10, function(s) {
+    set.seed(s); NNS.seas(10 + rnorm(300), plot = FALSE, p.value = TRUE, nperm = 40)$best.period
+  })
+  expect_lte(sum(fp > 1), 2)
+  set.seed(3); t <- 1:240
+  r <- NNS.seas(10 + 2 * sin(2 * pi * t / 12) + rnorm(240), plot = FALSE, p.value = TRUE, nperm = 40)
+  expect_equal(r$best.period %% 12, 0)
+  expect_true(all(r$all.periods$p.value[match(r$periods, r$all.periods$Period)] <= 0.05))
+})
+
+test_that("max.period caps the scan", {
+  set.seed(4); x <- 10 + rnorm(500)
+  expect_true(all(NNS.seas(x, plot = FALSE, max.period = 7)$all.periods$Period <= 7))
+  expect_error(NNS.seas(x, plot = FALSE, max.period = 0), "max.period")
 })

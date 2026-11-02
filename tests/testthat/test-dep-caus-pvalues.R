@@ -116,9 +116,10 @@ test_that("NNS.caus tau = \"ts\" stops when no seasonal period qualifies", {
   }
   # NNS.seas reports only lags with >= 5 points per component (#69), so an
   # AR(1) usually returns Period 1 (no seasonality), which qualifies as
-  # tau = 1. Seed 8 still yields a single period of 8 > sqrt(50) for x.
-  s <- ar1(8)
-  expect_error(NNS.caus(s$a, s$b, tau = "ts"), "no seasonal period")
+  # tau = 1. For seed 6 every period NNS.seas reports for x exceeds sqrt(50).
   s <- ar1(6)
+  expect_true(all(NNS.seas(s$a, plot = FALSE)$periods > sqrt(50)))
+  expect_error(NNS.caus(s$a, s$b, tau = "ts"), "no seasonal period")
+  s <- ar1(8)
   expect_length(NNS.caus(s$a, s$b, tau = "ts"), 2)
 })

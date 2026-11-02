@@ -57,8 +57,8 @@ NNS_part_cpp <- function(x, y, type, order_in, obs_req, min_obs_stop, noise_redu
     .Call(`_NNS_NNS_part_cpp`, x, y, type, order_in, obs_req, min_obs_stop, noise_reduction, quadrants_only)
 }
 
-NNS_seas_cpp <- function(variable, modulo = NULL, mod_only = TRUE) {
-    .Call(`_NNS_NNS_seas_cpp`, variable, modulo, mod_only)
+NNS_seas_cpp <- function(variable, modulo = NULL, mod_only = TRUE, max_period = NULL) {
+    .Call(`_NNS_NNS_seas_cpp`, variable, modulo, mod_only, max_period)
 }
 
 NNS_xstar_path_cpp <- function(train_design, test_design, coefficients, column_order, nthreads) {

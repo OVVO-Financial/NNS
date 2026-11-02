@@ -235,15 +235,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_seas_cpp
-Rcpp::List NNS_seas_cpp(NumericVector variable, Nullable<IntegerVector> modulo, bool mod_only);
-RcppExport SEXP _NNS_NNS_seas_cpp(SEXP variableSEXP, SEXP moduloSEXP, SEXP mod_onlySEXP) {
+Rcpp::List NNS_seas_cpp(NumericVector variable, Nullable<IntegerVector> modulo, bool mod_only, Nullable<int> max_period);
+RcppExport SEXP _NNS_NNS_seas_cpp(SEXP variableSEXP, SEXP moduloSEXP, SEXP mod_onlySEXP, SEXP max_periodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type variable(variableSEXP);
     Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type modulo(moduloSEXP);
     Rcpp::traits::input_parameter< bool >::type mod_only(mod_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only));
+    Rcpp::traits::input_parameter< Nullable<int> >::type max_period(max_periodSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only, max_period));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -821,7 +822,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_duplicate_column_map_cpp", (DL_FUNC) &_NNS_NNS_duplicate_column_map_cpp, 1},
     {"_NNS_NNS_mreg_setup_cpp", (DL_FUNC) &_NNS_NNS_mreg_setup_cpp, 5},
     {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 8},
-    {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 3},
+    {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 4},
     {"_NNS_NNS_xstar_path_cpp", (DL_FUNC) &_NNS_NNS_xstar_path_cpp, 5},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
     {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},
