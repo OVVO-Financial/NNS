@@ -66,7 +66,10 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   
   const int half_n = n/2;
   const double mean_var = vec_mean(variable);
-  const double sd_var = vec_sd(variable) / c4(n);
+  // Compare raw values: a repeated 0.1 need not centre to exactly 0.
+  const bool constant = std::all_of(variable.begin(), variable.end(),
+                                    [&](double v){ return v == variable[0]; });
+  const double sd_var = constant ? 0.0 : vec_sd(variable) / c4(n);
   // CV is meaningless for a mean that is zero up to rounding; compare sds instead
   const double tol = std::sqrt(DBL_EPSILON);
   const bool use_cv = std::fabs(mean_var) > tol * sd_var;
@@ -88,10 +91,11 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     for(int j=0;j<m;++j){
       int len = (n-1-j)/m + 1;
       double mu = 0.0, ss = 0.0;
-      for(int i=j;i<n;i+=m) mu += x[i];
+      bool same = true;
+      for(int i=j;i<n;i+=m){ mu += x[i]; same = same && x[i] == x[j]; }
       mu /= (double)len;
       for(int i=j;i<n;i+=m){ double d = x[i]-mu; ss += d*d; }
-      double sd = std::sqrt(ss / (double)(len-1)) / c4(len);
+      double sd = same ? 0.0 : std::sqrt(ss / (double)(len-1)) / c4(len);
       // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
       wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
     }
@@ -122,7 +126,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     VarCoefVar = NumericVector(m);
     for(int k=0;k<m;++k){ Period[k]=periods_vec[k]; CoefVar[k]=cvmean_vec[k]; VarCoefVar[k]=var_cov; }
     IntegerVector ord = seq(0, m-1);
-    std::sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
+    std::stable_sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
     Period = Period[ord]; CoefVar = CoefVar[ord]; VarCoefVar = VarCoefVar[ord];
   }else{
     Period = IntegerVector::create(1);
@@ -160,7 +164,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
         Period = IntegerVector(m); CoefVar = NumericVector(m); VarCoefVar = NumericVector(m);
         for(int i=0;i<m;++i){ Period[i]=keptP[i]; CoefVar[i]=keptCV[i]; VarCoefVar[i]=var_cov; }
         IntegerVector ord = seq(0, m-1);
-        std::sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
+        std::stable_sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
         Period = Period[ord]; CoefVar = CoefVar[ord]; VarCoefVar = VarCoefVar[ord];
       }
     } else {
@@ -176,7 +180,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
         for(int i=0;i<addm;++i){ P2[oldm+i]=add[i]; CV2[oldm+i]=added_cv(add[i]); VCV2[oldm+i]=var_cov; }
         Period=P2; CoefVar=CV2; VarCoefVar=VCV2;
         IntegerVector ord = seq(0, Period.size()-1);
-        std::sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
+        std::stable_sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
         Period = Period[ord]; CoefVar = CoefVar[ord]; VarCoefVar = VarCoefVar[ord];
       }
     }
@@ -193,7 +197,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
       CoefVar = NumericVector(CV.begin(), CV.end());
       VarCoefVar = NumericVector(VCV.begin(), VCV.end());
       IntegerVector ord = seq(0, Period.size()-1);
-      std::sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
+      std::stable_sort(ord.begin(), ord.end(), [&](int a, int b){ return CoefVar[a] < CoefVar[b]; });
       Period = Period[ord]; CoefVar = CoefVar[ord]; VarCoefVar = VarCoefVar[ord];
     } else {
       Period = IntegerVector::create(1);
