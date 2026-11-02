@@ -339,16 +339,25 @@ UPM.VaR <- function(percentile, degree, x) {
     )
   }
   
+  # The ratio residual is dimensionless, unlike f, whose size scales with x^degree.
+  ratio_gap <- function(t) {
+    lpm <- .NNS_LPM_raw_integer(t, degree, prefix_power)
+    upm <- .NNS_UPM_raw_integer(t, degree, prefix_power, total_power)
+    lpm / (lpm + upm) - percentile
+  }
+  
   f_lower <- f(lower)
   f_upper <- f(upper)
+  g_lower <- ratio_gap(lower)
+  g_upper <- ratio_gap(upper)
   
-  tol <- .Machine$double.eps^0.5
+  tol <- .Machine$double.eps^0.75
   
-  if (is.finite(f_lower) && abs(f_lower) <= tol) {
+  if (is.finite(g_lower) && abs(g_lower) <= tol) {
     return(lower)
   }
   
-  if (is.finite(f_upper) && abs(f_upper) <= tol) {
+  if (is.finite(g_upper) && abs(g_upper) <= tol) {
     return(upper)
   }
   
@@ -357,23 +366,20 @@ UPM.VaR <- function(percentile, degree, x) {
     is.finite(f_upper) &&
     f_lower * f_upper <= 0
   ) {
+    # Where the ratio is steep a tolerance on t does not bound its residual, so solve to rounding.
     root <- stats::uniroot(
       f,
       interval = c(lower, upper),
-      tol = tol
+      f.lower = f_lower,
+      f.upper = f_upper,
+      tol = .Machine$double.eps^2 * (upper - lower)
     )$root
     
     return(pmin(pmax(root, lower), upper))
   }
   
-  # Numerical safety fallback.
-  # This still uses the cheap prefix-polynomial objective, not full LPM.ratio scans.
-  root <- stats::optimize(
-    function(t) abs(f(t)),
-    interval = c(lower, upper)
-  )$minimum
-  
-  pmin(pmax(root, lower), upper)
+  # No sign change, from rounding at a break: take the closer endpoint.
+  if (abs(g_lower) <= abs(g_upper)) lower else upper
 }
 
 
