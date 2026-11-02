@@ -15,7 +15,7 @@
 #' @param threshold numeric [0, 1]; \code{NULL} (default) Probability supplied to \link{LPM.VaR} over the learner-trial objective distribution to determine the objective cutoff for keeping feature combinations.  Defaults to 0.80 when \code{objective = "max"} and 0.20 when \code{objective = "min"}.  It is not a literal objective-score cutoff.
 #' @param obj.fn expression;
 #' \code{expression( sum((predicted - actual)^2) )} (default) Sum of squared errors is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.  Automatically selects an accuracy measure when \code{(type = "CLASS")}.
-#' @param objective options: ("min", "max") \code{"max"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
+#' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
 #' @param extreme logical; \code{FALSE} (default) Sets the \link{LPM.VaR} probability to 1 (0) for maximization (minimization) \code{objective}, i.e. the most extreme learner-trial objective value becomes the cutoff.  Overrides \code{threshold}.
 #' @param features.only logical; \code{FALSE} (default) Returns only the final feature loadings along with the final feature frequencies.
 #' @param feature.importance logical; \code{TRUE} (default) Draws a two-panel diagnostic: the learner-trial objective distribution with its \link{LPM.VaR} cutoff, and the frequency of features used in the final estimate.
@@ -561,10 +561,11 @@ NNS.boost <- function(IVs.train,
     smallest <- min(lengths(groups))
     largest <- max(lengths(groups))
     
+    # sample(g, k) on a length-one group samples from 1:g, so index into g.
     down_idx <- unlist(lapply(groups, function(g)
-      sample(g, smallest, replace = FALSE)), use.names = FALSE)
+      g[sample.int(length(g), smallest, replace = FALSE)]), use.names = FALSE)
     up_idx <- unlist(lapply(groups, function(g)
-      sample(g, largest, replace = TRUE)), use.names = FALSE)
+      g[sample.int(length(g), largest, replace = TRUE)]), use.names = FALSE)
     
     idx <- sort(c(down_idx, up_idx))
     list(x = train_x[idx, , drop = FALSE], y = train_y[idx])
@@ -923,6 +924,23 @@ NNS.boost <- function(IVs.train,
   
   results <- final.stack$reg
   pred.int.output <- final.stack$reg.pred.int
+  
+  # NNS.stack returns class codes 1/2 for a two-valued numeric response even
+  # when boost treats it as a regression; map them back to the response values.
+  if (!is_class && !is.null(final.stack$class.levels)) {
+    stack_values <- as.numeric(final.stack$class.levels)
+    .decode_stack_codes <- function(v) {
+      v <- as.numeric(v)
+      ok <- is.finite(v)
+      v[ok] <- stack_values[pmin(pmax(as.integer(round(v[ok])), 1L), length(stack_values))]
+      v
+    }
+    results <- .decode_stack_codes(results)
+    if (!is.null(pred.int.output)) {
+      pred.int.output <- as.data.frame(pred.int.output)
+      pred.int.output[] <- lapply(pred.int.output, .decode_stack_codes)
+    }
+  }
   
   estimates_code <- .sanitize_predictions(results, y)
   pred_int_out <- pred.int.output
