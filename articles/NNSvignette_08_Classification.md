@@ -46,20 +46,20 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 ```
 
     ##   Sepal.Length Sepal.Width Petal.Length Petal.Width
-    ## 1     4.300000    2.000000          1.0         0.1
-    ## 2     4.381250    2.451641          1.1         0.2
-    ## 3     4.577396    2.773569          1.2         0.3
-    ## 4     4.700000    2.900000          1.3         0.4
-    ## 5     4.800000    3.000000          1.4         0.5
-    ## 6     4.900000    3.100000          1.5         0.6
+    ## 1     4.300000    2.000000         1.00        0.10
+    ## 2     4.498056    2.829734         1.05        0.20
+    ## 3     4.774255    3.358016         1.20        0.30
+    ## 4     4.900000    4.400000         1.30        0.40
+    ## 5     5.024342          NA         1.40        0.55
+    ## 6     5.337272          NA         1.50        1.00
     ## ---
-    ## 31           NA          NA     5.700000          NA
-    ## 32           NA          NA     5.800000          NA
-    ## 33           NA          NA     5.937500          NA
-    ## 34           NA          NA     6.112500          NA
-    ## 35           NA          NA     6.617835          NA
-    ## 36           NA          NA     6.900000          NA
-    ## --- [ 36 rows x 4 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
+    ## 21           NA          NA     5.337500          NA
+    ## 22           NA          NA     5.500000          NA
+    ## 23           NA          NA     5.617708          NA
+    ## 24           NA          NA     5.849554          NA
+    ## 25           NA          NA     6.336875          NA
+    ## 26           NA          NA     6.900000          NA
+    ## --- [ 26 rows x 4 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---
 
 ## `NNS.boost()`
 

@@ -98,10 +98,13 @@ mean((predicted - actual)^2)/.denom
 - pred.int:
 
   numeric \[0, 1\]; 0.95 (default) Returns the associated prediction
-  intervals for the final estimate. Constructed from the validation
-  errors: the estimate plus / minus
-  `abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)`
-  (deterministic, symmetric).
+  intervals for the final estimate. Constructed from the returned
+  model's internal validation residuals (actual - forecast), adding
+  their
+  [LPM.VaR](https://OVVO-Financial.github.io/NNS/reference/LPM.VaR.md)
+  and
+  [UPM.VaR](https://OVVO-Financial.github.io/NNS/reference/UPM.VaR.md)
+  at `(1 - pred.int)/2` to the final estimates.
 
 - print.trace:
 
@@ -135,13 +138,15 @@ Returns a list containing:
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   before forecasting.
 
-- `$bias.shift` a numerical result of the overall bias of the optimum
-  objective function result. To be added to the final result when using
-  the
+- `$bias.shift` a numerical result of the overall bias of the returned
+  model on the internal validation window, 0 when correcting it does not
+  improve the objective function. To be added to the final result when
+  using the
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
   with the derived parameters.
 
-- `$errors` a vector of model errors from internal calibration.
+- `$errors` a vector of the returned model's internal validation errors
+  (forecast - actual), before `$bias.shift`.
 
 - `$results` a vector of length `h`.
 

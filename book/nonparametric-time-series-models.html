@@ -386,13 +386,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="14.1" data-path="directional-causation.html"><a href="directional-causation.html#limitations-of-classical-granger-causality"><i class="fa fa-check"></i><b>14.1</b> Limitations of Classical Granger Causality</a></li>
 <li class="chapter" data-level="14.2" data-path="directional-causation.html"><a href="directional-causation.html#theoretical-foundations-three-axioms"><i class="fa fa-check"></i><b>14.2</b> Theoretical Foundations: Three Axioms</a></li>
 <li class="chapter" data-level="14.3" data-path="directional-causation.html"><a href="directional-causation.html#lagged-co-partial-moments"><i class="fa fa-check"></i><b>14.3</b> Lagged Co-Partial Moments</a></li>
-<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#removing-internal-dynamics"><i class="fa fa-check"></i><b>14.4</b> Removing Internal Dynamics</a></li>
-<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#joint-rangespace-normalization"><i class="fa fa-check"></i><b>14.5</b> Joint Rangespace Normalization</a></li>
-<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.6</b> Conditional Probability via Partial Moments</a></li>
-<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.7</b> Asymmetric Directional Dependence</a></li>
-<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.8</b> The Raw Directional Causation Statistic</a></li>
-<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.9</b> Bidirectional Normalization</a></li>
-<li class="chapter" data-level="14.10" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.10</b> Summary</a></li>
+<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#lagged-pairs-on-the-copula-scale"><i class="fa fa-check"></i><b>14.4</b> Lagged Pairs on the Copula Scale</a></li>
+<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.5</b> Conditional Probability via Partial Moments</a></li>
+<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.6</b> Asymmetric Directional Dependence</a></li>
+<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.7</b> The Raw Directional Causation Statistic</a></li>
+<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.8</b> Bidirectional Normalization</a></li>
+<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.9</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="15" data-path="distribution-comparison.html"><a href="distribution-comparison.html"><i class="fa fa-check"></i><b>15</b> Distribution Comparison</a>
 <ul>
@@ -1193,11 +1192,11 @@ X = (10, 18, 11, 21, 12, 20, 13, 23).
 \]</span></p>
 <p>and the sample standard deviation is approximately</p>
 <p><span class="math display">\[
-s_X \approx 5.345.
+s_X \approx 5.071.
 \]</span></p>
 <p>Hence the overall coefficient of variation is</p>
 <p><span class="math display">\[
-CV(X) \approx \frac{5.345}{16} = 0.334.
+CV(X) \approx \frac{5.071}{16} = 0.317.
 \]</span></p>
 <p>Now test lag <span class="math inline">\(m=2\)</span>. The component series are</p>
 <p><span class="math display">\[
@@ -1213,7 +1212,7 @@ CV(X) \approx \frac{5.345}{16} = 0.334.
 <p><span class="math display">\[
 \bar X_2 = 20.5,\qquad s_2 \approx 2.082,\qquad CV_2 \approx \frac{2.082}{20.5}=0.102.
 \]</span></p>
-<p>Both component coefficients of variation are far below the overall value <span class="math inline">\(0.334\)</span>. That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag <span class="math inline">\(2\)</span> reveals meaningful recurring structure.</p>
+<p>Both component coefficients of variation are far below the overall value <span class="math inline">\(0.317\)</span>. That means the lag-2 decomposition produces tighter, more internally coherent subseries than the original series. In the NNS interpretation, lag <span class="math inline">\(2\)</span> reveals meaningful recurring structure.</p>
 <p>By contrast, consider lag <span class="math inline">\(m=3\)</span>. The three component series are</p>
 <p><span class="math display">\[
 (10,21,13),\qquad (18,12,23),\qquad (11,20).
@@ -1241,6 +1240,7 @@ w_j \ge 0,
 \overline{CV}(m) &lt; CV(X).
 \]</span></p>
 <p>An even stricter rule requires most, or all, component CVs to lie below the full-series CV. The exact rule is a modeling choice, but the guiding principle is unchanged: a good seasonal lag is one that produces tighter conditional distributions than the unpartitioned series.</p>
+<p>Component length also matters. The sample standard deviation of <span class="math inline">\(k\)</span> observations is biased low, <span class="math inline">\(E[s] = c_4(k)\,\sigma\)</span> with <span class="math inline">\(c_4(2) \approx 0.80\)</span>, <span class="math inline">\(c_4(3) \approx 0.89\)</span> and <span class="math inline">\(c_4(5) \approx 0.94\)</span>, so at very long lags, where each component has only two or three points, every component looks tight even when the series is pure noise. <code>NNS.seas</code> therefore scans only lags with at least five observations in every component (<span class="math inline">\(m \le n/5\)</span>) and divides each component standard deviation by <span class="math inline">\(c_4(k)\)</span>. The eight-point series above is a worked illustration below that size; <code>NNS.seas</code> needs at least ten observations to test lag 2. Even with these corrections a series without seasonality passes some lags by chance, so the detected periods are best treated as candidates and validated, as <code>NNS.ARMA.optim</code> does.</p>
 <p>A technical caveat is also important. If <span class="math inline">\(\mu_X \approx 0\)</span>, then <span class="math inline">\(CV(X)\)</span> can become unstable because the denominator is near zero. In such cases the analyst may instead compare component standard deviations directly, center the series at a more stable scale, or regularize the denominator by adding a small constant. The predictive logic remains the same even if the raw coefficient of variation is numerically unreliable.</p>
 <hr />
 </div>
@@ -1428,22 +1428,19 @@ The dynamic approach favors adaptability.</p>
 <div id="prediction-intervals-for-forecasts" class="section level2 hasAnchor" number="25.11">
 <h2><span class="header-section-number">25.11</span> Prediction Intervals for Forecasts<a href="nonparametric-time-series-models.html#prediction-intervals-for-forecasts" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Point forecasts are only one part of the forecasting problem. Analysts also need measures of uncertainty.</p>
-<p>Because the NNS framework is nonparametric, forecast intervals are constructed without Gaussian error assumptions. Instead, uncertainty can be propagated using the maximum entropy bootstrap machinery developed in Chapter 17.</p>
-<p>The logic is straightforward:</p>
-<ol style="list-style-type: decimal">
-<li>generate replicates consistent with the forecast path and dependence structure,</li>
-<li>compute the implied distribution of future outcomes,</li>
-<li>extract lower and upper predictive bounds from directional quantiles.</li>
-</ol>
-<p>This produces prediction intervals that are aligned with the empirical distributional shape of the series rather than with a parametric error law.</p>
-<p>Thus the directional framework provides not only nonlinear point forecasts, but also <strong>distribution-free forecast uncertainty quantification</strong>.</p>
-<p>A bit more concretely, suppose the fitted model yields a forecast path</p>
+<p>Because the NNS framework is nonparametric, forecast bands are constructed without Gaussian error assumptions, using the maximum entropy bootstrap machinery developed in Chapter 20.</p>
+<p><code>NNS.ARMA(..., pred.int = )</code> applies it to the forecast path itself. Suppose the fitted model yields</p>
 <p><span class="math display">\[
 \hat X_{T+1}, \dots, \hat X_{T+H}.
 \]</span></p>
-<p>The bootstrap procedure does not assume i.i.d. Gaussian residuals around that path. Instead, it constructs synthetic continuations that preserve the rank structure and dependence features of the observed series as closely as possible. Each bootstrap replicate yields an alternative future trajectory, and the collection of such trajectories forms an empirical predictive distribution at each horizon.</p>
-<p>If the series is asymmetric, heavy-tailed, or exhibits occasional bursts, those features can appear in the predictive distribution instead of being averaged away by a normal approximation. Directional lower and upper tail functionals can then be used to extract forecast bands. In this sense, the interval forecast is not an accessory to the point forecast. It is the distributional analogue of the same nonparametric logic: preserve the observed structure first, summarize uncertainty second.</p>
-<p>In practice, one might generate a large number of bootstrap replicates, often on the order of hundreds or thousands, then evaluate the empirical future distribution at each horizon. If a central <span class="math inline">\(100(1-\alpha)\%\)</span> interval is desired, the lower and upper bounds can be extracted from directional quantiles corresponding to <span class="math inline">\(\alpha/2\)</span> and <span class="math inline">\(1-\alpha/2\)</span>. The exact number of replicates is an accuracy-versus-computation choice, but the principle is always the same: empirical resampled paths replace parametric error formulas.</p>
+<p>The procedure is:</p>
+<ol style="list-style-type: decimal">
+<li>resample this path with the maximum entropy bootstrap, across a range of dependence targets <span class="math inline">\(\rho \in [-1, 1]\)</span>, giving replicate paths that preserve its rank structure;</li>
+<li>at each step, take the directional quantiles <span class="math inline">\(\text{LPM.VaR}(\alpha/2)\)</span> and <span class="math inline">\(\text{UPM.VaR}(\alpha/2)\)</span> of the replicates;</li>
+<li>widen them by the spread of the per-lag linear estimates.</li>
+</ol>
+<p>Because the replicates rearrange the <span class="math inline">\(H\)</span> forecast values, the resulting band describes the <strong>dispersion of the forecast path</strong> — how much the forecasts themselves vary across the horizon — rather than the uncertainty of the outcome at each step. It does not widen with the horizon, it is wide for a strongly seasonal path and narrow for a flat one, and it is not calibrated to contain future values with probability <span class="math inline">\(1-\alpha\)</span>: rolling-origin coverage at a nominal 95% has ranged from about 35% on white noise to 97% on <code>AirPassengers</code>. Asymmetry and heavy tails in the path still carry into the band, since no normal approximation is used.</p>
+<p>A predictive interval in the sense of Chapter 17, <span class="math inline">\(P(\text{LPM.VaR}(\alpha/2) \le X_{T+h} \le \text{UPM.VaR}(\alpha/2)) \approx 1 - \alpha\)</span>, needs the distribution of future outcomes at each horizon instead. Two routes stay within the framework: directional quantiles of validation errors collected separately for each horizon, which <code>NNS.ARMA.optim</code> approximates with its validation-window errors, or synthetic continuations of the observed series, rerunning the recursion on each bootstrap replicate and taking directional quantiles of the simulated outcomes at each horizon. Whichever is used, the interval calibration check in the validation protocol below applies.</p>
 <hr />
 </div>
 <div id="relation-to-earlier-nns-chapters" class="section level2 hasAnchor" number="25.12">
@@ -1566,7 +1563,7 @@ NNS learns a predictive architecture from subset behavior.</p>
 </div>
 <div id="data-requirements" class="section level3 hasAnchor" number="25.16.2">
 <h3><span class="header-section-number">25.16.2</span> Data requirements<a href="nonparametric-time-series-models.html#data-requirements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Because prediction is learned from historical structure, sparse component series may limit reliability for very large lag lengths.</p>
+<p>Because prediction is learned from historical structure, sparse component series limit reliability for very large lag lengths. <code>NNS.seas</code> does not test lags whose components would have fewer than five observations.</p>
 </div>
 <div id="computational-cost-2" class="section level3 hasAnchor" number="25.16.3">
 <h3><span class="header-section-number">25.16.3</span> Computational cost<a href="nonparametric-time-series-models.html#computational-cost-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>

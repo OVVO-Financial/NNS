@@ -111,7 +111,7 @@ The default is the mean squared error divided by the degree-1 co-movement of <co
 
 
 <dt id="arg-pred-int">pred.int<a class="anchor" aria-label="anchor" href="#arg-pred-int"></a></dt>
-<dd><p>numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the validation errors: the estimate plus / minus <code>abs(UPM.VaR((1 - pred.int) / 2, 0, errors)) + abs(bias.shift)</code> (deterministic, symmetric).</p></dd>
+<dd><p>numeric [0, 1]; 0.95 (default) Returns the associated prediction intervals for the final estimate.  Constructed from the returned model's internal validation residuals (actual - forecast), adding their <a href="LPM.VaR.html">LPM.VaR</a> and <a href="UPM.VaR.html">UPM.VaR</a> at <code>(1 - pred.int)/2</code> to the final estimates.</p></dd>
 
 
 <dt id="arg-print-trace">print.trace<a class="anchor" aria-label="anchor" href="#arg-print-trace"></a></dt>
@@ -130,8 +130,8 @@ The default is the mean squared error divided by the degree-1 co-movement of <co
 <li><p><code>$method</code> the method identifying which <a href="NNS.ARMA.html">NNS.ARMA</a> method was used.</p></li>
 <li><p><code>$shrink</code> whether to use the <code>shrink</code> parameter in <a href="NNS.ARMA.html">NNS.ARMA</a>.</p></li>
 <li><p><code>$nns.regress</code> whether to smooth the variable via <a href="NNS.reg.html">NNS.reg</a> before forecasting.</p></li>
-<li><p><code>$bias.shift</code> a numerical result of the overall bias of the optimum objective function result.  To be added to the final result when using the <a href="NNS.ARMA.html">NNS.ARMA</a> with the derived parameters.</p></li>
-<li><p><code>$errors</code> a vector of model errors from internal calibration.</p></li>
+<li><p><code>$bias.shift</code> a numerical result of the overall bias of the returned model on the internal validation window, 0 when correcting it does not improve the objective function.  To be added to the final result when using the <a href="NNS.ARMA.html">NNS.ARMA</a> with the derived parameters.</p></li>
+<li><p><code>$errors</code> a vector of the returned model's internal validation errors (forecast - actual), before <code>$bias.shift</code>.</p></li>
 <li><p><code>$results</code> a vector of length <code>h</code>.</p></li>
 <li><p><code>$lower.pred.int</code> a vector of lower prediction intervals per forecast point.</p></li>
 <li><p><code>$upper.pred.int</code> a vector of upper prediction intervals per forecast point.</p></li>

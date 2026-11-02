@@ -171,17 +171,14 @@ NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
 
     ## $all.periods
     ##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-    ## 1     48                0.4002249                         0.4279947
-    ## 2     12                0.4059923                         0.4279947
-    ## 3     24                0.4279947                         0.4279947
-    ## 4     36                0.4279947                         0.4279947
-    ## 5     60                0.4279947                         0.4279947
+    ## 1     12                0.4214769                         0.4287436
+    ## 2     24                0.4287436                         0.4287436
     ## 
     ## $best.period
-    ## [1] 48
+    ## [1] 12
     ## 
     ## $periods
-    ## [1] 48 12 24 36 60
+    ## [1] 12 24
 
 ### Cross-Validating All Combinations of `seasonal.factor`
 
@@ -317,9 +314,12 @@ Equal weighting would be `weights = "equal"`.
 
 - `pred.int`
 
-Provides the values for the specified prediction intervals within
-\[0,1\] for each forecasted point and plots the bootstrapped replicates
-for the forecasted points.
+Returns lower and upper bands for each forecasted point from a maximum
+entropy bootstrap of the forecast path, and plots the bootstrapped
+replicates. The band describes how dispersed the forecast path is, not
+the probability that future values fall inside it: it does not widen
+with the horizon and is not calibrated to the nominal level.
+`NNS.ARMA.optim` builds its interval from validation errors instead.
 
 - `seasonal.factor = FALSE`
 
@@ -343,8 +343,11 @@ data) are included along with the results.
 - `mod.only`
 
 To be used in conjunction with
-`seasonal.factor = FALSE & modulo != NULL`. This parameter will ensure
-empirical patterns are kept along with the logical seasonal patterns.
+`seasonal.factor = FALSE & modulo != NULL`. With `mod.only = TRUE`
+(default), only periods at multiples of `modulo` are kept: the detected
+periods are replaced by their nearest multiples. Set `mod.only = FALSE`
+to keep the empirically detected periods along with the logical seasonal
+patterns.
 
 - `dynamic = TRUE`
 

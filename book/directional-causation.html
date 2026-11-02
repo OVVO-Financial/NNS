@@ -386,13 +386,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="14.1" data-path="directional-causation.html"><a href="directional-causation.html#limitations-of-classical-granger-causality"><i class="fa fa-check"></i><b>14.1</b> Limitations of Classical Granger Causality</a></li>
 <li class="chapter" data-level="14.2" data-path="directional-causation.html"><a href="directional-causation.html#theoretical-foundations-three-axioms"><i class="fa fa-check"></i><b>14.2</b> Theoretical Foundations: Three Axioms</a></li>
 <li class="chapter" data-level="14.3" data-path="directional-causation.html"><a href="directional-causation.html#lagged-co-partial-moments"><i class="fa fa-check"></i><b>14.3</b> Lagged Co-Partial Moments</a></li>
-<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#removing-internal-dynamics"><i class="fa fa-check"></i><b>14.4</b> Removing Internal Dynamics</a></li>
-<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#joint-rangespace-normalization"><i class="fa fa-check"></i><b>14.5</b> Joint Rangespace Normalization</a></li>
-<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.6</b> Conditional Probability via Partial Moments</a></li>
-<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.7</b> Asymmetric Directional Dependence</a></li>
-<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.8</b> The Raw Directional Causation Statistic</a></li>
-<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.9</b> Bidirectional Normalization</a></li>
-<li class="chapter" data-level="14.10" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.10</b> Summary</a></li>
+<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#lagged-pairs-on-the-copula-scale"><i class="fa fa-check"></i><b>14.4</b> Lagged Pairs on the Copula Scale</a></li>
+<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.5</b> Conditional Probability via Partial Moments</a></li>
+<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.6</b> Asymmetric Directional Dependence</a></li>
+<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.7</b> The Raw Directional Causation Statistic</a></li>
+<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.8</b> Bidirectional Normalization</a></li>
+<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.9</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="15" data-path="distribution-comparison.html"><a href="distribution-comparison.html"><i class="fa fa-check"></i><b>15</b> Distribution Comparison</a>
 <ul>
@@ -1045,8 +1044,8 @@ Two variables may move together because</p>
 <li>the relationship arises from structural constraints in the system.</li>
 </ul>
 <p>Identifying the direction and strength of causal influence requires more than a symmetric dependence measure. It requires a framework that can detect <strong>which variable is doing the driving</strong>.</p>
-<p>Classical approaches to this problem rely on <strong>Granger causality</strong>, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: causal structure is inferred from <strong>nonlinear probability relationships between variables after removing each variable’s internal dynamics</strong>, without imposing a parametric model.</p>
-<p>This chapter develops the <strong>directional causation framework</strong> in three stages: removing internal dynamics through nonlinear lag normalization, placing residual signals on a shared scale through joint rangespace normalization, and measuring causal influence through partial-moment-based conditional probability and asymmetric directional dependence.</p>
+<p>Classical approaches to this problem rely on <strong>Granger causality</strong>, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: causal structure is inferred from <strong>nonlinear probability relationships between a lagged cause and its effect, compared in both directions</strong>, without imposing a parametric model.</p>
+<p>This chapter develops the <strong>directional causation framework</strong> in three stages: forming explicitly lagged pairs and placing them on the copula scale, measuring how strongly the lagged cause constrains the effect through partial-moment conditional probability and asymmetric directional dependence, and comparing the two directions in a single normalized index.</p>
 <hr />
 <div id="limitations-of-classical-granger-causality" class="section level2 hasAnchor" number="14.1">
 <h2><span class="header-section-number">14.1</span> Limitations of Classical Granger Causality<a href="directional-causation.html#limitations-of-classical-granger-causality" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -1061,7 +1060,7 @@ Y_t =
 \varepsilon_t .
 \]</span></p>
 <p>If the coefficients <span class="math inline">\(b_i\)</span> are jointly significant, <span class="math inline">\(X\)</span> is said to Granger-cause <span class="math inline">\(Y\)</span>.</p>
-<p>Granger causality captures a genuine and important insight: the causal role of <span class="math inline">\(X\)</span> in <span class="math inline">\(Y\)</span> should only be assessed after conditioning on <span class="math inline">\(Y\)</span>’s own past. The directional framework retains this principle. What changes is how that conditioning is implemented — through nonlinear normalization rather than linear regression — and what the causal evidence consists of — conditional probability and asymmetric dependence rather than regression coefficients.</p>
+<p>Granger causality captures a genuine and important insight: the causal role of <span class="math inline">\(X\)</span> in <span class="math inline">\(Y\)</span> should only be assessed after conditioning on <span class="math inline">\(Y\)</span>’s own past. The directional framework retains this principle. What changes is how the comparison is implemented — through lagged pairs evaluated in both directions on the copula scale rather than a linear regression on own lags — and what the causal evidence consists of — conditional probability and asymmetric dependence rather than regression coefficients.</p>
 <p>The parametric Granger approach carries four limitations that are familiar from earlier chapters.</p>
 <p><strong>Linear specification.</strong> The causal relationship between variables is constrained to be linear. Nonlinear effects, including the simple case where <span class="math inline">\(X\)</span> drives <span class="math inline">\(Y = X^2\)</span>, are invisible to the regression coefficients even when the causal relationship is strong and unambiguous.</p>
 <p><strong>Symmetric aggregation.</strong> Regression models aggregate deviations symmetrically around the mean. Asymmetric causal effects — where large upward movements in <span class="math inline">\(X\)</span> drive movements in <span class="math inline">\(Y\)</span> but small movements do not — are absorbed into the residual.</p>
@@ -1076,7 +1075,8 @@ Y_t =
 <p><strong>Axiom 1 — Self-causation exclusion.</strong> No variable should be identified as causing itself. When <span class="math inline">\(X = Y\)</span>, the causal measure should return a symmetric result indicating no net directional influence, and the diagonal of the causation matrix should be zero.</p>
 <p><strong>Axiom 2 — Nonlinear causation detection.</strong> The measure should accurately identify causal relationships that are nonlinear and directional. A functional relationship <span class="math inline">\(Y = f(X)\)</span> should register positive causal influence from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> regardless of whether <span class="math inline">\(f\)</span> is linear, quadratic, or otherwise nonmonotone.</p>
 <p><strong>Axiom 3 — Directionality proportionality.</strong> Causal strength should scale with the degree of functional asymmetry between the two variables. When <span class="math inline">\(X\)</span> strongly determines <span class="math inline">\(Y\)</span> but <span class="math inline">\(Y\)</span> only weakly constrains <span class="math inline">\(X\)</span>, the statistic should reflect this imbalance clearly and in a stable, interpretable way.</p>
-<p>These axioms motivate a measure built from two components: a <strong>conditional probability</strong> that captures whether movements in one variable constrain the range of the other, and an <strong>asymmetric dependence</strong> measure that captures whether those movements are directionally aligned. Neither component alone satisfies all three axioms; together they do.</p>
+<p>These axioms motivate a measure built from two components: a <strong>conditional probability</strong> that captures how strongly the position of one variable constrains the distribution of the other, and an <strong>asymmetric dependence</strong> measure that captures whether that constraint is stronger in one direction than the other. Neither component alone satisfies all three axioms; together they do.</p>
+<p>One qualification applies to Axiom 2. When <span class="math inline">\(f\)</span> is invertible, <span class="math inline">\(X = f^{-1}(Y)\)</span> is just as much a function of <span class="math inline">\(Y\)</span>, so contemporaneous data register influence equally in both directions and the net index is neutral. Time order, through a lag <span class="math inline">\(\tau &gt; 0\)</span>, is what identifies the direction in that case. A non-invertible <span class="math inline">\(f\)</span>, such as <span class="math inline">\(Y = X^2\)</span>, is directional even without a lag.</p>
 <hr />
 </div>
 <div id="lagged-co-partial-moments" class="section level2 hasAnchor" number="14.3">
@@ -1106,95 +1106,71 @@ Y_t =
 (x_{t-\tau} - t_X)_+^r\,(y_t - t_Y)_+^s.
 \]</span></p>
 <p>These estimators converge to their population values by the law of large numbers.</p>
-<p>The causation statistic developed below operationalizes this lagged structure: first removing the self-driven component of each variable, then measuring the residual cross-variable co-movement through conditional probability and asymmetric dependence.</p>
+<p>The causation statistic developed below operationalizes this lagged structure directly: it evaluates each direction on its own lagged pairs, places them on the copula scale, and compares the two directions.</p>
 <hr />
 </div>
-<div id="removing-internal-dynamics" class="section level2 hasAnchor" number="14.4">
-<h2><span class="header-section-number">14.4</span> Removing Internal Dynamics<a href="directional-causation.html#removing-internal-dynamics" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The first computational step separates each variable’s <strong>internal temporal dynamics</strong> from its interaction with the other variable.</p>
-<p>This is the nonparametric analogue of pre-whitening in classical time-series analysis. In the Granger framework, pre-whitening is accomplished by including the variable’s own lags in the regression. In the directional framework, it is accomplished through <strong>nonlinear lag normalization</strong>.</p>
-<p>Let <span class="math inline">\(\tau\)</span> denote the lag order. Form the lag matrix for <span class="math inline">\(X\)</span>:</p>
+<div id="lagged-pairs-on-the-copula-scale" class="section level2 hasAnchor" number="14.4">
+<h2><span class="header-section-number">14.4</span> Lagged Pairs on the Copula Scale<a href="directional-causation.html#lagged-pairs-on-the-copula-scale" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Let <span class="math inline">\(\tau \ge 0\)</span> denote the lag. The two candidate directions are evaluated on two different sets of pairs:</p>
 <p><span class="math display">\[
-\mathbf{X}_\tau = \bigl[X_t,\; X_{t-1},\; \dots,\; X_{t-\tau}\bigr]
+X \to Y:\quad \bigl(X_{t-\tau},\; Y_t\bigr), \qquad
+Y \to X:\quad \bigl(Y_{t-\tau},\; X_t\bigr), \qquad t = \tau+1, \dots, n .
 \]</span></p>
-<p>and analogously <span class="math inline">\(\mathbf{Y}_\tau\)</span> for <span class="math inline">\(Y\)</span>. Apply joint normalization within each lag matrix:</p>
+<p>Each direction pairs the earlier value of the candidate cause with the later value of the candidate effect, exactly as in the lagged co-partial moments above. When <span class="math inline">\(\tau = 0\)</span> both sets are the contemporaneous pairs, which corresponds to the cross-sectional case where temporal ordering carries no information. The lag may be specified directly, or set to <span class="math inline">\(\tau = \texttt{&quot;ts&quot;}\)</span>, which uses one lag for both directions: the mean of the first seasonal period of each series detected by <span class="math inline">\(\texttt{NNS.seas}\)</span>, restricted to at most <span class="math inline">\(\sqrt{n}\)</span>.</p>
+<p>Within each set of pairs, both variables are mapped to the copula scale through their own empirical CDFs, the degree-zero lower partial moment from Chapter 3:</p>
 <p><span class="math display">\[
-X_t^{*} = \texttt{NNS.norm}(\mathbf{X}_\tau)[\,\cdot\,,1]
-\qquad
-Y_t^{*} = \texttt{NNS.norm}(\mathbf{Y}_\tau)[\,\cdot\,,1]
+U = L_0(X; X) = P(X&#39; \le X) \in (0, 1].
 \]</span></p>
-<p>where <span class="math inline">\(\texttt{NNS.norm}(\cdot)\)</span> implements the empirical CDF transformation — mapping each observation to its relative rank position within the column — a direct application of the degree-zero partial moment <span class="math inline">\(L_0(t;X) = P(X \le t)\)</span> from Chapter 3. The first column of each normalized matrix gives the representation of the current observation relative to its own lag structure.</p>
-<p>This normalization step has a direct partial-moment interpretation. Mapping each observation through the empirical CDF of its lagged neighborhood positions it on the uniform <span class="math inline">\([0,1]\)</span> scale relative to its own history. The resulting <span class="math inline">\(X_t^{*}\)</span> represents the <strong>relative standing of the current observation within its own temporal context</strong> — precisely the information that a Granger regression extracts through linear projection, but without imposing a linear model.</p>
-<p>Any remaining association between <span class="math inline">\(X_t^{*}\)</span> and <span class="math inline">\(Y_t^{*}\)</span> therefore reflects cross-variable interaction rather than self-dependence.</p>
-<p>When <span class="math inline">\(\tau = 0\)</span>, the lag-normalization step is skipped and the raw variables are passed directly to the joint normalization step. This corresponds to the cross-sectional case where temporal ordering carries no information. The lag order <span class="math inline">\(\tau\)</span> may be specified directly, or set to <span class="math inline">\(\tau = \texttt{&quot;ts&quot;}\)</span> for automatic selection via the detected seasonality of each series using <span class="math inline">\(\texttt{NNS.seas}\)</span>.</p>
+<p>Chapter 10 showed that this probability integral transform defines copula space. Working on ranks makes the statistic invariant to shifts, rescaling and any monotone transformation of either variable: adding a constant to <span class="math inline">\(Y\)</span>, changing its units, or replacing it by <span class="math inline">\(\log Y\)</span> leaves every quantity below unchanged.</p>
+<p>Two features of the construction do the work that internal-dynamics removal was meant to do. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: <span class="math inline">\((X_{t-\tau}, Y_t)\)</span> and <span class="math inline">\((Y_{t-\tau}, X_t)\)</span> are different pairs. Second, the comparison is always bidirectional. A shared driver or common persistence that links the two series symmetrically raises the evidence for both directions equally and cancels in the normalized index developed below.</p>
 <hr />
 </div>
-<div id="joint-rangespace-normalization" class="section level2 hasAnchor" number="14.5">
-<h2><span class="header-section-number">14.5</span> Joint Rangespace Normalization<a href="directional-causation.html#joint-rangespace-normalization" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Once internal dynamics have been removed, the lag-adjusted variables <span class="math inline">\(X_t^{*}\)</span> and <span class="math inline">\(Y_t^{*}\)</span> must be placed on a <strong>common scale</strong> before their interaction can be meaningfully measured.</p>
-<p>Because the two series may differ in scale, units, and distributional shape, direct comparison of the lag-normalized values can be misleading. The solution draws on the same degree-zero partial moment used in the previous step. From Chapter 3, the degree-zero lower partial moment equals the empirical CDF:</p>
+<div id="conditional-probability-via-partial-moments" class="section level2 hasAnchor" number="14.5">
+<h2><span class="header-section-number">14.5</span> Conditional Probability via Partial Moments<a href="directional-causation.html#conditional-probability-via-partial-moments" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>With each direction’s pairs on the copula scale, the conditional probability that the position of the cause constrains the distribution of the effect can be measured directly with partial moments.</p>
+<p>For the <span class="math inline">\(X \to Y\)</span> pairs, write <span class="math inline">\(U_X\)</span> for the copula-scale values of <span class="math inline">\(X_{t-\tau}\)</span> and <span class="math inline">\(U_Y\)</span> for those of <span class="math inline">\(Y_t\)</span>. The unconditional degree-one deviation of the effect about its mean <span class="math inline">\(\mu_Y\)</span> is</p>
 <p><span class="math display">\[
-L_0(t; X) = P(X \le t).
+D(U_Y) = L_1(\mu_Y; U_Y) + U_1(\mu_Y; U_Y),
 \]</span></p>
-<p>Mapping both variables jointly through their empirical CDFs places them on a shared <span class="math inline">\([0,1]\)</span> scale while preserving their relative positions within the joint distribution. Chapter 10 showed that this is precisely the probability integral transform that defines copula space.</p>
-<p>The directional framework applies this idea jointly to the lag-adjusted variables:</p>
+<p>the lower plus upper partial moment of degree one. Partition the cause into <span class="math inline">\(k = \lfloor\sqrt{n-\tau}\rfloor\)</span> equal-frequency cells <span class="math inline">\(c\)</span> on its copula scale, and measure the same deviation of the effect within each cell, about the cell’s own mean <span class="math inline">\(\mu_{Y \mid c}\)</span>:</p>
 <p><span class="math display">\[
-\bigl[X_t^{**},\; Y_t^{**}\bigr]
-=
-\texttt{NNS.norm}\!\bigl(\bigl[X_t^{*},\; Y_t^{*}\bigr]\bigr).
+D_c(U_Y) = L_1(\mu_{Y \mid c}; U_Y \mid c) + U_1(\mu_{Y \mid c}; U_Y \mid c).
 \]</span></p>
-<p>The resulting <span class="math inline">\(X_t^{**}\)</span> and <span class="math inline">\(Y_t^{**}\)</span> are copula-like transforms of the lag-adjusted series. Their degree-zero partial moments are approximately uniformly distributed on <span class="math inline">\([0,1]\)</span>, connecting to the copula interpretation of Chapter 10. All subsequent probability and dependence calculations are therefore performed on variables that are simultaneously free of internal dynamics and free of scale differences.</p>
-<hr />
-</div>
-<div id="conditional-probability-via-partial-moments" class="section level2 hasAnchor" number="14.6">
-<h2><span class="header-section-number">14.6</span> Conditional Probability via Partial Moments<a href="directional-causation.html#conditional-probability-via-partial-moments" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>With both variables on a shared rangespace, the conditional probability that movements in <span class="math inline">\(X\)</span> constrain the distribution of <span class="math inline">\(Y\)</span> can now be measured directly using partial moments.</p>
-<p>The <strong>partial-moment conditional probability</strong> is defined as the fraction of <span class="math inline">\(X^{**}\)</span>’s mass that falls within the observed support of <span class="math inline">\(Y^{**}\)</span>:</p>
+<p>The <strong>partial-moment conditional probability</strong> is the share of the effect’s deviation that knowing the cause’s cell resolves:</p>
 <p><span class="math display">\[
-P(X^{**} \mid Y^{**})
+P(X \to Y)
 =
 1
 -
-\Bigl[
-L_1\!\bigl(\min(Y^{**});\; X^{**}\bigr)_{\text{ratio}}
-+
-U_1\!\bigl(\max(Y^{**});\; X^{**}\bigr)_{\text{ratio}}
-\Bigr]
+\frac{\sum_c w_c\, D_c(U_Y)}{D(U_Y)},
+\qquad w_c = \frac{n_c}{n-\tau},
 \]</span></p>
-<p>where the degree-one ratio forms are</p>
-<p><span class="math display">\[
-L_r(t; X)_{\text{ratio}}
-=
-\frac{L_r(t; X)}{L_r(t; X) + U_r(t; X)},
-\qquad
-U_r(t; X)_{\text{ratio}}
-=
-\frac{U_r(t; X)}{L_r(t; X) + U_r(t; X)}.
-\]</span></p>
-<p>When <span class="math inline">\(L_r(t;X) + U_r(t;X) = 0\)</span>, indicating no mass on either side of <span class="math inline">\(t\)</span>, both ratios are defined as zero.</p>
-<p>The first subtracted term, <span class="math inline">\(L_1(\min(Y^{**}); X^{**})_{\text{ratio}}\)</span>, measures the proportion of <span class="math inline">\(X^{**}\)</span> mass lying <strong>below the lower bound</strong> of <span class="math inline">\(Y^{**}\)</span>’s support. The second, <span class="math inline">\(U_1(\max(Y^{**}); X^{**})_{\text{ratio}}\)</span>, measures the proportion lying <strong>above the upper bound</strong>. Subtracting both tails from one yields the probability that a randomly drawn value of <span class="math inline">\(X^{**}\)</span> falls within the range occupied by <span class="math inline">\(Y^{**}\)</span> — a measure of <strong>distributional co-occupancy</strong> grounded entirely in the partial-moment calculus developed in Chapters 2–4.</p>
-<p>This measure is not symmetric: <span class="math inline">\(P(X^{**} \mid Y^{**}) \neq P(Y^{**} \mid X^{**})\)</span> in general, because the support ranges of <span class="math inline">\(X^{**}\)</span> and <span class="math inline">\(Y^{**}\)</span> after joint normalization need not be identical. It requires no kernel bandwidth, no distributional assumption, and no parametric model.</p>
+<p>bounded to <span class="math inline">\([0, 1]\)</span>. Each deviation carries the small-sample factor <span class="math inline">\(\sqrt{m/(m-1)}\)</span> for its <span class="math inline">\(m\)</span> points, so that independent variables score near zero rather than at a positive bias of order <span class="math inline">\(1/m\)</span>.</p>
+<p>The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause’s position pins the effect down. It is not symmetric: <span class="math inline">\(P(X \to Y) \ne P(Y \to X)\)</span> in general. For <span class="math inline">\(Y = X^2\)</span>, knowing <span class="math inline">\(X\)</span> fixes <span class="math inline">\(Y\)</span>, while knowing <span class="math inline">\(Y\)</span> leaves <span class="math inline">\(X\)</span> split between <span class="math inline">\(\pm\sqrt{Y}\)</span>, so <span class="math inline">\(P(X \to Y)\)</span> is close to one and <span class="math inline">\(P(Y \to X)\)</span> close to zero. It requires no kernel bandwidth, no distributional assumption, and no parametric model.</p>
+<p>Because both variables are on the copula scale, this conditional probability is informative where a comparison of supports would not be: after rank normalization both supports are the same interval, so the share of one variable’s mass inside the other’s range would be one in both directions.</p>
 <hr />
 </div>
-<div id="asymmetric-directional-dependence" class="section level2 hasAnchor" number="14.7">
-<h2><span class="header-section-number">14.7</span> Asymmetric Directional Dependence<a href="directional-causation.html#asymmetric-directional-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Conditional probability alone does not establish the <strong>direction</strong> of co-movement. Two variables may overlap substantially in range while moving in opposite directions, or one may respond to the other only in extreme regions.</p>
-<p>To capture directional alignment, the framework uses the asymmetric dependence measures from Chapter 10. From the directional co-partial moment structure, the dependence of <span class="math inline">\(Y\)</span> on <span class="math inline">\(X\)</span> and the dependence of <span class="math inline">\(X\)</span> on <span class="math inline">\(Y\)</span> need not be equal after joint normalization:</p>
+<div id="asymmetric-directional-dependence" class="section level2 hasAnchor" number="14.6">
+<h2><span class="header-section-number">14.6</span> Asymmetric Directional Dependence<a href="directional-causation.html#asymmetric-directional-dependence" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Conditional probability measures how strongly the cause constrains the effect, but not whether that constraint is stronger in one direction than the other once the dependence structure is taken into account. Two variables may each constrain the other, or one may respond to the other only in extreme regions.</p>
+<p>To capture directional alignment, the framework uses the asymmetric dependence measures from Chapter 10 on each direction’s lagged copula pairs:</p>
 <p><span class="math display">\[
-\rho_{X^{**} \to Y^{**}} \neq \rho_{Y^{**} \to X^{**}}.
+\rho_{X \to Y} = \texttt{NNS.dep}\bigl(U_{X_{t-\tau}},\, U_{Y_t},\, \texttt{asym} = \texttt{TRUE}\bigr),
+\qquad
+\rho_{Y \to X} = \texttt{NNS.dep}\bigl(U_{Y_{t-\tau}},\, U_{X_t},\, \texttt{asym} = \texttt{TRUE}\bigr).
 \]</span></p>
-<p>These are computed from the asymmetric directional dependence matrix of the jointly normalized variables — exactly the structure developed in Chapter 10 — using <span class="math inline">\(\texttt{NNS.dep}(\cdot, \texttt{asym} = \texttt{TRUE})\)</span>.</p>
-<p>Implementation detail: <code>asym = TRUE</code> turns on asymmetric dependence, but <strong>direction is determined by argument order</strong>. In practice, <code>NNS.dep(x, y, asym = TRUE)</code> and <code>NNS.dep(y, x, asym = TRUE)</code> generally differ; the first quantifies directional dependence of <code>y</code> on <code>x</code>, while the second quantifies the reverse direction.</p>
+<p>Each is built from the degree-zero and degree-one co-partial moments of its pair within the partition of the candidate cause, so it is the lagged co-partial moment structure of this chapter measured as a dependence.</p>
+<p>Implementation detail: <code>asym = TRUE</code> turns on asymmetric dependence, but <strong>direction is determined by argument order</strong>. <code>NNS.dep(x, y, asym = TRUE)</code> partitions on <code>x</code> and measures the dependence of <code>y</code> on <code>x</code>; <code>NNS.dep(y, x, asym = TRUE)</code> measures the reverse.</p>
 <p>Define the <strong>excess directional dependence</strong> of <span class="math inline">\(Y\)</span> on <span class="math inline">\(X\)</span> as</p>
 <p><span class="math display">\[
-\Delta\rho = \rho_{X^{**} \to Y^{**}} - \rho_{Y^{**} \to X^{**}}.
+\Delta\rho = \rho_{X \to Y} - \rho_{Y \to X}.
 \]</span></p>
-<p>When <span class="math inline">\(\Delta\rho &gt; 0\)</span>, movements in <span class="math inline">\(X\)</span> are more closely tracked by <span class="math inline">\(Y\)</span> than the reverse — a second and independent signature of causal flow from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> beyond what conditional overlap alone captures. When <span class="math inline">\(\Delta\rho \le 0\)</span>, this component contributes nothing to the <span class="math inline">\(X \to Y\)</span> direction.</p>
-<p>The use of asymmetric directional dependence here — rather than Pearson correlation — is a direct consequence of Chapter 10. Joint normalization places the variables in copula space, but copula-space variables still exhibit asymmetric tail co-movements that the Chapter 10 framework is designed to detect. Classical symmetric correlation would average away exactly the directional asymmetry that makes the causation statistic informative.</p>
+<p>When <span class="math inline">\(\Delta\rho &gt; 0\)</span>, the lagged movements of <span class="math inline">\(X\)</span> are more closely tracked by <span class="math inline">\(Y\)</span> than the reverse — a second and independent signature of causal flow from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> beyond what the conditional probability alone captures. When <span class="math inline">\(\Delta\rho \le 0\)</span>, this component contributes nothing to the <span class="math inline">\(X \to Y\)</span> direction.</p>
+<p>The use of asymmetric directional dependence here — rather than Pearson correlation — is a direct consequence of Chapter 10. Copula-space variables still exhibit asymmetric tail co-movements that the Chapter 10 framework is designed to detect. Classical symmetric correlation would average away exactly the directional asymmetry that makes the causation statistic informative.</p>
 <hr />
 </div>
-<div id="the-raw-directional-causation-statistic" class="section level2 hasAnchor" number="14.8">
-<h2><span class="header-section-number">14.8</span> The Raw Directional Causation Statistic<a href="directional-causation.html#the-raw-directional-causation-statistic" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-raw-directional-causation-statistic" class="section level2 hasAnchor" number="14.7">
+<h2><span class="header-section-number">14.7</span> The Raw Directional Causation Statistic<a href="directional-causation.html#the-raw-directional-causation-statistic" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The two components — conditional probability and asymmetric directional dependence — are combined into a single statistic.</p>
 <p>The <strong>raw directional causation value</strong> from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> is</p>
 <p><span class="math display">\[
@@ -1202,42 +1178,45 @@ U_r(t; X)_{\text{ratio}}
 =
 \frac{1}{2}
 \Bigl[
-P(X^{**} \mid Y^{**})
+P(X \to Y)
 +
 \max\!\bigl(\Delta\rho, 0\bigr)
 \Bigr].
 \]</span></p>
-<p>The first term rewards directional overlap in support after lag and copula-style normalization. The second term adds only the positive directional asymmetry in dependence, so reverse-direction dominance is not allowed to inflate the <span class="math inline">\(X \to Y\)</span> score.</p>
-<p>By construction, <span class="math inline">\(\tilde{C}_{X \to Y}\in[0,1]\)</span> in standard empirical settings: both components are bounded in <span class="math inline">\([0,1]\)</span>, and the outer factor <span class="math inline">\(1/2\)</span> averages them.</p>
+<p>The first term rewards how strongly the lagged cause constrains the effect. The second term adds only the positive directional asymmetry in dependence, so reverse-direction dominance is not allowed to inflate the <span class="math inline">\(X \to Y\)</span> score.</p>
+<p>By construction, <span class="math inline">\(\tilde{C}_{X \to Y}\in[0,1]\)</span>: both components are bounded in <span class="math inline">\([0,1]\)</span>, and the outer factor <span class="math inline">\(1/2\)</span> averages them.</p>
 <hr />
 </div>
-<div id="bidirectional-normalization" class="section level2 hasAnchor" number="14.9">
-<h2><span class="header-section-number">14.9</span> Bidirectional Normalization<a href="directional-causation.html#bidirectional-normalization" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Directional causation should be interpreted comparatively, not in isolation. Define the reverse-direction raw score <span class="math inline">\(\tilde{C}_{Y \to X}\)</span> by swapping <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> in the same construction.</p>
+<div id="bidirectional-normalization" class="section level2 hasAnchor" number="14.8">
+<h2><span class="header-section-number">14.8</span> Bidirectional Normalization<a href="directional-causation.html#bidirectional-normalization" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Directional causation should be interpreted comparatively, not in isolation. Define the reverse-direction raw score <span class="math inline">\(\tilde{C}_{Y \to X}\)</span> by swapping <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> in the same construction, on the pairs <span class="math inline">\((Y_{t-\tau}, X_t)\)</span>.</p>
 <p>The final <strong>directional causation index</strong> from <span class="math inline">\(X\)</span> to <span class="math inline">\(Y\)</span> is then normalized as</p>
 <p><span class="math display">\[
 C_{X \to Y}
 =
-\frac{\tilde{C}_{X \to Y}}{\tilde{C}_{X \to Y}+\tilde{C}_{Y \to X}},
+\frac{\tilde{C}_{X \to Y} + \kappa}{\tilde{C}_{X \to Y}+\tilde{C}_{Y \to X} + 2\kappa},
 \qquad
-C_{Y \to X}=1-C_{X \to Y}.
+C_{Y \to X}=1-C_{X \to Y},
+\qquad
+\kappa = \frac{1}{\sqrt{n-\tau}}.
 \]</span></p>
-<p>When both raw scores are zero, neither direction shows measurable directional-causation signal and both normalized values are defined as zero.</p>
+<p>The neutral pseudo-count <span class="math inline">\(\kappa\)</span> is of the order of the raw scores’ sampling variation. Without it, two raw scores that are both close to zero — as they are for unrelated variables — would form a ratio dominated by noise and could land anywhere in <span class="math inline">\([0, 1]\)</span>. With it, weak or absent directional evidence stays near <span class="math inline">\(0.5\)</span>, while strong evidence is barely affected. It never changes which side of <span class="math inline">\(0.5\)</span> the index falls on.</p>
 <p>Interpretation:</p>
 <ul>
 <li><span class="math inline">\(C_{X \to Y} &gt; 0.5\)</span>: stronger evidence for <span class="math inline">\(X\)</span> leading <span class="math inline">\(Y\)</span>,</li>
 <li><span class="math inline">\(C_{X \to Y} &lt; 0.5\)</span>: stronger evidence for <span class="math inline">\(Y\)</span> leading <span class="math inline">\(X\)</span>,</li>
 <li><span class="math inline">\(C_{X \to Y} \approx 0.5\)</span>: weak directional asymmetry.</li>
 </ul>
+<p>For several variables, the <strong>causation matrix</strong> holds <span class="math inline">\(C_{X_i \to X_j}\)</span> in row <span class="math inline">\(i\)</span> and column <span class="math inline">\(j\)</span>, so that <span class="math inline">\(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\)</span> off the diagonal, and its diagonal is zero by Axiom 1. A permutation test of the signed statistic <span class="math inline">\(C_{X \to Y} - C_{Y \to X}\)</span> provides p-values for either direction.</p>
 <hr />
 </div>
-<div id="summary-8" class="section level2 hasAnchor" number="14.10">
-<h2><span class="header-section-number">14.10</span> Summary<a href="directional-causation.html#summary-8" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This chapter formalized directional causation as a three-stage construction: lag normalization to remove self-dynamics, joint rangespace normalization to align scales, and asymmetric directional scoring to detect net directional flow.</p>
-<p>The resulting statistic remains nonparametric, benchmark-relative, and distribution-aware, while avoiding linear-model restrictions of classical Granger-style tests.</p>
+<div id="summary-8" class="section level2 hasAnchor" number="14.9">
+<h2><span class="header-section-number">14.9</span> Summary<a href="directional-causation.html#summary-8" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This chapter formalized directional causation as a three-stage construction: explicitly lagged pairs on the copula scale, partial-moment conditional probability and asymmetric directional dependence for each direction, and a bidirectional index that detects net directional flow.</p>
+<p>The resulting statistic is nonparametric and invariant to monotone transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests.</p>
 <p>For an applied macroeconomic example using <code>NNS.nowcast</code>, <code>NNS.caus</code>, noise benchmarks, and strength-of-inference summaries, see <a href="https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html">Causal Inference Amongst Macroeconomic Variables Using NNS</a>.</p>
 <p>The next chapter develops distribution comparison methods, providing nonparametric tools for directly comparing distributions without parametric assumptions.</p>
-{Generated for: OVVO Labs Registrant Date: 2026-11-01}
+{Generated for: OVVO Labs Registrant Date: 2026-11-02}
 
 </div>
 </div>

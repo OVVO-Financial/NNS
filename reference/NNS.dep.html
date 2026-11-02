@@ -57,11 +57,11 @@
 
 
 <dt id="arg-asym">asym<a class="anchor" aria-label="anchor" href="#arg-asym"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Allows for asymmetrical dependencies.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) returns the symmetric measures. If <code>TRUE</code>, returns the asymmetric (directional) measures: the partition is built on <code>x</code> only and the result measures the dependence of <code>y</code> on <code>x</code> (<code>y</code> as a function of <code>x</code>); swap the arguments for the other direction.</p></dd>
 
 
 <dt id="arg-p-value">p.value<a class="anchor" aria-label="anchor" href="#arg-p-value"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Generates 100 independent random permutations to test results against and plots 95 percent confidence intervals along with all results.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) If <code>TRUE</code> (bivariate only), compares the results against 100 random permutations of <code>y</code>: the Dependence p-value is the upper-tail permutation p-value <code>(1 + #(null &gt;= observed)) / (1 + 100)</code>, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when <code>print.map = TRUE</code>).</p></dd>
 
 
 <dt id="arg-print-map">print.map<a class="anchor" aria-label="anchor" href="#arg-print-map"></a></dt>
@@ -73,8 +73,12 @@
     <p>Returns the bi-variate <code>"Correlation"</code> and <code>"Dependence"</code> or correlation / dependence matrix for matrix input.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Each partition cell's concordance (degree 0 and degree 1) is measured against its expectation under the within-cell permutation null and rescaled so that perfect dependence stays at 1.  Independent variables therefore score near 0 at any sample size, instead of a floor that shrank only like <code>n^(-1/4)</code> (about 0.32 at n = 1000).  Cells below chance can pull the average down; Dependence is floored at 0 after averaging, and <code>|Correlation|</code> never exceeds the Dependence of the same direction.</p>
+    </div>
+    <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>For asymmetrical <code>(asym = TRUE)</code> matrices, directional dependence is returned as ([column variable] —&gt; [row variable]).</p>
+    <p>For asymmetrical <code>(asym = TRUE)</code> matrices, entry <code>[i, j]</code> is the directional dependence ([row variable i] —&gt; [column variable j]), i.e. <code>NNS.dep(x[, i], x[, j], asym = TRUE)</code>, the dependence of column <code>j</code> on row variable <code>i</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

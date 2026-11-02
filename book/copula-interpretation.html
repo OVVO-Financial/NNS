@@ -386,13 +386,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="14.1" data-path="directional-causation.html"><a href="directional-causation.html#limitations-of-classical-granger-causality"><i class="fa fa-check"></i><b>14.1</b> Limitations of Classical Granger Causality</a></li>
 <li class="chapter" data-level="14.2" data-path="directional-causation.html"><a href="directional-causation.html#theoretical-foundations-three-axioms"><i class="fa fa-check"></i><b>14.2</b> Theoretical Foundations: Three Axioms</a></li>
 <li class="chapter" data-level="14.3" data-path="directional-causation.html"><a href="directional-causation.html#lagged-co-partial-moments"><i class="fa fa-check"></i><b>14.3</b> Lagged Co-Partial Moments</a></li>
-<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#removing-internal-dynamics"><i class="fa fa-check"></i><b>14.4</b> Removing Internal Dynamics</a></li>
-<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#joint-rangespace-normalization"><i class="fa fa-check"></i><b>14.5</b> Joint Rangespace Normalization</a></li>
-<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.6</b> Conditional Probability via Partial Moments</a></li>
-<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.7</b> Asymmetric Directional Dependence</a></li>
-<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.8</b> The Raw Directional Causation Statistic</a></li>
-<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.9</b> Bidirectional Normalization</a></li>
-<li class="chapter" data-level="14.10" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.10</b> Summary</a></li>
+<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#lagged-pairs-on-the-copula-scale"><i class="fa fa-check"></i><b>14.4</b> Lagged Pairs on the Copula Scale</a></li>
+<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.5</b> Conditional Probability via Partial Moments</a></li>
+<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.6</b> Asymmetric Directional Dependence</a></li>
+<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.7</b> The Raw Directional Causation Statistic</a></li>
+<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.8</b> Bidirectional Normalization</a></li>
+<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.9</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="15" data-path="distribution-comparison.html"><a href="distribution-comparison.html"><i class="fa fa-check"></i><b>15</b> Distribution Comparison</a>
 <ul>
@@ -1248,11 +1247,11 @@ E[(t_X-Q_X(U))_+^r (t_Y-Q_Y(V))_+^s].
 \]</span></p>
 <p>changes the coordinate system but preserves the dependence structure.</p>
 <p>For a direct multivariate dependence summary in the package, <code>NNS.copula()</code> can be called on a matrix of variables:</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="copula-interpretation.html#cb51-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="copula-interpretation.html#cb51-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)  <span class="co"># a fresh seed: reusing 123 would make z3 track x</span></span>
 <span id="cb51-2"><a href="copula-interpretation.html#cb51-2" tabindex="-1"></a>z3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(x))</span>
 <span id="cb51-3"><a href="copula-interpretation.html#cb51-3" tabindex="-1"></a></span>
 <span id="cb51-4"><a href="copula-interpretation.html#cb51-4" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z3), <span class="at">plot =</span> <span class="cn">TRUE</span>, <span class="at">independence.overlay =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb51-5"><a href="copula-interpretation.html#cb51-5" tabindex="-1"></a><span class="do">## [1] 0.302</span></span></code></pre></div>
+<span id="cb51-5"><a href="copula-interpretation.html#cb51-5" tabindex="-1"></a><span class="do">## [1] 0.475</span></span></code></pre></div>
 <p>The return value is a single scalar in <span class="math inline">\([0,1]\)</span> for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, <code>continuous = TRUE</code> can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.</p>
 <p>The same workflow in Python:</p>
 <div class="sourceCode" id="cb52"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb52-1"><a href="copula-interpretation.html#cb52-1" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>

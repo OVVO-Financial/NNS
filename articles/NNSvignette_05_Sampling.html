@@ -236,13 +236,22 @@ values.</p>
 <p><strong>Note — where the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
 target lives.</strong> The dependence alignment is applied to
-<strong>each replicate individually</strong>: every replicate is mixed
-so that its dependence on the original series matches the requested
+<strong>each replicate individually</strong> and in <strong>residual
+space</strong>: each replicate’s residuals are mixed between the aligned
+and anti-aligned orderings of the original residuals so that their
+dependence matches the requested
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-(the per-replicate correlations above confirm this). Two things to keep
-in mind when checking a result: (1) measure it in the <strong>same
-metric</strong> that <code>type</code> targets — a
-<code>type = "NNSdep"</code> target with
+(book Chapter 20). For a series without trend, as here, that is also the
+dependence on the series itself, which the per-replicate correlations
+above confirm. For a trending series the replicates keep the trend, so
+their correlation with the original series can stay high even at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\rho = -1</annotation></semantics></math>:
+on <code>AirPassengers</code>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">\rho = -1</annotation></semantics></math>
+replicates have a mean Spearman correlation of about 0.8 with the
+series. Two things to keep in mind when checking a result: (1) measure
+it in the <strong>same metric</strong> that <code>type</code> targets —
+a <code>type = "NNSdep"</code> target with
 <code>NNS.dep(...)$Dependence</code> (unsigned), a
 <code>"spearman"</code>/<code>"pearson"</code> target with rank/linear
 correlation; a <em>signed</em> correlation taken on an unsigned

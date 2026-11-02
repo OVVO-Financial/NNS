@@ -1,8 +1,21 @@
 # NNS Seasonality Test
 
 Seasonality test based on the coefficient of variation for the variable
-and lagged component series. A result of 1 signifies no seasonality
-present.
+and lagged component series. For each lag `m`, the variable is split
+into its `m` component series `variable[seq(j, n, m)]`, `j = 1, ..., m`,
+and lag `m` is reported when the length-weighted mean of the component
+coefficients of variation is below the coefficient of variation of the
+variable. When the mean of the variable is zero up to rounding, standard
+deviations are compared instead. Lags are scanned only up to `n / 5`, so
+every component series has at least 5 observations, and each standard
+deviation is divided by `c4(k)`, its small-sample bias factor for `k`
+observations; with 2-3 points per component the longest lags otherwise
+looked tightest even in pure noise. Periods added through `modulo` are
+kept up to `n / 2`. On a series without seasonality some lags still pass
+by chance, so treat the result as candidate periods and validate them,
+for example with
+[NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md).
+A result of 1 signifies no seasonality present.
 
 ## Usage
 

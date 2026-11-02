@@ -188,8 +188,7 @@ directional-causation
 limitations-of-classical-granger-causality
 theoretical-foundations-three-axioms
 lagged-co-partial-moments
-removing-internal-dynamics
-joint-rangespace-normalization
+lagged-pairs-on-the-copula-scale
 conditional-probability-via-partial-moments
 asymmetric-directional-dependence
 the-raw-directional-causation-statistic

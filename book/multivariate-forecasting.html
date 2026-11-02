@@ -386,13 +386,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="14.1" data-path="directional-causation.html"><a href="directional-causation.html#limitations-of-classical-granger-causality"><i class="fa fa-check"></i><b>14.1</b> Limitations of Classical Granger Causality</a></li>
 <li class="chapter" data-level="14.2" data-path="directional-causation.html"><a href="directional-causation.html#theoretical-foundations-three-axioms"><i class="fa fa-check"></i><b>14.2</b> Theoretical Foundations: Three Axioms</a></li>
 <li class="chapter" data-level="14.3" data-path="directional-causation.html"><a href="directional-causation.html#lagged-co-partial-moments"><i class="fa fa-check"></i><b>14.3</b> Lagged Co-Partial Moments</a></li>
-<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#removing-internal-dynamics"><i class="fa fa-check"></i><b>14.4</b> Removing Internal Dynamics</a></li>
-<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#joint-rangespace-normalization"><i class="fa fa-check"></i><b>14.5</b> Joint Rangespace Normalization</a></li>
-<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.6</b> Conditional Probability via Partial Moments</a></li>
-<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.7</b> Asymmetric Directional Dependence</a></li>
-<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.8</b> The Raw Directional Causation Statistic</a></li>
-<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.9</b> Bidirectional Normalization</a></li>
-<li class="chapter" data-level="14.10" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.10</b> Summary</a></li>
+<li class="chapter" data-level="14.4" data-path="directional-causation.html"><a href="directional-causation.html#lagged-pairs-on-the-copula-scale"><i class="fa fa-check"></i><b>14.4</b> Lagged Pairs on the Copula Scale</a></li>
+<li class="chapter" data-level="14.5" data-path="directional-causation.html"><a href="directional-causation.html#conditional-probability-via-partial-moments"><i class="fa fa-check"></i><b>14.5</b> Conditional Probability via Partial Moments</a></li>
+<li class="chapter" data-level="14.6" data-path="directional-causation.html"><a href="directional-causation.html#asymmetric-directional-dependence"><i class="fa fa-check"></i><b>14.6</b> Asymmetric Directional Dependence</a></li>
+<li class="chapter" data-level="14.7" data-path="directional-causation.html"><a href="directional-causation.html#the-raw-directional-causation-statistic"><i class="fa fa-check"></i><b>14.7</b> The Raw Directional Causation Statistic</a></li>
+<li class="chapter" data-level="14.8" data-path="directional-causation.html"><a href="directional-causation.html#bidirectional-normalization"><i class="fa fa-check"></i><b>14.8</b> Bidirectional Normalization</a></li>
+<li class="chapter" data-level="14.9" data-path="directional-causation.html"><a href="directional-causation.html#summary-8"><i class="fa fa-check"></i><b>14.9</b> Summary</a></li>
 </ul></li>
 <li class="chapter" data-level="15" data-path="distribution-comparison.html"><a href="distribution-comparison.html"><i class="fa fa-check"></i><b>15</b> Distribution Comparison</a>
 <ul>
@@ -1484,6 +1483,7 @@ U_{t-1},\ U_{t-12},\ I_{t-3},
 \operatorname{UPM.VaR}(\alpha/2,\cdot).
 \]</span></p>
 <p>In the nowcasting examples, this is illustrated directly for GDP. The GDP ensemble path is bootstrapped with <code>NNS.meboot</code>, and lower and upper confidence bounds are then computed from <code>LPM.VaR</code> and <code>UPM.VaR</code>.</p>
+<p>Because the replicates are generated from the forecast path, these bounds describe the dispersion of the path rather than the uncertainty of each future outcome: they do not widen with the horizon and are not calibrated to a coverage probability (see Chapter 25).</p>
 <p>The conceptual advantage is consistent with the rest of NNS:</p>
 <ul>
 <li>no Gaussian residual assumption is required,</li>

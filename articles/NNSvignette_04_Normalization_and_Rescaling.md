@@ -17,8 +17,14 @@ This vignette covers two related tools:
   for single‑vector rescaling with either min‑max or risk‑neutral
   targets.
 
-Both functions perform deterministic affine transformations that
-preserve rank structure while modifying scale.
+Both functions are deterministic rescalings.
+[`NNS.rescale()`](https://OVVO-Financial.github.io/NNS/reference/NNS.rescale.md)
+is affine on a single vector and preserves its rank structure.
+[`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
+multiplies each column by its own factor, so it preserves the order
+within each column, but in nonlinear mode a factor can be negative,
+which reverses that column’s order and the sign of its correlations with
+the others (see the note below).
 
 ------------------------------------------------------------------------
 
@@ -230,10 +236,10 @@ methods retain the original patterns.
 
 Normalization eliminates the need for multiple y‑axis charts and
 prevents their misuse. By placing variables on the same axes with shared
-ranges, we enable more relevant conditional probability analyses. This
-technique, combined with time normalization, is used in
+ranges, we enable more relevant conditional probability analyses.
 [`NNS.caus()`](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-to identify causal relationships between variables.
+places variables on a shared scale with per-column ranks instead, so its
+results do not depend on the location or units of either variable.
 
 ------------------------------------------------------------------------
 
@@ -417,7 +423,8 @@ c(
 - Multivariate
 - Dependence‑aware scaling
 - Equalizes means only in linear mode
-- Preserves shape and order
+- One factor per column: shape is preserved, and order too unless the
+  factor is negative
 
 #### `NNS.rescale()`
 
@@ -426,8 +433,17 @@ c(
 - Either range‑targeted or expectation‑targeted
 - Preserves rank structure
 
-Both functions maintain monotonicity and are therefore compatible with
-NNS copula and dependence modeling frameworks.
+[`NNS.rescale()`](https://OVVO-Financial.github.io/NNS/reference/NNS.rescale.md)
+is monotone increasing, so ranks, copulas and NNS dependence measures
+are unchanged by it.
+[`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
+is too when every factor is positive; in nonlinear mode a column whose
+mean has the opposite sign from the others gets a negative factor. For
+example, with `x ~ N(1, 1)` and `y = x - 1.5 + noise`, `cor(x, y)` is
+0.957 before
+[`NNS.norm()`](https://OVVO-Financial.github.io/NNS/reference/NNS.norm.md)
+and -0.957 after. Check the signs, or use `linear = TRUE`, before using
+normalized columns for dependence or causation.
 
 ``` r
 

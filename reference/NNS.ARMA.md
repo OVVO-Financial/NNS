@@ -122,17 +122,30 @@ NNS.ARMA(
 
 - pred.int:
 
-  numeric \[0, 1\]; `NULL` (default) Plots and returns the associated
-  prediction intervals for the final estimate. Constructed using the
-  maximum entropy bootstrap
-  [NNS.meboot](https://OVVO-Financial.github.io/NNS/reference/NNS.meboot.md)
-  on the final estimates.
+  numeric \[0, 1\]; `NULL` (default) Plots and returns lower and upper
+  bands around the forecasts. The forecast path itself is resampled with
+  the maximum entropy bootstrap
+  ([NNS.MC](https://OVVO-Financial.github.io/NNS/reference/NNS.MC.md)
+  over `rho` from -1 to 1), the bounds at each step are
+  [LPM.VaR](https://OVVO-Financial.github.io/NNS/reference/LPM.VaR.md)
+  and
+  [UPM.VaR](https://OVVO-Financial.github.io/NNS/reference/UPM.VaR.md)
+  of the replicates at probability `(1 - pred.int) / 2`, widened by the
+  spread of the per-lag linear estimates. The band therefore describes
+  the dispersion of the forecast path, not the uncertainty of the
+  outcome at each horizon: it does not widen with the horizon, and it is
+  not calibrated to contain future values with probability `pred.int`
+  (rolling-origin coverage at `pred.int = 0.95` has ranged from about
+  0.35 on white noise to 0.97 on `AirPassengers`).
+  [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md)
+  derives its interval from validation errors instead.
 
 ## Value
 
 Returns a vector of forecasts of length `(h)` if no `pred.int`
 specified. Else, returns a `data.table` with the forecasts as well as
-lower and upper prediction intervals per forecast point.
+the lower and upper forecast-path bands per forecast point (see
+`pred.int`).
 
 ## Note
 

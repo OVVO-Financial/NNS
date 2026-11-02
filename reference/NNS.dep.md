@@ -23,13 +23,20 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 
 - asym:
 
-  logical; `FALSE` (default) Allows for asymmetrical dependencies.
+  logical; `FALSE` (default) returns the symmetric measures. If `TRUE`,
+  returns the asymmetric (directional) measures: the partition is built
+  on `x` only and the result measures the dependence of `y` on `x` (`y`
+  as a function of `x`); swap the arguments for the other direction.
 
 - p.value:
 
-  logical; `FALSE` (default) Generates 100 independent random
-  permutations to test results against and plots 95 percent confidence
-  intervals along with all results.
+  logical; `FALSE` (default) If `TRUE` (bivariate only), compares the
+  results against 100 random permutations of `y`: the Dependence p-value
+  is the upper-tail permutation p-value
+  `(1 + #(null >= observed)) / (1 + 100)`, the Correlation p-value is
+  the smaller of the two one-sided tail frequencies, and the 95 percent
+  intervals of the permutation null are returned (and plotted when
+  `print.map = TRUE`).
 
 - print.map:
 
@@ -41,10 +48,22 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 Returns the bi-variate `"Correlation"` and `"Dependence"` or correlation
 / dependence matrix for matrix input.
 
+## Details
+
+Each partition cell's concordance (degree 0 and degree 1) is measured
+against its expectation under the within-cell permutation null and
+rescaled so that perfect dependence stays at 1. Independent variables
+therefore score near 0 at any sample size, instead of a floor that
+shrank only like `n^(-1/4)` (about 0.32 at n = 1000). Cells below chance
+can pull the average down; Dependence is floored at 0 after averaging,
+and `|Correlation|` never exceeds the Dependence of the same direction.
+
 ## Note
 
-For asymmetrical `(asym = TRUE)` matrices, directional dependence is
-returned as (\[column variable\] —\> \[row variable\]).
+For asymmetrical `(asym = TRUE)` matrices, entry `[i, j]` is the
+directional dependence (\[row variable i\] —\> \[column variable j\]),
+i.e. `NNS.dep(x[, i], x[, j], asym = TRUE)`, the dependence of column
+`j` on row variable `i`.
 
 ## References
 
