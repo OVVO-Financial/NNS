@@ -311,13 +311,6 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   
   // ====================== DISCRETE PATH ======================
   if (discrete) {
-    if (l <= 3) {
-      // For tiny samples, integerized median
-      std::vector<double> tmp = xnum; std::sort(tmp.begin(), tmp.end());
-      double med = (l % 2 == 1) ? tmp[l/2] : 0.5*(tmp[l/2 - 1] + tmp[l/2]);
-      return Rf_ScalarReal(nearest_int_half_up(med));
-    }
-    
     // Integerize and count exact frequencies. The key is a double so values
     // beyond the int range stay exact; "+ 0.0" folds -0.0 into the 0 key.
     std::unordered_map<double,int> freq; freq.reserve(l * 2u);
@@ -334,12 +327,16 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       for (int i = 0; i < (int)modes_int.size(); ++i) out[i] = modes_int[i];
       return out;            // e.g., 2 3 4 for c(1,2,2,3,3,4,4,5)
     } else {
-      // Return the arithmetic mean of all tied modes
-      long double sum = 0.0L;
-      for (double m : modes_int) sum += (long double)m;
-      double mean_modes = (modes_int.empty() ? NA_REAL
-                             : (double)(sum / (long double)modes_int.size()));
-      return Rf_ScalarReal(mean_modes);
+      // Tied modes: the one nearest the gravity of the data, then the lower
+      // value, as in the continuous path; a mean of tied classes is no class.
+      if (modes_int.size() == 1) return Rf_ScalarReal(modes_int[0]);
+      const double g = gravity_value(xnum, false);
+      double best_c = NA_REAL, best_d = R_PosInf;
+      for (double m : modes_int) {
+        const double dist = std::fabs(m - g);
+        if (dist < best_d) { best_d = dist; best_c = m; }
+      }
+      return Rf_ScalarReal(best_c);
     }
   }
   
