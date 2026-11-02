@@ -119,3 +119,24 @@ test_that("NNS.stack scores the univariate ALL candidate with the deployed NNS.r
   expect_equal(frame$candidate_raws$all, oof, tolerance = 1e-12)
   expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)
 })
+
+test_that("boost's objective sees response values for a two-valued numeric response", {
+  set.seed(1)
+  x <- matrix(rnorm(240), 80, 3)
+  y <- ifelse(x[, 1] + rnorm(80, sd = .5) > 0, 5, -5)
+  seen <- numeric(0)
+  record <- function(a) seen <<- c(seen, a)
+  loss <- as.expression(bquote({
+    .(record)(actual)
+    sum((predicted - actual)^2)
+  }))
+  NNS.boost(x, y, x[1:10, ], obj.fn = loss, learner.trials = 3, epochs = 0,
+            threshold = 1, CV.size = .25, seed = 1, status = FALSE,
+            feature.importance = FALSE)
+  expect_setequal(unique(seen), c(-5, 5))
+  seen <- numeric(0)
+  NNS.boost(x, ifelse(y > 0, .2, -.1), x[1:10, ], obj.fn = loss, learner.trials = 3,
+            epochs = 0, threshold = 1, CV.size = .25, seed = 1, status = FALSE,
+            feature.importance = FALSE)
+  expect_true(all(seen %in% c(-.1, .2)))
+})

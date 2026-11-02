@@ -898,13 +898,31 @@ NNS.boost <- function(IVs.train,
   names(replicated.train) <- make.unique(names(replicated.train), sep = ".")
   names(replicated.test) <- names(replicated.train)
   
+  # NNS.stack codes a two-valued numeric response as classes 1/2; decode them
+  # so obj.fn scores response values here as it did during learner selection.
+  stack.obj.fn <- obj.fn
+  two_valued <- sort(unique(as.numeric(y)))
+  if (!is_class && length(two_valued) == 2L) {
+    user.fn <- if (is.expression(obj.fn)) obj.fn[[1]] else obj.fn
+    decode <- function(v) {
+      ok <- is.finite(v)
+      v[ok] <- two_valued[pmin(pmax(round(v[ok]), 1), 2)]
+      v
+    }
+    stack.obj.fn <- as.expression(bquote({
+      predicted <- .(decode)(predicted)
+      actual <- .(decode)(actual)
+      .(user.fn)
+    }))
+  }
+
   final.stack <- suppressWarnings(
     NNS.stack(
       IVs.train = replicated.train,
       DV.train = y,
       IVs.test = replicated.test,
       type = type,
-      obj.fn = obj.fn,
+      obj.fn = stack.obj.fn,
       objective = objective,
       optimize.threshold = FALSE,
       dist = dist,
