@@ -72,14 +72,23 @@ NNS.seas <- function(variable,
   )
 
   # Optional significance: compare each period's dispersion ratio with the best
-  # ratio over all lags in shuffled copies of the (detrended) series, which have
-  # no seasonality by construction. Taking the best lag of each copy makes the
-  # p-value hold for the whole scan, not one lag at a time.
+  # ratio over all candidate periods in shuffled copies of the (detrended)
+  # series, which have no seasonality by construction. Taking the best
+  # candidate of each copy makes the p-value hold for the whole scan, not one
+  # lag at a time. Periods that modulo added beyond the scan are scored on every
+  # copy as well, so the null covers every candidate the observed table tests.
   if (isTRUE(p.value) && n >= 5L) {
     M <- ans$all.periods
     ratio <- function(A) A[["Coefficient.of.Variation"]] / A[["Variable.Coefficient.of.Variation"]]
+    scan_max <- min(n %/% 2L, n %/% 5L)
+    if (!is.null(mp)) scan_max <- max(1L, min(scan_max, mp))
+    extra <- M$Period[M$Period > scan_max]
     null_best <- vapply(seq_len(as.integer(nperm)), function(b) {
-      A <- NNS_seas_cpp(variable = sample(x), modulo = NULL, mod_only = TRUE, max_period = mp)$all.periods
+      A <- if (length(extra)) {
+        NNS_seas_cpp(variable = sample(x), modulo = as.integer(extra), mod_only = FALSE, max_period = mp)$all.periods
+      } else {
+        NNS_seas_cpp(variable = sample(x), modulo = NULL, mod_only = TRUE, max_period = mp)$all.periods
+      }
       if (A$Period[1L] <= 1L) 1 else ratio(A)[1L]
     }, numeric(1L))
     obs <- ratio(M)

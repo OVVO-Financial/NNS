@@ -143,3 +143,19 @@ test_that("max.period caps the scan", {
   expect_true(all(NNS.seas(x, plot = FALSE, max.period = 7)$all.periods$Period <= 7))
   expect_error(NNS.seas(x, plot = FALSE, max.period = 0), "max.period")
 })
+
+test_that("p.value tests modulo periods beyond the scan against a null that scores them", {
+  # Each shuffled copy scores the same modulo-added periods as the observed
+  # series; with a null that only scanned up to n / 5, noise passed in 27 of
+  # 40 series here.
+  hits <- sapply(1:20, function(s) {
+    set.seed(s)
+    a <- NNS.seas(10 + rnorm(96), modulo = 20:47, p.value = TRUE, nperm = 40, plot = FALSE)
+    any(a$periods > 1)
+  })
+  expect_lte(sum(hits), 3)
+  set.seed(3)
+  x <- 10 + sin(2 * pi * (1:96) / 24) + rnorm(96, sd = .3)
+  a <- NNS.seas(x, modulo = 24, mod.only = FALSE, p.value = TRUE, nperm = 40, plot = FALSE)
+  expect_equal(a$best.period, 24L)
+})
