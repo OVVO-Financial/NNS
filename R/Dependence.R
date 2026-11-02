@@ -10,7 +10,7 @@
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
 #' @details
-#' Each partition cell's concordance (degree 0 and degree 1) is measured against its expectation under the within-cell permutation null and rescaled so that perfect dependence stays at 1.  Independent variables therefore score near 0 at any sample size, instead of a floor that shrank only like \code{n^(-1/4)} (about 0.32 at n = 1000).  Cells below chance can pull the average down; Dependence is floored at 0 after averaging, and \code{|Correlation|} never exceeds the Dependence of the same direction.
+#' Dependence is read from the recursive mean-split partitions of the data (\link{NNS.part}): on \code{x} (\code{y} as a function of \code{x}), on \code{y}, and on the joint quadrants of \code{(x, y)}, where the co-lower, co-upper and divergent partial moments live.  In every cell the degree-0 (frequency) and degree-1 (area) concordance about the cell means is measured against its expectation under the within-cell permutation null and rescaled so that perfect dependence stays at 1, and the two are averaged.  The cell-size weighted average is taken at every level of each partition, from the whole sample down to the finest cells, and Dependence is the strongest level, so dependence carried between coarse cells (a noisy linear relationship), within fine cells (a nonlinear function) or by the joint quadrants (a circle, or \code{y = x * noise}) is detected alike.  With \code{asym = TRUE} only the partition on \code{x} is used.  A cell in which \code{x} is constant scores whether \code{y} is determined there (1 if \code{y} is constant, 0 otherwise), against the chance of that under the permutation null; in the joint quadrants such a cell is constant by construction and scores 0.  Independent variables score near 0.  Taking the strongest level adds a small selection effect, about 0.14 at n = 100 and 0.04 at n = 1000 for independent continuous data; the \code{p.value} permutation null includes it.  Levels below chance can make every average negative; Dependence is floored at 0, and Correlation, the signed average at the same level, never exceeds it in absolute value.
 #'
 #' @note
 #' For asymmetrical \code{(asym = TRUE)} matrices, entry \code{[i, j]} is the directional dependence ([row variable i] ---> [column variable j]), i.e. \code{NNS.dep(x[, i], x[, j], asym = TRUE)}, the dependence of column \code{j} on row variable \code{i}.
@@ -138,21 +138,32 @@ NNS.dep <- function(x,
   l   <- length(x)
   obs <- max(8L, as.integer(l / 8L))
 
-  # Native fast path: NNS_dep_pair_cpp only needs the two quadrant vectors, so
-  # call NNS_part_cpp in quadrants-only mode and skip the data.table wrappers
-  # NNS.part() builds.  Quadrants are identical to the full path, so the result
-  # is bit-identical.  Only when not plotting (Voronoi/print.map needs the full
-  # partition).  Gated by getOption("NNS.native").
+  # Three partitions feed the measure: the recursive mean split on x (y as a
+  # function of x), on y, and the joint quadrants of (x, y). asym = TRUE only
+  # needs the first. NNS_dep_pair_cpp reads every level of each partition from
+  # the prefix-coded cell labels.
+  #
+  # Native fast path: call NNS_part_cpp in quadrants-only mode and skip the
+  # data.table wrappers NNS.part() builds.  Quadrants are identical to the full
+  # path, so the result is bit-identical.  Only when not plotting
+  # (Voronoi/print.map needs the full partition).  Gated by
+  # getOption("NNS.native").
   if (isTRUE(getOption("NNS.native", TRUE)) && !isTRUE(print.map)) {
     ord <- max(ceiling(log(l, 2)), 1L)             # NNS.part default order
-    qxy <- NNS_part_cpp(x, y, type = "XONLY", order_in = as.integer(ord),
-                        obs_req = as.integer(obs), min_obs_stop = FALSE,
-                        noise_reduction = "off", quadrants_only = TRUE)$quadrant
-    qyx <- NNS_part_cpp(y, x, type = "XONLY", order_in = as.integer(ord),
-                        obs_req = as.integer(obs), min_obs_stop = FALSE,
-                        noise_reduction = "off", quadrants_only = TRUE)$quadrant
+    part <- function(a, b, type) {
+      as.character(NNS_part_cpp(a, b, type = type, order_in = as.integer(ord),
+                                obs_req = as.integer(obs), min_obs_stop = FALSE,
+                                noise_reduction = "off", quadrants_only = TRUE)$quadrant)
+    }
+    qxy <- part(x, y, "XONLY")
+    if (isTRUE(asym)) {
+      qyx <- qj <- character(0)
+    } else {
+      qyx <- part(y, x, "XONLY")
+      qj <- part(x, y, NULL)
+    }
     return(NNS_dep_pair_cpp(x = as.numeric(x), y = as.numeric(y),
-                            quad_xy = as.character(qxy), quad_yx = as.character(qyx),
+                            quad_xy = qxy, quad_yx = qyx, quad_joint = qj,
                             asym = isTRUE(asym)))
   }
 
@@ -160,20 +171,30 @@ NNS.dep <- function(x,
     NNS.part(x, y, order = NULL, obs.req = obs,
              min.obs.stop = FALSE, type = "XONLY", Voronoi = print.map)
   )
-  PART_yx <- suppressWarnings(
-    NNS.part(y, x, order = NULL, obs.req = obs,
-             min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)
-  )
   
   if (nrow(PART_xy$regression.points) == 0L)
     return(list("Correlation" = 0, "Dependence" = 0))
+
+  if (isTRUE(asym)) {
+    qyx <- qj <- character(0)
+  } else {
+    qyx <- as.character(suppressWarnings(
+      NNS.part(y, x, order = NULL, obs.req = obs,
+               min.obs.stop = FALSE, type = "XONLY", Voronoi = FALSE)
+    )$dt$quadrant)
+    qj <- as.character(suppressWarnings(
+      NNS.part(x, y, order = NULL, obs.req = obs,
+               min.obs.stop = FALSE, type = NULL, Voronoi = FALSE)
+    )$dt$quadrant)
+  }
   
   NNS_dep_pair_cpp(
-    x       = as.numeric(x),
-    y       = as.numeric(y),
-    quad_xy = as.character(PART_xy$dt$quadrant),
-    quad_yx = as.character(PART_yx$dt$quadrant),
-    asym    = isTRUE(asym)
+    x          = as.numeric(x),
+    y          = as.numeric(y),
+    quad_xy    = as.character(PART_xy$dt$quadrant),
+    quad_yx    = qyx,
+    quad_joint = qj,
+    asym       = isTRUE(asym)
   )
 }
 
