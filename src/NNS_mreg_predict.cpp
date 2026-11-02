@@ -151,7 +151,7 @@ namespace {
 inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest,
                           int r, int dist_code,
                           const std::vector<int>& active,
-                          const std::vector<double>& inv_range,
+                          const std::vector<double>& col_range,
                           std::vector<double>& d) {
   const int n = rpm_x.nrow(), p = rpm_x.ncol();
   if (dist_code == 3) {
@@ -168,7 +168,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
         const int j = active[a];
-        acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) * inv_range[a]);
+        acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) / col_range[a]);
       }
       d[i] = acc;
     }
@@ -177,7 +177,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
         const int j = active[a];
-        const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+        const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
         acc += std::fabs(z) + z * z;
       }
       d[i] = acc;
@@ -187,7 +187,7 @@ inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest
       double acc = 0.0;
       for (std::size_t a = 0; a < active.size(); ++a) {
         const int j = active[a];
-        const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+        const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
         acc += z * z;
       }
       d[i] = std::sqrt(acc);
@@ -216,13 +216,13 @@ inline double aggregate_min_ties(const std::vector<double>& d,
 }
 
 inline void active_columns(const NumericVector& mins, const NumericVector& maxs,
-                           std::vector<int>& active, std::vector<double>& inv_range) {
+                           std::vector<int>& active, std::vector<double>& col_range) {
   const int p = mins.size();
   for (int j = 0; j < p; ++j) {
     const double range = maxs[j] - mins[j];
     if (R_finite(range) && range > 0.0) {
       active.push_back(j);
-      inv_range.push_back(1.0 / range);
+      col_range.push_back(range);
     }
   }
 }
@@ -363,7 +363,7 @@ struct PredictPathWorker : public Worker {
   const bool is_class;
   const RankComponents& rank;
   std::vector<int> active;
-  std::vector<double> inv_range;
+  std::vector<double> col_range;
   // 1-D fast path (rank-one duplicated coordinate, e.g. dy.d_'s cbind(X*, X*)):
   // the range-normalised distance is non-decreasing in |coord - t|, so
   // neighbours are found in O(log n + k) per query.
@@ -382,7 +382,7 @@ struct PredictPathWorker : public Worker {
         p(rpm_x_.ncol()), only_k(only_k_), is_class(is_class_), rank(rank_) {
     for (int j = 0; j < p; ++j) {
       const double range = maxs[j] - mins[j];
-      if (R_finite(range) && range > 0.0) { active.push_back(j); inv_range.push_back(1.0 / range); }
+      if (R_finite(range) && range > 0.0) { active.push_back(j); col_range.push_back(range); }
     }
     // Detect an effectively 1-D design: all active columns element-wise
     // identical in both rpm_x and Xtest (FACTOR/Hamming metric excluded).
@@ -416,7 +416,7 @@ struct PredictPathWorker : public Worker {
     double acc = 0.0;
     for (std::size_t a = 0; a < active.size(); ++a) {
       const int j = active[a];
-      const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+      const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
       if (dist_code == 2) acc += std::fabs(z);
       else if (dist_code == 0) acc += std::fabs(z) + z * z;
       else acc += z * z;
@@ -643,12 +643,12 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
 
   // Active columns and reciprocal ranges for the normalized metrics.
   std::vector<int> active;
-  std::vector<double> inv_range;
+  std::vector<double> col_range;
   for (int j = 0; j < p; ++j) {
     const double range = maxs[j] - mins[j];
     if (R_finite(range) && range > 0.0) {
       active.push_back(j);
-      inv_range.push_back(1.0 / range);
+      col_range.push_back(range);
     }
   }
 
@@ -672,7 +672,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
-          acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) * inv_range[a]);
+          acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) / col_range[a]);
         }
         d[i] = acc;
       }
@@ -681,7 +681,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
-          const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+          const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
           acc += std::fabs(z) + z * z;
         }
         d[i] = acc;
@@ -691,7 +691,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
         double acc = 0.0;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
-          const double z = (rpm_x(i, j) - Xtest(r, j)) * inv_range[a];
+          const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
           acc += z * z;
         }
         d[i] = std::sqrt(acc);

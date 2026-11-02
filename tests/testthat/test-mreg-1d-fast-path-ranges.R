@@ -117,4 +117,11 @@ test_that("1-D fast path does not depend on the other queries in the batch", {
     }
   }
   expect_identical(NNS_mreg_predict_v2_cpp(rpm_x, y, one, 1L, 0L, mins, maxs, FALSE, 1L), 50)
+
+  # Native distances divide by the range, as the R reference does.
+  rx <- cbind(c(.03, .49, 1), c(.03, .49, 1))
+  pt <- matrix(.26, 1, 2)
+  rpm <- data.frame(X1 = rx[, 1], X2 = rx[, 2], y.hat = c(0, 100, 999))
+  expect_identical(NNS_mreg_predict_v2_cpp(rx, rpm$y.hat, pt, 1L, 0L, c(.03, .03), c(1, 1), FALSE, 1L),
+                   .nns_mreg_predict_reference(pt, rpm, 1L, "NNS", c(.03, .03), c(1, 1), FALSE))
 })
