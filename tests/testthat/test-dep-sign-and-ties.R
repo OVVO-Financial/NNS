@@ -39,13 +39,15 @@ test_that("NNS.dep degree-0 discordant count excludes ties with the cell mean", 
   # the within-cell permutation null (#70), so the result is 0, not -1.
   x <- -1:1
   expect_equal(unname(unlist(NNS.dep(x, -x))), c(0, 0))
-  # With five points the countermonotone signal clears the null.
+  # With five points the countermonotone signal clears the null: the debiased
+  # degree-0 and degree-1 terms average to 2/3 (no square root since #95).
   x <- -2:2
-  expect_equal(unname(unlist(NNS.dep(x, -x))), c(-1, 1) * sqrt(2 / 3))
+  expect_equal(unname(unlist(NNS.dep(x, -x))), c(-1, 1) * 2 / 3)
 })
 
-test_that("NNS.dep discrete blend on an independent tied grid uses the same split", {
+test_that("NNS.dep reads an exactly independent tied grid as 0", {
+  # The discrete blend used to add 1/6 here (#95).
   G <- as.matrix(expand.grid(-1:1, -1:1))[rep(1:9, each = 100), ]
-  expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2]))), c(0, 1 / 6))
-  expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2], asym = TRUE))), c(0, 1 / 6))
+  expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2]))), c(0, 0))
+  expect_equal(unname(unlist(NNS.dep(G[, 1], G[, 2], asym = TRUE))), c(0, 0))
 })

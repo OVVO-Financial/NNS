@@ -3,6 +3,7 @@
 #include <set>
 #include <algorithm>
 #include <cfloat>
+#include <numeric>
 
 using namespace Rcpp;
 
@@ -23,30 +24,11 @@ inline double vec_mean(const NumericVector& x){
   return s / (double)n;
 }
 
-// c4(k): E[s] = c4(k) * sigma for k normal observations. Dividing by it removes
-// the small-sample downward bias of the sd, which otherwise favours the lags
-// with the shortest components (#69).
-inline double c4(int k){
-  if (k < 2) return 1.0;
-  const double kd = static_cast<double>(k);
-  return std::sqrt(2.0 / (kd - 1.0)) * std::exp(std::lgamma(kd / 2.0) - std::lgamma((kd - 1.0) / 2.0));
-}
-
-inline double vec_sd(const NumericVector& x){
-  int n = x.size();
-  if(n < 2) return NA_REAL;
-  double m = vec_mean(x);
-  double ss = 0.0;
-  for(int i=0;i<n;++i){
-    double d = x[i]-m; ss += d*d;
-  }
-  return std::sqrt(ss / (double)(n-1));
-}
-
 // [[Rcpp::export]]
 Rcpp::List NNS_seas_cpp(NumericVector variable,
                         Nullable<IntegerVector> modulo = R_NilValue,
-                        bool mod_only = true){
+                        bool mod_only = true,
+                        Nullable<int> max_period = R_NilValue){
   if (variable.size() == 0)  stop("Variable must be numeric and non-empty");
   if (any_na_or_inf(variable)) stop("You have some missing or infinite values, please address.");
   
@@ -65,42 +47,61 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   }
   
   const int half_n = n/2;
-  const double mean_var = vec_mean(variable);
-  // Compare raw values: a repeated 0.1 need not centre to exactly 0.
-  const bool constant = std::all_of(variable.begin(), variable.end(),
-                                    [&](double v){ return v == variable[0]; });
-  const double sd_var = constant ? 0.0 : vec_sd(variable) / c4(n);
-  // CV is meaningless for a mean that is zero up to rounding; compare sds instead
-  const double tol = std::sqrt(DBL_EPSILON);
-  const bool use_cv = std::fabs(mean_var) > tol * sd_var;
-  const double var_cov = use_cv ? std::fabs(sd_var / mean_var) : sd_var;
-  
+  const double* x = variable.begin();
+
+  // Dispersion is the Gini mean difference, the degree-1 lower plus upper
+  // partial moment about each observation in turn: as the U-statistic
+  // sum_{i != j} |x_i - x_j| / (k (k - 1)) it is unbiased for any distribution
+  // at any component length k, so no normal-theory factor such as c4(k) is
+  // needed (#97). One sort of the series gives every component's order
+  // statistics: walking the sorted values, each lands in its component at
+  // that component's next rank.
+  std::vector<int> ord(n);
+  std::iota(ord.begin(), ord.end(), 0);
+  std::stable_sort(ord.begin(), ord.end(), [&](int a, int b){ return x[a] < x[b]; });
+
+  // The coefficient of variation needs a ratio scale: it is used only when the
+  // series stays on one side of zero, and dispersions are compared otherwise.
+  const bool use_cv = (x[ord[0]] > 0.0) || (x[ord[n - 1]] < 0.0);
+
   // Minimum component length (#69): every component series of lag m must have
   // at least MIN_COMPONENT_LENGTH points, i.e. m <= n / MIN_COMPONENT_LENGTH.
-  // With 2-3 points per component the sample sd is biased low (E[s] = c4(k) sigma,
-  // c4(2) = 0.80, c4(3) = 0.89), so the longest lags looked tightest even in
-  // pure noise and were picked as the best period.
+  // max_period caps the scan further; the scan is O(n) per lag.
   const int MIN_COMPONENT_LENGTH = 5;
-  const int max_m = std::min(half_n, n / MIN_COMPONENT_LENGTH);
+  int max_m = std::min(half_n, n / MIN_COMPONENT_LENGTH);
+  if (max_period.isNotNull()) max_m = std::max(1, std::min(max_m, as<int>(max_period)));
 
-  std::vector<int> periods_vec;
-  std::vector<double> cvmean_vec;
-  const double* x = variable.begin();
+  const int buf = half_n + 1;
+  std::vector<int> rank(buf), len(buf);
+  std::vector<double> sum(buf), acc(buf), first(buf), last(buf);
   auto score = [&](int m){
+    const double inv_m = 1.0 / (double)m;
+    for(int j=0;j<m;++j){ rank[j] = 0; len[j] = (n-1-j)/m + 1; sum[j] = 0.0; acc[j] = 0.0; }
+    for(int t=0;t<n;++t){
+      const int i = ord[t];
+      int j = i - m * (int)((double)i * inv_m);   // i mod m without a division
+      if (j >= m) j -= m; else if (j < 0) j += m;
+      const double v = x[i];
+      if (rank[j] == 0) first[j] = v;
+      last[j] = v;
+      acc[j] += (2.0 * rank[j] + 1.0 - len[j]) * v;
+      sum[j] += v;
+      ++rank[j];
+    }
     double wsum = 0.0;
     for(int j=0;j<m;++j){
-      int len = (n-1-j)/m + 1;
-      double mu = 0.0, ss = 0.0;
-      bool same = true;
-      for(int i=j;i<n;i+=m){ mu += x[i]; same = same && x[i] == x[j]; }
-      mu /= (double)len;
-      for(int i=j;i<n;i+=m){ double d = x[i]-mu; ss += d*d; }
-      double sd = same ? 0.0 : std::sqrt(ss / (double)(len-1)) / c4(len);
-      // a constant component has CV 0; a near-zero mean caps CV at 1/tol, where the series switches to sd
-      wsum += len * (use_cv ? (sd == 0.0 ? 0.0 : sd / std::max(std::fabs(mu), tol * sd)) : sd);
+      const double k = (double)len[j];
+      // a constant component (smallest value = largest) has dispersion 0
+      const double g = (len[j] < 2 || first[j] == last[j]) ? 0.0 : 2.0 * acc[j] / (k * (k - 1.0));
+      wsum += k * (use_cv ? (g == 0.0 ? 0.0 : g / std::fabs(sum[j] / k)) : g);
     }
     return wsum / (double)n;
   };
+  // The series itself is the single component of lag 1.
+  const double var_cov = score(1);
+
+  std::vector<int> periods_vec;
+  std::vector<double> cvmean_vec;
   // A period the user adds through modulo is scored even beyond the scan limit,
   // so ARMA.seas.weighting doesn't give it zero weight.
   auto added_cv = [&](int m){

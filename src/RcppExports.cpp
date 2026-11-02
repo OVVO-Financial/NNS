@@ -11,8 +11,37 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // NNS_dep_pair_cpp
-List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, bool asym);
-RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP asymSEXP) {
+List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, CharacterVector quad_joint, bool asym);
+RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP quad_jointSEXP, SEXP asymSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_xy(quad_xySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_yx(quad_yxSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_joint(quad_jointSEXP);
+    Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, quad_joint, asym));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_dep_levels_cpp
+NumericVector NNS_dep_levels_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy);
+RcppExport SEXP _NNS_NNS_dep_levels_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type quad_xy(quad_xySEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_levels_cpp(x, y, quad_xy));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_dep_local_cpp
+double NNS_dep_local_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, bool asym);
+RcppExport SEXP _NNS_NNS_dep_local_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP asymSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +50,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type quad_xy(quad_xySEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type quad_yx(quad_yxSEXP);
     Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, asym));
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_local_cpp(x, y, quad_xy, quad_yx, asym));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -221,15 +250,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_seas_cpp
-Rcpp::List NNS_seas_cpp(NumericVector variable, Nullable<IntegerVector> modulo, bool mod_only);
-RcppExport SEXP _NNS_NNS_seas_cpp(SEXP variableSEXP, SEXP moduloSEXP, SEXP mod_onlySEXP) {
+Rcpp::List NNS_seas_cpp(NumericVector variable, Nullable<IntegerVector> modulo, bool mod_only, Nullable<int> max_period);
+RcppExport SEXP _NNS_NNS_seas_cpp(SEXP variableSEXP, SEXP moduloSEXP, SEXP mod_onlySEXP, SEXP max_periodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type variable(variableSEXP);
     Rcpp::traits::input_parameter< Nullable<IntegerVector> >::type modulo(moduloSEXP);
     Rcpp::traits::input_parameter< bool >::type mod_only(mod_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only));
+    Rcpp::traits::input_parameter< Nullable<int> >::type max_period(max_periodSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_seas_cpp(variable, modulo, mod_only, max_period));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -793,7 +823,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 5},
+    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 6},
+    {"_NNS_NNS_dep_levels_cpp", (DL_FUNC) &_NNS_NNS_dep_levels_cpp, 3},
+    {"_NNS_NNS_dep_local_cpp", (DL_FUNC) &_NNS_NNS_dep_local_cpp, 5},
     {"_NNS_NNS_distance_cpp", (DL_FUNC) &_NNS_NNS_distance_cpp, 5},
     {"_NNS_NNS_distance_path_cpp", (DL_FUNC) &_NNS_NNS_distance_path_cpp, 5},
     {"_NNS_NNS_distance_bulk_cpp", (DL_FUNC) &_NNS_NNS_distance_bulk_cpp, 5},
@@ -806,7 +838,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_duplicate_column_map_cpp", (DL_FUNC) &_NNS_NNS_duplicate_column_map_cpp, 1},
     {"_NNS_NNS_mreg_setup_cpp", (DL_FUNC) &_NNS_NNS_mreg_setup_cpp, 5},
     {"_NNS_NNS_part_cpp", (DL_FUNC) &_NNS_NNS_part_cpp, 8},
-    {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 3},
+    {"_NNS_NNS_seas_cpp", (DL_FUNC) &_NNS_NNS_seas_cpp, 4},
     {"_NNS_NNS_xstar_path_cpp", (DL_FUNC) &_NNS_NNS_xstar_path_cpp, 5},
     {"_NNS_sd_dom_matrix_prefix_parallel", (DL_FUNC) &_NNS_sd_dom_matrix_prefix_parallel, 3},
     {"_NNS_NNS_SD_efficient_set_parallel_cpp", (DL_FUNC) &_NNS_NNS_SD_efficient_set_parallel_cpp, 4},

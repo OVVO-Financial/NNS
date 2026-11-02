@@ -358,7 +358,10 @@
 
 .nns_reg_dependence <- function(x, y) {
   if (length(unique(x)) < 2L || length(unique(y)) < 2L) return(0.1)
-  d1 <- tryCatch(NNS.dep(x, y, print.map = FALSE, asym = TRUE)$Dependence,
+  # The order heuristic needs a fine-scale signal-to-noise reading, which the
+  # local measure gives; NNS.dep's multi-level measure would also count
+  # dependence between coarse cells and over-partition noisy data (#95).
+  d1 <- tryCatch(.nns_dep_local(x, y, asym = TRUE),
                  error = function(e) NA_real_)
   d2 <- tryCatch({
     m <- cbind(NNS.rescale(x, 0, 1), NNS.rescale(x, 0, 1), NNS.rescale(y, 0, 1))

@@ -37,8 +37,9 @@ test_that("NNS.dep p.value = TRUE honours asym", {
   set.seed(4); p <- NNS.dep(y, x, p.value = TRUE, asym = TRUE)
   expect_equal(p$Correlation, direct$Correlation)
   expect_equal(p$Dependence, direct$Dependence)
-  # x is not a function of y = x^2: 0.6005389 before the per-cell debiasing (#70).
-  expect_equal(p$Dependence, 0.1027830, tolerance = 1e-6)
+  # x is not a function of y = x^2: 0.6005389 before the per-cell debiasing
+  # (#70), 0.1027830 before the multi-level measure (#95).
+  expect_equal(p$Dependence, 0.1156500, tolerance = 1e-6)
 })
 
 test_that("NNS.dep rejects infinite values", {
@@ -115,9 +116,10 @@ test_that("NNS.caus tau = \"ts\" stops when no seasonal period qualifies", {
   }
   # NNS.seas reports only lags with >= 5 points per component (#69), so an
   # AR(1) usually returns Period 1 (no seasonality), which qualifies as
-  # tau = 1. Seed 8 still yields a single period of 8 > sqrt(50) for x.
-  s <- ar1(8)
-  expect_error(NNS.caus(s$a, s$b, tau = "ts"), "no seasonal period")
+  # tau = 1. For seed 6 every period NNS.seas reports for x exceeds sqrt(50).
   s <- ar1(6)
+  expect_true(all(NNS.seas(s$a, plot = FALSE)$periods > sqrt(50)))
+  expect_error(NNS.caus(s$a, s$b, tau = "ts"), "no seasonal period")
+  s <- ar1(8)
   expect_length(NNS.caus(s$a, s$b, tau = "ts"), 2)
 })

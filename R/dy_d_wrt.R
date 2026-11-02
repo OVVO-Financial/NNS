@@ -7,9 +7,9 @@
 #' @param wrt integer; Selects the regressor to differentiate with respect to (vectorized).
 #' @param eval.points numeric or options: ("obs", "apd", "mean", "median", "last"); Regressor points to be evaluated.
 #' \itemize{
-#' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor.  See examples for use cases.
+#' \item Numeric values must be in matrix or data.frame form to be evaluated for each regressor, otherwise, a vector of points will evaluate only at the \code{wrt} regressor, averaging over the observed rows of the other regressors (at most \code{max(21, 10000 / k)} of them for \code{k} points, taken evenly through the data).  See examples for use cases.
 #' \item Set to \code{(eval.points = "obs")} (default) to find the average partial derivative at every observation of the variable with respect to \emph{for specific tuples of given observations.}
-#' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors.}
+#' \item Set to \code{(eval.points = "apd")} to find the average partial derivative at every observation of the variable with respect to \emph{over the entire distribution of other regressors}, represented by their observed rows.
 #' \item Set to \code{(eval.points = "mean")} to find the partial derivative at the mean of value of every variable.
 #' \item Set to \code{(eval.points = "median")} to find the partial derivative at the median value of every variable.
 #' \item Set to \code{(eval.points = "last")} to find the partial derivative at the last observation of every value (relevant for time-series data).
@@ -139,7 +139,8 @@ dy.d_ <- function(x, y, wrt,
   # v0.5.7 bandwidths.
   h_s <- 1/log(length(x), c(2, 10))
   h_s <- c(h_s, 10 * h_s)
-  if (NNS.dep(col, y)$Dependence < .5) h_s <- 2 * h_s
+  # The settled step rule reads the local (fine-scale) dependence (#95).
+  if (.nns_dep_local(col, y, asym = FALSE) < .5) h_s <- 2 * h_s
 
   is_vector <- is.vector(eval.points) || (!is.null(ncol(eval.points)) && ncol(eval.points) == 1)
 
@@ -159,7 +160,14 @@ dy.d_ <- function(x, y, wrt,
   if (is_vector) {
     eval_vec <- as.numeric(unlist(eval.points))
     k <- length(eval_vec)
-    grid <- apply(x, 2, function(z) LPM.VaR(seq(0, 1, .05), 0, z))
+    # Average over observed rows of the regressors -- the empirical joint
+    # distribution of the other regressors, as an average marginal effect
+    # uses -- not over a grid of matched quantiles, whose rows move together
+    # and are tuples the data may never contain (#65). Large samples are
+    # thinned to at most max(21, 10000 / k) rows per point, spread through the
+    # data without a fixed stride (.nns_spread_rows).
+    n_rows <- min(nrow(x), max(21L, floor(10000 / k)))
+    grid <- as.matrix(x[.nns_spread_rows(nrow(x), n_rows), , drop = FALSE])
     if (is.null(dim(grid)) || ncol(grid) != l) grid <- matrix(grid, ncol = l, byrow = FALSE)
     sampsize <- nrow(grid)
     position <- rep(rep(c("l", "m", "u"), each = sampsize), times = k)
@@ -298,3 +306,13 @@ dy.d_ <- function(x, y, wrt,
 }
 
 dy.d_ <- Vectorize(dy.d_, vectorize.args = c("wrt"))
+
+
+# k of n row indices spread through the data without a fixed stride: the rows
+# whose golden-ratio (Weyl) sequence values are smallest. A fixed stride can
+# line up with periodic or sorted row order and keep only some phases; an
+# irrational rotation visits every residue class evenly.
+.nns_spread_rows <- function(n, k) {
+  if (k >= n) return(seq_len(n))
+  sort(order((seq_len(n) * 0.6180339887498949) %% 1)[seq_len(k)])
+}

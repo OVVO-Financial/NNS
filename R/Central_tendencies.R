@@ -4,7 +4,7 @@
 #'
 #' @param x vector of data.
 #' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
-#' @param multi logical; \code{TRUE} (default) returns multiple mode values.
+#' @param multi logical; \code{TRUE} (default) returns multiple mode values.  \code{FALSE} returns the highest peak; among equally high peaks, the one nearest \link{NNS.gravity} of the data (then the lower value), so the result is always one of the modes.
 #' @return Returns the mode of the distribution: a numeric vector of all modes when \code{multi = TRUE} (default), otherwise a single numeric value.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples

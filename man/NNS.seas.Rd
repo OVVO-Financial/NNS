@@ -4,22 +4,39 @@
 \alias{NNS.seas}
 \title{NNS Seasonality Test}
 \usage{
-NNS.seas(variable, modulo = NULL, mod.only = TRUE, plot = TRUE)
+NNS.seas(
+  variable,
+  modulo = NULL,
+  mod.only = TRUE,
+  plot = TRUE,
+  detrend = TRUE,
+  max.period = NULL,
+  p.value = FALSE,
+  nperm = 100L
+)
 }
 \arguments{
 \item{variable}{a numeric vector.}
 
-\item{modulo}{integer(s); NULL (default) Used to find the nearest multiple(s) in the reported seasonal period.}
+\item{modulo}{integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).}
 
 \item{mod.only}{logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.}
 
 \item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.}
+
+\item{detrend}{logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored.}
+
+\item{max.period}{integer; \code{NULL} (default) scans lags up to \code{n / 5}.  A smaller value caps the scan, whose cost grows with \code{n} times the number of lags.}
+
+\item{p.value}{logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which have no seasonality by construction.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); since each copy contributes its best lag, the 5 percent level holds for the whole scan.  Uses the random number generator.}
+
+\item{nperm}{integer; 100 (default) number of shuffled copies when \code{p.value = TRUE}.}
 }
 \value{
-Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{all.periods} holds a single row with \code{Period = 1} and a coefficient of variation equal to the variable's (\code{Period = 0} for fewer than 5 observations).
+Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{all.periods} holds a single row with \code{Period = 1} and a coefficient of variation equal to the variable's (\code{Period = 0} for fewer than 5 observations).  The coefficients of variation are those of the detrended variable when \code{detrend = TRUE}.
 }
 \description{
-Seasonality test based on the coefficient of variation for the variable and lagged component series.  For each lag \code{m}, the variable is split into its \code{m} component series \code{variable[seq(j, n, m)]}, \code{j = 1, ..., m}, and lag \code{m} is reported when the length-weighted mean of the component coefficients of variation is below the coefficient of variation of the variable.  When the mean of the variable is zero up to rounding, standard deviations are compared instead.  Lags are scanned only up to \code{n / 5}, so every component series has at least 5 observations, and each standard deviation is divided by \code{c4(k)}, its small-sample bias factor for \code{k} observations; with 2-3 points per component the longest lags otherwise looked tightest even in pure noise.  Periods added through \code{modulo} are kept up to \code{n / 2}.  On a series without seasonality some lags still pass by chance, so treat the result as candidate periods and validate them, for example with \link{NNS.ARMA.optim}.  A result of 1 signifies no seasonality present.
+Seasonality test based on the coefficient of variation for the variable and lagged component series.  A linear trend is removed first (\code{detrend = TRUE}), keeping the mean of the variable, so that a trend does not mask the period.  For each lag \code{m}, the variable is split into its \code{m} component series \code{variable[seq(j, n, m)]}, \code{j = 1, ..., m}, and lag \code{m} is reported when the length-weighted mean of the component coefficients of variation is below the coefficient of variation of the variable.  Dispersion is the Gini mean difference, the degree-1 lower plus upper partial moment about each observation in turn, which is unbiased for any distribution at any component length.  The coefficient of variation is used when the (detrended) variable stays on one side of zero; otherwise dispersions are compared directly.  Lags are scanned up to \code{max.period}, by default \code{n / 5}, so every component series has at least 5 observations.  Periods added through \code{modulo} are kept up to \code{n / 2}.  On a series without seasonality about half of the lags pass by chance, so treat the result as candidate periods and validate them, for example with \link{NNS.ARMA.optim}, or set \code{p.value = TRUE}.  A result of 1 signifies no seasonality present.
 }
 \examples{
 \dontrun{
@@ -31,6 +48,9 @@ NNS.seas(x, plot = FALSE)$best.period
 
 ## Using modulos for logical seasonal inference:
 NNS.seas(x, modulo = c(2,3,5,7), plot = FALSE)
+
+## Keep only periods that beat shuffled copies of the series:
+NNS.seas(x, plot = FALSE, p.value = TRUE)$best.period
 }
 }
 \references{

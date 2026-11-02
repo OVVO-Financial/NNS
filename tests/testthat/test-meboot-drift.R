@@ -42,14 +42,15 @@ test_that("force.clt spreads changed-drift replicate means on the residual scale
     NNS.meboot(y, reps = 10, rho = 1, ...)["replicates", ]$replicates
   }
 
+  # The spread is that of a mean of n = 100 observations (#101).
   flat <- colMeans(clt_reps(drift = FALSE))
   expect_equal(mean(flat), mean(y), tolerance = 1e-6)
-  expect_equal(sd(flat), sd(resid(fit)) / sqrt(10), tolerance = 1e-5)
+  expect_equal(sd(flat), sd(resid(fit)) / sqrt(100), tolerance = 1e-5)
 
   sloped <- colMeans(clt_reps(target_drift = 5))
   ref <- 5 * tt + resid(fit)
   expect_equal(mean(sloped), mean(y), tolerance = 1e-6)
-  expect_equal(sd(sloped), sd(ref) / sqrt(10), tolerance = 1e-5)
+  expect_equal(sd(sloped), sd(ref) / sqrt(100), tolerance = 1e-5)
 })
 
 test_that("drift = FALSE keeps mean(x) as the replicate level", {
@@ -83,4 +84,13 @@ test_that("the slope tolerance allows for rounding at a large series level", {
   expect_identical(reps(target_drift = d_lm), reps())
   # A real change of drift still takes the changed-drift path.
   expect_false(isTRUE(all.equal(reps(target_drift = .1), reps())))
+})
+
+test_that("force.clt spreads replicate means like means of n observations (#101)", {
+  set.seed(1); x <- cumsum(rnorm(100))
+  spread <- function(r) { set.seed(2); sd(colMeans(NNS.meboot(x, reps = r, rho = 1)["replicates", ]$replicates)) }
+  s20 <- spread(20); s80 <- spread(80)
+  # Before: 0.841 at 20 replicates and 0.420 at 80 (sd(x) / sqrt(reps)).
+  expect_lt(abs(s80 / s20 - 1), 0.2)
+  expect_equal(s80, sd(x) / sqrt(length(x)), tolerance = 0.2)
 })

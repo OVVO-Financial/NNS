@@ -47,8 +47,9 @@ test_that("NNS.gravity / NNS.mode stay fast with a tight IQR and an outlier", {
   expect_lt(elapsed, 2)
   expect_equal(g, 5, tolerance = 1e-3)
   expect_equal(m, 5, tolerance = 1e-5)
-  # Tiny histograms (<= 3 bins) are well defined.
-  expect_equal(NNS.mode(c(0, 0, 1, 1), multi = FALSE), 0.5)
+  # Tiny histograms (<= 3 bins) are well defined; tied modes resolve to the
+  # one nearest the gravity (0.375), not their average.
+  expect_equal(NNS.mode(c(0, 0, 1, 1), multi = FALSE), 0)
   expect_equal(NNS.gravity(c(0, 0, 1, 1)), 0.375)
 })
 
@@ -109,7 +110,34 @@ test_that("generate.lin.vectors(x, 0) errors instead of killing the R session", 
   expect_match(paste(out, collapse = "\n"), "'l' must be a positive integer")
 })
 
-test_that("equally high mode peaks are averaged", {
+test_that("equally high mode peaks resolve to the one nearest the gravity", {
   x <- rep(0:19, each = 400)
-  expect_equal(NNS.mode(x, multi = FALSE), mean(NNS.mode(x)))
+  m <- NNS.mode(x)
+  r <- NNS.mode(x, multi = FALSE)
+  expect_true(r %in% m)
+  expect_equal(r, m[which.min(abs(m - NNS.gravity(x)))])
+  # Tied clusters: always a real peak, never a value in the gap between them
+  # (averaging them gave 8.91 for this sample).
+  y <- c(rep(1:3, each = 300), rep(10:12, each = 300), rep(20:22, each = 150))
+  expect_true(NNS.mode(y, multi = FALSE) %in% NNS.mode(y))
+})
+
+test_that("dy.d_ averages a scalar eval point over the observed rows (#65)", {
+  # With three regressors the old grid set the other two to the same
+  # quantile, so the average of d(x1 x2 x3)/dx1 = x2 x3 came out positive.
+  set.seed(611); n <- 600
+  x <- cbind(runif(n, -1, 1), runif(n, -1, 1), runif(n, -1, 1)); y <- x[, 1] * x[, 2] * x[, 3]
+  ame <- mean(x[, 2] * x[, 3])
+  r <- dy.d_(x, y, wrt = 1, eval.points = 0, messages = FALSE)
+  expect_lt(abs(unlist(r["First", ])[1] - ame), 0.05)
+})
+
+test_that("dy.d_ thins rows without a fixed stride", {
+  r <- NNS:::.nns_spread_rows(20000, 10000)
+  expect_length(r, 10000)
+  expect_false(is.unsorted(r)); expect_false(anyDuplicated(r) > 0)
+  # Every residue class is visited evenly, throughout the data.
+  for (q in 2:5) expect_lt(max(abs(tabulate(r %% q + 1, q) - 10000 / q)), 0.01 * 10000 / q)
+  expect_lt(abs(mean(r[r <= 10000] %% 2) - 0.5), 0.01)
+  expect_identical(NNS:::.nns_spread_rows(50, 80), 1:50)
 })

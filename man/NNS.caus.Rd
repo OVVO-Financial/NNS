@@ -12,7 +12,7 @@ NNS.caus(
   plot = FALSE,
   p.value = FALSE,
   nperm = 100L,
-  permute = c("y", "x", "both"),
+  permute = c("auto", "y", "x", "both", "shift"),
   seed = NULL,
   conf.int = 0.95
 )
@@ -32,7 +32,7 @@ NNS.caus(
 
 \item{nperm}{integer; number of permutations to use when \code{p.value = TRUE}. Default 100.}
 
-\item{permute}{one of "both", "y", or "x"; which variable(s) to shuffle when constructing the null distribution.}
+\item{permute}{one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  \code{"shift"} circularly shifts \code{y} by a random offset at least \code{max(tau + 1, n / 10)} steps from alignment, so each series keeps its own dynamics and only their alignment is broken: a nonparametric counterpart to conditioning on the effect's own past.  \code{"y"}, \code{"x"} and \code{"both"} shuffle the values, an independence null for cross-sections.  \code{"auto"} uses \code{"shift"} when the lag is positive (including \code{tau = "ts"}) and \code{"y"} otherwise.  The lag of \code{tau = "ts"} is resolved once on the observed series and kept for every permutation.}
 
 \item{seed}{optional integer seed for reproducibility of the permutation test.}
 
@@ -51,15 +51,15 @@ For a matrix \code{x}, entry \code{[i, j]} is \code{C(column i ---> column j)}, 
 Returns the directional causation between two variables from observational data, as an index in [0, 1] for each direction (0.5 = no net direction).
 }
 \details{
-Following book chapter 14, each direction is evaluated on explicitly lagged pairs mapped to the copula scale with per-column ranks (the degree-0 lower partial moment), so the result is invariant to shifts, rescaling and any monotone transform of either variable.  For x ---> y the raw score is
+Following book chapter 14, each direction is evaluated on explicitly lagged pairs mapped to the copula scale with per-column ranks (the degree-0 lower partial moment), so the result is invariant to shifts, rescaling and any increasing transform of either variable (reversing a variable's order changes the copula, and so the index).  For x ---> y the raw score is
 
 \deqn{\tilde{C}_{x \to y} = \frac{1}{2}\left[P_{x \to y} + \max(\rho_{x \to y} - \rho_{y \to x}, 0)\right],}
 
-where \eqn{P_{x \to y}} is the share of the degree-1 deviation (lower plus upper partial moment about the mean) of \code{y[t]} resolved by conditioning on the position of \code{x[t - tau]}, and \eqn{\rho_{x \to y}} is \code{NNS.dep(x[t - tau], y[t], asym = TRUE)$Dependence}, the directional dependence built from the lagged co-partial moments of the pair.  The index is
+where \eqn{P_{x \to y}} is the share of the deviation of \code{y[t]} resolved by conditioning on the position of \code{x[t - tau]}, the deviation being the degree-2 lower plus upper partial moment about the mean with the \eqn{m/(m-1)} factor, which is exactly unbiased under permutation for any distribution, and \eqn{\rho_{x \to y}} is the debiased directional dependence of \code{y[t]} on \code{x[t - tau]} from \link{NNS.dep}'s cells (the lagged co-partial moments of the pair), averaged over the levels of the partition on \code{x[t - tau]}.  \link{NNS.dep} reports the strongest level; the average has no selection step, so independent series are centred at 0.5 whatever their margins.  The index is
 
 \deqn{C_{x \to y} = \frac{\tilde{C}_{x \to y} + \kappa}{\tilde{C}_{x \to y} + \tilde{C}_{y \to x} + 2\kappa}, \quad C_{y \to x} = 1 - C_{x \to y},}
 
-with a neutral pseudo-count \eqn{\kappa = 1/\sqrt{n - \tau}}, the order of the raw scores' sampling variation, so that weak or absent directional evidence stays near 0.5.  An invertible relationship (e.g. \code{y = 2 * x + 1}) has no cross-sectional direction and returns 0.5; the lag is what identifies direction in that case.
+with a neutral pseudo-count \eqn{\kappa = 1/\sqrt{n - \tau}}, the order of the raw scores' sampling variation, so that weak or absent directional evidence stays near 0.5.  An invertible relationship (e.g. \code{y = 2 * x + 1}) has no cross-sectional direction and returns 0.5; the lag is what identifies direction in that case.  The index measures directional lagged association: it does not condition on other variables, so a common driver that reaches \code{y} later than \code{x} makes x ---> y look causal.
 }
 \examples{
 \dontrun{

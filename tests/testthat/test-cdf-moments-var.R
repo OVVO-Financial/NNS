@@ -107,3 +107,17 @@ test_that("degree-0 joint survival with many columns is the joint upper share", 
   h <- NNS.CDF(x, degree = 0, type = "cumulative hazard", plot = FALSE)$Function$CDF
   expect_equal(h, pmax(-log(pmax(s, 1e-10)), 0))
 })
+
+test_that("multivariate hazards need degree 0 (#100)", {
+  X <- cbind(c(0, 1, 2, 3), c(0, 2, 1, 3))
+  expect_error(NNS.CDF(X, degree = 1, type = "hazard", plot = FALSE), "needs degree = 0")
+  expect_error(NNS.CDF(X, degree = 1, type = "cumulative hazard", plot = FALSE), "needs degree = 0")
+  expect_true(is.list(NNS.CDF(X, degree = 0, type = "hazard", plot = FALSE)))
+  # One dimension at degree 1 is a proper distribution function and keeps its hazards.
+  set.seed(1)
+  expect_true(all(is.finite(NNS.CDF(rnorm(50), degree = 1, type = "hazard", plot = FALSE)$Function[[2]])))
+  # The degree-0 joint CDF gives every rectangle nonnegative mass.
+  A <- matrix(rnorm(200), 100, 2)
+  f <- function(t) NNS.CDF(A, degree = 0, target = t, plot = FALSE)$target.value
+  expect_gte(f(c(.5, .5)) - f(c(-.5, .5)) - f(c(.5, -.5)) + f(c(-.5, -.5)), 0)
+})

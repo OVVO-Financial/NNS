@@ -40,7 +40,7 @@
 #' \itemize{
 #'   \item \code{Control_Statistic}: Mean/median of control group
 #'   \item \code{Treatment_Statistic}: Mean/median of treatment group
-#'   \item \code{Grand_Statistic}: Grand mean/median
+#'   \item \code{Grand_Statistic}: Mean/median of all observations pooled
 #'   \item \code{Control_CDF}: CDF value at grand statistic (control)
 #'   \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
 #'   \item \code{Certainty}: Similarity index in [0, 1] (1 = the groups are the
@@ -226,9 +226,9 @@ NNS.ANOVA <- function(
   }
   
   if (medians) {
-    mean.of.means <- mean(apply(A, 2, function(i) median(i, na.rm = TRUE)))
+    mean.of.means <- median(unlist(A), na.rm = TRUE)
   } else {
-    mean.of.means <- mean(colMeans(A, na.rm = TRUE))
+    mean.of.means <- mean(unlist(A), na.rm = TRUE)
   }
   
   if (!pairwise) {
