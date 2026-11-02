@@ -84,3 +84,23 @@ test_that("continuous FSD sees ratios that differ only between the knots", {
   expect_equal(NNS.FSD(c(1, 1), c(0, 1), "continuous", plot = FALSE), "X FSD Y")
   expect_equal(c(NNS.FSD.uni(c(1, 1), c(0, 1), "continuous"), NNS.FSD.uni(c(0, 1), c(1, 1), "continuous")), c(1, 0))
 })
+
+test_that("adding a constant to both samples keeps the TSD result", {
+  x <- c(-.0085, -.0152, .0068); y <- c(-.0021, -.0033, -.0167)
+  expect_equal(NNS.TSD.uni(x + 20000, y + 20000), NNS.TSD.uni(x, y))
+  x <- c(.01, .07); y <- c(0, .08)
+  expect_equal(NNS.TSD.uni(x + 1e6, y + 1e6), 1)
+  expect_equal(NNS.SD.efficient.set(cbind(x, y) + 1e6, degree = 3, status = FALSE), "x")
+  x <- c(.01, .03); y <- c(0, .04)
+  expect_equal(c(NNS.SSD.uni(x + 20000, y + 20000), NNS.TSD.uni(x + 20000, y + 20000)), c(1, 1))
+  x <- c(0, .01, .03, 1:996, 1000); y <- c(0, .02, .02, 1:996, 999)
+  for (s in c(20000, 1e6)) {
+    expect_equal(NNS.TSD.uni(x + s, y + s), 0)
+    expect_equal(NNS.TSD.uni(c(0, .02, .02, 1:996, 1000) + s, x + s), 1)
+  }
+})
+
+test_that("an infinite value doesn't stop the centred comparison", {
+  a <- c(0, 1, Inf); b <- c(0, 1, 2)
+  expect_equal(c(NNS.SSD.uni(a, b), NNS.TSD.uni(a, b), NNS.FSD.uni(a, b, "continuous")), c(0, 0, 0))
+})

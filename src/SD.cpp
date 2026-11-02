@@ -31,9 +31,9 @@ inline void neumaier_add(double& sum, double& err, double v){
   sum = t;
 }
 
-static void finish_col(ColPre& c){
+static void finish_col(ColPre& c, bool sorted = false){
   if (c.m == 0) stop("Each sample needs at least one observation.");
-  std::sort(c.vals.begin(), c.vals.end());
+  if (!sorted) std::sort(c.vals.begin(), c.vals.end());
   c.P1.assign(c.m+1, 0.0);
   c.P2.assign(c.m+1, 0.0);
   // Compensated sums: a plain running sum drifts by up to ~m*eps*|x|,
@@ -50,6 +50,14 @@ static void finish_col(ColPre& c){
   c.S2   = c.P2[c.m];
   c.mn   = c.vals.front();
   c.mean = c.S1 / double(c.m);
+}
+
+// Same sample shifted by s; subtraction keeps the sort order.
+static ColPre shifted_col(const ColPre& c, double s){
+  ColPre o; o.m = c.m; o.vals.resize(c.m);
+  for(int i=0;i<c.m;++i) o.vals[i] = c.vals[i] - s;
+  finish_col(o, true);
+  return o;
 }
 
 static ColPre precompute_col(const NumericMatrix& X, int j){
@@ -123,13 +131,41 @@ inline void ratio_deg1_coefs(const ColPre& c, int k, double& alpha, double& beta
 // degree: 1=FSD, 2=SSD, 3=TSD. 'discrete' only matters for FSD.
 // Returns 1 iff X dominates Y, else 0.
 // =====================================================================
-inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discrete){
+inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discrete, double level = 0.0);
+
+// Dominance is translation invariant but the tolerances below scale with
+// |value|^degree, so compare the pair centred on its joint midrange. The data
+// still carry rounding at their own level |c|, which sd_dom_pair adds back.
+inline int sd_dom_pair_centred(const ColPre& X, const ColPre& Y, int degree, bool discrete){
+  if (degree==1 && discrete) return sd_dom_pair(X, Y, degree, discrete);
+  if (!(X.mn >= Y.mn) || identical_samples(X, Y)) return 0;
+  const double lo = std::min(X.vals.front(), Y.vals.front());
+  const double hi = std::max(X.vals.back(), Y.vals.back());
+  // A mean gap this large fails the centred gate too; skip the copies.
+  if (degree >= 2 && Y.mean - X.mean > 2.0 * 64.0 * DBL_EPSILON * std::max(std::fabs(lo), std::fabs(hi))) return 0;
+  const double c = 0.5*lo + 0.5*hi;
+  if (!R_FINITE(c)) return sd_dom_pair(X, Y, degree, discrete);  // an infinite value can't be shifted
+  return sd_dom_pair(shifted_col(X, c), shifted_col(Y, c), degree, discrete, std::fabs(c));
+}
+
+inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discrete, double level){
   // Prefix-sum rounding makes curves that are equal in exact arithmetic differ
   // by about eps * S^degree (S = largest |value|), so differences up to
   // 64 * DBL_EPSILON * S^degree count as ties. Discrete FSD uses no tolerance.
   const double S = std::max(std::max(std::fabs(X.vals.front()), std::fabs(X.vals.back())),
                             std::max(std::fabs(Y.vals.front()), std::fabs(Y.vals.back())));
   const double eps64 = 64.0 * DBL_EPSILON;
+  // Error bounds: summation rounding plus the inputs' own rounding at |level|
+  // (a few ulps per value). For LPM2 at t that rounding moves each term by about
+  // 2 (t - x) din, so its bound uses the LPM1 at t.
+  const double din = 4.0 * DBL_EPSILON * level;
+  const double E1 = eps64 * S + din;
+  auto E2 = [&](int kx, int ky, double t){
+    double Lx, Ux, Ly, Uy;
+    lpm_upm_deg1(X, kx, t, Lx, Ux);
+    lpm_upm_deg1(Y, ky, t, Ly, Uy);
+    return eps64 * S * S + 2.0 * din * (std::fabs(Lx) + std::fabs(Ly) + din);
+  };
   if (degree==1){ // FSD
     if (!(X.mn >= Y.mn)) return 0;                 // FSD gate
     if (identical_samples(X, Y)) return 0;         // identical series -> 0 (matches R's identical(LPM_x, LPM_y))
@@ -151,7 +187,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
         Rx = (Ax>0.0 ? Lx/Ax : double(kx)/double(X.m));
         Ry = (Ay>0.0 ? Ly/Ay : double(ky)/double(Y.m));
         double Amin = std::min(Ax, Ay);
-        tol = eps64 * ((Amin > 0.0) ? std::max(1.0, S / Amin) : 1.0);
+        tol = (Amin > 0.0) ? std::max(eps64, E1 / Amin) : eps64;
       }
       if (Rx - Ry > tol) x_gt_y = true;
       if (std::fabs(Rx - Ry) > tol) curves_differ = true;
@@ -174,7 +210,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
               double Dx = gx*ts + dx, Dy = gy*ts + dy;
               if (Dx > 0.0 && Dy > 0.0){
                 double Rxs = (ax*ts + bx) / Dx, Rys = (ay*ts + by) / Dy;
-                double tol_r = eps64 * std::max(1.0, S / std::min(Dx, Dy));
+                double tol_r = std::max(eps64, E1 / std::min(Dx, Dy));
                 if (Rxs - Rys > tol_r) { x_gt_y = true; curves_differ = true; }
               }
             }
@@ -189,7 +225,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
         lpm_upm_deg1(Y, ky, s, Ly, Uy);
         double Dx = Lx+Ux, Dy = Ly+Uy;
         double d = Lx/Dx - Ly/Dy;
-        double tol_m = eps64 * std::max(1.0, S / std::min(Dx, Dy));
+        double tol_m = std::max(eps64, E1 / std::min(Dx, Dy));
         if (std::fabs(d) > tol_m) curves_differ = true;
         if (d > tol_m) x_gt_y = true;
       }
@@ -200,7 +236,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
   }
   
   // SSD/TSD gates
-  if (!(X.mn >= Y.mn) || (Y.mean - X.mean > eps64 * S)) return 0;
+  if (!(X.mn >= Y.mn) || (Y.mean - X.mean > E1)) return 0;
   if (identical_samples(X, Y)) return 0;           // identical series -> 0
   
   if (degree==2){ // SSD: compare LPM degree 1
@@ -210,8 +246,8 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
       double Lx, Ux, Ly, Uy; (void)Ux; (void)Uy;   // not used beyond calc
       lpm_upm_deg1(X, kx, t, Lx, Ux);
       lpm_upm_deg1(Y, ky, t, Ly, Uy);
-      if (Lx - Ly > eps64 * S) x_gt_y = true;
-      if (std::fabs(Lx - Ly) > eps64 * S) curves_differ = true;
+      if (Lx - Ly > E1) x_gt_y = true;
+      if (std::fabs(Lx - Ly) > E1) curves_differ = true;
     });
     if (!curves_differ) return 0;                  // equal curves -> no SSD
     return x_gt_y ? 0 : 1;                         // 1 iff "X SSD Y"
@@ -222,8 +258,9 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
   for_each_threshold(X, Y, [&](double t, int kx, int ky, double t_next){
     double Lx2 = lpm_deg2(X, kx, t);
     double Ly2 = lpm_deg2(Y, ky, t);
-    if (Lx2 - Ly2 > eps64 * S * S) x_gt_y = true;
-    if (std::fabs(Lx2 - Ly2) > eps64 * S * S) curves_differ = true;
+    const double tol2 = E2(kx, ky, t);
+    if (Lx2 - Ly2 > tol2) x_gt_y = true;
+    if (std::fabs(Lx2 - Ly2) > tol2) curves_differ = true;
     // LPM2 is piecewise quadratic: on (t, t_next) the difference is
     // a*s^2 - 2*b*s + c with a = kx/mx - ky/my, b = P1x/mx - P1y/my. When
     // a < 0 it has an interior maximum at s* = b / a, which the knots miss.
@@ -234,7 +271,7 @@ inline int sd_dom_pair(const ColPre& X, const ColPre& Y, int degree, bool discre
         double ts = b / a;
         if (ts > t && ts < t_next){
           double Dts = lpm_deg2(X, kx, ts) - lpm_deg2(Y, ky, ts);
-          if (Dts > eps64 * S * S) { x_gt_y = true; curves_differ = true; }
+          if (Dts > E2(kx, ky, ts)) { x_gt_y = true; curves_differ = true; }
         }
       }
     }
@@ -258,7 +295,7 @@ struct DomWorker : public Worker {
     for (std::size_t i = begin; i < end; ++i) {
       const int ii = static_cast<int>(i);  // avoid signed/unsigned compare and index mismatch
       for (int j = 0; j < n; ++j) {
-        D(ii, j) = (ii == j ? 0 : sd_dom_pair(cols[ii], cols[j], degree, discrete));
+        D(ii, j) = (ii == j ? 0 : sd_dom_pair_centred(cols[ii], cols[j], degree, discrete));
       }
     }
   }
@@ -379,7 +416,7 @@ int NNS_FSD_uni_cpp(const NumericVector& x, const NumericVector& y, std::string 
   std::transform(type.begin(), type.end(), type.begin(), ::tolower);
   bool discrete = (type != "continuous");
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
-  return sd_dom_pair(X, Y, 1, discrete);
+  return sd_dom_pair_centred(X, Y, 1, discrete);
 }
 
 // [[Rcpp::export]]
@@ -387,7 +424,7 @@ int NNS_SSD_uni_cpp(const NumericVector& x, const NumericVector& y){
   if (is_true(any(is_na(x))) || is_true(any(is_na(y))))
     stop("You have some missing values, please address.");
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
-  return sd_dom_pair(X, Y, 2, true);
+  return sd_dom_pair_centred(X, Y, 2, true);
 }
 
 // [[Rcpp::export]]
@@ -395,5 +432,5 @@ int NNS_TSD_uni_cpp(const NumericVector& x, const NumericVector& y){
   if (is_true(any(is_na(x))) || is_true(any(is_na(y))))
     stop("You have some missing values, please address.");
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
-  return sd_dom_pair(X, Y, 3, true);
+  return sd_dom_pair_centred(X, Y, 3, true);
 }
