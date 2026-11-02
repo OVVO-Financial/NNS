@@ -12,7 +12,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
-#include <string_view>
+#include <cstring>
 #include <functional>
 #include <algorithm>
 #include <numeric>
@@ -52,10 +52,11 @@ struct DepResult {
 // variance of sum dx dy otherwise.
 // ------------------------------------------------------------
 
+// A plain aggregate, so `return {a, b};` compiles as C++11 too: the package
+// sets no C++ standard, and older R (4.2 on Windows, for one) builds as C++11.
 struct CellCopula {
   double signed_value;  // debiased dependence times the sign of the cell covariance
   double magnitude;     // debiased dependence; may be negative below chance
-  bool constant = false;  // x and y both constant: no within-cell sign
 };
 
 // E0|2 p0 - 1| for a cell of m points with a points at or below the x mean and
@@ -269,6 +270,39 @@ static std::vector<int> value_counts(std::vector<double> v) {
   return counts;
 }
 
+// A partition label: a view of the R string, which stays alive with the
+// CharacterVector it was read from. (std::string_view needs C++17.)
+// Comparisons are bytewise, as std::string_view's are.
+struct Label {
+  const char* p;
+  std::size_t n;
+  std::size_t size() const { return n; }
+};
+
+static inline bool operator<(const Label& a, const Label& b) {
+  const int c = std::memcmp(a.p, b.p, std::min(a.n, b.n));
+  return c < 0 || (c == 0 && a.n < b.n);
+}
+
+static inline bool operator==(const Label& a, const Label& b) {
+  return a.n == b.n && std::memcmp(a.p, b.p, a.n) == 0;
+}
+
+// The first len characters of a and b agree (a shorter label counts whole).
+static inline bool same_prefix(const Label& a, const Label& b, std::size_t len) {
+  const std::size_t la = std::min(a.n, len), lb = std::min(b.n, len);
+  return la == lb && std::memcmp(a.p, b.p, la) == 0;
+}
+
+static std::vector<Label> as_labels(const CharacterVector& q) {
+  std::vector<Label> out(q.size());
+  for (R_xlen_t i = 0; i < q.size(); ++i) {
+    out[i].p = CHAR(STRING_ELT(q, i));
+    out[i].n = std::strlen(out[i].p);
+  }
+  return out;
+}
+
 // Dependence of v on u over every level of a recursive mean-split partition
 // whose cell labels are prefix codes ("q", "q1", "q12", ...): the cells at level
 // l are the label prefixes of length l + 1. Each level's dependence is the
@@ -284,7 +318,7 @@ static std::vector<int> value_counts(std::vector<double> v) {
 // by construction, so it carries no information and scores 0.
 static LevelBest best_level(const std::vector<double>& u,
                             const std::vector<double>& v,
-                            const std::vector<std::string_view>& lab,
+                            const std::vector<Label>& lab,
                             double between_sign, PartitionKind kind,
                             bool u_ties, bool v_ties,
                             std::vector<double>* levels = nullptr) {
@@ -311,7 +345,7 @@ static LevelBest best_level(const std::vector<double>& u,
     starts.clear();
     starts.push_back(0);
     for (int k = 1; k < n; ++k) {
-      if (lab[ord[k]].substr(0, len) != lab[ord[k - 1]].substr(0, len)) starts.push_back(k);
+      if (!same_prefix(lab[ord[k]], lab[ord[k - 1]], len)) starts.push_back(k);
     }
     const int cells = static_cast<int>(starts.size());
     if (cells == prev_cells) continue;  // nested partition unchanged: same value
@@ -349,12 +383,6 @@ static LevelBest best_level(const std::vector<double>& u,
   best.dependence = std::max(0.0, best.dependence);
   best.correlation = std::min(best.dependence, std::max(-best.dependence, best.correlation));
   return best;
-}
-
-static std::vector<std::string_view> as_labels(const CharacterVector& q) {
-  std::vector<std::string_view> out(q.size());
-  for (R_xlen_t i = 0; i < q.size(); ++i) out[i] = std::string_view(CHAR(STRING_ELT(q, i)));
-  return out;
 }
 
 static bool has_ties(std::vector<double> v) {
@@ -479,11 +507,11 @@ static int count_unique(std::vector<double> v) {
 }
 
 static double local_dep_dir(const std::vector<double>& u, const std::vector<double>& v,
-                            const std::vector<std::string_view>& lab,
+                            const std::vector<Label>& lab,
                             bool u_ties, bool v_ties) {
   const int n = static_cast<int>(u.size());
   auto root = [](double inner) { return (inner >= 0.0 ? 1.0 : -1.0) * std::sqrt(std::abs(inner)); };
-  auto cell_value = [&](const std::vector<double>& uq, const std::vector<double>& vq) {
+  auto cell_value = [&](const std::vector<double>& uq, const std::vector<double>& vq) -> double {
     CellKind ck;
     CellCopula c = cell_dependence(uq, vq, u_ties, v_ties, ck, true);
     if (ck == CELL_BOTH_CONST) return 1.0;
