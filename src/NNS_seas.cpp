@@ -84,7 +84,8 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
       const double v = x[i];
       if (rank[j] == 0) first[j] = v;
       last[j] = v;
-      acc[j] += (2.0 * rank[j] + 1.0 - len[j]) * v;
+      // The weights sum to 0, so measuring from the component minimum avoids cancelling a large level.
+      acc[j] += (2.0 * rank[j] + 1.0 - len[j]) * (v - first[j]);
       sum[j] += v;
       ++rank[j];
     }
@@ -92,7 +93,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     for(int j=0;j<m;++j){
       const double k = (double)len[j];
       // a constant component (smallest value = largest) has dispersion 0
-      const double g = (len[j] < 2 || first[j] == last[j]) ? 0.0 : 2.0 * acc[j] / (k * (k - 1.0));
+      const double g = (len[j] < 2 || first[j] == last[j]) ? 0.0 : std::max(0.0, 2.0 * acc[j] / (k * (k - 1.0)));
       wsum += k * (use_cv ? (g == 0.0 ? 0.0 : g / std::fabs(sum[j] / k)) : g);
     }
     return wsum / (double)n;

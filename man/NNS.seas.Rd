@@ -24,7 +24,7 @@ NNS.seas(
 
 \item{plot}{logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.}
 
-\item{detrend}{logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored.}
+\item{detrend}{logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored; an exactly linear variable is then constant and has no seasonal period.}
 
 \item{max.period}{integer; \code{NULL} (default) scans lags up to \code{n / 5}.  A smaller value caps the scan, whose cost grows with \code{n} times the number of lags.}
 
