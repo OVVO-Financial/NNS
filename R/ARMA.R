@@ -296,7 +296,7 @@ NNS.ARMA <- function(variable,
     # A one-point (h = 1) or constant path has no dispersion to resample, and
     # the bootstrap can't target rho on it (#98): the band is the path widened
     # by the per-lag spread alone.
-    if (length(Estimates) < 2L || all(Estimates == Estimates[1L])) {
+    if (length(Estimates) < 2L || length(unique(Estimates[!is.na(Estimates)])) < 2L) {
       PIs <- matrix(Estimates, ncol = 1L)
     } else {
       PIs <- do.call(cbind, NNS.MC(Estimates, lower_rho = -1, upper_rho = 1, by = .2)$replicates)
