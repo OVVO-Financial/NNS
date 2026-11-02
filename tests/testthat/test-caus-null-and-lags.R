@@ -58,13 +58,25 @@ test_that("time series use a circular-shift null, cross-sections a shuffle", {
   expect_identical(NNS.caus(x, y, tau = 1, p.value = TRUE, nperm = 5, seed = 1)$p.value$permute, "shift")
   expect_identical(NNS.caus(x, y, p.value = TRUE, nperm = 5, seed = 1)$p.value$permute, "y")
   # A shift is a rotation at least max(tau + 1, n / 10) steps from alignment.
-  set.seed(3); v <- 1:100
-  for (i in 1:50) {
-    s <- NNS:::.nns_caus_shift(v, 2L)
-    k <- which(s == 1) - 1L                              # s starts at v[k + 1]
-    expect_identical(s, c(v[(101 - k):100], v[1:(100 - k)]))
-    expect_true(min(k, 100 - k) >= 10)
-  }
+  expect_identical(NNS:::.nns_caus_shift_offsets(100, 2L), 10:90)
+  expect_identical(NNS:::.nns_caus_shift(1:100, 30L), c(31:100, 1:30))
+})
+
+test_that("the shift null uses each admissible offset at most once", {
+  # n = 100, tau = 49 admits only offset 50. Drawn 19 times with replacement it
+  # gave p = 1 / 20 whenever the observed statistic beat it.
+  p <- vapply(1:10, function(s) {
+    set.seed(s); x <- rnorm(100); y <- rnorm(100)
+    NNS.caus(x, y, tau = 49, p.value = TRUE, nperm = 19, seed = s)$p.value$two.sided
+  }, numeric(1))
+  expect_true(all(p >= 0.5))
+  set.seed(1); M <- matrix(rnorm(120), 60, 2)
+  r <- NNS.caus(M, tau = 29, p.value = TRUE, nperm = 19, seed = 1)
+  expect_gte(r$p.value_matrix[1, 2], 0.5)
+  set.seed(2); d <- NNS:::.nns_caus_shift_draw(100, 2L, 19)
+  expect_length(d, 19)
+  expect_false(anyDuplicated(d) > 0)
+  expect_true(all(d %in% 10:90))
 })
 
 test_that("the matrix p-value path keeps factor columns numeric", {

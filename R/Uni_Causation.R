@@ -131,14 +131,24 @@
 }
 
 
-# Circular shift of v by a random offset at least max(tau + 1, n / 10) steps
-# from alignment: the series keeps its own dynamics and only its alignment with
-# the other series is broken. The permutation null for time series in NNS.caus.
-.nns_caus_shift <- function(v, tau = 0L) {
-  n <- length(v)
-  if (n < 2L) return(v)
+# Circular shift offsets at least max(tau + 1, n / 10) steps from alignment:
+# the series keeps its own dynamics and only its alignment with the other
+# series is broken. The permutation null for time series in NNS.caus.
+.nns_caus_shift_offsets <- function(n, tau = 0L) {
   m <- max(as.integer(tau) + 1L, as.integer(ceiling(n / 10)))
-  k <- if (n - 2L * m >= 0L) m - 1L + sample.int(n - 2L * m + 1L, 1L) else sample.int(n - 1L, 1L)
+  if (n - 2L * m >= 0L) m:(n - m) else seq_len(n - 1L)
+}
+
+
+# Distinct offsets only: a repeated one adds no information but shrinks the p-value.
+.nns_caus_shift_draw <- function(n, tau, nperm) {
+  K <- .nns_caus_shift_offsets(n, tau)
+  if (length(K) <= nperm) K else K[sample.int(length(K), nperm)]
+}
+
+
+.nns_caus_shift <- function(v, k) {
+  n <- length(v)
   c(v[(k + 1L):n], v[seq_len(k)])
 }
 
