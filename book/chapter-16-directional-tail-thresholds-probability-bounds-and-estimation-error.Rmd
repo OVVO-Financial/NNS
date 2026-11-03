@@ -151,11 +151,13 @@ Suppose \(g < \mu\), where \(\mu = E[X]\), and consider the lower-tail event
 X \le g.
 \]
 
-A classical one-sided Chebyshev argument bounds this probability using only the mean and variance:
+The classical one-sided bound using only the mean and variance is Cantelli's inequality:
 
 \[
-P(X \le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
+P(X \le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]
+
+(Half of Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), holds only for symmetric distributions; Chapter 4 gives a counterexample.)
 
 A directional refinement replaces symmetric standard deviation with semideviation:
 
@@ -163,7 +165,7 @@ A directional refinement replaces symmetric standard deviation with semideviatio
 P(X \le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 \]
 
-where \(\sigma_-\) measures only downside dispersion.
+where \(\sigma_-^2 = E[(\mu-X)_+^2]\) measures only downside dispersion. It is Markov's inequality applied to the lower partial moment, so it holds for every distribution.
 
 A more general bound uses lower partial moments of degree \(\alpha\). Define
 
@@ -277,7 +279,7 @@ A general workflow for directional tail analysis is:
    \]
 
 4. **Bound lower-tail probability conservatively.**  
-   Use one-sided Chebyshev, semivariance, and Atwood-style lower-partial-moment bounds to assess worst-case violation probabilities.
+   Use Cantelli, semivariance, and Atwood-style lower-partial-moment bounds to assess worst-case violation probabilities.
 
 5. **Compare with parametric approximations if relevant.**  
    Large discrepancies indicate model risk in the tail.
