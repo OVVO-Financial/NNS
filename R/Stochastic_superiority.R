@@ -147,9 +147,13 @@ NNS.SS <- function(x,
   
   empirical <- stoch_superiority_cpp(x = x, y = y)
   
-  # NNS maximum-entropy bootstrap replicates
-  x_boots <- NNS::NNS.meboot(x = x, reps = reps, rho = rho)["replicates", ]$replicates
-  y_boots <- NNS::NNS.meboot(x = y, reps = reps, rho = rho)["replicates", ]$replicates
+  # NNS maximum-entropy bootstrap replicates; a constant group's bootstrap is the constant itself
+  boots <- function(g) {
+    if (length(unique(g)) == 1L) return(matrix(g, length(g), reps))
+    NNS::NNS.meboot(x = g, reps = reps, rho = rho)["replicates", ]$replicates
+  }
+  x_boots <- boots(x)
+  y_boots <- boots(y)
   
   boot_vals <- vapply(seq_len(reps), function(i) {
     stoch_superiority_cpp(
