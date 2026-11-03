@@ -15,14 +15,20 @@ two_cycles <- function() {
 
 run_optim <- function(...) NNS.ARMA.optim(..., ncores = 1, print.trace = FALSE)
 
-test_that("the lin search scores forecasts with negative.values", {
+validation_forecast <- function(o, actual, negative.values = FALSE) {
+  p <- o$errors + actual + o$bias.shift
+  if (negative.values) p else pmax(0, p)
+}
+
+test_that("the lin model forecasts with negative.values", {
   t <- 1:160
   x <- pmax(0.1, 20 - 0.15 * t + sin(2 * pi * t / 12))
   o <- run_optim(x, training.set = 128, seasonal.factor = 12, lin.only = TRUE,
              negative.values = TRUE, obj.fn = mse)
   p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = 12, method = "lin",
                 negative.values = TRUE, plot = FALSE)
-  expect_equal(o$obj.fn, mean((p - tail(x, 32))^2))
+  expect_equal(o$errors, p - tail(x, 32))
+  expect_equal(o$obj.fn, mean((validation_forecast(o, tail(x, 32), TRUE) - tail(x, 32))^2))
 })
 
 test_that("linear.approximation = FALSE evaluates the nonlin method", {
@@ -31,15 +37,18 @@ test_that("linear.approximation = FALSE evaluates the nonlin method", {
   p <- NNS.ARMA(x, training.set = 84, h = 12, seasonal.factor = 12, method = "nonlin", plot = FALSE)
   expect_equal(o$method, "nonlin")
   expect_equal(as.numeric(o$periods), 12)
-  expect_equal(o$obj.fn, default_score(p, tail(x, 12)))
+  expect_equal(o$errors, p - tail(x, 12))
+  expect_equal(o$obj.fn, default_score(validation_forecast(o, tail(x, 12)), tail(x, 12)))
 })
 
 test_that("the both stage is scored with NNS.ARMA(method = \"both\")", {
   x <- random_walk(5)
   o <- run_optim(x, training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
-  p <- NNS.ARMA(x, training.set = 80, h = 20, seasonal.factor = 2, method = "both", plot = FALSE)
+  p <- NNS.ARMA(x, training.set = 80, h = 20, seasonal.factor = 2, method = "both",
+                shrink = o$shrink, plot = FALSE)
   expect_equal(o$method, "both")
-  expect_equal(o$obj.fn, mean((p - tail(x, 20))^2))
+  expect_equal(o$errors, p - tail(x, 20))
+  expect_equal(o$obj.fn, mean((validation_forecast(o, tail(x, 20)) - tail(x, 20))^2))
 })
 
 test_that("equal weights are selected when they score better", {
@@ -63,8 +72,9 @@ test_that("obj.fn is the equal-weights score when equal weights win (min)", {
   x <- two_cycles()
   o <- run_optim(x, h = 10, seasonal.factor = c(7, 12), obj.fn = mse)
   p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = o$method,
-                weights = c(0.5, 0.5), plot = FALSE)
-  expect_equal(o$obj.fn, mean((p - tail(x, 32))^2))
+                weights = c(0.5, 0.5), shrink = o$shrink, plot = FALSE)
+  expect_equal(o$errors, p - tail(x, 32))
+  expect_equal(o$obj.fn, mean((validation_forecast(o, tail(x, 32)) - tail(x, 32))^2))
 })
 
 test_that("obj.fn is the equal-weights score when equal weights win (max)", {
@@ -72,8 +82,9 @@ test_that("obj.fn is the equal-weights score when equal weights win (max)", {
   o <- run_optim(x, h = 10, seasonal.factor = c(7, 12), objective = "max",
              obj.fn = expression(-mean((predicted - actual)^2)))
   p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = o$method,
-                weights = c(0.5, 0.5), plot = FALSE)
-  expect_equal(o$obj.fn, -mean((p - tail(x, 32))^2))
+                weights = c(0.5, 0.5), shrink = o$shrink, plot = FALSE)
+  expect_equal(o$errors, p - tail(x, 32))
+  expect_equal(o$obj.fn, -mean((validation_forecast(o, tail(x, 32)) - tail(x, 32))^2))
 })
 
 test_that("nns.regress is not selected by a smooth that saw the validation window", {
@@ -97,4 +108,29 @@ test_that("nns.regress must beat the accepted shrink score", {
   o <- run_optim(random_walk(5), training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
   expect_true(o$shrink)
   expect_false(o$nns.regress)
+})
+
+trend_cycles <- function() {
+  set.seed(1)
+  t <- 1:160
+  50 + 0.05 * t + 5 * sin(2 * pi * t / 12) + 4 * sin(2 * pi * t / 7) + rnorm(160, sd = 1.5)
+}
+
+shrink_vs_equal_weights <- function(objective, obj.fn) {
+  x <- trend_cycles()
+  o <- run_optim(x, h = 10, seasonal.factor = c(7, 12), lin.only = TRUE, objective = objective, obj.fn = obj.fn)
+  p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = "lin",
+                weights = c(0.5, 0.5), plot = FALSE)
+  expect_equal(o$weights, c(0.5, 0.5))
+  expect_false(o$shrink)
+  expect_equal(o$errors, p - tail(x, 32))
+}
+
+# Equal weights score 12.04 and no weights 12.67, so shrink at 12.40 must lose to the equal-weights score.
+test_that("shrink is tested against the equal-weights score (min)", {
+  shrink_vs_equal_weights("min", mse)
+})
+
+test_that("shrink is tested against the equal-weights score (max)", {
+  shrink_vs_equal_weights("max", expression(-mean((predicted - actual)^2)))
 })

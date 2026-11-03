@@ -60,7 +60,7 @@ Returns a list containing:
 \itemize{
 \item{\code{$period}} a vector of optimal seasonal periods
 \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
-\item{\code{$obj.fn}} the objective function value
+\item{\code{$obj.fn}} the \code{obj.fn} value of the returned model's internal validation forecasts, after \code{$bias.shift}.
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.

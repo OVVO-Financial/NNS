@@ -22,7 +22,7 @@
 #' \itemize{
 #' \item{\code{$period}} a vector of optimal seasonal periods
 #' \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
-#' \item{\code{$obj.fn}} the objective function value
+#' \item{\code{$obj.fn}} the \code{obj.fn} value of the returned model's internal validation forecasts, after \code{$bias.shift}.
 #' \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 #' \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 #' \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.
@@ -447,6 +447,8 @@ NNS.ARMA.optim <- function(variable,
   if(!isTRUE(if(objective == "min") bias.SSE < model.SSE else bias.SSE > model.SSE)) bias <- 0
   final.predicted <- final.predicted - bias
   if(!negative.values) final.predicted <- pmax(0, final.predicted)
+  predicted <- final.predicted
+  final.SSE <- eval(obj.fn)
   
   residuals <- actual - final.predicted
   lower_PIs_is <- final.predicted + LPM.VaR((1-pred.int)/2, 0, residuals)
@@ -523,7 +525,7 @@ NNS.ARMA.optim <- function(variable,
   
   return(.NNS.out(list(periods = nns.periods,
               weights = nns.weights,
-              obj.fn = nns.SSE,
+              obj.fn = final.SSE,
               method = nns.method,
               shrink = nns.shrink,
               nns.regress = nns.regress,
