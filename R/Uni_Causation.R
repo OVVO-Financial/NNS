@@ -229,7 +229,8 @@ NNS.caus_core <- function(x, y = NULL,
 
   if(is.null(y)) {
     return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot,
-                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed))
+                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed,
+                           permute = match.arg(permute)))
   }
 
   if(is.factor(y)) y <- as.numeric(y)
