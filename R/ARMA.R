@@ -170,7 +170,8 @@ NNS.ARMA <- function(variable,
   Lin.Reg.Estimates <- list()
   Regression.Estimates_means <- list()
   
-  if (method == "lin" && is.numeric(seasonal.factor) && length(seasonal.factor) == 1) {
+  # Shrunk estimates leave the fitted line, so steps past the lag need the recursive refit below.
+  if (method == "lin" && !shrink && is.numeric(seasonal.factor) && length(seasonal.factor) == 1) {
     for(k in lag) {
       lag.idx <- which(k == lag)
       GV.lin <- generate.lin.vectors(variable, lag[lag.idx], h)
@@ -185,10 +186,6 @@ NNS.ARMA <- function(variable,
       })
       
       Lin.Reg.Estimates[[lag.idx]] <- unlist(Lin.Regression.Estimates)[order(unlist(GV.lin$forecast.index))] * Weights[lag.idx]
-      if((method=="means") || shrink){
-        Regression.Estimates_means <- unlist(lapply(GV.lin$Component.series, function(x) mean(x) * Weights[lag.idx]) )
-        if(shrink) Lin.Reg.Estimates[[lag.idx]] <- (Lin.Reg.Estimates[[lag.idx]] + Regression.Estimates_means) / 2 else Lin.Reg.Estimates <- Regression.Estimates_means
-      }
     }
     
     # Calculate weighted sum of regression estimates for each lag
@@ -267,6 +264,8 @@ NNS.ARMA <- function(variable,
         })
         
         Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
+        # A single lag longer than the history has nothing to fit: NaN, as the direct path gives.
+        if (length(lag) == 1 && length(Lin.Regression.Estimates) == 0) Lin.Regression.Estimates <- NaN
         
         if ((method == "means") || shrink) {
           Regression.Estimates_means <- sapply(Component.series, mean)
