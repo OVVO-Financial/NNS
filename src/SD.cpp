@@ -336,8 +336,45 @@ static inline double repeatMultiplication(double value, int n) {
   return result;
 }
 
+// Efficient: members of a dominance-cycle component (SCC) that no column outside it dominates.
+static std::vector<char> undominated_components(const IntegerMatrix& D){
+  const int n = D.nrow();
+  std::vector<int> fin; fin.reserve(n);
+  std::vector<char> seen(n, 0);
+  std::vector<std::pair<int,int>> st;
+  for (int s=0;s<n;++s){
+    if (seen[s]) continue;
+    seen[s] = 1; st.push_back({s, 0});
+    while (!st.empty()){
+      const int v = st.back().first;
+      int j = st.back().second;
+      while (j<n && !(D(v,j)==1 && !seen[j])) ++j;
+      st.back().second = j;
+      if (j<n){ seen[j] = 1; st.push_back({j, 0}); }
+      else { fin.push_back(v); st.pop_back(); }
+    }
+  }
+  std::vector<int> comp(n, -1), stk;
+  int nc = 0;
+  for (int a=n-1;a>=0;--a){
+    if (comp[fin[a]]>=0) continue;
+    comp[fin[a]] = nc; stk.push_back(fin[a]);
+    while (!stk.empty()){
+      const int v = stk.back(); stk.pop_back();
+      for (int i=0;i<n;++i) if (D(i,v)==1 && comp[i]<0){ comp[i] = nc; stk.push_back(i); }
+    }
+    ++nc;
+  }
+  std::vector<char> entered(nc, 0);
+  for (int j=0;j<n;++j) for (int i=0;i<n;++i)
+    if (D(i,j)==1 && comp[i]!=comp[j]) entered[comp[j]] = 1;
+  std::vector<char> keep(n);
+  for (int k=0;k<n;++k) keep[k] = !entered[comp[k]];
+  return keep;
+}
+
 // =====================================================================
-// Export: Efficient set (LPM(1, tmax, ·) order + single scan)
+// Export: Efficient set (undominated components of the dominance graph)
 // =====================================================================
 // [[Rcpp::export]]
 CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, std::string type="discrete", bool status=true){
@@ -353,7 +390,7 @@ CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, s
   std::vector<ColPre> cols; cols.reserve(n);
   for (int j=0;j<n;++j) cols.push_back(precompute_col(X, j));
   
-  // ===== order by LPM(degree, tmax, ·) =====
+  // ===== output order: LPM(degree, tmax, ·) =====
   std::vector<double> lpm_vals(n, 0.0);
   std::vector<int> non_na_counts(n, 0);
   
@@ -392,14 +429,12 @@ CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, s
   
   IntegerMatrix D = sd_dom_matrix_prefix_parallel(Xo, degree, type);
   
-  // single pass to keep maximal elements
+  std::vector<char> efficient = undominated_components(D);
   LogicalVector keep(n);
   for (int k=0;k<n;++k){
     if (status){ if (k<n-1) Rcpp::Rcout << "Checking " << (k+1) << " of " << (n-1) << "\r";
     if (k==n-1) Rcpp::Rcout << std::string(40,' ') << "\n"; }
-    bool dominated=false;
-    for (int i=0;i<k;++i) if (keep[i] && D(i,k)==1){ dominated=true; break; }
-    keep[k] = !dominated;
+    keep[k] = efficient[k];
   }
   std::vector<std::string> out; out.reserve(n);
   for (int k=0;k<n;++k) if (keep[k]) out.push_back( as<std::string>(names_sorted[k]) );

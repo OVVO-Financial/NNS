@@ -104,3 +104,33 @@ test_that("an infinite value doesn't stop the centred comparison", {
   a <- c(0, 1, Inf); b <- c(0, 1, 2)
   expect_equal(c(NNS.SSD.uni(a, b), NNS.TSD.uni(a, b), NNS.FSD.uni(a, b, "continuous")), c(0, 0, 0))
 })
+
+test_that("the efficient set does not depend on column order", {
+  x <- c(-1, -1, 2); y <- c(-2, 1, 1)
+  expect_equal(NNS.FSD.uni(x, y, "continuous"), 1)
+  expect_identical(NNS.SD.efficient.set(cbind(Y = y, X = x), 1, "continuous", status = FALSE), "X")
+  expect_identical(NNS.SD.efficient.set(cbind(X = x, Y = y), 1, "continuous", status = FALSE), "X")
+  expect_identical(NNS.SD.cluster(cbind(Y = y, X = x), 1, "continuous")$Clusters,
+                   NNS.SD.cluster(cbind(X = x, Y = y), 1, "continuous")$Clusters)
+
+  a <- 0:5; h <- 3 * 2^-44
+  M <- cbind(A = a, B = a + h * c(0, -2, 3, 0, -1, 0), C = a + h * c(0, -1, 0, 3, -2, 0))
+  D <- NNS:::sd_dom_matrix_prefix_parallel(M, 2L, "discrete")
+  expect_identical(D[cbind(c(1, 2, 3), c(2, 3, 1))], rep(1L, 3))
+  for (p in list(1:3, c(2, 3, 1), c(3, 2, 1), c(2, 1, 3)))
+    expect_setequal(NNS.SD.efficient.set(M[, p], 2, status = FALSE), c("A", "B", "C"))
+
+  differ <- character(0)
+  for (s in 1:200) {
+    set.seed(s)
+    nc <- sample(4:6, 1)
+    M <- matrix(sample(-3:3, 5 * nc, replace = TRUE), 5, nc, dimnames = list(NULL, paste0("C", 1:nc)))
+    p <- sample(nc)
+    for (d in 1:3) for (type in if (d == 1) c("discrete", "continuous") else "discrete") {
+      if (!setequal(NNS.SD.efficient.set(M[, p], d, type, status = FALSE),
+                    NNS.SD.efficient.set(M, d, type, status = FALSE)))
+        differ <- c(differ, paste(s, d, type))
+    }
+  }
+  expect_identical(differ, character(0))
+})
