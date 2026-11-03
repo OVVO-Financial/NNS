@@ -46,3 +46,31 @@ test_that("NNS.copula is 0 on an independent grid at a boundary target", {
   expect_equal(NNS.copula(expand.grid(0:1, 0:1), target = c(0, 1)), 0)
   expect_equal(NNS.copula(expand.grid(0:1, 0:1, 0:2), target = c(0, 0, 0)), 0)
 })
+
+test_that("NNS.copula is 0 when every margin lies on one side of its target", {
+  # Each pair is then trivially concordant or discordant; these returned 1.
+  g <- expand.grid(x = 1:10, y = 1:10)
+  expect_identical(NNS.copula(g, target = c(0, 0)), 0)
+  expect_identical(NNS.copula(g, target = c(0, 0), continuous = FALSE), 0)
+  expect_identical(NNS.copula(g, target = c(10, 10)), 0)
+  expect_identical(NNS.copula(g, target = c(0, 11)), 0)
+  expect_identical(NNS.copula(expand.grid(1:4, 1:4, 1:4), target = c(0, 0, 0)), 0)
+  set.seed(8); z <- cbind(rexp(1000), rexp(1000))
+  expect_identical(NNS.copula(z, target = c(0, 0)), 0)
+  x <- 1:10
+  expect_identical(NNS.copula(cbind(x, x), target = c(0, 0)), 0)
+  b <- cbind(rep(c(0, 1), 50), rep(c(1, 0), 50))
+  expect_identical(NNS.copula(b, target = c(1, 1)), 0)
+  expect_identical(NNS.copula(b, target = c(1, 1), continuous = FALSE), 0)
+})
+
+test_that("NNS.copula is 1 for perfect dependence at targets inside the data", {
+  x <- 1:10
+  for (cont in c(TRUE, FALSE)) {
+    expect_equal(NNS.copula(cbind(x, x), continuous = cont), 1)
+    expect_equal(NNS.copula(cbind(x, -x), continuous = cont), 1)
+    expect_equal(NNS.copula(cbind(x, 2 * x + 1), target = c(3, 7), continuous = cont), 1)
+    expect_equal(NNS.copula(cbind(x, -x), target = c(3.5, -3.5), continuous = cont), 1)
+    expect_equal(NNS.copula(cbind(x, x, -x), target = c(3.5, 3.5, -3.5), continuous = cont), 1)
+  }
+})

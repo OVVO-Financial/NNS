@@ -8,7 +8,7 @@
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
 #'
-#' @return Returns a multivariate dependence value [0,1]. Each co-partial moment is compared with its value under independence, the product of the marginal partial moments at \code{target}, so independent variables give a value near 0 for any target and marginal distributions.
+#' @return Returns a multivariate dependence value [0,1]. Each co-partial moment is compared with its value under independence, the product of the marginal partial moments at \code{target}, so independent variables give a value near 0 for any target and marginal distributions.  At a target with every variable's observations on one side of it, each co-partial moment equals its independence value whatever the dependence, so the value is 0.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \doi{10.2139/ssrn.2745308}.
@@ -87,8 +87,13 @@ NNS.copula <- function (
   utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
   discrete_Co_pm <- sum(discrete_pm_cov$cupm[utr]) + sum(discrete_pm_cov$clpm[utr]) 
   # Perfect dependence: every pair fully concordant (1) or fully discordant (0).
+  # A margin with every observation on one side of its target makes that trivially true.
+  lower_share <- vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1))
+  # Every co-partial moment then equals its independence product.
+  if(all(lower_share == 0 | lower_share == 1)) return(0)
   pair_Co_pm <- discrete_pm_cov$cupm[utr] + discrete_pm_cov$clpm[utr]
-  if(all(abs(pair_Co_pm - 1) < 1e-9 | abs(pair_Co_pm) < 1e-9)) return(1)
+  if(all(lower_share > 0 & lower_share < 1) &&
+     all(abs(pair_Co_pm - 1) < 1e-9 | abs(pair_Co_pm) < 1e-9)) return(1)
   
   
   if(continuous){
@@ -106,7 +111,7 @@ NNS.copula <- function (
   
   # Independence anchors from each margin's own lower-tail share, so they hold at any target
   indep_anchors <- function(p) list(Co = sum((outer(p, p) + outer(1 - p, 1 - p))[utr]), D = 1 - prod(p) - prod(1 - p))
-  discrete_indep <- indep_anchors(vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1)))
+  discrete_indep <- indep_anchors(lower_share)
   continuous_indep <- if(continuous) indep_anchors(vapply(seq_len(n), function(j) LPM.ratio(1, target[j], X[ , j]), numeric(1))) else discrete_indep
   # A boundary target can zero an anchor; an observed 0 then matches it exactly
   rel_dev <- function(obs, indep) if(obs == indep) 0 else abs(obs - indep)/indep
