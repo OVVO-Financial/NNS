@@ -48,9 +48,10 @@ test_that("NNS.gravity / NNS.mode stay fast with a tight IQR and an outlier", {
   expect_equal(g, 5, tolerance = 1e-3)
   expect_equal(m, 5, tolerance = 1e-5)
   # Tiny histograms (<= 3 bins) are well defined; tied modes resolve to the
-  # one nearest the gravity (0.375), not their average.
+  # one nearest the gravity, then the lower value, not their average. The
+  # gravity is 0.5, halfway (0.375 before #117), so the tie goes to 0.
   expect_equal(NNS.mode(c(0, 0, 1, 1), multi = FALSE), 0)
-  expect_equal(NNS.gravity(c(0, 0, 1, 1)), 0.375)
+  expect_equal(NNS.gravity(c(0, 0, 1, 1)), 0.5)
 })
 
 test_that("vector generators do not read out of bounds or divide by zero", {
@@ -85,7 +86,8 @@ test_that("vectorised UPM / UPM.ratio keep relative accuracy just below the maxi
 test_that("discrete NNS.mode keeps tied modes beyond the int range apart", {
   x <- c(3e9, 3e9, -5e9, -5e9, 1)
   expect_identical(NNS.mode(x, discrete = TRUE, multi = TRUE), c(-5e9, 3e9))
-  expect_identical(NNS.mode(x, discrete = TRUE, multi = FALSE), -5e9)
+  # The tie goes to the mode nearest the gravity, -6.5e8 (the median is 1).
+  expect_identical(NNS.mode(x, discrete = TRUE, multi = FALSE), 3e9)
 })
 
 test_that("discrete NNS.mode returns the tied mode nearest the gravity, not their mean", {

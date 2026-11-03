@@ -20,7 +20,8 @@ command -v pandoc >/dev/null || { echo "pandoc is required" >&2; exit 1; }
 mkdir -p "$OUT"
 
 rsync -a --delete \
-  --include='*.html' --include='*.pdf' \
+  --include='*/' --include='*.html' --include='*.pdf' \
+  --include='*.R' --include='*.Rmd' \
   --include='*.png' --include='*.jpg' --include='*.css' \
   --exclude='*' "$SRC/" "$OUT/"
 

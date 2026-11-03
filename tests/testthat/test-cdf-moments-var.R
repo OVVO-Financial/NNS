@@ -14,11 +14,12 @@ test_that("degree-0 survival for d = 3 matches strict joint counts with ties", {
                strict_joint_survival(A, t), tolerance = 1e-12)
 })
 
-test_that("bivariate hazard target.value equals the row value at that target", {
+test_that("unsupported multivariate hazard never returns a CDF divided by survival", {
   set.seed(7)
   A <- matrix(rnorm(80), ncol = 2)
-  out <- NNS.CDF(A, 0, target = A[5, ], type = "hazard", plot = FALSE)
-  expect_equal(out$target.value, out$Function[[3]][5], tolerance = 1e-12)
+  expect_error(NNS.CDF(A, 0, target = A[5, ], type = "hazard", plot = FALSE),
+               "joint density or coordinate-hazard definition")
+  expect_error(NNS.CDF(A, 1, type = "hazard", plot = FALSE), "not implemented")
 })
 
 test_that("bivariate cumulative hazard target.value equals the row value at that target", {
@@ -108,11 +109,11 @@ test_that("degree-0 joint survival with many columns is the joint upper share", 
   expect_equal(h, pmax(-log(pmax(s, 1e-10)), 0))
 })
 
-test_that("multivariate hazards need degree 0 (#100)", {
+test_that("multivariate cumulative hazard needs degree 0 (#100)", {
   X <- cbind(c(0, 1, 2, 3), c(0, 2, 1, 3))
-  expect_error(NNS.CDF(X, degree = 1, type = "hazard", plot = FALSE), "needs degree = 0")
+  expect_error(NNS.CDF(X, degree = 1, type = "hazard", plot = FALSE), "not implemented")
   expect_error(NNS.CDF(X, degree = 1, type = "cumulative hazard", plot = FALSE), "needs degree = 0")
-  expect_true(is.list(NNS.CDF(X, degree = 0, type = "hazard", plot = FALSE)))
+  expect_true(is.list(NNS.CDF(X, degree = 0, type = "cumulative hazard", plot = FALSE)))
   # One dimension at degree 1 is a proper distribution function and keeps its hazards.
   set.seed(1)
   expect_true(all(is.finite(NNS.CDF(rnorm(50), degree = 1, type = "hazard", plot = FALSE)$Function[[2]])))

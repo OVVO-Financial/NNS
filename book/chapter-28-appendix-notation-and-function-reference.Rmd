@@ -8,7 +8,7 @@ Unless otherwise noted, all functions in this appendix come from the **NNS** pac
 library(NNS)
 ```
 
-Every function referenced here has a Python counterpart in the `nns` package (distributed as `ovvo-nns`; see the Preface for conventions):
+The crosswalk gives the intended Python counterpart names in the `nns` package (distributed as `ovvo-nns`; see the Preface for conventions). R is the canonical implementation for this edition. New arguments, output labels, and numerical repairs must be checked against the installed Python version before assuming implementation parity:
 
 ```python
 import nns
@@ -21,7 +21,7 @@ The R name is the canonical reference used throughout the book; the Python name 
 | R function | Python function | Purpose |
 |---|---|---|
 | `LPM` / `UPM` | `nns.lpm` / `nns.upm` | Lower / upper partial moments |
-| `LPM.ratio` / `UPM.ratio` | `nns.lpm_ratio` / `nns.upm_ratio` | Directional CDF-style probabilities |
+| `LPM.ratio` / `UPM.ratio` | `nns.lpm_ratio` / `nns.upm_ratio` | Frequency probabilities at degree zero; directional area shares at positive degrees |
 | `LPM.VaR` / `UPM.VaR` | `nns.lpm_var` / `nns.upm_var` | Lower / upper tail quantile inversion |
 | `Co.LPM` / `Co.UPM` | `nns.co_lpm` / `nns.co_upm` | Concordant co-partial moments |
 | `D.LPM` / `D.UPM` | `nns.d_lpm` / `nns.d_upm` | Divergent co-partial moments |
@@ -57,8 +57,8 @@ The R name is the canonical reference used throughout the book; the Python name 
 | $(t-X)^+$ | $\max(t-X,0)$ | Deviation below benchmark $t$ | internal to `LPM(...)` |
 | $L_r(t;X)$ | $E[(t-X)_+^r]$ | Lower partial moment, degree $r$ | `LPM(r, t, X)` |
 | $U_r(t;X)$ | $E[(X-t)_+^r]$ | Upper partial moment, degree $r$ | `UPM(r, t, X)` |
-| $L_r/(L_r+U_r)$ | Degree-$r$ lower ratio | Directional CDF-style probability below $t$ | `LPM.ratio(r, t, X)` |
-| $U_r/(L_r+U_r)$ | Degree-$r$ upper ratio | Directional probability above $t$ | `UPM.ratio(r, t, X)` |
+| $L_r/(L_r+U_r)$ | Degree-$r$ lower ratio | Frequency below $t$ at degree zero; lower severity share otherwise | `LPM.ratio(r, t, X)` |
+| $U_r/(L_r+U_r)$ | Degree-$r$ upper ratio | Frequency above $t$ at degree zero; upper severity share otherwise | `UPM.ratio(r, t, X)` |
 
 ## Co-partial moments, dependence, and causation
 
@@ -75,26 +75,26 @@ The R name is the canonical reference used throughout the book; the Python name 
 | Symbol | Definition / role | R function |
 |---|---|---|
 | $F^{(0)}(t)$ | Degree-zero empirical CDF (step measure) | `ecdf(x)(t)` or `LPM.ratio(0, t, x)` |
-| $F^{(1)}(t)$ | Degree-one continuous CDF-style ratio | `LPM.ratio(1, t, x)` |
+| $F^{(1)}(t)$ | Degree-one area ratio: the share of deviation area below $t$, not $P(X \le t)$ | `LPM.ratio(1, t, x)` |
 | $p = P(X' > Y')$ | Directional exceedance probability for pairwise comparison | estimated by cross-sample indicator averages |
-| $\text{Certainty}_{\text{ANOVA}}$ | NNS ANOVA agreement certainty from CDF benchmark deviations ($1$ = strongest agreement) | `NNS.ANOVA(...)` |
-| FSD / SSD / TSD | First-, second-, third-order stochastic dominance | `NNS.FSD(...)`, `NNS.SSD(...)`, `NNS.TSD(...)` |
+| $\text{Certainty}_{\text{ANOVA}}$ | Descriptive target agreement with a finite-sample adjustment; not a p-value or power | `NNS.ANOVA(...)` |
+| FSD / SSD / TSD | Ordinary dominance at the stated orders; the legacy continuous FSD option instead uses Omega/expectile order | `NNS.FSD(...)`, `NNS.SSD(...)`, `NNS.TSD(...)` |
 | $Q^-_{d}(\alpha)$ | Lower degree-$d$ quantile | `LPM.VaR(alpha, degree = d, x)` |
 | $Q^+_{d}(\alpha)$ | Upper degree-$d$ quantile | `UPM.VaR(alpha, degree = d, x)` |
-| PI$_{1-\alpha}$ | Prediction interval $[Q^-_d(\alpha/2),Q^+_d(\alpha/2)]$ | `LPM.VaR(...)` + `UPM.VaR(...)` |
+| Directional band | $[Q^-_d(\alpha/2),Q^+_d(\alpha/2)]$: frequency target at degree zero, severity target otherwise; future coverage needs validation | `LPM.VaR(...)` + `UPM.VaR(...)` |
 
 
 
-`LPM.VaR(percentile, degree, variable)`
-Lower-tail threshold operator obtained by inverting the degree-specific lower partial-moment probability representation.
+`LPM.VaR(percentile, degree, x)`
+Lower-tail threshold operator obtained by inverting the degree-specific lower partial-moment representation.
 Interpretation by degree:
 
-* `degree = 0`: empirical-CDF lower quantile,
+* `degree = 0`: type-7 interpolated empirical lower quantile,
 * `degree = 1`: severity-weighted lower threshold based on directional magnitude,
 * `degree = 2`: extreme-deviation-sensitive lower threshold.
   In finance, the degree-zero case is commonly called VaR, but the operator is more general than that label.
 
-`UPM.VaR(percentile, degree, variable)`
+`UPM.VaR(percentile, degree, x)`
 Upper-tail analog of `LPM.VaR`, used for right-tail threshold selection and interval construction.
 
 
@@ -109,38 +109,48 @@ To maintain continuity with Chapter 22's directional decision-region framing, th
 | Parametric VaR / empirical quantile VaR | Tail-loss thresholding | `LPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Degree controls sensitivity to tail severity beyond degree-0 quantiles. |
 | Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
 | Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
-| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Directionality can be nonlinear and state dependent. |
-| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree_lpm, x, y, target_x, target_y)` / `Co.UPM(degree_upm, x, y, target_x, target_y)` | Chapter 4 | Co.LPM captures concurrent downside structure; Co.UPM is the upper-tail counterpart for joint directional events. |
-| Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapter 17 | Produces directional prediction intervals without normality assumptions. |
+| Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Measures directional lagged association; does not by itself identify a structural cause or condition on own-history dynamics. |
+| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree_lpm, x, y, target_x, target_y)` / `Co.UPM(degree_upm, x, y, target_x, target_y)` | Chapter 4 | Degree zero counts joint events; positive degrees measure joint directional magnitudes, with the requisite finite moments. |
+| Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapter 17 | Constructs directional thresholds without selecting a normal family; coverage requires a separate sampling and calibration argument. |
 
 
 ## Regression and forecasting workflow objects
 
 | Symbol | Definition / role | R function | Reference chapter |
 |---|---|---|---|
-| $\hat y = \hat E[Y\mid X]$ | NNS conditional mean estimate | `NNS.reg(x, y)` | Chapter 22 |
-| Residual local distribution | Partition-level error distribution | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 22 |
-| $\widehat{PI}(x_0)$ | Conditional prediction interval at $x_0$ | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 17 |
+| $\hat m_{NNS}(x)$ | NNS fitted location; the mean reducer targets conditional means under the stated conditions | `NNS.reg(x, y)` | Chapter 22 |
+| Global residual distribution | Pooled in-sample residuals, not a local conditional error law | via `NNS.reg(...)$Fitted.xy$residuals` outputs | Chapter 22 |
+| Residual band at $x_0$ | Fitted location plus global residual-quantile offsets | `NNS.reg(..., point.est = x0, confidence.interval = ...)` | Chapter 17 |
 | Regime-specific directional dependence | Time-local / state-local dependence | `NNS.dep(...)` on rolling/segmented windows | Chapter 10 |
 
 ## A.3 Technical Note: Adaptive Order and Consistency Conditions
 
-Chapter 18 established two core consistency conditions for recursive mean-split regression:
+Chapter 18 gives a conditional consistency argument for cell means under an
+appropriate sampling and partition design. Its assumptions include shrinking
+cell diameters, diverging local occupancy, control of conditional variation,
+and appropriate locality of any subsequent interpolation or averaging.
+Response-adaptive partition selection requires its own conditions; a proof for
+predictor-only partitions cannot simply be reused after selection on outcomes.
 
-1. **Shrinking cell diameter** at each target location so local bias vanishes,
-2. **Growing cell occupancy** so local sample averages stabilize.
+The current default order heuristic is bounded. A fixed minimum cell size does
+not establish diverging occupancy, and a bound on depth does not establish
+shrinking diameter as the sample grows. The default implementation therefore
+does not inherit a universal consistency theorem or an oracle convergence rate
+from the abstract construction. Such claims require a specified sequence of
+depths/neighbour counts and a proof that the actual estimator satisfies the
+conditions. Other location reducers, including gravity, need analysis for their
+own targets rather than an automatic conditional-mean claim.
 
-When `order = NULL`, the implementation determines effective recursion depth per regressor from directional dependence with the response (`NNS.dep`-style logic). This modifies how quickly local cells contract across predictors, but it does not alter the fundamental structure of the consistency argument.
+## Validation and compatibility choices
 
-High-dependence predictors are allocated deeper partitioning, so their local diameters contract faster in regions where signal is strong. Low-dependence predictors are partitioned more conservatively, preserving broader local averaging where aggressive refinement would primarily amplify noise. Occupancy control remains enforced through the minimum cell-size rule.
+| Function | Current choice | Interpretation |
+|---|---|---|
+| `NNS.ARMA.optim` | `bias.correction = "split"`, `"none"`, or `"legacy"` | Split estimates the shift earlier and accepts it later within internal validation; outer evaluation is still needed. |
+| `NNS.VAR` | `validation = "pipeline"` or `"observed"` | Pipeline predicts the held-out feature rows from the earlier origin; observed is the conditional-regression compatibility mode. |
+| `NNS.seas` | `dispersion = "auto"` or `"absolute"` | Auto preserves the historical sign-based CV/Gini choice; absolute supports translation-invariant interval-scale comparisons. |
+| `NNS.meboot` | `expand.sd` and `expand.residual.sd` | Level and residual expansion are separate; `force.clt` uses an iid mean-scale reference. |
+| `NNS.FSD` | `type = "continuous"` | Numerical area order is retained and returns `OMEGA` result labels. |
 
-The resulting estimator is therefore **locally adaptive in rate**:
-
-- in high-signal regions, convergence tracks a faster path closer to an oracle fixed-order choice for that local structure;
-- in low-signal regions, the estimator intentionally retains coarser cells, exchanging some local bias for improved stability.
-
-A concise takeaway is:
-
-> Under the Chapter 18 regularity conditions (shrinking local diameters and diverging local occupancy), dependence-driven order allocation preserves the same bias–variance decomposition used for consistency arguments, while allowing refinement to concentrate where dependence signal is stronger.
-
-The key practical point is that internal adaptive order selection keeps the same consistency checklist for users—control occupancy and ensure progressive local refinement—while often improving finite-sample stability by avoiding unnecessary depth in weak-signal coordinates.
+Use the installed package help for complete signatures. The table names
+statistical choices; it does not replace the assumptions and qualifications in
+the corresponding chapters.

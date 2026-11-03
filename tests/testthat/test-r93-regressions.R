@@ -19,13 +19,21 @@ test_that("a modulo period beyond the n/5 scan keeps its ARMA weight", {
 })
 
 test_that("ARMA.optim out-of-sample bands sit on the clamped forecasts", {
-  set.seed(17)
-  x <- rexp(60)
-  o <- NNS.ARMA.optim(x, h = 6, training.set = 56, seasonal.factor = c(2, 4),
+  # A fixed positive bias in the validation prefix persists in its acceptance
+  # half. The same shift must clamp the lower out-of-sample forecast to zero.
+  local_mocked_bindings(
+    NNS.ARMA = function(variable, h, ...) rep(c(1, 9), length.out = h),
+    .package = "NNS"
+  )
+  x <- rep(1, 80)
+  o <- NNS.ARMA.optim(x, h = 6, training.set = 64, seasonal.factor = c(2, 4),
+                      obj.fn = expression(mean((predicted - actual)^2)),
                       ncores = 1, print.trace = FALSE, plot = FALSE)
+  expect_true(o$bias.validation$accepted)
   expect_true(any(o$results == 0))
   expect_true(all(o$upper.pred.int >= o$results))
   expect_true(all(o$upper.pred.int[o$results == 0] > 0))
+  expect_equal(o$results, pmax(0, o$raw.results + o$bias.shift))
 })
 
 test_that("constant cells keep the direction of a discrete relationship", {

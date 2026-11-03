@@ -16,7 +16,7 @@ Two variables may move together because
 
 Identifying the direction and strength of causal influence requires more than a symmetric dependence measure. It requires a framework that can detect **which variable is doing the driving**.
 
-Classical approaches to this problem rely on **Granger causality**, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: causal structure is inferred from **nonlinear probability relationships between a lagged cause and its effect, compared in both directions**, without imposing a parametric model.
+Classical approaches to this problem rely on **Granger causality**, which uses parametric time-series regressions to test whether lagged values of one variable improve linear predictions of another. The directional framework offers a different approach: **nonlinear lagged relationships are compared in both directions** without specifying a parametric regression model. Interpreting that association as a structural causal arrow requires additional identification assumptions.
 
 This chapter develops the **directional causation framework** in three stages: forming explicitly lagged pairs and placing them on the copula scale, measuring how strongly the lagged cause constrains the effect through partial-moment conditional probability and asymmetric directional dependence, and comparing the two directions in a single normalized index.
 
@@ -39,11 +39,11 @@ Y_t =
 
 If the coefficients \(b_i\) are jointly significant, \(X\) is said to Granger-cause \(Y\).
 
-Granger causality captures a genuine and important insight: the causal role of \(X\) in \(Y\) should only be assessed after accounting for \(Y\)'s own past. The directional framework does not condition on own lags in the regression sense. It measures directional lagged association — lagged pairs evaluated in both directions on the copula scale, with conditional probability and asymmetric dependence rather than regression coefficients as the evidence — and accounts for each series' own dynamics at the inference step: the permutation test for time series circularly shifts one series against the other, which keeps every autocorrelation of each series and breaks only their alignment. Neither step conditions on third variables, so a common driver that reaches \(Y\) later than \(X\) makes \(X \to Y\) look causal. Partitioning on that variable — conditional co-partial moments — is the natural extension, and is not part of the index below.
+Granger causality asks whether \(X\)'s history improves prediction after accounting for \(Y\)'s own past. The NNS index below instead measures directional lagged association from paired values. It does not condition on the effect's own history or on third variables. Circularly shifting one series in the time-series null retains its cyclic ordering, but this resampling step is not equivalent to conditioning on own lags. A shared driver with different delays, persistence, or coupled dynamics can make the stronger lagged association point in a different direction from the structural forcing. Own-history or third-variable conditioning would be an extension of the method.
 
 The parametric Granger approach carries four limitations that are familiar from earlier chapters.
 
-**Linear specification.** The causal relationship between variables is constrained to be linear. Nonlinear effects, including the simple case where \(X\) drives \(Y = X^2\), are invisible to the regression coefficients even when the causal relationship is strong and unambiguous.
+**Linear specification.** The causal relationship between variables is constrained to be linear. Nonlinear effects can be invisible to the regression coefficients even when the causal relationship is strong and unambiguous: for an independent, identically distributed, symmetric zero-centered driver with finite fourth moment and nonconstant \(X^2\), a pure lagged quadratic response has zero population linear slope on that driver. (A linear test misses less when the driver is not centred: for \(X\) uniform on \([0,1]\), \(X^2\) has correlation 0.97 with \(X\).)
 
 **Symmetric aggregation.** Regression models aggregate deviations symmetrically around the mean. Asymmetric causal effects — where large upward movements in \(X\) drive movements in \(Y\) but small movements do not — are absorbed into the residual.
 
@@ -51,23 +51,23 @@ The parametric Granger approach carries four limitations that are familiar from 
 
 **Model dependence.** Results are sensitive to lag length selection, variable inclusion, and specification choices that the investigator must make before seeing the data.
 
-The directional causation framework addresses all four by working entirely within the partial-moment machinery developed in Chapters 2–11.
+The directional construction avoids a specified linear response model and parametric error distribution. It still requires choices of lag, partition resolution, and null resampling, and it does not remove the identification or specification questions above. Granger-style predictability can also be studied with nonlinear models; it is not inherently limited to the displayed linear VAR.
 
 ---
 
-## Theoretical Foundations: Three Axioms
+## Design Goals and Identification Limits
 
-Before developing the method, it is useful to state what a causation measure should satisfy. Three axioms motivate the construction.
+Three design goals motivate the directional index. They specify the intended comparison, rather than a theorem that the statistic identifies every structural causal mechanism.
 
-**Axiom 1 — Self-causation exclusion.** No variable should be identified as causing itself. When \(X = Y\), the causal measure should return a symmetric result indicating no net directional influence, and the diagonal of the causation matrix should be zero.
+**Goal 1 — Self-comparison neutrality.** No variable should be identified as causing itself. When \(X = Y\), the causal measure should return a symmetric result indicating no net directional influence, and the diagonal of the causation matrix should be zero.
 
-**Axiom 2 — Nonlinear causation detection.** The measure should accurately identify causal relationships that are nonlinear and directional. A functional relationship \(Y = f(X)\) should register positive causal influence from \(X\) to \(Y\) regardless of whether \(f\) is linear, quadratic, or otherwise nonmonotone.
+**Goal 2 — Sensitivity to nonlinear association.** The measure should respond to nonlinear relationships, including nonmonotone functions. A finite partition need not resolve every functional relationship, and a detected association does not by itself identify its generating causal arrow.
 
-**Axiom 3 — Directionality proportionality.** Causal strength should scale with the degree of functional asymmetry between the two variables. When \(X\) strongly determines \(Y\) but \(Y\) only weakly constrains \(X\), the statistic should reflect this imbalance clearly and in a stable, interpretable way.
+**Goal 3 — Directional comparison.** The index should summarize the degree of functional asymmetry between the two variables. When \(X\) strongly determines \(Y\) but \(Y\) only weakly constrains \(X\), the statistic should reflect this imbalance clearly and in a stable, interpretable way.
 
-These axioms motivate a measure built from two components: a **conditional probability** that captures how strongly the position of one variable constrains the distribution of the other, and an **asymmetric dependence** measure that captures whether that constraint is stronger in one direction than the other. Neither component alone satisfies all three axioms; together they do.
+These goals motivate a measure built from two components: a **conditional probability** that captures how strongly the position of one variable constrains the distribution of the other, and an **asymmetric dependence** measure that captures whether that constraint is stronger in one direction than the other. Their combination measures resolved directional asymmetry; it does not establish causal identifiability or universal detection.
 
-One qualification applies to Axiom 2. When \(f\) is invertible, \(X = f^{-1}(Y)\) is just as much a function of \(Y\), so contemporaneous data register influence equally in both directions and the net index is neutral. Time order, through a lag \(\tau > 0\), is what identifies the direction in that case. A non-invertible \(f\), such as \(Y = X^2\), is directional even without a lag.
+For an invertible \(f\), \(X=f^{-1}(Y)\) is also a function of \(Y\), so contemporaneous functional determination alone does not identify a causal direction. Finite partitions can resolve the two directions differently. Time ordering through \(\tau>0\) supplies additional information, but it is not by itself a guarantee of causal identification. A non-invertible \(f\), such as \(Y = X^2\), produces an asymmetric association even without a lag, but that asymmetry belongs to the joint distribution, not to the causal arrow: \(X \sim N(0,1)\) with \(Y = X^2\), and \(Y \sim \chi^2_1\) with \(X = S\sqrt{Y}\) for an independent random sign \(S\), have the same joint law, so no statistic of \((X, Y)\) can tell them apart, and `NNS.caus(x, y, tau = 0)` reads \(X \to Y\) for both. Without a lag the index measures directional association.
 
 ---
 
@@ -107,7 +107,7 @@ Like their contemporaneous counterparts from Chapter 10, lagged co-partial momen
 (x_{t-\tau} - t_X)_+^r\,(y_t - t_Y)_+^s.
 \]
 
-These estimators converge to their population values by the law of large numbers.
+These averages converge to population quantities under an appropriate law of large numbers, for example stationarity and ergodicity of the lagged-pair process with finite displayed moments. Arbitrary dependent or nonstationary series do not satisfy that conclusion automatically.
 
 The causation statistic developed below operationalizes this lagged structure directly: it evaluates each direction on its own lagged pairs, places them on the copula scale, and compares the two directions.
 
@@ -130,9 +130,9 @@ Within each set of pairs, both variables are mapped to the copula scale through 
 U = L_0(X; X) = P(X' \le X) \in (0, 1].
 \]
 
-Chapter 10 showed that this probability integral transform defines copula space. Working on ranks makes the statistic invariant to shifts, rescaling and any increasing transformation of either variable: adding a constant to \(Y\), changing its units, or replacing it by \(\log Y\) leaves every quantity below unchanged. A decreasing transformation reverses the ranks, which changes the copula and therefore the index.
+Chapter 12 described copula coordinates; empirical ranks are their sample counterpart, with ties retained. For a fixed lag and alignment, working on ranks makes the statistic invariant to shifts, positive rescaling, and strictly increasing transformations of either variable: adding a constant to \(Y\), changing its units, or replacing it by \(\log Y\) leaves every quantity below unchanged. A decreasing transformation reverses the ranks and can change the index. A data-selected lag, such as `tau = "ts"`, can also change after a transformation, so invariance of the fixed-lag score is not a claim about every lag-selection workflow.
 
-Two features of the construction do the work that internal-dynamics removal was meant to do. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: \((X_{t-\tau}, Y_t)\) and \((Y_{t-\tau}, X_t)\) are different pairs. Second, the comparison is always bidirectional. A shared driver or common persistence that links the two series symmetrically raises the evidence for both directions equally and cancels in the normalized index developed below. A driver that reaches the two series at different times does not cancel: it reads as direction from the series it reaches first.
+Two features make the comparison directional without removing internal dynamics. First, the lag introduces the temporal asymmetry of the lagged co-partial moments: \((X_{t-\tau}, Y_t)\) and \((Y_{t-\tau}, X_t)\) are different pairs. Second, the comparison is always bidirectional. If the two directional scores are equal, their contributions cancel in the normalized index. A common driver or persistence does not generally guarantee equal scores. In particular, different delays can make a shared cause appear as direction from the series it reaches first.
 
 ---
 
@@ -152,9 +152,9 @@ the lower plus upper partial moment of degree two — the variance, by Chapter 5
 D_c(U_Y) = D(U_Y \mid c).
 \]
 
-The deviation is taken about a centre on purpose. A pairwise measure such as the mean absolute difference would treat \(Y\) split between two values as concentrated; about its centre, a two-valued split is as spread out as the values are far apart, which is what an unresolved sign looks like.
+The deviation is measured quadratically about the cell mean. A split between separated response values therefore retains within-cell variation, as expected when the cause does not resolve the sign. Other dispersion measures, such as the mean absolute pairwise difference, also detect spread but use a different loss geometry.
 
-The **partial-moment conditional probability** is the share of the effect's deviation that knowing the cause's cell resolves:
+The quantity called **partial-moment conditional probability** here is a normalized share of the effect's deviation resolved by its candidate cause's cells:
 
 \[
 P(X \to Y)
@@ -165,11 +165,11 @@ P(X \to Y)
 \qquad w_c = \frac{n_c}{n-\tau},
 \]
 
-bounded to \([0, 1]\). Because each \(D_c\) is unbiased for \(D\) when the cause carries no information about the effect, independent variables score near zero whatever the effect's distribution: no normal-theory correction is needed.
+bounded to \([0,1]\). This is a resolved-deviation score, not an event probability or a calibrated probability of causation. Under independent random grouping, a nonsingleton cell's sample variance is unbiased for the global sample variance. Clipping, finite cells, and subsequent score selection still affect the sampling distribution, so the final score need not have exactly zero expectation under independence.
 
-The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause's position pins the effect down. It is not symmetric: \(P(X \to Y) \ne P(Y \to X)\) in general. For \(Y = X^2\), knowing \(X\) fixes \(Y\), while knowing \(Y\) leaves \(X\) split between \(\pm\sqrt{Y}\), so \(P(X \to Y)\) is close to one and \(P(Y \to X)\) close to zero. It requires no kernel bandwidth, no distributional assumption, and no parametric model.
+The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause's position pins the effect down. It is not symmetric: \(P(X \to Y) \ne P(Y \to X)\) in general. For a symmetric nondegenerate driver with \(Y=X^2\), knowing \(X\) fixes \(Y\), while knowing \(Y\) leaves the sign of \(X\) unresolved. Sufficiently fine cells can reveal this asymmetry; the finite score depends on the sample and resolution. It uses no kernel bandwidth or parametric response model, but its cell resolution and inferential assumptions still matter.
 
-Because both variables are on the copula scale, this conditional probability is informative where a comparison of supports would not be: after rank normalization both supports are the same interval, so the share of one variable's mass inside the other's range would be one in both directions.
+The rank transformation puts both variables on a common coordinate scale. Direction is then assessed through resolved within-cell variation, not by comparing their numerical ranges. Empirical ranks with ties need not fill the unit interval, and range overlap alone does not identify directional influence.
 
 ---
 
@@ -179,7 +179,7 @@ Conditional probability measures how strongly the cause constrains the effect, b
 
 To capture directional alignment, the framework uses the asymmetric dependence measure from Chapter 10 on each direction's lagged copula pairs: \(\rho_{X \to Y}\) is the dependence of \(U_{Y_t}\) on \(U_{X_{t-\tau}}\) and \(\rho_{Y \to X}\) the dependence of \(U_{X_t}\) on \(U_{Y_{t-\tau}}\). Each is built from the degree-zero and degree-one co-partial moments of its pair within the recursive mean-split partition of the candidate cause, each cell measured against its own permutation null, so it is the lagged co-partial moment structure of this chapter measured as a dependence.
 
-`NNS.dep(..., asym = TRUE)` reports the strongest level of that partition. For the causal comparison the dependence is averaged over the levels instead: the average has no selection step, so two independent series are centred at the same value whatever their margins. Taking the strongest level would favour the variable with more levels to search, so that a continuous series would appear to lead a binary one.
+`NNS.dep(..., asym = TRUE)` reports the strongest level of that partition. The causal comparison instead averages over levels to avoid maximizing over them. This removes that particular selection step, but does not guarantee identical finite-sample null distributions across all margins and serial-dependence structures. Taking the strongest level would favour the variable with more levels to search, so that a continuous series would appear to lead a binary one.
 
 Implementation detail: `asym = TRUE` turns on asymmetric dependence, but **direction is determined by argument order**. `NNS.dep(x, y, asym = TRUE)` partitions on `x` and measures the dependence of `y` on `x`; `NNS.dep(y, x, asym = TRUE)` measures the reverse.
 
@@ -189,7 +189,7 @@ Define the **excess directional dependence** of \(Y\) on \(X\) as
 \Delta\rho = \rho_{X \to Y} - \rho_{Y \to X}.
 \]
 
-When \(\Delta\rho > 0\), the lagged movements of \(X\) are more closely tracked by \(Y\) than the reverse — a second and independent signature of causal flow from \(X\) to \(Y\) beyond what the conditional probability alone captures. When \(\Delta\rho \le 0\), this component contributes nothing to the \(X \to Y\) direction.
+When \(\Delta\rho > 0\), the lagged movements of \(X\) are more closely tracked by \(Y\) than the reverse — an additional summary of directional lagged association from \(X\) to \(Y\) beyond what the conditional probability alone captures. When \(\Delta\rho \le 0\), this component contributes nothing to the \(X \to Y\) direction.
 
 The use of asymmetric directional dependence here — rather than Pearson correlation — is a direct consequence of Chapter 10. Copula-space variables still exhibit asymmetric tail co-movements that the Chapter 10 framework is designed to detect. Classical symmetric correlation would average away exactly the directional asymmetry that makes the causation statistic informative.
 
@@ -234,7 +234,7 @@ C_{Y \to X}=1-C_{X \to Y},
 \kappa = \frac{1}{\sqrt{n-\tau}}.
 \]
 
-The neutral pseudo-count \(\kappa\) is of the order of the raw scores' sampling variation. Without it, two raw scores that are both close to zero — as they are for unrelated variables — would form a ratio dominated by noise and could land anywhere in \([0, 1]\). With it, weak or absent directional evidence stays near \(0.5\), while strong evidence is barely affected. It never changes which side of \(0.5\) the index falls on.
+The neutral pseudo-count \(\kappa\) uses an \((n-\tau)^{-1/2}\) scale as a regularization choice; it is not a universal estimate of the scores' sampling variation. Without it, two raw scores that are both close to zero — as they are for unrelated variables — would form a ratio dominated by noise and could land anywhere in \([0, 1]\). It shrinks the ratio toward \(0.5\), with a larger effect when both raw scores are small. Independent persistent series can nevertheless have a dispersed index, so distance from \(0.5\) alone is not a significance criterion. It never changes which side of \(0.5\) the index falls on.
 
 Interpretation:
 
@@ -242,15 +242,30 @@ Interpretation:
 - \(C_{X \to Y} < 0.5\): stronger evidence for \(Y\) leading \(X\),
 - \(C_{X \to Y} \approx 0.5\): weak directional asymmetry.
 
-For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row \(i\) and column \(j\), so that \(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\) off the diagonal, and its diagonal is zero by Axiom 1. A permutation test of the signed statistic \(C_{X \to Y} - C_{Y \to X}\) provides p-values for either direction. For time series the null circularly shifts one series against the other, keeping each series' own dynamics, at the lag used for the observed statistic; for cross-sections it shuffles the values.
+For several variables, the **causation matrix** holds \(C_{X_i \to X_j}\) in row \(i\) and column \(j\), so that \(C_{X_i \to X_j} + C_{X_j \to X_i} = 1\) off the diagonal, and its diagonal is zero by the self-comparison convention. A permutation test of the signed statistic \(C_{X \to Y} - C_{Y \to X}\) provides p-values for either direction. For time series the null circularly shifts one series at the lag used for the observed statistic; for cross-sections it shuffles values. A valid randomization interpretation requires invariance under the chosen transformations. Independent exchangeable observations support the latter; cyclic shifts require suitable assumptions about the null process and treatment of boundaries. Trends, random walks, regime changes, or other nonstationarity need not be shift-invariant. Retaining cyclic order is not a general proof of valid time-series p-values.
+
+---
+
+## Structural Direction and Dynamical Systems
+
+Lagged predictability and structural forcing can disagree. For example, consider coupled maps
+
+\[
+X_{t+1}=X_t(3.8-3.8X_t),\qquad
+Y_{t+1}=Y_t(3.5-3.5Y_t-0.1X_t).
+\]
+
+The equations include an \(X\)-to-\(Y\) forcing term and no reverse term. Yet the lagged state of \(Y\) can carry substantial information about \(X\), while \(Y\)'s own dynamics dominate its response. A comparison that does not condition on those own dynamics can therefore favor the reverse lagged association. The NNS index should be interpreted as its defined comparison, not a guaranteed recovery of the arrows in such a system.
+
+Structural interpretation requires a stated design or assumptions addressing own-history effects, common drivers, measurement and sampling, and temporal ordering. Adding own-history-conditioned prediction or conditional partial moments would change the method and should be evaluated as an explicit extension.
 
 ---
 
 ## Summary
 
-This chapter formalized directional causation as a three-stage construction: explicitly lagged pairs on the copula scale, partial-moment conditional probability and asymmetric directional dependence for each direction, and a bidirectional index that detects net directional flow.
+This chapter formalized directional causation as a three-stage construction: explicitly lagged pairs on the copula scale, partial-moment conditional probability and asymmetric directional dependence for each direction, and a bidirectional index of resolved lagged asymmetry.
 
-The resulting statistic is nonparametric and invariant to increasing transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests. It measures directional lagged association: it does not condition on third variables.
+The resulting statistic is nonparametric and invariant to increasing transformations of either variable, while avoiding the linear-model restrictions of classical Granger-style tests. It measures directional lagged association without conditioning on own history or third variables. Its regularization and shift null do not supply those missing conditions, and causal interpretation requires additional assumptions.
 
 For an applied macroeconomic example using `NNS.nowcast`, `NNS.caus`, noise benchmarks, and strength-of-inference summaries, see [Causal Inference Amongst Macroeconomic Variables Using NNS](https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html).
 

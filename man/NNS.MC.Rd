@@ -31,7 +31,7 @@ NNS.MC(
 
 \item{by}{numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.}
 
-\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.}
+\item{exp}{positive finite numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 

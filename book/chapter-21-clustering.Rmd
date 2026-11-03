@@ -116,7 +116,7 @@ This yields a tree of increasingly refined directional cells.
 
 The terminal cells form a clustering of the data. Their number is determined entirely by where observations fall relative to successive local means and by the chosen stopping rule. No value of $K$ is ever specified.
 
-Unlike k-means, these clusters are not required to be spherical, convex, or globally separable by Voronoi boundaries. They arise from repeated local directional refinement.
+Each terminal mean-split cell is an intersection of axis-aligned half-spaces, hence a convex box in predictor space. Its width and occupancy adapt through repeated local directional refinement. A union of adjacent cells can describe a nonconvex region, but a single terminal cell should not be called nonconvex.
 
 ---
 
@@ -319,7 +319,7 @@ plot_nns_part(part)   # Voronoi view of the directional partition
 ```
 
 <center>
-![Figure 21.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The directional partition discovers the natural group structure without a prespecified count; k-means forces all observations into exactly three spherical regions regardless of whether three is the right number.](images/ch21_kmeans_comp.png)
+![Figure 21.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The directional partition uses a depth and occupancy rule without a prespecified count; k-means assigns observations to three centroid-based Voronoi regions.](images/ch21_kmeans_comp.png)
 </center>
 
 ---

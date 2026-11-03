@@ -5,10 +5,12 @@ options(mc.cores = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 
+
 ## ----setup2,message=FALSE,warning = FALSE-------------------------------------
 library(NNS)
 require(knitr)
 require(rgl)
+
 
 ## ----cars, fig.width=10, fig.align='center'-----------------------------------
 mpg_auto_trans = mtcars[mtcars$am==1, "mpg"]
@@ -16,8 +18,10 @@ mpg_man_trans = mtcars[mtcars$am==0, "mpg"]
 
 NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
 
+
 ## ----cars2, warning=FALSE-----------------------------------------------------
-wilcox.test(mpg ~ am, data=mtcars) 
+wilcox.test(mpg ~ am, data=mtcars)
+
 
 ## ----equalmeans, echo=TRUE, fig.width=10, fig.align='center'------------------
 set.seed(123)
@@ -29,6 +33,7 @@ NNS.ANOVA(control = x, treatment = y,
 
 t.test(x,y)
 
+
 ## ----unequalmeans, echo=TRUE, fig.width=10, fig.align='center'----------------
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
@@ -39,9 +44,11 @@ NNS.ANOVA(control = x, treatment = y,
 
 t.test(x,y)
 
+
 ## ----unequalmedians, echo=TRUE, fig.width=10, fig.align='center'--------------
 NNS.ANOVA(control = x, treatment = y,
           means.only = TRUE, medians = TRUE, robust = TRUE, plot = TRUE)
+
 
 ## ----stochsuperiority, echo=TRUE, eval=TRUE-----------------------------------
 set.seed(123)
@@ -50,23 +57,25 @@ y = rnorm(1000, mean = 1, sd = 1)
 
 NNS.SS(x, y)
 
+
 ## ----stochsuperiorityci, echo=TRUE, eval = FALSE------------------------------
-# NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
-# 
-# $p_gt
-# [1] 0.233915
-# 
-# $p_tie
-# [1] 0
-# 
-# $p_star
-# [1] 0.233915
-# 
-# $lower
-# [1] 0.2105631
-# 
-# $upper
-# [1] 0.2537789
+## NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
+##
+## $p_gt
+## [1] 0.233915
+##
+## $p_tie
+## [1] 0
+##
+## $p_star
+## [1] 0.233915
+##
+## $lower
+## [1] 0.2105631
+##
+## $upper
+## [1] 0.2537789
+
 
 ## ----stochsuperioritydiscrete, echo=TRUE, eval=TRUE---------------------------
 set.seed(123)
@@ -75,12 +84,14 @@ y = sample(1:5, 100, replace = TRUE)
 
 NNS.SS(x, y)
 
+
 ## ----stochdom, fig.width=7, fig.align='center'--------------------------------
 set.seed(123)
 x = rnorm(1000, mean = 0, sd = 1)
 y = rnorm(1000, mean = 1, sd = 1)
 
 NNS.FSD(x, y)
+
 
 ## ----stochdomset, eval=TRUE---------------------------------------------------
 set.seed(123)
@@ -94,6 +105,7 @@ x7 = rnorm(1000)
 x8 = x7 + 1
 
 NNS.SD.efficient.set(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, status = FALSE)
+
 
 ## ----stochdomclust, eval=TRUE, fig.width=7, fig.align='center'----------------
 NNS.SD.cluster(cbind(x1, x2, x3, x4, x5, x6, x7, x8), degree = 1, dendrogram = TRUE)

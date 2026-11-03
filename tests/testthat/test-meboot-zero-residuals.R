@@ -2,6 +2,11 @@ reps_of <- function(x, reps = 5, ...) {
   set.seed(1)
   NNS.meboot(x, reps = reps, ...)["replicates", ]$replicates
 }
+expect_replicate_matrix <- function(actual, expected) {
+  expect_s3_class(actual, "NNS.matrix")
+  expect_identical(dim(actual), dim(expected))
+  expect_equal(as.numeric(actual), as.numeric(expected))
+}
 slopes <- function(R) apply(R, 2, function(r) coef(lm(r ~ seq_along(r)))[[2]])
 max_resid <- function(R) max(abs(apply(R, 2, function(r) resid(lm(r ~ seq_along(r))))))
 
@@ -22,7 +27,7 @@ test_that("an exactly linear series bootstraps like a nearly linear one at any r
     }
   }
   expect_true(all(is.finite(reps_of(x, rho = 1, scl.adjustment = TRUE))))
-  expect_equal(unname(reps_of(x, rho = 1, reps = 1)), matrix(x, 10, 1))
+  expect_replicate_matrix(reps_of(x, rho = 1, reps = 1), matrix(x, 10, 1))
   expect_equal(unname(colMeans(reps_of(x, rho = 1, drift = FALSE))), rep(5.5, 5), tolerance = 1e-6)
 
   r <- reps_of(ts(x, frequency = 4), rho = 0.5)
@@ -31,10 +36,10 @@ test_that("an exactly linear series bootstraps like a nearly linear one at any r
 })
 
 test_that("a constant series bootstraps to constant columns", {
-  expect_equal(unname(reps_of(rep(3, 10), rho = 0.5)), matrix(3, 10, 5))
-  expect_equal(unname(reps_of(rep(3, 10), rho = 0.5, type = "nnsdep")), matrix(3, 10, 5))
-  expect_equal(unname(reps_of(rep(3, 10), rho = 0.5, scl.adjustment = TRUE)), matrix(3, 10, 5))
-  expect_equal(unname(reps_of(rep(3, 10), target_drift = 0)), matrix(3, 10, 5))
+  expect_replicate_matrix(reps_of(rep(3, 10), rho = 0.5), matrix(3, 10, 5))
+  expect_replicate_matrix(reps_of(rep(3, 10), rho = 0.5, type = "nnsdep"), matrix(3, 10, 5))
+  expect_replicate_matrix(reps_of(rep(3, 10), rho = 0.5, scl.adjustment = TRUE), matrix(3, 10, 5))
+  expect_replicate_matrix(reps_of(rep(3, 10), target_drift = 0), matrix(3, 10, 5))
 })
 
 test_that("NNS.SS and NNS.MC work on an exactly linear series", {

@@ -11,7 +11,7 @@ NNS.SD.efficient.set(x, degree, type = "discrete", status = TRUE)
 
 \item{degree}{numeric options: (1, 2, 3); Degree of stochastic dominance test from (1, 2 or 3).}
 
-\item{type}{options: ("discrete", "continuous"); \code{"discrete"} (default) selects the type of CDF.}
+\item{type}{\code{"discrete"} (default) uses empirical FSD. At degree 1, \code{"continuous"} retains the degree-one area-ratio (Omega/expectile) ordering, which need not imply FSD or preference for every increasing utility. SSD and TSD are unaffected by \code{type}.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 }
@@ -22,7 +22,7 @@ Returns set of stochastic dominant variable names.
 Determines the set of stochastic dominant variables for various degrees.
 }
 \note{
-The curves are compared on the merged sample points and, for TSD and continuous FSD, also at their closed-form extrema between those points. Differences smaller than \code{64 * .Machine$double.eps * S^d} (\code{S} = largest absolute value in \code{x} and \code{y}, \code{d} = 1 for SSD and the mean condition, 2 for TSD; a ratio analogue for continuous FSD) are treated as ties, so that rounding noise does not decide dominance. Discrete FSD compares exact empirical CDF values.
+The curves are compared on the merged sample points and, for TSD and continuous area order, also at their closed-form extrema between those points. Differences smaller than \code{64 * .Machine$double.eps * S^d} (\code{S} = largest absolute value in \code{x} and \code{y}, \code{d} = 1 for SSD and the mean condition, 2 for TSD; a ratio analogue for continuous area order) are treated as ties, so that rounding noise does not decide dominance. Discrete FSD compares exact empirical CDF values.
 }
 \examples{
 \dontrun{

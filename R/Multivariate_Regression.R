@@ -325,7 +325,10 @@
 }
 
 .nns_mreg_default_nbest <- function(X, y, rpm.rows) {
-  dep <- tryCatch(NNS.copula(cbind(X, y)), error = function(e) NA_real_)
+  # This is an unsigned smoothing heuristic. Retain the directional copula,
+  # but average the response orientations so a sign convention cannot change k.
+  dep <- tryCatch(mean(c(NNS.copula(cbind(X, y)),
+                        NNS.copula(cbind(X, -y)))), error = function(e) NA_real_)
   if (!is.finite(dep)) dep <- 0.5
   k <- max(1L, as.integer(floor((1 - dep) * sqrt(nrow(X)))))
   min(k, rpm.rows)
@@ -347,7 +350,8 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
                       residual.plot = TRUE, location = NULL,
                       noise.reduction = "off", dist = NULL,
                       return.values = FALSE, plot.regions = FALSE,
-                      ncores = NULL, confidence.interval = NULL) {
+                      ncores = NULL, confidence.interval = NULL,
+                      categorical = FALSE) {
   
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   point.only <- .nns_reg_scalar_logical(point.only, "point.only")
@@ -386,6 +390,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
     stop("[Y] must contain at least two finite values.", call. = FALSE)
   }
   
+  if (categorical) order <- "max"
   prepared <- .nns_mreg_prepare_model(
     X, y, order, noise.reduction, is.class
   )
@@ -399,7 +404,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   rpm <- prepared$RPM
   if (!nrow(rpm)) stop("NNS.M.reg produced an empty RPM.", call. = FALSE)
   
-  if (is.null(n.best) && identical(order, "max")) {
+  if (categorical || (is.null(n.best) && identical(order, "max"))) {
     k <- 1L
   } else if (is.null(n.best)) {
     k <- .nns_mreg_default_nbest(X, y, nrow(rpm))

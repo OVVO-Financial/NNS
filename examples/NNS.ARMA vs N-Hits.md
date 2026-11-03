@@ -1,4 +1,4 @@
-# 🚀 NNS.ARMA.optim vs. n-HiTS: A Surprising Forecasting Result
+# NNS.ARMA.optim traffic forecasting example
 
 When it comes to time-series forecasting, deep learning models like **N-BEATS** and **n-HiTS** often dominate the conversation. But what happens when we put them head-to-head against a nonparametric statistical approach?
 
@@ -15,9 +15,9 @@ I ran a comparison using hourly traffic volume data
 | n-HiTS                   | 266.0   |
 | **NNS.ARMA.optim()**     | **236.17** |
 
-**Yes — the nonlinear nonparametric `NNS.ARMA.optim()` outperformed all of them**, including the deep learning-based n-HiTS.
+These are historical reported scores from separate sources. The NNS code below reserves a test suffix, but this page does not establish that the external neural-model scores use the same data version, origin, horizon, preprocessing, or tuning budget. Treat the table as a motivation for a matched reproduction, not a validated ranking.
 
-## ✅ Exact Reproducible R Code
+## R demonstration
 
 ```r
 library(NNS)
@@ -63,9 +63,10 @@ textMetrics::mae(nns_estimates$results, test_set)
 ```
 
 
-✅ Takeaway
-Sometimes simplicity + interpretability beats complexity.
-Before jumping into the latest neural architecture, it’s worth asking:
-Can a nonparametric approach solve the problem faster, with fewer resources, and better performance?
+## Interpretation
 
-NNS on CRAN: [Install the latest version](https://cran.r-project.org/package=NNS)
+Run the script with recorded package versions and preserve the input data
+snapshot. A comparative claim requires reproducing every model on the same
+forecast origins and held-out outcomes. The historical NNS MAE is not a fixed
+result for current versions; recompute it after the gravity, shrinkage, and bias
+corrections.

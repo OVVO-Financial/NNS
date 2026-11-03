@@ -114,7 +114,7 @@ NNS.dep(df$x, df$y)
 
 
 # p-values for `NNS.dep()`
-p-values and confidence intervals can be obtained from sampling random permutations of $y \rightarrow y_p$ and running **`NNS.dep(x,$y_p$)`** to compare against a null hypothesis of 0 correlation, or independence between $(x, y)$.
+Permutation p-values and null reference intervals can be obtained by permuting $y$ and recomputing `NNS.dep(x, y_perm)`. Quantiles of those shuffled statistics describe the null distribution; they are not confidence intervals for the original population dependence. The permutation interpretation requires exchangeability under the null, so unrestricted shuffling is not automatically appropriate for serial, clustered, or other dependent observations.
 
 Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run 100 permutations and plot the results.
 

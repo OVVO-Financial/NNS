@@ -237,7 +237,7 @@ Consider two distributions:
 
 | Distribution | \(U_2(\mu;X)\) | \(L_2(\mu;X)\) | \(Var(X)=U_2+L_2\) |
 |---|---:|---:|---:|
-| A | 10 | 0 | 10 |
+| A | 9 | 1 | 10 |
 | B | 5 | 5 | 10 |
 
 Both produce
@@ -246,7 +246,7 @@ Both produce
 Var(X)=10,
 \]
 
-yet their directional risk structures are completely different.
+yet their directional risk structures are completely different. (Neither side can be zero unless the distribution is degenerate: \(L_2(\mu;X)=0\) means \(X\ge\mu\) almost surely, and \(E[X-\mu]=0\) then forces \(X=\mu\), the edge case below.)
 
 
 A useful edge case is degenerate support: if all probability mass is concentrated at a single point, then both directional components are zero, \(U_2(\mu;X)=L_2(\mu;X)=0\), so variance is exactly zero. This confirms that the decomposition remains valid at the boundary and that nonzero variance requires at least one nonzero directional component.

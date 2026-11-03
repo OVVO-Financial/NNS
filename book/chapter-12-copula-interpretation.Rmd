@@ -137,7 +137,7 @@ Thus
 - copulas measure **probability of directional regions**, while  
 - co-partial moments measure **magnitude of deviations within those regions**.
 
-Higher orders \(r,s\) increase sensitivity to extreme observations, producing a continuous generalization of tail dependence.
+Higher positive orders \(r,s\) increase the weight assigned to large deviations, giving a joint-severity summary. This is distinct from the asymptotic tail-dependence coefficients defined below.
 
 ---
 
@@ -145,7 +145,7 @@ Higher orders \(r,s\) increase sensitivity to extreme observations, producing a 
 
 Directional co-partial moments admit a direct representation in copula space.
 
-**Theorem 11.1 (Copula Representation of Co-Partial Moments)**  
+**Theorem 12.1 (Copula Representation of Co-Partial Moments)**
 
 Let \(X\) and \(Y\) be continuous random variables with copula \(C(u,v)\) and quantile functions \(Q_X(u)\), \(Q_Y(v)\). Here
 
@@ -153,7 +153,7 @@ Let \(X\) and \(Y\) be continuous random variables with copula \(C(u,v)\) and qu
 Q_X(u)=F_X^{-1}(u), \qquad Q_Y(v)=F_Y^{-1}(v)
 \]
 
-denote the marginal quantile functions.
+denote the generalized-inverse marginal quantile functions. Positive-degree moments require the displayed integrand to have a finite expectation when a finite value is asserted; degree-zero factors use indicators rather than a literal zero power.
 
 Then the co-lower partial moment can be written
 
@@ -210,13 +210,13 @@ y <- xy[,2]
 z <- expand.grid(x,y)
 ```
 
-Plot the **Co-Lower Partial Moment surface** relative to benchmark \(t_X=t_Y=0\):
+Plot the **Co-Lower Partial Moment surface** over the grid of benchmark pairs \((t_X, t_Y)\):
 
 ```r
 rgl::plot3d(
   z[,1],
   z[,2],
-  Co.LPM(0,z[,1],z[,2],z[,1],z[,2]),
+  Co.LPM(0,x,y,z[,1],z[,2]),
   col="red"
 )
 ```
@@ -225,9 +225,9 @@ rgl::plot3d(
 ![Figure 12.1. Co-LPM surface in original \((x,y)\) space (red), visualizing joint downside structure before copula transformation.](images/ch12_raw_copula.png)
 </center>
 
-In the call `Co.LPM(0, z[,1], z[,2], z[,1], z[,2])`, the argument order is `(degree, x, y, target.x, target.y)`. Setting `degree = 0` produces the probability-level co-lower partial moment, and reusing `z[,1]`/`z[,2]` as both variables and targets evaluates the surface over the full grid of benchmark pairs. The visualization uses `rgl::plot3d`, which produces an interactive three-dimensional plot.
+In the call `Co.LPM(0, x, y, z[,1], z[,2])`, the argument order is `(degree, x, y, target.x, target.y)`. Setting `degree = 0` produces the probability-level co-lower partial moment. The paired observations supply the data and the grid `z` supplies only the benchmark pairs, so the surface is the empirical joint CDF of \((X, Y)\). Passing the grid as the data would pair every \(x\) with every \(y\) and plot the independence surface \(F_X F_Y\) whatever the dependence: at the medians it gives 0.25, against 0.36 for these data. The visualization uses `rgl::plot3d`, which produces an interactive three-dimensional plot.
 
-This surface represents the magnitude of **joint downside deviations** in the original variable space.
+At degree 0 this surface is a probability: the share of observations jointly at or below each benchmark pair, in the original variable space.
 
 Next transform the variables into probability space:
 
@@ -244,7 +244,7 @@ Plotting the same directional statistic in probability space gives
 rgl::plot3d(
   z[,1],
   z[,2],
-  Co.LPM(0,z[,1],z[,2],z[,1],z[,2]),
+  Co.LPM(0,u_x,u_y,z[,1],z[,2]),
   col="blue"
 )
 ```
@@ -274,7 +274,16 @@ NNS.copula(cbind(x, y, z3), plot = TRUE, independence.overlay = TRUE)
 ## [1] 0.4756367
 ```
 
-The return value is a single scalar in \([0,1]\) for the full multivariate system, where values closer to 0 indicate near-independence and values closer to 1 indicate stronger joint dependence. When needed, `continuous = TRUE` can be supplied to align with the continuous-CDF formulation used elsewhere in the package vignettes.
+The return value is a scalar in \([0,1]\) summarizing the directional regions at the selected targets. It is not the entire copula function. A small value means little contrast with the marginal-product anchors at those targets, and a large value means strong contrast there. Zero does not establish independence; one does not establish a deterministic functional relationship. If the targets put all data on one side and the normalized shares contain no contrast, the neutral result is zero, not evidence of independence. The default `continuous = TRUE` includes degree-one deviation-area information; `continuous = FALSE` uses degree-zero event frequencies. Neither turns this finite target summary into a test of independence. Sampling floors depend on sample size, dimension, targets, and marginal distributions, so the number alone has no universal significance cutoff.
+
+For example, a symmetric sample of \(X\) paired with \(X^2\) can have nearly balanced directional shares about its means even though \(X\) determines \(X^2\):
+
+```r
+x.symmetric <- c(-50:-1, 1:50)
+NNS.copula(cbind(x.symmetric, x.symmetric^2))
+```
+
+More generally, independence of continuous variables is characterized by \(C(u,v)=uv\) **at every** copula coordinate, not equality of a few co-moment summaries at one target pair. Two well-separated noisy regimes can instead produce maximal directional concordance without a noiseless relation.
 
 The same workflow in Python:
 
@@ -295,7 +304,7 @@ gx, gy = np.meshgrid(x, y, indexing="ij")
 z1, z2 = gx.ravel(), gy.ravel()
 
 # Co-LPM surface in original (x, y) space
-surface_raw = co_lpm(0, z1, z2, z1, z2)
+surface_raw = co_lpm(0, x, y, z1, z2)
 
 # Transform the marginals into probability space
 u_x = lpm_ratio(0, x, x)
@@ -305,7 +314,7 @@ gux, guy = np.meshgrid(u_x, u_y, indexing="ij")
 u1, u2 = gux.ravel(), guy.ravel()
 
 # Same directional statistic on the copula domain [0, 1]^2
-surface_copula = co_lpm(0, u1, u2, u1, u2)
+surface_copula = co_lpm(0, u_x, u_y, u1, u2)
 
 # Direct multivariate dependence summary
 z3 = rng.normal(size=x.size)

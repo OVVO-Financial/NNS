@@ -64,8 +64,9 @@ test_that("NNS.dep p.value = TRUE honours asym", {
   expect_equal(p$Correlation, direct$Correlation)
   expect_equal(p$Dependence, direct$Dependence)
   # x is not a function of y = x^2: 0.6005389 before the per-cell debiasing
-  # (#70), 0.1027830 before the multi-level measure (#95).
-  expect_equal(p$Dependence, 0.1156500, tolerance = 1e-6)
+  # (#70), 0.1027830 before the multi-level measure (#95), 0.1156500 before
+  # the gravity splits were corrected (#117).
+  expect_equal(p$Dependence, 0.1045294, tolerance = 1e-6)
 })
 
 test_that("NNS.dep rejects infinite values", {

@@ -12,7 +12,8 @@ NNS.seas(
   detrend = TRUE,
   max.period = NULL,
   p.value = FALSE,
-  nperm = 100L
+  nperm = 100L,
+  dispersion = c("auto", "absolute")
 )
 }
 \arguments{
@@ -28,7 +29,9 @@ NNS.seas(
 
 \item{max.period}{integer; \code{NULL} (default) scans lags up to \code{n / 5}.  A smaller value caps the scan, whose cost grows with \code{n} times the number of lags.}
 
-\item{p.value}{logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which have no seasonality by construction.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); since each copy contributes its best lag, the 5 percent level holds for the whole scan.  Uses the random number generator.}
+\item{p.value}{logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which remove the original temporal ordering.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); each copy contributes its best lag, accounting for multiple lags under an exchangeable null. Serially dependent nonseasonal series need not satisfy that null.  Uses the random number generator.}
+
+\item{dispersion}{"auto" retains existing relative/absolute scoring. "absolute" centers the data first and compares Gini dispersion without a level denominator; use for interval-scale data such as temperature.}
 
 \item{nperm}{integer; 100 (default) number of shuffled copies when \code{p.value = TRUE}.}
 }
@@ -59,3 +62,8 @@ Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Par
 \author{
 Fred Viole, OVVO Financial Systems
 }
+
+\note{
+The historical column names \code{Coefficient.of.Variation} and \code{Variable.Coefficient.of.Variation} are retained in absolute mode; their values then contain absolute Gini dispersions.
+
+best.period is a predictive lag, not a guarantee of the smallest fundamental period. Multiples can score well. The five-observation default limits long-lag instability; modulo supplies longer domain-informed candidates. Shuffled-data p-values require an exchangeable null and are not a general test of no seasonality under arbitrary serial dependence.}

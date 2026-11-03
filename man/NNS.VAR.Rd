@@ -20,7 +20,8 @@ NNS.VAR(
   objective = "min",
   status = TRUE,
   ncores = NULL,
-  nowcast = FALSE
+  nowcast = FALSE,
+  validation = c("pipeline", "observed")
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ NNS.VAR(
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
 \item{nowcast}{logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.  When \code{TRUE}, rows of a time-indexed \code{variables} are labelled by month (\code{"Mon YYYY"}) whatever the input frequency, with the forecast rows labelled by the following \code{h} months.}
+
+\item{validation}{\code{"pipeline"} (default) rebuilds interpolation, univariate forecasts and lagged predictors using only the prefix before the chronological holdout. Same-period and later-horizon covariates are forecast, and only observed holdout targets are scored. \code{"observed"} retains conditional-regression tuning on realized holdout covariates; that score does not evaluate deployment forecasts.}
 }
 \value{
 Returns the following matrices of forecasted variables:
@@ -55,6 +58,8 @@ Returns the following matrices of forecasted variables:
 
  \item{\code{"multivariate"}} Returns the multi-variate forecasts: \link{NNS.stack} \code{(method = 1, stack = FALSE)} on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).
 
+ \item{\code{"validation"}} Returns the validation mode, origin, horizon and number of observed holdout targets for each series.
+
  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
  }
 
@@ -64,6 +69,9 @@ When \code{variables} is a \code{ts}, \code{xts} or \code{zoo} object, rows are 
 Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 }
 \note{
+Pipeline validation uses one chronological tuning origin. Missing prefix values are completed without later observations. Relevance coefficients are fitted on that prefix, the selected variables are retained for tuning, and the final forecast is refitted on all available observations. Assess the complete model at additional rolling origins for a performance estimate.
+
+
 \itemize{
 \item \code{"Error in { : task xx failed -}"} should be re-run with \code{NNS.VAR(..., ncores = 1)}.
 \item Not recommended for factor variables, even after transformed to numeric.  \link{NNS.reg} is better suited for factor or binary regressor extrapolation.

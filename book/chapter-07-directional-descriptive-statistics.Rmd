@@ -94,7 +94,7 @@ For example, two assets may share identical variance but differ dramatically in 
 
 | Distribution | \(U_2(\mu;X)\) | \(L_2(\mu;X)\) | Variance |
 |---|---|---|---|
-| A | 10 | 0 | 10 |
+| A | 9 | 1 | 10 |
 | B | 5 | 5 | 10 |
 
 Variance alone cannot distinguish these cases.
@@ -151,7 +151,7 @@ with benchmark \(t=1\). Then
 \hat{U}_1(1)=\frac{1}{5}(0+0+0+2+4)=1.2.
 \]
 
-Here the unconditional average shortfall below the benchmark equals the unconditional average excess above it, even though frequencies differ: three observations fall below \(t\), one equals \(t\), and two exceed \(t\). This illustrates how benchmark-relative directional moments separate **how often** outcomes fall on each side from **how far** they lie from the benchmark.
+Here the unconditional average shortfall below the benchmark equals the unconditional average excess above it, even though frequencies differ: three observations fall below \(t\) and two exceed it. This illustrates how benchmark-relative directional moments separate **how often** outcomes fall on each side from **how far** they lie from the benchmark.
 
 ---
 
@@ -241,7 +241,7 @@ Instead of reporting only the total magnitude of extreme deviations, we may exam
 - **upper tail heaviness**: \(U_4(\mu;X)\)
 - **lower tail heaviness**: \(L_4(\mu;X)\)
 
-Suppose two distributions share identical kurtosis. Classical statistics would describe both as equally heavy-tailed.
+Suppose two distributions share identical kurtosis. That does not make them equally heavy-tailed (a bounded three-point law and a scaled \(t_5\) both have kurtosis 9), and it says nothing about which tail the extreme observations come from.
 
 Directional kurtosis reveals whether extreme observations arise primarily from the **upper tail** or the **lower tail**.
 

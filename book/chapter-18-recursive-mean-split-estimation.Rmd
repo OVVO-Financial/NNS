@@ -15,13 +15,13 @@ Nonparametric methods instead estimate \(f(x)\) directly from observations.
 Partition-based estimators are among the most intuitive approaches: the predictor space is divided into regions, and the conditional mean is estimated locally within each region.
 
 This chapter introduces the **recursive mean-split estimator**, the partition-based nonparametric method at the core of the NNS framework.
-The estimator recursively divides the data into regions based on conditional mean structure, producing a flexible estimator that adapts automatically to nonlinear relationships.
+The estimator recursively divides observations around local centers, producing regression points that summarize nonlinear relationships. The mathematical development below uses arithmetic means (`noise.reduction = "mean"`). The package default, `noise.reduction = "off"`, instead uses `NNS.gravity`; median and mode reducers are also available. A theorem about cell means does not automatically describe these other reducers or the complete prediction procedure.
 
-Two distinct splitting modes are available. In **joint partitioning**, regions are defined by splitting simultaneously on both the predictor \(X\) and the response \(Y\) at their joint means, producing four partial-moment quadrants at each level. In **\(X\)-only partitioning**, regions are defined by splitting solely on the predictor mean, producing two subregions at each level. Both modes share the same limit condition and recursive logic; they differ in how region boundaries are located and how many subregions each split creates.
+Two distinct splitting modes are available. In **joint partitioning**, regions are defined by splitting simultaneously on both the predictor \(X\) and the response \(Y\) at their joint means, producing four partial-moment quadrants at each level. In **\(X\)-only partitioning**, regions are defined by splitting solely on the predictor mean, producing two subregions at each level. Both modes share the recursive logic, but only the second defines cells in predictor space without observing the response. Joint partitions describe the observed joint geometry; using their regression points for prediction adds an interpolation or neighbor-selection step.
 
 The procedure reflects the same directional logic used throughout the book: just as variance decomposes into directional components relative to a benchmark, recursive mean splitting partitions the joint distribution according to deviations around conditional means.
 
-A key theoretical result is established here: the recursive mean-split estimator belongs to the well-studied class of **data-adaptive partition estimators**, and consistency is inherited directly from that class under standard conditions on cell diameter and occupancy. This is not a limitation requiring further development — it is a strength. The estimator sits within a family whose convergence properties are fully characterized in the literature, and the NNS contribution is the specific splitting rule, the partial-moment geometric interpretation, and the multivariate architecture built on top of that foundation.
+Partition-estimation theory provides a useful foundation for this construction. Its conclusions require hypotheses about localization, local sample size, response-dependent partition selection, and the prediction rule. This chapter gives a sufficient result for the predictor-only mean-reducer building block, and distinguishes that result from the behavior of the package defaults. The NNS contribution remains the benchmark-based splitting rule, its partial-moment geometry, and the regression-point architecture.
 
 ---
 
@@ -70,51 +70,42 @@ Nonparametric estimators relax these assumptions. Common examples include
 - partition estimators.
 
 Kernel methods estimate \(f(x)\) through weighted averages of nearby observations.
-However, they require selecting a **bandwidth parameter** that determines the smoothing scale, and the probability that any kernel function assigns positive mass to an exact observed value is zero — the estimate therefore cannot achieve an exact fit at all observations simultaneously.
+They use a **bandwidth parameter** that determines the smoothing scale. Their weights are kernel evaluations at observed distances, not probabilities assigned to individual observations. Compactly supported kernels with a sufficiently small bandwidth can interpolate distinct predictor values; interpolation is also possible with local polynomials and other smoothers.
 
 Partition estimators divide the predictor space into regions and compute averages within each region.
-The recursive mean-split method belongs to this class but differs from classical approaches through its **partial-moment splitting rule**, which anchors region boundaries directly to the geometry of the conditional mean. The estimator is consistent for the true conditional mean under the same regularity conditions that govern all partition estimators in this class — conditions whose sufficiency has been established in the statistical literature. As the order parameter increases, the number of regions grows and the estimator converges to a perfect fit in finite steps.
+The recursive mean-split method uses a **partial-moment splitting rule**, anchoring boundaries to local mean benchmarks. Increasing the order permits finer partitions. Whether this gives consistent estimation or exact interpolation depends on the stopping rule, predictor ties, reducer, and prediction procedure.
 
 ---
 
-## Consistency by Class Membership
+## A Conditional Consistency Result
 
-The recursive mean-split estimator is an instance of the **data-adaptive partition estimator** class studied by Stone (1977), Lugosi and Nobel (1996), and Györfi, Kohler, Krzyżak, and Walk (2002).
+Local averaging and data-adaptive partition methods are studied by Stone (1977), Lugosi and Nobel (1996), and Györfi, Kohler, Krzyżak, and Walk (2002). Membership in this broad family alone is not a consistency proof. The following elementary result makes the relevant conditions explicit for a mean-reducer building block.
 
-The general result for this class is as follows.
-
-**Theorem (Consistency of Partition Estimators).** Let \((X_1, Y_1), \dots, (X_n, Y_n)\) be independent and identically distributed, with \(E[Y^2] < \infty\). Let \(\hat{f}_n\) be the partition estimator
+**Proposition (Predictor-only cell means).** Let \((X_i,Y_i)\) be independent and identically distributed, with \(|Y_i|\le M<\infty\), and choose a version of \(f(x)=E[Y\mid X=x]\) continuous at the predictor value \(x\) of interest. Let \(A_n(x)\) be the cell containing \(x\) in a partition chosen using only \(X_1,\ldots,X_n\), possibly with additional randomness independent of the responses given the predictors. Define
 
 \[
-\hat{f}_n(x) = \frac{1}{N_{n,x}} \sum_{i : X_i \in A_n(x)} Y_i,
+N_{n,x}=\#\{i:X_i\in A_n(x)\},\qquad
+\hat f_n(x)=\frac{1}{N_{n,x}}\sum_{i:X_i\in A_n(x)}Y_i,
 \]
 
-where \(A_n(x)\) is the cell of a data-adaptive partition \(\mathcal{P}_n\) containing \(x\). If the partition satisfies
+with \(\hat f_n(x)=0\) for an empty cell. If
 
 \[
-\operatorname{diam}(A_n(x)) \xrightarrow{P} 0
-\qquad \text{and} \qquad
-N_{n,x} \xrightarrow{P} \infty
+\operatorname{diam}(A_n(x))\xrightarrow{P}0,
+\qquad N_{n,x}\xrightarrow{P}\infty,
 \]
 
-as \(n \to \infty\), then
+then \(E[(\hat f_n(x)-f(x))^2]\to0\).
 
-\[
-E\bigl[(\hat{f}_n(x) - f(x))^2\bigr] \to 0.
-\]
+**Proof.** Conditional on the predictors and the partition randomness, the selected responses are independent. On a nonempty cell, the variance of their mean is at most \(M^2/N_{n,x}\). Its conditional bias is the mean of \(f(X_i)-f(x)\) over that cell. Continuity at \(x\) and shrinking diameter make this bias converge to zero in probability. Both the squared bias and variance are bounded, so their expectations converge to zero. The empty-cell contribution also vanishes because \(P(N_{n,x}=0)\to0\). ∎
 
-The recursive mean-split estimator satisfies both conditions under the standard occupancy and order growth assumptions used in practice. As \(n \to \infty\) with order parameter \(O = O(n)\) growing appropriately and minimum occupancy held fixed:
+This proposition is a sufficient result under explicit assumptions, not a universal consistency claim for `NNS.reg`. Broader results permit unbounded responses and other partition constructions, but their additional hypotheses must be checked for the procedure being used.
 
-- each cell's diameter converges to zero because successive splits are anchored to sample means, which concentrate around the true conditional mean as \(n\) grows, producing finer and finer partitions in regions where the function varies;
-- each cell's occupancy grows because the data density in any fixed region of the predictor space grows linearly with \(n\).
+For recursive splitting, both diameter and occupancy conditions need a sample-size-dependent refinement rule. A fixed occupancy cutoff does not make terminal-cell counts diverge: refining until small cells remain can keep their counts bounded. Conversely, a fixed maximum order can leave cells with nonvanishing diameter. The default dependence-selected order in `NNS.reg` is bounded (at most 10, with a smaller range for samples below 100), so it is not an asymptotic order-growth rule.
 
-Consequently, **consistency of the recursive mean-split estimator is inherited directly from the established theory of partition estimators.** This is not an approximate or informal claim. The estimator belongs to a well-characterized class, and the convergence result applies.
+The proposition also does not cover partitions chosen using the same response values later averaged, response-selected order, gravity or mode reducers, linear interpolation, or multivariate neighbor weighting without further argument. Joint \((X,Y)\) partitioning is valuable as a representation of directional structure, but a cell chosen in joint space cannot be identified from a new predictor \(x\) alone.
 
-What the NNS framework contributes beyond this class membership is:
-
-1. a specific splitting rule grounded in the partial-moment geometry of the data,
-2. a finite-order perfect-fit property unavailable to kernel estimators,
-3. a multivariate architecture — developed fully in Chapter 21 — that operates on per-regressor regression points rather than on the raw observation cloud, substantially mitigating the curse of dimensionality.
+These qualifications retain the useful link to partition theory while stating what remains to be established for a complete NNS prediction procedure.
 
 ---
 
@@ -155,7 +146,7 @@ The estimate of \(f(x)\) is therefore the **average response within the region c
 
 This structure is flexible in three respects:
 
-- Regions adapt to nonlinear features of the conditional mean surface.
+- Predictor-only regions adapt to the distribution of the predictors; joint regions also use the observed response geometry.
 - Local averages approximate the conditional expectation without a specified functional form.
 - Estimation is entirely data-driven.
 
@@ -169,7 +160,7 @@ The key design choice is how the regions \(A_k\) are constructed.
 
 The NNS recursive mean-split estimator builds partitions through an iterative procedure governed by an **order parameter** \(O\).
 At each order, each existing region is further subdivided.
-When left unspecified in the package interface (`order = NULL`), recursion depth is determined internally for each regressor according to its directional dependence with the response; Chapter 21 formalizes this dependence-driven adaptivity in the regression workflow.
+In `NNS.reg`, `order = NULL` selects a bounded order for each regressor using its directional dependence with the response; Chapter 22 describes this workflow. In the standalone `NNS.part` interface, the default depth is based on sample size. Occupancy controls can stop either construction before the requested depth.
 
 Two splitting modes are available, depending on whether regions are anchored to the joint distribution of \((X, Y)\) or to the marginal distribution of \(X\) alone.
 
@@ -216,18 +207,18 @@ so the split occurs precisely where the first-order upper and lower partial mome
 ### Recursion
 
 Within each nonempty quadrant, repeat the same procedure: compute local means and split into four subquadrants.
-Continuing to order \(O\) produces at most \(4^{O-1}\) nonempty regions.
+After \(O\) splits there are at most \(4^O\) terminal regions. For a numeric order, `NNS.part` reports regression-point centers of the preceding (`prior.quadrant`) cells: order 1 gives up to four terminal quadrants but one regression point, and order 2 gives up to sixteen quadrants and four regression points.
 
 ### Regression points
 
 The **regression points** of the partition are the local means \((\bar{X}_R, \bar{Y}_R)\) within each region.
-These points summarize the conditional mean surface and serve as the basis for prediction and curve fitting.
+These points summarize the joint distribution within directional regions and serve as the basis for prediction and curve fitting. Their response coordinate is a mean conditional on both predictor and response restrictions, which differs from a predictor-only conditional mean.
 
 ```r
 x <- seq(-5, 5, .05)
 y <- x ^ 3
 
-for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
+for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0, noise.reduction = "mean")}
 ```
 
 In Python (the `plot_nns_part` helper reproduces the Voronoi view):
@@ -241,12 +232,12 @@ x = np.arange(-5, 5.05, 0.05)
 y = x ** 3
 
 for i in range(1, 5):
-    part = nns_part(x, y, order=i, obs_req=0)
+    part = nns_part(x, y, order=i, obs_req=0, noise_reduction="mean")
     plot_nns_part(part)
 ```
 
 <center>
-![Figure 18.1. `NNS.part` joint partitioning for orders 1–4 (Voronoi view), showing progressive recursive refinement.](images/ch18_part_1.png)
+![Figure 18.1. `NNS.part` joint partitioning for orders 1–4 (with `noise.reduction = "mean"`), showing progressive recursive refinement.](images/ch18_part_1.png)
 </center>
 
 ---
@@ -291,47 +282,51 @@ Because the region boundaries are determined by \(X\) alone, the regression poin
 x <- seq(-5, 5, .05)
 y <- x ^ 3
 
-for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE, obs.req = 0)}
+for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE, obs.req = 0, noise.reduction = "mean")}
 ```
 
 In Python:
 
 ```python
 for i in range(1, 5):
-    part = nns_part(x, y, order=i, type="XONLY", obs_req=0)
+    part = nns_part(x, y, order=i, type="XONLY", obs_req=0, noise_reduction="mean")
     plot_nns_part(part)
 ```
 
 <center>
-![Figure 18.2. `NNS.part(..., type = "XONLY")` predictor-only partitioning across recursive splits.](images/ch18_part_2.png)
+![Figure 18.2. `NNS.part(..., type = "XONLY")` predictor-only mean partitioning across recursive splits.](images/ch18_part_2.png)
 </center>
+
+The figures can be regenerated from the repository root with `Rscript book/scripts/render_foundation_figures.R`.
 
 ---
 
 ## Comparison of Modes
 
-Both modes share the same conceptual foundation — recursive splitting at local means — and converge to a perfect fit as \(O\) grows. They differ in the following respects.
+Both modes share the same conceptual foundation — recursive splitting at local means. They differ in the following respects; neither the region count nor a larger requested order alone guarantees interpolation.
 
 | Property | Joint partitioning | \(X\)-only partitioning |
 |---|---|---|
 | Split dimensions | \(X\) and \(Y\) jointly | \(X\) only |
 | Subregions per split | 4 | 2 |
-| Regions at order \(O\) | at most \(4^{O-1}\) | at most \(2^O\) |
+| Terminal regions after \(O\) splits | at most \(4^O\) | at most \(2^O\) |
+| Reported numeric-order regression points | at most \(4^{O-1}\) | at most \(2^{O-1}\) |
 | Quadrant IDs | digits 1–4 | digits 1–2 |
 | Region definition | Joint (X,Y) partial-moment quadrants | Predictor-space intervals |
 | Regression points | Joint quadrant means | Predictor-interval means |
 
-Joint partitioning converges faster due to exponential growth in regions and provides a richer representation of the joint distribution.
+Joint partitioning allows more regions per level and describes joint directional structure. This combinatorial difference is not a convergence-rate guarantee.
 \(X\)-only partitioning is more directly analogous to classical predictor-space partition estimators and is often preferred when a clear functional relationship \(Y = f(X)\) is the primary object of interest.
 
 ### Stopping criteria
 
 Splitting terminates when any of the following conditions are met:
 
-- A region contains fewer than a user-specified minimum number of observations (minimum occupancy threshold).
-- The order parameter \(O\) reaches a user-specified maximum.
+- A cell has no more than `obs.req` observations and is no longer eligible for splitting.
+- With `min.obs.stop = TRUE`, a newly formed cell reaches that occupancy threshold, stopping the recursion globally.
+- The requested order or the implementation's sample-size depth limit is reached.
 
-The minimum occupancy threshold is quantitative and directly governs the coarsest admissible partition. Under any fixed occupancy threshold, as \(n \to \infty\) the occupied regions shrink and the occupancy within each region grows, satisfying the two conditions required for consistency in the partition estimator class.
+These are finite-sample controls. A fixed occupancy threshold is not a guarantee of shrinking cells together with diverging cell counts, and splitting tied predictor values cannot separate their different responses in predictor-only mode.
 
 ---
 
@@ -365,36 +360,35 @@ Each split separates observations into four directional groups defined by their 
 The joint mean \((\bar{X}_R, \bar{Y}_R)\) is the unique point at which the first-order partial moments balance on both axes. Splitting at this point therefore exactly decomposes the local joint variability into its four directional components.
 
 By recursively applying this decomposition, the algorithm parses the joint distribution into regions of progressively refined directional structure.
-Areas where the conditional mean changes most rapidly — where the CoUPM and CoLPM quadrants are most unequal in their response means — are split more frequently as \(O\) increases, because the local means shift and the quadrant boundaries realign at each level.
+At each level the eligible regions are split according to the same center and occupancy rules. There is no local curvature criterion that preferentially splits regions where the conditional mean changes fastest. Joint splits respond to the observed joint geometry; with predictor-only splits and a fixed order, changing the responses leaves the boundaries unchanged.
 
-The resulting partition structure therefore reflects the geometry of the conditional mean surface, not an externally imposed grid.
+The resulting partition is data-dependent rather than an externally imposed grid.
 
 ---
 
 ## Multivariate Predictors
 
-For a predictor vector \(X_i \in \mathbb{R}^d\), the recursive mean-split procedure extends through an architecture designed specifically to mitigate the curse of dimensionality. This architecture is described in full in Chapter 21; its foundations are laid here.
+For \(X_i\in\mathbb R^d\), the implementation first constructs a partition for each regressor and then combines their memberships. Chapter 22 describes the full prediction procedure.
 
-### Per-regressor partitioning against the response
+### Per-regressor boundaries and joint memberships
 
-The key structural decision in the multivariate case is that **each predictor is partitioned independently against the response**, rather than partitioning the joint predictor space.
+For each predictor \(j\), its partition against the response produces \(K_j\) cell labels. These boundaries are constructed one regressor at a time, which simplifies partition construction and permits different orders by regressor. Each observation then receives a **joint identifier** formed from all its per-regressor labels.
 
-For predictor \(j \in \{1, \dots, d\}\ \), recursive mean splitting is applied to the pairs \((X_i^{(j)}, Y_i)\) to produce a set of regression points for that predictor — local conditional means summarizing the relationship between \(X^{(j)}\) and \(Y\). These per-regressor partitions are each governed by the same splitting rules described above and produce a set of \(K_j\) regression points for predictor \(j\).
+The resulting groups are occupied intersections of these partitions. Their count \(K\) satisfies
 
-This is not joint partitioning of the full \(d\)-dimensional predictor space. It is a collection of univariate partitions, each anchored to the response. The important consequence is that the number of candidate regression points grows as \(\sum_j K_j\) — linearly in the number of regressors — rather than as \(\prod_j K_j\), which would grow exponentially and reproduce the curse.
+\[
+K\le\min\left(n,\prod_{j=1}^{d}K_j\right),
+\]
+
+not \(\sum_jK_j\). Factorwise construction does not prevent many intersections from containing only one observation.
 
 ### Regression point matrix
 
-The regression points from all \(d\) per-regressor partitions are assembled into a **regression point matrix (RPM)**. Each row of the RPM corresponds to one occupied joint region in the multivariate structure; the columns record the local mean of each predictor within that region, and a final column records the corresponding local mean response.
+Each occupied joint group contributes one row to the **regression point matrix (RPM)**. Its columns contain the selected center of each predictor and of the response; arithmetic means are obtained with the mean reducer. Prediction selects nearby rows across the predictor columns and combines their response centers using the configured distance and neighbor rules.
 
-For a new observation \(x^* \in \mathbb{R}^d\), prediction proceeds by identifying the rows of the RPM closest to \(x^*\) across the predictor columns, then returning the distance-weighted average of the corresponding local response means. This is a nearest-neighbor search over regression points — compressed, denoised local conditional means — rather than over the \(n\) raw observations.
+When many observations share each group, the RPM compresses the sample and local averaging can reduce response noise. When the groups are singletons, the RPM can have \(n\) rows and provide no averaging-based denoising. The number and occupancy of the joint groups therefore matter alongside the per-regressor orders.
 
-The curse of dimensionality is mitigated along two dimensions simultaneously:
-
-1. **Search space compression.** The RPM has far fewer rows than \(n\). Each row is a local conditional mean derived from a cluster of observations, not a raw data point.
-2. **Noise reduction before search.** Each regression point has already been smoothed through local averaging, so the candidates in the nearest-neighbor search carry substantially less noise than raw observations.
-
-The full multivariate prediction architecture — including dependence-adaptive neighbor count and alternative synthetic-predictor dimension reduction — is developed in Chapter 21.
+The architecture offers a useful way to construct local representatives and tune resolution, but does not prove removal of the curse of dimensionality or universal superiority over raw-observation nearest neighbors. Those are empirical questions for a stated data-generating setting and comparison protocol.
 
 ---
 
@@ -427,14 +421,11 @@ Iteratively apply the mean-split rule:
 
 ### Step 4 — Stopping rule
 
-Terminate splitting when any region falls below the minimum occupancy threshold or when the order \(O\) reaches its maximum.
+Apply the configured occupancy and depth controls described above; inspect the completed order and occupied cells.
 
 ### Step 5 — Prediction
 
-For a new predictor value \(x\):
-
-1. Identify the region \(A_n(x)\) containing \(x\) (univariate) or the matching rows in the RPM (multivariate).
-2. Return the local response mean or the distance-weighted average of the nearest regression-point means as the predicted value:
+For the predictor-only mean-reducer estimator, identify the cell \(A_n(x)\) containing a new predictor value and return its local response mean:
 
 \[
 \hat{f}_n(x)
@@ -445,63 +436,51 @@ For a new predictor value \(x\):
 
 ### Step 6 — Curve fitting (optional)
 
-The regression points at each order can be connected by **linear segments** to produce a piecewise-linear curve. This provides a smooth interpolating surface between partition means, supports well-defined interpolation and extrapolation, and reduces variance relative to a pure step-function estimator.
+The regression points can be connected by **linear segments** to produce a continuous, piecewise-linear curve between distinct predictor centers. `NNS.reg` uses interpolation in its univariate path and neighbor combinations in its multivariate path, so the complete predictor is not simply the cell-mean formula above. Extrapolation depends on the selected extension rule and has no general accuracy guarantee. Interpolation changes the bias and variance and need not reduce either uniformly.
 
 ---
 
-## Limit Condition and Perfect Fit
+## Refinement and Interpolation
 
-A notable property of the recursive mean-split estimator is its **finite-order limit condition**.
-
-As the order \(O\) increases, the number of regions grows — exponentially in the joint case (\(4^{O-1}\)) or geometrically in the \(X\)-only case (\(2^O\)). At a finite order \(O^*\), every observation occupies its own region and becomes its own regression point. At this limit:
+In an ideal predictor-only mean-split recursion with finitely many distinct predictor values, continued nontrivial splitting can eventually isolate each distinct value. With an interpolating prediction rule and no conflicting responses at tied predictors, this permits
 
 \[
-\hat{f}_n(X_i) = Y_i \quad \text{for all } i = 1, \dots, n,
+\hat f_n(X_i)=Y_i.
 \]
 
-and the \(R^2\) of the in-sample fit equals 1.
+It is a conditional interpolation property, not a guarantee for every numeric order in the package. Occupancy and depth controls can stop refinement first. If two observations have the same predictor vector and different responses, no single-valued predictor can reproduce both. The `order = "max"` predictor-only path accordingly summarizes responses at each distinct predictor value.
 
-This property distinguishes NNS from kernel regression, which cannot achieve an exact fit at all observations simultaneously due to the continuous support of the kernel function. The limit condition is reached in finite steps, not asymptotically.
+Joint partitioning may separate tied predictors by their responses, but converting those points into a function still requires resolving the duplicated predictors. An in-sample \(R^2\) of 1 also requires nonzero response variation for that statistic to be defined.
 
-In practice, \(O\) is selected to balance fit quality against overfitting. Larger \(O\) reduces bias but increases variance; the appropriate order is determined by the signal-to-noise ratio of the data. The NNS dependence measure provides an objective criterion for this selection.
+Exact interpolation is shared with several other methods, including suitable kernels and polynomial interpolation. It says nothing by itself about predictive accuracy for new observations. Order, occupancy, reducer, and prediction rules should be evaluated together, preferably with validation appropriate to the sampling design.
 
 ---
 
 ## Properties of the Recursive Mean-Split Estimator
 
-The recursive mean-split estimator possesses several important characteristics.
+### A connection to partition-estimation theory
 
-### Consistency by class inheritance
-
-The estimator belongs to the class of data-adaptive partition estimators studied by Stone (1977) and extended by Lugosi and Nobel (1996) and Györfi et al. (2002). Under standard conditions — shrinking cell diameter and growing cell occupancy — the class is universally consistent. The recursive mean-split estimator satisfies these conditions under the occupancy and order growth rules used in practice, and consistency is therefore established by class membership rather than requiring a separate proof from first principles.
+For the predictor-only mean-reducer building block, shrinking cells and growing cell counts provide a path to consistency under the assumptions stated above. The actual tuning sequence and any response-dependent selection must satisfy the relevant theorem; the package defaults do not establish this automatically.
 
 ### Nonparametric flexibility
 
-No functional form is imposed on the relationship between \(X\) and \(Y\).
-The estimator represents highly nonlinear relationships without specifying a parametric family.
+The method imposes no fixed parametric form on the relationship between \(X\) and \(Y\). Local representatives can describe nonlinear features of the observed sample.
 
 ### Grounding in partial moments
 
-Region boundaries are defined by the same partial-moment structure — upper and lower deviations relative to a benchmark — that underlies the directional statistics developed throughout this book.
-The estimator is therefore not simply an ad hoc tree method but an application of the NNS partial-moment framework to the estimation of conditional expectations.
+With arithmetic means, the split benchmarks balance first-order upper and lower partial moments within each region. Alternative reducers retain the directional partition construction while changing the center being represented.
 
-### Data-adaptive partitions
+### Data-dependent geometry
 
-Regions are determined entirely by the data.
-Areas where the conditional mean changes rapidly receive finer partitions as \(O\) increases.
+Predictor-only boundaries depend on the predictor distribution. Joint boundaries also depend on responses, and dependence-selected orders can vary across regressors. Neither mechanism is a local curvature-optimization rule.
 
 ### Implicit smoothing
 
-The order \(O\) governs the effective smoothing scale.
-Chapter 19 formalizes this by interpreting the partition cell diameter as a **dynamic bandwidth**, connecting the estimator to classical nonparametric smoothing theory.
+The order and occupancy controls determine how finely the data are represented. Chapter 19 interprets predictor-cell diameter as a **dynamic bandwidth**, while distinguishing it from the additional smoothing induced by interpolation and neighbor combinations.
 
-### Piecewise-linear interpolation
+### Interpolation when supported by the data and settings
 
-Connecting regression points with line segments produces an interpolating surface that is stable, interpretable, and well-behaved for interpolation and extrapolation — properties that kernel-based nonparametric regressions do not generally share.
-
-### Finite limit condition
-
-At a finite order \(O^*\), every observation occupies its own region and the estimator achieves a perfect in-sample fit — \(\hat{f}_n(X_i) = Y_i\) for all \(i\). This property is not available to kernel or polynomial methods, which are intrinsically approximate. It provides a well-defined upper bound on approximation error and a principled spectrum of fits indexed by \(O\), from a single linear approximation at \(O = 1\) to exact interpolation at \(O = O^*\).
+Distinct predictor centers can be joined by line segments. Fine partitions may allow interpolation of the sample, but tied predictors with different responses, stopping controls, and smoothing options limit that property. Coarse-to-fine refinement provides a useful family of fits without a universal finite-order perfect-fit assertion.
 
 ---
 
@@ -513,7 +492,7 @@ The recursive mean-split estimator is related to several classical approaches bu
 
 CART algorithms select splits greedily to minimize impurity or squared prediction error, then apply pruning penalties to prevent overfitting.
 
-Recursive mean splitting differs in two key respects. First, the splitting criterion is the **conditional mean** of the data within the region, not an optimized impurity measure. Second, overfitting is controlled through the minimum occupancy threshold and the order parameter rather than through post-hoc pruning. The resulting partition structure follows the conditional mean geometry rather than an impurity landscape (Breiman et al., 1984).
+Recursive mean splitting places boundaries at local coordinate means rather than searching candidate boundaries for the best impurity reduction. In predictor-only mode this is the mean of \(X\) within a region, not an estimate of where \(f(x)\) changes fastest. Occupancy and order control refinement instead of post-hoc pruning (Breiman et al., 1984).
 
 ### Kernel regression
 
@@ -521,36 +500,31 @@ Kernel estimators smooth data using a bandwidth parameter selected externally, o
 
 Recursive mean-split estimation avoids explicit bandwidth selection: smoothing arises implicitly through the order parameter and the partition cell size. Chapter 19 makes this connection precise by showing that the cell diameter functions as a data-adaptive bandwidth.
 
-A further distinction concerns exactness of fit. Because all kernel functions are continuous probability distributions, the probability that a kernel function assigns positive mass to any exact observed value is zero. Consequently, the kernel estimate at any point is a weighted average over the surrounding distribution and can never exactly equal any single observation. The recursive mean-split estimator does not share this limitation: at finite order \(O^*\), it achieves an exact fit at every observed point simultaneously.
+Both approaches can smooth or interpolate depending on their settings. For example, a compactly supported kernel with a bandwidth smaller than the minimum separation of distinct predictors gives each training point only its own positive weight. Probability mass at individual points of a continuous kernel distribution is irrelevant to those regression weights.
 
 ### \(k\)-means clustering
 
-The NNS partition objective — minimizing within-quadrant sum of squares — is equivalent to the \(k\)-means objective when the number of clusters equals the number of partition regions. The key difference is that NNS does not require a pre-specified \(k\): the number of regions is determined by the order parameter \(O\) and the data, not by an externally supplied cluster count.
+For fixed group memberships, arithmetic means minimize within-group squared deviations, which connects mean-based regression points to \(k\)-means centroids. The grouping rules differ: recursive coordinate splits do not solve the \(k\)-means optimization over assignments. NNS controls the number of possible groups through order and occupancy rather than a directly specified cluster count.
 
 ### Fixed-grid estimators
 
 Uniform grids divide the predictor space into equally sized cells.
-Mean-split partitions are data-driven and adapt to the density and conditional mean geometry of the sample.
+Mean-split partitions depend on sample geometry; predictor-only boundaries adapt to predictor density, while joint boundaries also use the response.
 
 ---
 
 ## Summary
 
-Recursive mean-split estimation provides a flexible, data-adaptive, nonparametric method for estimating conditional expectations.
+Recursive mean-split estimation connects directional benchmarks to local data representation.
 
-The key ideas developed in this chapter are:
+- With the mean reducer, split centers balance first-order partial moments within each region. The default gravity reducer represents a different center.
+- Joint \((X,Y)\) partitioning describes directional joint geometry; predictor-only partitioning defines neighborhoods usable without a new response.
+- Consistency of a cell-mean building block follows under explicit localization, occupancy, response-selection, and regularity assumptions. Fixed occupancy controls and bounded default orders do not establish those asymptotic conditions.
+- Numeric order controls refinement but does not guarantee interpolation. Tied predictors with conflicting responses cannot all be fitted by a single-valued function.
+- Multivariate prediction combines per-regressor memberships into occupied joint groups. The RPM can compress and average the sample, but its row count can reach \(n\).
+- Interpolation and nearest-neighbor combinations add prediction rules to the local representatives; their behavior must be assessed as part of the complete estimator.
 
-- **Consistency by class membership.** The recursive mean-split estimator belongs to the class of data-adaptive partition estimators, for which universal consistency under shrinking-diameter and growing-occupancy conditions has been established in the literature (Stone 1977; Lugosi and Nobel 1996; Györfi et al. 2002). The estimator satisfies both conditions under standard stopping rules, and its consistency is therefore inherited directly from this class.
-- Partition-based estimation of conditional means, using the local sample average within each region as the estimator.
-- Two splitting modes: joint \((X, Y)\) partitioning, which creates four partial-moment quadrants at each split, and \(X\)-only partitioning, which creates two predictor-interval subregions.
-- The joint splitting rule is grounded in the co-partial-moment structure of the NNS framework: region boundaries coincide with the joint conditional means, and the four quadrants correspond exactly to the CoUPM, CoLPM, DLPM, and DUPM regions.
-- An order parameter \(O\) governs partition depth; at a finite \(O^*\), the estimator achieves a perfect in-sample fit.
-- Multivariate predictors are handled via per-regressor partitioning against the response, which produces a regression point matrix (RPM) of local conditional means. The search space for prediction grows linearly in the number of regressors, not exponentially, substantially mitigating the curse of dimensionality.
-- Prediction connects regression points with local averages or piecewise-linear segments in the univariate case, and with distance-weighted nearest-neighbor averaging over the RPM in the multivariate case.
-
-Chapter 19 interprets the partition cell diameter as a **dynamic bandwidth**, linking the estimator to classical kernel smoothing theory while preserving its data-adaptive character.
-
-Chapter 21 develops the multivariate regression architecture in full, showing how per-regressor partitioning with response-anchored centroids — combined with dependence-adaptive neighbor count — produces a nearest-neighbor prediction method over a compressed, denoised geometry that handles high-dimensional predictors substantially better than raw-observation kNN.
+Chapter 19 develops the dynamic-bandwidth interpretation. Chapter 22 describes multivariate prediction and the practical consequences of joint-group occupancy.
 
 ---
 

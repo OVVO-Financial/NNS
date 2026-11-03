@@ -51,7 +51,7 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
 
   // Dispersion is the Gini mean difference, the degree-1 lower plus upper
   // partial moment about each observation in turn: as the U-statistic
-  // sum_{i != j} |x_i - x_j| / (k (k - 1)) it is unbiased for any distribution
+  // sum_{i != j} |x_i - x_j| / (k (k - 1)) it is unbiased under iid sampling with a finite first moment
   // at any component length k, so no normal-theory factor such as c4(k) is
   // needed (#97). One sort of the series gives every component's order
   // statistics: walking the sorted values, each lands in its component at

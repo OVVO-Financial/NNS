@@ -17,7 +17,7 @@ NNS.SD.cluster(
 
 \item{degree}{Numeric options: (1, 2, 3). Degree of stochastic dominance test.}
 
-\item{type}{Character, either  \code{"discrete"} (default) or \code{"continuous"}; specifies the type of CDF.}
+\item{type}{At degree 1, \code{"discrete"} (default) uses empirical FSD and \code{"continuous"} uses the degree-one area-ratio (Omega/expectile) ordering. The latter does not imply ordinary FSD. SSD and TSD are unaffected by \code{type}.}
 
 \item{min_cluster}{Integer. Peeling stops once at most \code{min_cluster} variables remain; those form the final cluster, and a final cluster smaller than \code{min_cluster} is merged into the previous one.  SD-efficient sets peeled before that are kept whatever their size.}
 

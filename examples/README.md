@@ -20,6 +20,15 @@ Canonical changes should be made in the corresponding file under `vignettes/`
 first. Python may use language-appropriate syntax and containers, but should
 preserve the same statistical demonstration and interpretation.
 
+## Corrections and current evidence
+
+Read [example corrections and reproducibility](example-corrections.md) before
+using the historical applied studies. The PDF originals are retained; their
+current executable companion and source-provenance notes are linked there.
+The earlier interval-benchmark ranking and unsupported comparative accuracy
+claims have been withdrawn. Current results must be regenerated under the
+stated validation protocol.
+
 See [`index.md`](index.md) for applied studies, comparison papers, and extended
 examples. Those applications supplement rather than replace the canonical
 numbered curriculum.

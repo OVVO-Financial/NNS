@@ -164,7 +164,7 @@ The interpretation is immediate.
 
 In this dataset, whenever \(X\) is above its benchmark, \(Y\) is also above its benchmark, and whenever \(X\) is below its benchmark, \(Y\) is also below its benchmark. Consequently observations never fall into divergent regions.
 
-Boundary observations contribute zero to all co-partial moments. For example, the point \((0,1)\) lies exactly on the \(X\) benchmark, so both \((X-t_X)_+\) and \((t_X-X)_+\) equal zero.
+Boundary observations contribute zero to these positive-degree co-partial moments; degree-zero moments instead use the event conventions from Chapter 3. For example, the point \((0,1)\) lies exactly on the \(X\) benchmark, so both \((X-t_X)_+\) and \((t_X-X)_+\) equal zero.
 
 Real datasets rarely exhibit such perfect alignment, and in practice the divergent moments capture regions where one variable rises while the other falls.
 
@@ -172,7 +172,7 @@ Real datasets rarely exhibit such perfect alignment, and in practice the diverge
 
 ## Dependence Versus Correlation
 
-Covariance aggregates directional components:
+With the benchmarks at the means, \(t_X=\mu_X\) and \(t_Y=\mu_Y\), covariance aggregates the degree-one directional components:
 
 \[
 Cov(X,Y)
@@ -185,6 +185,8 @@ DLPM_{1,1}
 -
 DUPM_{1,1}.
 \]
+
+For general benchmarks the same sum is \(E[(X-t_X)(Y-t_Y)] = Cov(X,Y) + (\mu_X-t_X)(\mu_Y-t_Y)\). With \(X\) and \(Y\) independent on \(\{9, 11\}\) and both benchmarks at 0, the sum is 100 while the covariance is 0.
 
 Correlation further standardizes covariance.
 
@@ -210,7 +212,7 @@ Consider
 Y = X^2
 \]
 
-with \(X\) symmetrically distributed around zero.
+with \(X\) symmetrically distributed around zero, \(E[X^4]<\infty\), and \(\operatorname{Var}(X^2)>0\). These conditions make both variances and the correlation well-defined.
 
 In this case
 
@@ -218,7 +220,7 @@ In this case
 Corr(X,Y)=0.
 \]
 
-Despite zero correlation, the variables are perfectly dependent.
+Despite zero correlation, \(Y\) is determined by \(X\). This functional relation is a property of the joint law; a finite-resolution dependence statistic need not assign it the numerical value 1.
 
 Directional moments reveal the structure.
 
@@ -284,7 +286,7 @@ d_lpm(1, 1, x, y, x.mean(), y.mean())
 d_upm(1, 1, x, y, x.mean(), y.mean())
 ```
 
-In typical runs, the concordant downside component exceeds the upside component, confirming that joint downside co-movement dominates while upside dependence remains weaker.
+In this example, the concordant downside component exceeds the upside component. These raw co-moments combine dependence and marginal severity; the marginal-product comparison developed below is needed to isolate departures from independence.
 
 Correlation averages across all regions and may therefore appear moderate even when downside dependence dominates.
 
@@ -300,7 +302,7 @@ Increasing the orders \(r\) and \(s\) increases sensitivity to large observation
 CoLPM_{r,s}, \quad CoUPM_{r,s}
 \]
 
-measure **tail dependence**.
+summarize **joint tail severity**. They differ from the limiting conditional tail probabilities defined in Chapter 12 and should be compared with marginal-product benchmarks when the goal is to isolate dependence.
 
 For example, a risk manager concerned with extreme joint losses may examine \(CoLPM_{2,2}\) or higher orders rather than \(CoLPM_{1,1}\), since larger powers place greater weight on large deviations.
 
@@ -350,7 +352,7 @@ the empirical estimators are
 (t_X-x_i)_+^r (y_i-t_Y)_+^s
 \]
 
-These converge to population values by the law of large numbers.
+For independent and identically distributed observations, fixed benchmarks, and finite expectations of the displayed products, these sample averages converge to their population values by the law of large numbers. Dependent observations or estimated benchmarks require the corresponding regularity conditions.
 
 Statistical inference for these estimators—including bootstrap procedures—is discussed later in the book when directional dependence measures are applied in empirical analysis.
 
@@ -370,7 +372,7 @@ CoLPM_{1,1},CoLPM_{2,2},CoLPM_{3,3},\dots
 CoUPM_{1,1},CoUPM_{2,2},CoUPM_{3,3},\dots
 \]
 
-These sequences describe how dependence changes across the distribution.
+These sequences describe how dependence changes across the distribution, but only relative to what the margins alone produce. Under independence the co-moments factorise, \(CoLPM_{d,d}(t_X,t_Y) = L_d(t_X;X)\,L_d(t_Y;Y)\) and \(CoUPM_{d,d}(t_X,t_Y) = U_d(t_X;X)\,U_d(t_Y;Y)\), so skewed margins alone make the two sequences diverge: for two independent negated Exp(1) variables at their means, \(CoLPM_{d,d}/CoUPM_{d,d}\) is 1, 7.8 and 113 at degrees 1, 2 and 3. A profile is therefore read against these independence products.
 
 Example:
 
@@ -380,9 +382,21 @@ Example:
 | 2 | 3.9 | 1.4 |
 | 3 | 8.5 | 1.8 |
 
-Moderate deviations appear symmetric, but higher orders reveal increasing **downside dependence**.
+Moderate deviations appear symmetric, while higher orders put more weight on the lower co-moment. Where the independence products of the margins grow the same way, this is marginal skew; only the excess over them is increasing **downside dependence**.
 
 Directional profiles therefore show **how dependence evolves from ordinary fluctuations to extreme events**.
+
+---
+
+## Finite-Resolution Dependence Summaries
+
+`NNS.dep` combines directional frequency and area information across a finite set of recursive partition levels. This is a useful summary of the structure resolved by those partitions, not a complete representation of the joint law.
+
+A numerical value of 1 corresponds to maximal contrast under the statistic's cellwise calibration. It is not guaranteed for every noiseless function: a coarse cell can contain several branches or oscillations of \(Y=f(X)\), so considerable response variation remains inside that cell. Finer partitions can resolve more structure, but also change sampling variation and the effect of selecting the strongest level. Conversely, a score near zero does not establish independence against every possible relationship.
+
+The implementation compares cells with their permutation-null expectations. Some small-cell calculations use exact enumeration and larger cells use approximations; this is distinct from an exact universal null law for the final selected score. When a p-value is requested, its permutation interpretation depends on the exchangeability of the observations under the null. Serially dependent data require a null resampling scheme appropriate to their process.
+
+These properties preserve the distinction between a directional profile, a dependence summary, and a calibrated statistical test. Power comparisons must specify the alternative, sample size, and testing procedure rather than claim uniform superiority for one summary.
 
 ---
 
@@ -403,4 +417,4 @@ Correlation therefore represents only a limited summary of joint behavior.
 
 Directional dependence provides a richer representation of relationships between variables.
 
-The next chapter connects this framework to **copula interpretation**, linking directional partial moments with rank-based dependence structures used in multivariate statistics.
+Chapter 12 connects this framework to **copula interpretation**, linking directional partial moments with rank-based dependence structures used in multivariate statistics.

@@ -7,7 +7,7 @@
 #' @param lower_rho numeric \code{[-1,1]}; \code{-1} default will set the \code{from} argument in \code{seq(from, to, by)}.
 #' @param upper_rho numeric \code{[-1,1]}; \code{1} default will set the \code{to} argument in \code{seq(from, to, by)}.
 #' @param by numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.
-#' @param exp numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.
+#' @param exp positive finite numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
 #' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
@@ -45,6 +45,13 @@ NNS.MC <- function(x,
                    xmin = NULL,
                    xmax = NULL, ...){
 
+
+  scalar_finite <- function(z) is.numeric(z) && length(z) == 1L && is.finite(z)
+  if (!scalar_finite(exp) || exp <= 0) stop("exp must be a single finite number > 0.")
+  if (!scalar_finite(lower_rho) || !scalar_finite(upper_rho) ||
+      lower_rho < -1 || upper_rho > 1 || lower_rho > upper_rho)
+    stop("lower_rho and upper_rho must satisfy -1 <= lower_rho <= upper_rho <= 1.")
+  if (!scalar_finite(by) || by <= 0) stop("by must be a single finite number > 0.")
 
   rhos <- seq(lower_rho, upper_rho, by)
   l <- length(rhos)

@@ -271,17 +271,17 @@ Suppose \(g<\mu\) is a lower benchmark and the event of interest is
 \[
 X\le g.
 \]
-A classical one-sided Chebyshev argument bounds this lower-tail probability using symmetric dispersion:
+The classical one-sided bound, Cantelli's inequality, controls this lower-tail probability using symmetric dispersion:
 \[
-P(X\le g)\le \frac{1}{2}\left(\frac{\sigma}{\mu-g}\right)^2.
+P(X\le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]
-This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations.
+This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations. Halving Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), is not a valid alternative: it holds for symmetric distributions only. The sample \(\{-1, 1/3, 1/3, 1/3\}\) has mean 0 and variance \(1/3\) and puts probability \(1/4\) at \(X\le -1\), above the halved bound of \(1/6\) and equal to Cantelli's.
 
 A directional refinement replaces symmetric variance with semivariance:
 \[
 P(X\le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 \]
-where \(\sigma_-\) measures dispersion only on the adverse side of the benchmark. The estimation-error literature highlights the importance of this refinement through the Berck–Hihn result, which links semivariance directly to a strong boundary form of Chebyshev’s inequality.
+where \(\sigma_-^2 = L_2(\mu;X) = E[(\mu-X)_+^2]\) measures dispersion only on the adverse side of the mean. This is Markov's inequality for \((\mu-X)_+^2\), which is at least \((\mu-g)^2\) whenever \(X\le g\), so it holds for every distribution. For a symmetric distribution \(\sigma_-^2=\sigma^2/2\) and the bound reduces to the halved form above, which is why that form holds in the symmetric case. The estimation-error literature highlights the importance of this refinement through the Berck–Hihn result, which links semivariance directly to a strong boundary form of Chebyshev’s inequality.
 
 A further generalization uses lower partial moments of degree \(\alpha\). Define
 \[

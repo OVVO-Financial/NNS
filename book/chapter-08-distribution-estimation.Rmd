@@ -163,7 +163,7 @@ Classical statistics addresses this issue using **kernel density estimation**, w
 
 The directional framework approaches the problem differently. Rather than smoothing the distribution directly, it identifies structural features of the distribution—such as the **mode and local concentration of probability mass**—through data-adaptive procedures whose tuning is set by the data rather than chosen by the analyst. `NNS.mode`, for example, counts observations in bins of width \(\mathrm{IQR}/\sqrt{n}\) and smooths the counts with a short triangular filter before locating peaks; the bin width is still a smoothing choice, but it is fixed by the sample's own spread and size.
 
-The theoretical foundation for this approach is established in Chapter 13, where degree-one partial moments are shown to recover the full distribution without smoothing parameters. The computational implementation — data-adaptive partitioning that locates modes and local probability mass concentration — is developed in Chapter 18.
+Chapter 13 develops a continuous hinge representation from which the distribution can be recovered, alongside the already complete degree-zero CDF representation. That identity does not eliminate smoothing choices in a finite-sample mode estimator. Chapter 18 develops recursive partitioning as a separate way to construct local representatives; `NNS.mode` uses the histogram and smoothing rule described here.
 
 Practical implementation of these methods — including sampling from empirical distributions and generating PDFs via degree manipulation of `LPM.VaR` — is demonstrated in the NNS package vignette [Sampling and Simulation](https://cran.r-project.org/web/packages/NNS/vignettes/NNSvignette_05_Sampling.html).
 

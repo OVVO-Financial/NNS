@@ -9,12 +9,12 @@ UPM.VaR(percentile, degree, x)
 \arguments{
 \item{percentile}{numeric [0, 1]; The percentile for right-tail VaR.}
 
-\item{degree}{integer; \code{(degree = 0)} for discrete distributions, \code{(degree = 1)} for continuous distributions. With \code{degree = 0} the result is the interpolated empirical quantile (\code{quantile(x, 1 - percentile, type = 7)}), which on tied data need not be an exact inverse of \code{UPM.ratio(0, ., x)}.}
+\item{degree}{integer; \code{(degree = 0)} gives the interpolated empirical quantile (\code{quantile(x, 1 - percentile, type = 7)}), which on tied data need not be an exact inverse of \code{UPM.ratio(0, ., x)}. Use it for probability statements.  \code{(degree = 1)} gives an area-weighted (severity-weighted) threshold, the (1 - \code{percentile})-expectile of \code{x} (Newey and Powell 1987): \code{percentile} of the area of deviations, not of the observations, lies above it, so it is not a quantile of \code{x}.  Higher degrees weight large deviations more.}
 
 \item{x}{a numeric vector.}
 }
 \value{
-Returns a numeric value representing the point at which \code{"percentile"} of the area of \code{x} is above.
+Returns the type-7 empirical quantile (\code{degree = 0}), whose strict or inclusive sample tail fraction may differ from \code{percentile} because of interpolation or ties, or the threshold with \code{percentile} of the directional deviation area above it (\code{degree > 0}).
 }
 \description{
 Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio.

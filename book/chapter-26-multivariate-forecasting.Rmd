@@ -1,6 +1,6 @@
 # Multivariate Forecasting
 
-Chapter 24 developed the NNS approach to univariate forecasting. A single series can be projected forward by treating future values as a nonlinear autoregression problem, estimating the relation between current and lagged values without imposing a fixed parametric law, and then extrapolating the series using directional nonparametric structure.
+Chapter 25 developed the NNS approach to univariate forecasting. A single series is partitioned into phase-specific component series, each regressed against its occurrence index and extrapolated using linear or directional nonparametric fits. The multivariate extension retains those univariate forecasts as its first stage.
 
 But many forecasting problems are not univariate.
 
@@ -123,7 +123,7 @@ This design is important. The multivariate forecast does not replace the univari
 
 ### Stage 2: construct lagged predictors
 
-The completed multivariate panel is transformed into a lag matrix.
+The completed panel is extended with the univariate forecasts and transformed into a lag matrix. At each forecast date, unknown same-period covariates and unknown lagged values come from these first-stage forecasts. The target variable's own contemporaneous value is excluded; other series' contemporaneous predictions remain part of the intended two-stage design.
 
 ### Stage 3: reduce lagged predictors
 
@@ -197,26 +197,23 @@ Thus the lag structure need not be homogeneous.
 
 One variable may use only lag 1, another may use lags 1 through 6, and a third may use a sparse pattern such as \(1, 3, 12\). This flexibility is especially important in economic and financial systems, where different variables evolve over different time scales.
 
-Mathematically, the forecasting feature vector for one horizon may be written as
+At forecast origin $T$, define the extended series
 
 \[
-Z_t
-=
-\bigl(
-X_{1,t}, X_{1,t-1}, \dots, X_{1,t-\tau_1},
-X_{2,t}, X_{2,t-1}, \dots, X_{2,t-\tau_2},
-\dots,
-X_{p,t}, X_{p,t-1}, \dots, X_{p,t-\tau_p}
-\bigr).
+\widetilde X_{k,s\mid T}=
+\begin{cases}
+X^{\mathrm{completed}}_{k,s\mid T}, & s\le T,\\
+\widehat u_{k,s\mid T}, & s>T.
+\end{cases}
 \]
 
-The multivariate forecast for variable \(j\) is then
+For target $j$ and horizon $h$, the feature vector $\widetilde Z_{j,T+h\mid T}$ contains the selected entries $\widetilde X_{k,T+h-\ell\mid T}$, excluding $(k,\ell)=(j,0)$. The multivariate forecast is
 
 \[
-\hat X_{j,t+h} = f_j(Z_t),
+\widehat m_{j,T+h\mid T}=f_j(\widetilde Z_{j,T+h\mid T}).
 \]
 
-with \(f_j\) estimated nonparametrically.
+The surface $f_j$ is fitted to historical rows with target $X_{j,t}$ and the corresponding contemporaneous cross-series and lagged predictors. Deployment then substitutes first-stage predictions where those inputs are unknown. This is a plug-in forecasting architecture, not a separate direct-horizon regression $X_{j,T+h}=f_j(Z_T)$. At later horizons, even positive-lag features can lie beyond $T$ and must be forecast as well.
 
 ---
 
@@ -329,17 +326,18 @@ So the multivariate forecasting problem becomes one of **discovering directional
 For each target variable \(X_j\), the forecasting problem can be written as
 
 \[
-X_{j,t+h} = f_j(Z_t),
+\widehat m_{j,T+h\mid T}=f_j(\widetilde Z_{j,T+h\mid T}),
 \]
 
-where \(Z_t\) is the selected lagged feature vector after dimension reduction.
+where \(\widetilde Z_{j,T+h\mid T}\) is the selected extended-panel feature vector after dimension reduction.
 
 The surface \(f_j\) is estimated through the NNS regression framework rather than through a linear coefficient matrix. This is the conceptual heart of `NNS.VAR`.
 
 Multivariate autoregression is therefore reinterpreted as a supervised learning problem:
 
-- the response is the future value of one variable,
-- the predictors are lagged values of all variables,
+- the training response is a historical value of one variable,
+- the predictors include other series at that date and the selected lags,
+- future rows replace unavailable predictors with first-stage forecasts,
 - the regression surface is estimated nonparametrically.
 
 This is still autoregression, but with nonlinear function estimation replacing linear matrix multiplication.
@@ -427,9 +425,7 @@ For each target variable, it records the lagged predictors that survived the rel
 - which other variables matter,
 - and at which lag horizons they matter.
 
-This has an interpretation close to a learned nonlinear Granger map, but without restricting the analysis to linear coefficients or symmetric residual-based testing.
-
-The result is both predictive and explanatory.
+This is a predictive relevance map. Because the model includes contemporaneous cross-series inputs and selects features for forecasting, the map alone is not a Granger-causality test or a causal identification result.
 
 A variable may be forecast mainly by its own lagged history, by a sparse collection of related series, or by a broad network of interacting indicators. The model does not impose one of these patterns a priori; it discovers them from the data.
 
@@ -509,7 +505,7 @@ This is a practically meaningful nowcasting panel. It combines labor, inflation,
 
 ### What the nowcast output means
 
-The output of `NNS.nowcast` is not a single number. It returns the same five-part structure as `NNS.VAR`:
+The output of `NNS.nowcast` is not a single number. It returns the five principal forecast components from `NNS.VAR`, together with validation metadata:
 
 - `interpolated_and_extrapolated`: the completed monthly panel after filling mixed-frequency gaps,
 - `relevant_variables`: the selected lagged predictors for each target,
@@ -531,7 +527,7 @@ This is a much richer object than a single real-time estimate.
 
 ## Prediction Intervals
 
-As in Chapter 15, point forecasts alone are not enough. Forecast uncertainty must also be quantified.
+As in Chapter 17, point forecasts alone are not enough. Forecast uncertainty must also be quantified.
 
 The examples associated with both `NNS.VAR` and `NNS.nowcast` construct prediction intervals using `NNS.meboot`, `LPM.VaR`, and `UPM.VaR`.
 
@@ -646,12 +642,19 @@ In all these settings, the problem is not merely to fit a system. It is to disco
 
 Before evaluating forecast accuracy, the data pipeline itself must be audited for information timing and release-order integrity.
 
+`NNS.VAR(validation = "pipeline")` uses one chronological tuning origin inside the supplied history. It completes each raw prefix independently, forecasts every series across the heldout window, and builds both contemporaneous and lagged heldout features from that extended prefix. Relevance coefficients and candidate grids are fitted on the prefix, and only actually observed heldout targets are scored; imputed target values do not count as validation outcomes. The final selected regression is then refitted on all available observations.
+
+The returned `validation` entry states the origin, horizon and observed target counts. `validation = "observed"` retains the earlier tuning calculation with realized holdout covariates for reproducibility. Its score measures conditional regression performance given those covariates, rather than the deployed two-stage forecast.
+
+A single internal tuning origin is not an independent performance report. To evaluate accuracy, repeat the complete pipeline at multiple outer rolling origins, including completion, univariate model selection, dimension reduction, tuning and final forecast combination. This also evaluates errors in the first-stage covariates.
+
 In multivariate nowcasting/forecasting, leakage control is more delicate because indicators arrive asynchronously.
 
 Use the following rules:
 
 - **Vintage-consistent features**: at forecast origin `t`, include only indicator values actually released by `t`.
 - **Release-calendar alignment**: construct mixed-frequency regressors using publication timestamps, not finalized revised datasets.
+- **Origin-wise completion and forecasting**: fill gaps from the available prefix and forecast every unknown feature, including later-horizon lags.
 - **Origin-wise dimension reduction**: relevance screening/thresholding must be recomputed within each training window.
 - **Horizon-by-horizon evaluation**: report forecast and interval metrics by target horizon and by target variable.
 - **Stability diagnostics**: track how the `relevant_variables` set changes over origins to distinguish signal from selection noise.
@@ -678,7 +681,7 @@ The main results are:
 - In classification-style forecasting tasks with skewed targets, NNS ensemble workflows can combine minority up-sampling and majority down-sampling across ensemble members to reduce imbalance bias.
 - The output `relevant_variables` provides a structural map of the learned dynamic system.
 - `NNS.nowcast` applies this architecture directly to a practical macroeconomic panel with mixed frequencies and monthly alignment.
-- Prediction intervals may be built nonparametrically using `NNS.meboot`, `LPM.VaR`, and `UPM.VaR`.
+- `NNS.meboot`, `LPM.VaR` and `UPM.VaR` describe forecast-path scenario bands; outcome prediction intervals additionally require calibration.
 
 Classical vector autoregression taught an important lesson: forecasting improves when variables are modeled jointly. The NNS framework retains that insight but frees it from linearity, common-frequency restrictions, and rigid parametric structure.
 

@@ -15,8 +15,9 @@ test_that("errors and bias.shift come from the returned shrink model", {
                 weights = c(0.5, 0.5), shrink = TRUE, plot = FALSE)
   expect_true(o$shrink)
   expect_equal(o$errors, p - tail(x, 32))
-  expect_equal(o$bias.shift, -NNS.gravity(o$errors))
-  expect_equal(o$bias.shift, -0.08088602, tolerance = 1e-6)
+  expect_equal(o$bias.validation$estimated.shift,
+               -NNS.gravity(o$errors[o$bias.validation$estimate.rows]))
+  expect_equal(o$bias.shift, o$bias.validation$applied.shift)
   expect_equal(o$results, p + o$bias.shift)
 })
 
@@ -37,8 +38,6 @@ test_that("the interval adds the LPM and UPM VaR of actual - results", {
   r <- tail(x, 32) - o$results
   expect_equal(o$lower.pred.int, o$results + LPM.VaR(0.025, 0, r))
   expect_equal(o$upper.pred.int, o$results + UPM.VaR(0.025, 0, r))
-  expect_equal(mean(o$upper.pred.int - o$results), 4.336331, tolerance = 1e-6)
-  expect_equal(mean(o$results - o$lower.pred.int), 5.216974, tolerance = 1e-6)
 })
 
 test_that("the out-of-sample interval uses the validation residuals", {
@@ -50,9 +49,13 @@ test_that("the out-of-sample interval uses the validation residuals", {
 })
 
 test_that("a nonnegative series takes residuals from the clamped forecasts it returns", {
-  # An objective that rewards lower forecasts always accepts a positive bias,
-  # which pushes some validation forecasts below 0 before clamping.
-  set.seed(5); v <- pmax(0, rep(c(0, 0, 3, 1), length.out = 80) + rnorm(80, 0, 0.8))
+  # A persistent positive residual centre shifts alternating raw forecasts
+  # downward; the lower member must be clamped before the bands are computed.
+  testthat::local_mocked_bindings(
+    NNS.ARMA = function(variable, h, ...) rep(c(1, 9), length.out = h),
+    .package = "NNS"
+  )
+  v <- rep(1, 80)
   o <- NNS.ARMA.optim(v, seasonal.factor = c(2, 4), training.set = 64, negative.values = FALSE,
                       obj.fn = expression(mean(predicted)), objective = "min",
                       print.trace = FALSE, ncores = 1, plot = FALSE)
@@ -60,4 +63,20 @@ test_that("a nonnegative series takes residuals from the clamped forecasts it re
   res <- tail(v, 16) - o$results
   expect_equal(o$upper.pred.int, pmax(0, o$results + UPM.VaR(.025, 0, res)))
   expect_equal(o$lower.pred.int, pmax(0, o$results + LPM.VaR(.025, 0, res)))
+  # Residuals of the unclamped forecasts move the bands on this series.
+  unclamped <- -(o$errors + o$bias.shift)
+  expect_gt(max(abs(c(pmax(0, o$results + UPM.VaR(.025, 0, unclamped)) - o$upper.pred.int,
+                      pmax(0, o$results + LPM.VaR(.025, 0, unclamped)) - o$lower.pred.int))), 0.01)
+})
+
+
+test_that("legacy correction explicitly retains the complete-window gravity rule", {
+  x <- two_cycles()
+  o <- run_optim(x, training.set = 128, seasonal.factor = c(7, 12),
+                 obj.fn = mse, bias.correction = "legacy")
+  expect_equal(o$bias.validation$estimate.rows, seq_len(32))
+  expect_equal(o$bias.validation$acceptance.rows, seq_len(32))
+  expect_true(o$bias.validation$accepted)
+  expect_equal(o$bias.shift, -NNS.gravity(o$errors))
+  expect_equal(o$results, o$raw.results + o$bias.shift)
 })

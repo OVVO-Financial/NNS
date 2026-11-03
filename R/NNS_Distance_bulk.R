@@ -1,34 +1,7 @@
 NNS.distance.bulk <- function(rpm, Xtest, k, class = NULL) {
-  rpm <- as.data.frame(rpm)
-  stopifnot("y.hat" %in% names(rpm))
-  
-  # drop y.hat, align columns with Xtest by name if possible
-  Xrpm <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
-  if (!is.null(colnames(Xrpm)) && !is.null(colnames(Xtest))) {
-    cmn <- intersect(colnames(Xrpm), colnames(Xtest))
-    if (length(cmn) == 0L) {
-      stop("No common feature columns between RPM and Xtest.")
-    }
-    Xrpm  <- as.matrix(Xrpm[, cmn, drop = FALSE])
-    Xtest <- as.matrix(as.data.frame(Xtest)[, cmn, drop = FALSE])
-  } else {
-    Xrpm  <- as.matrix(Xrpm)
-    Xtest <- as.matrix(Xtest)
-    if (ncol(Xtest) != ncol(Xrpm)) {
-      stop("Column mismatch between RPM and Xtest and no names to align.")
-    }
-  }
-  
-  if (identical(k, "all") ||
-      (is.numeric(k) && length(k) == 1L && is.infinite(k))) {
-    k <- nrow(Xrpm)
-  } else {
-    k <- suppressWarnings(as.integer(k[1L]))
-    if (is.na(k)) k <- nrow(Xrpm)
-    k <- max(1L, min(k, nrow(Xrpm)))
-  }
-  
-  NNS_distance_bulk_cpp(Xrpm, as.numeric(rpm$y.hat), Xtest, as.integer(k), !is.null(class))
+  # All R entry points use the same multi-weight NNS ensemble. The historical
+  # serial kernel used inverse-distance weights alone and disagreed at k > 1.
+  NNS.distance.path.single.bulk(rpm, Xtest, k, class = class, ncores = 1L)
 }
 
 NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) {

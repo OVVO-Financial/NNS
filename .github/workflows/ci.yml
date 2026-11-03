@@ -7,6 +7,10 @@ on:
     branches: ["NNS-Beta-Version"]
   workflow_dispatch:
 
+concurrency:
+  group: R-CMD-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}

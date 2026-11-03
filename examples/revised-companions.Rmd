@@ -1,0 +1,229 @@
+---
+title: "NNS applied examples: revised executable companions"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, fig.width = 7, fig.height = 4)
+library(NNS)
+RcppParallel::setThreadOptions(numThreads = 1)
+options(mc.cores = 1)
+set.seed(20261103)
+```
+
+This is revised material accompanying twelve historical PDFs, not their original
+editable source. See [example corrections](example-corrections.md) for the source
+inventory and withdrawn claims. Each section states its statistical target;
+illustrative outputs are recomputed from the installed NNS version.
+
+# Conditional event probabilities
+
+Companion to *Bayes' Theorem From Partial Moments*. Degree-zero co-partial moments
+count quadrant events. Positive-degree moments describe directional magnitude.
+
+```{r bayes}
+x <- c(-1, -1, -1, 1)
+y <- -x
+target <- 0
+p_y_above_given_x_below <- D.UPM(0, 0, x, y, target, target) / LPM(0, target, x)
+c(partial_moment = p_y_above_given_x_below,
+  direct_count = mean(y[x <= target] > target))
+```
+
+The conditioning event must have positive mass. A ratio of degree-one joint and
+marginal areas is a different directional quantity, not this event probability.
+
+# Frequency, severity, and comparison targets
+
+Companion to *Continuous CDFs and ANOVA with NNS*. The normalized degree-one curve
+has its exact mean anchor and defines an induced univariate law; it is not the
+original frequency CDF. Neither interval width nor frequency coverage has a
+universal ordering across these targets.
+
+```{r interval-targets}
+x <- c(rep(-100, 10), rep(0, 980), rep(100, 10))
+bands <- rbind(
+  frequency_type7 = c(LPM.VaR(.025, 0, x), UPM.VaR(.025, 0, x)),
+  directional_area = c(LPM.VaR(.025, 1, x), UPM.VaR(.025, 1, x))
+)
+data.frame(bands, sample_fraction = apply(bands, 1,
+  function(b) mean(x >= b[1] & x <= b[2])))
+```
+
+ANOVA mean, median, and distribution-profile modes retain distinct targets.
+Certainty summarizes agreement for the selected target; inferential calibration
+is a separate question.
+
+# Directional dependence and null calibration
+
+Companion to *Nonlinear Correlation and Dependence Using NNS*. Nonlinear
+dependence can be strong while linear correlation is zero. Finite partition
+resolution affects the NNS statistic and does not prove causal identification.
+
+```{r dependence}
+x <- seq(-2, 2, length.out = 201)
+y <- x^2
+c(Pearson = cor(x, y), NNS_dependence = NNS.dep(x, y)$Dependence)
+```
+
+Permutation quantiles are null reference intervals under exchangeability, not
+population-dependence confidence intervals. Serial and clustered sampling need
+an appropriate null and resampling design.
+
+# Positive scaling and association
+
+Companion to *Normalization*. Multiplication by positive constants preserves
+Pearson correlation. Negative factors reverse the sign. A change of portfolio
+weights is a separate operation from rescaling data columns.
+
+```{r normalization}
+x <- 1:10
+y <- x + c(0, 1, 0, -1, 0, 1, 0, -1, 0, 1)
+c(original = cor(x, y), positive_scaling = cor(3*x, 7*y),
+  one_negative_factor = cor(3*x, -7*y))
+```
+
+Check NNS normalization factors and their intended target before interpreting
+transformed relationships; positivity of all sample means is not automatic.
+
+# Severity shares and winner frequencies
+
+Companion to *5 way rank probabilities using R*. The two summaries below answer
+different questions about the same five-column panel.
+
+```{r ranking}
+set.seed(17)
+performance <- matrix(rnorm(1000), ncol = 5)
+performance[, 5] <- 3 * performance[, 5]
+severity <- apply(performance, 2, function(z) UPM(1, 0, z))
+severity_share <- severity / sum(severity)
+winner <- max.col(performance, ties.method = "first")
+win_frequency <- tabulate(winner, nbins = 5) / nrow(performance)
+data.frame(severity_share, win_frequency)
+```
+
+Winner frequencies require jointly observed or jointly generated races and an
+explicit tie policy. Sampling class labels with `prob = severity_share` confirms
+only that sampler's input weights.
+
+# A correctly centered regression target
+
+Companion to *Partitional Estimation Using Partial Moments*. A mean-zero noise
+term makes the known nonlinear function the conditional mean. All comparisons
+use the same held-out rows and loss.
+
+```{r regression-target}
+set.seed(18)
+x <- runif(240, -2, 2)
+f <- function(z) sin(pi*z)
+y <- f(x) + rnorm(240, sd = .1) + .2 * (runif(240) - .5)
+train <- seq_len(180)
+fit <- NNS.reg(x[train], y[train], point.est = x[-train], ncores = 1)
+c(test_RMSE = sqrt(mean((fit$Point.est-y[-train])^2)),
+  conditional_mean_RMSE = sqrt(mean((fit$Point.est-f(x[-train]))^2)))
+```
+
+Using uncentered `rnorm(n) + runif(n)` changes the conditional mean to `f(x)+0.5`.
+Out-of-bag error, training error, and test error should be labelled separately.
+
+# Held-out classification
+
+Companion to *Machine Learning*. The split includes every iris class. Class codes
+have no numeric distance or order; decode them using the returned class mapping.
+
+```{r classification}
+set.seed(19)
+test <- sort(unlist(lapply(split(seq_len(nrow(iris)), iris$Species),
+                          function(rows) sample(rows, 5))))
+fit <- NNS.reg(iris[-test, 1:4], iris[-test, 5],
+               point.est = iris[test, 1:4], ncores = 1)
+mean(as.numeric(fit$Point.est) == as.numeric(iris[test, 5]))
+```
+
+This is one demonstration, not evidence for a general error reduction or an
+escape from sample-size requirements in high dimensions.
+
+# A reproducible MNIST comparison contract
+
+Companion to *NNS vs KNN MNIST dataset*. A publishable comparison must retain the
+exact data version and training/test split, shared image preprocessing, tuning
+folds chosen only within training, kNN distance and k choices, NNS options,
+seeds, fitted predictions, elapsed time, and error denominators. Report both
+methods' code and repeated-run uncertainty. The historical single NNS accuracy
+and unsupported 75% comparison are not repeated here as validated results.
+
+MNIST data and a complete matched kNN run are not bundled in this companion;
+this section provides the required reproducibility contract, not fabricated
+replacement accuracy numbers.
+
+# Geometric matching
+
+Companion to *Spiral Matching Example*. The same curve can have a many-to-one
+projection on either coordinate. Plotting the geometry helps explain why linear
+correlation alone does not describe the relationship.
+
+```{r spiral}
+t <- seq(.2, 4*pi, length.out = 300)
+x <- t*cos(t)
+y <- t*sin(t)
+plot(x, y, type = "l", asp = 1, xlab = "x", ylab = "y")
+c(Pearson = cor(x, y), NNS_dependence = NNS.dep(x, y)$Dependence)
+```
+
+Matching, association, and forecasting are separate tasks. Any claimed matching
+accuracy requires an explicit labelled correspondence and held-out evaluation.
+
+# Residualization and conditional targets
+
+Companion to *Nonlinear FWL*. The ordinary Frisch-Waugh-Lovell identity is an exact
+linear projection identity. General nonlinear residualization need not recover
+the same multivariate target without additional structure or orthogonal-score
+conditions. Retain the NNS conditional surface and state which contrast is being
+estimated instead of claiming an unrestricted nonlinear identity.
+
+```{r linear-fwl-reference}
+z <- mtcars[c("wt", "hp", "disp")]
+y <- mtcars$mpg
+x <- mtcars$am
+ry <- resid(lm(y ~ ., data = z))
+rx <- resid(lm(x ~ ., data = z))
+c(full_linear_coefficient = unname(coef(lm(mpg ~ am + wt + hp + disp,
+                                          data = mtcars))["am"]),
+  residual_projection = sum(rx*ry)/sum(rx^2))
+```
+
+# Predictive contrasts and identification
+
+Companion to *Causal Inference with NNS stack*. NNS can estimate nonlinear
+conditional associations and heterogeneous fitted contrasts. A causal effect
+additionally requires an identification design, adequate overlap, and relevant
+confounding assumptions. Fitting both treatment settings does not establish
+those assumptions. See the [multivariate workflow](Multivariate%20NNS%20Inference.md)
+for pairs resampling that refits the model rather than resampling fixed effects.
+
+# Training, validation, and test chronology
+
+Companion to *NNS ARMA*. All tuning must precede the final test outcomes.
+
+```{r forecast}
+training <- head(AirPassengers, 100)
+predicted <- NNS.ARMA(training, h = 44, seasonal.factor = 12,
+                      method = "lin", plot = FALSE, seasonal.plot = FALSE)
+sqrt(mean((predicted - tail(AirPassengers, 44))^2))
+```
+
+Monthly frequency is specified here in advance. Vignette09 demonstrates an
+internal validation split for choosing periods. The optimizer's internal
+validation score and a later held-out forecast score must be labelled separately.
+Forecast-path dispersion or residual-quantile bands need their own coverage
+assessment; a requested nominal level alone is not a future guarantee.
+
+# Build provenance
+
+```{r provenance}
+packageVersion("NNS")
+sessionInfo()
+```
