@@ -689,11 +689,11 @@ double DUPM_C(
       if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
       out += x1 * y1;
     } else if(dont_use_pow_lpm && !dont_use_pow_upm){
-      if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
-      out += std::pow(x1, degree_lpm) * y1;
-    } else if(dont_use_pow_upm && !dont_use_pow_lpm){
       if(!d_lpm_0) x1 = repeatMultiplication(x1, static_cast<int>(degree_lpm));
       out += x1 * std::pow(y1, degree_upm);
+    } else if(dont_use_pow_upm && !dont_use_pow_lpm){
+      if(!d_upm_0) y1 = repeatMultiplication(y1, static_cast<int>(degree_upm));
+      out += std::pow(x1, degree_lpm) * y1;
     } else out += std::pow(x1, degree_lpm) * std::pow(y1, degree_upm);
   }
   return out/max_size;
