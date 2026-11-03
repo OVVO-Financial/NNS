@@ -53,7 +53,6 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
   n <- ncol(data)
   
   if(is.null(colnames(data))) colnames(data) <- paste0("X_",1:ncol(data))
-  original_names <- colnames(data)
   
   # Ensure the input data is a matrix
   remaining_data <- as.matrix(data)
@@ -87,7 +86,7 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
   }
   
   # If there are still variables left (and not already added), add them as the final cluster
-  if (ncol(remaining_data) > min_cluster && !paste0("Cluster_", iteration) %in% names(clusters)) {
+  if (ncol(remaining_data) > 0 && !paste0("Cluster_", iteration) %in% names(clusters)) {
     clusters[[paste0("Cluster_", iteration)]] <- colnames(remaining_data)
   }
   
@@ -127,14 +126,13 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
     # Perform hierarchical clustering
     hc <- hclust(dist_matrix, method = "complete")
     
-    plot(hc,
+    # plot.hclust rejects a two-leaf tree; plot.dendrogram draws it
+    plot(if (length(all_vars) > 2) hc else as.dendrogram(hc),
          main = paste0("Hierarchical Clustering of Stochastic Dominance Sets \nSD Degree: ", degree),
          xlab = "Variables",
          ylab = "SD Distance",
          sub = ""
     )
-
-    hc$order <- match(hc$labels, original_names)
     
     return(.NNS.out(list("Clusters" = clusters, "Dendrogram" = hc)))
   } else return(.NNS.out(list("Clusters" = clusters)))
