@@ -30,7 +30,7 @@ require(rgl)
 
 We have extended the **`NNS.reg`** applications per the use of an ensemble method of classification in **`NNS.boost`**. In short, **`NNS.reg`** is the base learner instead of trees.
 
-***One major advantage `NNS.boost` has over tree based methods is the ability to seamlessly extrapolate beyond the current range of observations.***
+For numeric regression, extrapolation follows the fitted NNS construction and needs boundary validation. Nominal classification predicts among the observed classes; numeric class codes do not define an extrapolation scale.
 
 ## Splits vs. Partitions
 
@@ -48,18 +48,20 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 # `NNS.boost()`
 
-Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value. From there we simply aggregate the predictions.
+**`NNS.boost`** screens feature subsets. Each learner trial fits **`NNS.reg`** on a random subset of the regressors and scores it on a held-out split. Subsets that clear a learned objective threshold are re-tested on new holdouts in the epoch stage, and each feature is counted every time a subset containing it passes again. The features are then replicated in proportion to those counts and a single **`NNS.stack`** (method 1) is fitted on that design. It is not an ensemble of voting or averaged learners, and it does not reweight residuals.
 
 **`NNS.boost`** will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console. A plot of the frequency of the learning accuracy on the training set is also provided.
 
 Once a `threshold` is obtained, **`NNS.boost`** will test various feature combinations against different splits of the training set and report back the frequency of each regressor used in the final estimate.
 
-Let's have a look and see how it works. We use 140 random `iris` observations as our training set with the 10 holdout observations as our test set. For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
+Let's have a look and see how it works. We hold out four observations from each iris species, using 138 observations for training and 12 for testing. The split is stratified and reproducible; the last ten rows alone would contain only virginica. For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
 
-**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
+**NOTE:** class labels can be factor levels or any distinct numbers. Numeric and logical responses are returned on their own values; factor and character responses are returned as codes, which `class.levels` maps back to the labels.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE}
-test.set = 141:150
+set.seed(20261103)
+test.set <- sort(unlist(lapply(split(seq_len(nrow(iris)), iris$Species),
+                               function(rows) sample(rows, 4))))
  
 a = NNS.boost(IVs.train = iris[-test.set, 1:4], 
               DV.train = iris[-test.set, 5],
@@ -69,36 +71,20 @@ a = NNS.boost(IVs.train = iris[-test.set, 1:4],
               type = "CLASS")
 
 a
-$results
- [1] 3 3 3 3 3 3 3 3 3 3
-
-$pred.int
-NULL
-
-$feature.weights
-Petal.Length  Petal.Width Sepal.Length  Sepal.Width 
-   0.2777778    0.2777778    0.2222222    0.2222222 
-
-$feature.frequency
-Petal.Length  Petal.Width Sepal.Length  Sepal.Width 
-           5            5            4            4 
-
-$class.levels
-[1] "setosa"     "versicolor" "virginica" 
-   
-mean( a$results == as.numeric(iris[test.set, 5]) )
-[1] 1
+mean(a$results == as.numeric(iris[test.set, 5]))
 ```
 
-A perfect classification, using the features weighted per the output above.
+The reported accuracy is for this held-out split. Repeated stratified splits are
+needed to assess variability; a small demonstration does not establish general
+superiority or robustness to increasing dimension.
 
 # Cross-Validation Classification Using `NNS.stack()`
 
-The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
+The **`NNS.stack()`** routine cross-validates, for a given objective function, the neighbour count `n.best` of the multivariate **`NNS.reg`** fit and the number of predictors in the dimension reduction **`NNS.reg`** version, then blends the two. For classification (**`NNS.stack(..., type = "CLASS", ...)`**) it tunes and blends class-probability vectors. The `OBJfn` values it returns are the best scores of that search on the out-of-fold predictions, so they overstate held-out performance; the held-out test set below is the assessment.
 
 For brevity, we set `folds = 1`.
 
-**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
+**NOTE:** class labels can be factor levels or any distinct numbers. Numeric and logical responses are returned on their own values; factor and character responses are returned as codes, which `class.levels` maps back to the labels.
 
 ```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5, message=FALSE, eval= FALSE}
 b = NNS.stack(IVs.train = iris[-test.set, 1:4], 
@@ -111,60 +97,17 @@ b
 ```
 
 ```{r stackeval, eval = FALSE}
-$OBJfn.reg
-[1] 0.9714286
-
-$NNS.reg.n.best
-[1] 1
-
-$probability.threshold
-[1] 0.13
-
-$OBJfn.dim.red
-[1] 0.9642857
-
-$NNS.dim.red.threshold
-[1] 0.9335162
-
-$reg
- [1] 3 3 3 3 3 3 3 3 3 3
-
-$reg.pred.int
-NULL
-
-$dim.red
- [1] 3 3 3 3 3 3 3 3 3 3
-
-$dim.red.pred.int
-NULL
-
-$stack
- [1] 3 3 3 3 3 3 3 3 3 3
-
-$pred.int
-NULL
-
-$weights
-    reg dim.red 
-   0.85    0.15 
-
-$class.levels
-[1] "setosa"     "versicolor" "virginica" 
+mean(b$stack == as.numeric(iris[test.set, 5]))
 ```
 
-```{r stackevalres, eval = FALSE}
-mean( b$stack == as.numeric(iris[test.set, 5]) )
-```
-
-```{r stackreseval, eval = FALSE}
-[1] 1
-```
+The returned `class.levels` gives the label mapping for encoded class results.
+Compare original labels after decoding when a classifier's API returns labels.
 
 ## Brief Notes on Other Parameters
 
 -   `depth = "max"` will force all observations to be their own partition, forcing a perfect fit of the multivariate regression. In essence, this is the basis for a `kNN` nearest neighbor type of classification.
 
--   `n.best = 1` will use the single nearest neighbor. When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` but as the dimensions increase the results diverge demonstrating `NNS` is less sensitive to the curse of dimensionality than `kNN`.
+-   `n.best = 1` will use the single nearest neighbor. When coupled with `depth = "max"`, `NNS` will emulate a `kNN = 1` for the chosen partition and distance configuration. Performance as dimension increases requires a matched comparison of sample size, features, tuning, distance metric, and held-out loss; this example does not establish a general dimensionality advantage.
 
 -   `extreme` will use the maximum or minimum `threshold` obtained, and may result in errors if that threshold cannot be eclipsed by subsequent iterations.
 

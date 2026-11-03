@@ -8,9 +8,13 @@
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the variable level reference.
 #' @param detrend logical; \code{TRUE} (default) removes the variable's linear trend, keeping its mean, before the lags are scored; an exactly linear variable is then constant and has no seasonal period.
 #' @param max.period integer; \code{NULL} (default) scans lags up to \code{n / 5}.  A smaller value caps the scan, whose cost grows with \code{n} times the number of lags.
-#' @param p.value logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which have no seasonality by construction.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); since each copy contributes its best lag, the 5 percent level holds for the whole scan.  Uses the random number generator.
+#' @param p.value logical; \code{FALSE} (default).  If \code{TRUE}, each period's dispersion ratio is compared with the best ratio over all lags in \code{nperm} shuffled copies of the (detrended) variable, which remove the original temporal ordering.  \code{all.periods} gains a \code{p.value} column, and \code{periods} and \code{best.period} keep only the periods with \code{p.value <= 0.05} (\code{1} if none); each copy contributes its best lag, accounting for scanning multiple lags under an exchangeable null. A serially dependent nonseasonal series need not satisfy that null.  Uses the random number generator.
+#' @param dispersion \code{"auto"} (default) retains relative CV scoring on one-sided data and absolute Gini dispersion otherwise. \code{"absolute"} always compares Gini dispersions, by centering the series first; use this translation-invariant option for interval-scale data such as temperature.
 #' @param nperm integer; 100 (default) number of shuffled copies when \code{p.value = TRUE}.
 #' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the single period exhibiting the least coefficient of variation versus the variable with \code{"best.period"}; as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{all.periods} holds a single row with \code{Period = 1} and a coefficient of variation equal to the variable's (\code{Period = 0} for fewer than 5 observations).  The coefficients of variation are those of the detrended variable when \code{detrend = TRUE}.
+#' @note The historical column names \code{Coefficient.of.Variation} and \code{Variable.Coefficient.of.Variation} are retained in absolute mode; their values then contain absolute Gini dispersions.
+#'
+#' @note \code{best.period} is the strongest tested predictive lag, not an estimator guaranteed to return the smallest fundamental period; its multiples may also score well. The minimum five observations per component is a reliability default; \code{modulo} can supply longer domain-informed candidates. Shuffling removes serial dependence as well as seasonality, so the optional permutation comparison is not calibrated against every dependent nonseasonal process.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
@@ -38,7 +42,9 @@ NNS.seas <- function(variable,
                      detrend = TRUE,
                      max.period = NULL,
                      p.value = FALSE,
-                     nperm = 100L) {
+                     nperm = 100L,
+                     dispersion = c("auto", "absolute")) {
+  dispersion <- match.arg(dispersion)
   # API per NNS manual / Rd (arguments & defaults)  :contentReference[oaicite:3]{index=3}
   # Coerce tbl/data.table to numeric vector (repo reference)  :contentReference[oaicite:4]{index=4}
   if (any(class(variable) %in% c("tbl", "data.table"))) {
@@ -54,6 +60,7 @@ NNS.seas <- function(variable,
     stop("nperm must be a single number >= 1.")
 
   x <- as.numeric(variable)
+  if (dispersion == "absolute") x <- x - mean(x)
   n <- length(x)
   # Remove the linear trend, keeping the mean level: a trend inflates every
   # component's dispersion alike and can hide the period (#97).
@@ -79,9 +86,8 @@ NNS.seas <- function(variable,
 
   # Optional significance: compare each period's dispersion ratio with the best
   # ratio over all candidate periods in shuffled copies of the (detrended)
-  # series, which have no seasonality by construction. Taking the best
-  # candidate of each copy makes the p-value hold for the whole scan, not one
-  # lag at a time. Periods that modulo added beyond the scan are scored on every
+  # series under an exchangeable null. Taking the best candidate of each copy
+  # accounts for the full scan under that null, not arbitrary serial dependence. Periods that modulo added beyond the scan are scored on every
   # copy as well, so the null covers every candidate the observed table tests.
   if (isTRUE(p.value) && n >= 5L) {
     M <- ans$all.periods
@@ -115,6 +121,8 @@ NNS.seas <- function(variable,
     if (is.null(M) || nrow(M) == 0L) return(ans)
     
     overall_cv <- as.numeric(M$`Variable.Coefficient.of.Variation`[1L])
+    metric_label <- if (all(x > 0) || all(x < 0)) "relative Gini dispersion"
+                    else "Gini dispersion"
     
     # Predictive strength in [0,1] with guards
     n <- nrow(M)
@@ -136,8 +144,8 @@ NNS.seas <- function(variable,
     
     plot(M[["Period"]], M[["Coefficient.of.Variation"]],
          xlab = "Period",
-         ylab = "Component Series CV",
-         main = "Seasonality Detection via Predictive Power\n(Lower CV = Tighter Distribution = More Predictable)",
+         ylab = paste("Component", metric_label),
+         main = "Seasonality Candidates via Predictive Concentration\n(Lower dispersion = tighter component distributions)",
          ylim = ylim,
          col = point_colors, pch = 19)
     
@@ -151,7 +159,7 @@ NNS.seas <- function(variable,
       usr <- graphics::par("usr")
       xmid <- mean(usr[1:2])
       graphics::text(xmid, overall_cv,
-                     labels = "Overall Series CV\n(Predictive Power Threshold)",
+                     labels = paste0("Overall ", metric_label, "\n(Concentration threshold)"),
                      adj = c(0.5, 0.5), col = "red", xpd = NA)
     }
   }

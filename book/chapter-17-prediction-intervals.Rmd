@@ -1,12 +1,12 @@
 # Prediction Intervals
 
-Previous chapters established the directional framework for probability, dependence, and statistical inference. Chapter 13 derived conditional probability and Bayes' theorem from co-partial moments, and Chapter 15 developed methods for comparing entire distributions without relying on parametric hypothesis tests — including the formal establishment of the degree-one partial moment CDF as a bias-free, continuous probability representation.
+Previous chapters established the directional framework for probability, dependence, and statistical inference. Chapter 13 derived conditional probability and Bayes' theorem from co-partial moments, and Chapter 15 developed methods for comparing entire distributions without relying on parametric hypothesis tests — including the distinction between the degree-zero CDF, which counts observations, and the degree-one ratio, which measures deviation area.
 
 A natural next step is **prediction**.
 
 In statistical analysis it is often necessary to estimate the range within which **future observations** are likely to occur. Classical statistics addresses this problem using *confidence intervals* and *prediction intervals*. These concepts are frequently confused, but they serve fundamentally different purposes.
 
-This chapter clarifies the distinction and develops **distribution-free prediction intervals** based on partial moments. Because the directional framework represents distributions directly through probability mass relative to benchmarks, interval estimation can be constructed without parametric assumptions and without relying on asymptotic approximations.
+This chapter clarifies the distinction and develops **empirical intervals and severity bands** based on partial moments. Their construction requires no specified parametric family. Degree-zero quantiles target event frequency; degree-one expectiles target deviation-area balance. Claims about future or repeated-sample coverage still require sampling assumptions and an appropriate calibration procedure.
 
 ---
 
@@ -49,21 +49,21 @@ The directional framework allows prediction intervals to be constructed **direct
 
 ## The Discrete–Continuous Distinction: Recap and Application to Intervals
 
-Chapter 15 (Section 15.1.8) established a fundamental result that carries directly into interval estimation. The empirical CDF is a **degree-zero lower partial moment** — a discrete, step-function measure that is systematically biased at the mean for any finite sample:
+Chapter 15 (Section 15.1.8) separated two readings of the mass below a benchmark. The empirical CDF is a **degree-zero lower partial moment**, a step function that counts observations. Its value at the sample mean,
 
 $$
-\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}} \ne 0.5
+\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}},
 $$
 
-in general. The **degree-one partial moment ratio**
+estimates $P(X \le \mu)$, which is 0.5 for a continuous distribution symmetric about its mean, but need not be 0.5 otherwise. The **degree-one partial moment ratio**
 
 $$
 F_1(t; X) = \frac{LPM_1(t, X)}{LPM_1(t, X) + UPM_1(t, X)}
 $$
 
-eliminates this bias exactly: $F_1(\bar{x}; X) = 0.5$ for every distribution, every sample size, without exception (Section 15.1.8).
+is the share of deviation area below $t$. It is continuous in $t$, and $F_1(\bar{x}; X) = 0.5$ for every non-constant sample by construction.
 
-This distinction matters for interval estimation because any quantile procedure that uses the discrete CDF to locate interval bounds inherits the same finite-sample bias — producing intervals that are systematically shifted or miscalibrated. The degree-one ratio corrects this at the source.
+This distinction matters for interval estimation. Coverage, the share of observations an interval contains, is a frequency, so coverage intervals invert the degree-zero CDF. Inverting the degree-one ratio gives severity-weighted thresholds. Their event-frequency tail proportions can be above or below the nominal area level, depending on the distribution.
 
 ---
 
@@ -109,16 +109,16 @@ Once higher degrees are introduced, the interpretation broadens further. Degree-
 
 The NNS package provides two complementary quantile functions that invert the partial moment CDF:
 
-**`LPM.VaR(percentile, degree, variable)`** — returns the value $t$ such that $F_\text{degree}(t; X) = p$ for the lower tail. This is the left-tail (lower) quantile at probability level $p$.
+**`LPM.VaR(percentile, degree, variable)`** — returns a lower-tail threshold $t$ for the level $p$. At `degree = 0` it is the type-7 (linearly interpolated) empirical quantile. Because the empirical CDF is a step function, that quantile need not satisfy $F_0(t; X) = p$: `LPM.VaR(0.1, 0, 1:4)` is 1.3, where $F_0(1.3) = 0.25$. At positive degrees $F_\text{degree}(t; X)$ is continuous in $t$, and `LPM.VaR` returns the $t$ with $F_\text{degree}(t; X) = p$; $p$ is then a share of directional mass rather than a probability (at degree 1, $t$ is the $p$-expectile).
 
-**`UPM.VaR(percentile, degree, variable)`** — returns the value $t$ such that $1 - F_\text{degree}(t; X) = p$ for the upper tail. This is the right-tail (upper) quantile at probability level $p$.
+**`UPM.VaR(percentile, degree, variable)`** — returns the matching upper-tail threshold: the type-7 empirical quantile at $1 - p$ when `degree = 0`, and the $t$ with $1 - F_\text{degree}(t; X) = p$ at positive degrees.
 
-Both functions accept a degree argument. Setting `degree = 0` uses the discrete empirical CDF and therefore returns classical empirical quantiles. Setting `degree = 1` uses the continuous area-based probability representation established in Chapter 15. Higher degrees extend the same inversion principle to severity-weighted directional probability. Thus `LPM.VaR` is best interpreted not as a finance-specific tool, but as a general lower-tail threshold operator generated by the partial-moment framework.
+Both functions accept a degree argument. Setting `degree = 0` returns classical (type-7) empirical quantiles. Setting `degree = 1` uses the area-based ratio of Chapter 15, so $p$ is a share of deviation area rather than of observations. Higher degrees extend the same inversion principle to severity-weighted directional probability. Thus `LPM.VaR` is best interpreted not as a finance-specific tool, but as a general lower-tail threshold operator generated by the partial-moment framework.
 
-Coverage — the share of observations a band contains — is a frequency statement, so a prediction interval with coverage $1 - \alpha$ uses the degree-zero quantiles:
+Coverage is a frequency statement, so a plug-in interval targeting coverage $1 - \alpha$ uses degree-zero quantiles. Finite-sample future coverage still depends on the sampling design and quantile estimation:
 
 ```r
-# 95% prediction interval: coverage is a frequency, so degree = 0
+# Plug-in interval targeting 95% coverage: degree = 0 uses frequency
 lower <- LPM.VaR(percentile = 0.025, degree = 0, x = x)
 upper <- UPM.VaR(percentile = 0.025, degree = 0, x = x)
 
@@ -132,7 +132,7 @@ In Python the same quantile inversions are `lpm_var` and `upm_var`:
 ```python
 from nns import lpm_var, upm_var
 
-# 95% prediction interval: coverage is a frequency, so degree = 0
+# Plug-in interval targeting 95% coverage: degree = 0 uses frequency
 lower = lpm_var(0.025, 0, x)
 upper = upm_var(0.025, 0, x)
 
@@ -141,7 +141,7 @@ lower_1 = lpm_var(0.025, 1, x)
 upper_1 = upm_var(0.025, 1, x)
 ```
 
-The degree-one quantiles provide **smoother, less jagged boundaries** than their degree-zero counterparts, particularly in small samples where the step-function CDF may produce large jumps between adjacent order statistics. They bound area rather than frequency, however, and so contain fewer than $1 - \alpha$ of the observations: at $\alpha = 0.05$, about 72% for uniform data, 76% for exponential and 84% for normal.
+The degree-one curve is continuous in the benchmark, whereas the empirical degree-zero CDF is a step function. The package also interpolates degree-zero quantiles between order statistics, so continuity of a computed endpoint is not unique to degree one. Expectile bounds calibrate area rather than frequency. At $\alpha = 0.05$, the population bands contain about 72% of uniform, 76% of exponential, and 84% of normal observations. These are examples, not a universal coverage ordering: rare large extremes can make a degree-one band wider and give coverage above the nominal level.
 
 
 
@@ -153,13 +153,13 @@ When \(d=0\), the threshold is
 \[
 t_\alpha^{(0)}=\inf\{t:L_0(t;X)\ge \alpha\},
 \]
-which is the ordinary empirical lower quantile.
+which is the ordinary empirical lower quantile. `LPM.VaR` interpolates linearly between adjacent order statistics instead (R's `quantile(x, alpha, type = 7)`), so the two agree at the order statistics and differ between them: for \(\{1, 2, 3, 4, 5, 100\}\) the lower 5% threshold is 1 by the infimum and 1.25 from `LPM.VaR`, and the upper 5% threshold is 100 and 76.25.
 
 When \(d=1\), the threshold instead solves
 \[
 t_\alpha^{(1)}=\inf\left\{t:\frac{L_1(t;X)}{L_1(t;X)+U_1(t;X)}\ge \alpha\right\}.
 \]
-This no longer counts all observations equally. Larger deviations below the benchmark contribute more heavily to the lower-tail mass.
+This no longer counts all observations equally. Larger deviations below the benchmark contribute more heavily to the lower-tail mass. The threshold is the \(\alpha\)-expectile of \(X\) (Newey and Powell, 1987): \(L_1/(L_1+U_1)=\alpha\) is the same equation as \(\alpha\,E[(X-t)_+]=(1-\alpha)\,E[(t-X)_+]\). Expectiles are elicitable on suitable moment classes. With losses taken as positive, an upper expectile at level $\tau \in [1/2,1)$ is a coherent risk measure; in the payoff convention the corresponding risk is the negative lower expectile at level $1-\tau$. Coherence is not an all-level statement under an unspecified sign convention. Expectiles are not quantiles and carry no event-frequency guarantee.
 
 Similarly, when \(d=2\),
 \[
@@ -188,7 +188,7 @@ Chapters 15 and 17 use the same degree-one quantile geometry from different angl
 - In **stochastic dominance** (Chapter 15), the ordering is defined by integrated quantile/CDF behavior.
 - In **prediction intervals** (this chapter), interval endpoints are degree-zero or degree-one quantiles from `LPM.VaR` and `UPM.VaR`.
 
-The methods are mathematically unified: the degree-one objects used to construct bias-corrected intervals are the same continuous probability objects used to diagnose dominance relations.
+The methods are mathematically unified: the degree-one objects used to construct magnitude-calibrated bands are the same area-based objects used to diagnose dominance relations.
 
 ---
 
@@ -222,28 +222,30 @@ The distribution of bootstrapped correlations is visibly asymmetric — there is
 
 ## Degree-Zero Partial Moment Intervals
 
-The degree-zero LPM quantile corresponds exactly to the percentile bootstrap method. The discrete CDF assigns equal weight to each bootstrap replicate, producing the same step-function quantiles:
+The degree-zero LPM quantile is the percentile bootstrap interval up to the interpolation rule. The discrete CDF assigns equal weight to each bootstrap replicate; `LPM.VaR` interpolates linearly between order statistics while `boot.ci` interpolates on the normal-quantile scale, so the endpoints agree closely but not exactly (0.4684 and 0.9615 here, against 0.4609 and 0.9620 from `boot.ci`):
 
 ```r
-# Discrete lower and upper CI — corresponds to percentile method
+# Discrete lower and upper CI: the percentile method, up to interpolation
 LPM.VaR(percentile = 0.025, degree = 0, x = boot_out$t)
-## [1] 0.4688333
+##     2.5% 
+## 0.468375
 
 UPM.VaR(percentile = 0.025, degree = 0, x = boot_out$t)
-## [1] 0.9632222
+##    97.5% 
+## 0.961525
 ```
 
 ## Degree-One Partial Moment Intervals
 
-The degree-one quantile uses area-based probability, which weights replicates by their distance from the boundary. This naturally down-weights extreme observations and corrects for asymmetry — without a double bootstrap:
+The degree-one quantile weights replicates by their distance from the boundary, so each tail beyond its bounds holds 2.5% of the replicates' deviation area rather than 2.5% of the replicates. The band is narrower, and it is not a 95% interval:
 
 ```r
-# Continuous CI — bias-corrected, no double bootstrap needed
+# Area-calibrated band: 2.5% of the deviation area in each tail
 LPM.VaR(percentile = 0.025, degree = 1, x = boot_out$t)
-## [1] 0.5612749
+## [1] 0.5612616
 
 UPM.VaR(percentile = 0.025, degree = 1, x = boot_out$t)
-## [1] 0.8263255
+## [1] 0.913772
 ```
 
 The bootstrap comparison in Python (the 15-observation `law` dataset is inlined; the resampling loop replaces `boot`):
@@ -263,16 +265,16 @@ boot_t = np.array([
     for idx in rng.integers(0, lsat.size, size=(500, lsat.size))
 ])
 
-# Discrete lower and upper CI — corresponds to percentile method
+# Discrete lower and upper CI: the percentile method, up to interpolation
 lpm_var(0.025, 0, boot_t), upm_var(0.025, 0, boot_t)
 
-# Continuous CI — bias-corrected, no double bootstrap needed
+# Area-calibrated band: 2.5% of the deviation area in each tail
 lpm_var(0.025, 1, boot_t), upm_var(0.025, 1, boot_t)
 ```
 
-The degree-one interval $(0.561,\, 0.826)$ is substantially tighter and more symmetric than the percentile interval $(0.461,\, 0.963)$ — and without requiring the computationally expensive double bootstrap needed for studentized intervals. The upper bound is comfortably below 1.0. Part of the tightening is the change of measure: the degree-one bounds leave 2.5% of the replicates' area, not 2.5% of the replicates, in each tail, so the interval holds fewer than 95% of the bootstrap replicates (see the next section).
+The degree-one band $(0.561,\, 0.914)$ is tighter than the percentile interval $(0.461,\, 0.962)$, and its upper bound is below 1.0. The tightening comes from the change of measure: the degree-one bounds leave 2.5% of the replicates' area, not 2.5% of the replicates, in each tail, so the band holds about 80% of the bootstrap replicates rather than 95% (see the next section). It describes where the replicates' deviation area concentrates; it is not a bias-corrected 95% confidence interval.
 
-Classical bootstrap corrections (BCa, studentized) attempt to fix asymmetry through additional resampling passes or acceleration constants. The degree-one partial moment approach achieves comparable correction by simply replacing the discrete counting measure with area-based probability on the **original** bootstrap sample — the same substitution that eliminates bias in the NNS ANOVA procedure (Chapter 15, Section 15.1.8).
+Classical bootstrap corrections (BCa, studentized) adjust the percentile interval for bias and skewness through acceleration constants or additional resampling passes, and keep its 95% coverage target. The degree-one band does not attempt that correction: it changes what is measured, from a share of replicates to a share of their deviation area. Use the degree-zero (percentile) interval, or BCa, when the goal is 95% confidence, and the degree-one band to describe where the replicates' deviation area lies.
 
 ---
 
@@ -286,11 +288,11 @@ $$
 
 for a chosen degree $d \in \{0, 1\}$.
 
-**Degree 0** recovers the classical empirical quantile interval — the order statistics at ranks $\lceil n\alpha/2 \rceil$ and $\lceil n(1-\alpha/2) \rceil$ — and is the prediction interval with coverage probability $1-\alpha$: coverage counts observations, which is what degree zero measures.
+**Degree 0** returns R's type-7 interpolated empirical quantiles at levels $\alpha/2$ and $1-\alpha/2$. The generalized-inverse ECDF convention instead selects order statistics at ceiling ranks. Neither interpolation nor an observed sample's tail fraction alone guarantees exact finite-sample coverage for a future observation.
 
-**Degree 1** is continuous and free of the finite-sample discretization error documented in Section 15.1.8, but it calibrates area rather than frequency: each tail beyond the bounds holds $\alpha/2$ of the degree-one partial moment mass, not $\alpha/2$ of the observations. On uniform data the degree-one band at $\alpha = 0.05$ contains about 72% of the observations, so it should be read as a magnitude-calibrated band, not as a $1-\alpha$ prediction interval.
+**Degree 1** is continuous in the data, but it calibrates area rather than frequency: each tail beyond the bounds holds $\alpha/2$ of the degree-one partial moment mass, not $\alpha/2$ of the observations. On uniform data the degree-one band at $\alpha = 0.05$ contains about 72% of the observations, so it should be read as a magnitude-calibrated band, not as a $1-\alpha$ prediction interval.
 
-No parametric assumptions, no variance estimates, and no asymptotic approximations are required by either variant.
+Neither calculation requires a parametric distribution or a variance estimate. This describes how the endpoints are computed; it does not establish exact predictive or confidence coverage without sampling and calibration assumptions.
 
 
 More generally, one may define a lower-tail directional threshold by
@@ -316,15 +318,17 @@ x <- c(-2, -1, 0, 1, 2, 3, 5, 7, 9, 10)
 
 # Degree 0: classical empirical quantiles
 LPM.VaR(percentile = 0.05, degree = 0, x = x)
-## [1] -2
+##    5% 
+## -1.55
 UPM.VaR(percentile = 0.05, degree = 0, x = x)
-## [1] 10
+##  95% 
+## 9.55
 
-# Degree 1: continuous area-based quantiles
+# Degree 1: area-based thresholds
 LPM.VaR(percentile = 0.05, degree = 1, x = x)
-## [1] -1.65
+## [1] -0.4347826
 UPM.VaR(percentile = 0.05, degree = 1, x = x)
-## [1] 9.15
+## [1] 8.173913
 ```
 
 In Python:
@@ -338,11 +342,11 @@ x = np.array([-2, -1, 0, 1, 2, 3, 5, 7, 9, 10.0])
 # Degree 0: classical empirical quantiles
 lpm_var(0.05, 0, x), upm_var(0.05, 0, x)
 
-# Degree 1: continuous area-based quantiles
+# Degree 1: area-based thresholds
 lpm_var(0.05, 1, x), upm_var(0.05, 1, x)
 ```
 
-The degree-zero interval is $[-2, 10]$ — anchored exactly at the observed extremes. The degree-one interval is tighter, reflecting the continuous probability mass that lies between order statistics. With only $n=10$ observations, this difference is practically meaningful.
+The degree-zero interval is $[-1.55, 9.55]$, interpolated between the two lowest and the two highest observations. The degree-one interval $[-0.43, 8.17]$ is tighter because it leaves 5% of the deviation area in each tail rather than 5% of the observations, so it holds fewer of them. With only $n=10$ observations, this difference is practically meaningful.
 
 ---
 
@@ -381,34 +385,36 @@ What appears paradoxical under degree-zero counting becomes natural under direct
 
 Prediction intervals constructed from partial moment quantiles possess a simple probabilistic interpretation.
 
-For general threshold analysis, the interpretation can be stated succinctly. Under degree zero, the lower-tail threshold controls event frequency. Under higher degrees, the threshold controls weighted adverse exposure. The probability statement is therefore exact in the ordinary counting sense only for degree zero. For higher degrees, what is controlled is not raw event count but directional mass in a weighted geometry.
+Degree zero targets event frequency in the estimated distribution. Higher degrees target weighted adverse exposure. At the population level, continuous CDF quantiles give the stated event probabilities; estimated quantiles add sampling uncertainty and interpolation choices. Area calibration at higher degrees is a different target.
 
-Let $X_{n+1}$ denote a future observation drawn from the same distribution as the sample. Then
+For independent identically distributed observations, with a continuous distribution and identifiable continuous quantiles at the two target levels, a plug-in degree-zero interval has the large-sample target
 
 $$
 P\bigl(\text{LPM.VaR}(\alpha/2, 0, X) \le X_{n+1} \le \text{UPM.VaR}(\alpha/2, 0, X)\bigr) \approx 1 - \alpha,
 $$
 
-and the approximation converges to equality as $n \to \infty$.
+as the empirical quantiles converge to the population quantiles. This is an asymptotic statement under the stated conditions; ties, dependence, distribution shifts, and small samples require their own coverage analysis.
 
-For degree $d = 1$ the same expression does not hold: the bounds leave $\alpha/2$ of the degree-one mass, not of the probability, in each tail, so the band contains fewer than $1 - \alpha$ of future observations (about 72% for uniform data at $\alpha = 0.05$). Its continuity removes the discretization error of the step-function CDF, but what it controls is weighted exposure, as stated above for higher degrees.
+For degree $d = 1$, each endpoint leaves $\alpha/2$ of the deviation area on its corresponding side. Its ordinary frequency coverage depends on the distribution and can be below or above $1-\alpha$. For example, a sample with ten values at $-100$, 980 at zero, and ten at $100$ has type-7 95% bounds $[0,0]$ and degree-one bounds approximately $[-27.5362,27.5362]$; the latter contain 98% of the observations. The directional bands remain useful measures of weighted exposure, with a target distinct from frequency coverage.
 
-Unlike parametric prediction intervals, neither variant depends on distributional assumptions; the coverage of the degree-zero interval is determined entirely by the empirical probability structure.
+Neither construction requires choosing a parametric family. Valid claims about future coverage still require sampling assumptions and calibration; a distribution-free construction does not make those requirements disappear.
 
 ---
 
-## Conditional Prediction Intervals via NNS Regression
+## Residual Prediction Bands via NNS Regression
 
-Conditional intervals derived from `NNS.reg` are developed in detail in Chapter 21, where the regression estimator is introduced formally and interpreted geometrically.
+The regression estimator is developed in Chapter 22. Its fitted location function can be nonlinear and locally adaptive; the current `NNS.reg` interval implementation uses a global residual distribution.
 
-For continuity, the key idea is that `NNS.reg(..., confidence.interval = ...)` builds local intervals from partition-specific empirical distributions. In this chapter, we focus on the unconditional interval mechanics (`LPM.VaR` / `UPM.VaR`) that those later conditional constructions rely on.
+`NNS.reg(..., confidence.interval = ...)` computes two type-8 quantiles of all in-sample residuals and adds the same offsets to every fitted or predicted value. Its band therefore has constant width across predictor locations; it does not estimate partition-specific residual distributions or automatically calibrate conditional coverage under heteroskedasticity. Local or held-out residual calibration is a separate extension.
 
 ```r
 set.seed(12345)
 x_train <- runif(1000, -2, 2)
 y_train <- sin(pi * x_train) + rnorm(1000, sd = 0.2)
 
-NNS.reg(x = x_train, y = y_train, order = NULL, confidence.interval = .95)
+fit <- NNS.reg(x = x_train, y = y_train, order = NULL,
+               point.est = c(-1, 0, 1), confidence.interval = .95)
+fit$pred.int  # common residual-quantile offsets around each prediction
 ```
 
 In Python:
@@ -421,32 +427,33 @@ rng = np.random.default_rng(12345)
 x_train = rng.uniform(-2, 2, 1000)
 y_train = np.sin(np.pi * x_train) + rng.normal(scale=0.2, size=1000)
 
-fit = nns_reg(x_train, y_train, order=None, confidence_interval=0.95)
-fit["pred.int"]   # local interval bounds from partition-specific distributions
+fit = nns_reg(x_train, y_train, order=None, point_est=np.array([-1, 0, 1]),
+              confidence_interval=0.95)
+fit["pred.int"]   # check the port's documented residual-band implementation
 ```
 
 <center>
-![Figure 17.1. `NNS.reg(..., confidence.interval = 0.95)` visualization with nonlinear fit and interval bands estimated from local partitions.](images/ch17_reg_conf_int.png)
+![Figure 17.1. `NNS.reg(..., confidence.interval = 0.95)` visualization with nonlinear fit and global residual-quantile bands.](images/ch17_reg_conf_int.png)
 </center>
 
 ## Advantages of the Directional Approach
 
 Prediction intervals based on partial moments possess several advantages over classical methods.
 
-**Bias elimination.**  
-As established in Chapter 15 (Section 15.1.8), the degree-one partial moment ratio places exactly 50% of probability mass below the mean for every distribution and every sample size. Interval bounds derived from degree-one quantiles do not inherit the systematic bias of the discrete empirical CDF.
+**Explicit calibration.**  
+Degree-zero bounds calibrate frequency, which is what coverage requires; degree-one bounds calibrate deviation area, which is continuous in the benchmark and anchored at 0.5 at the mean for every nondegenerate integrable distribution (Chapter 15, Section 15.1.8). The choice is stated, not hidden in a distributional assumption.
 
 **Distribution-free construction.**  
 No assumptions about normality or parametric form are required.
 
-**Robustness.**  
-Intervals are determined by empirical probability mass rather than moment estimates that may be sensitive to extreme observations.
+**Robustness depends on the degree.**  
+Degree-zero bounds are empirical quantiles, so an extreme observation moves them only by its rank. Degree-one bounds weight deviations by their size, as the mean does, so one extreme value moves them: for `x <- seq(0, 1, length.out = 21)`, moving the largest value from 1 to 10 leaves the degree-zero upper 5% point `UPM.VaR(0.05, 0, x)` at 0.95 but moves the degree-one point `UPM.VaR(0.05, 1, x)` from 0.83 to 5.12. The continuity of the degree-one ratio is smoothness, not robustness.
 
-**No double bootstrap required.**  
-Asymmetry correction that classical methods achieve only with computationally expensive double-bootstrap or BCa procedures is obtained automatically from the continuous partial moment representation.
+**Single pass.**  
+Degree-zero intervals and degree-one bands both come from one sample, or one set of bootstrap replicates, with no resampling of the resamples. They do not replace BCa or double-bootstrap corrections when the goal is a bias-corrected 95% confidence interval.
 
-**Conditional adaptivity.**  
-Through the NNS regression framework, prediction intervals adapt to local data structure — capturing nonlinearity and heteroskedasticity without parametric specification.
+**Flexible location with explicit residual calibration.**
+NNS regression adapts the fitted location to nonlinear structure. Its current global residual bands require separate validation when residual spread changes with predictor location.
 
 **Interpretability.**  
 Intervals correspond directly to probability statements about future observations, rooted in directional partial-moment representations.
@@ -461,16 +468,16 @@ A second advantage is that threshold analysis can be separated from domain-speci
 
 Prediction intervals describe the range within which future observations are expected to occur.
 
-Classical prediction intervals rely on parametric assumptions and variance estimates. Bootstrap methods correct for asymmetry but require multiple resampling passes. The directional framework constructs intervals directly from the **empirical distribution represented by partial moments**, with an additional layer of bias correction available through the continuous (degree-one) probability representation established in Chapter 15.
+Parametric, bootstrap, and other calibrated interval procedures offer different assumptions and coverage properties. A percentile bootstrap uses one collection of resamples; BCa additionally estimates acceleration, commonly by jackknife, while studentized methods can require further resampling. The directional framework represents empirical quantiles through degree-zero partial moments and severity thresholds through higher degrees. Computing these endpoints is distinct from validating their repeated-sample or future coverage.
 
 Key results:
 
-- The discrete CDF ($d=0$) is a degree-zero partial moment — unbiased asymptotically but systematically biased for any finite sample (Chapter 15, Section 15.1.8).
-- The continuous partial moment CDF ($d=1$) eliminates this bias exactly, with $F_1(\bar{x}; X) = 0.5$ without exception.
+- The discrete CDF ($d=0$) is a degree-zero partial moment: it counts observations, so its quantiles give coverage intervals.
+- The degree-one ratio ($d=1$) is the share of deviation area, continuous in the benchmark and equal to 0.5 at the mean of every non-constant sample by construction; it is not $P(X \le t)$.
 - `LPM.VaR` and `UPM.VaR` invert these CDFs to produce distribution-free quantile intervals at either degree.
-- Degree-one intervals match or exceed bias-corrected bootstrap intervals without the need for double resampling.
-- Conditional prediction intervals from `NNS.reg` adapt automatically to local nonlinearity and heteroskedasticity.
+- Degree-one bands calibrate deviation area. Their width and event-frequency coverage relative to percentile intervals depend on the distribution; neither has a universal ordering.
+- `NNS.reg` combines a flexible fitted location with global residual-quantile offsets. Conditional heteroskedastic coverage requires additional calibration.
 
-These ideas complete the core framework for **nonparametric statistical inference using directional statistics**. The next chapter turns to **directional tail thresholds, probability bounds, and estimation error**, extending interval logic into benchmark-driven tail-risk decisions before Chapter 17 develops synthetic data generation and bootstrap methods for uncertainty quantification.
+These ideas connect directional threshold analysis to statistical estimation. Chapter 18 develops recursive mean-split estimation, Chapter 19 interprets its effective bandwidth, and Chapter 20 develops synthetic data generation and bootstrap methods.
 
 ---

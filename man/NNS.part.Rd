@@ -56,7 +56,7 @@ observable partition representation without passing an invalid integer to C++.
 For a numeric \code{order}, each cell is split at a centre per coordinate, set
 by \code{noise.reduction}:
 \code{"mean"} and \code{"median"} use the mean and median, \code{"mode"}
-uses \code{NNS.mode(discrete = TRUE)}, \code{"mode_class"} uses
+uses the continuous \code{NNS.mode(multi = FALSE)}, \code{"mode_class"} uses
 \link{NNS.gravity} for x and \code{NNS.mode(discrete = TRUE)} for y, and
 \code{"off"} uses \link{NNS.gravity}. Regression points are the same centres
 of each \code{prior.quadrant}.

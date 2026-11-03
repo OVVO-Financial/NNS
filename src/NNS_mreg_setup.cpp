@@ -48,11 +48,14 @@ int find_interval_one(double x, const NumericVector& b) {
   return static_cast<int>(std::upper_bound(b.begin(), b.end(), x) - b.begin());
 }
 
-std::string id_for_row(const NumericMatrix& X, const List& boundaries, int r) {
+std::string id_for_row(const NumericMatrix& X, const List& boundaries,
+                       const std::vector<bool>& binary_coordinate, int r) {
   std::ostringstream os;
   for (int j = 0; j < X.ncol(); ++j) {
     if (j) os << ".";
-    os << find_interval_one(X(r, j), boundaries[j]);
+    NumericVector b = boundaries[j];
+    os << (binary_coordinate[j] ? (X(r, j) == b[0] ? 1 : 2) :
+             find_interval_one(X(r, j), b));
   }
   return os.str();
 }
@@ -91,11 +94,26 @@ List NNS_mreg_setup_cpp(const NumericMatrix& X, const NumericVector& y,
                         const List& boundaries, int reducer_code, bool is_class) {
   const int nr = X.nrow(), p = X.ncol();
   if (y.size() != nr) stop("y length must equal nrow(X)");
+  // Two observed atoms are terminal coordinate cells, not endpoints of one
+  // interval. Only apply that rule when both boundary values exactly match
+  // the observed support; all ordinary interval semantics remain unchanged.
+  std::vector<bool> binary_coordinate(p, false);
+  for (int j = 0; j < p; ++j) {
+    NumericVector b = boundaries[j];
+    if (b.size() != 2 || !(b[0] < b[1])) continue;
+    bool lower = false, upper = false, exact = true;
+    for (int i = 0; i < nr && exact; ++i) {
+      if (X(i, j) == b[0]) lower = true;
+      else if (X(i, j) == b[1]) upper = true;
+      else exact = false;
+    }
+    binary_coordinate[j] = exact && lower && upper;
+  }
   CharacterVector ids(nr);
   std::unordered_map<std::string, std::vector<int> > groups;
   groups.reserve(static_cast<std::size_t>(nr) * 2);
   for (int i = 0; i < nr; ++i) {
-    const std::string id = id_for_row(X, boundaries, i);
+    const std::string id = id_for_row(X, boundaries, binary_coordinate, i);
     ids[i] = id;
     groups[id].push_back(i);
   }

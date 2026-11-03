@@ -188,9 +188,9 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 #'
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
-#' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} (default) is frequency, the empirical distribution of \code{variable}; \code{(degree = 1)} is area, the share of deviation area below each point, which is not \eqn{P(X \le t)}.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).
-#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it, and need \code{degree = 0} for multivariate \code{variable}.  At \code{degree > 0} with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At \code{degree = 0}, and in one dimension at any degree, they are proper distribution functions.
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The multivariate cumulative hazard is the transform \eqn{-\log S(t)} and requires \code{degree = 0}; it is not automatically an integral of a scalar multivariate hazard. Multivariate \code{type = "hazard"} is unsupported and raises an error: a joint density-over-survival or a coordinate-hazard definition requires a separate estimator, and dividing the joint CDF by survival does not estimate either.  At \code{degree > 0} with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At \code{degree = 0}, and in one dimension at any degree, they are proper distribution functions; at positive degree the univariate induced law describes deviation-area balance rather than the frequency law of the original variable.
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
@@ -211,7 +211,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' ## Empirical CDF (degree = 0)
 #' NNS.CDF(x)
 #'
-#' ## Continuous CDF (degree = 1)
+#' ## Area-weighted CDF (degree = 1): the share of deviation area below each point
 #' NNS.CDF(x, 1)
 #'
 #' ## Joint CDF
@@ -299,7 +299,7 @@ NNS.CDF <- function(variable,
           hi <- min(n, findInterval(x[i], x) + 1L)
         }
         (F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
-      fit <- NNS.reg(x, pmax(proxy,1e-10), order=NULL, n.best=1, point.est=target, plot=FALSE)
+      fit <- NNS.reg(x, pmax(proxy,1e-10), type="REG", order=NULL, n.best=1, point.est=target, plot=FALSE)
       DT[[2]] <- pmin(pmax(fit$Fitted$y.hat / pmax(1-F,1e-10),0),1e6)
     }
     if (type=="cumulative hazard") DT[[2]] <- pmax(-log(pmax(1-pval,1e-10)),0)
@@ -331,10 +331,12 @@ NNS.CDF <- function(variable,
   
   # — Multivariate case (d >= 2)
   if (!is.null(dim(variable)) && ncol(variable) >= 2) {
+    if (type == "hazard")
+      stop("Multivariate type = 'hazard' is not implemented: a joint density or coordinate-hazard definition is required. Use 'survival' or 'cumulative hazard' for the documented joint survival transforms.")
     # At degree > 0 each target's co-partial moment is normalised by its own
-    # total, which is not a joint distribution function (#100): the hazard
-    # types divide by it as if it were one, so they need degree 0.
-    if (degree > 0 && type %in% c("hazard", "cumulative hazard"))
+    # total, which is not a joint distribution function (#100): the
+    # cumulative-hazard interpretation therefore requires degree 0.
+    if (degree > 0 && type == "cumulative hazard")
       stop("type = '", type, "' needs degree = 0 for multivariate variable: at degree > 0 the joint ratio is not a distribution function.")
     xlab <- colnames(variable)[1]
     ylab <- if(ncol(variable) >= 2) colnames(variable)[2] else ""
@@ -384,11 +386,6 @@ NNS.CDF <- function(variable,
       CDF <- pmax(0, pmin(1, S))
     }
     
-    if (type == "hazard") {
-      f <- NNS.reg(variable, pmax(CDF, 1e-10), order = "max", plot = FALSE, point.est = target)
-      CDF <- pmax(f$Fitted$y.hat / pmax(S, 1e-10), 0)
-    }
-    
     if (type == "cumulative hazard") {
       CDF <- pmax(-log(pmax(S, 1e-10)), 0)
     }
@@ -400,9 +397,6 @@ NNS.CDF <- function(variable,
       if (type != "cdf") S_t <- joint.survival(target, Pv)
       if (type == "survival") {
         Pv <- max(0, min(1, S_t))
-      }
-      if (type == "hazard") {
-        Pv <- max(f$Point.est / pmax(S_t, 1e-10), 0)
       }
       if (type == "cumulative hazard") {
         Pv <- pmax(-log(pmax(S_t, 1e-10)), 0)

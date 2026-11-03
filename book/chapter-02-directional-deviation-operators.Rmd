@@ -139,6 +139,8 @@ These quantities measure directional deviation magnitudes relative to the benchm
 
 For these expectations to be finite, it is sufficient that the corresponding directional powers are integrable (for example, \(E[|X|^r]<\infty\) for fixed \(r\)).
 
+At \(r = 0\) the powers are read as indicators, \((t-X)_+^0 = \mathbf{1}\{X \le t\}\) and \((X-t)_+^0 = \mathbf{1}\{X > t\}\) (Chapter 3), so that \(L_0(t;X) + U_0(t;X) = 1\); read literally with \(0^0 = 1\), both would equal 1.
+
 The parameter \(r\) determines the type of deviation measured.
 
 | Degree \(r\) | Interpretation |

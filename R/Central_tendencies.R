@@ -6,6 +6,7 @@
 #' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
 #' @param multi logical; \code{TRUE} (default) returns multiple mode values.  \code{FALSE} returns the highest peak; among equally high peaks, the one nearest \link{NNS.gravity} of the data (then the lower value), so the result is always one of the modes.
 #' @return Returns the mode of the distribution: a numeric vector of all modes when \code{multi = TRUE} (default), otherwise a single numeric value.
+#' @details The continuous mode finds the peaks of a smoothed histogram with bin width IQR / sqrt(n), peaks in the first and last bins included, and centres each peak on the mean of the observations within three bins of it, so a peak on a single value returns that value.  When every gap between consecutive distinct values is wider than a bin, the data are treated as discrete-valued: the modes are the values more frequent than their neighbouring values, a run of equally frequent values counting together.  \code{discrete = TRUE} instead rounds to integers and returns the most frequent integers.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
 #' \dontrun{
@@ -28,11 +29,12 @@ mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
 
 #' NNS gravity
 #'
-#' Alternative central tendency measure more robust to outliers.
+#' Central tendency averaging the median, the mean, the midpoint of the quartiles and a histogram mode; less sensitive to outliers than the mean.
 #'
 #' @param x vector of data.
 #' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
 #' @return Returns a numeric value representing the central tendency of the distribution.
+#' @details \deqn{(Q_2 + m + \bar{x} + (Q_1 + Q_3)/2) / 4,} with the quartiles \eqn{Q_1, Q_2, Q_3} of \code{quantile(x, type = 7)} and, as the mode \eqn{m}, the mean of the observations in the tallest bin of a histogram with bin width IQR / sqrt(n) and its two neighbouring bins (all observations when several bins are equally tall).  Up to three values give the median.  The mean term remains unbounded under one-point contamination: a single 1e6 among 99 zeros gives 2500, against 10000 for the mean. The other components can also change, so the one-quarter factor is an example, not a universal sensitivity bound. Its asymptotic replacement breakdown point is zero; it is not a high-breakdown estimator.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
 #' \dontrun{

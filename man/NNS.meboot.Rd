@@ -25,7 +25,8 @@ NNS.meboot(
   colsubj,
   coldata,
   coltimes,
-  ...
+  ...,
+  expand.residual.sd = TRUE
 )
 }
 \arguments{
@@ -54,7 +55,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 \item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.}
 
-\item{force.clt}{logical; If \code{TRUE} the ensemble is forced to satisfy the central limit theorem: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.}
+\item{force.clt}{logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.}
 
 \item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.}
 
@@ -70,6 +71,8 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 \item{coltimes}{numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 is not a \code{pdata.frame} object.}
+
+\item{expand.residual.sd}{Logical; TRUE retains residual-space SD expansion before trend reconstruction. FALSE leaves the generated residual scales unexpanded, separately from the later level-space expand.sd switch.}
 
 \item{...}{possible argument \code{fiv} to be passed to \code{expand.sd}.}
 }
@@ -95,17 +98,22 @@ Returns the following row names in a matrix:
 Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 }
 \note{
+These are dependence-targeted synthetic scenarios. Zero rank or linear correlation does not imply independence, and interior-rho mixing can alter marginal distributions. The force.clt scale sd(x)/sqrt(n) is an iid finite-variance reference, not a serial-dependence long-run standard error or a calibration for arbitrary statistics.
+
 Vectorized \code{rho} and \code{drift} parameters will not vectorize both simultaneously.  Also, do not specify \code{target_drift = NULL}.
 
 The \code{rho} dependence alignment is calibrated on each individual \code{replicate}: every replicate's \emph{detrended residuals} are mixed so that their dependence on the original series' detrended residuals matches \code{rho}, in the metric implied by \code{type}; the trend is added back afterwards. If the detrended residuals are all exactly zero (a constant or exactly linear series) there is nothing to align and \code{rho} has no effect.  For a trending series the replicate levels therefore stay strongly correlated with the original even at \code{rho = -1} (e.g. AirPassengers: mean Spearman 0.81 at \code{rho = -1}).  Assess a result in that \strong{same} metric -- a \code{"NNSdep"} target with \link{NNS.dep}\code{$Dependence} (unsigned) and a \code{"spearman"}/\code{"pearson"} target with rank/linear correlation -- because a signed correlation taken on an unsigned \code{"NNSdep"} target is not comparable to \code{rho} (it can even read negative while the dependence target is met).  Separately, the \code{ensemble} is the per-observation mean of the replicates -- a central summary, not a single series carrying the target dependence -- so a rank or linear correlation computed directly on the \code{ensemble} tends to read higher than the per-replicate \code{rho} (averaging amplifies the shared order).  Verify \code{rho} on the \code{replicates}, in the metric implied by \code{type}, rather than on the \code{ensemble}.
 }
 \examples{
 \dontrun{
-# To generate an orthogonal rank correlated time-series to AirPassengers
-boots <- NNS.meboot(AirPassengers, reps = 100, rho = 0, xmin = 0)
+# Target zero Spearman correlation of individual detrended residuals
+boots <- NNS.meboot(AirPassengers, reps = 100, rho = 0, drift = FALSE,
+  expand.sd = FALSE, force.clt = FALSE)
 
-# Verify correlation of replicates ensemble to original
-cor(boots["ensemble",]$ensemble, AirPassengers, method = "spearman")
+# Inspect residual correlations on individual replicates
+detrend <- function(z) residuals(lm(as.numeric(z) ~ seq_along(z)))
+apply(boots["replicates",]$replicates, 2, function(z)
+  cor(z, detrend(AirPassengers), method = "spearman"))
 
 # Plot all replicates
 matplot(boots["replicates",]$replicates , type = 'l')

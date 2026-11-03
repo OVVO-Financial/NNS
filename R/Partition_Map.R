@@ -30,7 +30,7 @@
 #' For a numeric \code{order}, each cell is split at a centre per coordinate, set
 #' by \code{noise.reduction}:
 #' \code{"mean"} and \code{"median"} use the mean and median, \code{"mode"}
-#' uses \code{NNS.mode(discrete = TRUE)}, \code{"mode_class"} uses
+#' uses the continuous \code{NNS.mode(multi = FALSE)}, \code{"mode_class"} uses
 #' \link{NNS.gravity} for x and \code{NNS.mode(discrete = TRUE)} for y, and
 #' \code{"off"} uses \link{NNS.gravity}. Regression points are the same centres
 #' of each \code{prior.quadrant}.
@@ -179,7 +179,9 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
           mean(z)
         } else if (noise.reduction == "median") {
           stats::median(z)
-        } else if (noise.reduction %in% c("mode", "mode_class")) {
+        } else if (noise.reduction == "mode") {
+          mode(z)
+        } else if (noise.reduction == "mode_class") {
           mode_class(z)
         } else {
           gravity(z)

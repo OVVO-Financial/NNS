@@ -23,7 +23,8 @@ NNS.ARMA.optim(
   ncores = NULL,
   pred.int = 0.95,
   print.trace = TRUE,
-  plot = FALSE
+  plot = FALSE,
+  bias.correction = c("none", "split")
 )
 }
 \arguments{
@@ -54,17 +55,22 @@ The default is the mean squared error divided by the degree-1 co-movement of \co
 \item{print.trace}{logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!}
 
 \item{plot}{logical; \code{FALSE} (default)}
+
+\item{bias.correction}{\code{"none"} (default) returns the selected model's forecasts without an additive shift. \code{"split"} estimates a gravity bias from the first half of the validation errors and accepts it only if the objective improves on the later half; at least four validation observations are required. On rolling-origin forecasts of nine series (AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and Nile; six expanding origins, h = 12), the uncorrected forecasts had the lower mean MASE on eight of the nine series, both against \code{"split"} and against estimating and accepting the shift on the same window, a rule that is no longer offered. Model selection still uses the validation window, so these diagnostics are not independent out-of-sample performance estimates.}
 }
 \value{
 Returns a list containing:
 \itemize{
 \item{\code{$period}} a vector of optimal seasonal periods
 \item{\code{$weights}} the optimal weights of each seasonal period between an equal weight or NULL weighting
-\item{\code{$obj.fn}} the objective function value
+\item{\code{$obj.fn}} the \code{obj.fn} value of the returned model's internal validation forecasts, after \code{$bias.shift}.
 \item{\code{$method}} the method identifying which \link{NNS.ARMA} method was used.
 \item{\code{$shrink}} whether to use the \code{shrink} parameter in \link{NNS.ARMA}.
 \item{\code{$nns.regress}} whether to smooth the variable via \link{NNS.reg} before forecasting.
-\item{\code{$bias.shift}} a numerical result of the overall bias of the returned model on the internal validation window, 0 when correcting it does not improve the objective function.  To be added to the final result when using the \link{NNS.ARMA} with the derived parameters.
+\item{\code{$bias.shift}} the accepted additive correction (0 when rejected or disabled). Add it to the forecast from \link{NNS.ARMA} with the returned model parameters, then apply the nonnegative support clamp if required.
+\item{\code{$bias.validation}} correction policy, estimated/applied shifts, chronological estimate and acceptance rows, and raw/adjusted acceptance scores.
+\item{\code{$raw.results}} forecasts before the additive bias correction.
+\item{\code{$validation.forecast}} the final internal validation forecasts, including correction and support clamp.
 \item{\code{$errors}} a vector of the returned model's internal validation errors (forecast - actual), before \code{$bias.shift}.
 \item{\code{$results}} a vector of length \code{h}.
 \item{\code{$lower.pred.int}} a vector of lower prediction intervals per forecast point.
@@ -75,6 +81,8 @@ Returns a list containing:
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  The objective function \code{obj.fn} on a validation window (the last \code{length(variable) - training.set} observations) is used to determine the optimum across all \link{NNS.ARMA} methods.
 }
 \note{
+By default no bias shift is added. With \code{bias.correction = "split"} the shift is estimated on the first half of the validation window and accepted on the second. Base model selection still uses the internal validation window, so these tuning scores are not an independent evaluation of the whole forecasting procedure. Evaluate the complete procedure at fresh chronological origins.
+
 \itemize{
 \item{} Typically, \code{(training.set = 0.8 * length(variable))} is used for optimization.  Smaller samples could use \code{(training.set = 0.9 * length(variable))} (or larger) in order to preserve information.
 

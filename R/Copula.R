@@ -8,7 +8,7 @@
 #' @param plot logical; \code{FALSE} (default) Generates a 3d scatter plot with regression points.
 #' @param independence.overlay logical; \code{FALSE} (default) Creates and overlays independent \link{Co.LPM} and \link{Co.UPM} regions to visually reference the difference in dependence from the data.frame of variables being analyzed.  Under independence, the light green and red shaded areas would be occupied by green and red data points respectively.
 #'
-#' @return Returns a multivariate dependence value [0,1]. Each co-partial moment is compared with its value under independence, the product of the marginal partial moments at \code{target}, so independent variables give a value near 0 for any target and marginal distributions.  At a target with every variable's observations on one side of it, each co-partial moment equals its independence value whatever the dependence, so the value is 0.
+#' @return Returns a multivariate dependence value [0,1]. Each co-partial moment is compared with its value under independence, the product of the marginal partial moments at \code{target}, so independent variables give a value near 0 for any target and marginal distributions.  At a target with every variable's observations on one side, the normalized directional-region shares carry no contrast and the neutral value is 0. This target degeneracy is not evidence that the variables are independent. In general, 0 and 1 describe this target-specific summary, not global independence or deterministic dependence.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Beyond Correlation: Using the Elements of Variance for Conditional Means and Probabilities"  \doi{10.2139/ssrn.2745308}.
@@ -89,7 +89,7 @@ NNS.copula <- function (
   # Perfect dependence: every pair fully concordant (1) or fully discordant (0).
   # A margin with every observation on one side of its target makes that trivially true.
   lower_share <- vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1))
-  # Every co-partial moment then equals its independence product.
+  # Normalized region shares have no informative contrast at this target.
   if(all(lower_share == 0 | lower_share == 1)) return(0)
   pair_Co_pm <- discrete_pm_cov$cupm[utr] + discrete_pm_cov$clpm[utr]
   if(all(lower_share > 0 & lower_share < 1) &&

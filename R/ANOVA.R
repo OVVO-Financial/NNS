@@ -1,34 +1,52 @@
 #' NNS ANOVA: Nonparametric Analysis of Variance
 #'
-#' Performs a distribution-free ANOVA using partial-moment statistics to assess
-#' differences between control and treatment groups. Depending on the setting of
-#' \code{means.only}, the procedure tests either differences in central tendency
-#' (means or medians) or differences across the full empirical distributions.
+#' Compares control and treatment groups through benchmark-relative partial
+#' moments. The chosen mode compares means, medians, or a distribution profile
+#' with central and tail benchmarks, without selecting a parametric family.
 #'
-#' The key output is the \code{Certainty} metric, a descriptive similarity index
-#' in \eqn{[0, 1]} (1 = the groups are the same) with respect to the chosen
-#' comparison mode:
+#' The key output, \code{Certainty}, is a descriptive agreement index in
+#' \eqn{[0, 1]} for the chosen target:
 #' \itemize{
-#'   \item If \code{means.only = TRUE}: similarity of the group \emph{means}
-#'         (or medians, if \code{medians = TRUE}), measured by how far each
-#'         group's partial-moment CDF at the grand statistic is from 0.5.
-#'   \item If \code{means.only = FALSE}: similarity of the two \emph{entire
-#'         distributions}, adding the same comparison at the 12.5\% and 25\% tail
-#'         quantiles.
+#'   \item \code{means.only = TRUE, medians = FALSE}: compares group means
+#'         using degree-one deviation-area ratios at the pooled mean.
+#'   \item \code{means.only = TRUE, medians = TRUE}: compares medians using
+#'         the distance of 0.5 from each interval \eqn{[F(t-), F(t)]} at the
+#'         pooled median \eqn{t}. This interval contains 0.5 exactly when
+#'         \eqn{t} is a median, including tied and discrete data.
+#'   \item \code{means.only = FALSE}: adds the 12.5\% and 25\% lower and
+#'         upper deviation-area benchmarks to the chosen central comparison.
+#'         This examines distributional shape through a finite profile;
+#'         agreement at these benchmarks does not prove equality of laws.
 #' }
 #'
-#' \code{Certainty} is \emph{not} a calibrated probability and not the inverse of
-#' a p-value: for two samples from the same distribution it is not uniform on
-#' \eqn{[0, 1]} and rises toward 1 with sample size, it is shrunk by
-#' the population adjustment \eqn{((n_1 + n_2 - 2) / (n_1 + n_2))^2} for small
-#' samples, and it should not be compared with p-value thresholds such as 0.05.
-#' \code{robust = TRUE} bounds the sampling variability of \code{Certainty}
-#' itself; it is not a reference distribution under no difference. For that,
-#' recompute \code{Certainty} on random relabelings of the pooled observations.
-#'  
+#' At a constant group's only value both deviation areas vanish. For agreement
+#' comparisons this satisfies the expectile balance at every level, so its
+#' area discrepancy is zero there. Returned CDF values retain the public
+#' partial-moment step convention; other benchmarks and nonconstant samples
+#' use the ordinary ratio discrepancy.
+#'
+#' The raw score is 1 at maximal benchmark agreement. The returned score is
+#' multiplied by \eqn{((n_1 + n_2 - 2)/(n_1 + n_2))^2}, so the finite-sample
+#' maximum is below 1. \code{Certainty} is not a calibrated probability,
+#' a p-value, or statistical power, and has no universal significance cutoff.
+#' Equal population means need not produce the same score distribution when
+#' sample sizes or spreads differ. \code{robust = TRUE} describes sampling
+#' variability of the score; it does not generate a null reference distribution.
+#'
+#' Random relabelings of the pooled observations provide a reference under
+#' identical distributions only when observations are exchangeable. They are
+#' not a general unequal-variance equal-means test. Any inferential calibration
+#' must match the chosen target and the sampling design; dependent observations
+#' require a suitable resampling design.
+#'
+#' Effect-size bounds retain the conservative difference of the groups' separate
+#' bootstrap endpoints. They are not quantiles of the bootstrap difference and
+#' need not have exactly the requested nominal coverage. The independent-group
+#' bootstrap assumes independent observations within and between groups.
+#'
 #' @param control Numeric vector of control group observations
 #' @param treatment Numeric vector of treatment group observations
-#' @param means.only Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for mean-only comparison
+#' @param means.only Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for the central comparison only (means, or medians when \code{medians = TRUE})
 #' @param medians Logical; \code{FALSE} (default) uses means. Set \code{TRUE} for median-based analysis
 #' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
 #' @param tails Character; specifies CI tail(s): "both", "left", or "right"
@@ -38,14 +56,14 @@
 #' 
 #' @return Returns a list containing:
 #' \itemize{
-#'   \item \code{Control_Statistic}: Mean/median of control group
-#'   \item \code{Treatment_Statistic}: Mean/median of treatment group
+#'   \item \code{Control}: Mean/median of control group
+#'   \item \code{Treatment}: Mean/median of treatment group
 #'   \item \code{Grand_Statistic}: Mean/median of all observations pooled
 #'   \item \code{Control_CDF}: CDF value at grand statistic (control)
 #'   \item \code{Treatment_CDF}: CDF value at grand statistic (treatment)
-#'   \item \code{Certainty}: Similarity index in [0, 1] (1 = the groups are the
-#'         \emph{same}; means-only or full distribution depending on
-#'         \code{means.only}); not a calibrated probability.
+#'   \item \code{Certainty}: Agreement index for the chosen central or
+#'         distribution-profile comparison, with the finite-sample adjustment;
+#'         not a calibrated probability.
 #'   \item \code{Effect_Size_LB}: Lower bound of treatment effect (if confidence.interval requested)
 #'   \item \code{Effect_Size_UB}: Upper bound of treatment effect (if confidence.interval requested)
 #'   \item \code{Confidence_Level}: Confidence level used (if confidence.interval requested)

@@ -23,7 +23,7 @@ test_that("continuous FSD ratios that agree at the knots but cross are not domin
 test_that("continuous FSD uses CDF 1 when every observation equals the threshold", {
   expect_equal(NNS.FSD.uni(rep(4, 6), c(5, 5, 0, 4, 0, 2), "continuous"), 0)
   expect_equal(NNS.FSD.uni(c(0, 3), c(0, 0), "continuous"), 1)
-  expect_equal(NNS.FSD(c(0, 0), c(0, 3), "continuous", plot = FALSE), "Y FSD X")
+  expect_equal(NNS.FSD(c(0, 0), c(0, 3), "continuous", plot = FALSE), "Y OMEGA X")
 })
 
 test_that("the missing-value check does not recycle samples of different lengths", {
@@ -47,7 +47,7 @@ test_that("continuous FSD checks the ratios between the sample points", {
   x <- c(0.15, 1.55, -0.86, -0.8, 0.25, 0.33); y <- c(-0.15, 1.17, 0.26, -0.04, -2.44, 1.19)
   ratio <- function(v, t) mean(pmax(t - v, 0)) / mean(abs(t - v))
   expect_equal(ratio(x, 0.5) - ratio(y, 0.5), 0.002972295, tolerance = 1e-6)
-  expect_equal(NNS.FSD(x, y, "continuous", plot = FALSE), "NO FSD EXISTS")
+  expect_equal(NNS.FSD(x, y, "continuous", plot = FALSE), "NO OMEGA DOMINANCE EXISTS")
   expect_equal(NNS.FSD.uni(x, y, "continuous"), 0)
   expect_setequal(NNS.SD.efficient.set(cbind(x, y), 1, "continuous", status = FALSE), c("x", "y"))
 })
@@ -78,10 +78,10 @@ test_that("an empty sample is an error", {
 
 test_that("continuous FSD sees ratios that differ only between the knots", {
   x <- c(0, 1, 1); y <- c(0, 0, 1)
-  expect_equal(NNS.FSD(x, y, "continuous", plot = FALSE), "X FSD Y")
+  expect_equal(NNS.FSD(x, y, "continuous", plot = FALSE), "X OMEGA Y")
   expect_equal(c(NNS.FSD.uni(x, y, "continuous"), NNS.FSD.uni(y, x, "continuous")), c(1, 0))
   expect_equal(NNS.SD.efficient.set(cbind(x, y), 1, "continuous", status = FALSE), "x")
-  expect_equal(NNS.FSD(c(1, 1), c(0, 1), "continuous", plot = FALSE), "X FSD Y")
+  expect_equal(NNS.FSD(c(1, 1), c(0, 1), "continuous", plot = FALSE), "X OMEGA Y")
   expect_equal(c(NNS.FSD.uni(c(1, 1), c(0, 1), "continuous"), NNS.FSD.uni(c(0, 1), c(1, 1), "continuous")), c(1, 0))
 })
 

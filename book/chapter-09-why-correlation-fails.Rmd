@@ -490,7 +490,7 @@ Consider
 Y=X^2
 \]
 
-with \(X\) symmetrically distributed around zero.
+with \(X\) symmetrically distributed around zero, \(E[X^4]<\infty\), and \(\operatorname{Var}(X^2)>0\). These conditions make both variances and the correlation well-defined.
 
 In this case
 
@@ -504,7 +504,7 @@ For example, if \(X\sim N(0,1)\), then
 \operatorname{Corr}(X,X^2)=0.
 \]
 
-Despite zero correlation, the variables are perfectly dependent.
+Despite zero correlation, \(Y\) is determined by \(X\). This functional relation is a property of the joint law; a finite-resolution dependence statistic need not assign it the numerical value 1.
 
 Directional co-partial moments reveal this structure.
 
@@ -563,7 +563,7 @@ Directional co-partial moments of higher order emphasize extreme deviations:
 
 Increasing \(r\) and \(s\) increases sensitivity to extreme observations.
 
-This concept is closely related to **tail dependence in copula theory**, which Chapter 10 examines in detail.
+This concept is closely related to **tail dependence in copula theory**, which Chapter 12 examines in detail.
 
 ---
 

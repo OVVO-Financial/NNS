@@ -56,6 +56,9 @@ jobs:
           mkdir -p docs/book
           rsync -a --delete book/_book/ docs/book/
 
+      - name: Build revised example companions
+        run: Rscript examples/build-revised-companions.R
+
       - name: Stage examples for Pages
         run: bash tools/stage_examples_site.sh docs/examples
 

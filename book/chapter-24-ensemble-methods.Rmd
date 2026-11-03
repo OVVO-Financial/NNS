@@ -1,10 +1,10 @@
 # Ensemble Methods
 
-Chapters 20–22 developed the machine-learning side of the NNS framework from three complementary angles.
+Chapters 21–23 developed the machine-learning side of the NNS framework from three complementary angles.
 
-- Chapter 20 treated recursive partitions as an unsupervised clustering device.
-- Chapter 21 used those same partitions for conditional expectation estimation.
-- Chapter 22 used them for local conditional probability estimation and classification.
+- Chapter 21 treated recursive partitions as an unsupervised clustering device.
+- Chapter 22 used those same partitions for conditional expectation estimation.
+- Chapter 23 used them for local conditional probability estimation and classification.
 
 A natural next step is to combine multiple directional learners into a single predictive system.
 
@@ -91,7 +91,7 @@ The package documentation for `NNS.stack` states that it is a prediction model u
 
 This matters conceptually.
 
-Classical boosting — and its modern descendant gradient boosting — achieves its power by iteratively correcting residuals from deliberately weak base learners. The mathematical theory of that residual-correction process is well developed, and systems like XGBoost have been engineered to exploit it with exceptional efficiency. NNS does not attempt to replicate that theory. Its base learner is already a flexible nonlinear estimator; there are no residuals to correct in the same sense. Ensemble improvement in NNS comes from a different source entirely: stability and structural coverage across feature subsets and validation splits, not from iterative error minimization.
+Classical boosting — and its modern descendant gradient boosting — achieves its power by iteratively correcting residuals from deliberately weak base learners. The mathematical theory of that residual-correction process is well developed, and systems like XGBoost have been engineered to exploit it with exceptional efficiency. NNS does not attempt to replicate that theory. Its base learner is a flexible nonlinear estimator with residuals, but this routine does not fit successive learners to those residuals. Ensemble improvement in NNS comes from a different source entirely: stability and structural coverage across feature subsets and validation splits, not from iterative error minimization.
 
 This is an engineering difference as much as a mathematical one. Competing with XGBoost on its own terms — speed of residual descent, regularization of additive tree models, hardware-aware split enumeration — is not the goal of NNS ensembles and should not be the standard of comparison. The goal is a directional nonparametric system that can represent nonlinear, asymmetric, and threshold-driven structure without imposing a tree topology, and that remains interpretable through the same benchmark-relative geometry used throughout the book.
 
@@ -133,19 +133,17 @@ $$\Phi(\hat y,y)=\sum_i (\hat y_i-y_i)^2,$$
 
 while for classification the code automatically switches the default objective to accuracy when `type = "CLASS"`.
 
-The threshold is then learned from the empirical distribution of the candidate objective scores. In the default setting `extreme = FALSE`, the routine uses the upper hinge of the five-number summary for maximization problems and the lower hinge for minimization problems. If `extreme = TRUE`, it instead uses the literal maximum or minimum observed score. Feature subsets whose validation performance passes that threshold are retained for the ensemble.
+The threshold is then learned from the empirical distribution of the candidate objective scores. A supplied `threshold` is a probability used by the degree-1 partial-moment quantile of trial scores. With no supplied probability, the defaults are 0.80 for maximization and 0.20 for minimization; `extreme = TRUE` selects the corresponding endpoint. The probability and the resulting score cutoff are distinct values. Feature subsets whose validation performance passes that threshold are retained for the ensemble.
 
 This is the first important NNS-specific departure from classical textbook boosting:
 
 **the algorithm is not reweighting observations sequentially in the AdaBoost sense; it is screening and aggregating feature-defined directional learners.**
 
-### Weighted feature sampling in the epoch loop
+### Re-testing survivors in the epoch loop
 
-After the threshold-learning stage, `NNS.boost` constructs a **feature pool weighted by survival frequency**: each feature index is repeated in proportion to how often it appeared across the learner-trial sets that passed the threshold. In each epoch, two random decisions are made jointly — a feature count $k \in \{1, \ldots, n\}$ is drawn uniformly, and then $k$ distinct indices are sampled from this weighted pool without replacement. Features that recurred often in successful learner trials are therefore overrepresented in the draw, but any combination of any size can still appear.
+The epoch loop draws no new feature combinations. It re-tests the learner-trial subsets that passed the threshold (the survivors) on new validation splits. The epochs are assigned to survivors on a balanced schedule — each survivor is re-tested about `epochs / survivors` times, in random order — so exposure alone cannot make a feature look important. With six survivors and twenty epochs, for example, the survivors are re-tested 4, 4, 3, 3, 3 and 3 times. Each epoch uses a fresh random holdout for cross-sectional data, or one of a set of expanding-window chronological holdouts when `ts.test` is set.
 
-This is structurally analogous to the random-subspace mechanism in random forests, but with a crucial difference: the sampling probabilities are not uniform. They are earned. A feature earns higher sampling weight by having appeared in learner-trial subsets that cleared the validation threshold. The epoch loop is thus not random exploration of feature space — it is **weighted exploration biased toward stability**, with the bias itself learned from the threshold stage.
-
-An epoch's feature set is retained only if its validation objective clears the same threshold. The surviving sets feed the frequency table that drives the final synthetic predictor construction described below.
+An epoch's subset is kept only if its validation objective clears the same threshold again. A feature's frequency is therefore the number of passing re-tests of the subsets that contain it: a stability count across holdouts, not a sampling weight. Those frequencies drive the final predictor design described below.
 
 ### User-specified objectives
 
@@ -168,11 +166,9 @@ That second output is especially useful in nonlinear settings, where variable im
 
 ### Final estimate
 
-Once the epoch loop is complete, feature frequencies are normalized across all passing epochs to produce a weight vector aligned to the columns of `IVs.train`. These normalized frequencies are then supplied to `NNS.reg` as a custom coefficient vector through `dim.red.method`, which constructs a frequency-weighted synthetic predictor $X^*$ from the original features. In this way, predictors that recur more often among successful learners receive greater influence in the final synthetic index.
+Once the epoch loop is complete, the routine records each keeper feature's frequency and reports normalized frequencies as `feature.weights`. For the final design, positive counts are divided by their minimum and rounded to integer replication counts, with at least one copy per retained feature. The corresponding original predictor columns are replicated in both training and test data.
 
-The final estimate is not taken directly from that first dimension-reduction fit. Instead, `NNS.boost` uses the resulting training and test projections onto $X^*$ to form a two-column design `(X^*, X^*)`, and then passes that design to `NNS.stack` with `method = 1`. This allows the routine to obtain the final prediction through the NNS regression-point mechanism while using the stacked framework to optimize the terminal neighbor-selection step `n.best`.
-
-Accordingly, the final model should not be described as a committee vote, a simple average of retained learners, or merely a single `NNS.reg` fit on the weighted composite. It is better understood as a **stability-weighted synthetic predictor followed by an optimized final NNS regression-point estimate**. The boosting stage learns which features survive repeated validation, and the closing stacking step converts that learned structure into the final prediction rule.
+`NNS.stack(method = 1, stack = FALSE)` then tunes the regression-point neighbor count on this multivariate design. Replication changes a predictor's contribution to the distance geometry; the final learner retains the original coordinates. Frequencies are not coefficients of a scalar synthetic index, and the retained learners are not averaged or voted as a committee. In classification, the final learner aggregates class-probability vectors and preserves original label identity.
 
 ---
 
@@ -190,13 +186,15 @@ A stacked model does not choose one of them. It treats them as a new feature vec
 
 $$z(x)=\bigl(\hat y^{(1)}(x),\dots,\hat y^{(K)}(x)\bigr)$$
 
-and then learns a second-stage predictor
+and then selects a second-stage combination. In the current two-component implementation, the rule is a convex blend
 
-$$\hat y_{\mathrm{stack}}(x)=G\!\bigl(z(x)\bigr).$$
+$$\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x),\qquad w\in\{0,.01,\ldots,1\},$$
+
+with the weight selected on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision. This is a restricted meta-model, not an arbitrary fitted function $G$.
 
 In the NNS setting, the base learners come from two main sources documented in the function interface:
 
-- **Method 1**: direct `NNS.reg` prediction, which in the multivariate case operates as regression-point nearest-neighbor search over a compressed set of local conditional means (as developed in Chapter 21) — not a piecewise-linear surface.
+- **Method 1**: direct `NNS.reg` prediction, which in the multivariate case operates as regression-point nearest-neighbor search over a compressed set of local conditional means (as developed in Chapter 22) — not a piecewise-linear surface.
 - **Method 2**: dimension-reduction regression built from synthetic predictor combinations, which collapses the predictor space to a univariate index before applying standard NNS regression.
 
 The `method` argument controls whether method 1, method 2, or both are used. The default `method = c(1, 2)` includes both, which means that the stacked system can combine the geometry-preserving regression-point prediction of method 1 with the parsimonious synthetic-index regression of method 2.
@@ -205,46 +203,46 @@ This is important because the two sources of prediction reflect structurally dif
 
 The `dim.red.method` argument controls how synthetic predictor weights are determined for method 2:
 
-- `"cor"` for linear correlation,
+- `"cor"` for signed Spearman rank correlation,
 - `"NNS.dep"` for nonlinear dependence,
-- `"NNS.caus"` for directional causation,
+- `"NNS.caus"` for directional lagged association,
 - `"equal"` for equal weighting,
 - `"all"` for averaging all methods.
 
-Thus the stacked learner can use not only multiple predictions, but multiple **structural weighting philosophies**. In particular, when `"NNS.caus"` is used, the weighting is directional rather than symmetric: the synthetic regressor is constructed from estimated causal influence rather than from a purely mutual dependence score.
+Thus the stacked learner can use not only multiple predictions, but multiple **structural weighting philosophies**. In particular, when `"NNS.caus"` is used, the weighting is directional rather than symmetric: the synthetic regressor uses the directional association diagnostic. This supplies a feature weighting rule without identifying a causal effect.
 
 ### Optimizing $k$: neighbor count selection in the regression-point search
 
 A key mechanism of `NNS.stack` that distinguishes it from generic stacking is the **cross-validated optimization of $k$**, the number of nearest regression-point neighbors used in the multivariate prediction step of method 1.
 
-Recall from Chapter 21 that multivariate `NNS.reg` does not predict by connecting regression points with line segments. It performs nearest-neighbor search over the regression-point matrix — a compressed set of local conditional means derived from the per-variable partitions. The number of neighbors $k$ used in that search directly controls the smoothness of the final prediction: small $k$ produces more local, potentially noisy predictions; large $k$ produces broader averaging that may underfit sharp local structure.
+Recall from Chapter 22 that multivariate `NNS.reg` does not predict by connecting regression points with line segments. It performs nearest-neighbor search over the regression-point matrix — a compressed set of local conditional means derived from the per-variable partitions. The number of neighbors $k$ used in that search directly controls the smoothness of the final prediction: small $k$ produces more local, potentially noisy predictions; large $k$ produces broader averaging that may underfit sharp local structure.
 
-Choosing the right $k$ is therefore a bias-variance decision specific to the regression-point geometry of each dataset. `NNS.stack` addresses this automatically within the fold loop: across each fold, candidate values of $k$ are evaluated on held-out validation predictions, and the $k$ that best satisfies the chosen objective is selected. The selected $k$ is then used for final prediction on the test set.
+Choosing the right $k$ is therefore a bias-variance decision specific to the regression-point geometry of each dataset. `NNS.stack` addresses this automatically within the fold loop: across each fold, candidate values of $k$ are evaluated on held-out validation predictions, and the $k$ that best satisfies the chosen objective is selected. Candidate predictions are pooled across validation folds before selecting $k$, which is then used in the full-data refit. The candidate set includes a bounded small-$k$ search and all regression points. For a single retained predictor, univariate interpolation has no neighbor count to tune.
 
 This means `NNS.stack` is not merely stacking predictions from fixed base learners. It is simultaneously discovering the right localization level for the regression-point nearest-neighbor search, fold by fold, as part of the same cross-validation loop that evaluates feature combinations and classification thresholds.
 
-The practical consequence is substantial. A value of $k$ that is too small will overfit to idiosyncratic regression-point neighborhoods; a value that is too large will smooth away the local structure that makes the regression-point geometry useful in the first place. Cross-validated $k$ selection finds the point of best generalization without requiring the analyst to tune it manually.
+The practical consequence is substantial. A value of $k$ that is too small will overfit to idiosyncratic regression-point neighborhoods; a value that is too large will smooth away the local structure that makes the regression-point geometry useful in the first place. Cross-validated $k$ selection chooses the best evaluated candidate on those folds. An independent test set is still required to assess generalization after tuning.
 
 This is one of the clearest ways in which `NNS.stack` goes beyond assembling predictions from pre-configured learners: it actively optimizes a structural hyperparameter of the underlying prediction mechanism, not just the weights placed on each learner's output.
 
 ### Classification threshold optimization
 
-For classification problems, `NNS.stack` includes `optimize.threshold = TRUE` by default. This means the routine does not simply round probabilities at $0.5$ in every case. Instead it searches a grid of candidate thresholds on validation predictions and chooses the threshold that maximizes the selected objective. The final classification threshold is then aggregated across folds into the reported `probability.threshold`.
+For binary classification, `NNS.stack` includes `optimize.threshold = TRUE` by default. It searches thresholds from 0.01 through 0.99 on pooled out-of-fold probability vectors and selects the threshold according to the chosen objective. The positive decision refers to the second class encountered in the training response, preserving label-order invariance; the selected threshold is returned as `probability.threshold`. Multiclass decisions use the largest probability. Numeric class identifiers are never rounded to create a label.
 
 That is especially useful under class imbalance, where the optimal decision threshold may differ materially from one half.
 
 ### Distance options
 
-The `dist` argument permits `"L1"`, `"L2"`, `"DTW"`, and `"FACTOR"` distances.
+The `dist` argument permits `NULL` or `"NNS"` for the native range-normalized blended distance, plus `"L1"`, `"L2"`, and `"FACTOR"`. `"DTW"` is not a supported option.
 
 This is another respect in which NNS stacking differs from generic stacking. The stacked system is not confined to Euclidean geometry. It can accommodate
 
 - Manhattan distance,
 - Euclidean distance,
-- dynamic time warping for temporal alignment,
+- the native sum of absolute and squared normalized coordinate differences,
 - factor-frequency style handling for discrete structures.
 
-The choice of distance metric applies to the regression-point nearest-neighbor search in method 1. Different distance metrics will define different neighborhoods in the regression-point space, and `NNS.stack`'s cross-validation loop evaluates which combination of $k$ and distance metric generalizes best on the held-out data.
+The choice of distance metric applies to the regression-point nearest-neighbor search in method 1. Different distance metrics define different neighborhoods. A call tunes $k$ for the supplied metric; it does not search distance metrics automatically. Comparing metrics requires separate validation runs.
 
 So the meta-model is not merely combining predictions. It is combining predictions within a distance-aware, $k$-optimized, data-type-aware directional framework.
 
@@ -304,7 +302,7 @@ Let a loss function be denoted by $\ell(y,\hat y)$. If the sample is partitioned
 
 $$CV_K(M) = \frac{1}{K} \sum_{k=1}^K \frac{1}{|\mathcal{I}_k|} \sum_{i\in \mathcal{I}_k} \ell\bigl(y_i,\hat y_i^{(-k)}\bigr),$$
 
-where $\hat y_i^{(-k)}$ denotes the prediction for observation $i$ from the model trained without fold $k$.
+where $\hat y_i^{(-k)}$ denotes the prediction for observation $i$ from the model trained without fold $k$. This is a general fold-average formulation. The implementation applies the requested objective to pooled out-of-fold predictions; repeated holdout predictions for the same row are averaged before scoring. Unequal fold sizes or a nonlinear objective can therefore differ from the formula above.
 
 Because the model is benchmark-relative and local, cross-validation is effectively checking whether the local structural decomposition — including the regression-point geometry and the chosen $k$ — generalizes beyond the particular sample partition that produced it.
 
@@ -312,7 +310,7 @@ Because the model is benchmark-relative and local, cross-validation is effective
 
 Both routines also include a `ts.test` option for time-series settings. This matters because ordinary random cross-validation can break temporal dependence and produce misleadingly optimistic results when data are ordered.
 
-In time-dependent settings, `ts.test` should be used so that validation preserves temporal ordering rather than random folds. This is the right way to adapt the ensemble logic to forecasting and other sequential applications, and it applies equally to the $k$ optimization step: the optimal neighbor count for a time-ordered regression-point geometry may differ materially from what random-fold cross-validation would select.
+In time-dependent settings, `ts.test` constructs chronological training prefixes and later holdouts. Forecast validation also requires predictors that can be generated at the forecast origin. Supplying realized future covariates measures a conditional prediction task instead. `NNS.VAR` can supply a private `.validation` fold containing a prefix-only completed training panel and deployment-generated validation predictors; the final model is then refitted using all available training observations. This is the right way to adapt the ensemble logic to forecasting and other sequential applications, and it applies equally to the $k$ optimization step: the optimal neighbor count for a time-ordered regression-point geometry may differ materially from what random-fold cross-validation would select.
 
 ---
 
@@ -407,7 +405,7 @@ Because ensemble methods combine multiple learners, practical considerations mat
 
 ### Computational cost
 
-Ensembles are more computationally intensive than single fits. This is especially true when the number of predictors is large, the candidate subset space is large, many folds or trials are used, $k$ optimization spans a wide candidate range, or time-series distance calculations such as DTW are involved. The price of flexibility is computation.
+Ensembles are more computationally intensive than single fits. This is especially true when the number of predictors is large, the candidate subset space is large, many folds or trials are used, or the $k$ search spans a wide candidate range. The price of flexibility is computation.
 
 ### Feature dimensionality
 
@@ -469,7 +467,7 @@ That is often the right trade in nonlinear settings.
 This chapter completes the machine-learning progression.
 
 - Chapter 20 used recursive partitions for **unsupervised grouping**.
-- Chapter 21 used them for **numeric prediction**, with regression-point nearest-neighbor search in the multivariate case.
+- Chapter 22 used them for **numeric prediction**, with regression-point nearest-neighbor search in the multivariate case.
 - Chapter 22 used them for **categorical prediction**.
 - This chapter uses them in **aggregated form** to improve predictive stability and performance, with cross-validated optimization of the neighbor count $k$ as a central mechanism.
 
@@ -487,13 +485,13 @@ Its main contributions are sixfold.
 
 **First**, it explained **feature-subset screening based on predictive performance**. Rather than combining all sampled learners indiscriminately, `NNS.boost` retains those feature-defined learners whose validation performance passes a learned threshold.
 
-**Second**, it described the **weighted epoch sampling mechanism**. After the threshold-learning stage, feature indices are pooled with weights proportional to their survival frequency, and each epoch draws from this weighted pool. The epoch loop is therefore not uniform random exploration but structured search biased toward stable features — a performance-earned analog of the random-subspace method.
+**Second**, it described the **epoch re-test stage**. The subsets that passed the threshold are re-tested on new holdouts on a balanced schedule, and a feature's final frequency counts the passing re-tests of the subsets that contain it — a measure of stability across holdouts rather than a sampling weight.
 
 **Third**, it introduced the **cross-validated optimization of $k$** in `NNS.stack`. Because multivariate NNS regression predicts through nearest-neighbor search over a compressed regression-point matrix — not through a piecewise-linear surface — the number of neighbors $k$ is a structural hyperparameter that directly controls the localization scale of prediction. `NNS.stack` optimizes $k$ fold by fold as part of its cross-validation loop, selecting the neighbor count that best generalizes on held-out data. This is one of the clearest ways `NNS.stack` goes beyond generic stacking: it actively discovers the right spatial scale for the underlying prediction mechanism.
 
 **Fourth**, it developed **dimension-reduction stacking with multiple dependence metrics**. Synthetic predictors may be constructed using linear correlation, nonlinear dependence, directional causation, equal weighting, or an average across all methods, and method 1 (regression-point nearest-neighbor) and method 2 (synthetic-index univariate regression) can be combined within the same stacked model.
 
-**Fifth**, it showed that NNS stacking is a form of **distance-aware meta-learning**. The ensemble can combine predictions using Euclidean, Manhattan, dynamic time warping, or factor-based geometry, and the chosen distance metric applies to the regression-point neighbor search.
+**Fifth**, it showed that NNS stacking is a form of **distance-aware meta-learning**. The neighbor search can use the blended NNS distance (the default), Euclidean, Manhattan, or factor-based geometry; the chosen metric applies to the regression-point neighbor search. Dynamic time warping is not an available `dist` option.
 
 **Sixth**, it emphasized **cross-validation as the practical control of complexity** in nonparametric ensemble learning. Cross-validation simultaneously optimizes feature selection, neighbor count, and classification thresholds — not merely estimating out-of-sample error, but actively determining the structural configuration of the learner.
 

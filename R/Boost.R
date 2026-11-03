@@ -36,15 +36,17 @@
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #' @examples
-#'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+#'  ## Using 'iris' dataset with a stratified test set of ten rows per species
+#'  ## (rows 141:150 alone are all virginica).
 #'  \dontrun{
-#'  a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
-#'  IVs.test = iris[141:150, 1:4],
+#'  test.set <- c(41:50, 91:100, 141:150)
+#'  a <- NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
+#'  IVs.test = iris[test.set, 1:4],
 #'  epochs = 100, learner.trials = 100,
 #'  type = "CLASS", depth = NULL, balance = TRUE)
 #'
 #'  ## Test accuracy
-#'  mean(a$results == as.numeric(iris[141:150, 5]))
+#'  mean(a$results == as.numeric(iris[test.set, 5]))
 #'
 #'  ## Recover the labels
 #'  a$class.levels[a$results]
@@ -552,7 +554,7 @@ NNS.boost <- function(IVs.train,
     if (!balance)
       return(list(x = train_x, y = train_y))
     
-    groups <- split(seq_along(train_y), train_y)
+    groups <- .nns_class_groups(train_y)
     if (length(groups) < 2L || any(lengths(groups) == 0L)) {
       stop("Balancing requires at least two non-empty classes in the fitting split.",
            call. = FALSE)
@@ -898,23 +900,9 @@ NNS.boost <- function(IVs.train,
   names(replicated.train) <- make.unique(names(replicated.train), sep = ".")
   names(replicated.test) <- names(replicated.train)
   
-  # NNS.stack codes a two-valued numeric response as classes 1/2; decode them
-  # so obj.fn scores response values here as it did during learner selection.
-  stack.obj.fn <- obj.fn
-  two_valued <- sort(unique(as.numeric(y)))
-  if (!is_class && length(two_valued) == 2L) {
-    user.fn <- if (is.expression(obj.fn)) obj.fn[[1]] else obj.fn
-    decode <- function(v) {
-      ok <- is.finite(v)
-      v[ok] <- two_valued[pmin(pmax(round(v[ok]), 1), 2)]
-      v
-    }
-    stack.obj.fn <- as.expression(bquote({
-      predicted <- .(decode)(predicted)
-      actual <- .(decode)(actual)
-      .(user.fn)
-    }))
-  }
+  # Stack now scores and returns numeric class responses on their original
+  # scale. Internal nominal codes in this function remain 1..K and are decoded
+  # once below; a two-valued regression response needs no extra translation.
 
   final.stack <- suppressWarnings(
     NNS.stack(
@@ -922,7 +910,7 @@ NNS.boost <- function(IVs.train,
       DV.train = y,
       IVs.test = replicated.test,
       type = type,
-      obj.fn = stack.obj.fn,
+      obj.fn = obj.fn,
       objective = objective,
       optimize.threshold = FALSE,
       dist = dist,
@@ -942,23 +930,6 @@ NNS.boost <- function(IVs.train,
   
   results <- final.stack$reg
   pred.int.output <- final.stack$reg.pred.int
-  
-  # NNS.stack returns class codes 1/2 for a two-valued numeric response even
-  # when boost treats it as a regression; map them back to the response values.
-  if (!is_class && !is.null(final.stack$class.levels)) {
-    stack_values <- as.numeric(final.stack$class.levels)
-    .decode_stack_codes <- function(v) {
-      v <- as.numeric(v)
-      ok <- is.finite(v)
-      v[ok] <- stack_values[pmin(pmax(as.integer(round(v[ok])), 1L), length(stack_values))]
-      v
-    }
-    results <- .decode_stack_codes(results)
-    if (!is.null(pred.int.output)) {
-      pred.int.output <- as.data.frame(pred.int.output)
-      pred.int.output[] <- lapply(pred.int.output, .decode_stack_codes)
-    }
-  }
   
   estimates_code <- .sanitize_predictions(results, y)
   pred_int_out <- pred.int.output

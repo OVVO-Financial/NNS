@@ -21,7 +21,7 @@
 #' @param shrink logical; \code{FALSE} (default) Ensembles forecasts with \code{method = "means"}.
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
-#' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates; a one-point (\code{h = 1}) or constant path has no dispersion to resample, so its band is the path widened by that spread alone (zero width with a single seasonal lag); \link{NNS.ARMA.optim} gives intervals from validation errors.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int} (rolling-origin coverage at \code{pred.int = 0.95} has ranged from about 0.35 on white noise to 0.97 on \code{AirPassengers}).  \link{NNS.ARMA.optim} derives its interval from validation errors instead.
+#' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates; a one-point (\code{h = 1}) or constant path has no dispersion to resample, so its band is the path widened by that spread alone (zero width with a single seasonal lag); \link{NNS.ARMA.optim} gives intervals from validation errors.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int}.  \link{NNS.ARMA.optim} derives its interval from validation errors instead.
 #' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as the lower and upper forecast-path bands per forecast point (see \code{pred.int}).
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
@@ -170,7 +170,8 @@ NNS.ARMA <- function(variable,
   Lin.Reg.Estimates <- list()
   Regression.Estimates_means <- list()
   
-  if (method == "lin" && is.numeric(seasonal.factor) && length(seasonal.factor) == 1) {
+  # Shrunk estimates leave the fitted line, so steps past the lag need the recursive refit below.
+  if (method == "lin" && !shrink && is.numeric(seasonal.factor) && length(seasonal.factor) == 1) {
     for(k in lag) {
       lag.idx <- which(k == lag)
       GV.lin <- generate.lin.vectors(variable, lag[lag.idx], h)
@@ -185,10 +186,6 @@ NNS.ARMA <- function(variable,
       })
       
       Lin.Reg.Estimates[[lag.idx]] <- unlist(Lin.Regression.Estimates)[order(unlist(GV.lin$forecast.index))] * Weights[lag.idx]
-      if((method=="means") || shrink){
-        Regression.Estimates_means <- unlist(lapply(GV.lin$Component.series, function(x) mean(x) * Weights[lag.idx]) )
-        if(shrink) Lin.Reg.Estimates[[lag.idx]] <- (Lin.Reg.Estimates[[lag.idx]] + Regression.Estimates_means) / 2 else Lin.Reg.Estimates <- Regression.Estimates_means
-      }
     }
     
     # Calculate weighted sum of regression estimates for each lag
@@ -236,7 +233,7 @@ NNS.ARMA <- function(variable,
           
           last.y <- y[length(y)]
           
-          reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
+          reg.points <- NNS.reg(x, y, type = "REG", return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
           
           reg.points <- reg.points[complete.cases(reg.points), ]
           
@@ -253,6 +250,7 @@ NNS.ARMA <- function(variable,
           last.y + (rise / run)
         })
         
+        if(shrink) Regression.Estimates <- (Regression.Estimates + sapply(Component.series, mean)) / 2
         if(!negative.values) Regression.Estimates <- pmax(0, Regression.Estimates)
         Nonlin.estimates <- sum(Regression.Estimates * Weights)
       }
@@ -267,6 +265,8 @@ NNS.ARMA <- function(variable,
         })
         
         Lin.Regression.Estimates <- unlist(Lin.Regression.Estimates)
+        # A single lag longer than the history has nothing to fit: NaN, as the direct path gives.
+        if (length(lag) == 1 && length(Lin.Regression.Estimates) == 0) Lin.Regression.Estimates <- NaN
         
         if ((method == "means") || shrink) {
           Regression.Estimates_means <- sapply(Component.series, mean)

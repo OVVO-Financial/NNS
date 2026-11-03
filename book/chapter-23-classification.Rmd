@@ -161,12 +161,12 @@ Y \in \{1,2\}.
 For each partition cell \(A\), define
 
 \[
-\hat p(A) = \frac{1}{N_A}\sum_{i:X_i \in A} Y_i,
+\hat p(A) = \frac{1}{N_A}\sum_{i:X_i \in A} \mathbf{1}\{Y_i=1\},
 \]
 
 where \(N_A\) is the number of observations in the cell.
 
-Since \(Y\) is binary, \(\hat p(A)\) is simply the empirical fraction of class-1 observations in the cell. Thus
+The indicator is one for class 1 and zero for class 2, so \(\hat p(A)\) is the empirical fraction of class-1 observations. Averaging the labels 1 and 2 themselves would not give a probability. Thus
 
 \[
 \hat p(A) \approx P(Y=1 \mid X \in A).
@@ -182,11 +182,11 @@ The decision rule becomes
 \end{cases}
 \]
 
-This makes the analogy to regression immediate. In regression, the local average estimates the conditional mean. In binary classification, the local average of the binary label estimates the conditional class probability.
+This makes the analogy to regression immediate. In regression, the local average estimates the conditional mean. In binary classification, the local average of a class indicator estimates the conditional class probability.
 
 So binary classification in the NNS framework is simply **partition-based probability estimation followed by thresholding**.
 
-> **Implementation note (important):** for `NNS.boost(..., type = "CLASS")` and related classification interfaces, class labels should start at `1` (not `0`). Recode `0/1` targets to `1/2` before fitting.
+> **Label convention:** numeric class labels may include `0/1`, negative values, or other distinct numbers; they are identifiers, not coordinates to interpolate. Factor and character responses return codes with `class.levels` for decoding. Numeric responses retain their original values. For numeric multiclass targets, request `type = "CLASS"` explicitly.
 
 ---
 
@@ -254,7 +254,7 @@ A class assignment is not produced by a hidden global optimization alone. It is 
 
 ### Boundary interpretation
 
-Decision boundaries are unions of partition edges separating regions with different dominant labels or different class-probability rankings.
+For the ideal cellwise classifier, boundaries lie on partition edges separating dominant classes. The package interpolates univariate class-probability vectors or weights neighboring multivariate cell vectors, so its probability crossings need not coincide with cell edges.
 
 ### Refinement interpretation
 
@@ -360,7 +360,9 @@ The underlying partition logic remains the same: predictor space is decomposed i
 \hat g(x)=\arg\max_c \hat p_c(x).
 \]
 
-The function `NNS.reg()` is useful for understanding the underlying partition-based estimation structure, and more generally the NNS framework supports classification through the same recursive partition machinery developed for regression. But in applied package use, classification is most naturally presented through the boosted and stacked interfaces, which stabilize the local decision rule and improve empirical performance.
+`NNS.reg(..., type = "CLASS")` forms one indicator per class and retains all class frequencies in each predictor cell. It returns `Point.probabilities`, `Fitted.probabilities`, and `RPM.probabilities`; class labels are selected only after interpolating or weighting those vectors. Equal-score decisions follow first appearance in the training response. This prevents a numeric code between two other codes from creating an absent class. Dimension reduction fits one signed NNS index per class indicator and normalizes the resulting probability vectors across classes. `NNS.stack` tunes and blends these vectors using held-out predictions.
+
+`Prediction.set` lists classes reaching a requested estimated probability mass. It is a descriptive set; coverage and calibration require validation. Nominal multiclass labels have no meaningful lower and upper numeric interval.
 
 ---
 
@@ -377,17 +379,7 @@ These extend the partition-based classifier without abandoning the directional l
 
 ### Boosting
 
-Boosting combines many classification models generated from resampled or reweighted data. Each model captures a slightly different local view of the class structure. Their outputs are then aggregated.
-
-Conceptually, if
-
-\[
-\hat g^{(1)}, \hat g^{(2)}, \dots, \hat g^{(B)}
-\]
-
-denote classifiers trained across bootstrap or resampled iterations, the boosted classifier aggregates them via voting or averaged class probabilities.
-
-This reduces instability in any single partition realization and improves classification robustness, especially when boundaries are irregular or the sample is noisy.
+`NNS.boost` screens feature subsets with NNS learners on held-out observations, records which features recur in retained subsets, and uses those frequencies to construct its final predictor design. Original predictor columns are replicated in proportion to relative keeper frequencies; the final `NNS.stack(method = 1, stack = FALSE)` call tunes a multivariate class-probability learner on that design. It does not vote across retained classifiers or average their class codes. Chapter 24 gives the complete screening and aggregation mechanics.
 
 ### Stacking
 
@@ -422,11 +414,11 @@ while often improving predictive accuracy.
 A practical classification workflow in NNS therefore proceeds in two layers.
 
 1. The partition-based learner defines local benchmark-relative class neighborhoods.
-2. The ensemble wrapper aggregates those local decisions across resamples or model combinations.
+2. A wrapper either screens feature subsets (`NNS.boost`) or tunes and blends the class-probability learners (`NNS.stack`) on held-out predictions.
 
-Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first improves stability through repeated resampling and aggregation; the second combines candidate classifiers through an optimized second-stage rule.
+Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first keeps the features whose subsets repeatedly pass a held-out objective and fits one stacked learner on them, replicating each feature by its frequency; it does not vote or average across classifiers. The second tunes the neighbor count and the dimension-reduction count on out-of-fold class probabilities and blends the two components. Both select on the same held-out predictions they report, so their objective values are not performance estimates; an untouched test set is needed for that.
 
-The corresponding Python workflow (recall the implementation note above: recode `0/1` class labels to `1/2`):
+The corresponding Python workflow below uses labels `1/2` as an example. Consult the installed Python wrapper version for its output schema; the R probability fields described above are defined by the implementation in this repository:
 
 ```python
 import numpy as np
@@ -448,7 +440,7 @@ stacked = nns_stack(X_train, y_train, X_test, type="CLASS", status=False)
 stacked["stack"]               # combined out-of-sample predictions
 ```
 
-Thus the package implementation mirrors the theory exactly: local directional partitions generate class probabilities, and ensemble aggregation improves robustness of the final decision boundary.
+The cell frequencies implement the local probability construction. Interpolation, neighbor weighting, class-specific synthetic indices, resampling, and blend selection are additional estimation steps whose predictive performance and calibration must be checked on held-out data.
 
 ---
 
@@ -471,7 +463,7 @@ Averaging over \(B\) such classifiers gives
 = p(x) + \frac{1}{B}\sum_{b=1}^B \varepsilon_b(x).
 \]
 
-If the errors are centered and not perfectly dependent, then
+For finite-variance errors, the variance identity is
 
 \[
 Var(\bar p_B(x))
@@ -482,11 +474,11 @@ Var(\bar p_B(x))
 \frac{2}{B^2}\sum_{b<j} Cov(\varepsilon_b(x),\varepsilon_j(x)).
 \]
 
-Thus aggregation reduces variance whenever the base learners are not perfectly collinear.
+For equal marginal error variances and average pairwise correlation below one, this average has lower variance than a single learner with that variance. With unequal variances, bias, fitted blend weights, or feature screening, a general improvement over the best component does not follow.
 
 This is the same bias–variance logic familiar from classical ensembles, but here applied to **directional partition classifiers**.
 
-Boosting and stacking therefore help because they stabilize local probability estimation while preserving nonlinear local structure.
+This identity motivates probability aggregation; it does not prove that every tuned stack improves prediction. The feature-screening aggregation in NNS.boost is a different construction and needs its own held-out assessment.
 
 ---
 
@@ -709,7 +701,7 @@ Third, it distinguished **binary and multiclass classification**, showing that b
 
 Fourth, it developed the idea of **directional decision boundaries**, emphasizing benchmark-relative and locally adaptive separation rather than a single global separating equation.
 
-Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed formally in Chapter 23, where their resampling and aggregation mechanics are treated in detail.
+Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed in Chapter 24, where their resampling and aggregation mechanics are treated in detail.
 
 Sixth, it introduced **boosting and stacking** as natural ensemble extensions of the NNS classifier, improving robustness and predictive accuracy while preserving directional interpretability.
 

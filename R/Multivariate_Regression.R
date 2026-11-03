@@ -14,34 +14,43 @@
   if (s <= 0) rep(1 / length(w), length(w)) else w / s
 }
 
-.nns_mreg_ensemble_weights <- function(distances) {
+# The rank-based terms of the ensemble depend only on the neighbour count, so
+# callers weighting many points can compute them once per count.
+.nns_mreg_rank_weights <- function(k) {
+  ranks <- seq_len(k)
+  rank.sd <- stats::sd(ranks)
+  list(
+    uniform = rep(1 / k, k),
+    exponential = .nns_mreg_normalize_weights(stats::dexp(ranks, rate = 1 / k)),
+    lognormal = if (is.finite(rank.sd) && rank.sd > 0) {
+      rev(.nns_mreg_normalize_weights(abs(stats::dlnorm(ranks, 0, rank.sd, log = TRUE))))
+    } else rep(0, k),
+    power = .nns_mreg_normalize_weights(ranks^(-2))
+  )
+}
+
+.nns_mreg_ensemble_weights <- function(distances, rank = NULL) {
   k <- length(distances)
   if (k == 1L) return(1)
+  if (is.null(rank)) rank <- .nns_mreg_rank_weights(k)
   
-  ranks <- seq_len(k)
-  uniform <- rep(1 / k, k)
   student <- .nns_mreg_normalize_weights(stats::dt(distances, df = k))
   inverse <- .nns_mreg_normalize_weights(1 / pmax(distances, 1e-12))
-  exponential <- .nns_mreg_normalize_weights(stats::dexp(ranks, rate = 1 / k))
   
-  rank.sd <- stats::sd(ranks)
-  lognormal <- if (is.finite(rank.sd) && rank.sd > 0) {
-    rev(.nns_mreg_normalize_weights(abs(stats::dlnorm(ranks, 0, rank.sd, log = TRUE))))
-  } else rep(0, k)
-  
-  power <- .nns_mreg_normalize_weights(ranks^(-2))
-  distance.sd <- stats::sd(distances)
+  # sd() is sqrt(var()), so one variance serves both distance kernels.
+  distance.var <- stats::var(distances)
+  distance.sd <- sqrt(distance.var)
   normal <- if (is.finite(distance.sd) && distance.sd > 0) {
     .nns_mreg_normalize_weights(stats::dnorm(distances, 0, distance.sd))
   } else rep(0, k)
   
-  distance.var <- stats::var(distances)
   rbf <- if (is.finite(distance.var) && distance.var > 0) {
     .nns_mreg_normalize_weights(exp(-distances / (2 * distance.var)))
   } else rep(0, k)
   
   .nns_mreg_normalize_weights(
-    uniform + student + inverse + exponential + lognormal + power + normal + rbf
+    rank$uniform + student + inverse + rank$exponential + rank$lognormal +
+      rank$power + normal + rbf
   )
 }
 
@@ -162,6 +171,9 @@
 .nns_mreg_partition_matrix <- function(X, y, order, noise.reduction, is.class) {
   p <- ncol(X)
   boundaries <- vector("list", p)
+  binary.coordinate <- vapply(seq_len(p), function(j) {
+    length(unique(X[, j])) == 2L
+  }, logical(1))
 
   # Exact duplicate predictor columns share one partition calculation.
   reps <- if (isTRUE(getOption("NNS.native.mreg", TRUE))) {
@@ -180,9 +192,9 @@
       next
     }
 
-    if (identical(order, "max")) {
-      # Maximum order is the observed coordinate support itself.  No recursive
-      # partitioning is required.
+    if (identical(order, "max") || binary.coordinate[j]) {
+      # Maximum order and binary coordinates supply their observed support
+      # directly. No recursive partitioning is required.
       boundaries[[j]] <- sort(unique(X[, j]))
     } else {
       boundaries[[j]] <- .nns_reg_partition_points_fast(
@@ -201,23 +213,20 @@
   }))
   colnames(rhs) <- colnames(X)
 
-  # order = "max" is not an interval-boundary problem.  Each distinct observed
-  # coordinate is a regression-point coordinate, so use its exact rank.  This
-  # preserves a separate ID for the maximum value rather than folding it into
-  # the preceding interval via rightmost.closed = TRUE.
-  id.parts <- if (identical(order, "max")) {
-    lapply(seq_len(p), function(j) {
+  # Maximum order uses exact support IDs. A binary coordinate also exhausts
+  # its support after one split, so its two atoms must remain separate. Other
+  # finite-order boundaries retain their ordinary rightmost-closed cells.
+  id.parts <- lapply(seq_len(p), function(j) {
+    if (identical(order, "max") || binary.coordinate[j]) {
       match(X[, j], boundaries[[j]])
-    })
-  } else {
-    lapply(seq_len(p), function(j) {
+    } else {
       findInterval(
         X[, j], boundaries[[j]],
         left.open = FALSE,
         rightmost.closed = TRUE
       )
-    })
-  }
+    }
+  })
 
   ids <- do.call(paste, c(as.data.frame(id.parts), sep = "."))
   list(rhs = rhs, ids = ids, boundaries = boundaries)
@@ -325,7 +334,10 @@
 }
 
 .nns_mreg_default_nbest <- function(X, y, rpm.rows) {
-  dep <- tryCatch(NNS.copula(cbind(X, y)), error = function(e) NA_real_)
+  # This is an unsigned smoothing heuristic. Retain the directional copula,
+  # but average the response orientations so a sign convention cannot change k.
+  dep <- tryCatch(mean(c(NNS.copula(cbind(X, y)),
+                        NNS.copula(cbind(X, -y)))), error = function(e) NA_real_)
   if (!is.finite(dep)) dep <- 0.5
   k <- max(1L, as.integer(floor((1 - dep) * sqrt(nrow(X)))))
   min(k, rpm.rows)
@@ -347,7 +359,8 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
                       residual.plot = TRUE, location = NULL,
                       noise.reduction = "off", dist = NULL,
                       return.values = FALSE, plot.regions = FALSE,
-                      ncores = NULL, confidence.interval = NULL) {
+                      ncores = NULL, confidence.interval = NULL,
+                      categorical = FALSE) {
   
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   point.only <- .nns_reg_scalar_logical(point.only, "point.only")
@@ -363,11 +376,11 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   ncores <- .nns_mreg_validate_cores(ncores)
   
   if (!is.null(type) && (!is.character(type) || length(type) != 1L ||
-                         is.na(type) || tolower(type) != "class")) {
-    stop("NNS.M.reg [type] must be NULL or 'CLASS'.", call. = FALSE)
+                         is.na(type) || !tolower(type) %in% c("class", "reg"))) {
+    stop("NNS.M.reg [type] must be NULL, 'REG', or 'CLASS'.", call. = FALSE)
   }
   Y <- .nns_reg_response_vector(Y)
-  task <- .nns_reg_type(if (is.null(type)) NULL else "CLASS", Y)
+  task <- .nns_reg_type(type, Y)
   is.class <- task$is.class
   
   encoded <- .nns_reg_encode_predictors(X_n, point.est, factor.2.dummy)
@@ -386,6 +399,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
     stop("[Y] must contain at least two finite values.", call. = FALSE)
   }
   
+  if (categorical) order <- "max"
   prepared <- .nns_mreg_prepare_model(
     X, y, order, noise.reduction, is.class
   )
@@ -399,7 +413,9 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   rpm <- prepared$RPM
   if (!nrow(rpm)) stop("NNS.M.reg produced an empty RPM.", call. = FALSE)
   
-  if (is.null(n.best) && identical(order, "max")) {
+  # Exact observed cells (maximum order, or purely categorical predictors)
+  # use one neighbour unless the caller supplies n.best.
+  if (is.null(n.best) && (categorical || identical(order, "max"))) {
     k <- 1L
   } else if (is.null(n.best)) {
     k <- .nns_mreg_default_nbest(X, y, nrow(rpm))

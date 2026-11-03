@@ -73,7 +73,7 @@
 
 # Directional dependence of b on a for the causal comparison: the unfloored
 # debiased dependence of NNS.dep's cells, averaged over the levels of the
-# recursive mean split on a (same partition settings as NNS.dep).
+# recursive gravity split on a (same partition settings as NNS.dep).
 .nns_caus_rho <- function(a, b) {
   l <- length(a)
   obs <- max(8L, as.integer(l / 8L))

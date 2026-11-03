@@ -17,9 +17,11 @@ test_that("dy.dx does not depend on the row order of x", {
   expect_equal(dy.dx(x, y, ep)$first.derivative, 3 * ep^2, tolerance = 0.1)
 })
 
-test_that("dy.d_ gives an irrelevant regressor a slope near zero", {
-  set.seed(5)
-  x <- cbind(runif(200, -2, 2), runif(200, -2, 2))
+test_that("dy.d_ gives an irrelevant balanced regressor a slope near zero", {
+  # A complete Cartesian design avoids incidental sample association and
+  # sparse-neighbour variation at the evaluated tuples.
+  x <- as.matrix(expand.grid(seq(-2, 2, length.out = 21),
+                            seq(-2, 2, length.out = 21)))
   ep <- rbind(c(-1, 0), c(0, 1), c(1, -1))
   r <- dy.d_(x, 2 * x[, 1], wrt = 1:2, eval.points = ep, messages = FALSE)
   expect_true(all(r["First", 1][[1]] > 1))

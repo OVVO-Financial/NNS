@@ -259,8 +259,10 @@ The hazard rate therefore measures the instantaneous **flow of probability mass 
 The **cumulative hazard function** is
 
 \[
-H(t) = \int_0^t h(s)\,ds.
+H(t) = -\log S(t) = \int_{-\infty}^t h(s)\,ds,
 \]
+
+The integral formula assumes an absolutely continuous distribution with positive survival on the interval in question. It reduces to \(\int_0^t h(s)\,ds\) for an absolutely continuous non-negative lifetime. For atoms, \(-\log S(t)\) remains the definition and jumps require a corresponding measure-based hazard treatment.
 
 Although hazard rates are typically introduced within survival analysis, they arise naturally within the directional framework once the survival function is recognized as an upper partial moment.
 
@@ -333,13 +335,13 @@ Q_X(\alpha)=\inf\{t:L_0(t;X)\ge \alpha\}.
 
 ## Probability Integral Transform
 
-If \(X\) has cumulative distribution function \(F_X\), then the transformed variable
+If \(X\) has a continuous cumulative distribution function \(F_X\), then the transformed variable
 
 \[
 U = F_X(X)
 \]
 
-is uniformly distributed on \([0,1]\).
+is uniformly distributed on \([0,1]\). Continuity matters: for a Bernoulli(0.5) variable \(F_X(X)\) takes only the values 0.5 and 1. The randomized transform \(U = F_X(X^-) + V\,(F_X(X) - F_X(X^-))\), with \(V\) uniform on \([0,1]\) and independent of \(X\), is uniform for every \(X\), which is the version needed for copulas with discrete margins.
 
 Since
 

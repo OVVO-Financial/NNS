@@ -480,7 +480,8 @@ NumericMatrix NNS_distance_path_parallel_cpp(NumericMatrix RPM,
     
     std::vector<double> ln(k, 0.0);
     if (k >= 2){
-      double sdlog = std::sqrt(((double)k * (double)k - 1.0) / 12.0);
+      // Match sd(1:k), the sample standard deviation used by the scalar path.
+      double sdlog = std::sqrt(static_cast<double>(k) * (k + 1.0) / 12.0);
       for (int r = 1; r <= k; ++r){ double lp = ::Rf_dlnorm((double)r, 0.0, sdlog, 1); ln[r-1] = std::fabs(lp); }
       std::reverse(ln.begin(), ln.end());
       double lns = std::accumulate(ln.begin(), ln.end(), 0.0);
@@ -685,7 +686,8 @@ NumericVector NNS_distance_path_single_parallel_cpp(NumericMatrix RPM,
   
   std::vector<double> lnormW(k, 0.0);
   if (k >= 2) {
-    double sdlog = std::sqrt(((double)k * (double)k - 1.0) / 12.0);
+    // Match sd(1:k), the sample standard deviation used by the scalar path.
+    double sdlog = std::sqrt(static_cast<double>(k) * (k + 1.0) / 12.0);
     for (int r = 1; r <= k; ++r) {
       double lp = ::Rf_dlnorm((double)r, 0.0, sdlog, 1);
       lnormW[r - 1] = std::fabs(lp);

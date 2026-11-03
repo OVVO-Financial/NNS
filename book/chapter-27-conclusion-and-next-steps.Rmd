@@ -6,7 +6,7 @@ A useful way to summarize the full arc is:
 
 1. **Directional building blocks** (Chapters 1–3): partial moments preserve sign and magnitude information that symmetric summaries discard.
 2. **Dependence and causation** (Part III): directional co-moments, copulas, and recursive decomposition expose asymmetric relationships and lead/lag structure.
-3. **Inference and comparison** (Part IV): continuous degree-one probability representations remove finite-sample discretization bias and support robust distributional comparisons.
+3. **Inference and comparison** (Part IV): degree-one ratios describe a continuous, severity-weighted distribution distinct from degree-zero event frequencies; the chosen estimand guides distributional comparisons.
 4. **Estimation and forecasting** (Part V): recursive nonparametric systems turn the same directional primitives into predictive tools without restrictive parametric assumptions.
 
 Taken together, these results support the book's unifying claim: **one directional probability language can connect theory, diagnostics, and implementation across tasks that are often taught separately.**
@@ -16,9 +16,9 @@ Taken together, these results support the book's unifying claim: **one direction
 Across the text, several practical outcomes recur.
 
 - **Unified notation and implementation**: the same lower/upper partial moment operators appear in derivations and in executable R functions.
-- **Bias-aware probability measurement**: degree-one partial moment ratios provide a continuous finite-sample correction to the step-function empirical CDF.
+- **Explicit probability and severity estimands**: for a nondegenerate distribution with a finite first moment, the degree-one ratio is a valid CDF of an induced law and its inverse levels are expectiles. It generally differs from the original event CDF; smoothing does not make it a universally less biased estimator of that original probability.
 - **Distribution-free comparison tools**: NNS ANOVA and stochastic dominance diagnostics compare distributions directly, rather than reducing comparisons to mean/variance-only tests.
-- **Adaptive predictive systems**: NNS regression and interval methods adapt to heteroskedastic, nonlinear structure using local empirical behavior.
+- **Adaptive predictive systems**: NNS regression responds to nonlinear structure through local empirical partitions. The current global residual-band construction requires calibration and does not automatically provide local heteroskedastic coverage.
 
 These capabilities matter most in real data settings where asymmetry, tail risk, and regime changes are central rather than exceptional.
 
@@ -26,7 +26,7 @@ These capabilities matter most in real data settings where asymmetry, tail risk,
 
 **Distribution-free probability control.** Partial moments support conservative tail-probability bounds through semivariance and higher-order directional dispersion measures. This connects descriptive nonparametrics to decision support without requiring strict distributional assumptions.
 
-**Finite-sample relevance under non-normality.** Partial moments are not merely conceptually distribution-free; they demonstrate improved finite-sample stability when data are skewed, heavy-tailed, or otherwise asymmetric.
+**Finite-sample relevance under non-normality.** Partial moments make adverse magnitude and asymmetry explicit. Their finite-sample bias, variance and stability depend on the degree, target, estimand and data-generating process; comparisons should specify those choices rather than claim universal improvement.
 
 ## Further Resources
 

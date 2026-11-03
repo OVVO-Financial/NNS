@@ -47,8 +47,9 @@ struct DepResult {
 // cell's dependence is (T0* + T1*) / 2: no square root, which would turn the
 // sampling noise of an unbiased estimate of 0 back into a floor of order
 // n^(-1/4).
-// E0[T0] is exact (hypergeometric). E0[T1] is exact whenever the distinct
-// arrangements of the cell can be enumerated cheaply (every cell of up to 7
+// E0[T0] uses the hypergeometric distribution (a normal approximation for
+// cells larger than 400). E0[T1] is exact whenever the distinct
+// arrangements of the cell can be enumerated cheaply (every cell of up to 6
 // points, and larger cells with heavily tied values) and uses the permutation
 // variance of sum dx dy otherwise.
 // ------------------------------------------------------------

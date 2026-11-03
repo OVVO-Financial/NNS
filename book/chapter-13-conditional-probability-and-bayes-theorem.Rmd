@@ -63,14 +63,14 @@ The joint events across all four quadrants defined by benchmarks \((t_X, t_Y)\) 
 \]
 
 \[
-\mathrm{DLPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y > t_Y),
+\mathrm{DUPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y > t_Y),
 \]
 
 \[
-\mathrm{DUPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y \le t_Y).
+\mathrm{DLPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y \le t_Y).
 \]
 
-The concordant moments, CoLPM and CoUPM, capture joint movement in the same directional region. The **divergent moments**, DLPM and DUPM, capture the two cross-quadrant regions where \(X\) and \(Y\) move in opposite directions relative to their benchmarks — directly parallel to the divergent co-partial moment structure developed in Chapter 10. All four are degree-zero specializations of the general co-partial moment framework.
+The concordant moments, CoLPM and CoUPM, capture joint movement in the same directional region. The **divergent moments**, DUPM and DLPM, capture the two cross-quadrant regions where \(X\) and \(Y\) move in opposite directions relative to their benchmarks — directly parallel to the divergent co-partial moment structure developed in Chapter 10. All four are degree-zero specializations of the general co-partial moment framework.
 
 ---
 
@@ -80,16 +80,16 @@ Benchmarks \((t_X, t_Y)\) partition the joint distribution into four mutually ex
 
 |                  | \(Y \le t_Y\)        | \(Y > t_Y\)          |
 |------------------|----------------------|----------------------|
-| \(X \le t_X\)    | CoLPM\(_{0,0}\)      | DLPM\(_{0,0}\)       |
-| \(X > t_X\)      | DUPM\(_{0,0}\)       | CoUPM\(_{0,0}\)      |
+| \(X \le t_X\)    | CoLPM\(_{0,0}\)      | DUPM\(_{0,0}\)       |
+| \(X > t_X\)      | DLPM\(_{0,0}\)       | CoUPM\(_{0,0}\)      |
 
 Because these four regions partition the joint distribution completely,
 
 \[
 \mathrm{CoLPM}_{0,0}
 + \mathrm{CoUPM}_{0,0}
-+ \mathrm{DLPM}_{0,0}
 + \mathrm{DUPM}_{0,0}
++ \mathrm{DLPM}_{0,0}
 = 1.
 \]
 
@@ -107,8 +107,8 @@ In NNS R-package notation:
 
 where the four terms correspond respectively to
 \(P(X>t_X,\,Y>t_Y)\),
-\(P(X>t_X,\,Y\le t_Y)\),
-\(P(X\le t_X,\,Y>t_Y)\), and
+\(P(X\le t_X,\,Y>t_Y)\),
+\(P(X>t_X,\,Y\le t_Y)\), and
 \(P(X\le t_X,\,Y\le t_Y)\).
 Conditional probabilities are simply **relative weights of these regions after conditioning on one of the marginals**.
 
@@ -140,10 +140,21 @@ P(X > t_X \mid Y > t_Y)
 
 \[
 P(Y > t_Y \mid X \le t_X)
-= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
+= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
 P(Y \le t_Y \mid X > t_X)
-= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}.
+= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}.
 \]
+
+The reverse conditional probabilities use the same quadrant numerators:
+
+\[
+P(X \le t_X \mid Y > t_Y)
+= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{U_0(t_Y;\,Y)}, \qquad
+P(X > t_X \mid Y \le t_Y)
+= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{L_0(t_Y;\,Y)}.
+\]
+
+Every conditional ratio requires a positive denominator.
 
 Each formula follows from the same logic: the joint probability of the relevant quadrant divided by the marginal probability of the conditioning event. Together, these eight expressions **complete the four-quadrant conditional probability picture** — every conditional probability involving thresholds on \(X\) and \(Y\) is a ratio of a degree-zero co-partial moment to a marginal degree-zero partial moment.
 
@@ -315,40 +326,45 @@ and total magnitude \(S = C^{--} + C^{++} + D^{+-} + D^{-+}\), the normalized we
 w^{--} = \frac{C^{--}}{S}, \quad w^{++} = \frac{C^{++}}{S}, \quad w^{+-} = \frac{D^{+-}}{S}, \quad w^{-+} = \frac{D^{-+}}{S}
 \]
 
-satisfy \(w^{--} + w^{++} + w^{+-} + w^{-+} = 1\) with all weights non-negative whenever \(S > 0\). The case \(S = 0\) is degenerate: since all four hinge products are non-negative, \(S = 0\) implies each term is zero, which in turn requires that for every observation, \(X = t_X\) or \(Y = t_Y\) (or both). This is a measure-zero event under any absolutely continuous distribution but can arise in discrete data; in practice one simply avoids placing benchmarks at point masses. In the limit as degree approaches zero, the normalized weights collapse to the hard quadrant probabilities of Section 13.3.
+satisfy \(w^{--} + w^{++} + w^{+-} + w^{-+} = 1\) with all weights non-negative whenever \(0<S<\infty\). These are magnitude shares at the chosen benchmarks, not automatically probabilities under the original joint law. If \(S=0\), every observation lies on at least one benchmark axis, \(X=t_X\) or \(Y=t_Y\); the unnormalized moments remain defined but their normalized shares require an explicit convention. This can occur in discrete data and must not be read as evidence of independence. As positive degrees approach zero, the weights approach the degree-zero quadrant probabilities when neither benchmark has an atom and the limiting expectations are justified. With mass on a benchmark axis, positive-degree hinges omit that mass, so the indicator convention at degree zero must be applied separately.
 
 ## Distributional recovery
 
-The hinge surface carries more information than its degree-zero counterpart. The following result shows that \(H\) is a complete representation of the joint law.
+The degree-zero co-lower partial moment is already complete: \(CoLPM_{0,0}(a,b) = P(X\le a, Y\le b)\) is the joint CDF, which determines the joint law (rectangle probabilities follow from its four corner values). The hinge surface is a second complete representation, and the following result shows how it recovers the joint CDF.
 
-**Theorem** (Distributional Recovery). Assume \((X, Y)\) is integrable and differentiation under the expectation is valid (e.g., by dominated convergence). Then at all continuity points of the joint CDF \(F_{X,Y}\),
-
-\[
-\frac{\partial^2 H}{\partial t_X\,\partial t_Y}(t_X, t_Y) = F_{X,Y}(t_X, t_Y).
-\]
-
-If \(F_{X,Y}\) is absolutely continuous with sufficiently smooth density \(f_{X,Y}\), then
+**Theorem** (Distributional Recovery). Assume the hinge surface is finite at every finite benchmark pair; a sufficient condition is \(E[(1+|X|)(1+|Y|)]<\infty\). Let \(D^+\) denote a right derivative in the indicated benchmark. Then
 
 \[
-\frac{\partial^4 H}{\partial t_X^2\,\partial t_Y^2}(t_X, t_Y) = f_{X,Y}(t_X, t_Y).
+D^+_{t_Y}D^+_{t_X}H(t_X,t_Y)=F_{X,Y}(t_X,t_Y).
 \]
 
-Consequently, \(H(\cdot,\cdot)\) over all threshold pairs uniquely determines the joint law and, when it exists, the joint density. The qualification "at all continuity points of \(F_{X,Y}\)" is essential: for discrete distributions, the CDF has jump discontinuities and the derivative identities hold only at points where \(F_{X,Y}\) is continuous.
-
-**Proof sketch.** To justify differentiation under the expectation, assume there exists an integrable envelope dominating the local difference quotients of the hinge terms in a neighborhood of \((t_X,t_Y)\); this is exactly the dominated-convergence qualification in the theorem statement. Using \(\partial_{t_X}(t_X - X)_+ = \mathbf{1}\{X \le t_X\}\) and \(\partial_{t_Y}(t_Y - Y)_+ = \mathbf{1}\{Y \le t_Y\}\) almost everywhere,
+The right-derivative convention includes atoms. Where the ordinary mixed derivative exists with the usual differentiation-under-expectation conditions, it gives the same CDF. If the joint law has a sufficiently smooth density, two further derivatives recover that density:
 
 \[
-\frac{\partial H}{\partial t_X}(t_X,t_Y) = E\!\bigl[\mathbf{1}\{X \le t_X\}(t_Y - Y)_+\bigr],
+\frac{\partial^4 H}{\partial t_X^2\partial t_Y^2}=f_{X,Y}(t_X,t_Y).
 \]
 
-and therefore
+**Proof.** For a hinge, the right derivative in its benchmark is
 
 \[
-\frac{\partial^2 H}{\partial t_X\,\partial t_Y}(t_X,t_Y)
-= E\!\bigl[\mathbf{1}\{X \le t_X\}\,\mathbf{1}\{Y \le t_Y\}\bigr]
-= P(X \le t_X,\; Y \le t_Y)
-= F_{X,Y}(t_X,t_Y). \qquad\square
+D^+_{t_X}(t_X-X)_+=\mathbf{1}\{X\le t_X\}.
 \]
+
+For small positive increments in \(t_X\), the difference quotient is bounded by a constant times \((t_X+1-X)_+(t_Y-Y)_+\), whose expectation is finite by the assumed hinge condition. Dominated convergence therefore gives
+
+\[
+D^+_{t_X}H(t_X,t_Y)
+=E[\mathbf{1}\{X\le t_X\}(t_Y-Y)_+].
+\]
+
+Taking the right derivative in \(t_Y\) gives
+
+\[
+E[\mathbf{1}\{X\le t_X\}\mathbf{1}\{Y\le t_Y\}]
+=F_{X,Y}(t_X,t_Y).
+\]
+
+The density statement follows by differentiating the CDF under the stated smoothness conditions. ∎
 
 The surface \(H\) is directly estimable from data by averaging hinge products. Mixed second derivatives recover the joint CDF numerically via finite differences; further differentiation recovers the density, though this is noisier due to higher-order amplification of sampling variation.
 
@@ -361,10 +377,10 @@ See [Discrete and Continuous Bayes](https://github.com/OVVO-Financial/NNS/blob/N
 This result establishes a natural hierarchy:
 
 - **Degree 0**: Indicator-level probability partition — the four-quadrant decomposition of Sections 13.3–13.6.
-- **Degree 1**: Continuous hinge partition of unity and complete distributional recovery — the minimal degree at which partial moments become full distributional generators.
-- **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degree one already provides. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
+- **Degree 1**: Continuous hinge partition of unity, from which the joint CDF is recovered by differentiation: a continuous complete representation alongside the degree-zero joint CDF itself.
+- **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degrees zero and one already provide. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
 
-Thus **degree one is the completeness threshold**: the minimal order at which the full joint law is captured.
+Thus degree zero already captures the full joint law, and degree one captures it again through a continuous hinge surface, with derivative recovery where the stated regularity conditions hold.
 
 ---
 
@@ -397,7 +413,7 @@ Conditional probability and Bayes' theorem arise naturally and completely from t
 - **All eight conditional probabilities** from the four-quadrant partition are ratios of a degree-zero co-partial moment to a marginal partial moment.
 - **Bayes' theorem follows directly from co-partial moment identities**, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.
 - **Bayesian updating corresponds to renormalizing the four-quadrant probability partition** after conditioning on one marginal.
-- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree one is the completeness threshold.
+- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a continuous complete representation with the stated derivative qualifications.
 - **Partial moments are law-invariant**: they depend only on the induced distribution of \(X\), making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.
 
 The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.

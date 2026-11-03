@@ -46,7 +46,7 @@ dy.dx <- function(x, y, eval.point = NULL){
   }
   
   if(is.character(eval.point)){
-    return("First" = mean(NNS.reg(x, y, order = order, plot = FALSE, ncores = 1)$Fitted.xy$gradient))
+    return("First" = mean(NNS.reg(x, y, type = "REG", order = order, plot = FALSE, ncores = 1)$Fitted.xy$gradient))
   } else {
 
     original.eval.point.min <- eval.point
@@ -83,7 +83,7 @@ dy.dx <- function(x, y, eval.point = NULL){
       # At the boundary one run is 0 (the window is clipped to [min(x), max(x)]);
       # the first derivative then uses the one-sided slope below.
 
-      reg.output <- NNS.reg(x, y, plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1, smooth = TRUE)
+      reg.output <- NNS.reg(x, y, type = "REG", plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1, smooth = TRUE)
 
       combined.matrices <- cbind(deriv.points, matrix(unlist(reg.output$Point.est), ncol = 3, byrow = F))
       colnames(combined.matrices) <- c(colnames(deriv.points), "estimates.min", "estimates", "estimates.max")
