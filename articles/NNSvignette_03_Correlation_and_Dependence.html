@@ -131,10 +131,10 @@ divergent partial moment quadrants, are properly compensated for in
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.0009593831</span></span>
+<span><span class="co">## [1] -0.0009596625</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.7888531</span></span></code></pre>
+<span><span class="co">## [1] 0.7906345</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="asymmetrical-analysis">Asymmetrical Analysis<a class="anchor" aria-label="anchor" href="#asymmetrical-analysis"></a>
@@ -151,20 +151,20 @@ dependence between the variables, which can be confirmed using
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, asym <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.0009593831</span></span>
+<span><span class="co">## [1] -0.0009596625</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.7888531</span></span></code></pre>
+<span><span class="co">## [1] 0.7906345</span></span></code></pre>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] -0.1297766</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">x</span>, asym <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.06098612</span></span>
+<span><span class="co">## [1] -0.05928228</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.06098612</span></span></code></pre>
+<span><span class="co">## [1] 0.05928228</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="dependence">Dependence<a class="anchor" aria-label="anchor" href="#dependence"></a>
@@ -209,11 +209,11 @@ to run 100 permutations and plot the results.</p>
 <span><span class="co">## [1] 0.1897929</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Correlation p.value`</span></span>
-<span><span class="co">## [1] 0.03</span></span>
+<span><span class="co">## [1] 0.04</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Correlation 95% CIs`</span></span>
-<span><span class="co">##      2.5%     97.5% </span></span>
-<span><span class="co">## -0.188110  0.187308 </span></span>
+<span><span class="co">##       2.5%      97.5% </span></span>
+<span><span class="co">## -0.1761214  0.1930509 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
 <span><span class="co">## [1] 0.8954724</span></span>
@@ -223,7 +223,7 @@ to run 100 permutations and plot the results.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Dependence 95% CIs`</span></span>
 <span><span class="co">##       2.5%      97.5% </span></span>
-<span><span class="co">## 0.04397262 0.25333031</span></span></code></pre>
+<span><span class="co">## 0.04397262 0.26266120</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="multivariate-dependence-nns-copula">Multivariate Dependence <code>NNS.copula()</code><a class="anchor" aria-label="anchor" href="#multivariate-dependence-nns-copula"></a>

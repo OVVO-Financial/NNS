@@ -103,10 +103,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] -0.0009593831
+    ## [1] -0.0009596625
     ## 
     ## $Dependence
-    ## [1] 0.7888531
+    ## [1] 0.7906345
 
 ### Asymmetrical Analysis
 
@@ -131,10 +131,10 @@ NNS.dep(x, y, asym = TRUE)
 ```
 
     ## $Correlation
-    ## [1] -0.0009593831
+    ## [1] -0.0009596625
     ## 
     ## $Dependence
-    ## [1] 0.7888531
+    ## [1] 0.7906345
 
 ``` r
 
@@ -149,10 +149,10 @@ NNS.dep(y, x, asym = TRUE)
 ```
 
     ## $Correlation
-    ## [1] -0.06098612
+    ## [1] -0.05928228
     ## 
     ## $Dependence
-    ## [1] 0.06098612
+    ## [1] 0.05928228
 
 ### Dependence
 
@@ -209,11 +209,11 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
     ## [1] 0.1897929
     ## 
     ## $`Correlation p.value`
-    ## [1] 0.03
+    ## [1] 0.04
     ## 
     ## $`Correlation 95% CIs`
-    ##      2.5%     97.5% 
-    ## -0.188110  0.187308 
+    ##       2.5%      97.5% 
+    ## -0.1761214  0.1930509 
     ## 
     ## $Dependence
     ## [1] 0.8954724
@@ -223,7 +223,7 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
     ## 
     ## $`Dependence 95% CIs`
     ##       2.5%      97.5% 
-    ## 0.04397262 0.25333031
+    ## 0.04397262 0.26266120
 
 ## Multivariate Dependence `NNS.copula()`
 
