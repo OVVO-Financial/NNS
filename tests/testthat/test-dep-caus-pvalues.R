@@ -31,6 +31,32 @@ test_that("NNS.dep Dependence p.value is at least 1 / 101", {
   expect_equal(NNS.dep(x, x, p.value = TRUE)$`Dependence p.value`, 1 / 101)
 })
 
+test_that("NNS.dep Correlation p.value is the two-sided permutation p-value", {
+  set.seed(5); x <- rnorm(50); y <- x + rnorm(50)
+  obs <- NNS.dep(x, y)$Correlation
+  set.seed(6); perms <- replicate(100L, sample.int(50))
+  null <- apply(perms, 2, function(i) NNS.dep(x, y[i])$Correlation)
+  set.seed(6); p <- NNS.dep(x, y, p.value = TRUE)
+  expect_equal(p$`Correlation p.value`,
+               min(1, 2 * min(1 + sum(null <= obs), 1 + sum(null >= obs)) / 101))
+  expect_equal(p$`Correlation p.value`, 2 / 101)
+})
+
+test_that("NNS.dep Correlation p.value counts tied null correlations", {
+  # 99 of the 100 positions of y's event give Correlation 0; it was 0 before.
+  x <- c(1, rep(0, 99)); y <- c(0, 1, rep(0, 98))
+  set.seed(871); p <- NNS.dep(x, y, p.value = TRUE)
+  expect_equal(p$Correlation, 0)
+  expect_equal(p$`Correlation p.value`, 1)
+})
+
+test_that("NNS.dep Correlation p.value holds its size under independence", {
+  # 28 / 200 rejections at 0.05 when it was the smaller one-sided tail.
+  set.seed(5)
+  p <- replicate(200L, NNS.dep(rnorm(30), rnorm(30), p.value = TRUE)$`Correlation p.value`)
+  expect_lte(mean(p <= 0.05), 0.10)
+})
+
 test_that("NNS.dep p.value = TRUE honours asym", {
   set.seed(3); x <- rnorm(100); y <- x^2 + rnorm(100, sd = 0.1)
   direct <- NNS.dep(y, x, asym = TRUE)

@@ -13,7 +13,7 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 
 \item{asym}{logical; \code{FALSE} (default) returns the symmetric measures. If \code{TRUE}, returns the asymmetric (directional) measures: the partition is built on \code{x} only and the result measures the dependence of \code{y} on \code{x} (\code{y} as a function of \code{x}); swap the arguments for the other direction.}
 
-\item{p.value}{logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).}
+\item{p.value}{logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the two-sided permutation p-value \code{min(1, 2 * min(1 + #(null <= observed), 1 + #(null >= observed)) / (1 + 100))}, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).}
 
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.}
 }

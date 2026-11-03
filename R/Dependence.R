@@ -5,7 +5,7 @@
 #' @param x a numeric vector, matrix or data frame.
 #' @param y \code{NULL} (default) or a numeric vector with compatible dimensions to \code{x}.
 #' @param asym logical; \code{FALSE} (default) returns the symmetric measures. If \code{TRUE}, returns the asymmetric (directional) measures: the partition is built on \code{x} only and the result measures the dependence of \code{y} on \code{x} (\code{y} as a function of \code{x}); swap the arguments for the other direction.
-#' @param p.value logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).
+#' @param p.value logical; \code{FALSE} (default) If \code{TRUE} (bivariate only), compares the results against 100 random permutations of \code{y}: the Dependence p-value is the upper-tail permutation p-value \code{(1 + #(null >= observed)) / (1 + 100)}, the Correlation p-value is the two-sided permutation p-value \code{min(1, 2 * min(1 + #(null <= observed), 1 + #(null >= observed)) / (1 + 100))}, and the 95 percent intervals of the permutation null are returned (and plotted when \code{print.map = TRUE}).
 #' @param print.map logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
@@ -118,8 +118,9 @@ NNS.dep <- function(x,
       
       return(list(
         "Correlation"         = as.numeric(cors[2L]),
-        "Correlation p.value" = min(LPM(0, cors[2L], cors[-c(1L, 2L)]),
-                                    UPM(0, cors[2L], cors[-c(1L, 2L)])),
+        "Correlation p.value" = min(1, 2 * min(1 + sum(cors[-c(1L, 2L)] <= cors[2L]),
+                                               1 + sum(cors[-c(1L, 2L)] >= cors[2L])) /
+                                       (1 + length(cors[-c(1L, 2L)]))),
         "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
         "Dependence"          = as.numeric(deps[2L]),
         # Dependence is a magnitude: only the upper tail is evidence against independence.
